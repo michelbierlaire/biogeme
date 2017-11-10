@@ -1,0 +1,55 @@
+#!/bin/bash -e
+# -e: Exit immediately if a command exits with a non-zero status.
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+pkgincludedir="@includedir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+pkglibdir="@libdir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+datarootdir="@datarootdir@"
+datadir="@datadir@"
+pkgdatadir="@datadir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+versionsuffix="@INSTALL_VERSION_SUFFIX@"
+
+
+display_help() {
+    echo
+    echo "Usage: $0 rawDataFile nbrBins" >&2
+    echo 
+    echo "     rawDataFile: contains numerical data separated by CR, blanks or tabs"
+    echo "     nbrBins:     number of bins"
+    echo "     Output:"
+    echo "        _hist_name.dat: the file contains a sequence of"
+    echo "                        pairs of values (x_i,n_i) such that"
+    echo "                        n_i is the number of values x such that"
+    echo "                        x_i <= x < x_{i+1}"
+    echo "        _hist.gp: a GNUPOT file to plot the histogram."
+    echo "                  (see www.gnuplot.info)"
+    echo "@PACKAGE_STRING@"
+    
+}
+
+case "$1" in
+    -h | --help)
+	display_help
+	exit 0
+	;;
+esac
+
+#The file contains a sequence of pairs of values
+# \f[ (x_i,n_i) \f]
+# such that \f$n_i\f$ is the number of values \f$x\f$ such that 
+# \f[ x_i \leq x < x_{i+1} \f]∑
+
+if [ $# -ne 2 ]; then
+    echo "Invalid number of arguments ("$#" instead of 2)"
+    display_help
+    exit -1
+fi
+f=$1
+if [ ! -f "${f}" ]
+then
+  echo "File ${f} not found!"
+  exit
+fi
+export PYTHONPATH=.:"${pkgdatadir}":$PYTHONPATH
+@PYTHONBIN@ "${pkgdatadir}"/generateHistogram.py "${f}" $2

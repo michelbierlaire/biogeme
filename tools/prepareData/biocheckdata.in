@@ -1,0 +1,46 @@
+#!/bin/bash -e
+# -e: Exit immediately if a command exits with a non-zero status.
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+pkgincludedir="@includedir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+pkglibdir="@libdir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+datarootdir="@datarootdir@"
+datadir="@datadir@"
+pkgdatadir="@datadir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+versionsuffix="@INSTALL_VERSION_SUFFIX@"
+pythonbin="@PYTHONBIN@"
+
+display_help() {
+    echo
+    echo "Usage: $0 dataFile" >&2
+    echo 
+    echo "     dataFile: data file in format requested by Biogeme"
+    echo "          If the format is not compliant, a diagnostic is presented"
+    echo "          If the format is compliant, an HTML file with statistics is generated"
+    echo "@PACKAGE_STRING@"
+    
+}
+
+case "$1" in
+    -h | --help)
+	display_help
+	exit 0
+	;;
+esac
+
+
+
+if [ $# -ne 1 ]; then
+    echo "Invalid number of arguments ("$#" instead of 1)"
+    display_help
+    exit -1
+fi
+m=$1 
+if [ ! -f "${m}" ]
+then
+  echo "File ${m} not found!"
+  exit
+fi
+"${pythonbin}" "${pkgdatadir}/biocheckdata.py" "${m}"

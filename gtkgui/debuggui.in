@@ -1,0 +1,22 @@
+#!/bin/bash -e
+# -e: Exit immediately if a command exits with a non-zero status.
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+pkgincludedir="@includedir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+pkglibdir="@libdir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+datarootdir="@datarootdir@"
+datadir="@datadir@"
+pkgdatadir="@datadir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+versionsuffix="@INSTALL_VERSION_SUFFIX@"
+
+lldb="@LLDB@"
+
+export PYTHONPATH=.:"${pkgdatadir}":$PYTHONPATH
+export LD_LIBRARY_PATH="${pkglibdir}":$LD_LIBRARY_PATH
+
+echo 'This is @PACKAGE@ (pythonbiogeme) @VERSION@'
+
+"${lldb}" "${bindir}/gtkguibiogeme${versionsuffix}" "$p" "$d"
+echo 'Done'

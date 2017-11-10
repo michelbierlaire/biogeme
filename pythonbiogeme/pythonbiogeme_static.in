@@ -1,0 +1,39 @@
+#!/bin/bash -e
+# -e: Exit immediately if a command exits with a non-zero status.
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+pkgincludedir="@includedir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+pkglibdir="@libdir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+datarootdir="@datarootdir@"
+datadir="@datadir@"
+pkgdatadir="@datadir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+versionsuffix="@INSTALL_VERSION_SUFFIX@"
+
+export PYTHONPATH=.:"${pkgdatadir}":$PYTHONPATH
+export LD_LIBRARY_PATH="${pkglibdir}":$LD_LIBRARY_PATH
+
+echo 'This is @PACKAGE@ (pythonbiogeme) @VERSION@'
+# Number of arguments
+if [ $# -ne 2 ]; then
+  echo 'Two arguments are required: the name of the python file (without extension) and the name of the data file.'
+  exit -1
+fi
+p=$1 
+d=$2 
+
+if [ ! -f "${p}.py" ]
+then
+  echo "File ${p}.py not found!"
+  exit
+fi
+
+if [ ! -f "$d" ]
+then
+  echo "File $d not found!"
+  exit
+fi
+
+"${bindir}/pybiogeme_static${versionsuffix}" "$p" "$d"
+echo 'Done'

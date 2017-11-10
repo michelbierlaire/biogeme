@@ -1,0 +1,50 @@
+#!/bin/bash -e
+# -e: Exit immediately if a command exits with a non-zero status.
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+pkgincludedir="@includedir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+pkglibdir="@libdir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+datarootdir="@datarootdir@"
+datadir="@datadir@"
+pkgdatadir="@datadir@/@PACKAGE@@INSTALL_VERSION_SUFFIX@"
+versionsuffix="@INSTALL_VERSION_SUFFIX@"
+pythonbin="@PYTHONBIN@"
+
+display_help() {
+    echo
+    echo "Usage: $0 dataFile samplingRate" >&2
+    echo 
+    echo "     dataFile: name of the data file in Biogeme format"
+    echo "     samplingRate: number between 1 and 100 representing (in percentage)"
+    echo "                   the probability for each row to be inserted in the sample"
+    echo
+    echo "     Output files:"
+    echo "           Sampled data (with the same headers as the original file)"
+    echo "           Not sampled data (with the same headers as the original file)"
+    echo "@PACKAGE_STRING@"
+    
+}
+
+case "$1" in
+    -h | --help)
+	display_help
+	exit 0
+	;;
+esac
+
+
+if [ $# -ne 2 ]; then
+    echo "Invalid number of arguments ("$#" instead of 2)"
+    display_help
+    exit -1
+fi
+m=$1 
+if [ ! -f "${m}" ]
+then
+  echo "File ${m} not found!"
+  exit
+fi
+"${pythonbin}" "${pkgdatadir}/biosampledata.py" "${m}" "$2"
+
