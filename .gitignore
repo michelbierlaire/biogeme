@@ -32,28 +32,21 @@ tools/prepareData/biosampledata
 
 # All .lo files
 **/*.lo
+**/*.la
+**/.libs
 
 # Other files
 autom4te.cache/
-libraries/cfsqp/.libs/
-libraries/cfsqp/libcfsqp.la
-libraries/gaussHermite/.libs/
-libraries/gaussHermite/libgaussHermite.la
-libraries/ipopt/.libs/
-libraries/ipopt/libipopt.la
-libraries/linearAlgebra/.libs/
-libraries/linearAlgebra/liblinearAlgebra.la
-libraries/parameters/.libs/
-libraries/parameters/libparameters.la
-libraries/randomNumbers/.libs/
-libraries/randomNumbers/librandomNumbers.la
-libraries/solvopt/.libs/
-libraries/solvopt/libsolvopt.la
-libraries/trustRegion/.libs/
-libraries/trustRegion/libtrustRegion.la
-libraries/utils/.libs/
-libraries/utils/libutils.la
 libraries/utils/patCompilationDate.h
 libraries/utils/patUser.h
+biogeme/biogeme
+biogeme/biogeme-biogeme.o
+libraries/bisonbiogeme/.libs/
+libraries/pythonbiogeme/.libs/
+libraries/pythonbiogeme/bioCompilationDate.h
+libraries/pythonbiogeme/bioUser.h
+pybiogeme/pybiogeme-pybiogeme.o
+libraries/bisonbiogeme/patSpecParser.cc
+libraries/bisonbiogeme/patSpecParser.hh
 
 
