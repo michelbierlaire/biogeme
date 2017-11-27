@@ -6,10 +6,12 @@
 
 # All makefiles
 **/Makefile
+**/Makefile.in
 
 # Other binary files
 config.h
 config.log
+config.h.in
 config.status
 gtkgui/debuggui
 libtool
