@@ -19,7 +19,7 @@ AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE([no-dependencies -Wno-portability])
 
-AM_CXXFLAGS="$AM_CXXFLAGS -std=gnu++11"
+AM_CXXFLAGS="$AM_CXXFLAGS -std=c++11"
 AM_LDFLAGS="$AM_LDFLAGS -no-undefined"
 AC_PROG_CXX([clang++ g++])
 AC_PROG_CC([clang gcc])

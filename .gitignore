@@ -48,5 +48,13 @@ libraries/pythonbiogeme/bioUser.h
 pybiogeme/pybiogeme-pybiogeme.o
 libraries/bisonbiogeme/patSpecParser.cc
 libraries/bisonbiogeme/patSpecParser.hh
+biomerge/biomerge
+biomerge/biomerge-biomerge.o
+biosim/biosim
+biosim/biosim-biosim.o
+biosim/biosim-patSimVersion.o
+mod2py/mod2py
+mod2py/mod2py-mod2py.o
+pybiogeme/pybiogeme
 
 
