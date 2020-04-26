@@ -66,3 +66,17 @@ pybiogeme/pybiogeme
 src/cbiogeme.cpp
 biogeme.egg-info
 build
+tests/functions/simpleExample.html
+tests/functions/simpleExample.pickle
+tests/functions/simpleExample~00.html
+tests/functions/simpleExample~00.pickle
+tests/functions/simpleExample~01.html
+tests/functions/simpleExample~01.pickle
+tests/functions/simpleExample~02.html
+tests/functions/simpleExample~02.pickle
+tests/functions/simpleExample~03.html
+tests/functions/simpleExample~03.pickle
+tests/functions/simpleExample~04.html
+tests/functions/simpleExample~04.pickle
+tests/functions/simpleExample~05.html
+tests/functions/simpleExample~05.pickle
