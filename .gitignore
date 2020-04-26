@@ -64,3 +64,5 @@ pybiogeme/pybiogeme
 #############################################
 .idea
 src/cbiogeme.cpp
+biogeme.egg-info
+build
