@@ -31,7 +31,7 @@ ASC_SM = Beta('ASC_SM',0,None,None,1)
 B_TIME = Beta('B_TIME',0,None,None,0)
 B_COST = Beta('B_COST',0,None,None,0)
 
-MU = Beta('MU',0.5,0.0,10.0,0)
+MU = Beta('MU',0.5,0.0,1.0,0)
 
 
 

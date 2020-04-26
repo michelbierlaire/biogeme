@@ -99,11 +99,11 @@ class test_11(unittest.TestCase):
     def testEstimationAndSimulation(self):
         biogeme  = bio.BIOGEME(database,logprob)
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike,-5238.55029969469,2)
+        self.assertAlmostEqual(results.data.logLike,-5214.049202307744,1)
         biosim  = bio.BIOGEME(database,simulate)
         simresults = biosim.simulate(results.data.betaValues)
         self.assertAlmostEqual(sum(simresults['Prob. train']),888.3883902853023,1)
-        self.assertAlmostEqual(sum(simresults['Elas. 1']),-17896.043955947385,delta=2)
+        self.assertAlmostEqual(sum(simresults['Elas. 1']),-17898.420882021313, 0)
     
         
 if __name__ == '__main__':

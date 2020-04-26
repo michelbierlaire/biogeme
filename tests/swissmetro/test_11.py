@@ -101,7 +101,7 @@ class test_11(unittest.TestCase):
         biosim  = bio.BIOGEME(database,simulate)
         simresults = biosim.simulate(results.data.betaValues)
         self.assertAlmostEqual(sum(simresults['Prob. train']),888.3883902853023,1)
-        self.assertAlmostEqual(sum(simresults['Elas. 1']),-17897.788964253334,1)
+        self.assertAlmostEqual(sum(simresults['Elas. 1']),-17897.702976576973, 0)
     
         
 if __name__ == '__main__':
