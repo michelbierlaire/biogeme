@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "biogeme"
+version = "3.2.6"
+description = "Biogeme is an open source freeware designed for the maximum likelihood estimation of parametric models in general, with a special emphasis on discrete choice models."
+authors = ["Michel Bierlaire <michel.bierlaire@epfl.ch>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+numpy = "^1.18.3"
+cython = "^0.29.16"
+pandas = "^1.0.3"
+scipy = "^1.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^4.6"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
