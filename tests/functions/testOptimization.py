@@ -111,13 +111,13 @@ class testOptimization(unittest.TestCase):
 
     def testNewton(self):
         x0 = np.array([-1.5,1.5])
-        xstar,nit,nfev,msg = opt.newtonLineSearch(self.theFunction,x0)
+        xstar, msg = opt.newtonLineSearch(self.theFunction,x0)
         for i in list(xstar):
             self.assertAlmostEqual(i,1,4)
 
     def testNewtonTrustRegion(self):
         x0 = np.array([-1.5,1.5])
-        xstar,nit,nfev,msg = opt.newtonTrustRegion(self.theFunction,x0)
+        xstar, msg = opt.newtonTrustRegion(self.theFunction,x0)
         for i in list(xstar):
             self.assertAlmostEqual(i,1,4)
         
