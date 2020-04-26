@@ -679,9 +679,9 @@ class Database:
             raise excep.biogemeError(theError)
 
         
-        self._buildPanelMap()
+        self.buildPanelMap()
 
-    def _buildPanelMap(self):
+    def buildPanelMap(self):
         """Sorts the data so that the observations for each individuals are
 contiguous, and builds a map that identifies the range of indices of
 the observations of each individuals.

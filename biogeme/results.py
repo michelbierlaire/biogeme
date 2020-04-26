@@ -223,7 +223,7 @@ class rawResults:
         ## Norm of the gradient
         self.gradientNorm = linalg.norm(self.g)
         ## Diagnostics given by the optimization algorithm
-        self.optimizationMessages = theModel.optimizationMessages
+        self.optimization_messages = theModel.optimization_messages
         ## Number of threads used for parallel computing
         self.numberOfThreads = theModel.numberOfThreads
         ## Name of the HTML output file
@@ -239,7 +239,7 @@ class rawResults:
         self.bootstrap = bootstrap
         if bootstrap is not None:
             ## Time needed to perform the bootstrap
-            self.bootstrapTime = theModel.bootstrapTime
+            self.bootstrap_time = theModel.bootstrap_time
     
 class bioResults:
     """ Class managing the estimation results
@@ -459,7 +459,7 @@ class bioResults:
             if isinstance(v, str):
                 v = v.replace('_','\\_')
             h += f"{k} & {v:{p}} \\\\\n"
-        for k, v in self.data.optimizationMessages.items():
+        for k, v in self.data.optimization_messages.items():
             h += f"{k} & \\verb${v}$ \\\\\n"
         h += "\\end{tabular}\n"
 
@@ -516,7 +516,7 @@ class bioResults:
             d['Draws generation time'] = self.data.drawsProcessingTime,''
             d['Types of draws'] = [f"{i}: {k}]" for i,k in self.data.typesOfDraws.items()],''
         if self.data.bootstrap is not None:
-            d['Bootstrapping time'] = self.data.bootstrapTime,''
+            d['Bootstrapping time'] = self.data.bootstrap_time,''
         d['Nbr of threads'] = self.data.numberOfThreads,''
         return d
 
@@ -624,7 +624,7 @@ a Pandas dataframe.
         # p is the precision to format it
         for k,(v,p) in d.items():
             h += f"<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> <td>{v:{p}}</td></tr>\n"
-        for k, v in self.data.optimizationMessages.items():
+        for k, v in self.data.optimization_messages.items():
             h += f"<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> <td>{v}</td></tr>\n"
             
         h += "</table>\n"
