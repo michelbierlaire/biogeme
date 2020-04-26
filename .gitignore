@@ -63,3 +63,4 @@ pybiogeme/pybiogeme
 #                                           #
 #############################################
 .idea
+src/cbiogeme.cpp
