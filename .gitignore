@@ -12,17 +12,17 @@
 config.h
 config.log
 config.status
-gtkgui/debuggui
+archive/gtkgui/debuggui
 libtool
-pythonbiogeme/debugbiogeme
-pythonbiogeme/pythonbiogeme
-pythonbiogeme/pythonbiogeme_static
+archive/pythonbiogeme/debugbiogeme
+archive/pythonbiogeme/pythonbiogeme
+archive/pythonbiogeme/pythonbiogeme_static
 stamp-h1
-tools/histograms/histogram
-tools/histograms/weightedhistogram
-tools/prepareData/biocheckdata
-tools/prepareData/biopreparedata
-tools/prepareData/biosampledata
+archive/tools/histograms/histogram
+archive/tools/histograms/weightedhistogram
+archive/tools/prepareData/biocheckdata
+archive/tools/prepareData/biopreparedata
+archive/tools/prepareData/biosampledata
 
 #############################################
 #                                           #
@@ -37,25 +37,25 @@ tools/prepareData/biosampledata
 
 # Other files
 autom4te.cache/
-libraries/utils/patCompilationDate.h
-libraries/utils/patUser.h
-biogeme/biogeme
-biogeme/biogeme-biogeme.o
-libraries/bisonbiogeme/.libs/
-libraries/pythonbiogeme/.libs/
-libraries/pythonbiogeme/bioCompilationDate.h
-libraries/pythonbiogeme/bioUser.h
-pybiogeme/pybiogeme-pybiogeme.o
-libraries/bisonbiogeme/patSpecParser.cc
-libraries/bisonbiogeme/patSpecParser.hh
-biomerge/biomerge
-biomerge/biomerge-biomerge.o
-biosim/biosim
-biosim/biosim-biosim.o
-biosim/biosim-patSimVersion.o
-mod2py/mod2py
-mod2py/mod2py-mod2py.o
-pybiogeme/pybiogeme
+archive/libraries/utils/patCompilationDate.h
+archive/libraries/utils/patUser.h
+archive/biogeme/biogeme
+archive/biogeme/biogeme-biogeme.o
+archive/libraries/bisonbiogeme/.libs/
+archive/libraries/pythonbiogeme/.libs/
+archive/libraries/pythonbiogeme/bioCompilationDate.h
+archive/libraries/pythonbiogeme/bioUser.h
+archive/pybiogeme/pybiogeme-pybiogeme.o
+archive/libraries/bisonbiogeme/patSpecParser.cc
+archive/libraries/bisonbiogeme/patSpecParser.hh
+archive/biomerge/biomerge
+archive/biomerge/biomerge-biomerge.o
+archive/biosim/biosim
+archive/biosim/biosim-biosim.o
+archive/biosim/biosim-patSimVersion.o
+archive/mod2py/mod2py
+archive/mod2py/mod2py-mod2py.o
+archive/pybiogeme/pybiogeme
 
 #############################################
 #                                           #
@@ -98,3 +98,13 @@ tests/swissmetro/biogemeModelDefaultName~17.html
 tests/swissmetro/biogemeModelDefaultName~17.pickle
 tests/swissmetro/biogemeModelDefaultName~18.html
 tests/swissmetro/biogemeModelDefaultName~18.pickle
+tests/swissmetro/biogemeModelDefaultName~19.html
+tests/swissmetro/biogemeModelDefaultName~19.pickle
+tests/swissmetro/biogemeModelDefaultName~20.html
+tests/swissmetro/biogemeModelDefaultName~20.pickle
+tests/swissmetro/biogemeModelDefaultName~21.html
+tests/swissmetro/biogemeModelDefaultName~21.pickle
+tests/swissmetro/biogemeModelDefaultName~22.html
+tests/swissmetro/biogemeModelDefaultName~22.pickle
+tests/swissmetro/biogemeModelDefaultName~23.html
+tests/swissmetro/biogemeModelDefaultName~23.pickle
