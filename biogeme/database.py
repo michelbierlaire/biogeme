@@ -271,15 +271,17 @@ class Database:
     def descriptionOfNativeDraws(self):
         """ Describe the draws available draws with Biogeme
 
-        :return: dict, where the keys are the names of the draws, and the value their description
+        :return: dict, where the keys are the names of the draws, 
+                 and the value their description
 
         Example of output::
 
-        {'UNIFORM: Uniform U[0, 1]',
-         'UNIFORM_ANTI: Antithetic uniform U[0, 1]'],
-         'NORMAL: Normal N(0, 1) draws'}
+            {'UNIFORM: Uniform U[0, 1]',
+             'UNIFORM_ANTI: Antithetic uniform U[0, 1]'],
+             'NORMAL: Normal N(0, 1) draws'}
 
         :rtype: dict
+
         """
         return [f'{key}: {tuple[1]}' for key, tuple in self.nativeRandomNumberGenerators.items()]
 

@@ -2921,7 +2921,7 @@ class bioLinearUtility(Expression):
         Overloads the generic function.
 
         :return: returns a dict with the variables appearing
-        in the expression the keys being their names.
+                 in the expression the keys being their names.
         :rtype: dict(string:biogeme.expressions.Expression)
 
         """

@@ -24,21 +24,21 @@ class functionToMinimize:
        implemented in a concrete class deriving from this one.
 
     """
-    
+
     @abstractmethod
     def setVariables(self, x):
 
-        """ Set the values of the variables for which the function has to b calculated. 
-        
+        """ Set the values of the variables for which the function has to b calculated.
+
         :param x: values
         :type x: numpy.array
         """
         pass
-    
+
     @abstractmethod
     def f(self, batch = None):
         """Calculate the value of the function
-        
+
         :param batch: for data driven functions (such as a log
                       likelikood function), it is possible to
                       approximate the value of the function using a
@@ -48,16 +48,16 @@ class functionToMinimize:
                       thre random batch. If None, the full data set is
                       used. Default: None pass
         :type batch: float
-        
+
         :return: value of the function
         :rtype: float
         """
         pass
-    
+
     @abstractmethod
     def f_g(self, batch = None):
         """Calculate the value of the function and the gradient
-        
+
         :param batch: for data driven functions (such as a log
                       likelikood function), it is possible to
                       approximate the value of the function using a
@@ -72,11 +72,11 @@ class functionToMinimize:
         :rtype: tuple float, numpy.array
         """
         pass
-    
+
     @abstractmethod
     def f_g_h(self, batch = None):
         """Calculate the value of the function, the gradient and the Hessian
-        
+
         :param batch: for data driven functions (such as a log
                       likelikood function), it is possible to
                       approximate the value of the function using a
@@ -86,16 +86,16 @@ class functionToMinimize:
                       the random batch. If None, the full data set is
                       used. Default: None pass
         :type batch: float
-        
+
         :return: value of the function, the gradient and the Hessian
         :rtype: tuple float, numpy.array, numpy.array
         """
         pass
-    
+
     @abstractmethod
     def f_g_bhhh(self, batch = None):
         """Calculate the value of the function, the gradient and the BHHH matrix
-        
+
         :param batch: for data driven functions (such as a log
                       likelikood function), it is possible to
                       approximate the value of the function using a
@@ -105,14 +105,14 @@ class functionToMinimize:
                       the random batch. If None, the full data set is
                       used. Default: None pass
         :type batch: float
-        
+
         :return: value of the function, the gradient and the BHHH
         :rtype: tuple float, numpy.array, numpy.array
         """
         pass
 
 
-    
+
 class bioBounds:
     """ This class is designed for the management of simple bound constraints
 
@@ -132,13 +132,13 @@ class bioBounds:
                 return -np.inf
             else:
                 return x
-            
+
         def noneToPlusInfinity(x):
             if x is None:
                 return np.inf
             else:
                 return x
-        
+
         self.bounds = b
         self.n = len(b)
         self.lowerBounds = [noneToMinusInfinity(bb[0]) for bb in b]
@@ -153,8 +153,8 @@ class bioBounds:
 
     def __repr__(self):
         return self.bounds.__repr__()
-    
-    
+
+
     def project(self, x):
 
         """Project a point onto the feasible domain defined by the bounds.
@@ -222,11 +222,11 @@ class bioBounds:
         """
         if len(x) != self.n:
             raise excep.biogemeError(f'Incompatible size: {len(x)} and {self.n}')
-                                     
+
         trustRegion = bioBounds([(xk - delta, xk + delta) for xk in x])
         return self.intersect(trustRegion)
 
-                                     
+
     def subspace(self, selectedVariables):
         """Generate a bioBounds object for selected variables
 
@@ -239,7 +239,7 @@ class bioBounds:
         :param delta: radius of the trust region (in infinity norm)
         :type delta: float
 
-        :return: bound object 
+        :return: bound object
         :rtype: class bioBounds
 
         :raises biogeme.exceptions.biogemeError: if the dimensions are inconsistent
@@ -248,7 +248,7 @@ class bioBounds:
             raise excep.biogemeError(f'Incompatible size: {len(selectedVariables)} and {self.n}')
 
         return bioBounds([i for i, j in zip(self.bounds, selectedVariables) if j])
-    
+
     def feasible(self, x):
         """ Check if point verifies the bound constraints
 
@@ -270,7 +270,7 @@ class bioBounds:
         return True
 
     def maximumStep(self, x, d):
-        """ Calculates the maximum step thatcan be performed 
+        """ Calculates the maximum step thatcan be performed
         along a direction while staying feasible.
 
         :param x: reference point
@@ -288,24 +288,24 @@ class bioBounds:
 
         if not self.feasible(x):
             raise excep.biogemeError(f'Infeasible point.')
-            
+
         alpha = np.array([(self.upperBounds[i] - x[i]) / d[i]
                           if d[i] > np.finfo(float).eps
                           else (self.lowerBounds[i] - x[i]) / d[i] if d[i] <  -np.finfo(float).eps
                           else np.inf for i in range(self.n)])
         m = np.amin(alpha)
         return m, np.where(alpha == m)[0]
-        
 
-    
+
+
     def activity(self, x, epsilon = np.finfo(float).eps):
 
-        """Determines the activity status of each variable. 
+        """Determines the activity status of each variable.
 
         :param x: point for which the activity must be determined.
         :type x: numpy.array
 
-        :param epsilon: a bound is considered active if the distance to it is less rhan epsilon. 
+        :param epsilon: a bound is considered active if the distance to it is less rhan epsilon.
         :type epsilon: float
 
         :return: a vector, same length as x, where each entry reports the activity of the corresponding variable:
@@ -331,9 +331,9 @@ class bioBounds:
             elif self.upperBounds[i] != np.inf and self.upperBounds[i] - x[i] <= epsilon:
                 activity[i] = 1
         return activity
-    
+
     def breakpoints(self, x, d):
-        """Projects the direction d, starting from x, 
+        """Projects the direction d, starting from x,
         on the intersection of the bound constraints
 
         :param x: current point
@@ -360,11 +360,11 @@ class bioBounds:
 
 
     def generalizedCauchyPoint(self, xk, gk, H, direction):
-        """ Implementation of Step 2 of the Specific Algorithm by `Conn et al. (1988)`_. 
+        """ Implementation of Step 2 of the Specific Algorithm by `Conn et al. (1988)`_.
 
         .. _`Conn et al. (1988)`: https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf
 
-        The quadratic model is defined as 
+        The quadratic model is defined as
 
         .. math:: m(x) = f(x_k) + (x - x_k)^T g_k + \\frac{1}{2} (x-x_k)^T H (x-x_k).
 
@@ -373,7 +373,7 @@ class bioBounds:
 
         :param gk: vector g involved in the quadratic model definition.
         :type gk: numpy.array. Dimension n.
-    
+
         :param H: matrix H involved in the quadratic model definition.
         :type H: numpy.array. Dimension n x n.
 
@@ -393,14 +393,14 @@ class bioBounds:
 
         if not self.feasible(xk):
             raise excep.biogemeError(f'Infeasible iterate')
-        
+
 
         x = xk
         g = gk - H @ xk
         d = direction
 
         J = set()
-    
+
         fprime = np.inner(gk, d)
 
         if fprime >= 0:
@@ -433,7 +433,7 @@ class bioBounds:
             # project it on the feasible domain to make sure to obtain
             # a feasible point.
             x = self.project(x + delta_t * d)
-            
+
             dg = np.sum([d[i] * g[i] for i in ind])
             fprime += delta_t * fsecond - np.inner(b, x) - dg
             fsecond += np.inner(b, bd - 2 * d)
@@ -445,7 +445,7 @@ class bioBounds:
         return x
 
 
-    
+
 def scipy(fct, initBetas, fixedBetas, betaIds, bounds, parameters = None):
 
     """Optimization interface for Biogeme, based on the scipy minimize function.
@@ -462,15 +462,15 @@ def scipy(fct, initBetas, fixedBetas, betaIds, bounds, parameters = None):
     :param bounds: list of tuples (ell,u) containing the lower and upper bounds
           for each free parameter
     :type bounds: list(tuple)
-    :param parameters: dict of parameters to be transmitted to the 
-         optimization routine. See the `scipy`_ documentation. 
- 
+    :param parameters: dict of parameters to be transmitted to the
+         optimization routine. See the `scipy`_ documentation.
+
     .. _`scipy`: https://docs.scipy.org/doc/scipy/reference/optimize.html
 
     :type parameters: dict(string:float or string)
 
     :return: x, messages
-        
+
         - x is the solution generated by the algorithm,
         - messages is a dictionary describing several information about the lagorithm
 
@@ -537,22 +537,22 @@ def schnabelEskow(A,
         for i in range(j+1, dim):
             A[j, i] = A[i, j] = A[i, j] / A[j, j]
             A[i, j+1:i+1] -= A[i, j]*A[j+1:i+1, j]
-            A[j+1:i+1, i] = A[i, j+1:i+1] 
+            A[j+1:i+1, i] = A[i, j+1:i+1]
 
     def permute(i, j):
         A[[i, j]] = A[[j, i]]
         E[[i, j]] = E[[j, i]]
         A[:, [i, j]] = A[:, [j, i]]
         P[:, [i, j]] = P[:, [j, i]]
-        
-    A = A.astype(np.float64)    
+
+    A = A.astype(np.float64)
     dim = A.shape[0]
     if A.shape[1] != dim:
         raise excep.biogemeError('The matrix must be square')
 
     if not np.all(np.abs(A - A.T) < np.sqrt(np.finfo(np.float64).eps)):
         raise excep.biogemeError('The matrix must be symmetric')
-    
+
     E = np.zeros(dim, dtype = np.float64)
     P = I = np.identity(dim)
     phaseOne = True
@@ -627,7 +627,7 @@ def schnabelEskow(A,
             A[-1, -2] = A[-1, -2] / A[-2, -2]   # overwrites A[-1, -2]
             A[-2, -1] = A[-1, -2]
             A[-1, -1] = np.sqrt(A[-1, -1] - A[-1, -2] * A[-1, -2]) # overwrites A[-1, -1]
-            
+
 
     return np.tril(A), np.diag(P @ E), P
 
@@ -644,7 +644,7 @@ def lineSearch(fct,
     """
     Calculate a step along a direction that satisfies both Wolfe conditions
 
-    
+
     :param fct: object to calculate the objective function and its derivatives.
     :type fct: optimization.functionToMinimize
 
@@ -673,7 +673,7 @@ def lineSearch(fct,
     :raises biogeme.exceptions.biogemeError: if alpha0 :math:`\\leq` 0
     :raises biogeme.exceptions.biogemeError: if beta1 :math:`\\geq` beta2
     :raises biogeme.exceptions.biogemeError: if d is not a descent direction
-    
+
     """
     if  lbd <= 1:
         raise excep.biogemeError(f'lambda is {lbd} and must be > 1')
@@ -713,15 +713,15 @@ def lineSearch(fct,
     return alpha, nfev
 
 def relativeGradient(x, f, g, typx, typf):
-    """ Calculates the relative gradients. 
+    """ Calculates the relative gradients.
 
-    It is typically used for stopping criteria. 
+    It is typically used for stopping criteria.
 
     :param x: current iterate.
     :type x: numpy.array
     :param f: value of f(x)
     :type f: float
-    :param g: :math:`\\nabla f(x)`, gradient of f at x 
+    :param g: :math:`\\nabla f(x)`, gradient of f at x
     :type g: numpy.array
     :param typx: typical value for x.
     :type typx: numpy.array
@@ -740,7 +740,7 @@ def relativeGradient(x, f, g, typx, typf):
         return result
     else:
         return np.finfo(float).max
-                           
+
 
 
 def newtonLineSearch(fct, x0, eps = np.finfo(np.float64).eps**0.3333, maxiter = 100):
@@ -760,7 +760,7 @@ def newtonLineSearch(fct, x0, eps = np.finfo(np.float64).eps**0.3333, maxiter = 
     :type maxiter: int
 
     :return: x, messages
-        
+
         - x is the solution generated by the algorithm,
         - messages is a dictionary describing information about the lagorithm
 
@@ -768,7 +768,7 @@ def newtonLineSearch(fct, x0, eps = np.finfo(np.float64).eps**0.3333, maxiter = 
 
     """
 
-    
+
     xk = x0
     fct.setVariables(xk)
     f, g, H = fct.f_g_h()
@@ -788,7 +788,7 @@ def newtonLineSearch(fct, x0, eps = np.finfo(np.float64).eps**0.3333, maxiter = 
                     'Number of hessian evaluations': nhev,
                     'Cause of termination': message}
         return xk, messages
-        
+
     k = 0
     cont = True
     while cont:
@@ -823,7 +823,7 @@ def newtonLineSearch(fct, x0, eps = np.finfo(np.float64).eps**0.3333, maxiter = 
                 'Number of gradient evaluations': ngev,
                 'Number of hessian evaluations': nhev,
                 'Cause of termination': message}
-    
+
     return xk, messages
 
 
@@ -845,15 +845,15 @@ def newtonLineSearchForBiogeme(fct, initBetas, fixedBetas, betaIds, bounds, para
     :param bounds: list of tuples (ell,u) containing the lower and upper bounds for each free parameter. Note that this algorithm does not support bound constraints. Therefore, all the bounds must be None.
     :type bounds: list(tuples)
 
-    :param parameters: dict of parameters to be transmitted to the  optimization routine:             
+    :param parameters: dict of parameters to be transmitted to the  optimization routine:
          - tolerance: when the relative gradient is below that threshold, the algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - maxiter: the maximum number of iterations (default: 100).
     :type parameters: dict(string:float or int)
 
-    :return: tuple x, nit, nfev, message, where 
+    :return: tuple x, nit, nfev, message, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
     :raises biogeme.exceptions.biogemeError: if bounds are imposed on the variables.
@@ -876,7 +876,7 @@ def newtonLineSearchForBiogeme(fct, initBetas, fixedBetas, betaIds, bounds, para
 
 def trustRegionIntersection(dc, d, delta):
     """Calculates the intersection with the boundary of the trust region.
-    
+
     Consider a trust region of radius :math:`\\delta`, centered at
     :math:`\\hat{x}`. Let :math:`x_c` be in the trust region, and
     :math:`d_c = x_c - \\hat{x}`, so that :math:`\\|d_c\\| \\leq
@@ -894,7 +894,7 @@ def trustRegionIntersection(dc, d, delta):
     :type delta: float
 
     :return: :math:`\\lambda` such that :math:`\\| d_c + \\lambda (d_d - d_c)\\| = \\delta`
-    
+
     :rtype: float
 
     """
@@ -917,7 +917,7 @@ def cauchyNewtonDogleg(g, H):
 
     where :math:`H_s` is a positive definite matrix generated with the method by `Schnabel and Eskow (1999)`_.
 
-    The Dogleg point is 
+    The Dogleg point is
 
     .. math:: d_d = \\eta d_n
 
@@ -937,7 +937,7 @@ def cauchyNewtonDogleg(g, H):
 
     :return: tuple with Cauchy point, Newton point, Dogleg point
     :rtype: numpy.array, numpy.array, numpy.array
-    
+
     :raises biogeme.exceptions.biogemeError: if the quadratic model is not convex.
 
     """
@@ -947,14 +947,14 @@ def cauchyNewtonDogleg(g, H):
     L, E, P = schnabelEskow(H)
     if np.any(E):
         raise excep.biogemeError('The dogleg method requires a convex optimization problem.')
-        
+
     y3 = -P.T @ g
     y2 = la.solve_triangular(L, y3, lower=True)
     y1 = la.solve_triangular(L.T, y2, lower=False)
     dn = P @ y1
-    eta = 0.2 + (0.8 * alpha * alpha / (beta * abs(np.inner(g,dn)))) 
+    eta = 0.2 + (0.8 * alpha * alpha / (beta * abs(np.inner(g,dn))))
     return dc, dn, eta*dn
-    
+
 def dogleg(g, H, delta):
     """
     Find an approximation of the trust region subproblem using the dogleg method
@@ -973,7 +973,7 @@ def dogleg(g, H, delta):
 
              * -2 if negative curvature along Newton direction
              * -1 if negative curvature along Cauchy direction (i.e. along the gradient)
-             * 1 if partial Cauchy step 
+             * 1 if partial Cauchy step
              * 2 if Newton step
              * 3 if partial Newton step
              * 4 if Dogleg
@@ -983,7 +983,7 @@ def dogleg(g, H, delta):
 
     dc, dn, dl = cauchyNewtonDogleg(g,H)
 
-    
+
     # Check if the model is convex along the gradient direction
 
     alpha = np.inner(g,g)
@@ -993,7 +993,7 @@ def dogleg(g, H, delta):
         return dstar, -1
 
     # Compute the Cauchy point
-    
+
     normdc = alpha * np.sqrt(alpha) / beta ;
     if normdc >= delta:
         # The Cauchy point is outside the trust
@@ -1014,31 +1014,31 @@ def dogleg(g, H, delta):
         # Return the Cauchy point
         return dc, -2
 
-    if normdn <= delta: 
+    if normdn <= delta:
         # Newton point is inside the trust region
         return dn, 2
 
 
     # Compute the dogleg point
 
-    eta = 0.2 + (0.8 * alpha * alpha / (beta * abs(np.inner(g,dn))))  
+    eta = 0.2 + (0.8 * alpha * alpha / (beta * abs(np.inner(g,dn))))
 
     partieldn = eta * la.norm(dn)
-    
+
     if partieldn <= delta:
         # Dogleg point is inside the trust region
         dstar = (delta / normdn) * dn ;
         return dstar, 3
-  
+
     # Between Cauchy and dogleg
     nu = dl - dc
-    lbd = trustRegionIntersection(dc, nu, delta)  
+    lbd = trustRegionIntersection(dc, nu, delta)
     dstar = dc + lbd * nu ;
     return dstar, 4
 
 def truncatedConjugateGradient(g, H, delta):
     """
-    Find an approximation of the trust region subproblem using the 
+    Find an approximation of the trust region subproblem using the
     truncated conjugate gradient method
 
     :param g: gradient of the quadratic model.
@@ -1048,7 +1048,7 @@ def truncatedConjugateGradient(g, H, delta):
     :param delta: radius of the trust region.
     :type delta: float
 
-    :return: d, diagnostic, where 
+    :return: d, diagnostic, where
 
           - d is the approximate solution of the trust region subproblem,
           - diagnostic is the nature of the solution:
@@ -1063,7 +1063,7 @@ def truncatedConjugateGradient(g, H, delta):
     tol = 1.0e-6
     n = len(g)
     xk = np.zeros(n)
-    gk = g 
+    gk = g
     dk = -gk
     for k in range(n):
         try:
@@ -1071,7 +1071,7 @@ def truncatedConjugateGradient(g, H, delta):
             if  curv <= 0:
                 # Negative curvature has been detected
                 type = 3
-                a = np.inner(dk, dk) 
+                a = np.inner(dk, dk)
                 b = 2 * np.inner(xk, dk)
                 c = np.inner(xk, xk) - delta * delta
                 rho = b * b - 4 * a * c ;
@@ -1081,8 +1081,8 @@ def truncatedConjugateGradient(g, H, delta):
             xkp1 = xk + alphak * dk
             if np.isnan(xkp1).any() or la.norm(xkp1) > delta:
                 # Out of the trust region
-                type = 2 
-                a = np.inner(dk, dk) 
+                type = 2
+                a = np.inner(dk, dk)
                 b = 2 * np.inner(xk, dk)
                 c = np.inner(xk, xk) - delta * delta
                 rho = b * b - 4 * a * c ;
@@ -1100,7 +1100,7 @@ def truncatedConjugateGradient(g, H, delta):
         except:
             # Numerical problem
             type = 4
-            a = np.inner(dk, dk) 
+            a = np.inner(dk, dk)
             b = 2 * np.inner(xk, dk)
             c = np.inner(xk, xk) - delta * delta
             rho = b * b - 4 * a * c ;
@@ -1147,10 +1147,10 @@ def newtonTrustRegion(fct,
     :param eta2: threshold for very successful iterations. Default 0.9.
     :type eta2: float
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
     """
@@ -1187,7 +1187,7 @@ def newtonTrustRegion(fct,
         k += 1
         if dl:
             step, type = dogleg(g, H, delta)
-        else: 
+        else:
             step, type = truncatedConjugateGradient(g, H, delta)
         xc = xk + step
         fct.setVariables(xc)
@@ -1259,22 +1259,30 @@ def newtonTrustRegionForBiogeme(fct,
     :param betaIds: internal identifiers of the non fixed betas.
     :type betaIds: numpy.array
 
-    :param bounds: list of tuples (ell,u) containing the lower and upper bounds for each free parameter. Note that this algorithm does not support bound constraints. Therefore, all the bounds must be None.
+    :param bounds: list of tuples (ell, u) containing the lower and
+                   upper bounds for each free parameter. Note that
+                   this algorithm does not support bound constraints.
+                   Therefore, all the bounds must be None.
     :type bounds: list(tuples)
 
-    :param parameters: dict of parameters to be transmitted to the  optimization routine:             
-         - tolerance: when the relative gradient is below that threshold, the algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
+    :param parameters: dict of parameters to be transmitted to the
+                       optimization routine:
+
+         - tolerance: when the relative gradient is below that threshold, 
+           the algorithm has reached convergence 
+           (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - maxiter: the maximum number of iterations (default: 100).
-         - dogleg: if True, the trust region subproblem is solved using 
-                   the Dogleg method. If False, it is solved using the 
+         - dogleg: if True, the trust region subproblem is solved using
+                   the Dogleg method. If False, it is solved using the
                    truncated conjugate gradient method (default: False).
          - radius: the initial radius of the truat region (default: 1.0).
+
     :type parameters: dict(string:float or int)
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
     :raises biogeme.exceptions.biogemeError: if bounds are imposed on the variables.
@@ -1316,7 +1324,7 @@ def bfgs(H, d, y):
     :param y: difference between two consecutive gradients.
     :type y: numpy.array (1D)
 
-    :return: updated approximation of the inverse of the Hessian. 
+    :return: updated approximation of the inverse of the Hessian.
     :rtype: numpy.array (2D)
 
     """
@@ -1348,7 +1356,7 @@ def inverseBfgs(Hinv, d, y):
     :param y: difference between two consecutive gradients.
     :type y: numpy.array (1D)
 
-    :return: updated approximation of the inverse of the Hessian. 
+    :return: updated approximation of the inverse of the Hessian.
     :rtype: numpy.array (2D)
     """
     n = len(d)
@@ -1386,10 +1394,10 @@ def bfgsLineSearch(fct,
     :param maxiter: the algorithm stops if this number of iterations is reached. Default: 1000
     :type maxiter: int
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
     :raises biogeme.exceptions.biogemeError: if the dimensions of the matrix initBfgs do not match the length of x0.
@@ -1461,7 +1469,7 @@ def bfgsLineSearchForBiogeme(fct,
                              bounds,
                              parameters = None):
     """Optimization interface for Biogeme, based on BFGS quasi-Newton method with LS.
-                       
+
     :param fct: object to calculate the objective function and its derivatives.
     :type fct: optimization.functionToMinimize
 
@@ -1477,18 +1485,18 @@ def bfgsLineSearchForBiogeme(fct,
     :param bounds: list of tuples (ell,u) containing the lower and upper bounds for each free parameter. Note that this algorithm does not support bound constraints. Therefore, all the bounds must be None.
     :type bounds: list(tuples)
 
-    :param parameters: dict of parameters to be transmitted to the  optimization routine:  
-           
+    :param parameters: dict of parameters to be transmitted to the  optimization routine:
+
          - tolerance: when the relative gradient is below that threshold, the algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - maxiter: the maximum number of iterations (default: 100).
-         - initBfgs: the positive definite matrix that initalizes the BFGS updates. If None, the identity matrix is used. Default: None. 
+         - initBfgs: the positive definite matrix that initalizes the BFGS updates. If None, the identity matrix is used. Default: None.
 
     :type parameters: dict(string:float or int)
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
     :raises biogeme.exceptions.biogemeError: if bounds are imposed on the variables.
@@ -1554,10 +1562,10 @@ def bfgsTrustRegion(fct,
     :param eta2: threshold for very successful iterations. Default 0.9.
     :type eta2: float
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
     :raises biogeme.exceptions.biogemeError: if the dimensions of the matrix initBfgs do not match the length of x0.
@@ -1597,7 +1605,7 @@ def bfgsTrustRegion(fct,
         k += 1
         if dl:
             step, type = dogleg(g, H, delta)
-        else: 
+        else:
             step, type = truncatedConjugateGradient(g, H, delta)
         xc = xk + step
         fct.setVariables(xc)
@@ -1650,7 +1658,7 @@ def bfgsTrustRegion(fct,
                 'Number of iterations': k,
                 'Number of function evaluations': nfev,
                 'Number of gradient evaluations': ngev}
-        
+
     return xk, messages
 
 
@@ -1674,28 +1682,35 @@ def bfgsTrustRegionForBiogeme(fct,
     :param betaIds: internal identifiers of the non fixed betas.
     :type betaIds: numpy.array
 
-    :param bounds: list of tuples (ell,u) containing the lower and upper bounds for each free parameter. Note that this algorithm does not support bound constraints. Therefore, all the bounds must be None.
+    :param bounds: list of tuples (ell,u) containing the lower and
+                   upper bounds for each free parameter. Note that
+                   this algorithm does not support bound constraints.
+                   Therefore, all the bounds must be None.
     :type bounds: list(tuples)
 
-    :param parameters: dict of parameters to be transmitted to the  optimization routine:             
+    :param parameters: dict of parameters to be transmitted to the
+         optimization routine:
+
          - tolerance: when the relative gradient is below that threshold, the algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - maxiter: the maximum number of iterations (default: 100).
-         - dogleg: if True, the trust region subproblem is solved using 
-                   the Dogleg method. If False, it is solved using the 
+         - dogleg: if True, the trust region subproblem is solved using
+                   the Dogleg method. If False, it is solved using the
                    truncated conjugate gradient method (default: False).
          - radius: the initial radius of the truat region (default: 1.0).
-         - initBfgs: the positive definite matrix that initalizes the BFGS updates. If None, the identity matrix is used. Default: None. 
- 
+         - initBfgs: the positive definite matrix that initalizes the BFGS updates. If None, the identity matrix is used. Default: None.
+
 
     :type parameters: dict(string:float or int)
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects
+                related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
-    :raises biogeme.exceptions.biogemeError: if bounds are imposed on the variables.
+    :raises biogeme.exceptions.biogemeError: if bounds are imposed on
+            the variables.
 
     """
     for l, u in bounds:
@@ -1718,7 +1733,7 @@ def bfgsTrustRegionForBiogeme(fct,
             radius = parameters['radius']
         if 'initBfgs' in parameters:
             initBfgs= parameters['initBfgs']
-            
+
 
     logger.detailed('** Optimization: BFGS with trust region')
     return bfgsTrustRegion(fct, x0 = initBetas, initBfgs = initBfgs, delta0 = radius, eps = tol, dl = dogleg, maxiter = maxiter)
@@ -1730,7 +1745,7 @@ def truncatedConjugateGradientSubspace(xk,
                                        delta,
                                        bounds,
                                        tol = np.finfo(np.float64).eps ** 0.3333):
-    """Find an approximation of the solution of the trust region subproblem using the truncated conjugate gradient method withinh the subspace of free variables. Free variables are those corresponding to inactive constraints at the generalized Cauchy point. 
+    """Find an approximation of the solution of the trust region subproblem using the truncated conjugate gradient method withinh the subspace of free variables. Free variables are those corresponding to inactive constraints at the generalized Cauchy point.
 
     :param g: gradient of the quadratic model.
     :type g: numpy.array
@@ -1744,7 +1759,7 @@ def truncatedConjugateGradientSubspace(xk,
     :param bounds: bounds on the variables.
     :type bounds: class bioBounds
 
-    :return: d, diagnostic, where 
+    :return: d, diagnostic, where
 
           - d is the approximate solution of the trust region subproblem,
           - diagnostic is the nature of the solution:
@@ -1767,7 +1782,7 @@ def truncatedConjugateGradientSubspace(xk,
 
     if np.isnan(Hk).any():
         raise excep.biogemeError(f'Invalid Hk: {Hk}')
-    
+
     # First, we calculate the intersection between the trust region on
     # the bounds. The trust region is also a bound constraint (based
     # on infinity norm) of radius 'delta', centered at xk.
@@ -1776,15 +1791,15 @@ def truncatedConjugateGradientSubspace(xk,
 
     # Then, we calculate the generalized Cauchy point
     gcp = intersection.generalizedCauchyPoint(xk, gk, Hk, -gk)
-    
+
     x = gcp
     r = -gk - Hk @ (x - xk)
     projectedGradient = intersection.project(xk - gk) - xk
     norm_projGrad = np.linalg.norm(projectedGradient)
 
-    
+
     #etak = np.minimum(0.1, np.sqrt(norm_projGrad)) * norm_projGrad
-    
+
     etak = np.finfo(np.float64).eps ** 0.333
 
     activityStatus = intersection.activity(gcp)
@@ -1792,7 +1807,7 @@ def truncatedConjugateGradientSubspace(xk,
 
     if not freeVariables.any():
         return gcp, 1
-    
+
     xbar = x[freeVariables]
     rbar = r[freeVariables]
 
@@ -1828,15 +1843,15 @@ def truncatedConjugateGradientSubspace(xk,
             rbar = rbar - alpha2 * ybar
             rho1 = rho2
             rho2 = np.inner(rbar, rbar)
-            
+
         except:
             # Numerical problem detected. Return the current value of x
             x[freeVariables] = xbar
             return x, 4
-    
+
         x[freeVariables] = xbar
     return x, 1
-    
+
 def simpleBoundsNewtonAlgorithm(fct,
                                 bounds,
                                 x0,
@@ -1885,7 +1900,7 @@ def simpleBoundsNewtonAlgorithm(fct,
     :type enlargingFactor: float
 
     :return: x, messages
-        
+
         - x is the solution generated by the algorithm,
         - messages is a dictionary describing information about the lagorithm
 
@@ -1895,13 +1910,13 @@ def simpleBoundsNewtonAlgorithm(fct,
 
     """
 
-    
+
     if len(x0) != bounds.n:
         raise excep.biogemeError(f'Incompatible size: {len(x0)} and {len(bounds)}')
-    
+
     if not bounds.feasible(x0):
         logger.warning(f'Initial point not feasible. It will be projected onto the feasible domain.')
-    
+
     numberOfTrueHessian = 0
     numberOfMatrices = 0
     k = 0
@@ -1915,7 +1930,7 @@ def simpleBoundsNewtonAlgorithm(fct,
         nfev += 1
         ngev += 1
         nhev += 1
-        
+
         numberOfTrueHessian += 1
         numberOfMatrices += 1
         # If there is a numerical problem with the Hessian, we use BFGS instead
@@ -1928,7 +1943,7 @@ def simpleBoundsNewtonAlgorithm(fct,
         ngev += 1
         H = np.eye(len(xk))
         numberOfMatrices += 1
-    
+
     projectedGradient = bounds.project(xk - g) - xk
     typx = np.ones(np.asarray(xk).shape)
     typf = max(np.abs(f), 1.0)
@@ -1944,7 +1959,7 @@ def simpleBoundsNewtonAlgorithm(fct,
                     'Number of hessian evaluations': nhev,
                     'Cause of termination': message}
         return xk, messages
-    
+
     delta = delta0
     cont = True
     maxDelta = np.finfo(float).max
@@ -1960,7 +1975,7 @@ def simpleBoundsNewtonAlgorithm(fct,
         fct.setVariables(xc)
         fc = fct.f()
         nfev += 1
-        
+
         num = f - fc
         step = xc - xk
         denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
@@ -1972,7 +1987,7 @@ def simpleBoundsNewtonAlgorithm(fct,
         else:
             # Candidate accepted
             if proportionTrueHessian > 0 and float(numberOfTrueHessian) / float(numberOfMatrices) <= proportionTrueHessian:
-                
+
                 fc, gc, Hc = fct.f_g_h()
                 nfev += 1
                 ngev += 1
@@ -1992,7 +2007,7 @@ def simpleBoundsNewtonAlgorithm(fct,
                 Hc = bfgs(H, step, y)
                 numberOfMatrices += 1
 
-                
+
             nfev += 1
             xk = xc
             f = fc
@@ -2027,9 +2042,9 @@ def simpleBoundsNewtonAlgorithm(fct,
                 'Number of gradient evaluations': ngev,
                 'Number of hessian evaluations': nhev,
                 'Cause of termination': message}
-    
+
     return xk, messages
-        
+
 def simpleBoundsNewtonAlgorithmForBiogeme(fct,
                                           initBetas,
                                           fixedBetas,
@@ -2052,10 +2067,17 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
     :param bounds: list of tuples (ell,u) containing the lower and upper bounds for each free parameter. Note that this algorithm does not support bound constraints. Therefore, all the bounds must be None.
     :type bounds: list(tuples)
 
-    :param parameters: dict of parameters to be transmitted to the  optimization routine:             
-         - tolerance: when the relative gradient is below that threshold, the algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
-         - cgtolerance: when the norm of the residual is below that threshold, the conjugate gradient algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
-         - proportionAnalyticalHessian: proportion of iterations when the analytical Hessian ia calculated (default: 1)
+    :param parameters: dict of parameters to be transmitted to the  
+                       optimization routine:
+
+         - tolerance: when the relative gradient is below that threshold,
+            the algorithm has reached convergence 
+            (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
+         - cgtolerance: when the norm of the residual is below that 
+           threshold, the conjugate gradient algorithm has reached 
+           convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
+         - proportionAnalyticalHessian: proportion of iterations when the
+           analytical Hessian ia calculated (default: 1)
          - maxiter: the maximum number of iterations (default: 100).
          - radius: the initial radius of the truat region (default: 1.0).
          - eta1: threshold for failed iterations (default: 0.01).
@@ -2066,7 +2088,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
     :type parameters: dict(string:float or int)
 
     :return: x, messages
-        
+
         - x is the solution generated by the algorithm,
         - messages is a dictionary describing information about the lagorithm
 
