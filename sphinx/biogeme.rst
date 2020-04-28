@@ -95,14 +95,6 @@ biogeme.optimization module
    :undoc-members:
    :show-inheritance:
 
-biogeme.constrainedOptimization module
----------------------------
-
-.. automodule:: biogeme.constrainedOptimization
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 biogeme.results module
 ----------------------
 
