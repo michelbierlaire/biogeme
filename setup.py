@@ -1,21 +1,33 @@
+"""Instructions for the installation of Biogeme
+
+:author: Michel Bierlaire
+:date: Tue Mar 26 16:45:15 2019
+
+"""
+
+# Too constraining
+# pylint: disable=invalid-name, protected-access, too-many-arguments
+
 import os
 import sys
 import platform
+import distutils.ccompiler
+import multiprocessing.pool
+import setuptools
+#from setuptools import setup, Extension
+#import setuptools.command.test
+
+
+import numpy
+
+from biogeme.version import __version__
+
 if platform.system() == 'Darwin':
     os.environ["CC"] = 'clang'
     os.environ["CXX"] = 'clang++'
 else:
     os.environ["CC"] = 'gcc'
     os.environ["CXX"] = 'g++'
-
-#from distutils.core import setup
-#from distutils.extension import Extension
-import numpy
-import setuptools
-from setuptools import setup, Extension, Command
-from setuptools.dist import Distribution
-import setuptools.command.test
-from setuptools import (find_packages, setup)
 
 
 
@@ -30,7 +42,7 @@ def parallelCCompile(self,
                      extra_preargs=None,
                      extra_postargs=None,
                      depends=None):
-    # those lines are copied from distutils.ccompiler.CCompiler directly
+    """ those lines are copied from distutils.ccompiler.CCompiler directly"""
     macros, objects, extra_postargs, pp_opts, build = \
         self._setup_compile(output_dir,
                             macros,
@@ -41,24 +53,24 @@ def parallelCCompile(self,
     cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
 
     # parallel code
-    N=8 # number of parallel compilations
-    import multiprocessing.pool
+    N = 8 # number of parallel compilations
     def _single_compile(obj):
-        try: src, ext = build[obj]
-        except KeyError: return
-        self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+        try:
+            src, extension = build[obj]
+        except KeyError:
+            return
+        self._compile(obj, src, extension, cc_args, extra_postargs, pp_opts)
     # convert to list, imap is evaluated on-demand
     list(multiprocessing.pool.ThreadPool(N).imap(_single_compile, objects))
     return objects
 
-import distutils.ccompiler
-distutils.ccompiler.CCompiler.compile=parallelCCompile
+distutils.ccompiler.CCompiler.compile = parallelCCompile
 
 try:
     from Cython.Build import cythonize
     from Cython.Distutils import build_ext
 except ImportError:
-    USE_CYTHON= False
+    USE_CYTHON = False
     print('Not using Cython')
 else:
     USE_CYTHON = True
@@ -116,68 +128,75 @@ source = ['src/biogeme.cc',
           'src/bioGhFunction.cc',
           'src/mycfsqp.cc',
           'src/myqld.cc',
-          'src/bioCfsqp.cc'
-]
+          'src/bioCfsqp.cc']
 
 
-extra_compile_args = ['-std=c++11','-Wall']
+extra_compile_args = ['-std=c++11', '-Wall']
 extra_link_args = []
 
 if platform.system() == 'Darwin':
-	extra_compile_args.append('-stdlib=libc++')
-	extra_link_args.append('-lc++')
+    extra_compile_args.append('-stdlib=libc++')
+    extra_link_args.append('-lc++')
 
 if sys.platform == 'win32':
-	# mismatch between library names
-	extra_compile_args.append('-D_hypot=hypot')
-	#as one cannot assume that libstdc++, libgcc and pthreads exists on windows, static link them so they are included in the compiled python extension.
-	extra_link_args.extend(['-mwindows','-mms-bitfields','-static-libstdc++', '-static-libgcc', '-Wl,-Bstatic', '-lstdc++', '-lpthread'])
+    # mismatch between library names
+    extra_compile_args.append('-D_hypot=hypot')
+    # as one cannot assume that libstdc++, libgcc and pthreads exists on windows,
+    # static link them so they are included in the compiled python extension.
+    extra_link_args.extend(['-mwindows',
+                            '-mms-bitfields',
+                            '-static-libstdc++',
+                            '-static-libgcc',
+                            '-Wl,-Bstatic',
+                            '-lstdc++',
+                            '-lpthread'])
 
-extensions = [Extension('biogeme.cbiogeme', ['src/cbiogeme'+ext]+source,include_dirs=[numpy.get_include()],extra_compile_args=extra_compile_args, language='c++11', extra_link_args = extra_link_args)]
+extensions = [setuptools.Extension('biogeme.cbiogeme',
+                                   ['src/cbiogeme'+ext] + source,
+                                   include_dirs=[numpy.get_include()],
+                                   extra_compile_args=extra_compile_args,
+                                   language='c++11',
+                                   extra_link_args=extra_link_args)]
 
-#extensions = [Extension('biogeme.cbiogeme', ['src/cbiogeme'+ext]+source,include_dirs=[numpy.get_include()],extra_compile_args=extra_compile_args,language='c++11', extra_link_args = ['-lprofiler'])]
+#extensions = [Extension('biogeme.cbiogeme',
+#                        ['src/cbiogeme'+ext]+source,
+#                        include_dirs=[numpy.get_include()],
+#                        extra_compile_args=extra_compile_args,
+#                        language='c++11',
+#                        extra_link_args = ['-lprofiler'])]
 
 
 #extra_compile_args=['-O0'],
 #extra_link_args=['-fsanitize=address','-O1','-fno-omit-frame-pointer','-g']
 
 if USE_CYTHON:
-    extensions = cythonize(extensions,language='c++',include_path=[numpy.get_include()])
-    cmdclass.update({ 'build_ext': build_ext})
+    extensions = cythonize(extensions, language='c++', include_path=[numpy.get_include()])
+    cmdclass.update({'build_ext': build_ext})
 
-exec(open('biogeme/version.py').read())
+#exec(open('biogeme/version.py').read())
 # now we have a `__version__` variable
-# later on we use: __version__    
+# later on we use: __version__
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-class BinaryDistribution(Distribution):
-   """Distribution which always forces a binary package with platform name"""
-   def has_ext_modules(foo):
-      return True
-
-setup(name = 'biogeme',
-      version=__version__,
-      description='Estimation and application of discrete choice models',
-      url='http://biogeme.epfl.ch',
-      author='Michel Bierlaire',
-      keywords='discrete choice maximum likelihood estimation',
-      author_email='michel.bierlaire@epfl.ch',
-      long_description=long_description,
-      long_description_content_type='text/markdown',
-      install_requires=['numpy','cython','unidecode','scipy','pandas'],
-      packages=setuptools.find_packages(),
-      include_package_data=True,
-      package_data={'biogeme': ['_biogeme.pyd']},
-      package_dir = {'biogeme.cbiogeme': 'src'},
-      cmdclass = cmdclass,
-      classifiers=[
-          'Programming Language :: Python :: 3',
-          'Operating System :: OS Independent',
-      ],
-      ext_modules = extensions
-)
-
-
-
+setuptools.setup(name='biogeme',
+                 version=__version__,
+                 description='Estimation and application of discrete choice models',
+                 url='http://biogeme.epfl.ch',
+                 author='Michel Bierlaire',
+                 keywords='discrete choice maximum likelihood estimation',
+                 author_email='michel.bierlaire@epfl.ch',
+                 long_description=long_description,
+                 long_description_content_type='text/markdown',
+                 install_requires=['numpy', 'cython', 'unidecode', 'scipy', 'pandas'],
+                 packages=setuptools.find_packages(),
+                 include_package_data=True,
+                 package_data={'biogeme': ['_biogeme.pyd']},
+                 package_dir={'biogeme.cbiogeme': 'src'},
+                 cmdclass=cmdclass,
+                 classifiers=[
+                     'Programming Language :: Python :: 3',
+                     'Operating System :: OS Independent',
+                 ],
+                 ext_modules=extensions)
