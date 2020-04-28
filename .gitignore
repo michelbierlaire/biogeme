@@ -114,3 +114,4 @@ sphinx/_build
 sphinx/shinx.log
 tests/test.pickle
 tests/test.pickle
+tests/test.pickle
