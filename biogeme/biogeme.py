@@ -1,4 +1,5 @@
-"""Implementation of the main Biogeme class that combines the database and the model specification.
+"""Implementation of the main Biogeme class that combines the database 
+   and the model specification.
 
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:45:15 2019
