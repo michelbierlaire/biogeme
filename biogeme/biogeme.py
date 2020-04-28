@@ -10,7 +10,6 @@
 # pylint: disable=invalid-unary-operand-type
 
 # Too constraining
-
 # pylint: disable=invalid-name,
 # pylint: disable=too-many-arguments, too-many-locals,
 # pylint: disable=too-many-statements, too-many-branches,
@@ -836,15 +835,11 @@ formulas.
                           'miter': 1000,
                           'eps': 6.05545e-06}
             return self.cfsqp(startingValues,
-                              self.fixedBetaValues,
-                              self.betaIds,
                               self.bounds,
                               parameters)
 
         results = self.algorithm(theFunction,
                                  startingValues,
-                                 self.fixedBetaValues,
-                                 self.betaIds,
                                  self.bounds,
                                  self.algo_parameters)
         return results

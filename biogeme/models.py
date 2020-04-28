@@ -5,8 +5,8 @@
 """
 
 # Too constraining
-# pylint: disable=invalid-name,
-# pylint: disable=too-many-lines,
+# pylint: disable=invalid-name
+# pylint: disable=too-many-lines
 
 import numpy as np
 import biogeme.exceptions as excep
