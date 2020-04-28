@@ -1,0 +1,83 @@
+test_01.py
+F
+======================================================================
+FAIL: testEstimation (__main__.test_01)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_01.py", line 139, in testEstimation
+    self.assertAlmostEqual(results.data.logLike,-18945.44,2)
+AssertionError: -18658.15200149035 != -18945.44 within 2 places (287.2879985096479 difference)
+
+----------------------------------------------------------------------
+Ran 1 test in 14.122s
+
+FAILED (failures=1)
+test_02.py
+E
+======================================================================
+ERROR: testEstimation (__main__.test_02)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_02.py", line 246, in testEstimation
+    results = biogeme.estimate()
+  File "/Users/michelbierlaire/opt/anaconda3/envs/python38/lib/python3.8/site-packages/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg/biogeme/biogeme.py", line 695, in estimate
+    output = self.optimize(self.betaInitValues)
+  File "/Users/michelbierlaire/opt/anaconda3/envs/python38/lib/python3.8/site-packages/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg/biogeme/biogeme.py", line 838, in optimize
+    results = self.algorithm(theFunction,
+  File "/Users/michelbierlaire/opt/anaconda3/envs/python38/lib/python3.8/site-packages/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg/biogeme/optimization.py", line 2111, in simpleBoundsNewtonAlgorithmForBiogeme
+    return simpleBoundsNewtonAlgorithm(fct,
+  File "/Users/michelbierlaire/opt/anaconda3/envs/python38/lib/python3.8/site-packages/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg/biogeme/optimization.py", line 1961, in simpleBoundsNewtonAlgorithm
+    fc = fct.f()
+  File "/Users/michelbierlaire/opt/anaconda3/envs/python38/lib/python3.8/site-packages/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg/biogeme/biogeme.py", line 1104, in f
+    self.fv = self.like(self.x, self.scaled, self.batch)
+  File "/Users/michelbierlaire/opt/anaconda3/envs/python38/lib/python3.8/site-packages/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg/biogeme/biogeme.py", line 429, in calculateLikelihood
+    f = self.theC.calculateLikelihood(x, self.fixedBetaValues)
+  File "src/cbiogeme.pyx", line 97, in biogeme.cbiogeme.pyBiogeme.calculateLikelihood
+RuntimeError: src/biogeme.cc:376: Biogeme exception: Error for data entry 956 : src/bioExprLog.cc:57: Biogeme exception: Current values of the literals: 
+B_Envir03_F1 = 0.0917465
+Envir03 = 4
+INTER_Envir03 = -0.185623
+SIGMA_STAR_Envir03 = -0.0437204
+ScaledIncome = 7
+age_65_more = 0
+beta_ScaledIncome_10_more = 0.322767
+beta_ScaledIncome_4_6 = -0.126552
+beta_ScaledIncome_6_8 = -0.122314
+beta_ScaledIncome_8_10 = -0.0416195
+beta_ScaledIncome_lessthan_4 = 0.0339709
+coef_age_65_more = 0.00629697
+coef_haveChildren = -0.0607002
+coef_haveGA = -0.201209
+coef_highEducation = -0.267695
+coef_individualHouse = -0.104115
+coef_intercept = 0.0546951
+coef_male = -0.0330567
+coef_moreThanOneBike = -0.210096
+coef_moreThanOneCar = 0.486753
+delta_1 = 0
+delta_2 = 0.229876
+haveChildren = 1
+haveGA = 0
+highEducation = 0
+individualHouse = 1
+male = 1
+moreThanOneBike = 1
+moreThanOneCar = 1
+row number: 956, Cannot take the log of a non positive number [-3.9432e-06]
+
+
+----------------------------------------------------------------------
+Ran 1 test in 1.260s
+
+FAILED (errors=1)
+test_03.py
+Traceback (most recent call last):
+  File "test_03.py", line 27, in <module>
+    age_65_more = DefineVariable('age_65_more',age >= Numeric(65),database)
+NameError: name 'Numeric' is not defined
+test_04.py
+Traceback (most recent call last):
+  File "test_04.py", line 29, in <module>
+    age_65_more = DefineVariable('age_65_more',age >= Numeric(65),database)
+NameError: name 'Numeric' is not defined
+test_05.py
