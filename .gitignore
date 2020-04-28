@@ -5,7 +5,7 @@
 #############################################
 
 # All makefiles
-**/Makefile
+
 **/Makefile.in
 
 # Other binary files
@@ -109,3 +109,4 @@ tests/swissmetro/biogemeModelDefaultName~22.pickle
 tests/swissmetro/biogemeModelDefaultName~23.html
 tests/swissmetro/biogemeModelDefaultName~23.pickle
 biogeme/tmp.lis
+tests/test.pickle
