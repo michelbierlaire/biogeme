@@ -4,12 +4,16 @@
 
 :date: Tue Mar 26 16:48:40 2019
 """
+
+# Too constraining
+# pylint: disable=invalid-name
+
 from pathlib import Path
 
 
-def getNewFileName(name,ext):
+def getNewFileName(name, ext):
     """
-      Generate a file name that does not exist. 
+      Generate a file name that does not exist.
 
     :param name: name of the file.
     :type name: string
@@ -22,11 +26,11 @@ def getNewFileName(name,ext):
        output files inadvertently.
     :rtype: string
     """
-    fileName = (name+"."+ext)
+    fileName = name + '.' + ext
     theFile = Path(fileName)
     number = int(0)
     while theFile.is_file():
-        fileName = "{}~{:02d}.{}".format(name,number,ext)
+        fileName = f'{name}~{number: 02d}.{ext}'
         theFile = Path(fileName)
         number += 1
     return fileName

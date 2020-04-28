@@ -1,17 +1,17 @@
-""" 
+"""
 Experimental algorithm by Gael Lederrey. Not yet documented.
 
 :author: Michel Bierlaire and Gael Lederrey
 :date: Thu Dec 26 17:41:18 2019
 """
 
+# Too constraining
+# pylint: disable=invalid-name, too-many-statements, too-many-branches, too-many-arguments, too-many-locals
+import time
 import numpy as np
-import pandas as pd
 import biogeme.optimization as opt
 import biogeme.messaging as msg
 import biogeme.exceptions as excep
-import copy
-import time
 logger = msg.bioMessage()
 
 class smoothing:
@@ -33,7 +33,7 @@ class smoothing:
         self.g.pop()
         self.h.pop()
         self.batch.pop()
-        
+
     def add(self, f, g, h, batch, discount = 0.95):
         if g is not None:
             if self.n is None:
@@ -69,31 +69,31 @@ class smoothing:
         if self.n is None:
             # No derivative has yet been stored
             return f, None, None
-        else:
-            g = np.zeros(self.n)
-            h = np.zeros(( self.n, self.n))
-            gscale = 0.0
-            hscale = 0.0
-            for k in range(0,min(len(self.f),self.windowSize)):
-                i = len(self.f)-k-1
-                if self.g[i] is not None:
-                    g += scale[k] * self.g[i]
-                    gscale += scale[k]
-                if self.h[i] is not None:
-                    h += scale[k] * self.h[i]
-                    hscale += scale[k]
 
-            if hscale == 0.0:
-                return f, g / gscale, None
-            else:
-                return f, g / gscale, h / hscale
+        g = np.zeros(self.n)
+        h = np.zeros(( self.n, self.n))
+        gscale = 0.0
+        hscale = 0.0
+        for k in range(0,min(len(self.f),self.windowSize)):
+            i = len(self.f)-k-1
+            if self.g[i] is not None:
+                g += scale[k] * self.g[i]
+                gscale += scale[k]
+            if self.h[i] is not None:
+                h += scale[k] * self.h[i]
+                hscale += scale[k]
+
+        if hscale == 0.0:
+            return f, g / gscale, None
+
+        return f, g / gscale, h / hscale
 
 def generateCandidateFirstOrder(fct, x, f, g, h, batch, delta, dogleg, maxiter, maxDelta, eta1, eta2):
     for k in range(maxiter):
         if dogleg:
-            step,type = opt.dogleg(g,h,delta)
-        else: 
-            step,type = opt.truncatedConjugateGradient(g,h,delta)
+            step, _ = opt.dogleg(g,h,delta)
+        else:
+            step, _ = opt.truncatedConjugateGradient(g,h,delta)
         xc = x + step
         fct.setVariables(xc)
         fc, gc = fct.f_g(batch=batch)
@@ -115,11 +115,14 @@ def generateCandidateFirstOrder(fct, x, f, g, h, batch, delta, dogleg, maxiter, 
     return success, None, None, None, None, delta
 
 def generateCandidateSecondOrder(fct, x, f, g, h, batch, delta, dogleg, maxiter, maxDelta, eta1, eta2):
+    """To be documented...
+
+    """
     for k in range(maxiter):
         if dogleg:
-            step,type = opt.dogleg(g,h,delta)
-        else: 
-            step,type = opt.truncatedConjugateGradient(g,h,delta)
+            step, _ = opt.dogleg(g,h,delta)
+        else:
+            step, _ = opt.truncatedConjugateGradient(g,h,delta)
         xc = x + step
         fct.setVariables(xc)
         fc, gc, hc = fct.f_g_h(batch=batch)
@@ -139,13 +142,13 @@ def generateCandidateSecondOrder(fct, x, f, g, h, batch, delta, dogleg, maxiter,
     return success, None, None, None, None, delta
 
 
-        
-def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
+
+def hamabs(fct, initBetas, fixedBetas, betaIds, bounds, parameters=None):
     """
     Algorithm inspired by `Lederrey et al. (2019)`
-    
+
     .. _`Lederrey et al. (2019)`: https://transp-or.epfl.ch/documents/technicalReports/LedLurHilBie19.pdf
-    
+
     :param fct: object to calculate the objective function and its derivatives.
     :type obj: optimization.functionToMinimize
 
@@ -161,24 +164,24 @@ def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
     :param bounds: list of tuples (ell,u) containing the lower and upper bounds for each free parameter. Note that this algorithm does not support bound constraints. Therefore, all the bounds must be None.
     :type bounds: list(tuples)
 
-    :param parameters: dict of parameters to be transmitted to the  optimization routine:             
+    :param parameters: dict of parameters to be transmitted to the  optimization routine:
          - tolerance: when the relative gradient is below that threshold, the algorithm has reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - maxiter: the maximum number of iterations (default: 100).
 
     :type parameters: dict(string:float or int)
 
-    :return: tuple x, messages, where 
+    :return: tuple x, messages, where
 
             - x is the solution found,
-            - messages is a dictionary reporting various aspects related to the run of the algorithm. 
+            - messages is a dictionary reporting various aspects related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
 
     """
 
-    for l,u in bounds:
+    for l, u in bounds:
         if l is not None or u is not None:
-            raise excep.biogemeError("This algorithm does not handle bound constraints. Remove the bounds, or select another algorithm.")
+            raise excep.biogemeError('This algorithm does not handle bound constraints. Remove the bounds, or select another algorithm.')
 
     tol = np.finfo(np.float64).eps**0.3333
     maxiter = 1000
@@ -188,10 +191,10 @@ def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
     hybrid = 1.0 / 2.0**2
     firstRadius = 1.0
     # Premature convergence for small batch sizes
-    scaleEps = 10.0
+    #scaleEps = 10.0
     # Maximum number of iterations before updating the batch size
     maxFailure = 2
-    
+
     dogleg = False
     eta1 = 0.01
     eta2 = 0.9
@@ -240,7 +243,6 @@ def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
             return xk,0,1,message
 
     delta = firstRadius
-    nfev = 0
     cont = True
 
     maxDelta = np.finfo(float).max
@@ -249,9 +251,8 @@ def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
     # Collect statistics per iteration
 #    columns = ['Batch','f','relgrad','Time','AbsDiff', 'RelDiff', 'AbsEff', 'RelEff']
 #    stats = pd.DataFrame(columns=columns)
-    
+
     while cont:
-        start = time.time()
         logger.debug(f'***************** Iteration {k} **************')
         logger.debug(f'N={avging.numberOfValues()} xk={xk} avgf={avgf} delta={delta}')
         k += 1
@@ -280,7 +281,7 @@ def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
                     fct.setVariables(xk)
                     f, g = fct.f_g(batch=batch)
                     avgf, avgg, _ = avging.add(f, g, None, batch)
-                    
+
         if delta <= minDelta:
             if batch == 1.0:
                 message = f"Trust region is too small: {delta}"
@@ -290,16 +291,11 @@ def hamabs(fct,initBetas,fixedBetas,betaIds,bounds,parameters=None):
             message = f"Maximum number of iterations reached: {maxiter}"
             cont = False
         logger.detailed(f"{k} f={avgf:10.7g} delta={delta:6.2g} batch={100*batch:6.2g}%")
-        elapsed = time.time()-start
-#        arow = {'Batch': 100*batch, 'f': avgf, 'relgrad': relgrad, 'Time': elapsed, 'AbsDiff': num, 'RelDiff': relnum, 'AbsEff': num/elapsed, 'RelEff': relnum/elapsed}
-#        stats.loc[k] = pd.Series(arow)
-#    logger.debug(f'\n{stats.to_string()}')
+
     logger.detailed(message)
     messages = {'Algorithm': 'HAMABS prototype',
                 'Relative gradient': relgrad,
                 'Cause of termination': message,
                 'Number of iterations': k}
-    
+
     return xk, messages
-    
-    

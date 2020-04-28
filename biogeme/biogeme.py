@@ -1,4 +1,4 @@
-"""Implementation of the main Biogeme class that combines the database 
+"""Implementation of the main Biogeme class that combines the database
    and the model specification.
 
 :author: Michel Bierlaire
@@ -7,10 +7,15 @@
 """
 
 # There seems to be a bug in PyLint.
-# pylint: disable=invalid-unary-operand-type, too-many-function-args
+# pylint: disable=invalid-unary-operand-type
 
 # Too constraining
-# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements, too-many-branches, too-many-instance-attributes, too-many-lines
+
+# pylint: disable=invalid-name,
+# pylint: disable=too-many-arguments, too-many-locals,
+# pylint: disable=too-many-statements, too-many-branches,
+# pylint: disable=too-many-instance-attributes, too-many-lines,
+# pylint: disable=too-many-function-args
 
 import multiprocessing as mp
 from datetime import datetime
@@ -824,7 +829,7 @@ formulas.
 
         if startingValues is None:
             startingValues = self.betaInitValues
-            
+
         if self.algorithm is None:
             parameters = {'mode': 100,
                           'iprint': self.logger.screenLevel,

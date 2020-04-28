@@ -271,7 +271,7 @@ class Database:
     def descriptionOfNativeDraws(self):
         """ Describe the draws available draws with Biogeme
 
-        :return: dict, where the keys are the names of the draws, 
+        :return: dict, where the keys are the names of the draws,
                  and the value their description
 
         Example of output::

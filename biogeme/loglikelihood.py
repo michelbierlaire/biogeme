@@ -5,7 +5,10 @@
 
 """
 
-from biogeme.expressions import *
+# Too constraining
+# pylint: disable=invalid-name,
+
+from biogeme.expressions import log, MonteCarlo, bioNormalPdf
 
 def loglikelihood(prob):
     """
@@ -17,9 +20,8 @@ def loglikelihood(prob):
     :return: the logarithm of the probability.
     :rtype: biogeme.expressions.Expression
 
-    """    
-    loglikelihood = log(prob)
-    return loglikelihood
+    """
+    return log(prob)
 
 def mixedloglikelihood(prob):
     """Compute a simulated loglikelihood function
@@ -32,14 +34,15 @@ def mixedloglikelihood(prob):
 
     .. math:: P(i|\\xi_1,\\ldots,\\xi_L)
 
-    
+
     :type prob: biogeme.expressions.Expression
-    
-    :return: the simulated loglikelihood, given by 
+
+    :return: the simulated loglikelihood, given by
 
     .. math:: \\ln\\left(\\sum_{r=1}^R P(i|\\xi^r_1,\\ldots,\\xi^r_L) \\right)
 
-    where :math:`R` is the number of draws, and :math:`\\xi_j^r` is the rth draw of the random variable :math:`\\xi_j`.
+    where :math:`R` is the number of draws, and :math:`\\xi_j^r`
+          is the rth draw of the random variable :math:`\\xi_j`.
 
     :rtype: biogeme.expressions.Expression
 
@@ -47,20 +50,24 @@ def mixedloglikelihood(prob):
     l = MonteCarlo(prob)
     return log(l)
 
-def likelihoodregression(meas,model,sigma):
+def likelihoodregression(meas, model, sigma):
     """ Computes likelihood function of a regression model.
 
-    :param meas: An expression providing the value :math:`y` of the measure for the current observation.
+    :param meas: An expression providing the value :math:`y` of the measure
+                 for the current observation.
     :type meas: biogeme.expressions.Expression
-    :param model: An expression providing the output :math:`m` of the model for the current observation.
+    :param model: An expression providing the output :math:`m` of the model
+                  for the current observation.
     :type model: biogeme.expressions.Expression
-    :param sigma: An expression (typically, a parameter) providing the standard error :math:`\sigma` of the error term.
+    :param sigma: An expression (typically, a parameter) providing the
+                  standard error :math:`\\sigma` of the error term.
     :type sigma: biogeme.expressions.Expression
-    :return: The likelihood of the regression, assuming a normal distribution, that is
+    :return: The likelihood of the regression, assuming a normal distribution,
+             that is
 
-    .. math:: \\frac{1}{\\sigma} \\phi\\left( \\frac{y-m}{\\sigma} \\right) 
+    .. math:: \\frac{1}{\\sigma} \\phi\\left( \\frac{y-m}{\\sigma} \\right)
 
-    where :math:`\phi(\cdot)` is the pdf of the normal distribution.
+             where :math:`\\phi(\\cdot)` is the pdf of the normal distribution.
 
     :rtype: biogeme.expressions.Expression
     """
@@ -69,7 +76,7 @@ def likelihoodregression(meas,model,sigma):
     return f
 
 
-def loglikelihoodregression(meas,model,sigma):
+def loglikelihoodregression(meas, model, sigma):
     """Computes log likelihood function of a regression model.
 
     :param meas: An expression providing the value :math:`y` of the
@@ -80,16 +87,17 @@ def loglikelihoodregression(meas,model,sigma):
                   model for the current observation.
     :type model: biogeme.expressions.Expression
 
-    :param sigma: An expression (typically, a parameter) providing the standard error :math:`\sigma` of the error term.
+    :param sigma: An expression (typically, a parameter) providing
+                  the standard error :math:`\\sigma` of the error term.
     :type sigma: biogeme.expressions.Expression
 
     :return: the likelihood of the regression, assuming a normal distribution, that is
-     
-    .. math:: -\\left( \\frac{(y-m)^2}{2\\sigma^2} \\right) - \\log(\\sigma) - \\frac{1}{2}\\log(2\\pi)
+
+    .. math:: -\\left( \\frac{(y-m)^2}{2\\sigma^2} \\right) -
+              \\log(\\sigma) - \\frac{1}{2}\\log(2\\pi)
 
     :rtype: biogeme.expressions.Expression
     """
     t = (meas - model) / sigma
     f = - (t ** 2) / 2 - log(sigma) -0.9189385332
     return f
-
