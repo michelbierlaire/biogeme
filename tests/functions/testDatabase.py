@@ -1,100 +1,117 @@
-import unittest
-import biogeme.database as db
-import pandas as pd
-import numpy as np
-from biogeme.expressions import *
-from pathlib import Path
+"""
+Test the database module
+
+:author: Michel Bierlaire
+:data: Wed Apr 29 18:02:59 2020
+
+"""
+# Bug in pylint
+# pylint: disable=no-member
+#
+# Too constraining
+# pylint: disable=invalid-name, too-many-instance-attributes
+#
+# Not needed in test
+# pylint: disable=missing-function-docstring, missing-class-docstring
+
 import os
+import unittest
+
+from copy import deepcopy
+from pathlib import Path
+import numpy as np
+from biogeme.expressions import Variable, bioDraws
+from testData import myData1
 
 class testDatabase(unittest.TestCase):
     def setUp(self):
         np.random.seed(90267)
-        self.df = pd.DataFrame({'Person':[1,1,1,2,2],'Exclude':[0,0,1,0,1],'Variable1':[1,2,3,4,5],'Variable2':[10,20,30,40,50],'Choice':[1,2,3,1,2],'Av1':[0,1,1,1,1],'Av2':[1,1,1,1,1],'Av3':[0,1,1,1,1]})
-        self.myData = db.Database('test',self.df)
-        self.myPanelData = db.Database('test',self.df)
-        self.Variable1=Variable('Variable1')
-        self.Variable2=Variable('Variable2')
-        self.Av1=Variable('Av1')
-        self.Av2=Variable('Av2')
-        self.Av3=Variable('Av3')
-        self.Choice=Variable('Choice')
-    
+        self.myPanelData = deepcopy(myData1)
+        self.Variable1 = Variable('Variable1')
+        self.Variable2 = Variable('Variable2')
+        self.Av1 = Variable('Av1')
+        self.Av2 = Variable('Av2')
+        self.Av3 = Variable('Av3')
+        self.Choice = Variable('Choice')
+
     def test_valuesFromDatabase(self):
         expr = self.Variable1 + self.Variable2
-        result = self.myData.valuesFromDatabase(expr).tolist()
-        self.assertListEqual(result,[11,22,33,44,55])
+        result = myData1.valuesFromDatabase(expr).tolist()
+        self.assertListEqual(result, [11, 22, 33, 44, 55])
 
     def test_checkAvailabilityOfChosenAlt(self):
-        avail = {1:self.Av1,2:self.Av2,3:self.Av3}
-        result = self.myData.checkAvailabilityOfChosenAlt(avail,self.Choice).tolist()
-        self.assertListEqual(result,[False,True,True,True,True])
+        avail = {1: self.Av1, 2: self.Av2, 3: self.Av3}
+        result = myData1.checkAvailabilityOfChosenAlt(avail, self.Choice).tolist()
+        self.assertListEqual(result, [False, True, True, True, True])
 
     def test_sumFromDatabase(self):
         expression = self.Variable2 / self.Variable1
-        result = self.myData.sumFromDatabase(expression)
-        self.assertEqual(result,50)
+        result = myData1.sumFromDatabase(expression)
+        self.assertEqual(result, 50)
 
     def test_addColumn(self):
-        Variable1=Variable('Variable1')
-        Variable2=Variable('Variable2')
+        Variable1 = Variable('Variable1')
+        Variable2 = Variable('Variable2')
         expression = Variable2 * Variable1
-        result = self.myData.addColumn(expression,'NewVariable')
+        result = myData1.addColumn(expression, 'NewVariable')
         theList = result.tolist()
-        self.assertListEqual(theList,[10, 40, 90, 160, 250])
+        self.assertListEqual(theList, [10, 40, 90, 160, 250])
 
     def test_count(self):
-        c = self.myData.count('Person',1)
-        self.assertEqual(c,3)
+        c = myData1.count('Person', 1)
+        self.assertEqual(c, 3)
 
     def test_remove(self):
-        Exclude=Variable('Exclude')
-        self.myData.remove(Exclude)
-        rows,col = self.myData.data.shape
-        self.assertEqual(rows,3)
+        Exclude = Variable('Exclude')
+        d = deepcopy(myData1)
+        d.remove(Exclude)
+        rows, _ = d.data.shape
+        self.assertEqual(rows, 3)
 
     def test_dumpOnFile(self):
-        f = self.myData.dumpOnFile()
+        f = myData1.dumpOnFile()
         exists = Path(f).is_file()
         os.remove(f)
         self.assertTrue(exists)
 
     def test_generateDraws(self):
-        randomDraws1 = bioDraws('randomDraws1','NORMAL')
-        randomDraws2 = bioDraws('randomDraws2','UNIFORMSYM')
+        randomDraws1 = bioDraws('randomDraws1', 'NORMAL')
+        randomDraws2 = bioDraws('randomDraws2', 'UNIFORMSYM')
         # We build an expression that involves the two random variables
         x = randomDraws1 + randomDraws2
         types = x.dictOfDraws()
-        theDrawsTable = self.myData.generateDraws(types,['randomDraws1','randomDraws2'],10)
+        theDrawsTable = myData1.generateDraws(types, ['randomDraws1', 'randomDraws2'], 10)
         dim = theDrawsTable.shape
         self.assertTupleEqual(dim, (5, 10, 2))
 
     def test_setRandomGenerators(self):
-        def logNormalDraws(sampleSize,numberOfDraws):
-            return np.exp(np.random.randn(sampleSize,numberOfDraws))
+        def logNormalDraws(sampleSize, numberOfDraws):
+            return np.exp(np.random.randn(sampleSize, numberOfDraws))
 
-        def exponentialDraws(sampleSize,numberOfDraws):
-            return -1.0 * np.log(np.random.rand(sampleSize,numberOfDraws))
+        def exponentialDraws(sampleSize, numberOfDraws):
+            return -1.0 * np.log(np.random.rand(sampleSize, numberOfDraws))
 
         # We associate these functions with a name
-        dict = {'LOGNORMAL':(logNormalDraws,'Draws from lognormal distribution'),'EXP':(exponentialDraws,'Draws from exponential distributions')}
-        self.myData.setRandomNumberGenerators(dict)
+        theDict = {'LOGNORMAL': (logNormalDraws, 'Draws from lognormal distribution'),
+                   'EXP': (exponentialDraws, 'Draws from exponential distributions')}
+        myData1.setRandomNumberGenerators(theDict)
 
         # We can now generate draws from these distributions
-        randomDraws1 = bioDraws('randomDraws1','LOGNORMAL')
-        randomDraws2 = bioDraws('randomDraws2','EXP')
+        randomDraws1 = bioDraws('randomDraws1', 'LOGNORMAL')
+        randomDraws2 = bioDraws('randomDraws2', 'EXP')
         x = randomDraws1 + randomDraws2
         types = x.dictOfDraws()
-        theDrawsTable = self.myData.generateDraws(types,['randomDraws1','randomDraws2'],10)
+        theDrawsTable = myData1.generateDraws(types, ['randomDraws1', 'randomDraws2'], 10)
         dim = theDrawsTable.shape
         self.assertTupleEqual(dim, (5, 10, 2))
 
     def test_sampleWithReplacement(self):
-        res1 = self.myData.sampleWithReplacement()
-        res2 = self.myData.sampleWithReplacement(12)
+        res1 = myData1.sampleWithReplacement()
+        res2 = myData1.sampleWithReplacement(12)
         dim1 = res1.shape
         dim2 = res2.shape
-        self.assertTupleEqual(dim1, (5, 8))
-        self.assertTupleEqual(dim2, (12, 8))
+        self.assertTupleEqual(dim1, (5, 9))
+        self.assertTupleEqual(dim2, (12, 9))
 
     def test_panel(self):
         # Data is not considered panel yet
@@ -105,31 +122,31 @@ class testDatabase(unittest.TestCase):
         self.assertFalse(shouldBeFalse)
 
     def test_panelDraws(self):
-        randomDraws1 = bioDraws('randomDraws1','NORMAL')
-        randomDraws2 = bioDraws('randomDraws2','UNIFORMSYM')
+        randomDraws1 = bioDraws('randomDraws1', 'NORMAL')
+        randomDraws2 = bioDraws('randomDraws2', 'UNIFORMSYM')
         # We build an expression that involves the two random variables
         x = randomDraws1 + randomDraws2
         types = x.dictOfDraws()
         self.myPanelData.panel('Person')
-        theDrawsTable = self.myPanelData.generateDraws(types,['randomDraws1','randomDraws2'],10)
+        theDrawsTable = self.myPanelData.generateDraws(types, ['randomDraws1', 'randomDraws2'], 10)
         dim = theDrawsTable.shape
         self.assertTupleEqual(dim, (2, 10, 2))
 
     def test_getNumberOfObservations(self):
         self.myPanelData.panel('Person')
-        self.assertEqual(self.myData.getNumberOfObservations(),5)
-        self.assertEqual(self.myPanelData.getNumberOfObservations(),5)
+        self.assertEqual(myData1.getNumberOfObservations(), 5)
+        self.assertEqual(self.myPanelData.getNumberOfObservations(), 5)
 
     def test_samplesSize(self):
         self.myPanelData.panel('Person')
-        self.assertEqual(self.myData.getSampleSize(),5)
-        self.assertEqual(self.myPanelData.getSampleSize(),2)
+        self.assertEqual(myData1.getSampleSize(), 5)
+        self.assertEqual(self.myPanelData.getSampleSize(), 2)
 
     def test_sampleIndividualMapWithReplacement(self):
         self.myPanelData.panel('Person')
         res = self.myPanelData.sampleIndividualMapWithReplacement(10)
         dim = res.shape
         self.assertTupleEqual(dim, (10, 2))
-        
+
 if __name__ == '__main__':
     unittest.main()
