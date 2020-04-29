@@ -120,3 +120,35 @@ tests/test.pickle
 dist/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg
 biogeme/.#biogeme.py
 tests/test.pickle
+examples/notebooks/_test.log
+examples/notebooks/_test~00.log
+examples/notebooks/_test~01.log
+examples/notebooks/_test~02.log
+examples/notebooks/_test~03.log
+examples/notebooks/_test~04.log
+examples/notebooks/_test~05.log
+examples/notebooks/_test~06.log
+examples/notebooks/_test~07.log
+examples/notebooks/_test~08.log
+examples/notebooks/simpleExample.html
+examples/notebooks/simpleExample.pickle
+examples/notebooks/simpleExample_validation.pickle
+examples/notebooks/simpleExample_validation~ 0.pickle
+examples/notebooks/simpleExample_validation~ 1.pickle
+examples/notebooks/simpleExample~ 0.html
+examples/notebooks/simpleExample~ 0.pickle
+examples/notebooks/simpleExample~ 1.html
+examples/notebooks/simpleExample~ 1.pickle
+examples/notebooks/simpleExample~ 2.html
+examples/notebooks/simpleExample~ 2.pickle
+examples/notebooks/simpleExample~ 3.html
+examples/notebooks/simpleExample~ 3.pickle
+examples/notebooks/simpleExample~ 4.html
+examples/notebooks/simpleExample~ 4.pickle
+examples/notebooks/simpleExample~ 5.html
+examples/notebooks/simpleExample~ 5.pickle
+examples/notebooks/simpleExample~ 6.html
+examples/notebooks/simpleExample~ 6.pickle
+examples/notebooks/simpleExample~ 7.html
+examples/notebooks/simpleExample~ 7.pickle
+examples/notebooks/__savedIterations.txt
