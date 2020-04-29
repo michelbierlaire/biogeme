@@ -201,3 +201,10 @@ tests/swissmetro/biogemeModelDefaultName~11.html
 tests/swissmetro/biogemeModelDefaultName~11.pickle
 tests/swissmetro/biogemeModelDefaultName~12.html
 tests/swissmetro/biogemeModelDefaultName~12.pickle
+examples/swissmetro/01logit.html
+examples/swissmetro/01logit.log
+examples/swissmetro/01logit.pickle
+examples/swissmetro/01logit~00.log
+examples/swissmetro/01logit~00.pickle
+examples/swissmetro/01logit~01.log
+examples/swissmetro/01logit~01.pickle
