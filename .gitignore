@@ -63,6 +63,8 @@ archive/pybiogeme/pybiogeme
 #                                           #
 #############################################
 .idea
+examples/notebooks/.ipynb_checkpoints/*
+examples/workingNotToDistribute
 src/cbiogeme.cpp
 biogeme.egg-info
 build
