@@ -152,3 +152,6 @@ examples/notebooks/simpleExample~ 6.pickle
 examples/notebooks/simpleExample~ 7.html
 examples/notebooks/simpleExample~ 7.pickle
 examples/notebooks/__savedIterations.txt
+examples/notebooks/test.dat
+examples/notebooks/test~00.dat
+dist/biogeme-3.2.6a0-py3.8-macosx-10.9-x86_64.egg
