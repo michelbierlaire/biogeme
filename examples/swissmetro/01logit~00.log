@@ -1,0 +1,23 @@
+*** File created 2020-04-29 16:31:22.832413 ***
+*** Log file from biogeme 3.2.6a [2020-04-29]
+[16:31:22] < General >   Remove 26 unused variables from the database as only 10 are used.
+[16:31:22] < General >   Log likelihood (N = 6768):  -6964.663
+[16:31:22] < Detailed >  ** Optimization: Newton with trust region for simple bounds
+[16:31:22] < General >   Log likelihood (N = 6768):  -6964.663 Gradient norm:      2e+03 Hessian norm:       3e+03 
+[16:31:22] < General >   Log likelihood (N = 6768):  -5421.799
+[16:31:22] < General >   Log likelihood (N = 6768):  -5421.799 Gradient norm:      4e+02 Hessian norm:       2e+03 
+[16:31:22] < Detailed >  1 f= 0.8010933 projected rel. grad.= 0.041 delta=    10 rho=   1.1 ++
+[16:31:22] < General >   Log likelihood (N = 6768):  -5332.809
+[16:31:22] < General >   Log likelihood (N = 6768):  -5332.809 Gradient norm:      5e+01 Hessian norm:       2e+03 
+[16:31:22] < Detailed >  2 f= 0.7879445 projected rel. grad.=0.0072 delta= 1e+02 rho=   1.1 ++
+[16:31:22] < General >   Log likelihood (N = 6768):  -5331.253
+[16:31:22] < General >   Log likelihood (N = 6768):  -5331.253 Gradient norm:          1 Hessian norm:       2e+03 
+[16:31:22] < Detailed >  3 f= 0.7877147 projected rel. grad.=0.00018 delta= 1e+03 rho=     1 ++
+[16:31:22] < General >   Log likelihood (N = 6768):  -5331.252
+[16:31:22] < General >   Log likelihood (N = 6768):  -5331.252 Gradient norm:     0.0006 Hessian norm:       2e+03 
+[16:31:22] < Detailed >  4 f= 0.7877145 projected rel. grad.=1.1e-07 delta= 1e+04 rho=     1 ++
+[16:31:22] < Detailed >  Proportion of Hessian calculation: 100.0%
+[16:31:22] < General >   Log likelihood (N = 6768):  -5331.252 Gradient norm:     0.0006 Hessian norm:       2e+03 BHHH norm:       2e+03
+[16:31:22] < General >   Results saved in file 01logit.html
+[16:31:22] < General >   Results saved in file 01logit~00.pickle
+[16:31:22] < General >   Log file created: 01logit~00.log

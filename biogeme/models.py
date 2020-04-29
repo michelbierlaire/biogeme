@@ -1396,7 +1396,7 @@ def checkValidityNestedLogit(V, nests):
     """
 
     ok = True
-    message = 'The nested logit model is based on a partition. '
+    message = ''
 
     fullChoiceSet = {i for i, v in V.items()}
     unionOfNests = set.union(*[set(n[1]) for n in nests])
@@ -1405,10 +1405,10 @@ def checkValidityNestedLogit(V, nests):
         d1 = fullChoiceSet.difference(unionOfNests)
         d2 = unionOfNests.difference(fullChoiceSet)
         if d1:
-            message += (f'Alternatives in the choice set, but not in any nest:'
+            message += (f'Alternative(s) in the choice set, but not in any nest:'
                         f' {d1}\n')
         if d2:
-            message += (f'Alternatives in a nest, but not in the choice set: '
+            message += (f'Alternative(s) in a nest, but not in the choice set: '
                         f'{d2}\n')
 
     # Consider all pairs of nests and verify that the intersection is empty
@@ -1420,4 +1420,8 @@ def checkValidityNestedLogit(V, nests):
             ok = False
             message += (f'Two nests contain the following alternative(s): '
                         f'{inter}\n')
+
+    if ok:
+        message = 'The nested logit model is based on a partition. '
+
     return ok, message

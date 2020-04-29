@@ -10,7 +10,9 @@
 # pylint: disable=invalid-unary-operand-type, too-many-function-args
 
 # Too constraining
-# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements, too-many-branches, too-many-instance-attributes, too-many-lines, too-many-public-methods
+# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements,
+# pylint: disable=too-many-branches, too-many-instance-attributes, too-many-lines,
+# pylint: disable=too-many-public-methods
 
 from biogeme.expressions import log, exp
 
@@ -42,7 +44,7 @@ def normalpdf(x, mu=0.0, s=1.0):
     p = num / den
     return p
 
-def lognormalpdf(x, mu, s):
+def lognormalpdf(x, mu=0.0, s=1.0):
     """
     Log normal pdf
 

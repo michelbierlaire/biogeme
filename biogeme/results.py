@@ -236,7 +236,7 @@ class rawResults:
         ## Norm of the gradient
         self.gradientNorm = linalg.norm(self.g)
         ## Diagnostics given by the optimization algorithm
-        self.optimization_messages = theModel.optimization_messages
+        self.optimizationMessages = theModel.optimizationMessages
         ## Number of threads used for parallel computing
         self.numberOfThreads = theModel.numberOfThreads
         ## Name of the HTML output file
@@ -476,8 +476,8 @@ class bioResults:
         h = ''
         h += '%% This file is designed to be included into a LaTeX document\n'
         h += '%% See http://www.latex-project.org/ for information about LaTeX\n'
-        h += (f'%%{self.data.modelName} - Report from biogeme {bv.getVersion()} '
-              f'[{bv.versionDate}]')
+        h += (f'%% {self.data.modelName} - Report from biogeme {bv.getVersion()} '
+              f'[{bv.versionDate}]\n')
 
         h += bv.getLaTeX()
         return h
@@ -491,7 +491,7 @@ class bioResults:
         now = datetime.datetime.now()
         h = self._getLaTeXHeader()
         if self.data.latexFileName is not None:
-            h += '\n%% File ' + self.data.latexFileName
+            h += '\n%% File ' + self.data.latexFileName + '\n'
         h += f'\n%% This file has automatically been generated on {now}</p>\n'
         if self.data.dataname is not None:
             h += f'\n%%Database name: {self.data.dataname}\n'
@@ -505,7 +505,7 @@ class bioResults:
             if isinstance(v, str):
                 v = v.replace('_', '\\_')
             h += f'{k} & {v:{p}} \\\\\n'
-        for k, v in self.data.optimization_messages.items():
+        for k, v in self.data.optimizationMessages.items():
             h += f'{k} & \\verb${v}$ \\\\\n'
         h += '\\end{tabular}\n'
 
@@ -670,7 +670,7 @@ a Pandas dataframe.
         now = datetime.datetime.now()
         h = self._getHtmlHeader()
         h += bv.getHtml()
-        h += '<p>This file has automatically been generated on {}</p>\n'.format(now)
+        h += f'<p>This file has automatically been generated on {now}</p>\n'
         h += ('<p>If you drag this HTML file into the Calc application of '
               '<a href="http://www.openoffice.org/" target="_blank">OpenOffice</a>, '
               'or the spreadsheet of <a href="https://www.libreoffice.org/" '
@@ -699,9 +699,9 @@ a Pandas dataframe.
         for k, (v, p) in d.items():
             h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
                   f'<td>{v:{p}}</td></tr>\n')
-        for k, v in self.data.optimization_messages.items():
+        for k, v in self.data.optimizationMessages.items():
             h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
-                  '<td>{v}</td></tr>\n')
+                  f'<td>{v}</td></tr>\n')
 
         h += '</table>\n'
 
@@ -860,31 +860,31 @@ a Pandas dataframe.
            string containing the header.
         """
         h = ''
-        h += '<html>'
-        h += '<head>'
-        h += '<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>'
-        h += '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
+        h += '<html>\n'
+        h += '<head>\n'
+        h += '<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>\n'
+        h += '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n'
         h += (f'<title>{self.data.modelName} - Report from biogeme {bv.getVersion()} '
-              f'[{bv.versionDate}]</title>')
-        h += '<meta name="keywords" content="biogeme, discrete choice, random utility">'
+              f'[{bv.versionDate}]</title>\n')
+        h += '<meta name="keywords" content="biogeme, discrete choice, random utility">\n'
         h += (f'<meta name="description" content="Report from biogeme {bv.getVersion()} '
-              f'[{bv.versionDate}]">')
-        h += '<meta name="author" content="{bv.author}">'
-        h += '<style type=text/css>'
-        h += '.biostyle'
-        h += '	{font-size:10.0pt;'
-        h += '	font-weight:400;'
-        h += '	font-style:normal;'
-        h += '	font-family:Courier;}'
-        h += '.boundstyle'
-        h += '	{font-size:10.0pt;'
-        h += '	font-weight:400;'
-        h += '	font-style:normal;'
-        h += '	font-family:Courier;'
-        h += '        color:red}'
-        h += '</style>'
-        h += '</head>'
-        h += '<body bgcolor='#ffffff'>'
+              f'[{bv.versionDate}]">\n')
+        h += '<meta name="author" content="{bv.author}">\n'
+        h += '<style type=text/css>\n'
+        h += '.biostyle\n'
+        h += '	{font-size:10.0pt;\n'
+        h += '	font-weight:400;\n'
+        h += '	font-style:normal;\n'
+        h += '	font-family:Courier;}\n'
+        h += '.boundstyle\n'
+        h += '	{font-size:10.0pt;\n'
+        h += '	font-weight:400;\n'
+        h += '	font-style:normal;\n'
+        h += '	font-family:Courier;\n'
+        h += '        color:red}\n'
+        h += '</style>\n'
+        h += '</head>\n'
+        h += '<body bgcolor="#ffffff">\n'
         return h
 
     def getBetasForSensitivityAnalysis(self, myBetas, size=100, useBootstrap=False):

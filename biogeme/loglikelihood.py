@@ -67,7 +67,7 @@ def likelihoodregression(meas, model, sigma):
 
     .. math:: \\frac{1}{\\sigma} \\phi\\left( \\frac{y-m}{\\sigma} \\right)
 
-             where :math:`\\phi(\\cdot)` is the pdf of the normal distribution.
+             Where :math:`\\phi(\\cdot)` is the pdf of the normal distribution.
 
     :rtype: biogeme.expressions.Expression
     """

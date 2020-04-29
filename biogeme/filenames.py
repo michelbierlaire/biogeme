@@ -30,7 +30,7 @@ def getNewFileName(name, ext):
     theFile = Path(fileName)
     number = int(0)
     while theFile.is_file():
-        fileName = f'{name}~{number: 02d}.{ext}'
+        fileName = f'{name}~{number:02d}.{ext}'
         theFile = Path(fileName)
         number += 1
     return fileName

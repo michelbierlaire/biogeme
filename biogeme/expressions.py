@@ -2499,7 +2499,7 @@ class LogLogit(Expression):
         listOfAlternatives = list(self.util)
         choices = database.valuesFromDatabase(self.choice)
         correctChoices = choices.isin(listOfAlternatives)
-        indexOfIncorrectChoices = correctChoices.index[not correctChoices].tolist()
+        indexOfIncorrectChoices = correctChoices.index[correctChoices == False].tolist()
         if indexOfIncorrectChoices:
             incorrectChoices = choices[indexOfIncorrectChoices]
             content = '-'.join('{}[{}]'.format(*t)\
@@ -2513,7 +2513,7 @@ class LogLogit(Expression):
 
         if consistent:
             choiceAvailability = database.checkAvailabilityOfChosenAlt(self.av, self.choice)
-            indexOfUnavailableChoices = choiceAvailability.index[not choiceAvailability].tolist()
+            indexOfUnavailableChoices = choiceAvailability.index[choiceAvailability == False].tolist()
             if indexOfUnavailableChoices:
                 incorrectChoices = choices[indexOfUnavailableChoices]
                 content = '-'.join('{}[{}]'.format(*t)\
@@ -2551,6 +2551,7 @@ class LogLogit(Expression):
 
     def __str__(self):
         s = self.getClassName()
+        s += '('
         first = True
         for i, e in self.util.items():
             if first:

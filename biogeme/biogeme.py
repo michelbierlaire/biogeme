@@ -236,7 +236,7 @@ class BIOGEME:
         self.bootstrap_results = None
 
         ## Information provided by the optimization algorithm after completion.
-        self.optimization_messages = None
+        self.optimizationMessages = None
 
         ## Name of the File where intermediate iterations are stotred
         self.file_iterations = None
@@ -245,7 +245,7 @@ class BIOGEME:
         self.cfsqp_default_bounds = 1000
 
         ## Parameters to be transferred to the optimization algorithm
-        self.algo_parameters = None
+        self.algoParameters = None
 
         ## Optimization algorithm
         self.algorithm = None
@@ -433,7 +433,7 @@ class BIOGEME:
         self._prepareDatabaseForFormula(batch)
         f = self.theC.calculateLikelihood(x, self.fixedBetaValues)
 
-        self.logger.general(f'Log likelihood (N = {self.database.getSampleSize()}): {f: 10.7g}')
+        self.logger.general(f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}')
 
         if scaled:
             return f / float(self.database.getSampleSize())
@@ -492,15 +492,15 @@ class BIOGEME:
 
         if len(self.freeBetaNames) <= 30:
             for i in range(len(self.freeBetaNames)):
-                self.logger.debug(f'{self.freeBetaNames[i]}: {x[i]: 10.7g}')
+                self.logger.debug(f'{self.freeBetaNames[i]}: {x[i]:10.7g}')
         hmsg = ''
         if hessian:
-            hmsg = f'Hessian norm:  {np.linalg.norm(h): 10.1g}'
+            hmsg = f'Hessian norm:  {np.linalg.norm(h):10.1g}'
         bhhhmsg = ''
         if bhhh:
-            bhhhmsg = f'BHHH norm:  {np.linalg.norm(bh): 10.1g}'
-        self.logger.general(f'Log likelihood (N = {self.database.getSampleSize()}): {f: 10.7g}'
-                            f' Gradient norm: {np.linalg.norm(g): 10.1g}'
+            bhhhmsg = f'BHHH norm:  {np.linalg.norm(bh):10.1g}'
+        self.logger.general(f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
+                            f' Gradient norm: {np.linalg.norm(g):10.1g}'
                             f' {hmsg} {bhhhmsg}')
 
         if self.saveIterations:
@@ -619,7 +619,7 @@ formulas.
     def estimate(self,
                  bootstrap=0,
                  algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
-                 algo_parameters=None,
+                 algoParameters=None,
                  cfsqp_default_bounds=1000.0,
                  saveIterations=False,
                  file_iterations='__savedIterations.txt'):
@@ -637,8 +637,8 @@ formulas.
                . Default: Biogeme's Newton's algorithm with simple bounds.
         :type algorithm: function
 
-        :param algo_parameters: parameters to transfer to the optimization algorithm
-        :type algo_parameters: dict
+        :param algoParameters: parameters to transfer to the optimization algorithm
+        :type algoParameters: dict
 
         :param cfsqp_default_bounds: if the user does not provide bounds
               on the parameters, CFSQP assumes that the bounds are
@@ -683,7 +683,7 @@ formulas.
 
 
         self.algorithm = algorithm
-        self.algo_parameters = algo_parameters
+        self.algoParameters = algoParameters
 
         self.cfsqp_default_bounds = cfsqp_default_bounds
 
@@ -698,11 +698,11 @@ formulas.
         #        yep.stop()
 
         output = self.optimize(self.betaInitValues)
-        xstar, optimization_messages = output
+        xstar, optimizationMessages = output
         ## Running time of the optimization algorithm
-        optimization_messages['Optimization time'] = datetime.now() - start_time
+        optimizationMessages['Optimization time'] = datetime.now() - start_time
         ## Information provided by the optimization algorithm after completion.
-        self.optimization_messages = optimization_messages
+        self.optimizationMessages = optimizationMessages
 
         fgHb = self.calculateLikelihoodAndDerivatives(xstar,
                                                       scaled=False,
@@ -841,7 +841,7 @@ formulas.
         results = self.algorithm(theFunction,
                                  startingValues,
                                  self.bounds,
-                                 self.algo_parameters)
+                                 self.algoParameters)
         return results
 
     def simulate(self, theBetaValues=None):
@@ -984,16 +984,12 @@ formulas.
         print(r)
         return r
 
-    def cfsqp(self, betas, fixedBetas, betaIds, bounds, parameters):
+    def cfsqp(self, betas, bounds, parameters):
         """
         Invokes the CFSQP algorithm for estimation
 
         :param betas: initial values of the parameters to be estimated.
         :type betas: list of float
-        :param fixedBetas: values of the parameters that are not estimated.
-        :type fixedBetas: list of float
-        :param betaIds: list of IDs of the beta to be estimated.
-        :type betaIds: list of int
         :param bounds: lower and upper bounds on each parameter.
         :type bounds: list of tuple
         :param parameters: user defined parameters for CFSQP
@@ -1048,8 +1044,8 @@ formulas.
         eps = parameters.get('eps', 6.05545e-06)
 
         x, iters, nf, diag = self.theC.cfsqp(betas,
-                                             fixedBetas,
-                                             betaIds,
+                                             self.fixedBetaValues,
+                                             self.betaIds,
                                              mode,
                                              iprint,
                                              miter,
