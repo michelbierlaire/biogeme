@@ -609,8 +609,8 @@ formulas.
             self.loglike.changeInitValues(betas)
         if self.weight is not None:
             self.weight.changeInitValues(betas)
-        for k in self.formulas():
-            self.formulas[k].changeInitValues(betas)
+        for _, f in self.formulas.items():
+            f.changeInitValues(betas)
         for i in range(len(self.freeBetaNames)):
             value = betas.get(self.freeBetaNames[i])
             if value is not None:
