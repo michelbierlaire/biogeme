@@ -149,7 +149,12 @@ biogeme.modelName = "06nestedWTP"
 betas = biogeme.freeBetaNames
 
 # Read the estimation results from the file.
-results = res.bioResults(pickleFile='01nestedEstimation.pickle')
+try:
+    results = res.bioResults(pickleFile='01nestedEstimation.pickle')
+except FileNotFoundError:
+    print('Run first the script 01nestedEstimation.py in order to generate the file '
+          '01nestedEstimation.pickle.')
+    quit()
 
 # Extract the values that are necessary.
 betaValues = results.getBetaValues(betas)
