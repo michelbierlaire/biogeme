@@ -364,6 +364,8 @@ class Database:
                 avExpression = self._avail[chosen]
             except IndexError:
                 return False
+            except KeyError:
+                return False
             avExpression.setRow(row)
             av = avExpression.getValue()
             return av != 0
@@ -572,6 +574,7 @@ class Database:
             return self._expression.getValue()
         self._expression = expression
         self.data[column] = self.data.apply(functionToApply, axis=1)
+        self.variables[column] = Variable(column)
         return self.data[column]
 
     def remove(self, expression):
