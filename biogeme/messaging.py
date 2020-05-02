@@ -104,8 +104,21 @@ class bioMessage(metaclass=Singleton):
         for m, i in self.messages:
             if fileLevel is None or i <= fileLevel:
                 print(m, file=f)
+        f.close()
         return completeFileName
 
+
+    def temporarySilent(self):
+        """ Temporarily turns off the message, remembering the current screen level. 
+        """
+        self.lastLevel = self.screenLevel
+        self.screenLevel = 0
+
+    def resume(self):
+        """ Resume the regular operations of the logger after the use of temporarySilent
+        """
+        self.screenLevel = self.lastLevel
+        
     def setSilent(self):
         """ Set both screen and file levels to 0 """
         self.screenLevel = 0
