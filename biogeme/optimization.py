@@ -12,7 +12,7 @@ Interface for the optimization algorithms.
 # Too constraining
 # pylint: disable=invalid-name
 # pylint: disable=too-many-lines, too-many-locals, too-many-arguments, too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-return-statements
 # pylint: disable=bare-except
 
 
@@ -811,7 +811,7 @@ def newtonLineSearch(fct, x0, eps=np.finfo(np.float64).eps**0.3333, maxiter=100)
     typf = max(np.abs(f), 1.0)
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
-        message = f'Relative gradient = {relgrad} <= {eps}'
+        message = f'Relative gradient = {relgrad:.3g} <= {eps:.2g}'
         messages = {'Algorithm': 'Unconstrained Newton with line search',
                     'Relative gradient': relgrad,
                     'Number of iterations': 0,
@@ -841,7 +841,7 @@ def newtonLineSearch(fct, x0, eps=np.finfo(np.float64).eps**0.3333, maxiter=100)
         k += 1
         relgrad = relativeGradient(xk, f, g, typx, typf)
         if relgrad <= eps:
-            message = f'Relative gradient = {relgrad} <= {eps}'
+            message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
             cont = False
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
@@ -981,7 +981,9 @@ def cauchyNewtonDogleg(g, H):
     beta = np.inner(g, H @ g)
     dc = - (alpha / beta) * g
     L, E, P = schnabelEskow(H)
-    if np.any(E):
+    negativeEigenvalue = E < 0
+    if np.any(negativeEigenvalue):
+        print(E)
         raise excep.biogemeError('The dogleg method requires a convex optimization problem.')
 
     y3 = -P.T @ g
@@ -1207,7 +1209,7 @@ def newtonTrustRegion(fct,
     typf = max(np.abs(f), 1.0)
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
-        message = f'Relative gradient = {relgrad} <= {eps}'
+        message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
         messages = {'Algorithm': 'Unconstrained Newton with trust region',
                     'Relative gradient': relgrad,
                     'Cause of termination': message,
@@ -1258,7 +1260,7 @@ def newtonTrustRegion(fct,
                 status = '+'
             relgrad = relativeGradient(xk, f, g, typx, typf)
             if relgrad <= eps:
-                message = f'Relative gradient = {relgrad} <= {eps}'
+                message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
                 cont = False
         if delta <= minDelta:
             message = f'Trust region is too small: {delta}'
@@ -1465,7 +1467,7 @@ def bfgsLineSearch(fct,
     typf = max(np.abs(f), 1.0)
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
-        message = f'Relative gradient = {relgrad} <= {eps}'
+        message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
         messages = {'Algorithm': 'Inverse BFGS with line search',
                     'Relative gradient': relgrad,
                     'Cause of termination': message,
@@ -1492,7 +1494,7 @@ def bfgsLineSearch(fct,
         k += 1
         relgrad = relativeGradient(xk, f, g, typx, typf)
         if relgrad <= eps:
-            message = f'Relative gradient = {relgrad} <= {eps}'
+            message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
             cont = False
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
@@ -1638,7 +1640,7 @@ def bfgsTrustRegion(fct,
     typf = max(np.abs(f), 1.0)
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
-        message = f'Relative gradient = {relgrad} <= {eps}'
+        message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
         messages = {'Algorithm': 'BFGS with trust region',
                     'Relative gradient': relgrad,
                     'Cause of termination': message,
@@ -1692,7 +1694,7 @@ def bfgsTrustRegion(fct,
                     status = '+'
                 relgrad = relativeGradient(xk, f, g, typx, typf)
                 if relgrad <= eps:
-                    message = f'Relative gradient = {relgrad} <= {eps}'
+                    message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
                     cont = False
         if delta <= minDelta:
             message = f'Trust region is too small: {delta}'
@@ -1797,9 +1799,10 @@ def truncatedConjugateGradientSubspace(xk,
                                        Hk,
                                        delta,
                                        bounds,
+                                       infeasibleIterate=False,
                                        tol=np.finfo(np.float64).eps ** 0.3333):
     """Find an approximation of the solution of the trust region subproblem using the truncated
-       conjugate gradient method withinh the subspace of free variables. Free variables are
+       conjugate gradient method within the subspace of free variables. Free variables are
        those corresponding to inactive constraints at the generalized Cauchy point.
 
     :param g: gradient of the quadratic model.
@@ -1813,6 +1816,12 @@ def truncatedConjugateGradientSubspace(xk,
 
     :param bounds: bounds on the variables.
     :type bounds: class bioBounds
+
+    :param infeasibleIterate: if True, the algorithm may generate until termination.
+                              The result will then be projected on the feasible domain.
+                              If False, the algorithm stops as soon as an infeasible iterate
+                              is generated.  Default: False.
+    :type infeasibleIterate: bool
 
     :return: d, diagnostic, where
 
@@ -1883,10 +1892,12 @@ def truncatedConjugateGradientSubspace(xk,
             if np.inner(pbar, ybar) <= 0:
                 # Negative curvature has been detected.
                 x[freeVariables] = xbar + alpha1 * pbar
+                if infeasibleIterate:
+                    return bounds.project(x), 3
                 return x, 3
 
             alpha2 = rho2 / np.inner(pbar, ybar)
-            if alpha2 > alpha1:
+            if not infeasibleIterate and alpha2 > alpha1:
                 # Infeasible iterate
                 x[freeVariables] = xbar + alpha1 * pbar
                 return x, 2
@@ -1899,15 +1910,20 @@ def truncatedConjugateGradientSubspace(xk,
         except:
             # Numerical problem detected. Return the current value of x
             x[freeVariables] = xbar
+            if infeasibleIterate:
+                return bounds.project(x), 4
             return x, 4
 
         x[freeVariables] = xbar
+    if infeasibleIterate:
+        return bounds.project(x), 4
     return x, 1
 
 def simpleBoundsNewtonAlgorithm(fct,
                                 bounds,
                                 x0,
                                 proportionTrueHessian=1.0,
+                                infeasibleConjugateGradient=False,
                                 delta0=1.0,
                                 tol=np.finfo(np.float64).eps ** 0.3333,
                                 cgtol=np.finfo(np.float64).eps ** 0.3333,
@@ -1929,6 +1945,14 @@ def simpleBoundsNewtonAlgorithm(fct,
     :param proportionTrueHessian: proportion of the iterations where the true hessian is
                                   calculated. When not, the BFGS update is used. If 1.0, it is
                                   used for all iterations. If 0.0, it is not used at all.
+    :type proportionTrueHessian: float
+
+    :param infeasibleConjugateGradient: if True, the conjugate gradient algorithm may generate
+                              until termination.
+                              The result will then be projected on the feasible domain.
+                              If False, the algorithm stops as soon as an infeasible iterate
+                              is generated.  Default: False.
+    :type infeasibleConjugateGradient: bool
 
     :param delta0: initial radius of the trust region. Default: 100.
     :type delta0: float
@@ -2010,7 +2034,7 @@ def simpleBoundsNewtonAlgorithm(fct,
 
     relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
     if relgrad <= tol:
-        message = f'Relative gradient = {relgrad} <= {tol}'
+        message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
         messages = {'Algorithm': 'Newton with trust region for simple bound constraints',
                     'Relative projected gradient': relgrad,
                     'Number of iterations': 0,
@@ -2030,7 +2054,13 @@ def simpleBoundsNewtonAlgorithm(fct,
 
         # Solve the quandratic problem in the subspace defined by the GCP
 
-        xc, _ = truncatedConjugateGradientSubspace(xk, g, H, delta, bounds, cgtol)
+        xc, _ = truncatedConjugateGradientSubspace(xk,
+                                                   g,
+                                                   H,
+                                                   delta,
+                                                   bounds,
+                                                   infeasibleConjugateGradient,
+                                                   cgtol)
 
         fct.setVariables(xc)
         fc = fct.f()
@@ -2089,7 +2119,7 @@ def simpleBoundsNewtonAlgorithm(fct,
             projectedGradient = bounds.project(xk - g) - xk
             relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
             if relgrad <= tol:
-                message = f'Relative gradient = {relgrad} <= {tol}'
+                message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
                 cont = False
         if delta <= minDelta:
             message = f'Trust region is too small: {delta}'
@@ -2143,7 +2173,12 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
            threshold, the conjugate gradient algorithm has reached
            convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - proportionAnalyticalHessian: proportion of iterations when the
-           analytical Hessian ia calculated (default: 1)
+           analytical Hessian is calculated (default: 1).
+         - infeasibleConjugateGradient: if True, the conjugate
+           gradient algorithm may generate until termination.  The
+           result will then be projected on the feasible domain.  If
+           False, the algorithm stops as soon as an infeasible iterate
+           is generated (default: False).
          - maxiter: the maximum number of iterations (default: 100).
          - radius: the initial radius of the truat region (default: 1.0).
          - eta1: threshold for failed iterations (default: 0.01).
@@ -2170,6 +2205,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
     eta2 = 0.9
     proportionTrueHessian = 1
     enlargingFactor = 10
+    infeasibleConjugateGradient = False
 
     # We replace the default value by user defined value, if any.
     if parameters is not None:
@@ -2189,6 +2225,8 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
             enlargingFactor = parameters['enlargingFactor']
         if 'proportionAnalyticalHessian' in parameters:
             proportionTrueHessian = parameters['proportionAnalyticalHessian']
+        if 'infeasibleConjugateGradient' in parameters:
+            infeasibleConjugateGradient = parameters['infeasibleConjugateGradient']
 
     if proportionTrueHessian == 1.0:
         logger.detailed('** Optimization: Newton with trust region for simple '
@@ -2205,6 +2243,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
          bounds=bioBounds(bounds),
          x0=initBetas,
          proportionTrueHessian=proportionTrueHessian,
+         infeasibleConjugateGradient=infeasibleConjugateGradient,
          delta0=radius,
          tol=tol,
          cgtol=cgtol,
