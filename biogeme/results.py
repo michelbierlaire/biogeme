@@ -10,9 +10,9 @@ Implementation of class contaning and processing the estimation results.
 # Too constraining
 # pylint: disable=invalid-name,
 # pylint: disable=too-many-instance-attributes, too-many-locals, too-many-branches
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-few-public-methods
 
-# 
+#
 
 import pickle
 import datetime
@@ -196,6 +196,8 @@ class rawResults:
 
         ## Name of the model
         self.modelName = theModel.modelName
+        ## User notes
+        self.userNotes = theModel.userNotes
         ## Number of parameters
         self.nparam = len(betaValues)
         ## Values of the parameters
@@ -280,7 +282,6 @@ class bioResults:
         else:
             raise excep.biogemeError('No data provided.')
 
-        self.comments = None
         self._calculateStats()
 
     def writePickle(self):
@@ -434,9 +435,13 @@ class bioResults:
                          trob,
                          prob]
 
-        eigIndex = np.argmin(self.data.eigenValues)
-        self.data.smallestEigenValue = self.data.eigenValues[eigIndex]
-        self.data.smallestEigenVector = self.data.eigenVectors[:, eigIndex]
+        eigIndexMin = np.argmin(self.data.eigenValues)
+        eigIndexMax = np.argmax(self.data.eigenValues)
+        self.data.smallestEigenValue = self.data.eigenValues[eigIndexMin]
+        self.data.smallestEigenVector = self.data.eigenVectors[:, eigIndexMin]
+        self.data.largestEigenValue = self.data.eigenValues[eigIndexMax]
+        self.data.largestEigenVector = self.data.eigenVectors[:, eigIndexMax]
+        self.data.conditionNumber = self.data.largestEigenValue / self.data.smallestEigenValue
         self.data.smallestSingularValue = min(self.data.singularValues)
 
     def __str__(self):
@@ -495,6 +500,11 @@ class bioResults:
         h += f'\n%% This file has automatically been generated on {now}</p>\n'
         if self.data.dataname is not None:
             h += f'\n%%Database name: {self.data.dataname}\n'
+
+        if self.data.userNotes is not None:
+            ## User notes
+            h += (f'\n%%{self.data.userNotes}\n')
+
         h += '\n%% General statistics\n'
         h += '\\section{General statistics}\n'
         d = self.getGeneralStatistics()
@@ -506,7 +516,10 @@ class bioResults:
                 v = v.replace('_', '\\_')
             h += f'{k} & {v:{p}} \\\\\n'
         for k, v in self.data.optimizationMessages.items():
-            h += f'{k} & \\verb${v}$ \\\\\n'
+            if k == 'Relative projected gradient':
+                h += f'{k} & \\verb${v:.7g}$ \\\\\n'
+            else:
+                h += f'{k} & \\verb${v}$ \\\\\n'
         h += '\\end{tabular}\n'
 
         h += '\n%%Parameter estimates\n'
@@ -560,7 +573,7 @@ class bioResults:
         if self.data.monteCarlo:
             d['Number of draws'] = self.data.numberOfDraws, ''
             d['Draws generation time'] = self.data.drawsProcessingTime, ''
-            d['Types of draws'] = [f'{i}: {k}]' for i, k in self.data.typesOfDraws.items()], ''
+            d['Types of draws'] = [f'{i}: {k}' for i, k in self.data.typesOfDraws.items()], ''
         if self.data.bootstrap is not None:
             d['Bootstrapping time'] = self.data.bootstrap_time, ''
         d['Nbr of threads'] = self.data.numberOfThreads, ''
@@ -683,12 +696,13 @@ a Pandas dataframe.
               f'<td>{self.data.dataname}</td></tr>\n')
         h += '</table>\n'
 
-        if self.comments is not None:
-            h += '<h2>Comments</h2>'
-            h += f'<p>{self.comments}</p>'
-
+        if self.data.userNotes is not None:
+            ## User notes
+            h += (f'<blockquote style="border: 2px solid #666; padding: 10px; background-color:'
+                  f' #ccc;">{self.data.userNotes}</blockquote>')
+        
         ### Include here the part on statistics
-
+        
         h += '<h1>Estimation report</h1>\n'
 
         h += '<table border="0">\n'
@@ -700,8 +714,12 @@ a Pandas dataframe.
             h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
                   f'<td>{v:{p}}</td></tr>\n')
         for k, v in self.data.optimizationMessages.items():
-            h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
-                  f'<td>{v}</td></tr>\n')
+            if k == 'Relative projected gradient':
+                h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
+                      f'<td>{v:.7g}</td></tr>\n')
+            else:
+                h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
+                      f'<td>{v}</td></tr>\n')
 
         h += '</table>\n'
 
@@ -710,10 +728,7 @@ a Pandas dataframe.
         table = self.getEstimatedParameters()
 
         h += '<h1>Estimated parameters</h1>\n'
-        h += ('<p><font size="-1>Click on the headers of the columns to sort the table  '
-              '[<a href="http://www.kryogenix.org/code/browser/sorttable/" target="_blank">'
-              'Credits</a>]</font></p>\n')
-        h += '<table border="1" class="sortable">\n'
+        h += '<table border="1">\n'
         h += '<tr class=biostyle><th>Name</th>'
         for c in table.columns:
             h += f'<th>{c}</th>'
@@ -728,10 +743,7 @@ a Pandas dataframe.
 
         table = self.getCorrelationResults()
         h += '<h2>Correlation of coefficients</h2>\n'
-        h += ('<p><font size="-1">Click on the headers of the columns to sort the table '
-              '[<a href="http://www.kryogenix.org/code/browser/sorttable/" '
-              'target="_blank">Credits</a>]</font></p>\n')
-        h += '<table border="1" class="sortable">\n'
+        h += '<table border="1">\n'
         h += '<tr class=biostyle><th>Coefficient1</th><th>Coefficient2</th>'
         for c in table.columns:
             h += f'<th>{c}</th>'
@@ -745,8 +757,10 @@ a Pandas dataframe.
         h += '</table>\n'
 
         h += '<p>Smallest eigenvalue: {:.6g}</p>\n'.format(self.data.smallestEigenValue)
+        h += '<p>Largest eigenvalue: {:.6g}</p>\n'.format(self.data.largestEigenValue)
+        h += '<p>Condition number: {:.6g}</p>\n'.format(self.data.conditionNumber)
         if np.abs(self.data.smallestEigenValue) <= 1.0e-5:
-            h += '<p>Variables involved in the corresponding eigenvector:'
+            h += '<p>The second derivatives is close to singularity. Variables involved:'
             h += '<table>'
             for i in range(len(self.data.smallestEigenVector)):
                 if np.abs(self.data.smallestEigenVector[i]) > 1.0e-5:
@@ -756,7 +770,7 @@ a Pandas dataframe.
             h += '</table>'
             h += '</p>\n'
 
-        h += '<p>Smallest singular value: {:.6g}</p>\n'.format(self.data.smallestSingularValue)
+#        h += '<p>Smallest singular value: {:.6g}</p>\n'.format(self.data.smallestSingularValue)
         h += '</html>'
         return h
 
