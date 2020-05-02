@@ -87,6 +87,8 @@ class Expression:
         :return: self + other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Plus(self, other)
 
     def __radd__(self, other):
@@ -99,6 +101,8 @@ class Expression:
         :return: other + self
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Plus(other, self)
 
 
@@ -112,6 +116,8 @@ class Expression:
         :return: self - other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Minus(self, other)
 
     def __rsub__(self, other):
@@ -124,6 +130,8 @@ class Expression:
         :return: other - self
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Minus(other, self)
 
     def __mul__(self, other):
@@ -136,6 +144,8 @@ class Expression:
         :return: self * other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Times(self, other)
 
     def __rmul__(self, other):
@@ -148,6 +158,8 @@ class Expression:
         :return: other * self
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Times(other, self)
 
     def __div__(self, other):
@@ -160,6 +172,8 @@ class Expression:
         :return: self / other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Divide(self, other)
 
     def __rdiv__(self, other):
@@ -172,6 +186,8 @@ class Expression:
         :return: other / self
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Divide(other, self)
 
     def __truediv__(self, other):
@@ -185,6 +201,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
 
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Divide(self, other)
 
     def __rtruediv__(self, other):
@@ -197,6 +215,8 @@ class Expression:
         :return: other / self
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Divide(other, self)
 
     def __neg__(self):
@@ -218,6 +238,8 @@ class Expression:
         :return: self ^ other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Power(self, other)
 
     def __rpow__(self, other):
@@ -230,6 +252,8 @@ class Expression:
         :return: other ^ self
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Power(other, self)
 
     def __and__(self, other):
@@ -242,6 +266,8 @@ class Expression:
         :return: self and other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return And(self, other)
 
     def __or__(self, other):
@@ -254,6 +280,8 @@ class Expression:
         :return: self or other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Or(self, other)
 
     def __eq__(self, other):
@@ -266,6 +294,8 @@ class Expression:
         :return: self == other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Equal(self, other)
 
     def __ne__(self, other):
@@ -278,6 +308,8 @@ class Expression:
         :return: self != other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return NotEqual(self, other)
 
     def __le__(self, other):
@@ -290,6 +322,8 @@ class Expression:
         :return: self <= other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return LessOrEqual(self, other)
 
     def __ge__(self, other):
@@ -302,6 +336,8 @@ class Expression:
         :return: self >= other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return GreaterOrEqual(self, other)
 
     def __lt__(self, other):
@@ -314,6 +350,8 @@ class Expression:
         :return: self < other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Less(self, other)
 
     def __gt__(self, other):
@@ -326,6 +364,8 @@ class Expression:
         :return: self > other
         :rtype: biogeme.expressions.Expression
         """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Greater(self, other)
 
     def _prepareFormulaForEvaluation(self, database):
@@ -734,10 +774,14 @@ class BinaryOperator(Expression):
         if isNumeric(left):
             self.left = Numeric(left)
         else:
+            if not isinstance(left, Expression):
+                raise excep.biogemeError(f'This is not a valid expression: {left}')
             self.left = left
         if isNumeric(right):
             self.right = Numeric(right)
         else:
+            if not isinstance(right, Expression):
+                raise excep.biogemeError(f'This is not a valid expression: {right}')
             self.right = right
         self.left.parent = self
         self.right.parent = self
@@ -1186,6 +1230,8 @@ class UnaryOperator(Expression):
         if isNumeric(child):
             self.child = Numeric(child)
         else:
+            if not isinstance(child, Expression):
+                raise excep.biogemeError(f'This is not a valid expression: {child}')
             self.child = child
         self.child.parent = self
         self.children.append(self.child)
@@ -1222,7 +1268,7 @@ class MonteCarlo(UnaryOperator):
     def __init__(self, child):
         """ Constructor
 
-        :param child: first arithmetic expression
+        :param child: arithmetic expression
         :type child: biogeme.expressions.Expression
         """
         UnaryOperator.__init__(self, child)
@@ -1823,7 +1869,6 @@ class bioDraws(Elementary):
             listOfErrors.append(theError)
         return listOfErrors, listOfWarnings
 
-
 class Numeric(Expression):
     """
     Numerical expression for a simple number
@@ -2051,6 +2096,8 @@ class DefineVariable(Variable):
         if isNumeric(expression):
             database.addColumn(Numeric(expression), name)
         else:
+            if not isinstance(expression, Expression):
+                raise excep.biogemeError(f'This is not a valid expression: {expression}')
             database.addColumn(expression, name)
 
 class RandomVariable(Elementary):
@@ -2438,6 +2485,8 @@ class LogLogit(Expression):
             if isNumeric(e):
                 self.util[i] = Numeric(e)
             else:
+                if not isinstance(e, Expression):
+                    raise excep.biogemeError(f'This is not a valid expression: {e}')
                 self.util[i] = e
         self.av = {}
         if av is None:
@@ -2447,10 +2496,14 @@ class LogLogit(Expression):
                 if isNumeric(e):
                     self.av[i] = Numeric(e)
                 else:
+                    if not isinstance(e, Expression):
+                        raise excep.biogemeError(f'This is not a valid expression: {e}')
                     self.av[i] = e
         if isNumeric(choice):
             self.choice = Numeric(choice)
         else:
+            if not isinstance(choice, Expression):
+                raise excep.biogemeError(f'This is not a valid expression: {choice}')
             self.choice = choice
 
         self.choice.parent = self
@@ -2505,6 +2558,9 @@ class LogLogit(Expression):
             content = '-'.join('{}[{}]'.format(*t)\
                                for t in zip(indexOfIncorrectChoices,
                                             incorrectChoices))
+            truncate = 100
+            if len(content) > truncate:
+                content = f'{content[:truncate]}...'
             theError = (f'The choice variable [{self.choice}] does not '
                         f'correspond to a valid alternative for the '
                         f'following observations (rownumber[choice]): ') + \
@@ -2519,6 +2575,9 @@ class LogLogit(Expression):
                 content = '-'.join('{}[{}]'.format(*t)\
                                    for t in zip(indexOfUnavailableChoices,
                                                 incorrectChoices))
+                truncate = 100
+                if len(content) > truncate:
+                    content = f'{content[:truncate]}...'
                 theError = (f'The chosen alternative [{self.choice}] '
                             f'is not available for the following '
                             f'observations (rownumber[choice]): ') + content
@@ -2670,6 +2729,8 @@ class bioMultSum(Expression):
                     theExpression.parent = self
                     self.children.append(theExpression)
                 else:
+                    if not isinstance(e, Expression):
+                        raise excep.biogemeError(f'This is not a valid expression: {e}')
                     e.parent = self
                     self.children.append(e)
         elif isinstance(listOfExpressions, list):
@@ -2679,6 +2740,8 @@ class bioMultSum(Expression):
                     theExpression.parent = self
                     self.children.append(theExpression)
                 else:
+                    if not isinstance(e, Expression):
+                        raise excep.biogemeError(f'This is not a valid expression: {e}')
                     e.parent = self
                     self.children.append(e)
         else:
@@ -2731,6 +2794,8 @@ class Elem(Expression):
             if isNumeric(v):
                 self.dictOfExpressions[k] = Numeric(v)
             else:
+                if not isinstance(v, Expression):
+                    raise excep.biogemeError(f'This is not a valid expression: {v}')
                 self.dictOfExpressions[k] = v
             self.dictOfExpressions[k].parent = self
             self.children.append(self.dictOfExpressions[k])
@@ -2740,6 +2805,8 @@ class Elem(Expression):
         elif isNumeric(keyExpression):
             self.keyExpression = Numeric(keyExpression)
         else:
+            if not isinstance(keyExpression, Expression):
+                raise excep.biogemeError(f'This is not a valid expression: {keyExpression}')
             self.keyExpression = keyExpression
         self.keyExpression.parent = self
         self.children.append(self.keyExpression)
