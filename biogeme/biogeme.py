@@ -46,6 +46,7 @@ class BIOGEME:
     def __init__(self,
                  database,
                  formulas,
+                 userNotes=None,
                  numberOfThreads=None,
                  numberOfDraws=1000,
                  seed=None,
@@ -70,6 +71,9 @@ class BIOGEME:
              simulation mode, the labels of each formula are used as
              labels of the resulting database.
         :type formulas: biogeme.expressions.Expression, or dict(biogeme.expressions.Expression)
+
+        :param userNotes: these notes will be included in the report file.
+        :type userNotes: str
 
         :param numberOfThreads: multi-threading can be used for
             estimation. This parameter defines the number of threads
@@ -122,8 +126,6 @@ class BIOGEME:
         self.weightName = 'weight'
         ## Name of the model. Default: 'biogemeModelDefaultName'
         self.modelName = 'biogemeModelDefaultName'
-        ## Comments to be added to the report
-        self.comments = None
         ## monteCarlo is True if one of the expression involves a
         # Monte-Carlo integration.
         self.monteCarlo = False
@@ -150,9 +152,13 @@ class BIOGEME:
             self.weight = formulas.get(self.weightName)
             self.formulas = formulas
 
+
         ## biogeme.database object
         self.database = database
 
+        ## User notes
+        self.userNotes = userNotes
+        
         ## Missing data
         self.missingData = missingData
 
@@ -182,7 +188,7 @@ class BIOGEME:
             if not suggestedScales.empty:
                 logger.detailed('It is suggested to scale the following variables.')
                 for index, row in suggestedScales.iterrows():
-                    error_msg = (f'Multiply {row["Column"]} by\t{row["Scale"]}'
+                    error_msg = (f'Multiply {row["Column"]} by\t{row["Scale"]} '
                                  'because the largest (abs) value is\t'
                                  f'{row["Largest"]}')
                     logger.detailed(error_msg)
@@ -433,7 +439,7 @@ class BIOGEME:
         self._prepareDatabaseForFormula(batch)
         f = self.theC.calculateLikelihood(x, self.fixedBetaValues)
 
-        self.logger.general(f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}')
+        self.logger.detailed(f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}')
 
         if scaled:
             return f / float(self.database.getSampleSize())
@@ -728,6 +734,7 @@ formulas.
 
             self.logger.general(f'Re-estimate the model {bootstrap} times for bootstrapping')
             self.bootstrap_results = np.empty(shape=[bootstrap, len(xstar)])
+            self.logger.temporarySilent()
             for b in range(bootstrap):
                 if self.database.isPanel():
                     sample = self.database.sampleIndividualMapWithReplacement()
@@ -740,13 +747,12 @@ formulas.
 
             ## Time needed to generate the bootstrap results
             self.bootstrap_time = datetime.now() - start_time
-
+            self.logger.resume()
         rawResults = res.rawResults(self,
                                     xstar,
                                     fgHb,
                                     bootstrap=self.bootstrap_results)
         r = res.bioResults(rawResults)
-        r.comments = self.comments
         if self.generateHtml:
             r.writeHtml()
         if self.generatePickle:
@@ -957,12 +963,12 @@ formulas.
         right = allResults.groupby(level=0).quantile(1.0 - r)
         return left, right
 
-    def createLogFile(self, level=3):
+    def createLogFile(self, verbosity=3):
         """ Creates a log file with the messages produced by Biogeme.
 
         The name of the file is the name of the model with an extension .log
 
-        :param level: types of messages to be captured
+        :param verbosity: types of messages to be captured
 
             - 0: no output
             - 1: warnings
@@ -975,7 +981,7 @@ formulas.
         :type level: int
 
         """
-        self.logger.createLog(fileLevel=level,
+        self.logger.createLog(fileLevel=verbosity,
                               fileName=self.modelName)
 
     def __str__(self):
