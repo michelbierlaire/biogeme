@@ -1,0 +1,7 @@
+numpy>=1.16.4
+cython>=0.29.13
+unidecode
+pandas
+scipy
+interval
+
