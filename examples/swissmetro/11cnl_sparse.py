@@ -110,7 +110,7 @@ logger.setSilent()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '11cnl'
+biogeme.modelName = '11cnl_sparse'
 
 # Estimate the parameters
 results = biogeme.estimate()
