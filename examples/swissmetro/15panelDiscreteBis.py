@@ -1,10 +1,11 @@
-"""File 15panelDiscrete.py
+"""File 15panelDiscreteBis.py
 
 :author: Michel Bierlaire, EPFL
 :date: Sun Sep  8 19:30:31 2019
 
  Example of a discrete mixture of logit models, also called latent class model.
  The datafile is organized as panel data.
+ Here, we integrate before the discrete mixture to show that it is equivalent.
  Three alternatives: Train, Car and Swissmetro
  SP data
 """
@@ -110,13 +111,14 @@ av = {1: TRAIN_AV_SP,
 
 # The choice model is a discrete mixture of logit, with availability conditions
 # We calculate the conditional probability for each class
-prob = [PanelLikelihoodTrajectory(models.logit(V[i], av, CHOICE)) for i in range(numberOfClasses)]
+prob = [MonteCarlo(PanelLikelihoodTrajectory(models.logit(V[i], av, CHOICE)))
+        for i in range(numberOfClasses)]
 
 # Conditional to the random variables, likelihood for the individual.
 probIndiv = PROB_class0 * prob[0] + PROB_class1 * prob[1]
 
 # We integrate over the random variables using Monte-Carlo
-logprob = log(MonteCarlo(probIndiv))
+logprob = log(probIndiv)
 
 # Define level of verbosity
 logger = msg.bioMessage()
@@ -127,7 +129,7 @@ logger.setGeneral()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob, numberOfDraws=20000)
-biogeme.modelName = '15panelDiscrete'
+biogeme.modelName = '15panelDiscreteBis'
 
 # Estimate the parameters.
 results = biogeme.estimate()

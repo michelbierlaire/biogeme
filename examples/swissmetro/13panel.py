@@ -1,11 +1,13 @@
-"""File 11cnl.py
+"""File 13panel.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 11:10:42 2019
+:date: Sun Sep  8 18:55:38 2019
 
- Example of a cross-nested logit model.
+ Example of a mixture of logit models, using Monte-Carlo integration.
+ The datafile is organized as panel data.
+ Same as 12panel, where the starting values for the parameters are close to optimal.
+ Useful for a faster estimation of the model with a large number of draws.
  Three alternatives: Train, Car and Swissmetro
- Train and car are in the same nest.
  SP data
 """
 
@@ -14,11 +16,15 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 import biogeme.models as models
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable
+from biogeme.expressions import Beta, DefineVariable, bioDraws, \
+    PanelLikelihoodTrajectory, MonteCarlo, log
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', '\t')
 database = db.Database('swissmetro', df)
+
+# They are organized as panel data. The variable ID identifies each individual.
+database.panel("ID")
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database
@@ -38,17 +44,30 @@ globals().update(database.variables)
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
 
-# Parameters to be estimated
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
 
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, None, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, None, 0)
-ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
-ALPHA_PUBLIC = 1 - ALPHA_EXISTING
+# Parameters to be estimated
+B_COST = Beta('B_COST', -3.58, None, None, 0)
+
+# Define a random parameter, normally distributed across individuals,
+# designed to be used for Monte-Carlo simulation
+B_TIME = Beta('B_TIME', -6.12, None, None, 0)
+
+# It is advised not to use 0 as starting value for the following parameter.
+B_TIME_S = Beta('B_TIME_S', 3.48, None, None, 0)
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL_ANTI')
+
+# We do the same for the constants, to address serial correlation.
+ASC_CAR = Beta('ASC_CAR', 0.352, None, None, 0)
+ASC_CAR_S = Beta('ASC_CAR_S', 4.02, None, None, 0)
+ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'NORMAL_ANTI')
+
+ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_TRAIN_S = Beta('ASC_TRAIN_S', 2.45, None, None, 0)
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'NORMAL_ANTI')
+
+ASC_SM = Beta('ASC_SM', 0, None, None, 1)
+ASC_SM_S = Beta('ASC_SM_S', 1.06, None, None, 0)
+ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'NORMAL_ANTI')
 
 # Definition of new variables
 SM_COST = SM_CO * (GA == 0)
@@ -65,14 +84,14 @@ CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
 CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
 
 # Definition of the utility functions
-V1 = ASC_TRAIN + \
-     B_TIME * TRAIN_TT_SCALED + \
+V1 = ASC_TRAIN_RND + \
+     B_TIME_RND * TRAIN_TT_SCALED + \
      B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + \
-     B_TIME * SM_TT_SCALED + \
+V2 = ASC_SM_RND + \
+     B_TIME_RND * SM_TT_SCALED + \
      B_COST * SM_COST_SCALED
-V3 = ASC_CAR + \
-     B_TIME * CAR_TT_SCALED + \
+V3 = ASC_CAR_RND + \
+     B_TIME_RND * CAR_TT_SCALED + \
      B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
@@ -85,35 +104,31 @@ av = {1: TRAIN_AV_SP,
       2: SM_AV,
       3: CAR_AV_SP}
 
-# Definition of nests
-# Nest membership parameters
-alpha_existing = {1: ALPHA_EXISTING,
-                  2: 0.0,
-                  3: 1.0}
+# Conditional to the random parameters, the likelihood of one observation is
+# given by the logit model (called the kernel)
+obsprob = models.logit(V, av, CHOICE)
 
-alpha_public = {1: ALPHA_PUBLIC,
-                2: 1.0,
-                3: 0.0}
+# Conditional to the random parameters, the likelihood of all observations for
+# one individual (the trajectory) is the product of the likelihood of
+# each observation.
+condprobIndiv = PanelLikelihoodTrajectory(obsprob)
 
-nest_existing = MU_EXISTING, alpha_existing
-nest_public = MU_PUBLIC, alpha_public
-nests = nest_existing, nest_public
-
-# The choice model is a cross-nested logit, with availability conditions
-logprob = models.logcnl_avail(V, av, nests, CHOICE)
+# We integrate over the random parameters using Monte-Carlo
+logprob = log(MonteCarlo(condprobIndiv))
 
 # Define level of verbosity
 logger = msg.bioMessage()
 #logger.setSilent()
 #logger.setWarning()
-logger.setGeneral()
-#logger.setDetailed()
+#logger.setGeneral()
+logger.setDetailed()
+#logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '11cnl'
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=20000)
+biogeme.modelName = '12panel'
 
-# Estimate the parameters
+# Estimate the parameters.
 results = biogeme.estimate()
 pandasResults = results.getEstimatedParameters()
 print(pandasResults)

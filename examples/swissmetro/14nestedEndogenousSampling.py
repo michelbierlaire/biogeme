@@ -1,9 +1,9 @@
-"""File 11cnl.py
+"""File 14nestedEndogenousSampling.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 11:10:42 2019
+:date: Sun Sep  8 19:26:25 2019
 
- Example of a cross-nested logit model.
+ Example of a nested logit model, with the corrections for endogenous sampling.
  Three alternatives: Train, Car and Swissmetro
  Train and car are in the same nest.
  SP data
@@ -44,11 +44,16 @@ ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
+MU = Beta('MU', 1, 1, 10, 0)
 
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, None, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, None, 0)
-ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
-ALPHA_PUBLIC = 1 - ALPHA_EXISTING
+# Additional parameters designed to capture the bias due to choice
+# based sampling. In practice, these values should not be estimated.
+# They should be derived from the sampling strategy.
+SB_TRAIN = Beta('SB_TRAIN', 0, None, None, 0)
+SB_CAR = Beta('SB_CAR', 0, None, None, 0)
+correction = {1: SB_TRAIN,
+              2: 0,
+              3: SB_CAR}
 
 # Definition of new variables
 SM_COST = SM_CO * (GA == 0)
@@ -85,33 +90,30 @@ av = {1: TRAIN_AV_SP,
       2: SM_AV,
       3: CAR_AV_SP}
 
-# Definition of nests
-# Nest membership parameters
-alpha_existing = {1: ALPHA_EXISTING,
-                  2: 0.0,
-                  3: 1.0}
+#Definition of nests:
+# 1: nests parameter
+# 2: list of alternatives
+existing = MU, [1, 3]
+future = 1.0, [2]
+nests = existing, future
 
-alpha_public = {1: ALPHA_PUBLIC,
-                2: 1.0,
-                3: 0.0}
+# The choice model is a nested logit, with corrections for endogenous sampling
+# We first obtain the expression of the Gi function for nested logit.
+Gi = models.getMevForNested(V, av, nests)
 
-nest_existing = MU_EXISTING, alpha_existing
-nest_public = MU_PUBLIC, alpha_public
-nests = nest_existing, nest_public
-
-# The choice model is a cross-nested logit, with availability conditions
-logprob = models.logcnl_avail(V, av, nests, CHOICE)
+# Then we calculate the MEV log probability, accounting for the correction.
+logprob = models.logmev_endogenousSampling(V, Gi, av, correction, CHOICE)
 
 # Define level of verbosity
 logger = msg.bioMessage()
-#logger.setSilent()
+logger.setSilent()
 #logger.setWarning()
-logger.setGeneral()
+#logger.setGeneral()
 #logger.setDetailed()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '11cnl'
+biogeme.modelName = '14selectionBias'
 
 # Estimate the parameters
 results = biogeme.estimate()
