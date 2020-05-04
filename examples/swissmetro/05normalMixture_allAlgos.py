@@ -101,7 +101,7 @@ logger.setGeneral()
 #logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
 
 algos = {'CFSQP                   ': None,
          'scipy                   ': opt.scipy,

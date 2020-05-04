@@ -104,7 +104,7 @@ userNotes = ('Example of a mixture of logit models with three alternatives, '
              'approximated using Monte-Carlo integration.')
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=20000, userNotes=userNotes)
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000, userNotes=userNotes)
 biogeme.modelName = '05normalMixture'
 
 # Estimate the parameters

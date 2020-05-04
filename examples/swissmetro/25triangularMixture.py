@@ -118,12 +118,8 @@ logger = msg.bioMessage()
 logger.setGeneral()
 #logger.setDetailed()
 
-# These notes will be included as such in the report file.
-userNotes = ('Example of a mixture of logit models with three alternatives, '
-             'approximated using Monte-Carlo integration with Halton draws.')
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=20000, userNotes=userNotes)
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
 biogeme.modelName = '25triangularMixture'
 
 # Estimate the parameters

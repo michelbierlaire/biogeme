@@ -103,7 +103,7 @@ prob = models.logit(V, av, CHOICE)
 
 # We calculate the integration error. Note that this formula assumes
 # independent draws, and is not valid for Haltom or antithetic draws.
-numberOfDraws = 20000
+numberOfDraws = 100000
 integral = MonteCarlo(prob)
 integralSquare = MonteCarlo(prob * prob)
 variance = integralSquare - integral * integral

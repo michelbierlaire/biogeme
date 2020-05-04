@@ -9,6 +9,7 @@
  SP data
 """
 
+import numpy as np
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
@@ -46,14 +47,17 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 MU = Beta('MU', 1, 1, 10, 0)
 
-# Additional parameters designed to capture the bias due to choice
-# based sampling. In practice, these values should not be estimated.
-# They should be derived from the sampling strategy.
-SB_TRAIN = Beta('SB_TRAIN', 0, None, None, 0)
-SB_CAR = Beta('SB_CAR', 0, None, None, 0)
-correction = {1: SB_TRAIN,
-              2: 0,
-              3: SB_CAR}
+# In this example, we assume that the three modes exist, and that the sampling protocal
+# is choice-based. The probability that a respondent belongs
+# to the sample is R_i.
+R_TRAIN = 4.42e-2
+R_SM = 3.36e-3
+R_CAR = 7.5e-3
+
+# The correction terms are the log of these quantities
+correction = {1: np.log(R_TRAIN),
+              2: np.log(R_SM),
+              3: np.log(R_CAR)}
 
 # Definition of new variables
 SM_COST = SM_CO * (GA == 0)
@@ -113,7 +117,7 @@ logger.setSilent()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '14selectionBias'
+biogeme.modelName = '14nestedEndogenousSampling'
 
 # Estimate the parameters
 results = biogeme.estimate()

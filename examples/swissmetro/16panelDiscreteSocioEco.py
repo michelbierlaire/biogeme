@@ -132,7 +132,7 @@ logger.setGeneral()
 #logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
 biogeme.modelName = '16panelDiscreteSocioEco'
 
 # Estimate the parameters.

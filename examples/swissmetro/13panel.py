@@ -46,27 +46,27 @@ database.remove(exclude)
 
 
 # Parameters to be estimated
-B_COST = Beta('B_COST', -3.58, None, None, 0)
+B_COST = Beta('B_COST', -3.32, None, None, 0)
 
 # Define a random parameter, normally distributed across individuals,
 # designed to be used for Monte-Carlo simulation
-B_TIME = Beta('B_TIME', -6.12, None, None, 0)
+B_TIME = Beta('B_TIME', -5.4, None, None, 0)
 
 # It is advised not to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 3.48, None, None, 0)
+B_TIME_S = Beta('B_TIME_S', 1.55, None, None, 0)
 B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL_ANTI')
 
 # We do the same for the constants, to address serial correlation.
-ASC_CAR = Beta('ASC_CAR', 0.352, None, None, 0)
-ASC_CAR_S = Beta('ASC_CAR_S', 4.02, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', 0.357, None, None, 0)
+ASC_CAR_S = Beta('ASC_CAR_S', 3.37, None, None, 0)
 ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'NORMAL_ANTI')
 
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_TRAIN_S = Beta('ASC_TRAIN_S', 2.45, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.617, None, None, 0)
+ASC_TRAIN_S = Beta('ASC_TRAIN_S', 3.13, None, None, 0)
 ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'NORMAL_ANTI')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-ASC_SM_S = Beta('ASC_SM_S', 1.06, None, None, 0)
+ASC_SM_S = Beta('ASC_SM_S', 1.36, None, None, 0)
 ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'NORMAL_ANTI')
 
 # Definition of new variables
@@ -125,8 +125,8 @@ logger.setDetailed()
 #logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=20000)
-biogeme.modelName = '12panel'
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme.modelName = '13panel'
 
 # Estimate the parameters.
 results = biogeme.estimate()
