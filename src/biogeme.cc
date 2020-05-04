@@ -40,7 +40,6 @@ void biogeme::setPanel(bioBoolean p) {
 bioReal biogeme::calculateLikelihood(std::vector<bioReal>& betas,
 				     std::vector<bioReal>& fixedBetas) {
 
-
   ++nbrFctEvaluations ;
   if (forceDataPreparation || (theThreadMemory->dimension() != literalIds.size())) {
     prepareData() ;
