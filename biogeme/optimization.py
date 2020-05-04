@@ -2179,7 +2179,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
            result will then be projected on the feasible domain.  If
            False, the algorithm stops as soon as an infeasible iterate
            is generated (default: False).
-         - maxiter: the maximum number of iterations (default: 100).
+         - maxiter: the maximum number of iterations (default: 1000).
          - radius: the initial radius of the truat region (default: 1.0).
          - eta1: threshold for failed iterations (default: 0.01).
          - eta2: threshold for very successful iteration (default 0.9).
@@ -2199,7 +2199,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
 
     tol = np.finfo(np.float64).eps**0.3333
     cgtol = np.finfo(np.float64).eps**0.3333
-    maxiter = 100
+    maxiter = 1000
     radius = 1.0
     eta1 = 0.1
     eta2 = 0.9
