@@ -219,3 +219,8 @@ examples/notebooks/simpleExample~03.html
 examples/notebooks/simpleExample~03.pickle
 examples/notebooks/simpleExample~04.html
 examples/swissmetro/26triangularPanelMixture.run
+*.run
+examples/swissmetro/scitas.csh
+examples/swissmetro/scitas.py
+examples/swissmetro/.ipynb_checkpoints/Untitled-checkpoint.ipynb
+examples/swissmetro/__savedIterations.txt
