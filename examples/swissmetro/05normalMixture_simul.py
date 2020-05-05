@@ -123,7 +123,7 @@ biosim = bio.BIOGEME(database, simulate, numberOfDraws=numberOfDraws)
 biosim.modelName = "05normalMixture_simul"
 
 # Simulate the requested quantities. The output is a Pandas data frame
-simresults = biosim.simulate(results.data.betaValues)
+simresults = biosim.simulate(results.getBetaValues())
 
 # 95% confidence interval on the log likelihood.
 simresults['left'] = np.log(simresults['Integral'] - 1.96 * simresults['Integration error'])
