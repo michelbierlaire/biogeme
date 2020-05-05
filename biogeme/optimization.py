@@ -2204,7 +2204,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
     eta1 = 0.1
     eta2 = 0.9
     proportionTrueHessian = 1
-    enlargingFactor = 10
+    enlargingFactor = 2
     infeasibleConjugateGradient = False
 
     # We replace the default value by user defined value, if any.
