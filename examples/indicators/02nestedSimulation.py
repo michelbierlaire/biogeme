@@ -8,7 +8,6 @@
  RP data.
  We simulate market shares and revenues.
 """
-# pylint: disable=invalid-name, undefined-variable
 
 import pandas as pd
 import biogeme.database as db

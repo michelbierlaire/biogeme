@@ -8,7 +8,7 @@
  RP data.
  We simulate pricing scenarios and their impact on the revenues.
 """
-# pylint: disable=invalid-name, undefined-variable
+
 import numpy as np
 import pandas as pd
 import biogeme.database as db

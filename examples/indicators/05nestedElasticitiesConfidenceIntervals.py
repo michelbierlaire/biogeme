@@ -9,7 +9,6 @@
  We calculate disaggregate and aggregate direct arc elasticities, and
  the confidence intervals.
 """
-# pylint: disable=invalid-name, undefined-variable
 
 import sys
 import pandas as pd

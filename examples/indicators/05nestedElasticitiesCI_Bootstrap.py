@@ -14,7 +14,6 @@
  distribution based on the bootstrap estimate of the variance
  covariance matrix.
 """
-# pylint: disable=invalid-name, undefined-variable
 
 import sys
 import numpy as np

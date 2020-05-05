@@ -8,8 +8,6 @@
  RP data.
  We calculate and plot willingness to pay.
 """
-# pylint: disable=invalid-name, undefined-variable
-
 
 import matplotlib.pyplot as plt
 import pandas as pd

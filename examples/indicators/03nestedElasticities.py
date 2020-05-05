@@ -8,7 +8,6 @@
  RP data.
  We calculate disaggregate and aggregate direct point elasticities.
 """
-# pylint: disable=invalid-name, undefined-variable
 
 import pandas as pd
 import biogeme.database as db
