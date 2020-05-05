@@ -105,7 +105,12 @@ nests = nest_existing, nest_public
 
 # Instead of estimating the parameters, read the estimation
 # results from the pickle file.
-results = res.bioResults(pickleFile='11cnl.pickle')
+try:
+    results = res.bioResults(pickleFile='11cnl.pickle')
+except FileNotFoundError:
+    print('Run first the script 11cnl.py in order to generate the file '
+          '11cnl.pickle.')
+    sys.exit()
 
 print('Estimation results: ', results.getEstimatedParameters())
 
@@ -132,7 +137,7 @@ biosim = bio.BIOGEME(database, simulate)
 biosim.modelName = '11cnl_simul'
 
 # Perform the simulation
-simresults = biosim.simulate(results.data.betaValues)
+simresults = biosim.simulate(results.getBetaValues())
 print('Simulation results')
 print(simresults.describe())
 
