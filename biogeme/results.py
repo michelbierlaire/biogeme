@@ -934,4 +934,7 @@ a Pandas dataframe.
                                                        size)
 
         index = [self.data.betaNames.index(b) for b in myBetas]
-        return simulatedBetas[:, index]
+
+        results = [{myBetas[i]: value for i, value in enumerate(row)}
+                   for row in simulatedBetas[:, index]]
+        return results
