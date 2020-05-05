@@ -856,7 +856,7 @@ formulas.
         :param theBetaValues: values of the parameters to be used in
                 the calculations. If None, the default values are
                 used. Default: None.
-        :type theBetaValues: dict(str, float) or list(float)
+        :type theBetaValues: dict(str, float)
 
         :return: a pandas data frame with the simulated value. Each
               row corresponds to a row in the database, and each
@@ -885,13 +885,9 @@ formulas.
             betaValues = self.betaInitValues
         else:
             if not isinstance(theBetaValues, dict):
-                if len(theBetaValues) != len(self.betaInitValues):
-                    err = (f'The value of {len(self.betaInitValues)}'
-                           f' parameters should be provided, not '
-                           f'{len(theBetaValues)}.')
-                    raise excep.biogemeError(err)
-
-                betaValues = theBetaValues
+                err = (f'Deprecated. A dictionary must be provided. '
+                       f'It can be obtained from results.getBetaValues()')
+                raise excep.biogemeError(err)
             else:
                 betaValues = list()
                 for i in range(len(self.freeBetaNames)):
@@ -919,7 +915,7 @@ formulas.
         :param betaValues: array of parameters values to be used in
                the calculations. Typically, it is a sample drawn from
                a distribution.
-        :type betaValues: list(dict(float))
+        :type betaValues: list(dict(str: float))
 
         :param intervalSize: size of the reported confidence interval,
                     in percentage. If it is denoted by s, the interval
