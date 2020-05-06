@@ -225,3 +225,4 @@ examples/swissmetro/scitas.py
 examples/swissmetro/.ipynb_checkpoints/Untitled-checkpoint.ipynb
 examples/swissmetro/__savedIterations.txt
 *.pickle
+examples/latent/01oneLatentRegression.tex
