@@ -121,19 +121,6 @@ V = [{1: V1[q],
       3: V3[q]}
      for q in range(nbrQuestions)]
 
-
-CAR_AV_SP = [DefineVariable(f'CAR_AV_SP_{q}',
-                            Variable(f'CAR_AV_{q}') * (SP != 0),
-                            database)
-             for q in range(nbrQuestions)]
-
-TRAIN_AV_SP = [DefineVariable(f'TRAIN_AV_SP_{q}',
-                              Variable(f'TRAIN_AV_{q}') * (SP != 0),
-                              database)
-               for q in range(nbrQuestions)]
-
-SM_AV = [Variable(f'SM_AV_{q}') for q in range(nbrQuestions)]
-
 av = [{1: TRAIN_AV_SP[q],
        2: SM_AV[q],
        3: CAR_AV_SP[q]}
@@ -164,7 +151,7 @@ logger.setDetailed()
 #logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database,logprob,numberOfDraws=10)
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=50000)
 biogeme.modelName = '12panel_p'
 
 # Estimate the parameters.
