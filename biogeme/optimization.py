@@ -2001,6 +2001,16 @@ def simpleBoundsNewtonAlgorithm(fct,
 
     numberOfTrueHessian = 0
     numberOfMatrices = 0
+
+
+    if proportionTrueHessian == 1.0:
+        algo = 'Newton with trust region for simple bound constraints'
+    elif proportionTrueHessian == 0.0:
+        algo = 'BFGS with trust region for simple bound constraints'
+    else:
+        algo = (f'Hybrid Newton [{100*proportionTrueHessian}%] with trust '
+                f'region for simple bound constraints')
+
     k = 0
     xk = bounds.project(x0)
     fct.setVariables(xk)
@@ -2035,7 +2045,7 @@ def simpleBoundsNewtonAlgorithm(fct,
     relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
     if relgrad <= tol:
         message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
-        messages = {'Algorithm': 'Newton with trust region for simple bound constraints',
+        messages = {'Algorithm': algo,
                     'Relative projected gradient': relgrad,
                     'Number of iterations': 0,
                     'Number of function evaluations': nfev,
@@ -2129,12 +2139,13 @@ def simpleBoundsNewtonAlgorithm(fct,
             cont = False
         logger.detailed(f'{k} f={f:10.7g} projected rel. grad.={relgrad:6.2g} '
                         f'delta={delta:6.2g} rho={rho:6.2g} {status}')
+    actualProp = 100 * float(numberOfTrueHessian) / float(numberOfMatrices)
     m = (f'Proportion of Hessian calculation: '
-         f'{100 * float(numberOfTrueHessian) / float(numberOfMatrices)}%')
+         f'{actualProp}%')
     logger.detailed(m)
 
-    messages = {'Algorithm':
-                'Newton with trust region for simple bound constraints',
+    messages = {'Algorithm': algo,
+                'Proportion analytical hessian': f'{actualProp:.1f}%',
                 'Relative projected gradient': relgrad,
                 'Number of iterations': k,
                 'Number of function evaluations': nfev,
