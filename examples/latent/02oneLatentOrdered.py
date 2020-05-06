@@ -7,7 +7,6 @@ Ordered probit.
 :date: Mon Sep  9 16:52:36 2019
 
 """
-# pylint: disable=invalid-name, undefined-variable
 
 import pandas as pd
 import biogeme.database as db
