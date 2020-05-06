@@ -8,7 +8,7 @@ No measurement equation for the indicators.
 :date: Thu Sep  6 15:14:39 2018
 
 """
-# pylint: disable=invalid-name, undefined-variable
+
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
