@@ -2072,7 +2072,7 @@ def simpleBoundsNewtonAlgorithm(fct,
         rho = num / denom
         if rho < eta1:
             # Failure: reduce the trust region
-            delta = la.norm(step, np.inf) / 2.0
+            delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
             status = '-'
         else:
             # Candidate accepted
