@@ -9,6 +9,7 @@ Sequential estimation.
 :date: Tue Sep 10 08:13:18 2019
 
 """
+# pylint: disable=invalid-name, undefined-variable
 import pandas as pd
 import numpy as np
 import biogeme.database as db
@@ -19,41 +20,36 @@ import biogeme.results as res
 from biogeme.expressions import Beta, DefineVariable, RandomVariable, exp, log, Integrate
 
 # Read the data
-df = pd.read_csv("optima.dat",sep='\t')
-database = db.Database("optima",df)
+df = pd.read_csv('optima.dat', sep='\t')
+database = db.Database('optima', df)
 
 # The following statement allows you to use the names of the variable
 # as Python variable.
 globals().update(database.variables)
 
 # Exclude observations such that the chosen alternative is -1
-exclude = (Choice == -1.0)
-database.remove(exclude)
-
+database.remove(Choice == -1.0)
 
 ### Variables
 
-ScaledIncome = DefineVariable('ScaledIncome',\
-                              CalculatedIncome / 1000,database)
-thresholds = [4,6,8,10]
-ContIncome = models.piecewise(ScaledIncome,thresholds)
-ContIncome_0_4000 = ContIncome[0]
-ContIncome_4000_6000 = ContIncome[1]
-ContIncome_6000_8000 = ContIncome[2]
-ContIncome_8000_10000 = ContIncome[3]
-ContIncome_10000_more = ContIncome[4]
+# Piecewise linear definition of income
+ScaledIncome = DefineVariable('ScaledIncome', CalculatedIncome / 1000, database)
+
+thresholds = [None, 4, 6, 8, 10, None]
+formulaIncome = models.piecewiseFormula(ScaledIncome,
+                                        thresholds,
+                                        [0.0, 0.0, 0.0, 0.0, 0.0])
 
 # Definition of other variables
-age_65_more = DefineVariable('age_65_more',age >= Numeric(65),database)
-moreThanOneCar = DefineVariable('moreThanOneCar',NbCar > 1,database)
-moreThanOneBike = DefineVariable('moreThanOneBike',NbBicy > 1,database)
-individualHouse = DefineVariable('individualHouse',\
-                                 HouseType == 1,database)
-male = DefineVariable('male',Gender == 1,database)
-haveChildren = DefineVariable('haveChildren',\
-                              ((FamilSitu == 3)+(FamilSitu == 4)) > 0,database)
-haveGA = DefineVariable('haveGA',GenAbST == 1,database)
-highEducation = DefineVariable('highEducation', Education >= 6,database)
+age_65_more = DefineVariable('age_65_more', age >= 65, database)
+moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
+moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
+individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
+male = DefineVariable('male', Gender == 1, database)
+haveChildren = DefineVariable('haveChildren', \
+                              ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database)
+haveGA = DefineVariable('haveGA', GenAbST == 1, database)
+highEducation = DefineVariable('highEducation', Education >= 6, database)
 
 ### Coefficients
 # Read the estimates from the structural equation estimation
