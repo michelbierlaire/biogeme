@@ -16,7 +16,7 @@ import biogeme.biogeme as bio
 import biogeme.models as models
 import biogeme.loglikelihood as ll
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable, Numeric, Elem, bioMultSum
+from biogeme.expressions import Beta, DefineVariable, Elem, bioMultSum
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
@@ -38,7 +38,7 @@ formulaIncome = models.piecewiseFormula(ScaledIncome,
                                         [0.0, 0.0, 0.0, 0.0, 0.0])
 
 # Definition of other variables
-age_65_more = DefineVariable('age_65_more', age >= Numeric(65), database)
+age_65_more = DefineVariable('age_65_more', age >= 65, database)
 moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
 moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
 individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
@@ -162,7 +162,7 @@ logger.setGeneral()
 #logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=50000)
+biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
 biogeme.modelName = '01oneLatentRegression'
 
 # Estimate the parameters
