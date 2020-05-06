@@ -6,8 +6,6 @@ Preliminary analysis of the indicators using factor analysis.
 :date: Mon Sep  9 16:04:57 2019
 
 """
-# pylint: disable=invalid-name
-
 
 import sys
 import pandas as pd
