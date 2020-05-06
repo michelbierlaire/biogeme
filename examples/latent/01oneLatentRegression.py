@@ -8,8 +8,6 @@ Linear regression.
 
 """
 
-# pylint: disable=invalid-name, undefined-variable
-
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
