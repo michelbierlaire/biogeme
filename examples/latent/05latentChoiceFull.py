@@ -18,7 +18,7 @@ import biogeme.distributions as dist
 import biogeme.results as res
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable, log, \
-    RandomVariable, Integrate, Elem, bioNormalCdf
+    RandomVariable, Integrate, Elem, bioNormalCdf, exp
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
