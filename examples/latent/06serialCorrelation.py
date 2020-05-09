@@ -17,7 +17,8 @@ import biogeme.biogeme as bio
 import biogeme.models as models
 import biogeme.results as res
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable, bioDraws, MonteCarlo, Elem, bioNormalCdf
+from biogeme.expressions import Beta, DefineVariable, bioDraws, \
+    MonteCarlo, Elem, bioNormalCdf, exp, log
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
@@ -136,11 +137,7 @@ ec_sigma = Beta('ec_sigma', 1, None, None, 0)
 
 CARLOVERS = coef_intercept + \
             coef_age_65_more * age_65_more + \
-            coef_ContIncome_0_4000 * ContIncome_0_4000 + \
-            coef_ContIncome_4000_6000 * ContIncome_4000_6000 + \
-            coef_ContIncome_6000_8000 * ContIncome_6000_8000 + \
-            coef_ContIncome_8000_10000 * ContIncome_8000_10000 + \
-            coef_ContIncome_10000_more * ContIncome_10000_more + \
+            formulaIncome + \
             coef_moreThanOneCar * moreThanOneCar + \
             coef_moreThanOneBike * moreThanOneBike + \
             coef_individualHouse * individualHouse + \
