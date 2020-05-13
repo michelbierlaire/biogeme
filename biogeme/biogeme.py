@@ -204,8 +204,10 @@ class BIOGEME:
 
         self._prepareDatabaseForFormula()
         self._prepareLiterals()
+        
         ## Boolean variable, True if the HTML file with the results must be generated.
         self.generateHtml = True
+        
         ## Boolean variable, True if the pickle file with the results must be generated.
         self.generatePickle = True
 
@@ -757,6 +759,73 @@ formulas.
             r.writeHtml()
         if self.generatePickle:
             r.writePickle()
+        return r
+
+
+    def quickEstimate(self,
+                      algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
+                      algoParameters=None):
+
+        """Estimate the parameters of the model. Same as estimate, where any extra 
+           calculation is skipped (init loglikelihood, t-statistics, etc.)
+
+        :param algorithm: optimization algorithm to use for the
+               maximum likelihood estimation. If None, cfsqp is
+               . Default: Biogeme's Newton's algorithm with simple bounds.
+        :type algorithm: function
+
+        :param algoParameters: parameters to transfer to the optimization algorithm
+        :type algoParameters: dict
+
+        :return: object containing the estimation results.
+        :rtype: biogeme.results.bioResults
+
+        Example::
+
+            # Create an instance of biogeme
+            biogeme  = bio.BIOGEME(database, logprob)
+
+            # Gives a name to the model
+            biogeme.modelName = 'mymodel'
+
+            # Estimate the parameters
+            results = biogeme.quickEstimate()
+
+        :raises biogemeError: if no expression has been provided for the likelihood
+
+        """
+
+        if self.loglike is None:
+            raise excep.biogemeError('No log likelihood function has been specificed')
+        if len(self.freeBetaNames) == 0:
+            raise excep.biogemeError(f'There is no parameter to estimate'
+                                     f' in the formula: {self.loglike}.')
+
+
+        self.algorithm = algorithm
+        self.algoParameters = algoParameters
+
+        start_time = datetime.now()
+        #        yep.start('profile.out')
+
+        #        yep.stop()
+
+        output = self.optimize(self.betaInitValues)
+        xstar, optimizationMessages = output
+        ## Running time of the optimization algorithm
+        optimizationMessages['Optimization time'] = datetime.now() - start_time
+        ## Information provided by the optimization algorithm after completion.
+        self.optimizationMessages = optimizationMessages
+
+        f = self.calculateLikelihood(xstar,
+                                     scaled=False)
+
+        fgHb = f, None, None, None
+        rawResults = res.rawResults(self,
+                                    xstar,
+                                    fgHb,
+                                    bootstrap=self.bootstrap_results)
+        r = res.bioResults(rawResults)
         return r
 
     def validate(self, estimationResults, slices=5):
