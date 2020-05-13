@@ -2761,15 +2761,7 @@ class bioMultSum(Expression):
         return result
 
     def __str__(self):
-        first = True
-        s = 'bioMultSum'
-        for e in self.children:
-            if first:
-                s += f'({e}'
-                first = False
-            else:
-                s += f' + {e}'
-        s += ')'
+        s = 'bioMultSum(' + ', '.join([f'{e}' for e in self.children]) + ')'
         return s
 
 class Elem(Expression):
