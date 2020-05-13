@@ -236,7 +236,7 @@ class rawResults:
         ## Time needed to process the draws
         self.drawsProcessingTime = theModel.drawsProcessingTime
         ## Norm of the gradient
-        self.gradientNorm = linalg.norm(self.g)
+        self.gradientNorm = linalg.norm(self.g) if self.g is not None else None
         ## Diagnostics given by the optimization algorithm
         self.optimizationMessages = theModel.optimizationMessages
         ## Number of threads used for parallel computing
@@ -255,6 +255,9 @@ class rawResults:
         if bootstrap is not None:
             ## Time needed to perform the bootstrap
             self.bootstrap_time = theModel.bootstrap_time
+
+        ## Second order statistics
+        self.secondOrderTable = None
 
 class bioResults:
     """ Class managing the estimation results
@@ -337,112 +340,56 @@ class bioResults:
         p value for the comparison of pairs of coefficients.
 
         """
-        self.data.likelihoodRatioTest = -2.0 * (self.data.initLogLike - self.data.logLike)
-        self.data.rhoSquare = np.nan_to_num(1.0 - self.data.logLike / self.data.initLogLike)
+        self.data.likelihoodRatioTest = -2.0 * (self.data.initLogLike - self.data.logLike) \
+            if self.data.initLogLike is not None else None
+        self.data.rhoSquare = np.nan_to_num(1.0 - self.data.logLike / self.data.initLogLike) \
+            if self.data.initLogLike is not None else None
         self.data.rhoBarSquare = np.nan_to_num(1.0 - (self.data.logLike-self.data.nparam) \
-                                               / self.data.initLogLike)
+                                               / self.data.initLogLike) \
+            if self.data.initLogLike is not None else None
+                                               
         self.data.akaike = 2.0 * self.data.nparam - 2.0 * self.data.logLike
         self.data.bayesian = - 2.0 * self.data.logLike + self.data.nparam * \
             np.log(self.data.sampleSize)
         # We calculate the eigenstructure to report in case of singularity
-        self.data.eigenValues, self.data.eigenVectors = linalg.eigh(-np.nan_to_num(self.data.H))
-        _, self.data.singularValues, _ = linalg.svd(-np.nan_to_num(self.data.H))
-        # We use the pseudo inverse in case the matrix is singular
-        self.data.varCovar = -linalg.pinv(np.nan_to_num(self.data.H))
-        for i in range(self.data.nparam):
-            if self.data.varCovar[i, i] < 0:
-                self.data.betas[i].setStdErr(np.finfo(float).max)
-            else:
-                self.data.betas[i].setStdErr(np.sqrt(self.data.varCovar[i, i]))
-
-        d = np.diag(self.data.varCovar)
-        if (d > 0).all():
-            diag = np.diag(np.sqrt(d))
-            diagInv = linalg.inv(diag)
-            self.data.correlation = diagInv.dot(self.data.varCovar.dot(diagInv))
-        else:
-            self.data.correlation = np.full_like(self.data.varCovar, np.finfo(float).max)
-
-
-        # Robust estimator
-        self.data.robust_varCovar = self.data.varCovar.dot(self.data.bhhh.dot(self.data.varCovar))
-        for i in range(self.data.nparam):
-            if self.data.robust_varCovar[i, i] < 0:
-                self.data.betas[i].setRobustStdErr(np.finfo(float).max)
-            else:
-                self.data.betas[i].setRobustStdErr(np.sqrt(self.data.robust_varCovar[i, i]))
-        rd = np.diag(self.data.robust_varCovar)
-        if (rd > 0).all():
-            diag = np.diag(np.sqrt(rd))
-            diagInv = linalg.inv(diag)
-            self.data.robust_correlation = diagInv.dot(self.data.robust_varCovar.dot(diagInv))
-        else:
-            self.data.robust_correlation = \
-                np.full_like(self.data.robust_varCovar, np.finfo(float).max)
-
-        # Bootstrap
-        if self.data.bootstrap is not None:
-            self.data.bootstrap_varCovar = np.cov(self.data.bootstrap, rowvar=False)
+        if self.data.H is not None:
+            self.data.eigenValues, self.data.eigenVectors = \
+                linalg.eigh(-np.nan_to_num(self.data.H))
+            _, self.data.singularValues, _ = linalg.svd(-np.nan_to_num(self.data.H))
+            # We use the pseudo inverse in case the matrix is singular
+            self.data.varCovar = -linalg.pinv(np.nan_to_num(self.data.H))
             for i in range(self.data.nparam):
-                if self.data.bootstrap_varCovar[i, i] < 0:
-                    self.data.betas[i].setBootstrapStdErr(np.finfo(float).max)
+                if self.data.varCovar[i, i] < 0:
+                    self.data.betas[i].setStdErr(np.finfo(float).max)
                 else:
-                    self.data.betas[i].\
-                        setBootstrapStdErr(np.sqrt(self.data.bootstrap_varCovar[i, i]))
-            rd = np.diag(self.data.bootstrap_varCovar)
+                    self.data.betas[i].setStdErr(np.sqrt(self.data.varCovar[i, i]))
+
+            d = np.diag(self.data.varCovar)
+            if (d > 0).all():
+                diag = np.diag(np.sqrt(d))
+                diagInv = linalg.inv(diag)
+                self.data.correlation = diagInv.dot(self.data.varCovar.dot(diagInv))
+            else:
+                self.data.correlation = np.full_like(self.data.varCovar, np.finfo(float).max)
+
+
+            # Robust estimator
+            self.data.robust_varCovar = \
+                self.data.varCovar.dot(self.data.bhhh.dot(self.data.varCovar))
+            for i in range(self.data.nparam):
+                if self.data.robust_varCovar[i, i] < 0:
+                    self.data.betas[i].setRobustStdErr(np.finfo(float).max)
+                else:
+                    self.data.betas[i].setRobustStdErr(np.sqrt(self.data.robust_varCovar[i, i]))
+            rd = np.diag(self.data.robust_varCovar)
             if (rd > 0).all():
                 diag = np.diag(np.sqrt(rd))
                 diagInv = linalg.inv(diag)
-                self.data.bootstrap_correlation = \
-                    diagInv.dot(self.data.bootstrap_varCovar.dot(diagInv))
+                self.data.robust_correlation = diagInv.dot(self.data.robust_varCovar.dot(diagInv))
             else:
-                self.data.bootstrap_correlation = \
-                    np.full_like(self.data.bootstrap_varCovar, np.finfo(float).max)
+                self.data.robust_correlation = \
+                    np.full_like(self.data.robust_varCovar, np.finfo(float).max)
 
-        self.data.secondOrderTable = dict()
-        for i in range(self.data.nparam):
-            for j in range(i):
-                t = self._calculateTest(i, j, self.data.varCovar)
-                p = calcPValue(t)
-                trob = self._calculateTest(i, j, self.data.robust_varCovar)
-                prob = calcPValue(trob)
-                if self.data.bootstrap is not None:
-                    tboot = self._calculateTest(i, j, self.data.bootstrap_varCovar)
-                    pboot = calcPValue(tboot)
-                name = (self.data.betaNames[i], self.data.betaNames[j])
-                if self.data.bootstrap is not None:
-                    self.data.secondOrderTable[name] = \
-                        [self.data.varCovar[i, j],
-                         self.data.correlation[i, j],
-                         t,
-                         p,
-                         self.data.robust_varCovar[i, j],
-                         self.data.robust_correlation[i, j],
-                         trob,
-                         prob,
-                         self.data.bootstrap_varCovar[i, j],
-                         self.data.bootstrap_correlation[i, j],
-                         tboot,
-                         pboot]
-                else:
-                    self.data.secondOrderTable[name] = \
-                        [self.data.varCovar[i, j],
-                         self.data.correlation[i, j],
-                         t,
-                         p,
-                         self.data.robust_varCovar[i, j],
-                         self.data.robust_correlation[i, j],
-                         trob,
-                         prob]
-
-        eigIndexMin = np.argmin(self.data.eigenValues)
-        eigIndexMax = np.argmax(self.data.eigenValues)
-        self.data.smallestEigenValue = self.data.eigenValues[eigIndexMin]
-        self.data.smallestEigenVector = self.data.eigenVectors[:, eigIndexMin]
-        self.data.largestEigenValue = self.data.eigenValues[eigIndexMax]
-        self.data.largestEigenVector = self.data.eigenVectors[:, eigIndexMax]
-        self.data.conditionNumber = self.data.largestEigenValue / self.data.smallestEigenValue
-        self.data.smallestSingularValue = min(self.data.singularValues)
 
     def __str__(self):
         r = '\n'
@@ -456,19 +403,23 @@ class bioResults:
         if self.data.sampleSize != self.data.numberOfObservations:
             r += f'Observations:\t\t\t{self.data.numberOfObservations}\n'
         r += f'Excluded data:\t\t\t{self.data.excludedData}\n'
-        r += f'Init log likelihood:\t\t{self.data.initLogLike:.7g}\n'
+        if self.data.initLogLike is not None:
+            r += f'Init log likelihood:\t\t{self.data.initLogLike:.7g}\n'
         r += f'Final log likelihood:\t\t{self.data.logLike:.7g}\n'
-        r += f'Likelihood ratio test:\t\t{self.data.likelihoodRatioTest:.7g}\n'
-        r += f'Rho square:\t\t\t{self.data.rhoSquare:.3g}\n'
-        r += f'Rho bar square:\t\t\t{self.data.rhoBarSquare:.3g}\n'
+        if self.data.initLogLike is not None:
+            r += f'Likelihood ratio test:\t\t{self.data.likelihoodRatioTest:.7g}\n'
+            r += f'Rho square:\t\t\t{self.data.rhoSquare:.3g}\n'
+            r += f'Rho bar square:\t\t\t{self.data.rhoBarSquare:.3g}\n'
         r += f'Akaike Information Criterion:\t{self.data.akaike:.7g}\n'
         r += f'Bayesian Information Criterion:\t{self.data.bayesian:.7g}\n'
-        r += f'Final gradient norm:\t\t{self.data.gradientNorm:.7g}\n'
+        if self.data.gradientNorm is not None:
+            r += f'Final gradient norm:\t\t{self.data.gradientNorm:.7g}\n'
         r += '\n'.join([f'{b}' for b in self.data.betas])
         r += '\n'
-        for k, v in self.data.secondOrderTable.items():
-            r += ('{}:\t{:.3g}\t{:.3g}\t{:.3g}\t{:.3g}\t'
-                  '{:.3g}\t{:.3g}\t{:.3g}\t{:.3g}\n').format(k, *v)
+        if self.data.secondOrderTable is not None:
+            for k, v in self.data.secondOrderTable.items():
+                r += ('{}:\t{:.3g}\t{:.3g}\t{:.3g}\t{:.3g}\t'
+                      '{:.3g}\t{:.3g}\t{:.3g}\t{:.3g}\n').format(k, *v)
         return r
 
     def _getLaTeXHeader(self):
@@ -700,9 +651,9 @@ a Pandas dataframe.
             ## User notes
             h += (f'<blockquote style="border: 2px solid #666; padding: 10px; background-color:'
                   f' #ccc;">{self.data.userNotes}</blockquote>')
-        
+
         ### Include here the part on statistics
-        
+
         h += '<h1>Estimation report</h1>\n'
 
         h += '<table border="0">\n'
@@ -851,6 +802,7 @@ a Pandas dataframe.
 
     def writeHtml(self):
         """ Write the results in an HTML file.
+
         """
         self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
         f = open(self.data.htmlFileName, 'w')
