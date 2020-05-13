@@ -2184,7 +2184,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
            threshold, the conjugate gradient algorithm has reached
            convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - proportionAnalyticalHessian: proportion of iterations when the
-           analytical Hessian is calculated (default: 1).
+           analytical Hessian is calculated (default: 0).
          - infeasibleConjugateGradient: if True, the conjugate
            gradient algorithm may generate until termination.  The
            result will then be projected on the feasible domain.  If
@@ -2214,7 +2214,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
     radius = 1.0
     eta1 = 0.1
     eta2 = 0.9
-    proportionTrueHessian = 1
+    proportionTrueHessian = 0.0
     enlargingFactor = 2
     infeasibleConjugateGradient = False
 
