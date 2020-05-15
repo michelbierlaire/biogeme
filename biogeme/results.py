@@ -390,6 +390,68 @@ class bioResults:
                 self.data.robust_correlation = \
                     np.full_like(self.data.robust_varCovar, np.finfo(float).max)
 
+            # Bootstrap
+            if self.data.bootstrap is not None:
+                self.data.bootstrap_varCovar = np.cov(self.data.bootstrap,rowvar=False)
+                for i in range(self.data.nparam):
+                    if self.data.bootstrap_varCovar[i,i] < 0:
+                        self.data.betas[i].setBootstrapStdErr(np.finfo(float).max)
+                    else:
+                        self.data.betas[i].\
+                            setBootstrapStdErr(np.sqrt(self.data.bootstrap_varCovar[i,i]))
+                rd = np.diag(self.data.bootstrap_varCovar)
+                if (rd > 0).all():
+                    diag = np.diag(np.sqrt(rd))
+                    diagInv = linalg.inv(diag)
+                    self.data.bootstrap_correlation = \
+                        diagInv.dot(self.data.bootstrap_varCovar.dot(diagInv))
+                else:
+                    self.data.bootstrap_correlation = \
+                        np.full_like(self.data.bootstrap_varCovar,np.finfo(float).max)
+
+            self.data.secondOrderTable = dict()
+            for i in range(self.data.nparam):
+                for j in range(i):
+                    t = self._calculateTest(i, j, self.data.varCovar)
+                    p = calcPValue(t)
+                    trob = self._calculateTest(i, j, self.data.robust_varCovar)
+                    prob = calcPValue(trob)
+                    if self.data.bootstrap is not None:
+                        tboot = self._calculateTest(i, j, self.data.bootstrap_varCovar)
+                        pboot = calcPValue(tboot)
+                    name = (self.data.betaNames[i], self.data.betaNames[j])
+                    if self.data.bootstrap is not None:
+                        self.data.secondOrderTable[name] = [self.data.varCovar[i, j],
+                                                            self.data.correlation[i, j],
+                                                            t,
+                                                            p,
+                                                            self.data.robust_varCovar[i, j],
+                                                            self.data.robust_correlation[i, j],
+                                                            trob,
+                                                            prob,
+                                                            self.data.bootstrap_varCovar[i, j],
+                                                            self.data.bootstrap_correlation[i, j],
+                                                            tboot,
+                                                            pboot]
+                    else:
+                        self.data.secondOrderTable[name] = [self.data.varCovar[i, j],
+                                                            self.data.correlation[i, j],
+                                                            t,
+                                                            p,
+                                                            self.data.robust_varCovar[i, j],
+                                                            self.data.robust_correlation[i, j],
+                                                            trob,
+                                                            prob]
+
+            eigIndex = np.argmin(self.data.eigenValues)
+            self.data.smallestEigenValue = self.data.eigenValues[eigIndex]
+            self.data.smallestEigenVector = self.data.eigenVectors[:, eigIndex]
+            self.data.smallestSingularValue = min(self.data.singularValues)
+            eigIndex = np.argmax(self.data.eigenValues)
+            self.data.largestEigenValue = self.data.eigenValues[eigIndex]
+            self.data.largestEigenVector = self.data.eigenVectors[:, eigIndex]
+            self.data.largestSingularValue = max(self.data.singularValues)
+            self.data.conditionNumber = self.data.largestEigenValue / self.data.smallestEigenValue
 
     def __str__(self):
         r = '\n'
