@@ -126,15 +126,16 @@ biogeme.modelName = '03nestedElasticties'
 try:
     results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 except FileNotFoundError:
-    sys.exit('Run first the script 01nestedEstimation.py in order to generate the file '
-             '01nestedEstimation.pickle.')
+    sys.exit('Run first the script 01nestedEstimation.py in order to generate '
+             'the file 01nestedEstimation.pickle.')
 
 # simulatedValues is a Panda dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
 simulatedValues = biogeme.simulate(results.getBetaValues())
 
 # We calculate the elasticities
-simulatedValues['Weighted prob. car'] = simulatedValues['weight'] * simulatedValues['Prob. car']
+simulatedValues['Weighted prob. car'] = simulatedValues['weight'] * \
+    simulatedValues['Prob. car']
 simulatedValues['Weighted prob. PT'] = simulatedValues['weight'] * \
     simulatedValues['Prob. public transportation']
 simulatedValues['Weighted prob. SM'] = simulatedValues['weight'] * \
@@ -145,21 +146,31 @@ denominator_pt = simulatedValues['Weighted prob. PT'].sum()
 denominator_sm = simulatedValues['Weighted prob. SM'].sum()
 
 direct_elas_term_car_time = (simulatedValues['Weighted prob. car']
-                             * simulatedValues['direct_elas_car_time'] / denominator_car).sum()
-print(f'Aggregate direct point elasticity of car wrt time: {direct_elas_term_car_time:.3g}')
+                             * simulatedValues['direct_elas_car_time']
+                             / denominator_car).sum()
+print(f'Aggregate direct point elasticity of car wrt time: '
+      f'{direct_elas_term_car_time:.3g}')
 
 direct_elas_term_car_cost = (simulatedValues['Weighted prob. car']
-                             * simulatedValues['direct_elas_car_cost'] / denominator_car).sum()
-print(f'Aggregate direct point elasticity of car wrt cost: {direct_elas_term_car_cost:.3g}')
+                             * simulatedValues['direct_elas_car_cost']
+                             / denominator_car).sum()
+print(f'Aggregate direct point elasticity of car wrt cost: '
+      f'{direct_elas_term_car_cost:.3g}')
 
 direct_elas_term_pt_time = (simulatedValues['Weighted prob. PT']
-                            * simulatedValues['direct_elas_pt_time'] / denominator_pt).sum()
-print(f'Aggregate direct point elasticity of PT wrt time: {direct_elas_term_pt_time:.3g}')
+                            * simulatedValues['direct_elas_pt_time']
+                            / denominator_pt).sum()
+print(f'Aggregate direct point elasticity of PT wrt time: '
+      f'{direct_elas_term_pt_time:.3g}')
 
 direct_elas_term_pt_cost = (simulatedValues['Weighted prob. PT']
-                            * simulatedValues['direct_elas_pt_cost'] / denominator_pt).sum()
-print(f'Aggregate direct point elasticity of PT wrt cost: {direct_elas_term_pt_cost:.3g}')
+                            * simulatedValues['direct_elas_pt_cost']
+                            / denominator_pt).sum()
+print(f'Aggregate direct point elasticity of PT wrt cost: '
+      f'{direct_elas_term_pt_cost:.3g}')
 
 direct_elas_term_sm_dist = (simulatedValues['Weighted prob. SM']
-                            * simulatedValues['direct_elas_sm_dist'] / denominator_sm).sum()
-print(f'Aggregate direct point elasticity of SM wrt distance: {direct_elas_term_sm_dist:.3g}')
+                            * simulatedValues['direct_elas_sm_dist']
+                            / denominator_sm).sum()
+print(f'Aggregate direct point elasticity of SM wrt distance: '
+      f'{direct_elas_term_sm_dist:.3g}')
