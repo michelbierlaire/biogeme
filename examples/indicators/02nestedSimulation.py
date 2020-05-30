@@ -106,7 +106,7 @@ prob_sm = models.nested(V, None, nests, 2)
 
 simulate = {'weight': normalizedWeight,
             'Prob. car': prob_car,
-            'Prob. public transportation': prob_pt,
+            'Prob. public transp.': prob_pt,
             'Prob. slow modes': prob_sm,
             'Revenue public transportation': prob_pt * MarginalCostPT}
 
@@ -117,8 +117,8 @@ biogeme.modelName = '02nestedSimulation'
 try:
     results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 except FileNotFoundError:
-    sys.exit('Run first the script 01nestedEstimation.py in order to generate the file '
-             '01nestedEstimation.pickle.')
+    sys.exit('Run first the script 01nestedEstimation.py in order to generate the '
+             'file 01nestedEstimation.pickle.')
 
 # simulatedValues is a Panda dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
@@ -149,13 +149,13 @@ print(f'Market share for car: {100*marketShare_car:.1f}% '
       f'[{100*marketShare_car_left:.1f}%, {100*marketShare_car_right:.1f}%]')
 
 simulatedValues['Weighted prob. PT'] = simulatedValues['weight'] * \
-    simulatedValues['Prob. public transportation']
+    simulatedValues['Prob. public transp.']
 
 marketShare_pt = simulatedValues['Weighted prob. PT'].mean()
 
-marketShare_pt_left = (left['Prob. public transportation'] * left['weight']).mean()
+marketShare_pt_left = (left['Prob. public transp.'] * left['weight']).mean()
 
-marketShare_pt_right = (right['Prob. public transportation'] * right['weight']).mean()
+marketShare_pt_right = (right['Prob. public transp.'] * right['weight']).mean()
 
 print(f'Market share for PT: {100*marketShare_pt:.1f}% '
       f'[{100*marketShare_pt_left:.1f}%, {100*marketShare_pt_right:.1f}%]')
@@ -177,4 +177,5 @@ revenues_pt_left = (left['Revenue public transportation'] *
                     left['weight']).sum()
 revenues_pt_right = (right['Revenue public transportation'] *
                      right['weight']).sum()
-print(f'Revenues for PT: {revenues_pt:.3f} [{revenues_pt_left:.3f}, {revenues_pt_right:.3f}]')
+print(f'Revenues for PT: {revenues_pt:.3f} [{revenues_pt_left:.3f}, '
+      f'{revenues_pt_right:.3f}]')
