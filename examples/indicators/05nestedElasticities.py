@@ -121,7 +121,8 @@ V_after = {0: V_PT,
 prob_sm_after = models.nested(V_after, None, nests, 2)
 
 # Disaggregate elasticities
-direct_elas_sm_dist = (prob_sm_after - prob_sm) * distance_km / (prob_sm * delta_dist)
+direct_elas_sm_dist = (prob_sm_after - prob_sm) * \
+    distance_km / (prob_sm * delta_dist)
 
 simulate = {'weight': normalizedWeight,
             'Prob. slow modes': prob_sm,
@@ -134,8 +135,8 @@ biogeme.modelName = '05nestedElasticities'
 try:
     results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 except FileNotFoundError:
-    sys.exit('Run first the script 01nestedEstimation.py in order to generate the file '
-             '01nestedEstimation.pickle.')
+    sys.exit('Run first the script 01nestedEstimation.py in order to generate '
+             f'the file 01nestedEstimation.pickle.')
 
 # simulatedValues is a Panda dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
@@ -151,4 +152,5 @@ direct_elas_sm_dist = (simulatedValues['Weighted prob. slow modes']
                        * simulatedValues['direct_elas_sm_dist'] /
                        denominator_sm).sum()
 
-print(f'Aggregate direct arc elasticity of slow modes wrt distance: {direct_elas_sm_dist:.3g}')
+print(f'Aggregate direct arc elasticity of slow modes wrt distance: '
+      f'{direct_elas_sm_dist:.3g}')
