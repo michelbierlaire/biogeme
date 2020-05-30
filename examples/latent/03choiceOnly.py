@@ -15,7 +15,8 @@ import biogeme.biogeme as bio
 import biogeme.models as models
 import biogeme.distributions as dist
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable, RandomVariable, Integrate, exp, log
+from biogeme.expressions import Beta, DefineVariable, \
+    RandomVariable, Integrate, exp, log
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
