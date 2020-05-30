@@ -133,7 +133,8 @@ V_after = {0: V_PT,
 
 prob_sm_after = models.nested(V_after, None, nests, 2)
 
-direct_elas_sm_dist = (prob_sm_after - prob_sm) * distance_km / (prob_sm * delta_dist)
+direct_elas_sm_dist = (prob_sm_after - prob_sm) * \
+    distance_km / (prob_sm * delta_dist)
 
 simulate = {'weight': normalizedWeight,
             'Prob. slow modes': prob_sm,
@@ -158,8 +159,10 @@ simulatedValues['Weighted prob. slow modes'] = simulatedValues['weight'] * \
 denominator_sm = simulatedValues['Weighted prob. slow modes'].sum()
 
 direct_elas_sm_dist = (simulatedValues['Weighted prob. slow modes'] *
-                       simulatedValues['direct_elas_sm_dist'] / denominator_sm).sum()
-print(f'Aggregate direct arc elasticity of slow modes wrt distance: {direct_elas_sm_dist:.7f}')
+                       simulatedValues['direct_elas_sm_dist'] /
+                       denominator_sm).sum()
+print(f'Aggregate direct arc elasticity of slow modes wrt distance: '
+      f'{direct_elas_sm_dist:.7f}')
 
 print('Calculating confidence interval...')
 
@@ -180,12 +183,14 @@ denominator_right = right['Weighted prob. slow modes'].sum()
 denominator_interval = ia.interval[(denominator_left, denominator_right)]
 
 # Build a list of interval objects, one for each disaggregate elasticity
-elas_interval = [ia.interval([l, r]) for l, r in zip(left['direct_elas_sm_dist'],
-                                                     right['direct_elas_sm_dist'])]
+elas_interval = [ia.interval([l, r])
+                 for l, r in zip(left['direct_elas_sm_dist'],
+                                 right['direct_elas_sm_dist'])]
 
 # Build a list of interval objects, one for each term of the numerator
-numerator_interval = [ia.interval([l, r]) for l, r in zip(left['Weighted prob. slow modes'],
-                                                          right['Weighted prob. slow modes'])]
+numerator_interval = [ia.interval([l, r])
+                      for l, r in zip(left['Weighted prob. slow modes'],
+                                      right['Weighted prob. slow modes'])]
 
 # Build a list of interval objects, one for each term of the sum
 terms_of_the_sum_interval = [e * wp / denominator_interval
