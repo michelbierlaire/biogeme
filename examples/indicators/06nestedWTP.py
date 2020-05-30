@@ -117,8 +117,8 @@ biogeme.modelName = '06nestedWTP'
 try:
     results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 except FileNotFoundError:
-    sys.exit('Run first the script 01nestedEstimation.py in order to generate the file '
-             '01nestedEstimation.pickle.')
+    sys.exit('Run first the script 01nestedEstimation.py in order to generate '
+             'the file 01nestedEstimation.pickle.')
 
 # simulatedValues is a Panda dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
@@ -135,12 +135,14 @@ left, right = biogeme.confidenceIntervals(b, 0.9)
 
 wtpcar_left = (60 * left['WTP CAR time'] * left['weight']).mean()
 wtpcar_right = (60 * right['WTP CAR time'] * right['weight']).mean()
-print(f'Average WTP for car: {wtpcar:.3g} CI:[{wtpcar_left:.3g}, {wtpcar_right:.3g}]')
+print(f'Average WTP for car: {wtpcar:.3g} '
+      f'CI:[{wtpcar_left:.3g}, {wtpcar_right:.3g}]')
 
 
 # In this specific case, there are only two distinct values in the
 # population: for workers and non workers
-print('Unique values: ', [f'{i:.3g}' for i in 60 * simulatedValues['WTP CAR time'].unique()])
+print('Unique values: ',
+      [f'{i:.3g}' for i in 60 * simulatedValues['WTP CAR time'].unique()])
 
 def wtpForSubgroup(theFilter):
     """
