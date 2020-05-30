@@ -101,8 +101,8 @@ def scenario(scale):
     try:
         results = res.bioResults(pickleFile='01nestedEstimation.pickle')
     except FileNotFoundError:
-        sys.exit('Run first the script 01nestedEstimation.py in order to generate the file '
-                 '01nestedEstimation.pickle.')
+        sys.exit('Run first the script 01nestedEstimation.py in order to generate '
+                 'the file 01nestedEstimation.pickle.')
     # Simulation
     simulatedValues = biogeme.simulate(results.getBetaValues())
 
