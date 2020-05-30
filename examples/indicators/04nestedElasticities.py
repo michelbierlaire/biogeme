@@ -122,8 +122,8 @@ biogeme.modelName = '04nestedElasticities'
 try:
     results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 except FileNotFoundError:
-    sys.exit('Run first the script 01nestedEstimation.py in order to generate the file '
-             '01nestedEstimation.pickle.')
+    sys.exit('Run first the script 01nestedEstimation.py in order to generate '
+             'the file 01nestedEstimation.pickle.')
 
 # simulatedValues is a Panda dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
@@ -139,17 +139,23 @@ denominator_car = simulatedValues['Weighted prob. car'].sum()
 denominator_pt = simulatedValues['Weighted prob. PT'].sum()
 
 cross_elas_term_car_time = (simulatedValues['Weighted prob. car']
-                            * simulatedValues['cross_elas_car_time'] / denominator_car).sum()
+                            * simulatedValues['cross_elas_car_time']
+                            / denominator_car).sum()
 print(f'Aggregate cross elasticity of car wrt time: {cross_elas_term_car_time:.3g}')
 
 cross_elas_term_car_cost = (simulatedValues['Weighted prob. car']
-                            * simulatedValues['cross_elas_car_cost'] / denominator_car).sum()
+                            * simulatedValues['cross_elas_car_cost']
+                            / denominator_car).sum()
 print(f'Aggregate cross elasticity of car wrt cost: {cross_elas_term_car_cost:.3g}')
 
 cross_elas_term_pt_time = (simulatedValues['Weighted prob. PT']
-                           * simulatedValues['cross_elas_pt_time'] / denominator_pt).sum()
-print(f'Aggregate cross elasticity of PT wrt car time: {cross_elas_term_pt_time:.3g}')
+                           * simulatedValues['cross_elas_pt_time']
+                           / denominator_pt).sum()
+print(f'Aggregate cross elasticity of PT wrt car time: '
+      f'{cross_elas_term_pt_time:.3g}')
 
 cross_elas_term_pt_cost = (simulatedValues['Weighted prob. PT']
-                           * simulatedValues['cross_elas_pt_cost'] / denominator_pt).sum()
-print(f'Aggregate cross direct elasticity of PT wrt car cost: {cross_elas_term_pt_cost:.3g}')
+                           * simulatedValues['cross_elas_pt_cost']
+                           / denominator_pt).sum()
+print(f'Aggregate cross direct elasticity of PT wrt car cost: '
+      f'{cross_elas_term_pt_cost:.3g}')
