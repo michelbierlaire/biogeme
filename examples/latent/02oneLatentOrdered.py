@@ -100,13 +100,13 @@ MODEL_Mobil14 = INTER_Mobil14 + B_Mobil14_F1 * CARLOVERS
 MODEL_Mobil16 = INTER_Mobil16 + B_Mobil16_F1 * CARLOVERS
 MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
-SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, 1.0e-5, None, 1)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, 1.0e-5, None, 0)
 
 
 delta_1 = Beta('delta_1', 0.1, 1.0e-5, None, 0)
