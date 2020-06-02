@@ -160,13 +160,13 @@ MODEL_Mobil14 = INTER_Mobil14 + B_Mobil14_F1 * CARLOVERS
 MODEL_Mobil16 = INTER_Mobil16 + B_Mobil16_F1 * CARLOVERS
 MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
-SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, 1.0e-5, None, 1)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, 1.0e-5, None, 0)
 
 
 delta_1 = Beta('delta_1', 0.1, 1.0e-5, None, 0)
@@ -306,13 +306,37 @@ ASC_CAR = Beta('ASC_CAR', choiceBetas['ASC_CAR'], None, None, 0)
 ASC_PT = Beta('ASC_PT', 0, None, None, 1)
 ASC_SM = Beta('ASC_SM', choiceBetas['ASC_SM'], None, None, 0)
 BETA_COST_HWH = Beta('BETA_COST_HWH', choiceBetas['BETA_COST_HWH'], None, None, 0)
-BETA_COST_OTHER = Beta('BETA_COST_OTHER', choiceBetas['BETA_COST_OTHER'], None, None, 0)
+BETA_COST_OTHER = Beta('BETA_COST_OTHER',
+                       choiceBetas['BETA_COST_OTHER'],
+                       None,
+                       None,
+                       0)
 BETA_DIST = Beta('BETA_DIST', choiceBetas['BETA_DIST'], None, None, 0)
-BETA_TIME_CAR_REF = Beta('BETA_TIME_CAR_REF', choiceBetas['BETA_TIME_CAR_REF'], None, 0, 0)
-BETA_TIME_CAR_CL = Beta('BETA_TIME_CAR_CL', choiceBetas['BETA_TIME_CAR_CL'], None, None, 0)
-BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', choiceBetas['BETA_TIME_PT_REF'], None, 0, 0)
-BETA_TIME_PT_CL = Beta('BETA_TIME_PT_CL', choiceBetas['BETA_TIME_PT_CL'], None, None, 0)
-BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', choiceBetas['BETA_WAITING_TIME'], None, None, 0)
+BETA_TIME_CAR_REF = Beta('BETA_TIME_CAR_REF',
+                         choiceBetas['BETA_TIME_CAR_REF'],
+                         None,
+                         0,
+                         0)
+BETA_TIME_CAR_CL = Beta('BETA_TIME_CAR_CL',
+                        choiceBetas['BETA_TIME_CAR_CL'],
+                        None,
+                        None,
+                        0)
+BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF',
+                        choiceBetas['BETA_TIME_PT_REF'],
+                        None,
+                        0,
+                        0)
+BETA_TIME_PT_CL = Beta('BETA_TIME_PT_CL',
+                       choiceBetas['BETA_TIME_PT_CL'],
+                       None,
+                       None,
+                       0)
+BETA_WAITING_TIME = Beta('BETA_WAITING_TIME',
+                         choiceBetas['BETA_WAITING_TIME'],
+                         None,
+                         None,
+                         0)
 
 TimePT_scaled = DefineVariable('TimePT_scaled', TimePT / 200, database)
 TimeCar_scaled = DefineVariable('TimeCar_scaled', TimeCar / 200, database)
