@@ -18,7 +18,9 @@ import biogeme.models as models
 import biogeme.distributions as dist
 import biogeme.results as res
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable, RandomVariable, exp, log, Integrate
+import biogeme.optimization as opt
+from biogeme.expressions import Beta, DefineVariable, \
+    RandomVariable, exp, log, Integrate
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
@@ -40,19 +42,17 @@ except FileNotFoundError:
     sys.exit()
 structBetas = structResults.getBetaValues()
 
-
 ### Variables
 
 # Piecewise linear definition of income
 ScaledIncome = DefineVariable('ScaledIncome', CalculatedIncome / 1000, database)
 thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(ScaledIncome,
-                                        thresholds,
-                                        [structBetas['beta_ScaledIncome_lessthan_4'],
-                                         structBetas['beta_ScaledIncome_4_6'],
-                                         structBetas['beta_ScaledIncome_6_8'],
-                                         structBetas['beta_ScaledIncome_8_10'],
-                                         structBetas['beta_ScaledIncome_10_more']])
+piecewiseVariables = models.piecewiseVariables(ScaledIncome, thresholds)
+formulaIncome = structBetas['beta_ScaledIncome_lessthan_4'] * piecewiseVariables[0] + \
+    structBetas['beta_ScaledIncome_4_6'] * piecewiseVariables[1] + \
+    structBetas['beta_ScaledIncome_6_8'] * piecewiseVariables[2] + \
+    structBetas['beta_ScaledIncome_8_10'] * piecewiseVariables[3] + \
+    structBetas['beta_ScaledIncome_10_more'] * piecewiseVariables[4]
 
 
 # Definition of other variables
@@ -103,21 +103,21 @@ CARLOVERS = coef_intercept + \
             sigma_s * omega
 
 # Choice model
-ASC_CAR = Beta('ASC_CAR', 0.0, None, None, 0)
-ASC_PT = Beta('ASC_PT', 0.0, None, None, 1)
-ASC_SM = Beta('ASC_SM', 0.0, None, None, 0)
-BETA_COST_HWH = Beta('BETA_COST_HWH', 0.0, None, None, 0)
-BETA_COST_OTHER = Beta('BETA_COST_OTHER', 0.0, None, None, 0)
-BETA_DIST = Beta('BETA_DIST', 0.0, None, None, 0)
-BETA_TIME_CAR_REF = Beta('BETA_TIME_CAR_REF', 0.0, None, 0, 0)
-BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', 0.0, None, 0, 0)
-BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', 0.0, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
+ASC_PT = Beta('ASC_PT', 0, None, None, 1)
+ASC_SM = Beta('ASC_SM', 0, None, None, 0)
+BETA_COST_HWH = Beta('BETA_COST_HWH', 0, None, None, 0)
+BETA_COST_OTHER = Beta('BETA_COST_OTHER', 0, None, None, 0)
+BETA_DIST = Beta('BETA_DIST', 0, None, None, 0)
+BETA_TIME_CAR_REF = Beta('BETA_TIME_CAR_REF', 0, None, 0, 0)
+BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', 0, None, 0, 0)
+BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', 0, None, None, 0)
 
 # The coefficient of the latent variable should be initialized to
 # something different from zero. If not, the algorithm may be trapped
 # in a local optimum, and never change the value.
-BETA_TIME_PT_CL = Beta('BETA_TIME_PT_CL', -0.001, None, None, 0)
-BETA_TIME_CAR_CL = Beta('BETA_TIME_CAR_CL', -0.001, None, None, 0)
+BETA_TIME_PT_CL = Beta('BETA_TIME_PT_CL', -0.01, None, None, 0)
+BETA_TIME_CAR_CL = Beta('BETA_TIME_CAR_CL', -.01, None, None, 0)
 
 
 TimePT_scaled = DefineVariable('TimePT_scaled', TimePT / 200, database)
