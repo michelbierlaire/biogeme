@@ -14,6 +14,7 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 import biogeme.models as models
 import biogeme.distributions as dist
+import biogeme.optimization as opt
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable, \
     RandomVariable, Integrate, exp, log
@@ -52,7 +53,7 @@ haveGA = DefineVariable('haveGA', GenAbST == 1, database)
 highEducation = DefineVariable('highEducation', Education >= 6, database)
 
 # Parameters to be estimated
-coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
+coef_intercept = Beta('coef_intercept', 0.0, None, None, 1)
 coef_age_65_more = Beta('coef_age_65_more', 0.0, None, None, 0)
 coef_age_unknown = Beta('coef_age_unknown', 0.0, None, None, 0)
 coef_haveGA = Beta('coef_haveGA', 0.0, None, None, 0)
@@ -155,7 +156,7 @@ biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = '03choiceOnly'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = biogeme.estimate(algorithm=opt.bioNewton)
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')
