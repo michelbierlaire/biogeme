@@ -233,3 +233,4 @@ examples/swissmetro/01logit~00.html
 examples/swissmetro/01logit~01.html
 examples/latent/02oneLatentOrdered.tex
 examples/latent/__savedIterations.txt
+examples/latent/.#03choiceOnly_mc.py
