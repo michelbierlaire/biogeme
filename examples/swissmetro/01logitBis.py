@@ -88,7 +88,6 @@ logprob = models.loglogit(V, av, CHOICE)
 # Define level of verbosity
 logger = msg.bioMessage()
 #logger.setSilent()
-#logger.setDebug()
 #logger.setWarning()
 logger.setGeneral()
 #logger.setDetailed()
@@ -104,8 +103,9 @@ biogeme = bio.BIOGEME(database, logprob, numberOfThreads=2, userNotes=userNotes)
 biogeme.modelName = '01logitBis'
 
 # Estimate the parameters
-results = biogeme.estimate(bootstrap=0,
-                           algorithm=opt.newtonLineSearchForBiogeme,
+results = biogeme.estimate(bootstrap=100,
+                           algorithm=opt.bioNewton,
+                           algoParameters={'hamabs': True},
                            saveIterations=True)
 
 biogeme.createLogFile(verbosity=3)
