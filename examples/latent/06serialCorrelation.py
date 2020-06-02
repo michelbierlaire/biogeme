@@ -130,8 +130,8 @@ omega = bioDraws('omega', 'NORMAL')
 sigma_s = Beta('sigma_s', betas['sigma_s'], None, None, 0)
 
 #
-# Deal with serial correlation by including an error component that is individual specific
-#
+# Deal with serial correlation by including an error component 
+# that is individual specific
 errorComponent = bioDraws('errorComponent', 'NORMAL')
 ec_sigma = Beta('ec_sigma', 1, None, None, 0)
 
@@ -175,12 +175,36 @@ MODEL_Mobil16 = INTER_Mobil16 + B_Mobil16_F1 * CARLOVERS
 MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
 SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, None, None, 1)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', betas['SIGMA_STAR_Envir02'], None, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', betas['SIGMA_STAR_Envir03'], None, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', betas['SIGMA_STAR_Mobil11'], None, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', betas['SIGMA_STAR_Mobil14'], None, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', betas['SIGMA_STAR_Mobil16'], None, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', betas['SIGMA_STAR_Mobil17'], None, None, 0)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02',
+                          betas['SIGMA_STAR_Envir02'],
+                          None,
+                          None,
+                          0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03',
+                          betas['SIGMA_STAR_Envir03'],
+                          None,
+                          None,
+                          0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11',
+                          betas['SIGMA_STAR_Mobil11'],
+                          None,
+                          None,
+                          0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14',
+                          betas['SIGMA_STAR_Mobil14'],
+                          None,
+                          None,
+                          0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16',
+                          betas['SIGMA_STAR_Mobil16'],
+                          None,
+                          None,
+                          0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17',
+                          betas['SIGMA_STAR_Mobil17'],
+                          None,
+                          None,
+                          0)
 
 delta_1 = Beta('delta_1', betas['delta_1'], 0, 10, 0)
 delta_2 = Beta('delta_2', betas['delta_2'], 0, 10, 0)
@@ -321,7 +345,11 @@ BETA_TIME_CAR_REF = Beta('BETA_TIME_CAR_REF', betas['BETA_TIME_CAR_REF'], None, 
 BETA_TIME_CAR_CL = Beta('BETA_TIME_CAR_CL', betas['BETA_TIME_CAR_CL'], -10, 10, 0)
 BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', betas['BETA_TIME_PT_REF'], None, 0, 0)
 BETA_TIME_PT_CL = Beta('BETA_TIME_PT_CL', betas['BETA_TIME_PT_CL'], -10, 10, 0)
-BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', betas['BETA_WAITING_TIME'], None, None, 0)
+BETA_WAITING_TIME = Beta('BETA_WAITING_TIME',
+                         betas['BETA_WAITING_TIME'],
+                         None,
+                         None,
+                         0)
 
 TimePT_scaled = DefineVariable('TimePT_scaled', TimePT / 200, database)
 TimeCar_scaled = DefineVariable('TimeCar_scaled', TimeCar / 200, database)
@@ -386,7 +414,7 @@ logger.setGeneral()
 #logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=10000)
+biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
 biogeme.modelName = '06serialCorrelation'
 
 # Estimate the parameters
