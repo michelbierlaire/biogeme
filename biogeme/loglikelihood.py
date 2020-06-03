@@ -8,7 +8,7 @@
 # Too constraining
 # pylint: disable=invalid-name,
 
-from biogeme.expressions import log, MonteCarlo, bioNormalPdf
+from biogeme.expressions import exp, log, MonteCarlo
 
 def loglikelihood(prob):
     """
@@ -71,9 +71,7 @@ def likelihoodregression(meas, model, sigma):
 
     :rtype: biogeme.expressions.Expression
     """
-    t = (meas - model) / sigma
-    f = bioNormalPdf(t) / sigma
-    return f
+    return exp(loglikelihoodregression(meas, model, sigma))
 
 
 def loglikelihoodregression(meas, model, sigma):
