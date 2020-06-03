@@ -146,3 +146,4 @@ Simple bounds BFGS      	-5236.90	0.0027	0:00:00.403998	Relative gradient = 3.5e
 Simple bounds hybrid 20%	-5236.90	0.024	0:00:00.661252	Relative gradient = 2.7e-06 <= 6.1e-06
 Simple bounds hybrid 50%	-5236.90	0.0074	0:00:00.531165	Relative gradient = 1.4e-06 <= 6.1e-06
 Simple bounds hybrid 80%	-5236.90	0.0096	0:00:00.479969	Relative gradient = 1.9e-06 <= 6.1e-06
+"""
