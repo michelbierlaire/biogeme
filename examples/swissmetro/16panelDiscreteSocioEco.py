@@ -135,7 +135,11 @@ logger.setGeneral()
 biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
 biogeme.modelName = '16panelDiscreteSocioEco'
 
+# As the estimation may take a while and risk to be interrupted, we save the iterations,
+# and restore them before the estimation.
+fname = "__16panelDiscreteSocioEco.iters"
+biogeme.loadSavedIteration(filename=fname)
 # Estimate the parameters.
-results = biogeme.estimate()
+results = biogeme.estimate(saveIterations=True, file_iterations=fname)
 pandasResults = results.getEstimatedParameters()
 print(pandasResults)
