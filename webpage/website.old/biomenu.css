@@ -1,0 +1,79 @@
+ul.biomenu  {
+    list-style-type: none;
+    font-family: Sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: rgb(130,130,130);
+}
+
+li.biomenu {
+    float: left;
+}
+
+li.biomenu a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li.biomenu a:hover:not(.active) {
+    background-color: rgb(100,100,100);
+}
+
+li.dropdown a:hover:not(.active) {
+    background-color: rgb(100,100,100);
+}
+
+
+li.biomenu a, .dropbtn {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+li.biomenu a:hover, .dropdown:hover .dropbtn {
+    background-color: rgb(30,30,30);
+}
+
+li.dropdown {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+
+
+}
+
+.active {
+    background-color: rgb(30,30,30);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left;
+}
+
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
