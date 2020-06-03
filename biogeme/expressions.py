@@ -1297,21 +1297,6 @@ class MonteCarlo(UnaryOperator):
             listOfErrors.append(theError)
         return listOfErrors, listOfWarnings
 
-class bioNormalPdf(UnaryOperator):
-    """
-    Probability density function of a normal random variable
-    """
-    def __init__(self, child):
-        """ Constructor
-
-        :param child: first arithmetic expression
-        :type child: biogeme.expressions.Expression
-        """
-        UnaryOperator.__init__(self, child)
-
-    def __str__(self):
-        return f'bioNormalPdf({self.child})'
-
 class bioNormalCdf(UnaryOperator):
     """
     Cumulative Distribution Function of a normal random variable
