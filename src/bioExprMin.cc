@@ -40,19 +40,11 @@ bioDerivatives* bioExprMin::getValueAndDerivatives(std::vector<bioUInt> literalI
 
   if (gradient) {
     if (containsLiterals(literalIds)) {
-      std::stringstream str ;
-      str << "Expression "+print()+" is not differentiable" << std::endl ; 
-      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
-    }
-    if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives->setGradientToZero() ;
+      std::cout << "Warning: expression " << print()
+		<< " is not differentiable everywhere. " << std::endl ;
     }
   }
 
-  
   if (theDerivatives == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
   }
@@ -63,13 +55,33 @@ bioDerivatives* bioExprMin::getValueAndDerivatives(std::vector<bioUInt> literalI
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
-  bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
-  if (l->f <= r->f) {
-    theDerivatives->f = l->f ;
+  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  if (leftResult->f <= rightResult->f) {
+    theDerivatives->f = leftResult->f ;
+    if (gradient) {
+      for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
+	theDerivatives->g[k] = leftResult->g[k] ;
+	if (hessian) {
+	  for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
+	    theDerivatives->h[k][l] = leftResult->h[k][l] ;
+	  }
+	}
+      }
+    }
   }
   else { 
-    theDerivatives->f = r->f ;
+    theDerivatives->f = rightResult->f ;
+    if (gradient) {
+      for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
+	theDerivatives->g[k] = rightResult->g[k] ;
+	if (hessian) {
+	  for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
+	    theDerivatives->h[k][l] = rightResult->h[k][l] ;
+	  }
+	}
+      }
+    }
   }
   return theDerivatives ;
 }
