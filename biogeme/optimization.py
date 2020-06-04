@@ -2123,85 +2123,88 @@ def simpleBoundsNewtonAlgorithm(fct,
                                                    infeasibleConjugateGradient,
                                                    cgtol)
 
-        fct.setVariables(xc)
-        fc = fct.f()
-        nfev += 1
+        
 
-        num = f - fc
-        step = xc - xk
-        denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
-        rho = num / denom
         if np.isnan(xc).any():
             delta = delta / 2.0
             status = '-'
             if stochasticNewton: 
                 batch = min(2.0 * batch, 1.0)
-        elif rho < eta1:
-            # Failure: reduce the trust region
-            delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
-            status = '-'
-            if stochasticNewton: 
-                batch = min(2.0 * batch, 1.0)
         else:
-            # Candidate accepted
-            if stochasticNewton:
-                logger.detailed(f'*** Stochastic Newton with {100*batch:.1f}% of the data ***')
-                fc, gc, Hc = fct.f_g_h(batch=batch)
-                logger.debug(f'f={f} g={g}')
-                stochasticNewtonIterations += 1
-            elif proportionTrueHessian > 0 and \
-               float(numberOfTrueHessian) / float(numberOfMatrices) \
-               <= proportionTrueHessian:
+            fct.setVariables(xc)
+            fc = fct.f()
+            nfev += 1
 
-                fc, gc, Hc = fct.f_g_h()
-                nfev += 1
-                ngev += 1
-                nhev += 1
-                numberOfTrueHessian += 1
-                numberOfMatrices += 1
-                # If there is a numerical problem with the Hessian, we apply
-                # BFGS
-                if np.linalg.norm(Hc) > 1.0e100:
-                    logger.warning(f'Numerical problem with the second '
-                                   f'derivative matrix. '
-                                   f'Norm = {np.linalg.norm(Hc)}. '
-                                   f'Replaced by the identity matrix.')
+            num = f - fc
+            step = xc - xk
+            denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
+            rho = num / denom
+            if rho < eta1:
+                # Failure: reduce the trust region
+                delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
+                status = '-'
+                if stochasticNewton: 
+                    batch = min(2.0 * batch, 1.0)
+            else:
+                # Candidate accepted
+                if stochasticNewton:
+                    logger.detailed(f'*** Stochastic Newton with {100*batch:.1f}% of the data ***')
+                    fc, gc, Hc = fct.f_g_h(batch=batch)
+                    logger.debug(f'f={f} g={g}')
+                    stochasticNewtonIterations += 1
+                elif proportionTrueHessian > 0 and \
+                   float(numberOfTrueHessian) / float(numberOfMatrices) \
+                   <= proportionTrueHessian:
+
+                    fc, gc, Hc = fct.f_g_h()
+                    nfev += 1
+                    ngev += 1
+                    nhev += 1
+                    numberOfTrueHessian += 1
+                    numberOfMatrices += 1
+                    # If there is a numerical problem with the Hessian, we apply
+                    # BFGS
+                    if np.linalg.norm(Hc) > 1.0e100:
+                        logger.warning(f'Numerical problem with the second '
+                                       f'derivative matrix. '
+                                       f'Norm = {np.linalg.norm(Hc)}. '
+                                       f'Replaced by the identity matrix.')
+                        y = gc - g
+                        Hc = bfgs(H, step, y)
+                else:
+                    fc, gc = fct.f_g()
+                    nfev += 1
+                    ngev += 1
                     y = gc - g
                     Hc = bfgs(H, step, y)
-            else:
-                fc, gc = fct.f_g()
+                    numberOfMatrices += 1
+
+
                 nfev += 1
-                ngev += 1
-                y = gc - g
-                Hc = bfgs(H, step, y)
-                numberOfMatrices += 1
+                xk = xc
+                f = fc
+                g = gc
+                H = Hc
+                if rho >= eta2:
+                    # Enlarge the trust region
+                    delta = min(enlargingFactor * delta, maxDelta)
+                    status = '++'
+                else:
+                    status = '+'
 
-
-            nfev += 1
-            xk = xc
-            f = fc
-            g = gc
-            H = Hc
-            if rho >= eta2:
-                # Enlarge the trust region
-                delta = min(enlargingFactor * delta, maxDelta)
-                status = '++'
-            else:
-                status = '+'
-
-            projectedGradient = bounds.project(xk - g) - xk
-            relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
-            if relgrad <= tol:
-                message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
+                projectedGradient = bounds.project(xk - g) - xk
+                relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
+                if relgrad <= tol:
+                    message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
+                    cont = False
+            if delta <= minDelta:
+                message = f'Trust region is too small: {delta}'
                 cont = False
-        if delta <= minDelta:
-            message = f'Trust region is too small: {delta}'
-            cont = False
-        if k == maxiter:
-            message = f'Maximum number of iterations reached: {maxiter}'
-            cont = False
-        logger.detailed(f'{k} f={f:10.7g} projected rel. grad.={relgrad:6.2g} '
-                        f'delta={delta:6.2g} rho={rho:6.2g} {status}')
+            if k == maxiter:
+                message = f'Maximum number of iterations reached: {maxiter}'
+                cont = False
+            logger.detailed(f'{k} f={f:10.7g} projected rel. grad.={relgrad:6.2g} '
+                            f'delta={delta:6.2g} rho={rho:6.2g} {status}')
     if numberOfMatrices != 0:
         actualProp = 100 * float(numberOfTrueHessian) / float(numberOfMatrices)
     else:
