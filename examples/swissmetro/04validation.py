@@ -1,0 +1,93 @@
+"""File 04validation.py
+
+:author: Michel Bierlaire, EPFL
+:date: Thu Jun  4 17:55:27 2020
+
+ Example of the out-of-sample validation of a logit model.
+ Three alternatives: Train, Car and Swissmetro
+ SP data
+"""
+
+import pandas as pd
+import biogeme.database as db
+import biogeme.biogeme as bio
+import biogeme.models as models
+from biogeme.expressions import Beta
+
+# Read the data
+df = pd.read_csv('swissmetro.dat', '\t')
+database = db.Database('swissmetro', df)
+
+# The following statement allows you to use the names of the variable
+# as Python variable.
+globals().update(database.variables)
+
+# Removing some observations
+exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
+database.remove(exclude)
+
+# Parameters to be estimated
+ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_SM = Beta('ASC_SM', 0, None, None, 1)
+B_TIME = Beta('B_TIME', 0, None, None, 0)
+B_COST = Beta('B_COST', 0, None, None, 0)
+
+
+# Definition of new variables
+SM_COST = SM_CO * (GA == 0)
+TRAIN_COST = TRAIN_CO * (GA == 0)
+CAR_AV_SP = CAR_AV * (SP != 0)
+TRAIN_AV_SP = TRAIN_AV * (SP != 0)
+TRAIN_TT_SCALED = TRAIN_TT / 100.0
+TRAIN_COST_SCALED = TRAIN_COST / 100
+SM_TT_SCALED = SM_TT / 100.0
+SM_COST_SCALED = SM_COST / 100
+CAR_TT_SCALED = CAR_TT / 100
+CAR_CO_SCALED = CAR_CO / 100
+
+# Definition of the utility functions
+V1 = ASC_TRAIN + \
+     B_TIME * TRAIN_TT_SCALED + \
+     B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + \
+     B_TIME * SM_TT_SCALED + \
+     B_COST * SM_COST_SCALED
+V3 = ASC_CAR + \
+     B_TIME * CAR_TT_SCALED + \
+     B_COST * CAR_CO_SCALED
+
+# Associate utility functions with the numbering of alternatives
+V = {1: V1,
+     2: V2,
+     3: V3}
+
+# Associate the availability conditions with the alternatives
+av = {1: TRAIN_AV_SP,
+      2: SM_AV,
+      3: CAR_AV_SP}
+
+# Definition of the model. This is the contribution of each
+# observation to the log likelihood function.
+logprob = models.loglogit(V, av, CHOICE)
+
+# Create the Biogeme object
+biogeme = bio.BIOGEME(database, logprob)
+biogeme.modelName = '04validation'
+
+# Estimate the parameters
+results = biogeme.estimate()
+
+# The validation consists in organizing the data into several slices
+# of about the same size, randomly defined. Each slide is considered
+# as a validation dataset. The model is then re-estimated using all
+# the data except the slice, and the estimated model is applied on the
+# validation set (i.e. the slice). The value of the log likelihood for
+# each observation in the validation set is reported in a
+# dataframe. As this is done for each slice, the output is a list of
+# dataframes, each corresponding to one of these exercises.
+
+validation_results = biogeme.validate(results)
+
+for slide in validation_results:
+    print(f'Log likelihood for {slide.shape[0]} validation data: {slide["Loglikelihood"].sum()}')
