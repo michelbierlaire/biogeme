@@ -154,7 +154,7 @@ biogeme.modelName = '03choiceOnly_mc'
 # Estimate the parameters
 fname = '__03iterations.txt'
 biogeme.loadSavedIteration(filename=fname)
-results = biogeme.estimate(saveIterations=True, file_iterations=fname)
+results = biogeme.estimate(saveIterations=True, algorithm=opt.bioNewton, file_iterations=fname)
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')
