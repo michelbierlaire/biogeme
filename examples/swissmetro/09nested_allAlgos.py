@@ -121,7 +121,7 @@ algoParameters = {'Simple bounds Newton': {'proportionAnalyticalHessian': 1.0},
 results = {}
 msg = ''
 for name, algo in algos.items():
-    biogeme.modelName = f'05normalMixture_allAlgos_{name}'.strip()
+    biogeme.modelName = f'09nested_allAlgos_{name}'.strip()
     p = algoParameters.get(name)
     results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
     g = results[name].data.g
