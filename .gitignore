@@ -235,3 +235,5 @@ examples/latent/02oneLatentOrdered.tex
 examples/latent/__savedIterations.txt
 examples/latent/.#03choiceOnly_mc.py
 examples/latent/02oneLatentOrdered~00.tex
+examples/latent/04latentChoiceSeq.tex
+examples/latent/04latentChoiceSeq~00.tex
