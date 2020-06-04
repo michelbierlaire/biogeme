@@ -192,8 +192,8 @@ class BIOGEME:
                                  'because the largest (abs) value is\t'
                                  f'{row["Largest"]}')
                     logger.detailed(error_msg)
-                error_msg = ('To remove this feature, set the parameter'
-                             'suggestScales to False when creating the'
+                error_msg = ('To remove this feature, set the parameter '
+                             'suggestScales to False when creating the '
                              'BIOGEME object.')
                 logger.detailed(error_msg)
 
