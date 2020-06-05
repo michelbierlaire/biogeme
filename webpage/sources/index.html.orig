@@ -33,6 +33,65 @@
 	</div>
 	</div>
 
+      
+	<div class="panel panel-default">
+	<div class="panel-heading">What's new in Biogeme 3.2.6</div>
+	<div class="panel-body">
+	  <dl>
+	    <dt>Optimization</dt>
+	    <dd>New optimization algorithms are
+	    available for estimation See the documentation of
+	    the <a href="sphinx/biogeme.html?highlight=algorithm#biogeme.biogeme.BIOGEME.estimate"><code>estimate</code></a>
+	    function, and
+	    the <a href="sphinx/biogeme.html#module-biogeme.optimization"><code>optimization</code>
+	    module</a>. See also an
+	      <a href="examples/swissmetro/01logit_allAlgos.py">example.</a></dd>
+	    <dt>Stochastic log likelihood</dt>
+	    <dd>It is now possible to calculate the log likelihood
+	    function on a sample (a batch) of the full data
+	    file. This is particularly useful with large
+	    databases. It can be used in the implementation of a
+	    stochastic gradient algorithm, for instance. See <a href="sphinx/biogeme.html?highlight=calculatelikelihood#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">documentation</a>.</dd>
+	    <dt>User's notes</dt>
+	    <dd>It is possible to include your own notes in the HTML
+	    file using the <code>userNotes</code> parameter of the
+	    <code>biogeme</code>
+	    object. See <a href="sphinx/biogeme.html?highlight=usernotes#biogeme.biogeme.BIOGEME"
+	    target="_blank">documentation</a>. See
+	    <a href="examples/swissmetro/01logitBis.py">example</a>.</dd>
+	    <dt>Scaling</dt>
+	    <dd>It is possible to have Biogeme suggesting the scales
+	    of the variables in the database using
+	    the <code>suggestScales</code> parameter of
+	    the <code>biogeme</code>
+	    object. See <a href="sphinx/biogeme.html?highlight=suggestscales#biogeme.biogeme.BIOGEME.__init__"
+			   target="_blank">documentation</a>.</dd>
+	    <dt>Estimation</dt>
+	    <dd>A new function <code>quickEstimate</code> performs
+	    the estimation of the parameters, and skips the
+	    calculation of the
+	      statistics. See <a href="sphinx/biogeme.html?highlight=quickestimate#biogeme.biogeme.BIOGEME.quickEstimate">documentation</a>. </dd>
+	    <dt>Validation</dt>
+	    <dd>A new function in the <code>database</code> module allows to split the database in order to
+	    prepare an estimation and a validation sets, for
+	    out-of-sample
+	    validation. See <a href="sphinx/biogeme.html?highlight=split#biogeme.database.Database.split">documentation</a>. It
+	    is used by the new function <code>validate</code> in the
+	    <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/04validation.py">example</a>.</dd>
+	    <dt>Messages</dt>
+	    <dd>A new function allows to extract all the messages
+	    generated during a
+	    run. See <a href="sphinx/biogeme.html?highlight=allmessages#biogeme.messaging.bioMessage.allMessages">documentation</a>. See
+	    <a href
+	    ="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.messaging.ipynb">example</a>. It
+	    is also possible to make the logger temporarily silent
+	    using the functions <a href="sphinx/biogeme.html?highlight=temporarysilent#biogeme.messaging.bioMessage.temporarySilence"><code>temporarySilence</code></a> and <a href="sphinx/biogeme.html?highlight=resume#biogeme.messaging.bioMessage.resume"><code>resume</code>.</a></dd>
+	   </dl>
+
+	</div>
+	</div>
+
+	
 	<div class="panel panel-default">
 	<div class="panel-heading">The zoo must go on</div>
 	<div class="panel-body">
