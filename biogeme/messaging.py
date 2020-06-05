@@ -108,14 +108,14 @@ class bioMessage(metaclass=Singleton):
         return completeFileName
 
 
-    def temporarySilent(self):
+    def temporarySilence(self):
         """ Temporarily turns off the message, remembering the current screen level. 
         """
         self.lastLevel = self.screenLevel
         self.screenLevel = 0
 
     def resume(self):
-        """ Resume the regular operations of the logger after the use of temporarySilent
+        """ Resume the regular operations of the logger after the use of temporarySilence
         """
         self.screenLevel = self.lastLevel
         
