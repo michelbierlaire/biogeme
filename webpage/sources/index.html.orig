@@ -1,271 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
-
-   HEADER
-
+  
+  HEADER
+  
   <body role="document">
-
+    
     INCLUDEMENU
     
     BANNER
-
+    
     
     <div class="container theme-showcase" role="main">
-
       
-	<div class="panel panel-default">
+      
+      <div class="panel panel-default">
 	<div class="panel-heading">Biogeme</div>
 	<div class="panel-body">
-<p>
-	  Biogeme is a open source <a href="https://www.python.org/" target="_blank">Python</a> package designed for the
-		  maximum likelihood estimation of parametric models
-		  in general, with a special emphasis on discrete
-	          choice models. It relies on the
-		  package <a href="https://pandas.pydata.org/" target="_blank">Python Data
-		  Analysis Library called Pandas</a>.
-</p>
-<p>Biogeme used to be a stand alone software package, written in
-	  C++. All the material related to the previous versions of
-	  Biogeme are available on
-	  the <a href="http://transp-or.epfl.ch/pythonbiogeme/"  target="_blank">old
-    webpage</a>.
-  <p>
+	  <p>
+	    Biogeme is a open source <a href="https://www.python.org/" target="_blank">Python</a> package designed for the
+	    maximum likelihood estimation of parametric models
+	    in general, with a special emphasis on discrete
+	    choice models. It relies on the
+	    package <a href="https://pandas.pydata.org/" target="_blank">Python Data
+	      Analysis Library called Pandas</a>.
+	  </p>
+	  <p>Biogeme used to be a stand alone software package, written in
+	    C++. All the material related to the previous versions of
+	    Biogeme are available on
+	    the <a href="http://transp-or.epfl.ch/pythonbiogeme/"  target="_blank">old
+	      webpage</a>.
+	  <p>
 	</div>
-	</div>
+      </div>
 
+      <div class="panel panel-default">
+	<div class="panel-heading">Conditions of use</div>
+	<div class="panel-body">
+	  <p>BIOGEME is distributed free of charge. We ask each user 
+	  </p><ul> 
+	    <li>to register
+	      to <a href="https://groups.google.com/d/forum/biogeme"
+		    target="_blank">Biogeme's users group</a>, and </li> 
+	    <li>to mention explicitly the use of the package when
+	      publishing results, using the following reference:
+	      <p><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier20.pdf"
+		    target="_blank">Bierlaire, M. (2020). A short
+		  introduction to PandasBiogeme. Technical report TRANSP-OR 200605. Transport and Mobility Laboratory, ENAC, EPFL.</a></p>
+	  </li></ul>
+	</div>
+	<div class="panel-footer">
+	  <p><strong>Disclaimer</strong> This software is provided free of charge and "AS
+	    IS" WITHOUT ANY WARRANTY of any kind. The implied
+	    warranties of merchantability, fitness for a
+	    particular purpose and non-infringment are expressly
+	    disclaimed. In no event will the
+	    author (Michel Bierlaire) or his employer (EPFL) be
+	    liable to any party for any direct, indirect, special
+	    or other consequential damages for any use of the
+	    code including, without limitation, any lost
+	    profits, business interruption, loss of programs or
+	    other data on your information handling system or
+	    otherwise, even if we are expressly advised of the
+	    possibility of such damages.</p>
+	</div>
+      </div>
       
-	<div class="panel panel-default">
+      <div class="panel panel-default">
 	<div class="panel-heading">What's new in Biogeme 3.2.6</div>
 	<div class="panel-body">
 	  <dl>
 	    <dt>Optimization</dt>
 	    <dd>New optimization algorithms are
-	    available for estimation See the documentation of
-	    the <a href="sphinx/biogeme.html?highlight=algorithm#biogeme.biogeme.BIOGEME.estimate"><code>estimate</code></a>
-	    function, and
-	    the <a href="sphinx/biogeme.html#module-biogeme.optimization"><code>optimization</code>
-	    module</a>. See also an
+	      available for estimation See the documentation of
+	      the <a href="sphinx/biogeme.html?highlight=algorithm#biogeme.biogeme.BIOGEME.estimate"><code>estimate</code></a>
+	      function, and
+	      the <a href="sphinx/biogeme.html#module-biogeme.optimization"><code>optimization</code>
+		module</a>. See also an
 	      <a href="examples/swissmetro/01logit_allAlgos.py">example.</a></dd>
 	    <dt>Stochastic log likelihood</dt>
 	    <dd>It is now possible to calculate the log likelihood
-	    function on a sample (a batch) of the full data
-	    file. This is particularly useful with large
-	    databases. It can be used in the implementation of a
-	    stochastic gradient algorithm, for instance. See <a href="sphinx/biogeme.html?highlight=calculatelikelihood#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">documentation</a>.</dd>
+	      function on a sample (a batch) of the full data
+	      file. This is particularly useful with large
+	      databases. It can be used in the implementation of a
+	      stochastic gradient algorithm, for instance. See <a href="sphinx/biogeme.html?highlight=calculatelikelihood#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">documentation</a>.</dd>
 	    <dt>User's notes</dt>
 	    <dd>It is possible to include your own notes in the HTML
-	    file using the <code>userNotes</code> parameter of the
-	    <code>biogeme</code>
-	    object. See <a href="sphinx/biogeme.html?highlight=usernotes#biogeme.biogeme.BIOGEME"
-	    target="_blank">documentation</a>. See
-	    <a href="examples/swissmetro/01logitBis.py">example</a>.</dd>
+	      file using the <code>userNotes</code> parameter of the
+	      <code>biogeme</code>
+	      object. See <a href="sphinx/biogeme.html?highlight=usernotes#biogeme.biogeme.BIOGEME"
+			     target="_blank">documentation</a>. See
+	      <a href="examples/swissmetro/01logitBis.py">example</a>.</dd>
 	    <dt>Scaling</dt>
 	    <dd>It is possible to have Biogeme suggesting the scales
-	    of the variables in the database using
-	    the <code>suggestScales</code> parameter of
-	    the <code>biogeme</code>
-	    object. See <a href="sphinx/biogeme.html?highlight=suggestscales#biogeme.biogeme.BIOGEME.__init__"
-			   target="_blank">documentation</a>.</dd>
+	      of the variables in the database using
+	      the <code>suggestScales</code> parameter of
+	      the <code>biogeme</code>
+	      object. See <a href="sphinx/biogeme.html?highlight=suggestscales#biogeme.biogeme.BIOGEME.__init__"
+			     target="_blank">documentation</a>.</dd>
 	    <dt>Estimation</dt>
 	    <dd>A new function <code>quickEstimate</code> performs
-	    the estimation of the parameters, and skips the
-	    calculation of the
+	      the estimation of the parameters, and skips the
+	      calculation of the
 	      statistics. See <a href="sphinx/biogeme.html?highlight=quickestimate#biogeme.biogeme.BIOGEME.quickEstimate">documentation</a>. </dd>
 	    <dt>Validation</dt>
 	    <dd>A new function in the <code>database</code> module allows to split the database in order to
-	    prepare an estimation and a validation sets, for
-	    out-of-sample
-	    validation. See <a href="sphinx/biogeme.html?highlight=split#biogeme.database.Database.split">documentation</a>. It
-	    is used by the new function <code>validate</code> in the
-	    <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/04validation.py">example</a>.</dd>
+	      prepare an estimation and a validation sets, for
+	      out-of-sample
+	      validation. See <a href="sphinx/biogeme.html?highlight=split#biogeme.database.Database.split">documentation</a>. It
+	      is used by the new function <code>validate</code> in the
+	      <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/04validation.py">example</a>.</dd>
 	    <dt>Messages</dt>
 	    <dd>A new function allows to extract all the messages
-	    generated during a
-	    run. See <a href="sphinx/biogeme.html?highlight=allmessages#biogeme.messaging.bioMessage.allMessages">documentation</a>. See
-	    <a href
-	    ="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.messaging.ipynb">example</a>. It
-	    is also possible to make the logger temporarily silent
-	    using the functions <a href="sphinx/biogeme.html?highlight=temporarysilent#biogeme.messaging.bioMessage.temporarySilence"><code>temporarySilence</code></a> and <a href="sphinx/biogeme.html?highlight=resume#biogeme.messaging.bioMessage.resume"><code>resume</code>.</a></dd>
-	   </dl>
+	      generated during a
+	      run. See <a href="sphinx/biogeme.html?highlight=allmessages#biogeme.messaging.bioMessage.allMessages">documentation</a>. See
+	      <a href
+		 ="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.messaging.ipynb">example</a>. It
+	      is also possible to make the logger temporarily silent
+	      using the functions <a href="sphinx/biogeme.html?highlight=temporarysilent#biogeme.messaging.bioMessage.temporarySilence"><code>temporarySilence</code></a> and <a href="sphinx/biogeme.html?highlight=resume#biogeme.messaging.bioMessage.resume"><code>resume</code>.</a></dd>
+	  </dl>
 
 	</div>
-	</div>
+      </div>
 
-	
-	<div class="panel panel-default">
+      
+      <div class="panel panel-default">
 	<div class="panel-heading">The zoo must go on</div>
 	<div class="panel-body">
-<p>Several versions of Biogeme have been developed over the
-  years. Several names of animals appear: Gnu, Bison, Python, and now, Pandas. </p>
-<dl>
-  <dt>Version -1: HieLoW</dt>
-  <dd>	 <p>   Around 1990, Michel Bierlaire wrote a software package
-	      called <em>HieLoW: Hierarchical Logit for
-	      Windows</em>. It was written in Borland C++, and was the
-	      first discrete choice estimation software with a
-	      graphical user interface. It was designed for the
-	      estimation of logit and nested logit models. The user
-	      had to specify the models through a graphical user
-	      interface.  This software was distributed by Stratec SA,
-	      Brussels.</p>
-</dd>
-  <dt>Version 1: BisonBiogeme</dt>
-  <dd><p> Around 2000, the first version of Biogeme was
-	    released. Written in GNU C++, it was the first open source
-	    discrete choice software. It was designed to estimate the
-	    parameters of a list of predetermined discrete choice
-	    models such as logit, binary probit, nested logit,
-	    cross-nested logit, multivariate extreme value models,
-	    discrete and continuous mixtures of multivariate extreme
-	    value models, models with nonlinear utility functions,
-	    models designed for panel data, and heteroscedastic
-	    models. The modeling language was designed to be simple,
-	    and was developed using a a general-purpose parser
-	    generator
-	    called <a href="https://www.gnu.org/software/bison/"
-	    target="_blank">GNU Bison</a>. Later, it will be referred
-      to as BisonBiogeme. The
-	    distributions can be found <a href='archives.html'>here</a>.
-    </p>
-  </dd>
-  <dt><a href="http://transp-or.epfl.ch/pythonbiogeme/"
-    target="_blank">Version 2: PythonBiogeme</a></dt>
-  <dd><p>
-	    Around 2010, a more flexible version was designed for general purpose parametric models.  The  modeling language was extended, and based on
-	    the Python language. A series of discrete
-choice models were precoded for an easy use. Also written in GNU C++, the
-	    distributions can be found <a href='archives.html'>here</a>.
-     </p></dd>
-  <dt>Version 3: PandasBiogeme</dt>
-  <dd><p>In 2018, a completely new version of the software was
-	  released. It was not anymore a standalone executable, but a
-	  Python package. The package is written in Python, with the
-	  exception of the core calculations of the models, that are
-	  written in C++ for the sake of efficiency.  The motivation
-	  was to combine the simplicity of the usage (especially for
-	  teaching purposes), with the sophistication provided by
-	  Python (for research and applications purposes). Morever, the management of the data relies on the
-	  package Pandas, which has become the workhorse of data
-	  scientists. Therefore, the name PandasBiogeme has been
-	  adopted. It is distributed on the
-	   <a href="https://pypi.org/project/biogeme/" target="_blank">Python
-	  Package Index</a> repository.
+	  <p>Several versions of Biogeme have been developed over the
+	    years. Several names of animals appear: Gnu, Bison, Python, and now, Pandas. </p>
+	  <dl>
+	    <dt>Version -1: HieLoW</dt>
+	    <dd>	 <p>   Around 1990, Michel Bierlaire wrote a software package
+		called <em>HieLoW: Hierarchical Logit for
+		  Windows</em>. It was written in Borland C++, and was the
+		first discrete choice estimation software with a
+		graphical user interface. It was designed for the
+		estimation of logit and nested logit models. The user
+		had to specify the models through a graphical user
+		interface.  This software was distributed by Stratec SA,
+		Brussels.</p>
+	    </dd>
+	    <dt>Version 1: BisonBiogeme</dt>
+	    <dd><p> Around 2000, the first version of Biogeme was
+		released. Written in GNU C++, it was the first open source
+		discrete choice software. It was designed to estimate the
+		parameters of a list of predetermined discrete choice
+		models such as logit, binary probit, nested logit,
+		cross-nested logit, multivariate extreme value models,
+		discrete and continuous mixtures of multivariate extreme
+		value models, models with nonlinear utility functions,
+		models designed for panel data, and heteroscedastic
+		models. The modeling language was designed to be simple,
+		and was developed using a a general-purpose parser
+		generator
+		called <a href="https://www.gnu.org/software/bison/"
+			  target="_blank">GNU Bison</a>. Later, it will be referred
+		to as BisonBiogeme. The
+		distributions can be found <a href='archives.html'>here</a>.
+	      </p>
+	    </dd>
+	    <dt><a href="http://transp-or.epfl.ch/pythonbiogeme/"
+		   target="_blank">Version 2: PythonBiogeme</a></dt>
+	    <dd><p>
+		Around 2010, a more flexible version was designed for general purpose parametric models.  The  modeling language was extended, and based on
+		the Python language. A series of discrete
+		choice models were precoded for an easy use. Also written in GNU C++, the
+		distributions can be found <a href='archives.html'>here</a>.
+	    </p></dd>
+	    <dt>Version 3: PandasBiogeme</dt>
+	    <dd><p>In 2018, a completely new version of the software was
+		released. It was not anymore a standalone executable, but a
+		Python package. The package is written in Python, with the
+		exception of the core calculations of the models, that are
+		written in C++ for the sake of efficiency.  The motivation
+		was to combine the simplicity of the usage (especially for
+		teaching purposes), with the sophistication provided by
+		Python (for research and applications purposes). Morever, the management of the data relies on the
+		package Pandas, which has become the workhorse of data
+		scientists. Therefore, the name PandasBiogeme has been
+		adopted. It is distributed on the
+		<a href="https://pypi.org/project/biogeme/" target="_blank">Python
+		  Package Index</a> repository.
 
-  </p> </dd>
-  </dl>
+	    </p> </dd>
+	  </dl>
 
 	</div>
 	<div class="panel-footer">
 	  <a href="http://transp-or.epfl.ch/pythonbiogeme/"
-    target="_blank">Python Biogeme
-    webpage</a>.
-</div>
+	     target="_blank">Python Biogeme
+	    webpage</a>.
 	</div>
+      </div>
 
-	
-		<div class="panel panel-default">
-	<div class="panel-heading">Conditions of use</div>
-	<div class="panel-body">
-		<p>BIOGEME is distributed free of charge. We ask each user 
-		</p><ul> 
-		<li>to register
-		to <a href="https://groups.google.com/d/forum/biogeme"
-		target="_blank">Biogeme's users group</a>, and </li> 
-		<li>to mention explicitly the use of the package when
-		  publishing results, using the following reference:
-		  <p><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18.pdf"
-		  target="_blank">Bierlaire, M. (2018). PandasBiogeme: a short introduction. Technical report TRANSP-OR 181219. Transport and Mobility Laboratory, ENAC, EPFL.</a></p>
-		</li></ul>
-	</div>
-	<div class="panel-footer">
-		<p><strong>Disclaimer</strong> This software is provided free of charge and "AS
-		IS" WITHOUT ANY WARRANTY of any kind. The implied
-		warranties of merchantability, fitness for a
-		particular purpose and non-infringment are expressly
-		disclaimed. In no event will the
-		author (Michel Bierlaire) or his employer (EPFL) be
-		liable to any party for any direct, indirect, special
-		or other consequential damages for any use of the
-		code including, without limitation, any lost
-		profits, business interruption, loss of programs or
-		other data on your information handling system or
-		otherwise, even if we are expressly advised of the
-		  possibility of such damages.</p>
-	</div>
-	</div>
+      
 
 
-		
-		<div class="panel panel-default">
+      
+      <div class="panel panel-default">
 	<div class="panel-heading">Acknowledgments</div>
 	<div class="panel-body">
-		<p>I would like to thank the following persons who played various roles in the development of Biogeme along the years. The list is certainly not complete, and I apologize for those who are omitted: 
-Alexandre Alahi, 
-Nicolas Antille, 
-Gianluca Antonini, 
-Kay Axhausen,
-John Bates, 
-Denis Bolduc,
-David Bunch, 
-Andrew Daly, 
-Anna Fernandez Antolin,
-Mamy Fetiarison,
-Mogens Fosgerau, 
-Emma Frejinger,
-Carmine Gioia, 
-Marie-H&eacute;l&egrave;ne Godbout, 
-		  Stephane Hess,
-		  Tim Hillel,
-		  Richard Hurni,
-		  Eva Kazagli,
-Jasper Knockaert, 
-		  Xinjun Lai,
-		  Gael Lederrey,
-		  Virginie Lurkin,
-		  Nicholas Molyneaux,
-		  Carolina Osorio,
-		  Meritxell Pacheco Paneque,
-Thomas Robin,
-Pascal Scheiben,
-Matteo Sorci,
-Michael Th&eacute;mans, 
-Joan Walker.
-		</p>
-		<p>
-I would like to express a special thank to Moshe Ben-Akiva
-and Daniel McFadden for their friendship, and for the immense
-influence that they had and still have on my work.
-</p>	</div>
-	</div>
+	  <p>I would like to thank the following persons who played various roles in the development of Biogeme along the years. The list is certainly not complete, and I apologize for those who are omitted: 
+	    Alexandre Alahi, 
+	    Nicolas Antille, 
+	    Gianluca Antonini, 
+	    Kay Axhausen,
+	    John Bates, 
+	    Denis Bolduc,
+	    David Bunch, 
+	    Andrew Daly, 
+	    Anna Fernandez Antolin,
+	    Mamy Fetiarison,
+	    Mogens Fosgerau, 
+	    Emma Frejinger,
+	    Carmine Gioia, 
+	    Marie-H&eacute;l&egrave;ne Godbout, 
+	    Stephane Hess,
+	    Tim Hillel,
+	    Richard Hurni,
+	    Eva Kazagli,
+	    Jasper Knockaert, 
+	    Xinjun Lai,
+	    Gael Lederrey,
+	    Virginie Lurkin,
+	    Nicholas Molyneaux,
+	    Carolina Osorio,
+	    Meritxell Pacheco Paneque,
+	    Thomas Robin,
+	    Pascal Scheiben,
+	    Matteo Sorci,
+	    Michael Th&eacute;mans, 
+	    Joan Walker.
+	  </p>
+	  <p>
+	    I would like to express a special thank to Moshe Ben-Akiva
+	    and Daniel McFadden for their friendship, and for the immense
+	    influence that they had and still have on my work.
+	</p>	</div>
+      </div>
 
-		
-		<div class="panel panel-default">
+      
+      <div class="panel panel-default">
 	<div class="panel-heading">Author</div>
 	<div class="panel-body">
-<p>
-	  Biogeme has been developed by
- <a href="http://people.epfl.ch/michel.bierlaire"
-      target="_blank">Michel
-    Bierlaire</a>, <a href="http://www.epfl.ch" target="_blank">Ecole Polytechnique
-    F&eacute;d&eacute;rale de Lausanne</a>, Switzerland. 
-</p>
+	  <p>
+	    Biogeme has been developed by
+	    <a href="http://people.epfl.ch/michel.bierlaire"
+	       target="_blank">Michel
+	      Bierlaire</a>, <a href="http://www.epfl.ch" target="_blank">Ecole Polytechnique
+	      F&eacute;d&eacute;rale de Lausanne</a>, Switzerland. 
+	  </p>
 
 	</div>
 	<div class="panel-footer">
-<a href="http://people.epfl.ch/michel.bierlaire"
-      target="_blank">people.epfl.ch/michel.bierlaire</a>
+	  <a href="http://people.epfl.ch/michel.bierlaire"
+	     target="_blank">people.epfl.ch/michel.bierlaire</a>
 	</div>
-	</div>
+      </div>
 
-		
-		</div>
-
-     
-
-
-
-FOOTER  
+      
+    </div>
 
     
-</body>
+
+
+
+    FOOTER  
+
+    
+  </body>
 </html>
