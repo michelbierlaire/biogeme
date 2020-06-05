@@ -387,8 +387,7 @@ class bioBounds:
     def generalizedCauchyPoint(self, xk, gk, H, direction):
         """ Implementation of Step 2 of the Specific Algorithm by `Conn et al. (1988)`_.
 
-        .. _`Conn et al. (1988)`:
-        https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf
+        .. _`Conn et al. (1988)`: https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf
 
         The quadratic model is defined as
 
@@ -874,9 +873,11 @@ def newtonLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
     :type bounds: list(tuples)
 
     :param parameters: dict of parameters to be transmitted to the  optimization routine:
+
          - tolerance: when the relative gradient is below that threshold, the algorithm has
                       reached convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
          - maxiter: the maximum number of iterations (default: 100).
+
     :type parameters: dict(string:float or int)
 
     :return: tuple x, nit, nfev, message, where
@@ -960,8 +961,7 @@ def cauchyNewtonDogleg(g, H):
 
     .. math:: \\eta = 0.2 + 0.8 \\frac{\\alpha^2}{\\beta |\\nabla f(x)^T d_n|}
 
-    and :math:`\\alpha= \\nabla f(x)^T \\nabla f(x)`, :math:`\\beta=\\nabla f(x)^T
-           \\nabla^2 f(x)\\nabla f(x)`
+    and :math:`\\alpha= \\nabla f(x)^T \\nabla f(x)`, :math:`\\beta=\\nabla f(x)^T \\nabla^2 f(x)\\nabla f(x)`
 
     :param g: gradient :math:`\\nabla f(x)`
 
@@ -1985,7 +1985,7 @@ def simpleBoundsNewtonAlgorithm(fct,
                    designed for estimation with large data sets. It is experimental, and 
                    inspired by the algorithm proposed by `Lederrey et al. (2019)`_.
 
-    .. _Lederrey et al. (2019)`: 
+    .. _`Lederrey et al. (2019)`: 
           https://transp-or.epfl.ch/documents/technicalReports/LedLurHilBie19.pdf
 
     :type hamabs: bool
@@ -2232,6 +2232,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
                                           parameters=None):
     """Optimization interface for Biogeme, based on variants of Newton method with simple
        bounds.
+
     :param fct: object to calculate the objective function and its derivatives.
     :type fct: optimization.functionToMinimize
 
@@ -2268,6 +2269,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
          - enlargingFactor: factor used to enlarge the trust region
                        during very successful iterations (default 10).
          - hamabs: if True, a starting point is calculated using sotchastic Newton (default: False).
+
     :type parameters: dict(string:float or int)
 
     :return: x, messages
@@ -2345,6 +2347,7 @@ def bioNewton(fct,
               parameters=None):
     """Optimization interface for Biogeme, based on Newton's method with simple
        bounds.
+
     :param fct: object to calculate the objective function and its derivatives.
     :type fct: optimization.functionToMinimize
     
@@ -2379,6 +2382,7 @@ def bioNewton(fct,
          - enlargingFactor: factor used to enlarge the trust region
                        during very successful iterations (default 10).
          - hamabs: if True, a starting point is calculated using sotchastic Newton (default: False).
+
     :type parameters: dict(string:float or int)
 
     :return: x, messages
@@ -2405,6 +2409,7 @@ def bioBfgs(fct,
             parameters=None):
     """Optimization interface for Biogeme, based on BFGS quasi-Newton method with simple
        bounds.
+    
     :param fct: object to calculate the objective function and its derivatives.
     :type fct: optimization.functionToMinimize
     
@@ -2439,6 +2444,7 @@ def bioBfgs(fct,
          - enlargingFactor: factor used to enlarge the trust region
                        during very successful iterations (default 10).
          - hamabs: if True, a starting point is calculated using sotchastic Newton (default: False).
+
     :type parameters: dict(string:float or int)
 
     :return: x, messages
