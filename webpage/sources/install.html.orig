@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  HEADER
+
+
+  <body role="document">
+
+    INCLUDEMENU
+
+    BANNER
+    
+    <div class="container theme-showcase" role="main">
+
+	<div class="page-header">
+     <h1>Install</h1>
+        </div>
+  		
+	<div id="menu" class="panel panel-default">
+	<div class="panel-heading">Install Python</div>
+	<div class="panel-body">
+	  <p>
+Biogeme is an open source Python package, that relies on the version 3
+of Python. Make sure that Python 3.x is installed on your
+	    computer. If you have never used Python before, you may
+want to consider a complete platform such
+as <a href="https://www.anaconda.com/" target="_blank">Anaconda</a>.
+	  </p>
+	  <p>If Python is already installed on your computer, verify
+	  the version. Two versions of Python are distributed:
+	  version 2 and version 3. Biogeme  works only with version 3.
+	</div>
+	<div class="panel-footer">
+         <a href="https://www.python.org/" target="_blank">Python</a>,
+         <a href="https://www.anaconda.com/" target="_blank">Anaconda</a>
+	</div>
+	</div>
+
+	<div id="menu" class="panel panel-default">
+	<div class="panel-heading">Install Biogeme</div>
+	<div class="panel-body">
+	  <p>
+Biogeme is distributed using the
+<a href="https://pypi.org/project/pip/" target="_blank">pip</a>
+package manager. There are several tutorials available on the internet
+such
+as <a href="https://packaging.python.org/tutorials/installing-packages/"
+      target="_blank">this one</a> or
+<a href="https://www.youtube.com/watch?v=U2ZN104hIcc"
+   target="_blank">this one</a>.
+	  </p>
+	  <p>The command to install is simply
+	    <pre>
+	      pip install biogeme
+	    </pre>
+	    </p>
+	  <p>Depending on your OS and the version of
+	  Python, pip will either directly install 
+	  the executable (it is called a "wheel"), or attempt to compile the package from
+	  sources. </p> 
+        <p>In the latter case, it requires a proper compiling
+        environment. In general, it is readily available on Linux, and
+        MacOSX (if <a href="https://developer.apple.com/xcode/"
+        target="_blank">Xcode</a> has been installed). It may be more
+        complicated on Windows. 
+	</div>
+	<div class="panel-footer">
+         <a href="https://pypi.org/project/biogeme" target="_blank">pypi.org/project/biogeme</a>
+	</div>
+	</div>
+
+	<div id="menu" class="panel panel-default">
+	<div class="panel-heading">Troubleshooting</div>
+	<div class="panel-body">
+	  <dl>
+	    <dt><strong>ImportError</strong></dt>
+	    
+	     <dd>Followed by a message that looks like
+	     this: <p><code>/venv/lib/python3.6/site-packages/biogeme/cbiogeme.cpython-36m-x86_64-linux-gnu.so:
+	     undefined symbol:
+		   _ZTVN10__cxxabiv120__si_class_type_infoE</code></p>
+	    <p>It is likely to be caused by a conflict among versions
+	      or an installation problem. Try to uninstall biogeme:
+	    </p>
+	       <p><code>pip uninstall biogeme</code></p>
+	       <p>and reinstall it without using the cache:</p>
+	       <p><code>pip install biogeme —no-cache-dir</code></p>.
+		 
+	     </dd>
+	    <dt><strong>Cython library not found</strong></dt><dd>On Mac OSX, the
+	    following error is sometimes
+	    generated: <p><code>ImportError:
+	    dlopen(/Users/~/anaconda3/lib/python3.6/site-packages/biogeme/cbiogeme.cpython-36m-darwin.so,
+	    2): Symbol not found:
+		  __ZNSt15__exception_ptr13exception_ptrD1Ev</code></a>
+<p> It
+	    is likely to be due to a conflict of versions of Python
+	    packages. The
+	    best way to deal with it is to reinstall Biogeme using the
+following steps:
+<ul>First, make sure that you have the latest version of pip:
+<li><p><code>
+    pip install --upgrade pip
+    </code></p></li>
+<li>Uninstall biogeme:
+<p><code>
+pip uninstall biogeme
+</code></p></li>
+<li>Install cython:
+<p><code>
+    pip install —-upgrade cython
+    </code></p>
+</li>
+<li>Reinstall biogeme, without using the cache:
+<p><code>
+    pip install biogeme -—no-cache-dir
+  </code>
+  </p>
+</ul>
+
+If it does not work, try first to install gcc:
+<p><code>
+conda install gcc
+</code></p>
+If it does not work, try creating a new conda environment: 
+<p><code>
+conda create -n python37 python=3.7 pip gcc pandas unidecode jupyter<br>
+conda activate python37<br>
+pip install biogeme<br>
+</code></p>
+If it does not work... I don't know :-(
+</dl>
+<dt><strong>Trying to compile</strong></dt>
+<dl>On Mac OSX and Windows, the installation is designed to install
+  from binaries, not sources. If you get messages that look like the
+  following, it means that pip is trying to compile from sources. And
+  it will most certainly fail as the environment must be properly configured.
+  <p><code><pre>
+  Running setup.py install for biogeme ... error
+  Complete output from command c:\users\willi\anaconda3\python.exe -u -c "import setuptools, tokenize;__file__='C:\\Users\\willi\\AppData\\Local\\Temp\\pip-install-iaflhasr\\biogeme\\setup.py';f=getattr(tokenize, 'open', open)(__file__);code=f.read().replace('\r\n', '\n');f.close();exec(compile(code, __file__, 'exec'))" install --record C:\Users\willi\AppData\Local\Temp\pip-record-v6_zn0ff\install-record.txt --single-version-externally-managed --compile:
+  Using Cython
+  Please put "# distutils: language=c++" in your .pyx or .pxd file(s)
+  running install
+</pre>  </code></p>
+It means that there is no binaries available for your version of
+  Python. To check which versions are supported, go to the repository
+  <p>
+    <a href="https://pypi.org/project/biogeme/">pypi.org/project/biogeme/</a>
+  </p>
+ If you select the "Download files", you will see the list of files
+ available. What you need to look at are the "Wheel" files. For
+  instance, the following files are available for version 3.2.1:
+  <ul>
+<li>Python 3.6 for MacOSX: <code>biogeme-3.2.1-cp36-cp36m-macosx_10_7_x86_64.whl</code></li>
+<li>Python 3.6 for Windows: <code>biogeme-3.2.1-cp36-cp36m-win_amd64.whl</code></li>
+<li>Python 3.7 for MacOSX: <code>biogeme-3.2.1-cp37-cp37m-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.7 for Windows: <code>biogeme-3.2.1-cp37-cp37m-win_amd64.whl</code></li>
+<li>Source: <code>biogeme-3.2.1.tar.gz</code></li>
+  </ul>
+  It means that you must use Python 3.6 or 3.7.
+</dd>
+	  </dl>
+	</div>
+	<div class="panel-footer">
+    <a href="https://groups.google.com/d/forum/biogeme">Users' group: groups.google.com/d/forum/biogeme</a>
+	</div>
+	</div>
+
+	
+	
+	<div id="MacOS" class="panel panel-default">
+	<div class="panel-heading">Check the installation</div>
+	<div class="panel-body">
+	  To verify if biogeme is correctly installed, you can print
+	  the version of Biogeme. To do so,  execute the
+	  following commands in Python:
+	  <ul>
+	    <li>Import the package: <code>import biogeme.version as ver</code></li>
+	    <li>Print the version information: <code>print(ver.getText())</code>
+	  </ul>
+	  The result should look like the following:
+<pre>
+Python 3.8.0 (default, Nov  6 2019, 15:49:01)
+[Clang 4.0.1 (tags/RELEASE_401/final)] :: Anaconda, Inc. on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import biogeme.version as ver
+>>> print(ver.getText())
+biogeme 3.2.6 [2020-06-04]
+Version entirely written in Python
+Home page: http://biogeme.epfl.ch
+Submit questions to https://groups.google.com/d/forum/biogeme
+Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
+</pre>
+
+	</div>
+	<div class="panel-footer">
+	</div>
+	</div>
+
+
+     
+
+
+
+  
+FOOTER
+
+  </body>
+</html>
