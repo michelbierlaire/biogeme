@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  HEADER
+
+  <body role="document">
+    
+    INCLUDEMENU
+    
+    BANNER
+    
+    <div class="container theme-showcase" role="main">
+      
+      <div class="page-header">
+	<h1>Documentation</h1>
+      </div>
+      
+      
+      <div class="panel panel-default">
+	<div class="panel-heading">Technical reports</div>
+	<div class="panel-body">
+          <p>
+	    The following technical reports will walk through concrete examples to
+	    get familiar with the software.
+	  </p>
+	  <p>
+	    <ul>
+	      <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18.pdf" target="_blank">PandasBiogeme: a short introduction. </a></li>
+	      <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf" target="_blank">Calculating indicators with PandasBiogeme.</a></li>
+	      <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf"
+	      target="_blank">Monte-Carlo integration with PandasBiogeme.</a></li>
+	      <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf" target="_blank">Estimating choice models with latent variables with PandasBiogeme.</a></li>
+	    </ul>
+	  </p>
+	  
+	</div>
+	<div class="panel-footer">
+	  <a href="https://get.adobe.com/reader" target="_blank"><img align="center" src="getacrobat.png" alt="Get Acrobat Reader"></a>
+	</div>
+      </div>
+
+      <div class="panel panel-default">
+	<div class="panel-heading">Code documentation</div>
+	<div class="panel-body">
+	  The <a href="sphinx/index.html" target="_blank">documentation of the source of Biogeme</a> has been
+	  generated with the <a href="http://www.sphinx-doc.org"
+	  target="_blank">Python Documentation Generator Sphinx</a>.
+	</div>
+	<div class="panel-footer">
+	  <a href="sphinx/index.html" target="_blank">Code documentation</a>
+	</div>
+      </div>
+
+    </div>
+    
+    FOOTER
+    
+  </body>
+</html>
