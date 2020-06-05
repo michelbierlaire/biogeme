@@ -79,7 +79,7 @@ biogeme.modelName = '04validation'
 results = biogeme.estimate()
 
 # The validation consists in organizing the data into several slices
-# of about the same size, randomly defined. Each slide is considered
+# of about the same size, randomly defined. Each slice is considered
 # as a validation dataset. The model is then re-estimated using all
 # the data except the slice, and the estimated model is applied on the
 # validation set (i.e. the slice). The value of the log likelihood for
