@@ -754,6 +754,8 @@ class Database:
         :param slices: number of slices
         :type slices: int
 
+        :return: list of estimation and validation data sets
+        :rtype: tuple(pandas.DataFrame, pandas.DataFrame)
         """
         shuffled = self.data.sample(frac=1)
         theSlices = np.array_split(shuffled, slices)
