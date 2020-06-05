@@ -18,8 +18,8 @@ from biogeme.expressions import Beta
 df = pd.read_csv('swissmetro.dat', '\t')
 database = db.Database('swissmetro', df)
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
+# The following statement allows you to use the names of the
+# variable as Python variable.
 globals().update(database.variables)
 
 # Removing some observations
@@ -39,9 +39,9 @@ SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 CAR_AV_SP = CAR_AV * (SP != 0)
 TRAIN_AV_SP = TRAIN_AV * (SP != 0)
-TRAIN_TT_SCALED = TRAIN_TT / 100.0
+TRAIN_TT_SCALED = TRAIN_TT / 100
 TRAIN_COST_SCALED = TRAIN_COST / 100
-SM_TT_SCALED = SM_TT / 100.0
+SM_TT_SCALED = SM_TT / 100
 SM_COST_SCALED = SM_COST / 100
 CAR_TT_SCALED = CAR_TT / 100
 CAR_CO_SCALED = CAR_CO / 100
