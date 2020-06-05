@@ -7,9 +7,11 @@
 \lstset{numbers=none, basicstyle=\footnotesize\ttfamily,
   numberstyle=\tiny,keywordstyle=\color{blue},stringstyle=\ttfamily,showstringspaces=false}
 \lstset{backgroundcolor=\color[rgb]{0.95 0.95 0.95}}
-\lstdefinestyle{numbers}{numbers=left, stepnumber=1, numberstyle=\tiny, numbersep=10pt,basicstyle=\footnotesize\ttfamily}
+%\lstdefinestyle{numbers}{numbers=left, stepnumber=1, numberstyle=\tiny, numbersep=10pt,basicstyle=\footnotesize\ttfamily}
+\lstdefinestyle{numbers}{numbers=left}
 \lstdefinestyle{nonumbers}{numbers=none,basicstyle=\footnotesize\ttfamily}
-\lstdefinestyle{tiny}{numbers=none,basicstyle=\tiny\ttfamily}
+%\lstdefinestyle{nonumbers}{numbers=none}
+%\lstdefinestyle{tiny}{numbers=none,basicstyle=\tiny\ttfamily}
 
 % Font selection: uncomment the next line to use the ``beton'' font
 %\usepackage{beton}
@@ -37,6 +39,9 @@
 \usepackage{pst-node}
 \usepackage{pst-plot}
 \usepackage{pst-tree}
+
+% To include hyperlinks in the PDF file
+\usepackage{hyperref}
 
 %Package to display boxes around a minipage. Used especially to
 %describe the biography of people.
@@ -341,7 +346,7 @@
 \newcommand{\BIOGEME}{Biogeme}
 \newcommand{\BBIOGEME}{BisonBiogeme}
 
-
+\newcommand*{\examplesPath}{../examples}
 \begin{document}
 
 
@@ -352,31 +357,40 @@
 \vspace{2cm}
 
 \begin{center}
-\small Report TRANSP-OR 20xxxx \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+\small Report TRANSP-OR 200605 \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
 \begin{center}
 \textsc{Series on Biogeme}
 \end{center}
+
+\emph{This is an updated version of \citeasnoun{Bier18}, adapted for
+  Biogeme 3.2.6.}
 \end{center}
 
 
 \clearpage
 \end{titlepage}
 
+
 The package Biogeme (\texttt{biogeme.epfl.ch}) is designed to estimate the parameters of
 various models using maximum likelihood estimation. It is particularly
 designed for discrete choice models. In this document, we present step
 by step how to specify a simple model, estimate its parameters and
 interpret the output of the  package.  We assume that the
-reader is already familiar with discrete choice models, and has
+reader is already familiar with discrete choice models (\cite{BenALerm85}), and has
 successfully installed \PDBIOGEME. Note that \PBIOGEME\ and \PDBIOGEME\
 have a very similar syntax. The difference is that \PBIOGEME\ is an
 independent software package written in C++, and using the Python
-language for model specification. \PDBIOGEME\ is a genuine Python
+language for model specification.
+
+
+
+\PDBIOGEME\ is a genuine Python
 package written in Python and C++, that relies on the Pandas library
-for the management of the data. The syntax for model specification is
+for the management of the data. This is the standard mode of operations of more and more
+data scientists. The syntax for model specification is
 almost identical, but there are slight differences, that are
 highlighted at the end of the document.  This document has been written using
-\PDBIOGEME\ 3.1, but should remain valid for future versions.  
+\PDBIOGEME\ 3.2.6, but should remain valid for future versions.  
 
 \section{Data}
 
@@ -391,31 +405,10 @@ row corresponding to an observation. Delimiters can be tabs or
 spaces. 
 
 
-The data file used for this example is \texttt{swissmetro.dat}.
+The data file used for this example is \texttt{swissmetro.dat}. It can
+be downloaded from the ``Data'' section of \href{http://biogeme.epfl.ch}{biogeme.epfl.ch}.
 
-\BIOGEME\ is available in three versions.
-\begin{itemize}
-  \item \emph{BisonBiogeme} is designed to
-estimate the parameters of a list of predetermined discrete choice
-models such as logit, binary probit, nested logit, cross-nested logit,
-multivariate extreme value models, discrete and continuous mixtures of
-multivariate extreme value models, models with nonlinear utility
-functions, models designed for panel data, and heteroscedastic
-models. It is based on a formal and simple language for model
-specification.
-\item \emph{PythonBiogeme} is designed for general purpose parametric models. The
-specification of the model and of the likelihood function is based on
-an extension of the Python programming language. A series of discrete
-choice models are precoded for an easy use. The package is written in
-C++ and is standalone.
-\item \emph{PandasBiogeme} is a Python package, that must be imported in a
-Python code. It relies on the Pandas package for the data
-manipulation. This is the standard mode of operations of more and more
-data scientists. The syntax for model specification is almost exactly
-the same as \PBIOGEME. 
-\end{itemize}
-In this document, we describe the model
-specification for \PDBIOGEME.
+
 
 \section{Python}
 
@@ -448,34 +441,42 @@ different entities.
 \section{The model}
 The model is a logit model with 3 alternatives: \emph{train}, \emph{Swissmetro} and \emph{car}. The utility functions are defined as:
 \begin{lstlisting}[style=nonumbers,backgroundcolor=]
-V_1 = V_TRAIN =  ASC_TRAIN + B_TIME * TRAIN_TT_SCALED 
-                           + B_COST * TRAIN_COST_SCALED
-V_2 = V_SM = ASC_SM + B_TIME * SM_TT_SCALED 
-                    + B_COST * SM_COST_SCALED
-V_3 = V_CAR =  ASC_CAR + B_TIME * CAR_TT_SCALED 
-                       + B_COST * CAR_CO_SCALED
+V1 = ASC_TRAIN + \
+     B_TIME * TRAIN_TT_SCALED + \
+     B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + \
+     B_TIME * SM_TT_SCALED + \
+     B_COST * SM_COST_SCALED
+V3 = ASC_CAR + \
+     B_TIME * CAR_TT_SCALED + \
+     B_COST * CAR_CO_SCALED
 \end{lstlisting}
-where 
-\lstinline@TRAIN_TT_SCALED@,
-\lstinline@TRAIN_COST_SCALED@,
-\lstinline@SM_TT_SCALED@,
-\lstinline@SM_COST_SCALED@,
-\lstinline@CAR_TT_SCALED@,
-\lstinline@CAR_CO_SCALED@
-are variables, and 
-  \lstinline@ASC_TRAIN@,
-  \lstinline@ASC_SM@,
-  \lstinline@ASC_CAR@,
-  \lstinline@B_TIME@,
-  \lstinline@B_COST@ are parameters to be estimated. Note that it is not possible to identify all alternative specific constants  
+where
+\begin{itemize}
+\item \lstinline@TRAIN_TT_SCALED@,
+\item \lstinline@TRAIN_COST_SCALED@,
+\item \lstinline@SM_TT_SCALED@,
+\item \lstinline@SM_COST_SCALED@,
+\item \lstinline@CAR_TT_SCALED@,
+\item \lstinline@CAR_CO_SCALED@
+\end{itemize}
+are variables, and
+\begin{itemize}
+\item   \lstinline@ASC_TRAIN@,
+\item   \lstinline@ASC_SM@,
+\item   \lstinline@ASC_CAR@,
+\item   \lstinline@B_TIME@,
+\item   \lstinline@B_COST@
+\end{itemize}
+  are parameters to be estimated. Note that it is not possible to identify all alternative specific constants  
   \lstinline@ASC_TRAIN@,
   \lstinline@ASC_SM@,
   \lstinline@ASC_CAR@ from data. Consequently,  \lstinline@ASC_SM@
   is normalized to 0. 
 
 The availability of an alternative \texttt{i} is determined by the
-variable $y_i$, \texttt{i}=1,...3, which is equal to 1 if the
-alternative is available, 0 otherwise. The probability of choosing an
+variable $y_i$, \texttt{i}=1, 2, 3, which is equal to 1 if the
+alternative is available, and 0 otherwise. The probability of choosing an
 available alternative \texttt{i} is given by the logit model: 
 \begin{equation}
 P(i|\{1,2,3\};x,\beta) = \frac{y_i e^{V_i(x,\beta)}}{y_1 e^{V_1(x,\beta)} + y_2 e^{V_2(x,\beta)}+ y_3 e^{V_3(x,\beta)}}.
@@ -486,7 +487,7 @@ sample is
 \L = \sum_n \log P(i_n|\{1,2,3\};x_n,\beta)
 \end{equation}
 where $i_n$ is the alternative actually chosen
-by individual $n$, and $x_n$ are the explanatory variables for
+by individual $n$, and $x_n$ are the explanatory variables associated with
 individual $n$.  
 
 \section{Model specification: \PDBIOGEME}
@@ -500,25 +501,26 @@ The objective is to provide to \PDBIOGEME\ the formula of the log
 likelihood function to maximize, using a syntax based on the Python
 programming language, and extended for the specific needs of \BIOGEME.
 The file can
-contain comments, designed to document the specification. 
-Comments are included using the characters \verb+#+, consistently with
+contain comments, designed to document the specification.
+Single-line comments are included using the characters \verb+#+, consistently with
 the Python syntax. All characters
-after this command, up to the end of the current line, are ignored by Python.
+after this command, up to the end of the current line, are ignored by
+Python.
+Multiple lines comments  are created by adding a delimiter
+(\verb+"""+) at the beginning and the end  of the comment.
 In our example, the file starts with comments describing the name of
 the file, its author and the date when it was created. A short
 description of its content is also provided. 
 \begin{lstlisting}[style=nonumbers]
-########################################
-#
-# @file 01logit.py
-# @author: Michel Bierlaire, EPFL
-# @date: Thu Sep  6 15:14:39 2018
-#
-# Logit model
-# Three alternatives: Train, Car and Swissmetro
-# SP data
-#
-#######################################
+"""File 01logit.py
+
+:author: Michel Bierlaire, EPFL
+:date: Thu Sep  6 15:14:39 2018
+
+ Example of a logit model.
+ Three alternatives: Train, Car and Swissmetro
+ SP data
+"""
 \end{lstlisting}
 These comments are
 completely ignored by Python. However, it is recommended to use
@@ -526,42 +528,47 @@ many comments to describe the model specification, for future
 reference, or to help other persons to understand the specification. 
 
 The specification file must start by loading the Python libraries
-needed by \PDBIOGEME. Three libraries must be loaded:
+needed by \PDBIOGEME. The following libraries must be loaded:
 \begin{itemize}
 \item \lstinline+pandas+, the generic package for data management,
-\item \lstinline+biogeme.database+, the Biogeme package for data management,
-\item \lstinline+biogeme.biogeme+, the Biogeme extensions to Python. 
+\item \lstinline+biogeme.database+, the Biogeme module for data management,
+\item \lstinline+biogeme.biogeme+, the core Biogeme module,
+\item \lstinline+biogeme.models+, the Biogeme module for choice models.
 \end{itemize}
 It is custom in Python to use shortcuts to simplify the syntax. Here,
-we use \lstinline+pd+,  \lstinline+db+, and  \lstinline+bio+,
-respectively.   
-
+we use \lstinline+pd+,  \lstinline+db+,   \lstinline+bio+, and   \lstinline+models+,
+respectively.   Finally, we need to import the expressions to build
+the model specification. In this example, we use only the expression
+\lstinline+Beta+ that defines parameters to be estimated.
+ 
 \begin{lstlisting}[style=nonumbers]
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
+import biogeme.models as models
+from biogeme.expressions import Beta
 \end{lstlisting}
 
 The next step consists in preparing the Pandas database. If you have
 a data file formatted for previous versions of Biogeme,   this can easily be done using the
 following statements:
 \begin{lstlisting}[style=nonumbers]
-pandas = pd.read_table("swissmetro.dat")
-database = db.Database("swissmetro",pandas)
+df = pd.read_csv('swissmetro.dat', '\t')
+database = db.Database('swissmetro', df)
 \end{lstlisting}
-The first statement reads the data from the file, and store it in a
-Pandas sata structure. The second statement prepares the database for
+The first statement reads the data from the file, using tabs as
+delimiters. It stores it in a
+Pandas data structure. The second statement prepares the database for
 Biogeme. 
 Clearly, if you prefer to create your Pandas database in another way,
 it is possible. In that case, you still have to use the second statement to
 transfer the Pandas database to Biogeme. 
 
-During the initialization of the Biogeme database, a
-file \lstinline+headers.py+ is created, that defines each column
-header as a variable for the model. To use this file, it must be
-imported using the following statement: 
+The name of the columns in the database characterize the variables for
+your model. In order to make them available as a Python variable, the
+following statement must be included: 
 \begin{lstlisting}[style=nonumbers]
-from headers import *
+globals().update(database.variables)
 \end{lstlisting}
 
 It is possible to tell \PDBIOGEME\ to ignore some
@@ -582,8 +589,7 @@ and \lstinline$PURPOSE$ different from 3), or \lstinline$CHOICE$ equal
 to 0. 
 
 \begin{lstlisting}[style=nonumbers]
-exclude = (( PURPOSE != 1 ) * (  PURPOSE   !=  3  ) +\
-           ( CHOICE == 0 )) > 0
+exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
 \end{lstlisting}
 
@@ -657,37 +663,18 @@ function, as illustrated in this example.
 \end{itemize}
 
 It is possible to define new variables in addition to the variables
-defined in the data files. It can be done either by defining Python
-variables using the Python syntax:
+defined in the data files. 
 \begin{lstlisting}[style=nonumbers]
-SM_COST =  SM_CO   * (  GA   ==  0  ) 
-TRAIN_COST =  TRAIN_CO   * (  GA   ==  0  )
-\end{lstlisting}
-It can also be done by defining \PDBIOGEME\ variables, using the
-function \lstinline+DefineVariable+.
-
-
-\begin{lstlisting}[style=nonumbers]
-CAR_AV_SP =  DefineVariable('CAR_AV_SP',CAR_AV  * (  SP   !=  0  ),database)
-TRAIN_AV_SP =  DefineVariable('TRAIN_AV_SP',TRAIN_AV  * (  SP   !=  0  ),database)
+SM_COST = SM_CO * (GA == 0)
+TRAIN_COST = TRAIN_CO * (GA == 0)
+CAR_AV_SP = CAR_AV * (SP != 0)
+TRAIN_AV_SP = TRAIN_AV * (SP != 0)
 \end{lstlisting}
 
-\begin{itemize}
-\item The latter definition is equivalent to add a column with the
-specified header to the database. It means that the value of the new
-variables for each observation is calculated once before the
-estimation starts. On the contrary, with the method based on Python
-variable, the calculation will be applied again and again, each time
-it is needed by the algorithm. For small models, it may not make any
-difference, and the first method may be more readable. But for models
-requiring a significant amount of time to be estimated, the time
-savings may be substantial. Of course, the additional column can be
-added using Pandas functions as well. 
-
-\item When boolean expressions are involved, the value TRUE is
-  represented by 1, and the value FALSE is represented by
+When boolean expressions are involved, the value True is
+  represented by 1, and the value False is represented by
   0. Therefore, a multiplication involving a boolean expression is
-  equivalent to a ``AND'' operator. The above code is interpreted in
+  equivalent to a ``and'' operator. The above code is interpreted in
   the following way:
 \begin{itemize}
 \item \lstinline$CAR_AV_SP$ is equal to \lstinline$CAR_AV$ if
@@ -700,26 +687,23 @@ added using Pandas functions as well.
   and the variable \lstinline$SM_COST$ is zero. The variable
   \lstinline$TRAIN_COST$ is defined in the same way.
 \end{itemize}
-\end{itemize}
 
 Variables can be also be rescaled. For numerical reasons, it is good
-practice to scale the data so that the values of the estimated parameters are around 1.0. A previous estimation with the unscaled data has generated
+practice to scale the data so that the values of the estimated parameters are around 1. A previous estimation with the unscaled data has generated
 parameters around -0.01 for both cost and time. Therefore, 
 time and cost are divided by 100.
 
 \begin{lstlisting}[style=nonumbers]
-TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED',\
-                                 TRAIN_TT / 100.0,database)
-TRAIN_COST_SCALED = DefineVariable('TRAIN_COST_SCALED',\
-                                   TRAIN_COST / 100,database)
-SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0,database)
-SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100,database)
-CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100,database)
-CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100,database)
+TRAIN_TT_SCALED = TRAIN_TT / 100
+TRAIN_COST_SCALED = TRAIN_COST / 100
+SM_TT_SCALED = SM_TT / 100
+SM_COST_SCALED = SM_COST / 100
+CAR_TT_SCALED = CAR_TT / 100
+CAR_CO_SCALED = CAR_CO / 100
 \end{lstlisting}
 
 We now write the specification of the
-utility functions. Note that it is the exact same syntax as for \PBIOGEME.
+utility functions. 
 
 \begin{lstlisting}[style=nonumbers]
 V1 = ASC_TRAIN + \
@@ -735,7 +719,21 @@ V3 = ASC_CAR + \
 
 We need to associate each utility function with the number, the identifier, of the
 alternative, using the same numbering convention as in the data file. In this
-example, the convention is described in Table~\ref{tab:choice}. To do
+example, the convention is described in Table~\ref{tab:choice}.
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{rl}
+Train & 1 \\
+Swissmetro & 2 \\
+Car & 3
+\end{tabular}
+\end{center}
+\caption{\label{tab:choice}Numbering of the alternatives}
+\end{table}
+
+
+To do
 this, we use a Python dictionary:
 \begin{lstlisting}[style=nonumbers]
 V = {1: V1,
@@ -750,18 +748,8 @@ av = {1: TRAIN_AV_SP,
       3: CAR_AV_SP}
 \end{lstlisting}
 
-\begin{table}[htb]
-\begin{center}
-\begin{tabular}{rl}
-Train & 1 \\
-Swissmetro & 2 \\
-Car & 3
-\end{tabular}
-\end{center}
-\caption{\label{tab:choice}Numbering of the alternatives}
-\end{table}
 
-We now define the choice model. The function \lstinline+bioLogLogit+
+We now define the choice model. The function \lstinline+models.loglogit+
 provides the logarithm of the choice probability of the logit
 model. It takes three arguments: 
 \begin{enumerate}
@@ -771,13 +759,13 @@ model. It takes three arguments:
 \end{enumerate}
 In this example, we obtain
 \begin{lstlisting}[style=nonumbers]
-logprob = bioLogLogit(V,av,CHOICE)
+logprob = models.loglogit(V, av, CHOICE)
 \end{lstlisting}
 
 We are now ready to create the \lstinline+BIOGEME+ object, using the
 following syntax:
 \begin{lstlisting}
-biogeme = bio.BIOGEME(database,logprob)
+biogeme = bio.BIOGEME(database, logprob)
 \end{lstlisting}
 The constructor accepts two mandatory arguments:
 \begin{itemize}
@@ -788,7 +776,7 @@ The constructor accepts two mandatory arguments:
 It is advised to give a name to the model using the following
 statement:
 \begin{lstlisting}
-biogeme.modelName = "01logit"
+biogeme.modelName = '01logit'
 \end{lstlisting}
 
 The estimation of the model parameters is performed using the
@@ -803,18 +791,12 @@ results = biogeme.estimate()
 
 The script is executed like any python script. Typically, by typing
 \begin{lstlisting}
-python3 01logit.py
+python 01logit.py
 \end{lstlisting}
 is a terminal, or by typing ``shift-return'' in a Jupyter notebook.
 
 By default, running \PDBIOGEME\ is silent, in the sense that it does
-not produce any output. The following warning, generated by another
-package, is sometimes produced, and can be safely ignored:
-\begin{lstlisting}
-/usr/local/lib/python3.7/site-packages/scipy/linalg/basic.py:1321: RuntimeWarning: internal gelsd driver lwork query error, required iwork dimension not returned. This is likely the result of LAPACK bug 0038, fixed in LAPACK 3.2.2 (released July 21, 2010). Falling back to 'gelss' driver.
-  x, resids, rank, s = lstsq(a, b, cond=cond, check_finite=False)  
-\end{lstlisting}
-
+not produce any output. 
 Two files are generated:
 \begin{itemize}
 \item \lstinline+01logit.html+ reports the results of the estimation
@@ -830,15 +812,15 @@ it is important to verify the latest files created in the directory.
 You can also print the name of the files that were actually
 created using the following Python statement:
 \begin{lstlisting}
-print(f"HTML file:   {results.data.htmlFileName}")
-print(f"Pickle file: {results.data.pickleFileName}")
+print(f'HTML file:   {results.data.htmlFileName}')
+print(f'Pickle file: {results.data.pickleFileName}')
 \end{lstlisting}
 \clearpage
 
 \section{\PDBIOGEME: the report file}
 \label{sec:pythonreport}
 
-The report file generated by \PDBIOGEME\ gathers various information
+The report file generated by \PDBIOGEME\ gathers information
 about the result of the estimation. First, some information about the
 version of Biogeme, and some links to relevant URLs is provided. 
 Next, the name of the report file and the name of the database  are reported. 
@@ -849,57 +831,67 @@ The estimation report follows, including
       \item The sample size, that is, the number of rows in
         the data file  that have not been excluded.
       \item The number of excluded observations.
-      \item \lstinline+Init log likelihood+ is the log likelihood
+      \item \texttt{Init log likelihood} is the log likelihood
         $\mathcal{L}^i$ of
         the sample for the model defined with the default values of
         the parameters. 
-      \item \lstinline+Final log likelihood+ is the log likelihood
+      \item \texttt{Final log likelihood} is the log likelihood
         $\mathcal{L}^*$ of the sample for the estimated model. 
-      \item \lstinline+Likelihood ratio test for the init. model+ is 
+      \item \texttt{Likelihood ratio test for the init. model} is 
          \begin{equation}
             -2 ( \mathcal{L}^i - \mathcal{L}^*)
          \end{equation}
          where 
          $ \mathcal{L}^i$ is the log likelihood of the init model
          as defined above, and $\mathcal{L}^*$ is the log likelihood of the sample for the estimated model. 
-      \item \lstinline+Rho-square for the init. model+ is
+      \item \texttt{Rho-square for the init. model} is
          \begin{equation}
             \rho^2 = 1 - \frac{\mathcal{L}^*}{\mathcal{L}^i}.
          \end{equation}
-        \item \lstinline+Rho-square-bar for the init. model+ is
+        \item \texttt{Rho-square-bar for the init. model} is
          \begin{equation}
             \rho^2 = 1 - \frac{\mathcal{L}^* - K}{\mathcal{L}^i}.
          \end{equation}
          where $K$ is the number of estimated parameters.
-       \item \lstinline+Akaike Information Criterion+ is:
+       \item \texttt{Akaike Information Criterion} is:
          \begin{equation}
           2 K - 2 \mathcal{L}^*,
          \end{equation}
          where $K$ is the number of estimated parameters.
-       \item \lstinline+Bayesian Information Criterion+ is:
+       \item \texttt{Bayesian Information Criterion} is:
          \begin{equation}
  - 2 \mathcal{L}^* + K \ln(N),
          \end{equation}
          where  $K$ is the number of estimated parameters, and $N$ is
          the sample size. 
-      \item \lstinline+Final gradient norm+ is the gradient of the log
-        likelihood function computed for the estimated parameters. If
-        no constraint is active at the solution, it should be close to
-        0. If  some bound
-        constraints  are active at the
-        solution (that is, they are verified with equality), the
-        gradient may not be close to zero.
-\item \lstinline+Diagnostic+ is the diagnostic reported by the optimization
-algorithm. 
-\item \lstinline+Database readings+ is the number of time the database
-  has been read by the algorithm.
-\item \lstinline+Iterations+ is the number of iterations used by the
-  algorithm before it stopped.
- \item \lstinline+Data processing time+ is the time needed to process
-   the database before starting the estimation. 
-\item \lstinline+Optimization time+ is the actual time used by the algorithm before
-it stopped.
-\item \lstinline+Nbr of threads+: number of processors used during the estimation. 
+      \item \texttt{Final gradient norm} is the gradient of the log
+        likelihood function computed for the estimated parameters.
+      \item \texttt{Nbr of threads} is the number of processors used
+        by Biogeme to calculate the log likelihood at each iteration.
+       \item \texttt{Algorithm} is the optimization algorithm used to
+         solve the maximum likelihood estimation problem.
+        \item \texttt{Proportion analytical hessian} is the proportion
+          of iterations where the analytical second derivatives matrix
+          (called ``hessian'') has been calculated.
+         \item \texttt{Relative projected gradient} is the norm of the
+           projected gradient, scaled to account for the level of
+           magnitude of the log likelihood. This quantity is used as
+           stopping criterion for the algorithm.
+         \item \texttt{Number of iterations} is the number of
+           iterations performed by the optimization algorithms.
+         \item \texttt{Number of function evaluations} reports the
+           number of times that the log likelihood function has been
+           calculated.
+         \item \texttt{Number of gradient evaluations} reports the
+           number of times that the gradient of the log likelihood function has been
+           calculated.
+         \item \texttt{Number of hessian evaluations} reports the
+           number of times that the second derivatives matrix (or
+           hessian) of the log likelihood function has been
+           calculated.
+         \item \texttt{Cause of termination} provides the reason why
+           the optimization algorithm has stopped. 
+         \item \texttt{Optimization time} is the actual time used by the algorithm.
    \end{itemize}
 
 
@@ -957,9 +949,9 @@ t^R_{k,\ell}=\frac{\beta_k - \beta_\ell}{\sqrt{\Sigma^R_{k,k} + \Sigma^R_{\ell,\
 where $\Phi(\cdot)$ is the cumulative density function of the
 univariate standard normal distribution,
 \end{itemize}
-The final lines report the value of the smallest eigenvalue and the
-smallest singular value of the
-second derivatives matrix. In principle, they must be equal.  A value close to zero is a sign of
+The final lines report the value of the smallest and the largest
+eigenvalues, as well as the ratio between the two, called the
+``condition number''.   If smallest eigenvalue is close to zero, it is a sign of
 singularity, that may be due to a lack of variation in the data or
 an unidentified model.
 
@@ -992,6 +984,8 @@ function, the results of the estimation can be accessed in
 \item \lstinline+beta.name+,
 \item \lstinline+beta.value+,
 \item \lstinline+beta.stdErr+,
+\item \lstinline+beta.lb+,
+\item \lstinline+beta.ub+,
 \item \lstinline+beta.tTest+,
 \item \lstinline+beta.pValue+,
 \item \lstinline+beta.robust_stdErr+,
@@ -1012,11 +1006,13 @@ function, the results of the estimation can be accessed in
 \item \lstinline+results.data.numberOfObservations+: the number of
   rows in the data file. If the data is not panel, it is the same as
   the sample size. 
-\item \lstinline+results.data.monteCarlo+: a Boolean that is True if
+\item \lstinline+results.data.monteCarlo+: a boolean that is True if
   the model involves Monte-Carlo simulation for the calculation of
   integrals. 
 \item \lstinline+results.data.numberOfDraws+: number of draws used for
-  Monte-Carlo simulation. 
+  Monte-Carlo simulation.
+\item \lstinline+results.data.typesOfDraws+: type of draws used for
+  Monte-Carlo simulation.
 \item \lstinline+results.data.excludedData+: number of excluded data. 
 \item \lstinline+results.data.dataProcessingTime+: time needed to
   process the data before estimation. 
@@ -1026,7 +1022,7 @@ function, the results of the estimation can be accessed in
   optimization algorithm. 
 \item \lstinline+results.data.gradientNorm+: norm of the gradient of
   the log likelihood at the final value of the parameters. 
-\item \lstinline+results.data.optimizationMessage+: message returned
+\item \lstinline+results.data.optimizationMessages+: message returned
   by the optimization routine. 
 \item \lstinline+results.data.numberOfFunctionEval+: number of time
   the log likelihood function has been evaluated. 
@@ -1037,7 +1033,7 @@ function, the results of the estimation can be accessed in
 \item \lstinline+results.data.htmlFileName+: name of the HTML file. 
 \item \lstinline+results.data.pickleFileName+: name of the Pickle
   file. 
-\item \lstinline+results.data.bootstrap+: a Boolean that is True if
+\item \lstinline+results.data.bootstrap+: a boolean that is True if
   the calculation of statistics using bootstrapping has been
   requested. 
 \item \lstinline+results.data.bootstrapTime+: the time needed for
@@ -1063,7 +1059,7 @@ gs = results.getGeneralStatistics()
 \end{lstlisting}
 
 
-The results can also be obtained as a Pandas dataframe:
+The results can also be obtained as a Pandas data frame:
 \begin{lstlisting}[style=nonumbers]
 pandasResults = results.getEstimatedParameters()
 \end{lstlisting}
@@ -1071,6 +1067,11 @@ and
 \begin{lstlisting}[style=nonumbers]
 correlationResults = results.getCorrelationResults()
 \end{lstlisting}
+
+
+\bibliographystyle{dcu}
+\bibliography{dca}
+
 
 \clearpage 
 
@@ -1081,7 +1082,7 @@ correlationResults = results.getCorrelationResults()
 
 \subsection{\lstinline$01logit.py$}
 \label{sec:modelPython}
-\lstinputlisting[style=numbers,basicstyle=\footnotesize]{../../pandasbiogeme/swissmetro/01logit.py}
+\lstinputlisting[style=numbers,basicstyle=\footnotesize]{\examplesPath/swissmetro/01logit.py}
 
 \clearpage
 
@@ -1174,9 +1175,6 @@ as pseudo maximum likelihood estimators, are often used when the true
 likelihood function is unknown or difficult to compute. In such cases,
 it is often possible to obtain consistent estimators by maximizing an
 objective function based on a simplified probability distribution. 
-
-\bibliographystyle{dcu}
-\bibliography{../dca}
 
 
 \section{Differences with \PBIOGEME}
