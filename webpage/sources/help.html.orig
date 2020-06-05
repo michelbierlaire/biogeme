@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  HEADER
+  
+  
+  <body role="document">
+    
+    INCLUDEMENU
+    
+    BANNER
+    
+    <div class="container theme-showcase" role="main">
+      
+      <div class="page-header">
+	<h1>Getting help</h1>
+      </div>
+      
+      
+      <div class="panel panel-default">
+	<div class="panel-heading"> Biogeme users' group</div>
+	<div class="panel-body">
+	  If you need help, submit your questions to the users' group:
+	  <p align="center"><a href="https://groups.google.com/d/forum/biogeme"
+			       target="_blank">groups.google.com/d/forum/biogeme</a></p>
+	  The forum is moderated. 
+	  Please keep the following in mind before posting a question:
+	  <ul>
+	    <li>Check that the same question has not already been
+	      addressed on the forum.</li>
+	    <li>Try to submit only questions about the software. </li>
+	    <li>Make sure to read completely the documentation and to
+	      try the examples before submitting a question.</li>
+	    <li>Do not submit large files (typically, data files) to
+	      the forum.</li>
+	  </ul>
+	  
+	</div>
+	<div class="panel-footer">
+	  Important notice: the discussion group on Yahoo! is now
+	  obsolete. Although it is not closed, it will not be active
+	  anymore. Use the above mentioned Google forum instead.
+	</div>
+      </div>
+      
+      <div class="panel panel-default">
+	<div class="panel-heading">Frequently Asked Questions</div>
+	<div class="panel-body">
+	  <ul>
+	    <li><a href="#q1">Why is the file headers.py not generated?</a></li>
+	    <li><a href="#q2">What initial values should I select for
+	    the parameters?</a></li>
+	    <li><a href="#q3">Can I save intermediate iterations
+		during the estimation?</a></li>
+	    <li><a href="#q4">Does Biogeme provide support for
+	    out-of-sample validation?</a></li>
+
+	  </ul>
+	</div>
+      </div>
+
+      <div id="q1" class="panel panel-default">
+	<div class="panel-heading">Why is the file headers.py not generated?</div>
+	<div class="panel-body">
+	  <p>In order to comply better with good programming practice in
+	    Python, the syntax to import the variable names from the data
+	    file has been modified since version 3.2.5. The file
+	    <code>headers.py</code> is not generated anymore. The statement
+	  </p>
+	  <p><code>from headers import *</code></p>
+	  <p>must be replaced by</p>
+	  <p><code>
+	      globals().update(database.variables)
+	    </code>
+	  </p>
+	  <p>where <code>database</code>  is the object containing the
+	    database, created as follows:</p>
+	  <p>  <code>
+	      import biogeme.database as db<br>
+	      df = pd.read_csv("swissmetro.dat",'\t')<br>
+	      database = db.Database("swissmetro",df)
+	  </code></p>
+	  <p>Moreover, in order to avoid any ambiguity, the operators used by
+	    Biogeme must be explicitly imported. For instance:</p>
+	  <p>
+	    <code>
+	      from biogeme.expressions import Beta, DefineVariable, bioDraws, PanelLikelihoodTrajectory, MonteCarlo, log
+	    </code>
+	  </p>
+	  <p>
+	    Note that it is also possible to import all of them using the
+	    following syntax</p>
+	  <p>  <code>
+	      from biogeme.expressions import *
+	  </code></p>
+	  <p>  although this is not a good Python programming practice. </p>
+	  
+	</div>
+      </div>
+
+      <div id="q2" class="panel panel-default">
+	<div class="panel-heading">What initial values should I select for
+	  the parameters?</div>
+	<div class="panel-body">
+	  If you have the results of a previous estimation, it may be
+	  a good idea to use the estimated values as a starting point
+	  for the estimation of a similar models. If not, it depends
+	  on the nature of the parameters:
+	  <ul>
+	    <li>If the parameter is a coefficient (traditionally
+	      denoted by &beta;), the value 0 is
+	      appropriate.</li>
+	    <li>If the parameter is a nest parameter of a nested or
+	      cross-nested logit model (traditionally
+	      denoted by &mu;), the value 1 is
+	      appropriate. Make sure to define the lower bound of the
+	      parameter to 1.</li>
+	    <li>If the parameter is the nest membership coefficient of
+	    a cross-nested logit model (traditionally
+	      denoted by &alpha;), the value 0.5 is
+	    appropriate. Make sure to define the lower bound to 0 and
+	      the upper bound to 1.</li>
+	    <li>If the parameter captures the membership to a class of
+	    a latent class model, the value 0.5 is appropriate. Make
+	      sure to define the lower bound to 0 and
+	      the upper bound to 1.</li>
+	    <li>If the parameter is the scale of an error component in
+	      a mixture of logit model (traditionally
+	      denoted by &sigma;), the value must be sufficient
+	      large so that the likelihood of each observation is not
+	      too close to zero. It is suggested to try first with the
+	      value one. If there are numerical issues, try a larger
+	      value, such as 10. See Section 7 in the report
+	      "Estimating choice models  with latent variables
+	      with PandasBiogeme" for a detailed discussion. </li>
+	    
+	  </ul>
+	</div>
+      </div>
+
+      <div id="q3" class="panel panel-default">
+	<div class="panel-heading">Can I save intermediate iterations
+	    during the estimation?</div>
+	<div class="panel-body">
+	  <p>
+	  Yes. Use the parameter <code>saveIterations</code> in the
+	  <code>estimate</code>
+	  function (see
+	  documentation <a href="sphinx/biogeme.html#biogeme.biogeme.BIOGEME.estimate">here</a>).  Each time the value of the log
+	  likelihood function is improved, Biogeme will save the
+	  current value of all parameters in a file. The name of the
+	  file is defined by the
+	  parameter <code>file_iterations</code>. By default, it
+	  is <code>__savedIterations.txt</code>.
+	  If you want to start the iterations from the values in the
+	  file, call the function <code>loadSavedIteration</code>
+	  (documentation <a href="sphinx/biogeme.html#biogeme.biogeme.BIOGEME.loadSavedIteration">here</a>)
+	  before starting the estimation. </p><p>Example:
+	  <pre>
+	    biogeme = bio.BIOGEME(database, logprob)
+	    fname = "myIterations.log"
+	    biogeme.loadSavedIteration(filename=fname)
+	    results = biogeme.estimate(saveIterations=True, file_iterations=fname)
+	  </pre>
+	  </p>
+	</div>
+      </div>
+
+      <div id="q4" class="panel panel-default">
+	<div class="panel-heading">Does Biogeme provide support for
+	    out-of-sample validation?</div>
+	<div class="panel-body">
+	  <p>
+	    Yes. 
+	    <ul>
+	      <li>You can extract a random sample of the database (see
+	      <a href="sphinx/biogeme.html#biogeme.database.Database.sampleWithoutReplacement">documentation</a>).</li>
+	      <li>You can split your database into slices, and
+	      generate estimation and validation data sets (see <a href="sphinx/biogeme.html#biogeme.database.Database.split">documentation</a> ). </li>
+	      <li>You can use the <code>validate</code> function
+	      (see <a href="">documentation</a>) to perform a full
+	      validation.  The validation consists in organizing the
+	      data into several slices of about the same size,
+	      randomly defined. Each slice is considered as a
+	      validation dataset. The model is then re-estimated using
+	      all the data except the slice, and the estimated model
+	      is applied on the validation set (i.e. the slice). The
+	      value of the log likelihood for each observation in the
+	      validation set is reported in a dataframe. As this is
+	      done for each slice, the output is a list of dataframes,
+	      each corresponding to one of these exercises. See
+	      example <code><a href="examples/swissmetro/04validation.py">04validation.py</a>
+	      from <a href="examples.html#swissmetro">here</a>. </li>
+	    </ul>
+	</div>
+      </div>
+      
+      
+    </div>
+    
+    
+    
+    
+    
+    FOOTER  
+    
+    
+  </body>
+</html>
