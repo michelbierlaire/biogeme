@@ -18,11 +18,11 @@ sys.path.insert(0, os.path.abspath('.hyperlearn'))
 # -- Project information -----------------------------------------------------
 
 project = 'Biogeme'
-copyright = '2019, Michel Bierlaire'
+copyright = '2020, Michel Bierlaire'
 author = 'Michel Bierlaire'
 
 # The full version, including alpha/beta/rc tags
-release = '3.2.2'
+release = '3.2.6'
 
 
 # -- General configuration ---------------------------------------------------
