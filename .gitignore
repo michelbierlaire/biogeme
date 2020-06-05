@@ -269,3 +269,4 @@ reports/pandasfirstmodel.log
 reports/pandasfirstmodel.bbl
 reports/pandasfirstmodel.blg
 reports/pandasfirstmodel.out
+*.pyc
