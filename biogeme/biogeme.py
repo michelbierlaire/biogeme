@@ -102,6 +102,9 @@ class BIOGEME:
            True.
         :type removeUnusedVariables: bool
 
+        :param suggestScales: if True, Biogeme suggests the scaling of the variables in the database. Default: True. See also :func:`biogeme.database.Database.suggestScaling`
+        :type suggestScales: bool. 
+
         :param missingData: if one variable has this value, it is
            assumed that a data is missing and an exception will be
            triggered. Default: 99999.
@@ -736,7 +739,7 @@ formulas.
 
             self.logger.general(f'Re-estimate the model {bootstrap} times for bootstrapping')
             self.bootstrap_results = np.empty(shape=[bootstrap, len(xstar)])
-            self.logger.temporarySilent()
+            self.logger.temporarySilence()
             for b in range(bootstrap):
                 if self.database.isPanel():
                     sample = self.database.sampleIndividualMapWithReplacement()
