@@ -91,10 +91,19 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
     theInput[thread]->calcHessian = (h != NULL) ;
     theInput[thread]->calcBhhh = (bh != NULL) ;
       
-    bioUInt diagnostic = pthread_create(&(theThreads[thread]),
-					NULL,
-					computeFunctionForThread,
-					(void*) theInput[thread]) ;
+    
+    bioUInt diagnostic ;
+
+    try {
+      diagnostic = pthread_create(&(theThreads[thread]),
+				  NULL,
+				  computeFunctionForThread,
+				  (void*) theInput[thread]) ;
+    }
+    catch (std::exception& e) {
+      throw bioExceptions(__FILE__,__LINE__, e.what()) ;
+    }
+    
 
     if (diagnostic != 0) {
       std::stringstream str ;
@@ -210,8 +219,13 @@ bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal>& betas,
   std::vector< std::vector<bioReal> >* hptr = (calculateHessian) ? &h : NULL ;
   std::vector< std::vector<bioReal> >* bhptr = (calculateBhhh) ? &bh : NULL ;
 
-  
-  bioReal r = applyTheFormula(&g,hptr,bhptr) ;
+  bioReal r ;
+  try {
+    r = applyTheFormula(&g,hptr,bhptr) ;
+  }
+  catch (std::exception& e) {
+      throw bioExceptions(__FILE__,__LINE__, e.what()) ;
+  }
   return r ;
 
 
