@@ -38,13 +38,6 @@ bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalI
     }
   }
 
-  if (gradient) {
-    if (containsLiterals(literalIds)) {
-      std::cout << "Warning: expression " << print()
-		<< " is not differentiable everywhere. " << std::endl ;
-    }
-  }
-  
   if (theDerivatives == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
   }
@@ -73,6 +66,11 @@ bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalI
   else { 
     theDerivatives->f = rightResult->f ;
     if (gradient) {
+      if (leftResult->f == rightResult->f) {
+	std::cout << "Warning: expression " << print()
+		  << " is not differentiable at " << leftResult->f
+		  << ". Right derivative is used." << std::endl ;
+      }
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
 	theDerivatives->g[k] = rightResult->g[k] ;
 	if (hessian) {
