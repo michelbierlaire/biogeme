@@ -423,6 +423,11 @@ class Database:
         :rtype: pandas.DataFrame
 
         """
+        for c in columns:
+            if not c in self.data:
+                errorMsg = (f'Variable {c} not found.')
+                raise excep.biogemeError(errorMsg)
+                
         if columns is None:
             columns = self.data.columns
         largestValue = [max(np.abs(self.data[col].max()),
