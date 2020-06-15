@@ -190,9 +190,6 @@ class BIOGEME:
                 errorMsg = (f'Variables in formula {k} missing in the database: '
                             f'{missingVariables}')
                 raise excep.biogemeError(errorMsg)
-                
-            logger.debug(f'Formula {k}')
-            logger.debug(f.setOfVariables())
             self.usedVariables |= f.setOfVariables()
         if self.database.isPanel():
             self.usedVariables.add(self.database.panelColumn)
