@@ -455,7 +455,7 @@ class bioBounds:
             bd[ind] = d[ind]
             b = H @ bd
 
-            # In theory, x + delta_t * dmust be feasible. However,
+            # In theory, x + delta_t * d must be feasible. However,
             # there may be some numerical problem. Therefore, we
             # project it on the feasible domain to make sure to obtain
             # a feasible point.
@@ -2115,6 +2115,7 @@ def simpleBoundsNewtonAlgorithm(fct,
 
         # Solve the quandratic problem in the subspace defined by the GCP
 
+
         xc, _ = truncatedConjugateGradientSubspace(xk,
                                                    g,
                                                    H,
@@ -2123,7 +2124,7 @@ def simpleBoundsNewtonAlgorithm(fct,
                                                    infeasibleConjugateGradient,
                                                    cgtol)
 
-        
+
 
         if np.isnan(xc).any():
             delta = delta / 2.0
