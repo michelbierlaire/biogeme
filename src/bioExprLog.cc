@@ -40,29 +40,22 @@ bioDerivatives* bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalI
 
   bioUInt n = literalIds.size() ;
   bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  if (childResult->f < 0) {
-    if (std::abs(childResult->f) < 1.0e-6) {
-      childResult->f = 0.0 ;
+  if (childResult->f <= 0) {
+    std::stringstream str ;
+    str << "Current values of the literals: " << std::endl ;
+    std::map<bioString,bioReal> m = getAllLiteralValues() ;
+    for (std::map<bioString,bioReal>::iterator i = m.begin() ;
+	 i != m.end() ;
+	 ++i) {
+      str << i->first << " = " << i->second << std::endl ;
     }
-    else {
-      std::stringstream str ;
-      str << "Current values of the literals: " << std::endl ;
-      std::map<bioString,bioReal> m = getAllLiteralValues() ;
-      for (std::map<bioString,bioReal>::iterator i = m.begin() ;
-	   i != m.end() ;
-	   ++i) {
-	str << i->first << " = " << i->second << std::endl ;
-      }
-      if (rowIndex != NULL) {
-	str << "row number: " << *rowIndex << ", ";
-      }
-      
-      str << "Cannot take the log of a non positive number [" << childResult->f << "]" << std::endl ;
-      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+    if (rowIndex != NULL) {
+      str << "row number: " << *rowIndex << ", ";
     }
-  }
-  if (childResult->f == 0.0) {
-    theDerivatives->f = -std::numeric_limits<bioReal>::max() / 2.0 ;
+    
+    str << "Cannot take the log of a non positive number: log("
+	<< childResult->f << ")" << std::endl ;
+    throw bioExceptions(__FILE__,__LINE__,str.str()) ;
   }
   else {    
     theDerivatives->f = log(childResult->f) ;
