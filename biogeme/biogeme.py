@@ -537,8 +537,9 @@ class BIOGEME:
                             f' {hmsg} {bhhhmsg}')
 
         if not np.isfinite(gradnorm):
-            logger.debug(g)
-            sys.exit()
+            error_msg = f'The norm of the gradient is {gradnorm}: g={g}'
+            raise excep.biogemeError(error_msg)
+
         if self.saveIterations:
             if self.bestIteration is None:
                 self.bestIteration = f
