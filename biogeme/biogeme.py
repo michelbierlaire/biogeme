@@ -136,7 +136,11 @@ class BIOGEME:
         ## If True, the values are saved on a file each time the likelihood function is calculated
         self.saveIterations = False
         if not isinstance(formulas, dict):
-
+            if not isinstance(formulas, eb.Expression):
+                raise excep.biogemeError(f'Expression {formulas} is not of type '
+                                         f'biogeme.expressions.Expression. '
+                                         f'It is of type {type(formulas)}')
+            
             ## Object of type biogeme.expressions.Expression
             ## calculating the formula for the loglikelihood
             self.loglike = formulas
@@ -151,6 +155,12 @@ class BIOGEME:
             # The keys are the names of the formulas.
             self.formulas = dict({self.loglikeName: formulas})
         else:
+            ## Verify the validity of the formulas
+            for k, f in formulas.items():
+                if not isinstance(f, eb.Expression):
+                    raise excep.biogemeError(f'Expression for "{k}" is not of type '
+                                             f'biogeme.expressions.Expression. '
+                                             f'It is of type {type(f)}')
             self.loglike = formulas.get(self.loglikeName)
             self.weight = formulas.get(self.weightName)
             self.formulas = formulas
@@ -174,7 +184,16 @@ class BIOGEME:
 
         self.usedVariables = set()
         for k, f in self.formulas.items():
-            self.usedVariables = self.usedVariables.union(f.setOfVariables())
+            vars = f.setOfVariables()
+            missingVariables = [v for v in vars if v not in self.database.data]
+            if missingVariables:
+                errorMsg = (f'Variables in formula {k} missing in the database: '
+                            f'{missingVariables}')
+                raise excep.biogemeError(errorMsg)
+                
+            logger.debug(f'Formula {k}')
+            logger.debug(f.setOfVariables())
+            self.usedVariables |= f.setOfVariables()
         if self.database.isPanel():
             self.usedVariables.add(self.database.panelColumn)
         if removeUnusedVariables:
@@ -186,6 +205,8 @@ class BIOGEME:
             self.database.data = \
                 self.database.data.drop(columns=list(unusedVariables))
 
+
+                
         if suggestScales:
             suggestedScales = self.database.suggestScaling(columns=self.usedVariables)
             if not suggestedScales.empty:
@@ -510,10 +531,14 @@ class BIOGEME:
         bhhhmsg = ''
         if bhhh:
             bhhhmsg = f'BHHH norm:  {np.linalg.norm(bh):10.1g}'
+        gradnorm = np.linalg.norm(g)
         self.logger.general(f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
-                            f' Gradient norm: {np.linalg.norm(g):10.1g}'
+                            f' Gradient norm: {gradnorm:10.1g}'
                             f' {hmsg} {bhhhmsg}')
 
+        if not np.isfinite(gradnorm):
+            logger.debug(g)
+            sys.exit()
         if self.saveIterations:
             if self.bestIteration is None:
                 self.bestIteration = f
