@@ -48,6 +48,8 @@ class bioMessage(metaclass=Singleton):
 
         self.resetMessages()
 
+        self.lastLevel = None
+
 
     def resetMessages(self):
         self.messages = []
@@ -117,7 +119,8 @@ class bioMessage(metaclass=Singleton):
     def resume(self):
         """ Resume the regular operations of the logger after the use of temporarySilence
         """
-        self.screenLevel = self.lastLevel
+        if self.lastLevel is not None:
+            self.screenLevel = self.lastLevel
         
     def setSilent(self):
         """ Set both screen and file levels to 0 """
