@@ -11,35 +11,27 @@
 #include "bioDebug.h"
 #include "bioExceptions.h"
 #include <cmath>
+#include "bioSmartPointer.h"
 #include <sstream>
 
-bioExprLog::bioExprLog(bioExpression* c) :
+bioExprLog::bioExprLog(bioSmartPointer<bioExpression>  c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 
 bioExprLog::~bioExprLog() {
-  
 }
 
-bioDerivatives* bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						   bioBoolean gradient,
-						   bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				   bioBoolean gradient,
+				   bioBoolean hessian) {
   
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
-
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   if (childResult->f <= 0) {
     std::stringstream str ;
     str << "Current values of the literals: " << std::endl ;

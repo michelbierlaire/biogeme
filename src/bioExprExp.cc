@@ -10,40 +10,28 @@
 #include "bioExprExp.h"
 #include "bioExceptions.h"
 #include "bioDebug.h"
+#include "bioSmartPointer.h"
 #include <cmath>
 #include <sstream> 
 
-bioExprExp::bioExprExp(bioExpression* c) :
+bioExprExp::bioExprExp(bioSmartPointer<bioExpression>  c) :
   child(c) {
 
   listOfChildren.push_back(c) ;
 }
 
 bioExprExp::~bioExprExp() {
-
 }
 
-bioDerivatives* bioExprExp::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						   bioBoolean gradient,
-						   bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprExp::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				   bioBoolean gradient,
+				   bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  // if (childResult->f <= -10) {
-  //   std::stringstream str ;
-  //   str << "Low argument for exp " << childResult->f << "for " << child->print() ;
-  //   throw bioExceptions(__FILE__,__LINE__,str.str()) ;
-  // }
+  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   if (childResult->f <= bioLogMaxReal::the()) { 
     theDerivatives->f = exp(childResult->f) ;
   }

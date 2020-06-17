@@ -15,15 +15,15 @@
 
 class bioExprNormalPdf: public bioExpression {
  public:
-  bioExprNormalPdf(bioExpression* c) ;
+  bioExprNormalPdf(bioSmartPointer<bioExpression>  c) ;
   ~bioExprNormalPdf() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						 bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
   
   virtual bioString print(bioBoolean hp = false) const ;
   
 protected:
-  bioExpression* child ;
+  bioSmartPointer<bioExpression>  child ;
 };
 #endif

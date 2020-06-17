@@ -8,11 +8,12 @@
 //--------------------------------------------------------------------
 
 #include "bioExprAnd.h"
+#include "bioSmartPointer.h"
 #include <sstream>
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprAnd::bioExprAnd(bioExpression* l, bioExpression* r) :
+bioExprAnd::bioExprAnd(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
   left(l), right(r) {
 
   listOfChildren.push_back(l) ;
@@ -20,23 +21,16 @@ bioExprAnd::bioExprAnd(bioExpression* l, bioExpression* r) :
 }
 
 bioExprAnd::~bioExprAnd() {
-
 }
 
   
-bioDerivatives* bioExprAnd::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						     bioBoolean gradient,
-						     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+bioSmartPointer<bioDerivatives>
+bioExprAnd::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				   bioBoolean gradient,
+				   bioBoolean hessian) {
+
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {
@@ -63,12 +57,12 @@ bioDerivatives* bioExprAnd::getValueAndDerivatives(std::vector<bioUInt> literalI
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
+  bioSmartPointer<bioDerivatives> l = left->getValueAndDerivatives(literalIds,false,false) ;
   if (l->f == 0.0) {
     theDerivatives->f = 0.0 ;
   }
   else { 
-    bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
+    bioSmartPointer<bioDerivatives> r = right->getValueAndDerivatives(literalIds,false,false) ;
     if (r->f == 0.0) {
       theDerivatives->f = 0.0 ;
     }

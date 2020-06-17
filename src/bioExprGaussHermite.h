@@ -11,6 +11,7 @@
 #define bioExprGaussHermite_h
 
 #include "bioGaussHermite.h"
+#include "bioSmartPointer.h"
 
 class bioExpression ;
 
@@ -20,13 +21,17 @@ class bioExpression ;
 
 class bioExprGaussHermite: public bioGhFunction {
  public:
-  bioExprGaussHermite(bioExpression* e, std::vector<bioUInt> derivl, bioUInt l, bioBoolean wg, bioBoolean wh) ;
+  bioExprGaussHermite(bioSmartPointer<bioExpression>  e,
+		      std::vector<bioUInt> derivl,
+		      bioUInt l,
+		      bioBoolean wg,
+		      bioBoolean wh) ;
   std::vector<bioReal> getValue(bioReal x) ;
   bioUInt getSize() const ;
 private:
   bioBoolean withGradient ;
   bioBoolean withHessian ;
-  bioExpression* theExpression ;
+  bioSmartPointer<bioExpression>  theExpression ;
   std::vector<bioUInt> derivLiteralIds ;
   bioUInt rvId;
   bioReal theValue ;

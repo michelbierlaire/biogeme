@@ -16,16 +16,16 @@
 
 class bioExprLogLogit: public bioExpression {
  public:
-  bioExprLogLogit(bioExpression* c, std::map<bioUInt,bioExpression*> u, std::map<bioUInt,bioExpression*> a) ;
+  bioExprLogLogit(bioSmartPointer<bioExpression>  c, std::map<bioUInt,bioSmartPointer<bioExpression> > u, std::map<bioUInt,bioSmartPointer<bioExpression> > a) ;
   ~bioExprLogLogit() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
-  bioExpression* choice ;
-  std::map<bioUInt,bioExpression*> utilities ;
-  std::map<bioUInt,bioExpression*> availabilities ;
+  bioSmartPointer<bioExpression>  choice ;
+  std::map<bioUInt,bioSmartPointer<bioExpression> > utilities ;
+  std::map<bioUInt,bioSmartPointer<bioExpression> > availabilities ;
 };
 
 

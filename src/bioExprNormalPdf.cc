@@ -8,33 +8,26 @@
 
 #include "bioExprNormalPdf.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include <cmath>
 #include "bioDebug.h"
 
-bioExprNormalPdf::bioExprNormalPdf(bioExpression* c) :
+bioExprNormalPdf::bioExprNormalPdf(bioSmartPointer<bioExpression>  c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
-bioExprNormalPdf::~bioExprNormalPdf() {
 
+bioExprNormalPdf::~bioExprNormalPdf() {
 }
 
-bioDerivatives* bioExprNormalPdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							  bioBoolean gradient,
-							  bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprNormalPdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					 bioBoolean gradient,
+					 bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
-
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   bioReal x = - childResult->f * childResult->f / 2.0 ;
   if (x <= bioLogMaxReal::the()) { 
     theDerivatives->f = exp(x) * 0.3989422804 ;

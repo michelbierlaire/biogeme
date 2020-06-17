@@ -10,9 +10,10 @@
 #include "bioExprMinus.h"
 #include "bioDebug.h"
 
+#include "bioSmartPointer.h"
 #include <sstream>
 
-bioExprMinus::bioExprMinus(bioExpression* l, bioExpression* r) :
+bioExprMinus::bioExprMinus(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
   left(l), right(r) {
   listOfChildren.push_back(l) ;
   listOfChildren.push_back(r) ;
@@ -20,26 +21,18 @@ bioExprMinus::bioExprMinus(bioExpression* l, bioExpression* r) :
 }
 
 bioExprMinus::~bioExprMinus() {
-
 }
 
-bioDerivatives* bioExprMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						     bioBoolean gradient,
-						     bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				     bioBoolean gradient,
+				     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
   theDerivatives->f = leftResult->f - rightResult->f ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {

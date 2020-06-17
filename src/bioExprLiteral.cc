@@ -9,6 +9,7 @@
 
 #include "bioExprLiteral.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioExceptions.h"
 #include "bioDebug.h"
 
@@ -19,26 +20,17 @@ bioExprLiteral::~bioExprLiteral() {
 }
 
 
-bioDerivatives* bioExprLiteral::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						       bioBoolean gradient,
-						       bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprLiteral::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				       bioBoolean gradient,
+				       bioBoolean hessian) {
 
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
-  
-  
   if (gradient) {
     if (hessian) {
       theDerivatives->setDerivativesToZero() ;

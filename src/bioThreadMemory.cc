@@ -21,16 +21,6 @@ bioThreadMemory::bioThreadMemory(bioUInt nThreads,bioUInt dim):
 }
 
 bioThreadMemory::~bioThreadMemory() {
-  for(std::vector<bioFormula*>::iterator i = loglikes.begin() ;
-      i != loglikes.end() ;
-      ++i) {
-    delete(*i) ;
-  }
-  for(std::vector<bioFormula*>::iterator i = weights.begin() ;
-      i != weights.end() ;
-      ++i) {
-    delete(*i) ;
-  }
 }
 
 
@@ -59,32 +49,22 @@ bioThreadArg* bioThreadMemory::getInput(bioUInt t) {
 
 
 void bioThreadMemory::setLoglike(std::vector<bioString> f) {
-  for(std::vector<bioFormula*>::iterator i =  loglikes.begin() ;
+  loglikes.resize(numberOfThreads()) ;
+  for(std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
       i != loglikes.end() ;
       ++i) {
-    delete(*i) ;
-  }
-  loglikes.erase(loglikes.begin(),loglikes.end()) ;
-  for (bioUInt i= 0 ; i < numberOfThreads() ; ++i) {
-    bioFormula* ptr = new bioFormula(f) ;
-    loglikes.push_back(ptr) ;
+    *i = bioSmartPointer<bioFormula>(new bioFormula(f)) ;
   }
 }
 
 void bioThreadMemory::setWeight(std::vector<bioString> w) {
-  for(std::vector<bioFormula*>::iterator i =  weights.begin() ;
+  weights.resize(numberOfThreads()) ;
+  for(std::vector<bioSmartPointer<bioFormula> >::iterator i =  weights.begin() ;
       i != weights.end() ;
       ++i) {
-    delete(*i) ;
-  }
-  weights.erase(weights.begin(),weights.end()) ;
-  for (bioUInt i= 0 ; i < numberOfThreads() ; ++i) {
-    bioFormula* ptr = new bioFormula(w) ;
-    weights.push_back(ptr) ;
+    *i = bioSmartPointer<bioFormula>(new bioFormula(w)) ;
   }
 }
-
-
 
 bioUInt bioThreadMemory::numberOfThreads() {
   return inputStructures.size() ;
@@ -94,12 +74,12 @@ bioUInt bioThreadMemory::dimension() {
 }
 
 void bioThreadMemory::setParameters(std::vector<bioReal>* p) {
-  for (std::vector<bioFormula*>::iterator i = loglikes.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
        i != loglikes.end() ;
        ++i) {
     (*i)->setParameters(p) ;
   }
-  for (std::vector<bioFormula*>::iterator i = weights.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = weights.begin() ;
        i != weights.end() ;
        ++i) {
     (*i)->setParameters(p) ;
@@ -107,12 +87,12 @@ void bioThreadMemory::setParameters(std::vector<bioReal>* p) {
 }
 
 void bioThreadMemory::setFixedParameters(std::vector<bioReal>* p) {
-  for (std::vector<bioFormula*>::iterator i = loglikes.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
        i != loglikes.end() ;
        ++i) {
     (*i)->setFixedParameters(p) ;
   }
-  for (std::vector<bioFormula*>::iterator i = weights.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = weights.begin() ;
        i != weights.end() ;
        ++i) {
     (*i)->setFixedParameters(p) ;
@@ -121,12 +101,12 @@ void bioThreadMemory::setFixedParameters(std::vector<bioReal>* p) {
 }
 
 void bioThreadMemory::setData(std::vector< std::vector<bioReal> >* d) {
-  for (std::vector<bioFormula*>::iterator i = loglikes.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
        i != loglikes.end() ;
        ++i) {
     (*i)->setData(d) ;
   }
-  for (std::vector<bioFormula*>::iterator i = weights.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = weights.begin() ;
        i != weights.end() ;
        ++i) {
     (*i)->setData(d) ;
@@ -135,12 +115,12 @@ void bioThreadMemory::setData(std::vector< std::vector<bioReal> >* d) {
 }
 
 void bioThreadMemory::setMissingData(bioReal md) {
-  for (std::vector<bioFormula*>::iterator i = loglikes.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
        i != loglikes.end() ;
        ++i) {
     (*i)->setMissingData(md) ;
   }
-  for (std::vector<bioFormula*>::iterator i = weights.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = weights.begin() ;
        i != weights.end() ;
        ++i) {
     (*i)->setMissingData(md) ;
@@ -149,12 +129,12 @@ void bioThreadMemory::setMissingData(bioReal md) {
 
 
 void bioThreadMemory::setDataMap(std::vector< std::vector<bioUInt> >* dm) {
-  for (std::vector<bioFormula*>::iterator i = loglikes.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
        i != loglikes.end() ;
        ++i) {
     (*i)->setDataMap(dm) ;
   }
-  for (std::vector<bioFormula*>::iterator i = weights.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = weights.begin() ;
        i != weights.end() ;
        ++i) {
     (*i)->setDataMap(dm) ;
@@ -162,12 +142,12 @@ void bioThreadMemory::setDataMap(std::vector< std::vector<bioUInt> >* dm) {
 }
 
 void bioThreadMemory::setDraws(std::vector< std::vector< std::vector<bioReal> > >* d) {
-  for (std::vector<bioFormula*>::iterator i = loglikes.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = loglikes.begin() ;
        i != loglikes.end() ;
        ++i) {
     (*i)->setDraws(d) ;
   }
-  for (std::vector<bioFormula*>::iterator i = weights.begin() ;
+  for (std::vector<bioSmartPointer<bioFormula> >::iterator i = weights.begin() ;
        i != weights.end() ;
        ++i) {
     (*i)->setDraws(d) ;

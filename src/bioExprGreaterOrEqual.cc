@@ -9,10 +9,11 @@
 
 #include "bioExprGreaterOrEqual.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprGreaterOrEqual::bioExprGreaterOrEqual(bioExpression* l, bioExpression* r) :
+bioExprGreaterOrEqual::bioExprGreaterOrEqual(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
   left(l), right(r) {
 
   listOfChildren.push_back(l) ;
@@ -20,22 +21,14 @@ bioExprGreaterOrEqual::bioExprGreaterOrEqual(bioExpression* l, bioExpression* r)
 }
 
 bioExprGreaterOrEqual::~bioExprGreaterOrEqual() {
-
 }
 
-bioDerivatives* bioExprGreaterOrEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							      bioBoolean gradient,
-							      bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprGreaterOrEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					      bioBoolean gradient,
+					      bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {

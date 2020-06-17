@@ -15,16 +15,16 @@
 
 class bioExprLessOrEqual: public bioExpression {
  public:
-  bioExprLessOrEqual(bioExpression* l, bioExpression* r) ;
+  bioExprLessOrEqual(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) ;
   ~bioExprLessOrEqual() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						 bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
 
   virtual bioString print(bioBoolean hp = false) const ;
  protected:
-  bioExpression* left ;
-  bioExpression* right ;
+  bioSmartPointer<bioExpression>  left ;
+  bioSmartPointer<bioExpression>  right ;
 };
 
 

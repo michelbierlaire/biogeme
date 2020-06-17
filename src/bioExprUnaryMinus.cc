@@ -9,32 +9,24 @@
 
 #include "bioExprUnaryMinus.h"
 #include "bioDebug.h"
-#include <sstream> 
+#include <sstream>
+#include "bioSmartPointer.h"
 
-bioExprUnaryMinus::bioExprUnaryMinus(bioExpression* c) :
+bioExprUnaryMinus::bioExprUnaryMinus(bioSmartPointer<bioExpression>  c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 bioExprUnaryMinus::~bioExprUnaryMinus() {
-
 }
 
-bioDerivatives* bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+bioSmartPointer<bioDerivatives> bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   theDerivatives->f = - childResult->f ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {

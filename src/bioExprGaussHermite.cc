@@ -13,7 +13,7 @@
 #include "bioExpression.h"
 #include "bioDebug.h"
 
-bioExprGaussHermite::bioExprGaussHermite(bioExpression* e,
+bioExprGaussHermite::bioExprGaussHermite(bioSmartPointer<bioExpression>  e,
 					 std::vector<bioUInt> derivl,
 					 bioUInt l,
 					 bioBoolean wg,
@@ -34,7 +34,7 @@ std::vector<bioReal> bioExprGaussHermite::getValue(bioReal x) {
   std::vector<bioReal> result ;
   theValue = x ;
   bioUInt n = derivLiteralIds.size() ;
-  bioDerivatives* fgh = theExpression->getValueAndDerivatives(derivLiteralIds,withGradient,withHessian) ;
+  bioSmartPointer<bioDerivatives> fgh = theExpression->getValueAndDerivatives(derivLiteralIds,withGradient,withHessian) ;
   result.push_back(fgh->f) ;
   if (withGradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {

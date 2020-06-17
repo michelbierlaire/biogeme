@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <cmath>
+#include "bioSmartPointer.h"
 #include <vector>
 #include "bioDebug.h"
 #include "bioExceptions.h"
@@ -26,27 +27,19 @@ bioExprLinearUtility::bioExprLinearUtility(std::vector<bioLinearTerm> t):
 }
 
 bioExprLinearUtility::~bioExprLinearUtility() {
-
 }
 
-bioDerivatives* bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							bioBoolean gradient,
-							bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					     bioBoolean gradient,
+					     bioBoolean hessian) {
 
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
   
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
-  
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+
   bioUInt n = literalIds.size() ;
   theDerivatives->f = 0.0 ;
   std::map<bioString,bioReal> values = getAllLiteralValues() ;

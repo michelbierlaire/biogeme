@@ -9,33 +9,26 @@
 
 #include "bioExprPanelTrajectory.h"
 #include <cmath>
+#include "bioSmartPointer.h"
 #include <sstream>
 #include "bioExceptions.h"
 #include "bioDebug.h"
 
-bioExprPanelTrajectory::bioExprPanelTrajectory(bioExpression* c) :
+bioExprPanelTrajectory::bioExprPanelTrajectory(bioSmartPointer<bioExpression>  c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 
 bioExprPanelTrajectory::~bioExprPanelTrajectory() {
-
 }
 
-bioDerivatives* bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							  bioBoolean gradient,
-							  bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					       bioBoolean gradient,
+					       bioBoolean hessian) {
 
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   theDerivatives->f = 0.0 ;
   if (gradient) {
@@ -63,7 +56,7 @@ bioDerivatives* bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUI
   child->setRowIndex(&theRowIndex) ;
 
   for (theRowIndex = (*dataMap)[*individualIndex][0]  ; theRowIndex <= (*dataMap)[*individualIndex][1] ; ++theRowIndex) {
-    bioDerivatives* childResult(NULL) ;
+    bioSmartPointer<bioDerivatives> childResult(NULL) ;
     try {
       childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
       // if (childResult->f <= 1.0e-6) {

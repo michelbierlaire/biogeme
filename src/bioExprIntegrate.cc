@@ -10,26 +10,26 @@
 #include "bioExprIntegrate.h"
 #include <sstream>
 #include <cmath>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 #include "bioExprGaussHermite.h"
 
 
-bioExprIntegrate::bioExprIntegrate(bioExpression* c, bioUInt id) :
+bioExprIntegrate::bioExprIntegrate(bioSmartPointer<bioExpression>  c, bioUInt id) :
   child(c), rvId(id) {
   listOfChildren.push_back(c) ;
 }
 bioExprIntegrate::~bioExprIntegrate() {
-
 }
 
-bioDerivatives* bioExprIntegrate::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							  bioBoolean gradient,
-							  bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprIntegrate::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					 bioBoolean gradient,
+					 bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  
 
   bioExprGaussHermite theGh(child,literalIds,rvId,gradient,hessian) ;   
   bioGaussHermite theGhAlgo(&theGh) ;

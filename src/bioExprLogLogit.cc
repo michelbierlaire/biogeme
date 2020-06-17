@@ -9,21 +9,22 @@
 
 #include <sstream>
 #include <cmath>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 #include "bioExprLogLogit.h"
 
-bioExprLogLogit::bioExprLogLogit(bioExpression* c,
-				 std::map<bioUInt,bioExpression*> u,
-				 std::map<bioUInt,bioExpression*> a) :
+bioExprLogLogit::bioExprLogLogit(bioSmartPointer<bioExpression>  c,
+				 std::map<bioUInt,bioSmartPointer<bioExpression> > u,
+				 std::map<bioUInt,bioSmartPointer<bioExpression> > a) :
   choice(c), utilities(u), availabilities(a) {
   listOfChildren.push_back(choice) ;
-  for (std::map<bioUInt,bioExpression*>::iterator i = u.begin() ;
+  for (std::map<bioUInt,bioSmartPointer<bioExpression> >::iterator i = u.begin() ;
        i != u.end();
        ++i) {
     listOfChildren.push_back(i->second) ;
   }
-  for (std::map<bioUInt,bioExpression*>::iterator i = a.begin() ;
+  for (std::map<bioUInt,bioSmartPointer<bioExpression> >::iterator i = a.begin() ;
        i != a.end();
        ++i) {
     listOfChildren.push_back(i->second) ;
@@ -31,10 +32,9 @@ bioExprLogLogit::bioExprLogLogit(bioExpression* c,
 }
 
 bioExprLogLogit::~bioExprLogLogit() {
-
 }
 
-bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+bioSmartPointer<bioDerivatives> bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							bioBoolean gradient,
 							bioBoolean hessian) {
 
@@ -42,23 +42,15 @@ bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> lit
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
   
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
-  
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+
   bioUInt n = literalIds.size() ;
   bioUInt chosen = bioUInt(choice->getValue()) ;
-  std::vector<bioDerivatives*> Vs ;
-  bioDerivatives* chosenUtility(NULL) ;
-  bioDerivatives* V;
+  std::vector<bioSmartPointer<bioDerivatives> > Vs ;
+  bioSmartPointer<bioDerivatives> chosenUtility(NULL) ;
+  bioSmartPointer<bioDerivatives> V;
   bioReal largestUtility(-bioMaxReal) ;
-  for (std::map<bioUInt,bioExpression*>::iterator i = availabilities.begin() ;
+  for (std::map<bioUInt, bioSmartPointer<bioExpression> >::iterator i = availabilities.begin() ;
        i != availabilities.end() ;
        ++i) {
     bioReal av = i->second->getValue() ;
@@ -83,7 +75,7 @@ bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> lit
     }
     else {
       //      DEBUG_MESSAGE("FIND THE EQUIVALENT OF ZIP IN C++")
-      std::map<bioUInt,bioExpression*>::iterator theUtil = utilities.find(i->first) ;
+      std::map<bioUInt,bioSmartPointer<bioExpression> >::iterator theUtil = utilities.find(i->first) ;
       if (theUtil == utilities.end()) {
 	std::stringstream str ;
 	str << "Inconsistent dictionaries. Alternative " << i->first << " defined in the availabilities, and not in the utilities" ;
@@ -112,7 +104,7 @@ bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> lit
     str << "Alternative "
 	<< chosen
 	<< " is not known. The alternatives that have been defined are" ;
-    for (std::map<bioUInt,bioExpression*>::iterator i = utilities.begin() ;
+    for (std::map<bioUInt,bioSmartPointer<bioExpression> >::iterator i = utilities.begin() ;
 	 i != utilities.end() ;
 	 ++i) {
       str << " " << i->first ;
@@ -122,7 +114,7 @@ bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> lit
   bioReal maxexp = ceil(largestUtility / 10.0) * 10.0 ;
 
   
-  for (std::vector<bioDerivatives*>::iterator i = Vs.begin() ;
+  for (std::vector<bioSmartPointer<bioDerivatives> >::iterator i = Vs.begin() ;
        i != Vs.end() ;
        ++i) {
     (*i)->f -= maxexp ;
@@ -184,7 +176,7 @@ bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUInt> lit
 bioString bioExprLogLogit::print(bioBoolean hp) const {
   std::stringstream str ;
   str << "Logit[" << choice->print(hp) << "](" ;
-  for (std::map<bioUInt,bioExpression*>::const_iterator i = utilities.begin() ;
+  for (std::map<bioUInt,bioSmartPointer<bioExpression> >::const_iterator i = utilities.begin() ;
        i != utilities.end() ;
        ++i) {
     if (i != utilities.begin()) {

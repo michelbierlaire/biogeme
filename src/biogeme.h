@@ -92,7 +92,7 @@ private: // data
   bioBoolean fixedBetasDefined ;
   bioBoolean calculateHessian ;
   bioBoolean calculateBhhh ;
-  bioThreadMemory* theThreadMemory ;
+  bioSmartPointer<bioThreadMemory> theThreadMemory ;
   std::vector< std::vector<bioReal> > theData ;
   std::vector< std::vector<bioUInt> > theDataMap ;
   std::vector< std::vector< std::vector<bioReal> > > theDraws ;

@@ -15,15 +15,15 @@
 
 class bioExprLogLogitFullChoiceSet: public bioExpression {
  public:
-  bioExprLogLogitFullChoiceSet(bioExpression* c, std::map<bioUInt,bioExpression*> u) ;
+  bioExprLogLogitFullChoiceSet(bioSmartPointer<bioExpression>  c, std::map<bioUInt,bioSmartPointer<bioExpression> > u) ;
   ~bioExprLogLogitFullChoiceSet() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
-  bioExpression* choice ;
-  std::map<bioUInt,bioExpression*> utilities ;
+  bioSmartPointer<bioExpression>  choice ;
+  std::map<bioUInt,bioSmartPointer<bioExpression> > utilities ;
 };
 
 

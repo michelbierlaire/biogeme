@@ -7,35 +7,27 @@
 //
 //--------------------------------------------------------------------
 
-#include "bioExprNormalCdf.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include <cmath>
+#include "bioExprNormalCdf.h"
 #include "bioDebug.h"
 
-bioExprNormalCdf::bioExprNormalCdf(bioExpression* c) :
+bioExprNormalCdf::bioExprNormalCdf(bioSmartPointer<bioExpression>  c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 bioExprNormalCdf::~bioExprNormalCdf() {
-
 }
 
-bioDerivatives* bioExprNormalCdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							  bioBoolean gradient,
-							  bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprNormalCdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					 bioBoolean gradient,
+					 bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
-
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   theDerivatives->f = theNormalCdf.compute(childResult->f) ;
 
   if (gradient) {

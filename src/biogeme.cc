@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include "bioSmartPointer.h"
 #include <algorithm>
 #include <pthread.h>
 #include "bioExceptions.h"
@@ -24,13 +25,15 @@ static std::exception_ptr theExceptionPtr = nullptr ;
 
 void *computeFunctionForThread( void *ptr );
 
-biogeme::biogeme(): nbrOfThreads(1),calculateHessian(false),calculateBhhh(false),fixedBetasDefined(false),theThreadMemory(NULL),panel(false),forceDataPreparation(true) {
+biogeme::biogeme(): nbrOfThreads(1),
+		    fixedBetasDefined(false),
+		    calculateHessian(false),
+		    calculateBhhh(false),
+		    panel(false),
+		    forceDataPreparation(true) {
 }
 
 biogeme::~biogeme() {
-  if (theThreadMemory != NULL) {
-    delete(theThreadMemory) ;
-  }
 }
 
 void biogeme::setPanel(bioBoolean p) {
@@ -56,7 +59,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 				   std::vector< std::vector<bioReal> >* h,
 				   std::vector< std::vector<bioReal> >* bh) {
 
-  if ( g != NULL) {
+  if (g != NULL) {
     if (g->size() != theThreadMemory->dimension()) {
       std::stringstream str ;
       str << "Gradient: inconsistent dimensions " << g->size() << " and " << theThreadMemory->dimension() ;
@@ -103,7 +106,6 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
     catch (std::exception& e) {
       throw bioExceptions(__FILE__,__LINE__, e.what()) ;
     }
-    
 
     if (diagnostic != 0) {
       std::stringstream str ;
@@ -223,7 +225,7 @@ bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal>& betas,
   try {
     r = applyTheFormula(&g,hptr,bhptr) ;
   }
-  catch (std::exception& e) {
+  catch (const std::bad_alloc& e) {
       throw bioExceptions(__FILE__,__LINE__, e.what()) ;
   }
   return r ;
@@ -271,7 +273,7 @@ void *computeFunctionForThread(void* fctPtr) {
       }
     }
 
-    bioExpression* myLoglike = input->theLoglike->getExpression() ;
+    bioSmartPointer<bioExpression> myLoglike = input->theLoglike->getExpression() ;
     if (input->panel) {
       // Panel data
       bioUInt individual ;
@@ -283,12 +285,9 @@ void *computeFunctionForThread(void* fctPtr) {
 	  w = input->theWeight->getExpression()->getValue() ;
 	}
       
-	bioDerivatives* fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
-								 input->calcGradient,
-								 input->calcHessian) ;
-      
-      
-
+	bioSmartPointer<bioDerivatives> fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
+										input->calcGradient,
+										input->calcHessian) ;
 	if (input->theWeight == NULL) {
 	  input->result += fgh->f ;
 	  for (bioUInt i = 0 ; i < input->grad.size() ; ++i) {
@@ -344,7 +343,7 @@ void *computeFunctionForThread(void* fctPtr) {
 	    w = input->theWeight->getExpression()->getValue() ;
 	  }
 	
-	  bioDerivatives* fgh(NULL) ;
+	  bioSmartPointer<bioDerivatives> fgh(NULL) ;
 	  fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
 						  input->calcGradient,
 						  input->calcHessian) ;
@@ -405,20 +404,11 @@ void *computeFunctionForThread(void* fctPtr) {
 }
 
 void biogeme::prepareMemoryForThreads(bioBoolean force) {
-  if (theThreadMemory != NULL) {
-    if (theThreadMemory->numberOfThreads() != nbrOfThreads ||
-	theThreadMemory->dimension() < literalIds.size() ||
-	force) {
-      delete(theThreadMemory) ;
-      theThreadMemory = NULL ;
-    }
-  }
-  if (theThreadMemory == NULL) {
-    theThreadMemory = new bioThreadMemory(nbrOfThreads,literalIds.size()) ;
-    theThreadMemory->setLoglike(theLoglikeString) ;
-    if (!theWeightString.empty()) {
-      theThreadMemory->setWeight(theWeightString) ;
-    }
+  theThreadMemory = bioSmartPointer<bioThreadMemory>(new bioThreadMemory(nbrOfThreads,
+									 literalIds.size())) ;
+  theThreadMemory->setLoglike(theLoglikeString) ;
+  if (!theWeightString.empty()) {
+    theThreadMemory->setWeight(theWeightString) ;
   }
 }
 
@@ -536,7 +526,7 @@ void biogeme::prepareData() {
       theInput[thread]->endData = (thread == nbrOfThreads-1) ? theData.size() : (thread+1) * sizeOfEachBlock ;
     }
     theInput[thread]->literalIds = &literalIds ;
-    bioExpression* theLoglike = theInput[thread]->theLoglike->getExpression() ;
+    bioSmartPointer<bioExpression>  theLoglike = theInput[thread]->theLoglike->getExpression() ;
     theLoglike->setData(theInput[thread]->data) ;
     if (panel) {
       theLoglike->setDataMap(theInput[thread]->dataMap) ;

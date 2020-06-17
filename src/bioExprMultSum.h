@@ -16,15 +16,15 @@
 
 class bioExprMultSum: public bioExpression {
  public:
-  bioExprMultSum(std::vector<bioExpression*> e) ;
+  bioExprMultSum(std::vector<bioSmartPointer<bioExpression> > e) ;
   ~bioExprMultSum() ;
   
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
-  std::vector<bioExpression*> expressions ;
+  std::vector<bioSmartPointer<bioExpression> > expressions ;
 };
 
 

@@ -9,10 +9,11 @@
 
 #include "bioExprLessOrEqual.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprLessOrEqual::bioExprLessOrEqual(bioExpression* l, bioExpression* r) :
+bioExprLessOrEqual::bioExprLessOrEqual(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
   left(l), right(r) {
   listOfChildren.push_back(l) ;
   listOfChildren.push_back(r) ;
@@ -20,23 +21,14 @@ bioExprLessOrEqual::bioExprLessOrEqual(bioExpression* l, bioExpression* r) :
 }
 
 bioExprLessOrEqual::~bioExprLessOrEqual() {
-
 }
 
-bioDerivatives* bioExprLessOrEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							   bioBoolean gradient,
-							   bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprLessOrEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					   bioBoolean gradient,
+					   bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
-
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {

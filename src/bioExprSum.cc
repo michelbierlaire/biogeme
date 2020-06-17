@@ -9,32 +9,25 @@
 
 #include "bioExprSum.h"
 #include "bioDebug.h"
+#include "bioSmartPointer.h"
 #include <sstream>
 
-bioExprSum::bioExprSum(bioExpression* c, std::vector< std::vector<bioReal> >* d) :
+bioExprSum::bioExprSum(bioSmartPointer<bioExpression>  c, std::vector< std::vector<bioReal> >* d) :
   child(c), data(d) {
   listOfChildren.push_back(c) ;
 
 }
 
 bioExprSum::~bioExprSum() {
-
 }
   
-bioDerivatives* bioExprSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						   bioBoolean gradient,
-						   bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				   bioBoolean gradient,
+				   bioBoolean hessian) {
 
   bioString str = print(true) ;
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
   theDerivatives->setToZero() ;
@@ -42,7 +35,7 @@ bioDerivatives* bioExprSum::getValueAndDerivatives(std::vector<bioUInt> literalI
        rowIterator != data->end() ;
        ++rowIterator) {
     child->setVariables(&(*rowIterator)) ;
-    bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
     theDerivatives->f += childResult->f ;
     if (gradient) {
       for (bioUInt i = 0 ; i < n ; ++i) {

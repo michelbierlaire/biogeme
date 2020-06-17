@@ -9,25 +9,23 @@
 
 #include "bioExprDerive.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
 
-bioExprDerive::bioExprDerive(bioExpression* c, bioUInt lid) :
+bioExprDerive::bioExprDerive(bioSmartPointer<bioExpression>  c, bioUInt lid) :
   child(c), literalId(lid) {
   listOfChildren.push_back(c) ;
 }
 bioExprDerive::~bioExprDerive() {
-
 }
 
-bioDerivatives* bioExprDerive::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							  bioBoolean gradient,
-							  bioBoolean hessian) {
+bioSmartPointer<bioDerivatives> bioExprDerive::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								      bioBoolean gradient,
+								      bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
   if (gradient || hessian) {
     throw bioExceptions(__FILE__,__LINE__,"No derivatives are available for this expression, yet.") ;
   }
@@ -35,7 +33,7 @@ bioDerivatives* bioExprDerive::getValueAndDerivatives(std::vector<bioUInt> liter
   std::vector<bioUInt> theIds ;
   theIds.push_back(literalId) ;
 
-  bioDerivatives* childResult = child->getValueAndDerivatives(theIds,true,false) ;
+  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(theIds,true,false) ;
   if (childResult == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"derivatives") ;
   }

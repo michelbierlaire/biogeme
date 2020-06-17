@@ -16,16 +16,16 @@
 
 class bioExprNormalCdf: public bioExpression {
  public:
-  bioExprNormalCdf(bioExpression* c) ;
+  bioExprNormalCdf(bioSmartPointer<bioExpression>  c) ;
   ~bioExprNormalCdf() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						 bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
   
   virtual bioString print(bioBoolean hp = false) const ;
   
 protected:
   bioNormalCdf theNormalCdf ;
-  bioExpression* child ;
+  bioSmartPointer<bioExpression>  child ;
 };
 #endif

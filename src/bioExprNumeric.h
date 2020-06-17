@@ -17,9 +17,9 @@ class bioExprNumeric: public bioExpression {
  public:
   bioExprNumeric(bioReal v) ;
   ~bioExprNumeric() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						 bioBoolean gradient,
-						bioBoolean hessian) ;
+  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+								 bioBoolean gradient,
+								 bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
   bioReal value ;

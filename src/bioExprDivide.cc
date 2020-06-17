@@ -9,10 +9,11 @@
 
 #include "bioExprDivide.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprDivide::bioExprDivide(bioExpression* l, bioExpression* r) :
+bioExprDivide::bioExprDivide(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
   left(l), right(r) {
     listOfChildren.push_back(l) ;
     listOfChildren.push_back(r) ;
@@ -23,28 +24,20 @@ bioExprDivide::~bioExprDivide() {
 
 }
 
-bioDerivatives* bioExprDivide::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						      bioBoolean gradient,
-						      bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprDivide::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				      bioBoolean gradient,
+				      bioBoolean hessian) {
 
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
-
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  bioDerivatives* rightResult = NULL ;
+  bioSmartPointer<bioDerivatives> leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> rightResult = NULL ;
   bioReal rightValue ;
   if (leftResult->f == 0.0 && !hessian) {
     // No need to calculate the derivatives of the other term

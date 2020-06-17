@@ -8,17 +8,18 @@
 //--------------------------------------------------------------------
 
 #include <sstream>
+#include "bioSmartPointer.h"
 #include <cmath>
 #include "bioDebug.h"
 #include "bioExceptions.h"
 #include "bioExprElem.h"
 
-bioExprElem::bioExprElem(bioExpression* k, std::map<bioUInt,bioExpression*> d):
+bioExprElem::bioExprElem(bioSmartPointer<bioExpression>  k, std::map<bioUInt,bioSmartPointer<bioExpression> > d):
   key(k), dictOfExpressions(d) {
 
 
   listOfChildren.push_back(k) ;
-  for (std::map<bioUInt,bioExpression*>::iterator i = d.begin() ;
+  for (std::map<bioUInt,bioSmartPointer<bioExpression> >::iterator i = d.begin() ;
        i != d.end();
        ++i) {
     if (i->second == NULL) {
@@ -30,31 +31,22 @@ bioExprElem::bioExprElem(bioExpression* k, std::map<bioUInt,bioExpression*> d):
 }
 
 bioExprElem::~bioExprElem() {
-
 }
 
-bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						    bioBoolean gradient,
-				      bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				    bioBoolean gradient,
+				    bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
-
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt k = bioUInt(key->getValue()) ;
 
-  std::map<bioUInt,bioExpression*>::const_iterator found = dictOfExpressions.find(k) ;
+  std::map<bioUInt,bioSmartPointer<bioExpression> >::iterator found = dictOfExpressions.find(k) ;
   if (found == dictOfExpressions.end()) {
     std::stringstream str ;
     str << "Key (" << key->print(true) << "=" << k << ") is not present in dictionary: " << std::endl;
-    for (std::map<bioUInt,bioExpression*>::const_iterator i = dictOfExpressions.begin() ;
+    for (std::map<bioUInt,bioSmartPointer<bioExpression> >::const_iterator i = dictOfExpressions.begin() ;
 	 i != dictOfExpressions.end() ;
 	 ++i) {
       str << "  " << i->first << ": " << i->second->print(true) << std::endl ;
@@ -64,7 +56,7 @@ bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literal
   if (found->second == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"expression") ;
   }
-  bioDerivatives* fgh =  found->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioSmartPointer<bioDerivatives> fgh = found->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
   if (fgh == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"derivatives") ;
   }
@@ -90,7 +82,7 @@ bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literal
 bioString bioExprElem::print(bioBoolean hp) const {
   std::stringstream str ;
   str << "Elem[" << key->print(hp) << "](" ;
-  for (std::map<bioUInt,bioExpression*>::const_iterator i = dictOfExpressions.begin() ;
+  for (std::map<bioUInt,bioSmartPointer<bioExpression> >::const_iterator i = dictOfExpressions.begin() ;
        i != dictOfExpressions.end() ;
        ++i) {
     if (i != dictOfExpressions.begin()) {

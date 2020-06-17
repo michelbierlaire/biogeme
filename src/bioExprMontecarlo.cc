@@ -9,30 +9,23 @@
 
 #include "bioExprMontecarlo.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprMontecarlo::bioExprMontecarlo(bioExpression* c) :
+bioExprMontecarlo::bioExprMontecarlo(bioSmartPointer<bioExpression>  c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 bioExprMontecarlo::~bioExprMontecarlo() {
-
 }
 
-bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							  bioBoolean gradient,
-							  bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+					  bioBoolean gradient,
+					  bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   theDerivatives->f = 0.0 ;
   if (gradient) {
@@ -51,7 +44,7 @@ bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> l
   bioUInt n = literalIds.size() ;
   child->setDrawIndex(&drawIndex) ;
   for (drawIndex = 0 ; drawIndex < numberOfDraws ; ++drawIndex) {
-    bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
     theDerivatives->f += childResult->f ;
     if (gradient) {
       for (bioUInt i = 0 ; i < n ; ++i) {

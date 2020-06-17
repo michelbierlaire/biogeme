@@ -9,10 +9,11 @@
 
 #include "bioExprMax.h"
 #include <sstream>
+#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprMax::bioExprMax(bioExpression* l, bioExpression* r) :
+bioExprMax::bioExprMax(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
   left(l), right(r) {
 
   listOfChildren.push_back(l) ;
@@ -20,23 +21,15 @@ bioExprMax::bioExprMax(bioExpression* l, bioExpression* r) :
 }
 
 bioExprMax::~bioExprMax() {
-
 }
 
   
-bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						     bioBoolean gradient,
-						     bioBoolean hessian) {
+bioSmartPointer<bioDerivatives>
+bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+				   bioBoolean gradient,
+				   bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
-  }
+  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   if (theDerivatives == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
@@ -48,8 +41,8 @@ bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalI
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
-  bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  bioSmartPointer<bioDerivatives> leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  bioSmartPointer<bioDerivatives> rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
   if (leftResult->f > rightResult->f) {
     theDerivatives->f = leftResult->f ;
     if (gradient) {
@@ -67,9 +60,11 @@ bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalI
     theDerivatives->f = rightResult->f ;
     if (gradient) {
       if (leftResult->f == rightResult->f) {
-	std::cout << "Warning: expression " << print()
-		  << " is not differentiable at " << leftResult->f
-		  << ". Right derivative is used." << std::endl ;
+	if (containsLiterals(literalIds)) {
+	  std::cout << "Warning: expression " << print()
+		    << " is not differentiable at " << leftResult->f
+		    << ". Right derivative is used." << std::endl ;
+	}
       }
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
 	theDerivatives->g[k] = rightResult->g[k] ;
