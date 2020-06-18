@@ -994,6 +994,7 @@ formulas.
 
         output = pd.DataFrame(index=self.database.data.index)
         for k, v in self.formulas.items():
+            logger.detailed(f'Simulate {k}')
             signature = v.getSignature()
             result = self.theC.simulateFormula(signature,
                                                betaValues,
