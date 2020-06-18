@@ -1,0 +1,14 @@
+language: python
+dist: bionic
+python: 3.8
+arch:
+ - amd64
+ - arm64
+
+install:
+  - pip install pipenv
+  - pipenv install --dev
+
+script:
+  - python setup.py install
+#  - pytest
