@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1f6005ce435d207418fd302aeb77e88f10f7534e24acac0ca88ef34b9c72aed1"
+            "sha256": "6f099c4214418581acfc212d371898da36153de27b93acf71d1a35df495930c5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,10 @@
         ]
     },
     "default": {
+        "biogeme": {
+            "editable": true,
+            "path": "."
+        },
         "cython": {
             "hashes": [
                 "sha256:0754ec9d45518d0dbb5da72db2c8b063d40c4c51779618c68431054de179387f",
