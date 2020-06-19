@@ -3,6 +3,7 @@ on: [push, pull_request]
 
 jobs:
   install:
+    name: "Install"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -11,4 +12,4 @@ jobs:
     - run: pip install pipenv
     - run: pipenv install --dev --system
     - run: python setup.py install
-#    - run: pytest
+    - run: pytest tests/simple_test.py
