@@ -10,6 +10,8 @@
 
 import numpy as np
 import biogeme.exceptions as excep
+import biogeme.messaging as msg
+
 
 from biogeme.expressions import (_bioLogLogit,
                                  _bioLogLogitFullChoiceSet,
@@ -21,7 +23,8 @@ from biogeme.expressions import (_bioLogLogit,
                                  Numeric,
                                  Beta,
                                  bioMultSum,
-                                 Variable)
+                                 Variable,
+                                 Expression)
 
 def loglogit(V, av, i):
     """The logarithm of the logit model
@@ -1163,6 +1166,9 @@ def logcnl(V, availability, nests, choice):
     :rtype: biogeme.expressions.Expression
 
     """
+    ok, message = checkValidityCNL(V, nests)
+    if not ok:
+        raise excep.biogemeError(message)
     logGi = getMevForCrossNested(V, availability, nests)
     logP = logmev(V, logGi, availability, choice)
     return logP
@@ -1362,6 +1368,9 @@ def logcnlmu(V, availability, nests, choice, mu):
     :rtype: biogeme.expressions.Expression
 
     """
+    ok, message = checkValidityCNL(V, nests)
+    if not ok:
+        raise excep.biogemeError(message)
     logGi = getMevForCrossNestedMu(V, availability, nests, mu)
     logP = logmev(V, logGi, availability, choice)
     return logP
@@ -1424,4 +1433,78 @@ def checkValidityNestedLogit(V, nests):
     if ok:
         message = 'The nested logit model is based on a partition. '
 
+    return ok, message
+
+
+def checkValidityCNL(V, nests):
+    """Verifies if the cross-nested logit specifciation is valid
+
+    :param V: dict of objects representing the utility functions of
+              each alternative, indexed by numerical ids.
+    :type V: dict(int:biogeme.expressions.Expression)
+
+    :param nests: a tuple containing as many items as nests.
+                  Each item is also a tuple containing two items
+
+          - an object of type biogeme.expressions.Expression  representing
+            the nest parameter,
+          - a dictionary mapping the alternative ids with the cross-nested
+            parameters for the corresponding nest. If an alternative is
+            missing in the dictionary, the corresponding alpha is set to zero.
+
+        Example::
+
+            alphaA = {1: alpha1a,
+                      2: alpha2a,
+                      3: alpha3a,
+                      4: alpha4a,
+                      5: alpha5a,
+                      6: alpha6a}
+            alphaB = {1: alpha1b,
+                      2: alpha2b,
+                      3: alpha3b,
+                      4: alpha4b,
+                      5: alpha5b,
+                      6: alpha6b}
+            nesta = MUA, alphaA
+            nestb = MUB, alphaB
+            nests = nesta, nestb
+
+    :type nests: tuple
+
+    :return: a tuple ok, message, where the message explains the
+             problem is the nested structure is not OK.
+    :rtype: tuple(bool, str)
+    """
+
+    ok = True
+    message = ''
+    
+    fullChoiceSet = {i for i, v in V.items()}
+
+    alt = {i: list() for i in V}
+    number = 0
+    for mu, alpha in nests:
+        for i, a in alpha.items():
+            if a != 0.0:
+                alt[i].append(a)
+        number += 1
+
+    problems_zero = []
+    problems_one = []
+    for i, ell in alt.items():
+        if not ell:
+            problems_zero.append(i)
+            ok = False
+        if len(ell) == 1 and isinstance(ell[0], Expression):
+            problems_one.append(i)
+            ok = False
+            
+    if problems_zero:
+        message += f'Alternative(s) not in any nest: {problems_zero}'
+
+    if problems_one:
+        message += (f' Alternative in exactly one nest, '
+                    f'and parameter alpha is not constant: {problems_one}')
+    
     return ok, message
