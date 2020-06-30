@@ -26,7 +26,7 @@ class bioExprLiteral: public bioExpression {
   // the list. Used to simplify the calculation of the derivatives
   virtual bioBoolean containsLiterals(std::vector<bioUInt> literalIds) const ;
   virtual void setData(std::vector< std::vector<bioReal> >* d) ;
-  virtual std::map<bioString,bioReal> getAllLiteralValues() ;
+  virtual std::map<bioString,bioReal> getAllLiteralValues() const ;
   virtual bioUInt getLiteralId() const ;
   
 protected:
