@@ -89,7 +89,7 @@ void bioExprLiteral::setData(std::vector< std::vector<bioReal> >* d) {
 }
 
 
-std::map<bioString,bioReal> bioExprLiteral::getAllLiteralValues() {
+std::map<bioString,bioReal> bioExprLiteral::getAllLiteralValues() const {
   std::map<bioString,bioReal> m ;
   bioReal v ;
   try {
