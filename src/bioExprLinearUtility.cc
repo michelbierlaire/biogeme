@@ -19,6 +19,20 @@ bioExprLinearUtility::bioExprLinearUtility(std::vector<bioLinearTerm> t):
   for (std::vector<bioLinearTerm>::iterator i = listOfTerms.begin() ;
        i != listOfTerms.end() ;
        ++i) {
+    bioBoolean problem = false ;
+    if (i->theBeta == NULL) {
+      DEBUG_MESSAGE("Null pointer to beta") ;
+      problem = true ;
+    }
+    if (i->theVar == NULL) {
+      DEBUG_MESSAGE("Null pointer to var") ;
+      problem = true ;
+    }
+    if (problem) {
+      throw bioExceptions(__FILE__,__LINE__,"Null pointer in linear utility expression") ;
+    }
+      
+    
     listOfChildren.push_back(i->theBeta) ;
     listOfChildren.push_back(i->theVar) ;
     theFriend[i->theBetaId] = i->theVarName ;
@@ -49,6 +63,7 @@ bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt> literalIds,
        ++i) {
     if ((values[i->theBetaName] != 0.0) &&  (values[i->theVarName] != 0.0)) {
       theDerivatives->f += values[i->theBetaName] * values[i->theVarName] ;
+      //      DEBUG_MESSAGE(i->theBetaName << " * " <<  i->theVarName << " = " << values[i->theBetaName] * values[i->theVarName]) ;
     }
   }
   if (gradient) {
@@ -60,6 +75,8 @@ bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt> literalIds,
     }
     for (std::size_t i = 0 ; i < literalIds.size() ; ++i) {
       theDerivatives->g[i] = values[theFriend[i]] ;
+      //      DEBUG_MESSAGE("Gradient[" << i << "]=" << "value[" << theFriend[i] << "]=" <<theDerivatives->g[i]) ;
+      
     }
   } 
   return theDerivatives ;
