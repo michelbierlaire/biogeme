@@ -984,12 +984,16 @@ formulas.
                        f'It can be obtained from results.getBetaValues()')
                 raise excep.biogemeError(err)
             else:
+                for x in theBetaValues.keys():
+                    if not x in self.freeBetaNames:
+                        logger.warning(f'Parameter {x} not present in the model')
                 betaValues = list()
                 for i in range(len(self.freeBetaNames)):
                     x = self.freeBetaNames[i]
                     if x in theBetaValues:
                         betaValues.append(theBetaValues[x])
                     else:
+                        logger.warning(f'Simulation: initial value of {x} not provided.')
                         betaValues.append(self.betaInitValues[i])
 
         output = pd.DataFrame(index=self.database.data.index)
