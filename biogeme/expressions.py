@@ -2917,6 +2917,9 @@ class bioLinearUtility(Expression):
         self.children += self.betas + self.variables
 
 
+    def __str__(self):
+        return ' + '.join([f'{b} * {x}' for b, x in self.listOfTerms])
+
     def setOfBetas(self, free=True, fixed=False):
         """
         Extract the set of parameters from the expression.
