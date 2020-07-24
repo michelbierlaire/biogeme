@@ -133,8 +133,10 @@ class BIOGEME:
         # Monte-Carlo integration.
         self.monteCarlo = False
         np.random.seed(seed)
-        ## If True, the values are saved on a file each time the likelihood function is calculated
-        self.saveIterations = False
+        ## If not None, it is the name of a file. The values of the
+        ## estimated parameters are saved on that file each time the
+        ## likelihood function is improved.
+        self.saveIterations = '__savedIterations.txt'
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(f'Expression {formulas} is not of type '
@@ -267,8 +269,7 @@ class BIOGEME:
         ## Information provided by the optimization algorithm after completion.
         self.optimizationMessages = None
 
-        ## Name of the File where intermediate iterations are stotred
-        self.file_iterations = None
+
 
         ## Default bounds, replacing None, for the CFSQP algorithm
         self.cfsqp_default_bounds = 1000
@@ -537,11 +538,11 @@ class BIOGEME:
             error_msg = f'The norm of the gradient is {gradnorm}: g={g}'
             raise excep.biogemeError(error_msg)
 
-        if self.saveIterations:
+        if self.saveIterations is not None:
             if self.bestIteration is None:
                 self.bestIteration = f
             if f >= self.bestIteration:
-                with open(self.file_iterations, 'w') as pf:
+                with open(self.saveIterations, 'w') as pf:
                     for i, v in enumerate(x):
                         print(f'{self.freeBetaNames[i]} = {v}', file=pf)
 
@@ -612,6 +613,19 @@ class BIOGEME:
 
 
     def loadSavedIteration(self, filename='__savedIterations.txt'):
+        """
+        Obsolete function
+        """
+        message = ('The function loadSavedIterations is obsolete. The parameter '
+                   'saveIterations of the estimate function must be set to the '
+                   'name of the file used to save the iterations, or None. If '
+                   'not None, the values saved in the file will be loaded, and '
+                   'each improvement of the log likelihood function will trigger '
+                   'a save of the parameters in the same file. Therefore, there '
+                   'is no need to call the function loadSavedIteration anymore.')
+        raise excep.biogemeError(message)
+
+    def _loadSavedIteration(self, filename='__savedIterations.txt'):
         """Reads the values of the parameters from a text file where each line
 has the form name_of_beta = value_of_beta, and use these values in all
 formulas.
@@ -655,8 +669,7 @@ formulas.
                  algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
                  algoParameters=None,
                  cfsqp_default_bounds=1000.0,
-                 saveIterations=False,
-                 file_iterations='__savedIterations.txt'):
+                 saveIterations='__savedIterations.txt'):
 
         """Estimate the parameters of the model.
 
@@ -679,17 +692,13 @@ formulas.
               [-cfsqp_default_bounds, cfsqp_default_bounds]
         :type cfsqp_default_bounds: float
 
-        :param saveIterations: if True, the values of the parameters
+        :param saveIterations: if not None, the values of the parameters
                                corresponding to the largest value of
                                the likelihood function are saved in a
-                               pickle file at each iteration of the
-                               algorithm. Default: False.
-        :type saveIterations: bool
-
-        :param file_iterations: name of the file where to save the
-                               values of the parameters. Default:
-                               '__savedIterations.txt'
-        :type file_iterations: str
+                               text file at each iteration of the
+                               algorithm. The parameter is the name of that file. 
+                               Default: '__savedIterations.txt'
+        :type saveIterations: str
 
         :return: object containing the estimation results.
         :rtype: biogeme.bioResults
@@ -716,6 +725,9 @@ formulas.
                                      f' in the formula: {self.loglike}.')
 
 
+        self.saveIterations = saveIterations
+        if saveIterations is not None:
+            self._loadSavedIteration(saveIterations)
         self.algorithm = algorithm
         self.algoParameters = algoParameters
 
@@ -723,7 +735,6 @@ formulas.
 
         self.calculateInitLikelihood()
         self.saveIterations = saveIterations
-        self.file_iterations = f'{file_iterations}'
         self.bestIteration = None
 
         start_time = datetime.now()
@@ -1272,3 +1283,4 @@ class negLikelihood(opt.functionToMinimize):
         return (-self.fv,
                 -self.gv,
                 -self.bhhhv)
+
