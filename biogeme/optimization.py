@@ -2264,7 +2264,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
            False, the algorithm stops as soon as an infeasible iterate
            is generated (default: False).
          - maxiter: the maximum number of iterations (default: 1000).
-         - radius: the initial radius of the truat region (default: 1.0).
+         - radius: the initial radius of the trust region (default: 1.0).
          - eta1: threshold for failed iterations (default: 0.01).
          - eta2: threshold for very successful iteration (default 0.9).
          - enlargingFactor: factor used to enlarge the trust region
