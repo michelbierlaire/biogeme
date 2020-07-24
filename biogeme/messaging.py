@@ -11,16 +11,7 @@
 import datetime
 import biogeme.filenames as bf
 import biogeme.version as bv
-
-class Singleton(type):
-    """
-    A singleton is a class with only one instance
-    """
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+from singleton import Singleton
 
 class bioMessage(metaclass=Singleton):
     """ Manages the Biogeme messages
