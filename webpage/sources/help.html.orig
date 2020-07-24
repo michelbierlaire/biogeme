@@ -54,6 +54,8 @@
 		during the estimation?</a></li>
 	    <li><a href="#q4">Does Biogeme provide support for
 	    out-of-sample validation?</a></li>
+	    <li><a href="#q5">The init loglikelihood is <code>-1.797693e+308</code>
+ and no iteration is performed. What should I do?</a></li>
 
 	  </ul>
 	</div>
@@ -192,6 +194,46 @@
 	      example <code><a href="examples/swissmetro/04validation.py">04validation.py</a>
 	      from <a href="examples.html#swissmetro">here</a>. </li>
 	    </ul>
+	</div>
+      </div>
+
+      <div id="q5" class="panel panel-default">
+	<div class="panel-heading">The init loglikelihood is <code>-1.797693e+308</code>
+ and no iteration is performed. What should I do?</div>
+	<div class="panel-body">
+	  <p>If the model returns a probability 0 for the chosen
+	  alternative for at least one observation in the sample, then
+	  the likelihood is 0, and the log likelihood is minus
+	  infinity. For the sake of robustness, Biogeme assigns the
+	  value <code>-1.797693e+308</code> to the log likelihood in
+	  this context. 
+	  </p>
+	  <p>A common reason why the model returns a probability 0 for
+	    the chosen alternative is when it is declared
+	    unavailable. The following code allows to verify that the
+	    availability conditions are compatible with the choice
+	    variable:
+	    <pre>
+	      diagnostic = database.checkAvailabilityOfChosenAlt(av, CHOICE)
+
+	      if not diagnostic.all():
+	          row_indices = np.where(diagnostic == False)[0]
+	          print(f'Rows where the chosen alternative is not available: {row_indices}')
+	      
+	    </pre>
+	    See the documentation
+	    of <a href="sphinx/biogeme.html?highlight=checkavailabilityofchosenalt#biogeme.database.Database.checkAvailabilityOfChosenAlt"><code>checkAvailabilityOfChosenAlt</code> here</a>.
+	  </p>
+	  <p>Another reason is when the initial value of a scale
+	  parameter is too close to zero. See the discussion <a href="#q2">here</a>.
+	  </p>
+	  <p>But there are many other possible reasons. The best way
+	  to investigate the source of the problem is to use Biogeme
+	  in simulation mode, and report the probability of the chosen
+	  alternative for each observation. Once you have identified
+	  the problematic entries, it is easier to investigate the
+	    reason why the model returns a probability of zero.
+	    </p>
 	</div>
       </div>
       
