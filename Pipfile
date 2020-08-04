@@ -13,7 +13,7 @@ scipy = "*"
 interval = "*"
 Cython = "*"
 Unidecode = "*"
-biogeme = {editable = true, path = "."}
+tqdm = "*"
 
 [requires]
 python_version = "3.8"
