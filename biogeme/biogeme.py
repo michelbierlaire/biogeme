@@ -21,6 +21,7 @@ from datetime import datetime
 import pickle
 import numpy as np
 import pandas as pd
+import tqdm
 
 import biogeme.database as db
 import biogeme.cbiogeme as cb
@@ -183,6 +184,9 @@ class BIOGEME:
 
         ## Init value of the likelihood function
         self.initLogLike = None
+
+        ## Log likelihood of the null model
+        self.nullLogLike = None
 
         self.usedVariables = set()
         for k, f in self.formulas.items():
@@ -413,6 +417,21 @@ class BIOGEME:
         ## Values of the fixed parameters (not estimated).
         self.fixedBetaValues = [float(self.allFixedBetas[x].initValue) for x in self.fixedBetaNames]
 
+    def calculateNullLoglikelihood(self, avail):
+        """Calculate the log likelihood of the null model that predicts equal
+            probability for each alternative 
+
+        :param avail: list of expressions to evaluate the
+                      availability conditions for each alternative.
+        :type avail: list of biogeme.expressions.Expression
+
+        :return: value of the log likelihood
+        :rtype: float
+
+        """
+        expression = -eb.log(eb.bioMultSum(avail))
+        self.nullLogLike = self.database.sumFromDatabase(expression)
+        return self.nullLogLike
 
     def calculateInitLikelihood(self):
         """Calculate the value of the log likelihood function
@@ -427,6 +446,7 @@ class BIOGEME:
         self.initLogLike = self.calculateLikelihood(self.betaInitValues,
                                                     scaled=False)
         return self.initLogLike
+
 
     def calculateLikelihood(self, x, scaled, batch=None):
         """Calculates the value of the log likelihood function
@@ -725,6 +745,15 @@ formulas.
                                      f' in the formula: {self.loglike}.')
 
 
+        if isinstance(saveIterations, bool):
+            errorMsg = ('The syntax for saving intermediate iterations has changed. '
+                        'The parameter "saveIterations" is not a boolean (True or False).'
+                        ' It must be set to the name of the file where the iterations'
+                        ' must be saved, or to None if you do not want the iterations'
+                        ' to be saved. If you omit the parameter, the default value'
+                        ' "__savedIterations.txt" is used.')
+            raise excep.biogemeError(errorMsg)
+            
         self.saveIterations = saveIterations
         if saveIterations is not None:
             self._loadSavedIteration(saveIterations)
@@ -773,8 +802,9 @@ formulas.
 
             self.logger.general(f'Re-estimate the model {bootstrap} times for bootstrapping')
             self.bootstrap_results = np.empty(shape=[bootstrap, len(xstar)])
+            hideProgress = self.logger.screenLevel == 0
             self.logger.temporarySilence()
-            for b in range(bootstrap):
+            for b in tqdm.tqdm(range(bootstrap), disable=hideProgress):
                 if self.database.isPanel():
                     sample = self.database.sampleIndividualMapWithReplacement()
                     self.theC.setDataMap(sample)
