@@ -206,6 +206,8 @@ class rawResults:
         self.betaNames = theModel.freeBetaNames
         ## Value of the likelihood function with the initial value of the parameters
         self.initLogLike = theModel.initLogLike
+        ## Value of the likelihood function with equal probability model
+        self.nullLogLike = theModel.nullLogLike
         ## List of objects of type results.beta
         self.betas = list()
         for b, n in zip(betaValues, self.betaNames):
@@ -243,6 +245,8 @@ class rawResults:
         self.numberOfThreads = theModel.numberOfThreads
         ## Name of the HTML output file
         self.htmlFileName = None
+        ## Name of the F12 output file
+        self.F12FileName = None
         ## Name of the LaTeX output file
         self.latexFileName = None
         ## Name of the pickle outpt file
@@ -328,7 +332,7 @@ class bioResults:
     def _calculateStats(self):
         """Calculates the following statistics:
 
-            - likelihood ratio test between the initial and ethe estimated models:
+            - likelihood ratio test between the initial and the estimated models:
                    :math:`-2(L_0-L^*)`
             - Rho square: :math:`1 - \\frac{L^*}{L^0}`
             - Rho bar square: :math:`1 - \\frac{L^* - K}{L^0}`
@@ -340,13 +344,20 @@ class bioResults:
         p value for the comparison of pairs of coefficients.
 
         """
+        self.data.likelihoodRatioTestNull = -2.0 * (self.data.nullLogLike - self.data.logLike) \
+            if self.data.nullLogLike is not None else None
         self.data.likelihoodRatioTest = -2.0 * (self.data.initLogLike - self.data.logLike) \
             if self.data.initLogLike is not None else None
         self.data.rhoSquare = np.nan_to_num(1.0 - self.data.logLike / self.data.initLogLike) \
             if self.data.initLogLike is not None else None
+        self.data.rhoSquareNull = np.nan_to_num(1.0 - self.data.logLike / self.data.nullLogLike) \
+            if self.data.nullLogLike is not None else None
         self.data.rhoBarSquare = np.nan_to_num(1.0 - (self.data.logLike-self.data.nparam) \
                                                / self.data.initLogLike) \
             if self.data.initLogLike is not None else None
+        self.data.rhoBarSquareNull = np.nan_to_num(1.0 - (self.data.logLike-self.data.nparam) \
+                                               / self.data.nullLogLike) \
+            if self.data.nullLogLike is not None else None
                                                
         self.data.akaike = 2.0 * self.data.nparam - 2.0 * self.data.logLike
         self.data.bayesian = - 2.0 * self.data.logLike + self.data.nparam * \
@@ -465,13 +476,19 @@ class bioResults:
         if self.data.sampleSize != self.data.numberOfObservations:
             r += f'Observations:\t\t\t{self.data.numberOfObservations}\n'
         r += f'Excluded data:\t\t\t{self.data.excludedData}\n'
+        if self.data.nullLogLike is not None:
+            r += f'Null log likelihood:\t\t{self.data.nullLogLike:.7g}\n'
         if self.data.initLogLike is not None:
             r += f'Init log likelihood:\t\t{self.data.initLogLike:.7g}\n'
         r += f'Final log likelihood:\t\t{self.data.logLike:.7g}\n'
+        if self.data.nullLogLike is not None:
+            r += f'Likelihood ratio test (null):\t\t{self.data.likelihoodRatioTestNull:.7g}\n'
+            r += f'Rho square (null):\t\t\t{self.data.rhoSquareNull:.3g}\n'
+            r += f'Rho bar square (null):\t\t\t{self.data.rhoBarSquareNull:.3g}\n'
         if self.data.initLogLike is not None:
-            r += f'Likelihood ratio test:\t\t{self.data.likelihoodRatioTest:.7g}\n'
-            r += f'Rho square:\t\t\t{self.data.rhoSquare:.3g}\n'
-            r += f'Rho bar square:\t\t\t{self.data.rhoBarSquare:.3g}\n'
+            r += f'Likelihood ratio test (init):\t\t{self.data.likelihoodRatioTest:.7g}\n'
+            r += f'Rho square (init):\t\t\t{self.data.rhoSquare:.3g}\n'
+            r += f'Rho bar square (init):\t\t\t{self.data.rhoBarSquare:.3g}\n'
         r += f'Akaike Information Criterion:\t{self.data.akaike:.7g}\n'
         r += f'Bayesian Information Criterion:\t{self.data.bayesian:.7g}\n'
         if self.data.gradientNorm is not None:
@@ -575,8 +592,14 @@ class bioResults:
         if self.data.sampleSize != self.data.numberOfObservations:
             d['Observations'] = self.data.numberOfObservations, ''
         d['Excluded observations'] = self.data.excludedData, ''
+        if self.data.nullLogLike is not None:
+            d['Null log likelihood'] = self.data.nullLogLike, '.7g'
         d['Init log likelihood'] = self.data.initLogLike, '.7g'
         d['Final log likelihood'] = self.data.logLike, '.7g'
+        if self.data.nullLogLike is not None:
+            d['Likelihood ratio test for the null model'] = self.data.likelihoodRatioTestNull, '.7g'
+            d['Rho-square for the null model'] = self.data.rhoSquareNull, '.3g'
+            d['Rho-square-bar for the null model'] = self.data.rhoBarSquareNull, '.3g'
         d['Likelihood ratio test for the init. model'] = self.data.likelihoodRatioTest, '.7g'
         d['Rho-square for the init. model'] = self.data.rhoSquare, '.3g'
         d['Rho-square-bar for the init. model'] = self.data.rhoBarSquare, '.3g'
@@ -691,7 +714,7 @@ a Pandas dataframe.
         """ Get the results coded in HTML
 
         :return: HTML code
-        :rtpye: string
+        :rtype: string
         """
         now = datetime.datetime.now()
         h = self._getHtmlHeader()
@@ -952,3 +975,140 @@ a Pandas dataframe.
         results = [{myBetas[i]: value for i, value in enumerate(row)}
                    for row in simulatedBetas[:, index]]
         return results
+
+    def getF12(self, robustStdErr=True):
+        """ F12 is a format used by the software ALOGIT to report estimation results.
+
+        :param robustStdErr: if True, the robust standard errors are reports. 
+                             If False, the Rao-Cramer are. 
+        :type robustStdErr: bool
+
+        :return: results in F12 format
+        :rtype: string
+        """
+
+        checkline1 = ('0000000001111111111222222222233333333334444444444'
+                      '5555555555666666666677777777778')
+        checkline2 = ('1234567890123456789012345678901234567890123456789'
+                      '0123456789012345678901234567890')
+
+        results = ''
+
+        #results += f'{checkline1}\n'
+        #results += f'{checkline2}\n'
+
+        #Line 1, title, characters 1-79
+        results += f'{self.data.modelName[:79]: <79}\n'
+
+        #Line 2, subtitle, characters 1-27, and time-date, characters 57-77
+        t = f'From biogeme {bv.getVersion()}'
+        d = f'{datetime.datetime.now()}'[:19]
+        results += f'{t[:27]: <56}{d: <21}\n'
+
+        #Line 3, "END" (this is historical!)
+        results += 'END\n'
+
+        #results += f'{checkline1}\n'
+        #results += f'{checkline2}\n'
+
+        #Line 4-(K+3), coefficient values
+        #  characters 1-4, "   0" (again historical)
+        #  characters 6-15, coefficient label, suggest using first 10 characters of label in R
+        #  characters 16-17, " F" (this indicates whether or not the coefficient is constrained)
+        #  characters 19-38, coefficient value   20 chars
+        #  characters 39-58, standard error      20 chars
+
+        stats = self.getGeneralStatistics()
+        table = self.getEstimatedParameters()
+        coefNames = list(table.index.values)
+        for name in coefNames:
+            values = table.loc[name]
+            results += '   0 '
+            results += f'{name[:10]: <10}'
+            if 'Active bound' in values:
+                if values['Active bound'] == 1:
+                    results += ' T'
+                else:
+                    results += ' F'
+            else:
+                results += ' F'
+            results += ' '
+            results += f'{values["Value"]: <+20.13e}'
+            if robustStdErr:
+                results += f'{values["Rob. Std err"]: <+20.13e}'
+            else:
+                results += f'{values["Std err"]: <+20.13e}'
+            results += '\n'
+        
+        # Line K+4, "  -1" indicates end of coefficients
+        results += '  -1\n'
+
+        #results += f'{checkline1}\n'
+        #results += f'{checkline2}\n'
+
+
+        # Line K+5, statistics about run
+        #   characters 1-8, number of observations        8 chars
+        #   characters 9-27, likelihood-with-constants   19 chars
+        #   characters 28-47, null likelihood            20 chars
+        #   characters 48-67, final likelihood           20 chars
+
+        results += f'{stats["Sample size"][0]: <8}'
+        # The cte log likelihood is not available. We put 0 instead.
+        results += f'{0: <19}'
+        if self.data.nullLogLike is not None:
+            results += f'{stats["Null log likelihood"][0]: <+20.13e}'
+        else:
+            results += f'{0: <20}'
+        results += f'{stats["Final log likelihood"][0]: <+20.13e}'
+        results += '\n'
+
+        #results += f'{checkline1}\n'
+        #results += f'{checkline2}\n'
+
+        # Line K+6, more statistics
+        #   characters 1-4, number of iterations (suggest use 0)        4 chars
+        #   characters 5-8, error code (please use 0)                   4 chars
+        #   characters 9-29, time and date (suggest repeat from line 2) 21 chars
+
+        if "Number of iterations" in stats:
+            results += f'{stats["Number of iterations"][0]: <4}'
+        else:
+            results += f'{0: <4}'
+        results += f'{0: <4}'
+        results += f'{d: <21}'
+        results += '\n'
+        
+        #results += f'{checkline1}\n'
+        #results += f'{checkline2}\n'
+
+        # Lines (K+7)-however many we need, correlations*100000
+        #   10 per line, fields of width 7
+        #   The order of these is that correlation i,j (i>j) is in position (i-1)*(i-2)/2+j, i.e.
+        #   (2,1) (3,1) (3,2) (4,1) etc.        
+        
+        count = 0
+        for i in range(len(coefNames)):
+            for j in range(0, i):
+                name = (coefNames[i], coefNames[j])
+                if robustStdErr:
+                    corr = int(100000 * self.data.secondOrderTable[name][5])
+                else:
+                    corr = int(100000 * self.data.secondOrderTable[name][1])
+                results += f'{corr:7d}'
+                count += 1
+                if count % 10 == 0:
+                    results += '\n'
+        results += '\n'
+        return results
+
+    def writeF12(self, robustStdErr=True):
+        """ Write the results in F12 file.
+
+        """
+        self.data.F12FileName = bf.getNewFileName(self.data.modelName, 'F12')
+        f = open(self.data.F12FileName, 'w')
+        f.write(self.getF12(robustStdErr))
+        self.logger.general(f'Results saved in file {self.data.F12FileName}')
+        f.close()
+    
