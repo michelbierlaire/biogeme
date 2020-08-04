@@ -11,7 +11,7 @@
 import datetime
 import biogeme.filenames as bf
 import biogeme.version as bv
-from singleton import Singleton
+from biogeme.singleton import Singleton
 
 class bioMessage(metaclass=Singleton):
     """ Manages the Biogeme messages
