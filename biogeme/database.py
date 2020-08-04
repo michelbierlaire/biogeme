@@ -372,6 +372,40 @@ class Database:
         res = self.data.apply(functionToApply, axis=1)
         return res
 
+    def choiceAvailabilityStatistics(self, avail, choice):
+        """Calculates the number of time an alternative is chosen and available
+
+        :param avail: list of expressions to evaluate the
+                      availability conditions for each alternative.
+        :type avail: list of biogeme.expressions.Expression
+        :param choice: expression for the chosen alternative.
+        :type choice: biogeme.expressions.Expression
+
+        :return: for each alternative, a tuple containing the number of time it is chosen, 
+                 and the number of time it is available.
+        :rtype: dict(int: (int, int))
+
+        """
+        self._avail = avail
+        self._choice = choice
+        def functionToApply(row):
+            self._choice.setRow(row)
+            chosen = self._choice.getValue()
+            results = [chosen]
+            for v in self._avail.values():
+                v.setRow(row)
+                av = v.getValue()
+                results.append(av)
+            return pd.Series(results, index=['Chosen'] + list(self._avail.keys()))
+        res = self.data.apply(functionToApply, axis=1)
+        theResults = dict()
+        for k in self._avail:
+            c = (res['Chosen'] == k).sum()
+            theResults[k] = c, res[k].sum()
+        return theResults
+
+
+    
     def sumFromDatabase(self, expression):
         """ Calculates the value of an expression for each entry
             in the database, and returns the sum.
@@ -401,7 +435,7 @@ class Database:
         """
         self.data[column] = self.data[column] * scale
 
-    def suggestScaling(self, columns=None):
+    def suggestScaling(self, columns=None, all=False):
         """Suggest a scaling of the variables in the database.
 
         For each column, :math:`\\delta` is the difference between the
@@ -416,6 +450,10 @@ class Database:
         :param columns: list of columns to be considered.
                         If None, all of them will be considered.
         :type columns: list(str)
+
+        :param all: if False, remove entries where the suggested scale is 1, 0.1 or 10
+        :type all: bool
+
         :return: A Pandas dataframe where each row contains the name
                  of the variable and the suggested scale s. Ideally,
                  the column should be multiplied by s.
@@ -423,13 +461,14 @@ class Database:
         :rtype: pandas.DataFrame
 
         """
-        for c in columns:
-            if not c in self.data:
-                errorMsg = (f'Variable {c} not found.')
-                raise excep.biogemeError(errorMsg)
-                
         if columns is None:
             columns = self.data.columns
+        else:
+            for c in columns:
+                if not c in self.data:
+                    errorMsg = (f'Variable {c} not found.')
+                    raise excep.biogemeError(errorMsg)
+                
         largestValue = [max(np.abs(self.data[col].max()),
                             np.abs(self.data[col].min())) for col in columns]
         res = [[col,
@@ -437,9 +476,10 @@ class Database:
                 lv]
                for col, lv in zip(columns, largestValue)]
         df = pd.DataFrame(res, columns=['Column', 'Scale', 'Largest'])
-        # Remove entries where the suggested scale is 1, 0.1 or 10
-        remove = (df.Scale == 1) | (df.Scale == 0.1) | (df.Scale == 10)
-        df.drop(df[remove].index, inplace=True)
+        if not all:
+            # Remove entries where the suggested scale is 1, 0.1 or 10
+            remove = (df.Scale == 1) | (df.Scale == 0.1) | (df.Scale == 10)
+            df.drop(df[remove].index, inplace=True)
         return df
 
     def sampleWithReplacement(self, size=None):
