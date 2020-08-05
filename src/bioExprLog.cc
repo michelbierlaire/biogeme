@@ -10,44 +10,52 @@
 #include "bioExprLog.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
-#include <cmath>
 #include "bioSmartPointer.h"
+#include <cmath>
 #include <sstream>
 
-bioExprLog::bioExprLog(bioSmartPointer<bioExpression>  c) :
+bioExprLog::bioExprLog(bioSmartPointer<bioExpression> c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 
 bioExprLog::~bioExprLog() {
+  
 }
 
 bioSmartPointer<bioDerivatives>
 bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				   bioBoolean gradient,
-				   bioBoolean hessian) {
+						   bioBoolean gradient,
+						   bioBoolean hessian) {
   
 
   theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
 
   bioUInt n = literalIds.size() ;
   bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  if (childResult->f <= 0) {
-    std::stringstream str ;
-    str << "Current values of the literals: " << std::endl ;
-    std::map<bioString,bioReal> m = getAllLiteralValues() ;
-    for (std::map<bioString,bioReal>::iterator i = m.begin() ;
-	 i != m.end() ;
-	 ++i) {
-      str << i->first << " = " << i->second << std::endl ;
+  if (childResult->f < 0) {
+    if (std::abs(childResult->f) < 1.0e-6) {
+      childResult->f = 0.0 ;
     }
-    if (rowIndex != NULL) {
-      str << "row number: " << *rowIndex << ", ";
+    else {
+      std::stringstream str ;
+      str << "Current values of the literals: " << std::endl ;
+      std::map<bioString,bioReal> m = getAllLiteralValues() ;
+      for (std::map<bioString,bioReal>::iterator i = m.begin() ;
+	   i != m.end() ;
+	   ++i) {
+	str << i->first << " = " << i->second << std::endl ;
+      }
+      if (rowIndex != NULL) {
+	str << "row number: " << *rowIndex << ", ";
+      }
+      
+      str << "Cannot take the log of a non positive number [" << childResult->f << "]" << std::endl ;
+      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
-    
-    str << "Cannot take the log of a non positive number: log("
-	<< childResult->f << ")" << std::endl ;
-    throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+  }
+  if (childResult->f == 0.0) {
+    theDerivatives->f = -std::numeric_limits<bioReal>::max() / 2.0 ;
   }
   else {    
     theDerivatives->f = log(childResult->f) ;
