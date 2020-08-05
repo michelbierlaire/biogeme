@@ -796,7 +796,8 @@ a Pandas dataframe.
         h += '<p>Largest eigenvalue: {:.6g}</p>\n'.format(self.data.largestEigenValue)
         h += '<p>Condition number: {:.6g}</p>\n'.format(self.data.conditionNumber)
         if np.abs(self.data.smallestEigenValue) <= 1.0e-5:
-            h += '<p>The second derivatives is close to singularity. Variables involved:'
+            h += ('<p>The second derivatives matrix is close to singularity. '
+                  'Variables involved:')
             h += '<table>'
             for i in range(len(self.data.smallestEigenVector)):
                 if np.abs(self.data.smallestEigenVector[i]) > 1.0e-5:
