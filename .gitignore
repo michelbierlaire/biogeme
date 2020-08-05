@@ -35,6 +35,8 @@ archive/tools/prepareData/biosampledata
 **/*.la
 **/.libs
 
+videos/
+
 # Other files
 autom4te.cache/
 archive/libraries/utils/patCompilationDate.h
