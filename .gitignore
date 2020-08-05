@@ -274,3 +274,4 @@ biogeme/cbiogeme.cpython-38-darwin.so
 compile.log
 dist/biogeme-3.2.7a0-py3.8-macosx-10.9-x86_64.egg
 dist/biogeme-3.2.7a0.tar.gz
+src/bioExprLog.cc.keep
