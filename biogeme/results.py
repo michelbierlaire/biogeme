@@ -999,7 +999,7 @@ a Pandas dataframe.
         #results += f'{checkline2}\n'
 
         #Line 1, title, characters 1-79
-        results += f'{self.data.modelName[:79]: <79}\n'
+        results += f'{self.data.modelName[:79]: >79}\n'
 
         #Line 2, subtitle, characters 1-27, and time-date, characters 57-77
         t = f'From biogeme {bv.getVersion()}'
@@ -1025,7 +1025,7 @@ a Pandas dataframe.
         for name in coefNames:
             values = table.loc[name]
             results += '   0 '
-            results += f'{name[:10]: <10}'
+            results += f'{name[:10]: >10}'
             if 'Active bound' in values:
                 if values['Active bound'] == 1:
                     results += ' T'
@@ -1034,11 +1034,11 @@ a Pandas dataframe.
             else:
                 results += ' F'
             results += ' '
-            results += f'{values["Value"]: <+20.13e}'
+            results += f' {values["Value"]: >+19.12e}'
             if robustStdErr:
-                results += f'{values["Rob. Std err"]: <+20.13e}'
+                results += f' {values["Rob. Std err"]: >+19.12e}'
             else:
-                results += f'{values["Std err"]: <+20.13e}'
+                results += f' {values["Std err"]: >+19.12e}'
             results += '\n'
         
         # Line K+4, "  -1" indicates end of coefficients
@@ -1054,14 +1054,14 @@ a Pandas dataframe.
         #   characters 28-47, null likelihood            20 chars
         #   characters 48-67, final likelihood           20 chars
 
-        results += f'{stats["Sample size"][0]: <8}'
+        results += f'{stats["Sample size"][0]: >8}'
         # The cte log likelihood is not available. We put 0 instead.
-        results += f'{0: <19}'
+        results += f' {0: >18}'
         if self.data.nullLogLike is not None:
-            results += f'{stats["Null log likelihood"][0]: <+20.13e}'
+            results += f' {stats["Null log likelihood"][0]: >+19.12e}'
         else:
-            results += f'{0: <20}'
-        results += f'{stats["Final log likelihood"][0]: <+20.13e}'
+            results += f' {0: >19}'
+        results += f' {stats["Final log likelihood"][0]: >+19.12e}'
         results += '\n'
 
         #results += f'{checkline1}\n'
@@ -1073,11 +1073,11 @@ a Pandas dataframe.
         #   characters 9-29, time and date (suggest repeat from line 2) 21 chars
 
         if "Number of iterations" in stats:
-            results += f'{stats["Number of iterations"][0]: <4}'
+            results += f'{stats["Number of iterations"][0]: >4}'
         else:
-            results += f'{0: <4}'
-        results += f'{0: <4}'
-        results += f'{d: <21}'
+            results += f'{0: >4}'
+        results += f'{0: >4}'
+        results += f'{d: >21}'
         results += '\n'
         
         #results += f'{checkline1}\n'
