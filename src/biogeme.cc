@@ -11,14 +11,14 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
-#include "bioSmartPointer.h"
 #include <algorithm>
 #include <pthread.h>
+#include "bioMemoryManagement.h"
 #include "bioExceptions.h"
 #include "bioDebug.h"
 #include "bioThreadMemory.h"
 #include "bioExpression.h"
-#include "bioCfsqp.h"
+//#include "bioCfsqp.h"
 
 // Dealing with exceptions across threads
 static std::exception_ptr theExceptionPtr = nullptr ;
@@ -34,22 +34,24 @@ biogeme::biogeme(): nbrOfThreads(1),
 }
 
 biogeme::~biogeme() {
+  //DEBUG_MESSAGE("********* CALL DESTRUCTOR **************") ;
+  //bioMemoryManagement::the()->releaseAllMemory() ;
 }
 
 void biogeme::setPanel(bioBoolean p) {
   panel = p ;
 }
 
-bioReal biogeme::calculateLikelihood(std::vector<bioReal>& betas,
-				     std::vector<bioReal>& fixedBetas) {
+bioReal biogeme::calculateLikelihood(std::vector<bioReal> betas,
+				     std::vector<bioReal> fixedBetas) {
 
   ++nbrFctEvaluations ;
-  if (forceDataPreparation || (theThreadMemory->dimension() != literalIds.size())) {
+  if (forceDataPreparation || (theThreadMemory.dimension() != literalIds.size())) {
     prepareData() ;
     forceDataPreparation = false ;
   }
-  theThreadMemory->setParameters(&betas) ;
-  theThreadMemory->setFixedParameters(&fixedBetas) ;
+  theThreadMemory.setParameters(&betas) ;
+  theThreadMemory.setFixedParameters(&fixedBetas) ;
   bioReal result = applyTheFormula() ;
   return result ;
 }
@@ -59,33 +61,31 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 				   std::vector< std::vector<bioReal> >* h,
 				   std::vector< std::vector<bioReal> >* bh) {
 
-  if (g != NULL) {
-    if (g->size() != theThreadMemory->dimension()) {
+
+  if ( g != NULL) {
+    if (g->size() != theThreadMemory.dimension()) {
       std::stringstream str ;
-      str << "Gradient: inconsistent dimensions " << g->size() << " and " << theThreadMemory->dimension() ;
+      str << "Gradient: inconsistent dimensions " << g->size() << " and " << theThreadMemory.dimension() ;
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
   }
   if ( h != NULL) {
-    if (h->size() != theThreadMemory->dimension()) {
+    if (h->size() != theThreadMemory.dimension()) {
       std::stringstream str ;
-      str << "Hessian: inconsistent dimensions " << h->size() << " and " << theThreadMemory->dimension() ;
+      str << "Hessian: inconsistent dimensions " << h->size() << " and " << theThreadMemory.dimension() ;
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
   }
   if ( bh != NULL) {
-    if (bh->size() != theThreadMemory->dimension()) {
+    if (bh->size() != theThreadMemory.dimension()) {
       std::stringstream str ;
-      str << "BHHH: inconsistent dimensions " << bh->size() << " and " << theThreadMemory->dimension() ;
+      str << "BHHH: inconsistent dimensions " << bh->size() << " and " << theThreadMemory.dimension() ;
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
   }
 
   //  std::vector<bioThreadArg*> theInput(nbrOfThreads) ;
   std::vector<pthread_t> theThreads(nbrOfThreads) ;
-  if (theThreadMemory == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"thread memory") ;
-  }
   for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
     if (theInput[thread] == NULL) {
       throw bioExceptNullPointer(__FILE__,__LINE__,"thread") ;
@@ -93,19 +93,11 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
     theInput[thread]->calcGradient = (g != NULL) ;
     theInput[thread]->calcHessian = (h != NULL) ;
     theInput[thread]->calcBhhh = (bh != NULL) ;
-      
-    
-    bioUInt diagnostic ;
 
-    try {
-      diagnostic = pthread_create(&(theThreads[thread]),
-				  NULL,
-				  computeFunctionForThread,
-				  (void*) theInput[thread]) ;
-    }
-    catch (std::exception& e) {
-      throw bioExceptions(__FILE__,__LINE__, e.what()) ;
-    }
+    bioUInt diagnostic = pthread_create(&(theThreads[thread]),
+					NULL,
+					computeFunctionForThread,
+					(void*) theInput[thread]) ;
 
     if (diagnostic != 0) {
       std::stringstream str ;
@@ -113,7 +105,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
   }
-  
+
   bioReal result(0.0) ;
   if (g != NULL) {
     std::fill(g->begin(),g->end(),0.0) ;
@@ -187,51 +179,99 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
       }
     }
   }
-  
+
   return result ;
 }
 
 
-bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal>& betas,
-					     std::vector<bioReal>& fixedBetas,
-					     std::vector<bioUInt>& betaIds,
-					     std::vector<bioReal>& g,
-					     std::vector< std::vector<bioReal> >& h,
-					     std::vector< std::vector<bioReal> >& bh,
-					     bioBoolean hessian,
-					     bioBoolean bhhh) {
+ bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal> betas,
+ 					     std::vector<bioReal> fixedBetas,
+ 					     std::vector<bioUInt> betaIds,
+ 					     bioReal* g,
+ 					     bioReal* h,
+ 					     bioReal* bh,
+ 					     bioBoolean hessian,
+ 					     bioBoolean bhhh) {
 
-
+  int n = betas.size() ;
+  
   ++nbrFctEvaluations ;
   literalIds = betaIds ;
-  if (forceDataPreparation || (theThreadMemory->dimension() != literalIds.size())) {
+  if (forceDataPreparation || (theThreadMemory.dimension() != literalIds.size())) {
     prepareData() ;
     forceDataPreparation = false ;
   }
   calculateHessian = hessian ;
   calculateBhhh = bhhh ;
 
-  if (theThreadMemory == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"thread memory") ;
-  }
-  theThreadMemory->setParameters(&betas) ;
-  theThreadMemory->setFixedParameters(&fixedBetas) ;
+  theThreadMemory.setParameters(&betas) ;
+  theThreadMemory.setFixedParameters(&fixedBetas) ;
 
 
-  std::vector< std::vector<bioReal> >* hptr = (calculateHessian) ? &h : NULL ;
-  std::vector< std::vector<bioReal> >* bhptr = (calculateBhhh) ? &bh : NULL ;
+  // This is inefficient. It is first implemented to check that the
+  // memory leak is fixed. Afterwards, everything should be
+  // implemented as linear array.
 
-  bioReal r ;
-  try {
-    r = applyTheFormula(&g,hptr,bhptr) ;
+  std::vector<bioReal> gmem(n) ;
+  std::vector< std::vector<bioReal> > hmem(n, std::vector<bioReal>(n)) ;
+  std::vector< std::vector<bioReal> > bhmem(n, std::vector<bioReal>(n)) ;
+
+  std::vector< std::vector<bioReal> >* hptr = (calculateHessian) ? &hmem : NULL ;
+  std::vector< std::vector<bioReal> >* bhptr = (calculateBhhh) ? &bhmem : NULL ;
+
+  bioReal r = applyTheFormula(&gmem,hptr,bhptr) ;
+  
+  for (int i = 0 ; i < n ; ++i) {
+    g[i] = gmem[i] ;
+    if (calculateHessian || calculateBhhh) {
+      for (int j = i ; j < n ; j++) {
+	if (calculateHessian) {
+	  h[i*n+j] = h[j*n+i] = hmem[i][j] ;
+	}
+	if (calculateBhhh) {
+	  bh[i*n+j] = bh[j*n+i] = bhmem[i][j] ;
+	}
+      }
+    }
   }
-  catch (const std::bad_alloc& e) {
-      throw bioExceptions(__FILE__,__LINE__, e.what()) ;
-  }
+
   return r ;
 
 
 }
+
+// bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal>& betas,
+// 					     std::vector<bioReal>& fixedBetas,
+// 					     std::vector<bioUInt>& betaIds,
+// 					     std::vector<bioReal>& g,
+// 					     std::vector< std::vector<bioReal> >& h,
+// 					     std::vector< std::vector<bioReal> >& bh,
+// 					     bioBoolean hessian,
+// 					     bioBoolean bhhh) {
+
+
+//   ++nbrFctEvaluations ;
+//   literalIds = betaIds ;
+//   if (forceDataPreparation || (theThreadMemory.dimension() != literalIds.size())) {
+//     prepareData() ;
+//     forceDataPreparation = false ;
+//   }
+//   calculateHessian = hessian ;
+//   calculateBhhh = bhhh ;
+
+//   theThreadMemory.setParameters(&betas) ;
+//   theThreadMemory.setFixedParameters(&fixedBetas) ;
+
+
+//   std::vector< std::vector<bioReal> >* hptr = (calculateHessian) ? &h : NULL ;
+//   std::vector< std::vector<bioReal> >* bhptr = (calculateBhhh) ? &bh : NULL ;
+
+  
+//   bioReal r = applyTheFormula(&g,hptr,bhptr) ;
+//   return r ;
+
+
+// }
 
 
 void biogeme::setExpressions(std::vector<bioString> ll,
@@ -273,7 +313,7 @@ void *computeFunctionForThread(void* fctPtr) {
       }
     }
 
-    bioSmartPointer<bioExpression> myLoglike = input->theLoglike->getExpression() ;
+    bioExpression* myLoglike = input->theLoglike.getExpression() ;
     if (input->panel) {
       // Panel data
       bioUInt individual ;
@@ -281,14 +321,17 @@ void *computeFunctionForThread(void* fctPtr) {
       for (individual = input->startData ;
 	   individual < input->endData ;
 	   ++individual) {
-	if (input->theWeight != NULL) {
-	  w = input->theWeight->getExpression()->getValue() ;
+	if (input->theWeight.isDefined()) {
+	  w = input->theWeight.getExpression()->getValue() ;
 	}
       
-	bioSmartPointer<bioDerivatives> fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
-										input->calcGradient,
-										input->calcHessian) ;
-	if (input->theWeight == NULL) {
+	const bioDerivatives* fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
+								      input->calcGradient,
+								      input->calcHessian) ;
+      
+      
+
+	if (!input->theWeight.isDefined()) {
 	  input->result += fgh->f ;
 	  for (bioUInt i = 0 ; i < input->grad.size() ; ++i) {
 	    (input->grad)[i] += fgh->g[i] ;
@@ -331,25 +374,28 @@ void *computeFunctionForThread(void* fctPtr) {
       }
       myLoglike->setIndividualIndex(&row) ;
       myLoglike->setRowIndex(&row) ;
-      if (input->theWeight != NULL) {
-	input->theWeight->setIndividualIndex(&row) ;
-	input->theWeight->setRowIndex(&row) ;
+      if (input->theWeight.isDefined()) {
+	input->theWeight.setIndividualIndex(&row) ;
+	input->theWeight.setRowIndex(&row) ;
       }
+      
       for (row = input->startData ;
 	   row < input->endData ;
 	   ++row) {
-	try {
-	  if (input->theWeight != NULL) {
-	    w = input->theWeight->getExpression()->getValue() ;
-	  }
 	
-	  bioSmartPointer<bioDerivatives> fgh(NULL) ;
-	  fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
+	try {
+	  if (input->theWeight.isDefined()) {
+	    w = input->theWeight.getExpression()->getValue() ;
+	  }
+
+	  const bioDerivatives* fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
 						  input->calcGradient,
 						  input->calcHessian) ;
-      
-	  if (input->theWeight == NULL) {
+
+
+	  if (!input->theWeight.isDefined()) {
 	    input->result += fgh->f ;
+
 	    for (bioUInt i = 0 ; i < input->grad.size() ; ++i) {
                 
 	      (input->grad)[i] += fgh->g[i] ;
@@ -389,11 +435,11 @@ void *computeFunctionForThread(void* fctPtr) {
 	}
       }
     }
-    input->theLoglike->setRowIndex(NULL) ;
-    input->theLoglike->setIndividualIndex(NULL) ;
-    if (input->theWeight != NULL) {
-      input->theWeight->setRowIndex(NULL) ;
-      input->theWeight->setIndividualIndex(NULL) ;
+    input->theLoglike.setRowIndex(NULL) ;
+    input->theLoglike.setIndividualIndex(NULL) ;
+    if (input->theWeight.isDefined()) {
+      input->theWeight.setRowIndex(NULL) ;
+      input->theWeight.setIndividualIndex(NULL) ;
     }
   }
   catch(...)  {
@@ -404,21 +450,21 @@ void *computeFunctionForThread(void* fctPtr) {
 }
 
 void biogeme::prepareMemoryForThreads(bioBoolean force) {
-  theThreadMemory = bioSmartPointer<bioThreadMemory>(new bioThreadMemory(nbrOfThreads,
-									 literalIds.size())) ;
-  theThreadMemory->setLoglike(theLoglikeString) ;
+  theThreadMemory.resize(nbrOfThreads,literalIds.size()) ;
+  theThreadMemory.setLoglike(theLoglikeString) ;
   if (!theWeightString.empty()) {
-    theThreadMemory->setWeight(theWeightString) ;
+    theThreadMemory.setWeight(theWeightString) ;
   }
 }
 
 void biogeme::simulateFormula(std::vector<bioString> formula,
-			      std::vector<bioReal>& beta,
-			      std::vector<bioReal>& fixedBeta,
-			     std::vector< std::vector<bioReal> >& data,
-			     std::vector<bioReal>& results) {
+			      std::vector<bioReal> beta,
+			      std::vector<bioReal> fixedBeta,
+			      std::vector< std::vector<bioReal> > data,
+			      bioReal* results) {
 
-  bioFormula theFormula(formula) ;
+  bioFormula theFormula ;
+  theFormula.setExpression(formula) ;
   theFormula.setParameters(&beta) ;
   theFormula.setFixedParameters(&fixedBeta) ;
   if (!theDraws.empty()) {
@@ -426,7 +472,6 @@ void biogeme::simulateFormula(std::vector<bioString> formula,
   }  
 
   bioUInt N = data.size() ;
-  results.resize(N) ;
   theFormula.setData(&data) ;
   theFormula.setMissingData(missingData) ;
   bioUInt row ;
@@ -437,10 +482,42 @@ void biogeme::simulateFormula(std::vector<bioString> formula,
        ++row) {
     results[row] = theFormula.getExpression()->getValue() ;
   }
-  theFormula.setRowIndex(NULL) ;
-  theFormula.setIndividualIndex(NULL) ;
   return ;
 }
+
+void biogeme::simulateSeveralFormulas(std::vector<std::vector<bioString> > formulas,
+				      std::vector<bioReal> beta,
+				      std::vector<bioReal> fixedBeta,
+				      std::vector< std::vector<bioReal> > data,
+				      bioReal* results) {
+
+  std::vector<bioFormula> theFormulas(formulas.size()) ;
+  bioUInt N = data.size() ;
+  bioUInt row ;
+  for (bioUInt i = 0 ; i < formulas.size() ; ++i) {
+    theFormulas[i].setExpression(formulas[i]) ;
+    theFormulas[i].setParameters(&beta) ;
+    theFormulas[i].setFixedParameters(&fixedBeta) ;
+    if (!theDraws.empty()) {
+      theFormulas[i].setDraws(&theDraws) ;
+    }  
+    theFormulas[i].setData(&data) ;
+    theFormulas[i].setMissingData(missingData) ;
+    theFormulas[i].setRowIndex(&row) ;
+    theFormulas[i].setIndividualIndex(&row) ;
+  }
+  for (row = 0 ;
+       row < N ;
+       ++row) {
+    for (bioUInt i = 0 ; i < formulas.size() ; ++i) {
+      //results[row * formulas.size() + i] = bioReal(theFormulas[i].getExpression()->getValue()) ;
+      results[i * N + row] = bioReal(theFormulas[i].getExpression()->getValue()) ;
+    }
+  }
+  return ;
+}
+
+
 
 
 void biogeme::setData(std::vector< std::vector<bioReal> >& d) {
@@ -469,21 +546,18 @@ void biogeme::prepareData() {
   // functions to the next.
 
   prepareMemoryForThreads() ;
-  if (theThreadMemory == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"thread memory") ;
-  }
-  theThreadMemory->setData(&theData) ;
+  theThreadMemory.setData(&theData) ;
   if (panel) {
-    theThreadMemory->setDataMap(&theDataMap) ;
+    theThreadMemory.setDataMap(&theDataMap) ;
   }
-  theThreadMemory->setMissingData(missingData) ;
+  theThreadMemory.setMissingData(missingData) ;
   if (!theDraws.empty()) {
-    theThreadMemory->setDraws(&theDraws) ;
+    theThreadMemory.setDraws(&theDraws) ;
   }
 
-  if (theThreadMemory->dimension() < literalIds.size()) {
+  if (theThreadMemory.dimension() < literalIds.size()) {
     std::stringstream str ;
-    str << " Memory should be reserved for dimension " << literalIds.size() << " and not " << theThreadMemory->dimension() ;
+    str << " Memory should be reserved for dimension " << literalIds.size() << " and not " << theThreadMemory.dimension() ;
     throw bioExceptions(__FILE__,__LINE__,str.str()) ;
   }
   
@@ -508,7 +582,7 @@ void biogeme::prepareData() {
   theInput.resize(nbrOfThreads,NULL) ;
 
   for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
-    theInput[thread] = theThreadMemory->getInput(thread) ;
+    theInput[thread] = theThreadMemory.getInput(thread) ;
     theInput[thread]->panel = panel ;
     if (theInput[thread] == NULL) {
       throw bioExceptNullPointer(__FILE__,__LINE__,"thread memory") ;
@@ -526,18 +600,18 @@ void biogeme::prepareData() {
       theInput[thread]->endData = (thread == nbrOfThreads-1) ? theData.size() : (thread+1) * sizeOfEachBlock ;
     }
     theInput[thread]->literalIds = &literalIds ;
-    bioSmartPointer<bioExpression>  theLoglike = theInput[thread]->theLoglike->getExpression() ;
+    bioExpression* theLoglike = theInput[thread]->theLoglike.getExpression() ;
     theLoglike->setData(theInput[thread]->data) ;
     if (panel) {
       theLoglike->setDataMap(theInput[thread]->dataMap) ;
     }
     theLoglike->setMissingData(theInput[thread]->missingData) ;
-    if (theInput[thread]->theWeight != NULL) {
-      theInput[thread]->theWeight->setData(theInput[thread]->data) ;
+    if (theInput[thread]->theWeight.isDefined()) {
+      theInput[thread]->theWeight.setData(theInput[thread]->data) ;
       if (panel) {
-	theInput[thread]->theWeight->setDataMap(theInput[thread]->dataMap) ;
+	theInput[thread]->theWeight.setDataMap(theInput[thread]->dataMap) ;
       }
-      theInput[thread]->theWeight->setMissingData(theInput[thread]->missingData) ;
+      theInput[thread]->theWeight.setMissingData(theInput[thread]->missingData) ;
     }
   }
 }
@@ -546,29 +620,29 @@ bioUInt biogeme::getDimension() const {
   return literalIds.size() ;
 }
 
-// Used only by CFSQP
-bioReal biogeme::repeatedCalcLikeAndDerivatives(std::vector<bioReal>& beta,
-						std::vector<bioReal>& g,
-						std::vector< std::vector<bioReal> >& h,
-						std::vector< std::vector<bioReal> >& bh,
-						bioBoolean hessian,
-						bioBoolean bhhh) {
+// // Used only by CFSQP
+// bioReal biogeme::repeatedCalcLikeAndDerivatives(std::vector<bioReal>& beta,
+// 						std::vector<bioReal>& g,
+// 						std::vector< std::vector<bioReal> >& h,
+// 						std::vector< std::vector<bioReal> >& bh,
+// 						bioBoolean hessian,
+// 						bioBoolean bhhh) {
 
-  if (!fixedBetasDefined) {
-    std::stringstream str ;
-    str << "The function setFixedBetas must be called first" ;
-    throw bioExceptions(__FILE__,__LINE__,str.str()) ;
-  }
-  return calculateLikeAndDerivatives(beta,
-				     theFixedBetas,
-				     literalIds,
-				     g,
-				     h,
-				     bh,
-				     hessian,
-				     bhhh) ;
+//   if (!fixedBetasDefined) {
+//     std::stringstream str ;
+//     str << "The function setFixedBetas must be called first" ;
+//     throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+//   }
+//   return calculateLikeAndDerivatives(beta,
+// 				     theFixedBetas,
+// 				     literalIds,
+// 				     g,
+// 				     h,
+// 				     bh,
+// 				     hessian,
+// 				     bhhh) ;
   
-}
+// }
 
 void biogeme::setFixedBetas(std::vector<bioReal>& fb,
 			    std::vector<bioUInt>& betaIds) {
@@ -577,35 +651,35 @@ void biogeme::setFixedBetas(std::vector<bioReal>& fb,
   fixedBetasDefined = true ;
 }
 
-// Used only by CFSQP
-bioReal biogeme::repeatedCalculateLikelihood(std::vector<bioReal>& beta) {
-  return calculateLikelihood(beta,theFixedBetas) ;
-}
+// // Used only by CFSQP
+// bioReal biogeme::repeatedCalculateLikelihood(std::vector<bioReal>& beta) {
+//   return calculateLikelihood(beta,theFixedBetas) ;
+// }
 
 
-bioString biogeme::cfsqp(std::vector<bioReal>& beta,
-			 std::vector<bioReal>& fixedBeta,
-			 std::vector<bioUInt>& betaIds,
-			 bioUInt& nit,
-			 bioUInt& nf,
-			 bioUInt& mode,
-			 bioUInt& iprint,
-			 bioUInt& miter,
-			 bioReal eps) {
+// bioString biogeme::cfsqp(std::vector<bioReal>& beta,
+// 			 std::vector<bioReal>& fixedBeta,
+// 			 std::vector<bioUInt>& betaIds,
+// 			 bioUInt& nit,
+// 			 bioUInt& nf,
+// 			 bioUInt& mode,
+// 			 bioUInt& iprint,
+// 			 bioUInt& miter,
+// 			 bioReal eps) {
 
-  setFixedBetas(fixedBeta,betaIds) ;
-  bioCfsqp theCfsqp(this) ;
-  theCfsqp.setParameters(mode,iprint,miter,eps,eps,0) ;
-  theCfsqp.defineStartingPoint(beta) ;
-  bioString d = theCfsqp.run() ;
-  std::vector<bioReal> xstar = theCfsqp.getSolution() ;
-  std::copy(xstar.begin(),xstar.end(),beta.begin()) ;
-  nit = theCfsqp.nbrIter() ;
-  nf = nbrFctEvaluations ;
-  return d ;
-}
+//   setFixedBetas(fixedBeta,betaIds) ;
+//   bioCfsqp theCfsqp(this) ;
+//   theCfsqp.setParameters(mode,iprint,miter,eps,eps,0) ;
+//   theCfsqp.defineStartingPoint(beta) ;
+//   bioString d = theCfsqp.run() ;
+//   std::vector<bioReal> xstar = theCfsqp.getSolution() ;
+//   std::copy(xstar.begin(),xstar.end(),beta.begin()) ;
+//   nit = theCfsqp.nbrIter() ;
+//   nf = nbrFctEvaluations ;
+//   return d ;
+// }
 
-void biogeme::setBounds(std::vector<bioReal>& lb, std::vector<bioReal>& ub) {
+void biogeme::setBounds(std::vector<bioReal> lb, std::vector<bioReal> ub) {
   lowerBounds = lb ;
   upperBounds = ub ;
 }

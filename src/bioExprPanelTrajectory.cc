@@ -9,34 +9,35 @@
 
 #include "bioExprPanelTrajectory.h"
 #include <cmath>
-#include "bioSmartPointer.h"
 #include <sstream>
 #include "bioExceptions.h"
 #include "bioDebug.h"
 
-bioExprPanelTrajectory::bioExprPanelTrajectory(bioSmartPointer<bioExpression>  c) :
+bioExprPanelTrajectory::bioExprPanelTrajectory(bioExpression* c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 
 bioExprPanelTrajectory::~bioExprPanelTrajectory() {
+
 }
 
-bioSmartPointer<bioDerivatives>
-bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-					       bioBoolean gradient,
-					       bioBoolean hessian) {
+const bioDerivatives* bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+							  bioBoolean gradient,
+							  bioBoolean hessian) {
 
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
-  theDerivatives->f = 0.0 ;
+  theDerivatives.f = 0.0 ;
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
 
@@ -56,7 +57,7 @@ bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
   child->setRowIndex(&theRowIndex) ;
 
   for (theRowIndex = (*dataMap)[*individualIndex][0]  ; theRowIndex <= (*dataMap)[*individualIndex][1] ; ++theRowIndex) {
-    bioSmartPointer<bioDerivatives> childResult(NULL) ;
+    const bioDerivatives* childResult(NULL) ;
     try {
       childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
       // if (childResult->f <= 1.0e-6) {
@@ -64,19 +65,19 @@ bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
       // 	str << "Error for data entry " << theRowIndex << ": probability " << childResult->f << "for " << child->print() ;
       // 	throw bioExceptions(__FILE__,__LINE__,str.str()) ;
       // }
-      theDerivatives->f += log(childResult->f) ;
+      theDerivatives.f += log(childResult->f) ;
       if (gradient) {
 	for (bioUInt i = 0 ; i < n ; ++i) {
 	  if (childResult->g[i] != 0.0) {
-	    theDerivatives->g[i] += childResult->g[i] / childResult->f ;
+	    theDerivatives.g[i] += childResult->g[i] / childResult->f ;
 	  }
 	  if (hessian) {
 	    for (bioUInt j = i ; j < n ; ++j) {
 	      if (childResult->h[i][j] != 0.0) {
-		theDerivatives->h[i][j] += childResult->h[i][j] / childResult->f ;
+		theDerivatives.h[i][j] += childResult->h[i][j] / childResult->f ;
 	      }
 	      if (childResult->g[i] != 0.0 && childResult->g[j] != 0.0) {
-		theDerivatives->h[i][j] -= childResult->g[i] * childResult->g[j] / (childResult->f * childResult->f) ;
+		theDerivatives.h[i][j] -= childResult->g[i] * childResult->g[j] / (childResult->f * childResult->f) ;
 	      }
 	    }
 	  }
@@ -93,28 +94,28 @@ bioExprPanelTrajectory::getValueAndDerivatives(std::vector<bioUInt> literalIds,
   // likelihood. We need now to store the derivatives of the
   // likelihood of the trajectory.
 
-  theDerivatives->f = exp(theDerivatives->f) ;
+  theDerivatives.f = exp(theDerivatives.f) ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
       if (hessian) {
 	for (bioUInt j = i ; j < n ; ++j) {
-	  if (theDerivatives->g[i] != 0.0 && theDerivatives->g[j] != 0.0) {
-	    theDerivatives->h[i][j] += theDerivatives->g[i] * theDerivatives->g[j] ;
+	  if (theDerivatives.g[i] != 0.0 && theDerivatives.g[j] != 0.0) {
+	    theDerivatives.h[i][j] += theDerivatives.g[i] * theDerivatives.g[j] ;
 	  }
-	  theDerivatives->h[i][j] *= theDerivatives->f ;
+	  theDerivatives.h[i][j] *= theDerivatives.f ;
 	}
       }
-      theDerivatives->g[i] *= theDerivatives->f ;
+      theDerivatives.g[i] *= theDerivatives.f ;
     }
   }
   if (hessian) {
     for (bioUInt i = 0 ; i < n ; ++i) {
       for (bioUInt j = i ; j < n ; ++j) {
-	theDerivatives->h[j][i] = theDerivatives->h[i][j] ;
+	theDerivatives.h[j][i] = theDerivatives.h[i][j] ;
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprPanelTrajectory::print(bioBoolean hp) const {

@@ -15,20 +15,20 @@
 
 class bioExprPanelTrajectory: public bioExpression {
  public:
-  bioExprPanelTrajectory(bioSmartPointer<bioExpression>  c) ;
+  bioExprPanelTrajectory(bioExpression* c) ;
   ~bioExprPanelTrajectory() ;
   bioExprPanelTrajectory(const bioExprPanelTrajectory&) = delete;
   void operator=(const bioExprPanelTrajectory&) = delete;  
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
-								 bioBoolean gradient,
-								 bioBoolean hessian) ;
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						 bioBoolean gradient,
+						 bioBoolean hessian) ;
 
   virtual bioString print(bioBoolean hp = false) const ;
   virtual void setRowIndex(bioUInt* i) ;
 
  protected:
   bioUInt theRowIndex ;
-  bioSmartPointer<bioExpression>  child ;
+  bioExpression* child ;
 
 };
 #endif

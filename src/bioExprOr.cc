@@ -9,11 +9,10 @@
 
 #include "bioExprOr.h"
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprOr::bioExprOr(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
+bioExprOr::bioExprOr(bioExpression* l, bioExpression* r) :
   left(l), right(r) {
 
   listOfChildren.push_back(l) ;
@@ -21,15 +20,18 @@ bioExprOr::bioExprOr(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpre
 }
 
 bioExprOr::~bioExprOr() {
+
 }
 
   
-bioSmartPointer<bioDerivatives>
-bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				  bioBoolean gradient,
-				  bioBoolean hessian) {
+const bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						     bioBoolean gradient,
+						     bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
+
   if (gradient) {
     if (containsLiterals(literalIds)) {
       std::stringstream str ;
@@ -37,18 +39,13 @@ bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalIds,
       throw(bioExceptions(__FILE__,__LINE__,str.str())) ;
     }
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
-
-
   
-  if (theDerivatives == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
-  }
   if (left == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"left") ;
   }
@@ -56,20 +53,20 @@ bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalIds,
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioSmartPointer<bioDerivatives> l = left->getValueAndDerivatives(literalIds,false,false) ;
+  const bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
   if (l->f != 0.0) {
-    theDerivatives->f = 1.0 ;
+    theDerivatives.f = 1.0 ;
   }
   else { 
-    bioSmartPointer<bioDerivatives> r = right->getValueAndDerivatives(literalIds,false,false) ;
+    const bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
     if (r->f != 0.0) {
-      theDerivatives->f = 1.0 ;
+      theDerivatives.f = 1.0 ;
     }
     else {
-      theDerivatives->f = 0.0 ;
+      theDerivatives.f = 0.0 ;
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprOr::print(bioBoolean hp) const {

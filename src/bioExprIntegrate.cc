@@ -10,58 +10,58 @@
 #include "bioExprIntegrate.h"
 #include <sstream>
 #include <cmath>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 #include "bioExprGaussHermite.h"
 
 
-bioExprIntegrate::bioExprIntegrate(bioSmartPointer<bioExpression>  c, bioUInt id) :
+bioExprIntegrate::bioExprIntegrate(bioExpression* c, bioUInt id) :
   child(c), rvId(id) {
   listOfChildren.push_back(c) ;
 }
 bioExprIntegrate::~bioExprIntegrate() {
+
 }
 
-bioSmartPointer<bioDerivatives>
-bioExprIntegrate::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-					 bioBoolean gradient,
-					 bioBoolean hessian) {
+const bioDerivatives* bioExprIntegrate::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+							  bioBoolean gradient,
+							  bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
-  
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
   bioExprGaussHermite theGh(child,literalIds,rvId,gradient,hessian) ;   
   bioGaussHermite theGhAlgo(&theGh) ;
   std::vector<bioReal> r = theGhAlgo.integrate() ;
-  theDerivatives->f = r[0] ;
+  theDerivatives.f = r[0] ;
   bioUInt n = literalIds.size() ;
   if (gradient) {
     for (bioUInt j = 0 ; j < n ; ++j) {
       if (std::isfinite(r[j+1])) {
-	theDerivatives->g[j] = r[j+1] ;
+	theDerivatives.g[j] = r[j+1] ;
       }
       else {
-	theDerivatives->g[j] = bioMaxReal ;
+	theDerivatives.g[j] = bioMaxReal ;
       }
     }
   }
   if (hessian) {
-    bioUInt index = 1 + theDerivatives->g.size() ;
+    bioUInt index = 1 + theDerivatives.g.size() ;
     for (bioUInt i = 0 ; i < n ; ++i) {
       for (bioUInt j = i ; j < n ; ++j) {
 	if (std::isfinite(r[index])) {
-	  theDerivatives->h[i][j] = theDerivatives->h[j][i] = r[index] ;
+	  theDerivatives.h[i][j] = theDerivatives.h[j][i] = r[index] ;
 	}
 	else {
-	  theDerivatives->h[i][j] = theDerivatives->h[j][i] = bioMaxReal ;
+	  theDerivatives.h[i][j] = theDerivatives.h[j][i] = bioMaxReal ;
 	}
 	++index ;
       }
     }
   }
 
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprIntegrate::print(bioBoolean hp) const {

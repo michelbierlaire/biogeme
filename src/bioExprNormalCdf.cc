@@ -7,51 +7,53 @@
 //
 //--------------------------------------------------------------------
 
-#include <sstream>
-#include "bioSmartPointer.h"
-#include <cmath>
 #include "bioExprNormalCdf.h"
+#include <sstream>
+#include <cmath>
 #include "bioDebug.h"
 
-bioExprNormalCdf::bioExprNormalCdf(bioSmartPointer<bioExpression>  c) :
+bioExprNormalCdf::bioExprNormalCdf(bioExpression* c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 bioExprNormalCdf::~bioExprNormalCdf() {
+
 }
 
-bioSmartPointer<bioDerivatives>
-bioExprNormalCdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-					 bioBoolean gradient,
-					 bioBoolean hessian) {
+const bioDerivatives* bioExprNormalCdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+							  bioBoolean gradient,
+							  bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
-  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  theDerivatives->f = theNormalCdf.compute(childResult->f) ;
+
+  const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  theDerivatives.f = theNormalCdf.compute(childResult->f) ;
 
   if (gradient) {
     bioUInt n = literalIds.size() ;
     bioReal thePdf = invSqrtTwoPi * exp(- childResult->f * childResult->f / 2.0) ;
     for (bioUInt i = 0 ; i < n ; ++i) {
       if (childResult->g[i] == 0.0) {
-	theDerivatives->g[i] = 0.0 ;
+	theDerivatives.g[i] = 0.0 ;
       }
       else {
-	theDerivatives->g[i] = thePdf * childResult->g[i] ;
+	theDerivatives.g[i] = thePdf * childResult->g[i] ;
       }
       if (hessian) {
 	for (bioUInt j = i ; j < n ; ++j) {
 	  if (childResult->h[i][j] != 0.0) {
-	    theDerivatives->h[i][j] = thePdf * childResult->h[i][j] ;
+	    theDerivatives.h[i][j] = thePdf * childResult->h[i][j] ;
 	  }
 	  else {
-	    theDerivatives->h[i][j] = 0.0 ;
+	    theDerivatives.h[i][j] = 0.0 ;
 	  }
 	  if (childResult->f != 0.0 && 
 	      childResult->g[i] != 0 && 
 	      childResult->g[j] != 0) {
-	    theDerivatives->h[i][j] -= thePdf * childResult->f * childResult->g[i] * childResult->g[j] ;
+	    theDerivatives.h[i][j] -= thePdf * childResult->f * childResult->g[i] * childResult->g[j] ;
 	  }
 	}
       }
@@ -61,11 +63,11 @@ bioExprNormalCdf::getValueAndDerivatives(std::vector<bioUInt> literalIds,
     bioUInt n = literalIds.size() ;
     for (bioUInt i = 0 ; i < n ; ++i) {
       for (bioUInt j = i ; j < n ; ++j) {
-	theDerivatives->h[j][i] = theDerivatives->h[i][j] ;
+	theDerivatives.h[j][i] = theDerivatives.h[i][j] ;
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprNormalCdf::print(bioBoolean hp) const {

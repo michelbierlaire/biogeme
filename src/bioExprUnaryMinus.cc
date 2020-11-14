@@ -9,36 +9,38 @@
 
 #include "bioExprUnaryMinus.h"
 #include "bioDebug.h"
-#include <sstream>
-#include "bioSmartPointer.h"
+#include <sstream> 
 
-bioExprUnaryMinus::bioExprUnaryMinus(bioSmartPointer<bioExpression>  c) :
+bioExprUnaryMinus::bioExprUnaryMinus(bioExpression* c) :
   child(c) {
   listOfChildren.push_back(c) ;
 }
 bioExprUnaryMinus::~bioExprUnaryMinus() {
+
 }
 
-bioSmartPointer<bioDerivatives> bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
   bioUInt n = literalIds.size() ;
-  bioSmartPointer<bioDerivatives> childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  theDerivatives->f = - childResult->f ;
+  const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  theDerivatives.f = - childResult->f ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] = - childResult->g[i] ;
+      theDerivatives.g[i] = - childResult->g[i] ;
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
-	  theDerivatives->h[i][j] = - childResult->h[i][j] ;
+	  theDerivatives.h[i][j] = - childResult->h[i][j] ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprUnaryMinus::print(bioBoolean hp) const {

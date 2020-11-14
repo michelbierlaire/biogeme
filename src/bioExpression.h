@@ -15,12 +15,12 @@
 #include "bioConst.h"
 #include "bioTypes.h"
 #include "bioString.h"
-#include "bioSmartPointer.h"
 #include "bioDerivatives.h"
 class bioExpression {
  public:
   bioExpression() ;
   virtual ~bioExpression() ;
+  virtual void resetDerivatives() ;
   virtual bioString print(bioBoolean hp = false) const = PURE_VIRTUAL ;
   virtual void setParameters(std::vector<bioReal>* p) ;
   virtual void setFixedParameters(std::vector<bioReal>* p) ;
@@ -36,14 +36,14 @@ class bioExpression {
   // Returns true is the expression contains at least one literal in
   // the list. Used to simplify the calculation of the derivatives
   virtual bioBoolean containsLiterals(std::vector<bioUInt> literalIds) const ;
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
-								 bioBoolean gradient,
-								 bioBoolean hessian) = PURE_VIRTUAL ;
-  virtual std::map<bioString,bioReal> getAllLiteralValues() const;
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						 bioBoolean gradient,
+						 bioBoolean hessian) = PURE_VIRTUAL ;
+  virtual std::map<bioString,bioReal> getAllLiteralValues() ;
  protected:
   std::vector<bioReal>* parameters ;
   std::vector<bioReal>* fixedParameters ;
-  bioSmartPointer<bioDerivatives> theDerivatives ;
+  bioDerivatives theDerivatives ;
   // Dimensons of the data
   // 1. number of rows
   // 2. number of variables
@@ -54,7 +54,7 @@ class bioExpression {
   // 2. two: the first and the last row of  each individual in the dataset
   std::vector< std::vector<bioUInt> >* dataMap;
   
-  std::vector<bioSmartPointer<bioExpression> > listOfChildren ;
+  std::vector<bioExpression*> listOfChildren ;
   // Dimensions of the draws
   // 1. number of individuals
   // 2. number of draws

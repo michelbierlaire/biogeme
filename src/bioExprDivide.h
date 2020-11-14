@@ -15,17 +15,17 @@
 
 class bioExprDivide: public bioExpression {
  public:
-  bioExprDivide(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) ;
+  bioExprDivide(bioExpression* l, bioExpression* r) ;
   ~bioExprDivide() ;
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						bioBoolean hessian) ;
 
 
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
-  bioSmartPointer<bioExpression>  left ;
-  bioSmartPointer<bioExpression>  right ;
+  bioExpression* left ;
+  bioExpression* right ;
 };
 
 

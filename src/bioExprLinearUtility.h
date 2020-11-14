@@ -15,10 +15,10 @@
 
 class bioLinearTerm {
 public:
-  bioSmartPointer<bioExpression>  theBeta ;
+  bioExpression* theBeta ;
   bioUInt theBetaId ;
   bioString theBetaName ;
-  bioSmartPointer<bioExpression>  theVar ;
+  bioExpression* theVar ;
   bioUInt theVarId ;
   bioString theVarName ;
 };
@@ -27,9 +27,9 @@ class bioExprLinearUtility: public bioExpression {
 public:
   bioExprLinearUtility(std::vector<bioLinearTerm> t) ;
   ~bioExprLinearUtility() ;
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
-								 bioBoolean gradient,
-								 bioBoolean hessian) ;
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						 bioBoolean gradient,
+						 bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
   std::vector<bioLinearTerm > listOfTerms ;

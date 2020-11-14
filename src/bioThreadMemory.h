@@ -13,7 +13,6 @@
 #include <pthread.h> 
 #include <vector>
 #include <map>
-#include "bioSmartPointer.h"
 #include "bioTypes.h"
 #include "bioString.h"
 #include "bioFormula.h"
@@ -34,8 +33,8 @@ typedef struct{
   bioReal result ;
   bioUInt startData ;
   bioUInt endData ;
-  bioSmartPointer<bioFormula> theLoglike ;
-  bioSmartPointer<bioFormula> theWeight ;
+  bioFormula theLoglike ;
+  bioFormula theWeight ;
   std::vector<bioUInt>* literalIds ;
   bioBoolean panel ;
 } bioThreadArg ;
@@ -44,8 +43,9 @@ typedef struct{
 class bioThreadMemory {
 
  public:
-  bioThreadMemory(bioUInt nThreads,bioUInt dim) ;
+  bioThreadMemory() ;
   ~bioThreadMemory() ;
+  void resize(bioUInt nThreads, bioUInt dim) ;
   bioThreadArg* getInput(bioUInt t) ;
   void setLoglike(std::vector<bioString> f) ;
   void setWeight(std::vector<bioString> w) ;
@@ -60,8 +60,8 @@ class bioThreadMemory {
   
  private:
   std::vector<bioThreadArg> inputStructures ;
-  std::vector<bioSmartPointer<bioFormula> > loglikes ;
-  std::vector<bioSmartPointer<bioFormula> > weights ;
+  std::vector<bioFormula> loglikes ;
+  std::vector<bioFormula> weights ;
 
 };
 #endif

@@ -9,7 +9,6 @@
 
 #include "bioExprLiteral.h"
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioExceptions.h"
 #include "bioDebug.h"
 
@@ -20,35 +19,38 @@ bioExprLiteral::~bioExprLiteral() {
 }
 
 
-bioSmartPointer<bioDerivatives>
-bioExprLiteral::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				       bioBoolean gradient,
-				       bioBoolean hessian) {
+const bioDerivatives* bioExprLiteral::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						       bioBoolean gradient,
+						       bioBoolean hessian) {
 
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
+  
+  
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
     for (std::size_t i = 0 ; i < literalIds.size() ; ++i) {
       if (literalIds[i] == theLiteralId) {
-	theDerivatives->g[i] = 1.0 ;
+	theDerivatives.g[i] = 1.0 ;
       }
       else {
-	theDerivatives->g[i] = 0.0 ;
+	theDerivatives.g[i] = 0.0 ;
       }
     }
   }
-  theDerivatives->f = getLiteralValue() ;
-  return theDerivatives ;
+  theDerivatives.f = getLiteralValue() ;
+  return &theDerivatives ;
 }
 
 
@@ -89,7 +91,7 @@ void bioExprLiteral::setData(std::vector< std::vector<bioReal> >* d) {
 }
 
 
-std::map<bioString,bioReal> bioExprLiteral::getAllLiteralValues() const {
+std::map<bioString,bioReal> bioExprLiteral::getAllLiteralValues() {
   std::map<bioString,bioReal> m ;
   bioReal v ;
   try {

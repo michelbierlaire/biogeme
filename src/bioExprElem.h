@@ -16,16 +16,16 @@
 
 class bioExprElem: public bioExpression {
  public:
-  bioExprElem(bioSmartPointer<bioExpression>  k, std::map<bioUInt,bioSmartPointer<bioExpression> > d) ;
+  bioExprElem(bioExpression* k, std::map<bioUInt,bioExpression*> d) ;
   ~bioExprElem() ;
   
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
-								 bioBoolean gradient,
-								 bioBoolean hessian) ;
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						 bioBoolean gradient,
+						bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
-  bioSmartPointer<bioExpression>  key ;
-  std::map<bioUInt,bioSmartPointer<bioExpression> > dictOfExpressions ;
+  bioExpression* key ;
+  std::map<bioUInt,bioExpression*> dictOfExpressions ;
 
 };
 

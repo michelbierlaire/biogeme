@@ -8,50 +8,52 @@
 //--------------------------------------------------------------------
 
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExprMultSum.h"
 #include "bioExceptions.h"
 
-bioExprMultSum::bioExprMultSum(std::vector<bioSmartPointer<bioExpression> > e) :
+bioExprMultSum::bioExprMultSum(std::vector<bioExpression*> e) :
   expressions(e) {
   listOfChildren = e ;
 }
 
 bioExprMultSum::~bioExprMultSum() {
+
 }
 
-bioSmartPointer<bioDerivatives>
-bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				       bioBoolean gradient,
-				       bioBoolean hessian) {
+const bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						       bioBoolean gradient,
+						       bioBoolean hessian) {
 
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
-  theDerivatives->f = 0.0 ;
+  theDerivatives.f = 0.0 ;
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
-  for (std::vector<bioSmartPointer<bioExpression> >::iterator i = expressions.begin();
+  for (std::vector<bioExpression*>::iterator i = expressions.begin();
        i != expressions.end() ;
        ++i) {
-    bioSmartPointer<bioDerivatives> fgh = (*i)->getValueAndDerivatives(literalIds,gradient,hessian) ;
-    theDerivatives->f += fgh->f ;
+    const bioDerivatives* fgh = (*i)->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    
+    theDerivatives.f += fgh->f ;
     if (gradient) {
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-	theDerivatives->g[k] += fgh->g[k] ;
+	theDerivatives.g[k] += fgh->g[k] ;
 	if (hessian) {
 	  for (std::size_t l = k ; l < literalIds.size() ; ++l) {
-	    theDerivatives->h[k][l] += fgh->h[k][l] ;
+	    theDerivatives.h[k][l] += fgh->h[k][l] ;
 	  }
 	}
       }
@@ -61,18 +63,19 @@ bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
     // Fill the symmetric part of the matrix
     for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
       for (std::size_t l = k+1 ; l < literalIds.size() ; ++l) {
-	theDerivatives->h[l][k]  = theDerivatives->h[k][l] ;
+	theDerivatives.h[l][k]  = theDerivatives.h[k][l] ;
       }
     }
   }
-  return theDerivatives ;
+  //  DEBUG_MESSAGE("MultiSum calculated " << str.length()) ;
+  return &theDerivatives ;
 }
 
 bioString bioExprMultSum::print(bioBoolean hp) const {
   std::stringstream str ;
   if (hp) {
     str << "MultiSum(" ;
-    for (std::vector<bioSmartPointer<bioExpression> >::const_iterator i = expressions.begin() ;
+    for (std::vector<bioExpression*>::const_iterator i = expressions.begin() ;
 	 i != expressions.end() ;
 	 ++i) {
       if (i != expressions.begin()) {
@@ -84,7 +87,7 @@ bioString bioExprMultSum::print(bioBoolean hp) const {
   }
   else {
     str << "(" ;
-    for (std::vector<bioSmartPointer<bioExpression> >::const_iterator i = expressions.begin() ;
+    for (std::vector<bioExpression*>::const_iterator i = expressions.begin() ;
 	 i != expressions.end() ;
 	 ++i) {
       if (i != expressions.begin()) {

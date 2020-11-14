@@ -15,16 +15,16 @@
 
 class bioExprMontecarlo: public bioExpression {
  public:
-  bioExprMontecarlo(bioSmartPointer<bioExpression>  c) ;
+  bioExprMontecarlo(bioExpression* c) ;
   ~bioExprMontecarlo() ;
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
-								 bioBoolean gradient,
-								 bioBoolean hessian) ;
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						 bioBoolean gradient,
+						 bioBoolean hessian) ;
 
   virtual bioString print(bioBoolean hp = false) const ;
 
  protected:
   bioUInt drawIndex ;
-  bioSmartPointer<bioExpression>  child ;
+  bioExpression* child ;
 };
 #endif

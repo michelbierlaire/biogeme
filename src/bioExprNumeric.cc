@@ -9,33 +9,34 @@
 
 #include "bioExprNumeric.h"
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 bioExprNumeric::bioExprNumeric(bioReal v) : value(v) {
   
 }
 
 bioExprNumeric::~bioExprNumeric() {
+
 }
 
-bioSmartPointer<bioDerivatives>
-bioExprNumeric::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				       bioBoolean gradient,
-				       bioBoolean hessian) {
+const bioDerivatives* bioExprNumeric::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						       bioBoolean gradient,
+						       bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
-  theDerivatives->f = value ;
+  theDerivatives.f = value ;
   
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprNumeric::print(bioBoolean hp) const {

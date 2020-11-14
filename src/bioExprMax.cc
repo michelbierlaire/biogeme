@@ -9,11 +9,10 @@
 
 #include "bioExprMax.h"
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprMax::bioExprMax(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
+bioExprMax::bioExprMax(bioExpression* l, bioExpression* r) :
   left(l), right(r) {
 
   listOfChildren.push_back(l) ;
@@ -21,19 +20,25 @@ bioExprMax::bioExprMax(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExp
 }
 
 bioExprMax::~bioExprMax() {
+
 }
 
   
-bioSmartPointer<bioDerivatives>
-bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				   bioBoolean gradient,
-				   bioBoolean hessian) {
+const bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						     bioBoolean gradient,
+						     bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
-
-  if (theDerivatives == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
+
+  if (gradient) {
+    if (containsLiterals(literalIds)) {
+      std::cout << "Warning: expression " << print()
+		<< " is not differentiable everywhere. " << std::endl ;
+    }
+  }
+  
   if (left == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"left") ;
   }
@@ -41,42 +46,35 @@ bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioSmartPointer<bioDerivatives> leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
-  bioSmartPointer<bioDerivatives> rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  const bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
   if (leftResult->f > rightResult->f) {
-    theDerivatives->f = leftResult->f ;
+    theDerivatives.f = leftResult->f ;
     if (gradient) {
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-	theDerivatives->g[k] = leftResult->g[k] ;
+	theDerivatives.g[k] = leftResult->g[k] ;
 	if (hessian) {
 	  for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-	    theDerivatives->h[k][l] = leftResult->h[k][l] ;
+	    theDerivatives.h[k][l] = leftResult->h[k][l] ;
 	  }
 	}
       }
     }
   }
   else { 
-    theDerivatives->f = rightResult->f ;
+    theDerivatives.f = rightResult->f ;
     if (gradient) {
-      if (leftResult->f == rightResult->f) {
-	if (containsLiterals(literalIds)) {
-	  std::cout << "Warning: expression " << print()
-		    << " is not differentiable at " << leftResult->f
-		    << ". Right derivative is used." << std::endl ;
-	}
-      }
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-	theDerivatives->g[k] = rightResult->g[k] ;
+	theDerivatives.g[k] = rightResult->g[k] ;
 	if (hessian) {
 	  for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-	    theDerivatives->h[k][l] = rightResult->h[k][l] ;
+	    theDerivatives.h[k][l] = rightResult->h[k][l] ;
 	  }
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprMax::print(bioBoolean hp) const {

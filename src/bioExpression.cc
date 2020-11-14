@@ -10,11 +10,16 @@
 #include "bioExpression.h"
 #include "bioDebug.h"
 #include <sstream>
-bioExpression::bioExpression() : parameters(NULL), theDerivatives(NULL), data(NULL), dataMap(NULL), draws(NULL), sampleSize(0), numberOfDraws(0), numberOfDrawVariables(0), rowIndex(NULL), individualIndex(NULL) {
+bioExpression::bioExpression() : parameters(NULL), data(NULL), dataMap(NULL), draws(NULL), sampleSize(0), numberOfDraws(0), numberOfDrawVariables(0), rowIndex(NULL), individualIndex(NULL) {
 }
 
 bioExpression::~bioExpression() {
+  resetDerivatives() ;
+}
 
+
+void bioExpression::resetDerivatives() {
+  theDerivatives.clear() ;
 }
 
 void bioExpression::setParameters(std::vector<bioReal>* p) {
@@ -48,7 +53,7 @@ void bioExpression::setDraws(std::vector< std::vector< std::vector<bioReal> > >*
 
 void bioExpression::setRowIndex(bioUInt* d) {
   rowIndex = d ;
-  for (std::vector<bioSmartPointer<bioExpression> >::iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     (*i)->setRowIndex(d) ;
@@ -57,7 +62,7 @@ void bioExpression::setRowIndex(bioUInt* d) {
 
 void bioExpression::setIndividualIndex(bioUInt* d) {
   individualIndex = d ;
-  for (std::vector<bioSmartPointer<bioExpression> >::iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     (*i)->setIndividualIndex(d) ;
@@ -66,7 +71,7 @@ void bioExpression::setIndividualIndex(bioUInt* d) {
 
 void bioExpression::setMissingData(bioReal md) {
   missingData = md ;
-  for (std::vector<bioSmartPointer<bioExpression> >::iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     (*i)->setMissingData(md) ;
@@ -75,7 +80,7 @@ void bioExpression::setMissingData(bioReal md) {
 
 
 void bioExpression::setDrawIndex(bioUInt* d) {
-  for (std::vector<bioSmartPointer<bioExpression> >::iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     (*i)->setDrawIndex(d) ;
@@ -83,7 +88,7 @@ void bioExpression::setDrawIndex(bioUInt* d) {
 }
 
 void bioExpression::setRandomVariableValuePtr(bioUInt rvId, bioReal* v) {
-  for (std::vector<bioSmartPointer<bioExpression> >::iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     (*i)->setRandomVariableValuePtr(rvId, v) ;
@@ -91,13 +96,13 @@ void bioExpression::setRandomVariableValuePtr(bioUInt rvId, bioReal* v) {
 }
 
 bioReal bioExpression::getValue() {
-  bioSmartPointer<bioDerivatives> r = getValueAndDerivatives(std::vector<bioUInt>(),false,false) ;
+  const bioDerivatives* r = getValueAndDerivatives(std::vector<bioUInt>(),false,false) ;
   return r->f ;
 
 }
 
 bioBoolean bioExpression::containsLiterals(std::vector<bioUInt> literalIds) const {
-  for (std::vector<bioSmartPointer<bioExpression> >::const_iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::const_iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     if ((*i)->containsLiterals(literalIds)) {
@@ -107,9 +112,9 @@ bioBoolean bioExpression::containsLiterals(std::vector<bioUInt> literalIds) cons
   return false ;
 }
 
-std::map<bioString,bioReal> bioExpression::getAllLiteralValues() const {
+std::map<bioString,bioReal> bioExpression::getAllLiteralValues() {
   std::map<bioString,bioReal>  m ;
-  for (std::vector<bioSmartPointer<bioExpression> >::const_iterator i = listOfChildren.begin() ;
+  for (std::vector<bioExpression*>::const_iterator i = listOfChildren.begin() ;
        i != listOfChildren.end() ;
        ++i) {
     std::map<bioString,bioReal> cm = (*i)->getAllLiteralValues() ;

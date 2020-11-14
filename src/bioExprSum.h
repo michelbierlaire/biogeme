@@ -15,15 +15,15 @@
 
 class bioExprSum: public bioExpression {
  public:
-  bioExprSum(bioSmartPointer<bioExpression>  c, std::vector< std::vector<bioReal> >* d) ;
+  bioExprSum(bioExpression* c, std::vector< std::vector<bioReal> >* d) ;
   ~bioExprSum() ;
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
   
   virtual bioString print(bioBoolean hp = false) const ;
 protected:
-  bioSmartPointer<bioExpression>  child ;
+  bioExpression* child ;
   std::vector< std::vector<bioReal> >* data ;
 };
 #endif

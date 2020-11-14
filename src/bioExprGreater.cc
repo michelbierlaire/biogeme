@@ -9,11 +9,10 @@
 
 #include "bioExprGreater.h"
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprGreater::bioExprGreater(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
+bioExprGreater::bioExprGreater(bioExpression* l, bioExpression* r) :
   left(l), right(r) {
 
   listOfChildren.push_back(l) ;
@@ -21,14 +20,16 @@ bioExprGreater::bioExprGreater(bioSmartPointer<bioExpression>  l, bioSmartPointe
 }
 
 bioExprGreater::~bioExprGreater() {
+
 }
 
-bioSmartPointer<bioDerivatives>
-bioExprGreater::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				       bioBoolean gradient,
-				       bioBoolean hessian) {
-
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+const bioDerivatives* bioExprGreater::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+							     bioBoolean gradient,
+							     bioBoolean hessian) {
+  
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
   if (gradient || hessian) {
     if (containsLiterals(literalIds)) {
@@ -39,23 +40,23 @@ bioExprGreater::getValueAndDerivatives(std::vector<bioUInt> literalIds,
   }
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
 
   
   if (left->getValue() > right->getValue()) {
-    theDerivatives->f = 1.0 ;
+    theDerivatives.f = 1.0 ;
   }
   else {
-    theDerivatives->f = 0.0 ;
+    theDerivatives.f = 0.0 ;
   }
 
   
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprGreater::print(bioBoolean hp) const {

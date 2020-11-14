@@ -15,16 +15,16 @@
 
 class bioExprIntegrate: public bioExpression {
  public:
-  bioExprIntegrate(bioSmartPointer<bioExpression>  c, bioUInt lid) ;
+  bioExprIntegrate(bioExpression* c, bioUInt lid) ;
   ~bioExprIntegrate() ;
-  virtual bioSmartPointer<bioDerivatives> getValueAndDerivatives(std::vector<bioUInt> literalIds,
-								 bioBoolean gradient,
-								 bioBoolean hessian) ;
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						 bioBoolean gradient,
+						 bioBoolean hessian) ;
 
   virtual bioString print(bioBoolean hp = false) const ;
 
  protected:
-  bioSmartPointer<bioExpression>  child ;
+  bioExpression* child ;
   bioUInt rvId ;
 };
 #endif

@@ -9,11 +9,10 @@
 
 #include "bioExprPlus.h"
 #include <sstream>
-#include "bioSmartPointer.h"
 #include "bioDebug.h"
 #include "bioExceptions.h"
 
-bioExprPlus::bioExprPlus(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioExpression>  r) :
+bioExprPlus::bioExprPlus(bioExpression* l, bioExpression* r) :
   left(l), right(r) {
   listOfChildren.push_back(l) ;
   listOfChildren.push_back(r) ;
@@ -23,59 +22,62 @@ bioExprPlus::bioExprPlus(bioSmartPointer<bioExpression>  l, bioSmartPointer<bioE
 bioExprPlus::~bioExprPlus() {
 }
   
-bioSmartPointer<bioDerivatives>
-bioExprPlus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-				    bioBoolean gradient,
-				    bioBoolean hessian) {
+const bioDerivatives* bioExprPlus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+						    bioBoolean gradient,
+						    bioBoolean hessian) {
 
-  theDerivatives = bioSmartPointer<bioDerivatives>(new bioDerivatives(literalIds.size())) ;
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
+  }
 
+
+  
   bioUInt n = literalIds.size() ;
-  bioSmartPointer<bioDerivatives> leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  bioSmartPointer<bioDerivatives> rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
   if (rightResult == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"right result") ;
   }
 
   if (leftResult->f == 0.0) {
-    theDerivatives->f = rightResult->f ;
+    theDerivatives.f = rightResult->f ;
   }
   else if (rightResult->f == 0.0) {
-    theDerivatives->f = leftResult->f ;
+    theDerivatives.f = leftResult->f ;
   }
   else {
-    theDerivatives->f = leftResult->f + rightResult->f ;
+    theDerivatives.f = leftResult->f + rightResult->f ;
   }
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
       if (leftResult->g[i] == 0.0) {
-	theDerivatives->g[i] = rightResult->g[i] ;
+	theDerivatives.g[i] = rightResult->g[i] ;
 
       }
       else if (rightResult->g[i] == 0.0) {
-	theDerivatives->g[i] = leftResult->g[i] ;
+	theDerivatives.g[i] = leftResult->g[i] ;
       }
       else {
-	theDerivatives->g[i] = leftResult->g[i] + rightResult->g[i] ;
+	theDerivatives.g[i] = leftResult->g[i] + rightResult->g[i] ;
       }
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
 	  if (leftResult->h[i][j] == 0.0) {
-	    theDerivatives->h[i][j] = rightResult->h[i][j] ;
+	    theDerivatives.h[i][j] = rightResult->h[i][j] ;
 	  }
 	  else if (rightResult->h[i][j] == 0.0) {
-	    theDerivatives->h[i][j] = leftResult->h[i][j] ;
+	    theDerivatives.h[i][j] = leftResult->h[i][j] ;
 	    
 	  }
 	  else {
-	    theDerivatives->h[i][j] = leftResult->h[i][j] + rightResult->h[i][j] ;
+	    theDerivatives.h[i][j] = leftResult->h[i][j] + rightResult->h[i][j] ;
 	  }
 	}
       }
     }
   }
-  //  DEBUG_MESSAGE("Plus - Calculated: " << str.length() << " = " << theDerivatives->f) ;
-  return theDerivatives ;
+  //  DEBUG_MESSAGE("Plus - Calculated: " << str.length() << " = " << theDerivatives.f) ;
+  return &theDerivatives ;
 }
 
 bioString bioExprPlus::print(bioBoolean hp) const {

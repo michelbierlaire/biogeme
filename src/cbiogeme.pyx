@@ -12,6 +12,12 @@ ctypedef vector[uint_vector] uint_matrix
 ctypedef vector[double] double_vector
 ctypedef vector[double_vector] double_matrix
 ctypedef vector[double_matrix] double_tensor
+ctypedef vector[string] string_vector
+
+ctypedef int[::1] uint_vector_view
+ctypedef int[:, ::1] uint_matrix_view
+ctypedef double[::1] double_vector_view
+ctypedef double[:, ::1] double_matrix_view
 
 
 cdef extern from "biogeme.h":
@@ -22,34 +28,30 @@ cdef extern from "biogeme.h":
 		double calculateLikelihood(double_vector betas, 
 			double_vector fixedBetas) except +
 
-		double calculateLikeAndDerivatives(double_vector betas, 
-			double_vector fixedBetas, 
-			uint_vector betaIds, 
-			double_vector& g,
-			double_matrix& h,
-			double_matrix& bhhh,
-			bool_t hessian,
-			bool_t bhhh) except +
-
-		string cfsqp(double_vector betas,
+		double calculateLikeAndDerivatives(double_vector betas,
 			double_vector fixedBetas,
 			uint_vector betaIds,
-			unsigned long nit,
-			unsigned long nf,
-			unsigned long mode,
-			unsigned long iprint,
-			unsigned long miter,
-			double eps) except +
+			double* g,
+			double* h,
+			double* bhhh,
+			bool_t hessian,
+			bool_t bhhh) except +
 
 		void setPanel(bool_t p)
 
 		void setBounds(double_vector lb, double_vector ub)
 
 		void simulateFormula(vector[string] loglikeSignatures,
-					double_vector betas, 
-					double_vector fixedBetas,
+				     double_vector betas, 
+				     double_vector fixedBetas,
 				     double_matrix& data,
-				     double_vector& results) except +
+				     double* results) except +
+
+		void simulateSeveralFormulas(vector[string_vector] loglikeSignatures,
+				     double_vector betas, 
+				     double_vector fixedBetas,
+				     double_matrix& data,
+				     double* results) except +
 
 		void setExpressions(vector[string] loglikeSignatures, 
 						vector[string] weightSignatures,
@@ -70,37 +72,85 @@ cdef class pyBiogeme:
 	def __cinit__(self):
 		self.theBiogeme = biogeme()
 
+
 	def setPanel(self,panel=True):
 		self.theBiogeme.setPanel(panel)
 
-	def calculateLikelihoodAndDerivatives(self,betas,fixedBetas,betaIds,hessian,bhhh,draws=None):
-		cdef double_vector g
-		cdef double_matrix h
-		cdef double_matrix b
-		g = np.empty(len(betas))
-		h = np.empty([len(betas),len(betas)])
-		b = np.empty([len(betas),len(betas)])
-		f = self.theBiogeme.calculateLikeAndDerivatives(betas,fixedBetas,betaIds,g,h,b,hessian,bhhh)
-		return f,g,h,b
+	def calculateLikelihoodAndDerivatives(self,
+	                                      betas,
+					      fixedBetas,
+					      betaIds,
+					      gmem,
+					      hmem,
+					      bmem,
+					      hessian,
+					      bhhh,
+					      draws=None):
+		n = len(betas)
 
-	def cfsqp(self,betas,fixedBetas,betaIds,mode,iprint,moter,eps):
-		cdef double_vector b = betas
-		cdef unsigned long nit
-		cdef unsigned long nf
-		diag = self.theBiogeme.cfsqp(b,fixedBetas,betaIds,nit,nf,mode,iprint,moter,eps)
-		return b,nit,nf,diag
+		if not gmem.flags['C_CONTIGUOUS']:
+			print('gmem not contiguous')
+			gmem = np.ascontiguousarray(gmem)
+		if not hmem.flags['C_CONTIGUOUS']:
+			print('hmem not contiguous')
+			hmem = np.ascontiguousarray(hmem)
+		if not bmem.flags['C_CONTIGUOUS']:
+			print('bmem not contiguous')
+			bmem = np.ascontiguousarray(bmem)
+
+		cdef double_vector_view gmem_view = gmem
+		cdef double_matrix_view hmem_view = hmem
+		cdef double_matrix_view bmem_view = bmem
+
+
+		f = self.theBiogeme.calculateLikeAndDerivatives(betas,
+			                                        fixedBetas,
+								betaIds,
+								&gmem_view[0],
+								&hmem_view[0,0],
+								&bmem_view[0,0],
+								hessian,
+								bhhh)
+		return f, gmem, hmem, bmem
 
 	def setBounds(self,lb,ub):
 		self.theBiogeme.setBounds(lb,ub)
 
 	def calculateLikelihood(self, betas,fixedBetas):
-		r = self.theBiogeme.calculateLikelihood(betas,fixedBetas)
+		r = self.theBiogeme.calculateLikelihood(betas, fixedBetas)
 		return r
 
-	def simulateFormula(self, formula, betas,fixedBetas, d):	
-		cdef double_vector r
+	def simulateFormula(self, formula, betas, fixedBetas, d):
+		n = d.shape[0]	
+		r = np.empty(n)
+		if not r.flags['C_CONTIGUOUS']:
+			print('r not contiguous')
+			r = np.ascontiguousarray(r)
 		d = np.ascontiguousarray(d)
-		self.theBiogeme.simulateFormula(formula,betas,fixedBetas,d,r)
+
+		cdef double_vector_view r_view = r
+		self.theBiogeme.simulateFormula(formula,
+					        betas, 
+   						fixedBetas, 
+						d, 
+						&r_view[0])
+		return r
+	
+	def simulateSeveralFormulas(self, formulas, betas, fixedBetas, d):
+		n = d.shape[0]
+		nf = len(formulas)
+		r = np.zeros([nf, n])
+		if not r.flags['C_CONTIGUOUS']:
+			print('r not contiguous')
+			r = np.ascontiguousarray(r)
+		d = np.ascontiguousarray(d)
+
+		cdef double_matrix_view r_view = r
+		self.theBiogeme.simulateSeveralFormulas(formulas,
+					        			 betas, 
+   									 fixedBetas, 
+									 d, 
+									 &r_view[0,0])
 		return r
 	
 	def setExpressions(self,loglikeFormulas,nbrOfThreads,weightFormulas=None):
