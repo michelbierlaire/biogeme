@@ -546,7 +546,7 @@ class bioResults:
                 v = v.replace('_', '\\_')
             h += f'{k} & {v:{p}} \\\\\n'
         for k, v in self.data.optimizationMessages.items():
-            if k == 'Relative projected gradient':
+            if k == 'Relative projected gradient' or k == 'Relative change':
                 h += f'{k} & \\verb${v:.7g}$ \\\\\n'
             else:
                 h += f'{k} & \\verb${v}$ \\\\\n'
@@ -588,6 +588,9 @@ class bioResults:
         """
         d = {}
         d['Number of estimated parameters'] = self.data.nparam, ''
+        nf = self.numberOfFreeParameters()
+        if nf != self.data.nparam:
+            d['Number of free parameters'] = nf, ''
         d['Sample size'] = self.data.sampleSize, ''
         if self.data.sampleSize != self.data.numberOfObservations:
             d['Observations'] = self.data.numberOfObservations, ''
@@ -615,6 +618,11 @@ class bioResults:
         d['Nbr of threads'] = self.data.numberOfThreads, ''
         return d
 
+    def numberOfFreeParameters(self):
+        """This is the number of estimated parameters, minus those that are at their bounds
+        """
+        return sum([not b.isBoundActive() for b in self.data.betas])
+    
     def getEstimatedParameters(self):
         """Gather the estimated parameters and the corresponding statistics in
 a Pandas dataframe.
