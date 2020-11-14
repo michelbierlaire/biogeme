@@ -12,6 +12,7 @@
 import numpy as np
 import biogeme.messaging as msg
 
+logger = msg.bioMessage()
 
 def findiff_g(theFunction, x):
     """Calculates the gradient of a function :math`f` using finite differences
@@ -125,7 +126,6 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
     g_num = findiff_g(theFunction, x)
     gdiff = g - g_num
     if logg:
-        logger = msg.bioMessage()
         if names is None:
             names = [f'x[{i}]' for i in range(len(x))]
         logger.detailed('x\t\tGradient\tFinDiff\t\tDifference')
