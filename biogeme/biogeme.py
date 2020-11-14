@@ -104,7 +104,7 @@ class BIOGEME:
         :type removeUnusedVariables: bool
 
         :param suggestScales: if True, Biogeme suggests the scaling of the variables in the database. Default: True. See also :func:`biogeme.database.Database.suggestScaling`
-        :type suggestScales: bool. 
+        :type suggestScales: bool.
 
         :param missingData: if one variable has this value, it is
            assumed that a data is missing and an exception will be
@@ -133,17 +133,16 @@ class BIOGEME:
         ## monteCarlo is True if one of the expression involves a
         # Monte-Carlo integration.
         self.monteCarlo = False
-        np.random.seed(seed)
-        ## If not None, it is the name of a file. The values of the
-        ## estimated parameters are saved on that file each time the
-        ## likelihood function is improved.
-        self.saveIterations = '__savedIterations.txt'
+        if seed is not None:
+            np.random.seed(seed)
+
+        self.saveIterations = True
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(f'Expression {formulas} is not of type '
                                          f'biogeme.expressions.Expression. '
                                          f'It is of type {type(formulas)}')
-            
+
             ## Object of type biogeme.expressions.Expression
             ## calculating the formula for the loglikelihood
             self.loglike = formulas
@@ -174,7 +173,7 @@ class BIOGEME:
 
         ## User notes
         self.userNotes = userNotes
-        
+
         ## Missing data
         self.missingData = missingData
 
@@ -209,7 +208,7 @@ class BIOGEME:
                 self.database.data.drop(columns=list(unusedVariables))
 
 
-                
+
         if suggestScales:
             suggestedScales = self.database.suggestScaling(columns=self.usedVariables)
             if not suggestedScales.empty:
@@ -227,14 +226,23 @@ class BIOGEME:
         if not skipAudit:
             self._audit()
 
-        self.theC = cb.pyBiogeme()
 
         self._prepareDatabaseForFormula()
         self._prepareLiterals()
-        
+        self.theC = cb.pyBiogeme(len(self.freeBetaNames))
+        if self.database.isPanel():
+            self.theC.setPanel(True)
+            self.theC.setDataMap(self.database.individualMap)
+        # Transfer the data to the C++ formula
+        self.theC.setData(self.database.data)
+        self.theC.setMissingData(self.missingData)
+
+
+
+
         ## Boolean variable, True if the HTML file with the results must be generated.
         self.generateHtml = True
-        
+
         ## Boolean variable, True if the pickle file with the results must be generated.
         self.generatePickle = True
 
@@ -273,11 +281,6 @@ class BIOGEME:
         ## Information provided by the optimization algorithm after completion.
         self.optimizationMessages = None
 
-
-
-        ## Default bounds, replacing None, for the CFSQP algorithm
-        self.cfsqp_default_bounds = 1000
-
         ## Parameters to be transferred to the optimization algorithm
         self.algoParameters = None
 
@@ -286,6 +289,13 @@ class BIOGEME:
 
         ## Store the best iteration found so far.
         self.bestIteration = None
+
+    def _saveIterationsFileName(self):
+        """
+        :return: The name of the file where the iterations are saved.
+        :rtype: str
+        """
+        return f'__{self.modelName}.iter'
 
     def _audit(self):
         """Each expression provides an audit function, that verifies its
@@ -360,12 +370,6 @@ class BIOGEME:
         # Rebuild the map for panel data
         if self.database.isPanel():
             self.database.buildPanelMap()
-            self.theC.setPanel(True)
-            self.theC.setDataMap(self.database.individualMap)
-
-        # Transfer the data to the C++ formula
-        self.theC.setData(self.database.data)
-        self.theC.setMissingData(self.missingData)
 
     def getBoundsOnBeta(self, betaName):
         """ Returns the bounds on the parameter as defined by the user.
@@ -417,9 +421,10 @@ class BIOGEME:
         ## Values of the fixed parameters (not estimated).
         self.fixedBetaValues = [float(self.allFixedBetas[x].initValue) for x in self.fixedBetaNames]
 
+
     def calculateNullLoglikelihood(self, avail):
         """Calculate the log likelihood of the null model that predicts equal
-            probability for each alternative 
+            probability for each alternative
 
         :param avail: list of expressions to evaluate the
                       availability conditions for each alternative.
@@ -528,21 +533,30 @@ class BIOGEME:
 
         """
 
-        if len(x) != len(self.betaInitValues):
+        n = len(x)
+        if n != len(self.betaInitValues):
             error_msg = (f'Input vector must be of length '
                          f'{len(self.betaInitValues)} and not {len(x)}')
             raise ValueError(error_msg)
         self._prepareDatabaseForFormula(batch)
 
-        f, g, h, bh = self.theC.calculateLikelihoodAndDerivatives(x,
-                                                                  self.fixedBetaValues,
-                                                                  self.betaIds,
-                                                                  hessian,
-                                                                  bhhh)
+        g = np.empty(n)
+        h = np.empty([n, n])
+        bh = np.empty([n, n])
 
-        if len(self.freeBetaNames) <= 30:
-            for i in range(len(self.freeBetaNames)):
-                self.logger.debug(f'{self.freeBetaNames[i]}: {x[i]:10.7g}')
+        f, g, h, bh = \
+            self.theC.calculateLikelihoodAndDerivatives(x,
+                                                        self.fixedBetaValues,
+                                                        self.betaIds,
+                                                        g,
+                                                        h,
+                                                        bh,
+                                                        hessian,
+                                                        bhhh)
+
+#        if len(self.freeBetaNames) <= 30:
+#            for i in range(len(self.freeBetaNames)):
+#                self.logger.debug(f'{self.freeBetaNames[i]}: {x[i]:10.7g}')
         hmsg = ''
         if hessian:
             hmsg = f'Hessian norm:  {np.linalg.norm(h):10.1g}'
@@ -558,11 +572,11 @@ class BIOGEME:
             error_msg = f'The norm of the gradient is {gradnorm}: g={g}'
             raise excep.biogemeError(error_msg)
 
-        if self.saveIterations is not None:
+        if self.saveIterations:
             if self.bestIteration is None:
                 self.bestIteration = f
             if f >= self.bestIteration:
-                with open(self.saveIterations, 'w') as pf:
+                with open(self._saveIterationsFileName(), 'w') as pf:
                     for i, v in enumerate(x):
                         print(f'{self.freeBetaNames[i]} = {v}', file=pf)
 
@@ -636,24 +650,19 @@ class BIOGEME:
         """
         Obsolete function
         """
-        message = ('The function loadSavedIterations is obsolete. The parameter '
-                   'saveIterations of the estimate function must be set to the '
-                   'name of the file used to save the iterations, or None. If '
-                   'not None, the values saved in the file will be loaded, and '
-                   'each improvement of the log likelihood function will trigger '
-                   'a save of the parameters in the same file. Therefore, there '
+        message = ('The function loadSavedIterations is obsolete. It is '
+                   'sufficient to set the parameter saveIterations to True '
+                   'or False to control the process. Therefore, there '
                    'is no need to call the function loadSavedIteration anymore.')
         raise excep.biogemeError(message)
 
-    def _loadSavedIteration(self, filename='__savedIterations.txt'):
+    def _loadSavedIteration(self):
         """Reads the values of the parameters from a text file where each line
 has the form name_of_beta = value_of_beta, and use these values in all
 formulas.
 
-        :param filename: name of the text file to read. Default: '__savedIterations.txt'
-        :type filename: str.
-
         """
+        filename = self._saveIterationsFileName()
         betas = {}
         try:
             with open(filename) as fp:
@@ -687,9 +696,7 @@ formulas.
     def estimate(self,
                  bootstrap=0,
                  algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
-                 algoParameters=None,
-                 cfsqp_default_bounds=1000.0,
-                 saveIterations='__savedIterations.txt'):
+                 algoParameters=None):
 
         """Estimate the parameters of the model.
 
@@ -700,25 +707,12 @@ formulas.
         :type bootstrap: int
 
         :param algorithm: optimization algorithm to use for the
-               maximum likelihood estimation. If None, cfsqp is
-               . Default: Biogeme's Newton's algorithm with simple bounds.
+               maximum likelihood estimation. Default: Biogeme's
+               Newton's algorithm with simple bounds.
         :type algorithm: function
 
         :param algoParameters: parameters to transfer to the optimization algorithm
         :type algoParameters: dict
-
-        :param cfsqp_default_bounds: if the user does not provide bounds
-              on the parameters, CFSQP assumes that the bounds are
-              [-cfsqp_default_bounds, cfsqp_default_bounds]
-        :type cfsqp_default_bounds: float
-
-        :param saveIterations: if not None, the values of the parameters
-                               corresponding to the largest value of
-                               the likelihood function are saved in a
-                               text file at each iteration of the
-                               algorithm. The parameter is the name of that file. 
-                               Default: '__savedIterations.txt'
-        :type saveIterations: str
 
         :return: object containing the estimation results.
         :rtype: biogeme.bioResults
@@ -735,7 +729,7 @@ formulas.
             results = biogeme.estimate()
 
         :raises biogemeError: if no expression has been provided for the likelihood
-
+7
         """
 
         if self.loglike is None:
@@ -745,25 +739,14 @@ formulas.
                                      f' in the formula: {self.loglike}.')
 
 
-        if isinstance(saveIterations, bool):
-            errorMsg = ('The syntax for saving intermediate iterations has changed. '
-                        'The parameter "saveIterations" is not a boolean (True or False).'
-                        ' It must be set to the name of the file where the iterations'
-                        ' must be saved, or to None if you do not want the iterations'
-                        ' to be saved. If you omit the parameter, the default value'
-                        ' "__savedIterations.txt" is used.')
-            raise excep.biogemeError(errorMsg)
-            
-        self.saveIterations = saveIterations
-        if saveIterations is not None:
-            self._loadSavedIteration(saveIterations)
+        if self.saveIterations:
+            self.logger.general(f'*** Initial values of the parameters are '
+                                f'obtained from the file {self._saveIterationsFileName()}')
+            self._loadSavedIteration()
         self.algorithm = algorithm
         self.algoParameters = algoParameters
 
-        self.cfsqp_default_bounds = cfsqp_default_bounds
-
         self.calculateInitLikelihood()
-        self.saveIterations = saveIterations
         self.bestIteration = None
 
         start_time = datetime.now()
@@ -833,12 +816,12 @@ formulas.
                       algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
                       algoParameters=None):
 
-        """Estimate the parameters of the model. Same as estimate, where any extra 
+        """Estimate the parameters of the model. Same as estimate, where any extra
            calculation is skipped (init loglikelihood, t-statistics, etc.)
 
         :param algorithm: optimization algorithm to use for the
-               maximum likelihood estimation. If None, cfsqp is
-               . Default: Biogeme's Newton's algorithm with simple bounds.
+               maximum likelihood estimation.Default: Biogeme's
+               Newton's algorithm with simple bounds.
         :type algorithm: function
 
         :param algoParameters: parameters to transfer to the optimization algorithm
@@ -950,7 +933,7 @@ formulas.
     def optimize(self, startingValues=None):
         """ Calls the optimization algorithm.
 
-        The function self.algorithm is called. If None, CFSQP is invoked.
+        The function self.algorithm is called.
 
         :param startingValues: starting point for the algorithm
         :type: list(float)
@@ -972,13 +955,10 @@ formulas.
             startingValues = self.betaInitValues
 
         if self.algorithm is None:
-            parameters = {'mode': 100,
-                          'iprint': self.logger.screenLevel,
-                          'miter': 1000,
-                          'eps': 6.05545e-06}
-            return self.cfsqp(startingValues,
-                              self.bounds,
-                              parameters)
+            err = ('An algorithm must be specified. The CFSQP algorithm '
+                   'is not available anymore.')
+            raise excep.biogemeError(err)
+
 
         results = self.algorithm(theFunction,
                                  startingValues,
@@ -986,8 +966,71 @@ formulas.
                                  self.algoParameters)
         return results
 
+
     def simulate(self, theBetaValues=None):
         """Applies the formulas to each row of the database.
+
+        :param theBetaValues: values of the parameters to be used in
+                the calculations. If None, the default values are
+                used. Default: None.
+        :type theBetaValues: dict(str, float)
+
+        :return: a pandas data frame with the simulated value. Each
+              row corresponds to a row in the database, and each
+              column to a formula.
+
+        :rtype: Pandas data frame
+
+        Example::
+
+              # Read the estimation results from a file
+              results = res.bioResults(pickleFile = 'myModel.pickle')
+              # Simulate the formulas using the nominal values
+              simulatedValues = biogeme.simulate(betaValues)
+
+        :raises biogemeError: if the number of parameters is incorrect
+
+        """
+
+        if self.database.isPanel():
+            error_msg = ('Simulation for panel data is not yet'
+                         ' implemented. Remove the "panel" '
+                         'statement to simulate each observation.')
+            raise excep.biogemeError(error_msg)
+
+        if theBetaValues is None:
+            betaValues = self.betaInitValues
+        else:
+            if not isinstance(theBetaValues, dict):
+                err = (f'Deprecated. A dictionary must be provided. '
+                       f'It can be obtained from results.getBetaValues()')
+                raise excep.biogemeError(err)
+            else:
+                for x in theBetaValues.keys():
+                    if not x in self.freeBetaNames:
+                        logger.warning(f'Parameter {x} not present in the model')
+                betaValues = list()
+                for i in range(len(self.freeBetaNames)):
+                    x = self.freeBetaNames[i]
+                    if x in theBetaValues:
+                        betaValues.append(theBetaValues[x])
+                    else:
+                        logger.warning(f'Simulation: initial value of {x} not provided.')
+                        betaValues.append(self.betaInitValues[i])
+
+        output = pd.DataFrame(index=self.database.data.index)
+        formulas = [v.getSignature() for v in self.formulas.values()]
+        result = self.theC.simulateSeveralFormulas(formulas,
+                                                   betaValues,
+                                                   self.fixedBetaValues,
+                                                   self.database.data)
+        for key, r in zip(self.formulas.keys(), result):
+            output[key] = r
+        return output
+
+    def oldsimulate(self, theBetaValues=None):
+        """Applies the formulas to each row of the database. This is the old
+        implementation. To be removed in future versions.
 
         :param theBetaValues: values of the parameters to be used in
                 the calculations. If None, the default values are
@@ -1127,78 +1170,6 @@ formulas.
         print(r)
         return r
 
-    def cfsqp(self, betas, bounds, parameters):
-        """
-        Invokes the CFSQP algorithm for estimation
-
-        :param betas: initial values of the parameters to be estimated.
-        :type betas: list of float
-        :param bounds: lower and upper bounds on each parameter.
-        :type bounds: list of tuple
-        :param parameters: user defined parameters for CFSQP
-
-           - mode = CBA: specifies job options as described below
-
-                 * A = 0: ordinary minimax problems
-                 * A = 1: ordinary minimax problems with each individual
-                          function replaced by its absolute value, ie, an L_infty problem
-                 * B = 0: monotone decrease of objective function after each iteration
-                 * B = 1: monotone decrease of objective function after at most four iterations
-                 * C = 1: default operation.
-                 * C = 2: requires that constraints always be evaluated
-                          before objectives during the line search.
-
-           -  iprint: print level indicator with the following options
-
-               * iprint = 0: no normal output, only error
-                             information (this option is
-                             imposed during phase 1)
-               * iprint = 1: a final printout at a local solution
-               * iprint = 2: a brief printout at the end of each iteration
-               * iprint = 3: detailed infomation is printed out
-                             at the end of each iteration
-                             (for debugging purposes)
-
-           -  miter: maximum number of iterations allowed by
-                     the user to solve the problem
-
-
-        :type parameters: dict
-
-
-        :return: x, messages
-
-        - x is the solution generated by the algorithm,
-        - messages is a dictionary describing information about the lagorithm
-
-        :rtype: numpay.array, dict(str:object)
-
-
-        """
-        lb, ub = zip(*bounds)
-        lb = [-self.cfsqp_default_bounds if v is None else v for v in lb]
-        ub = [self.cfsqp_default_bounds if v is None else v for v in ub]
-        self.theC.setBounds(lb, ub)
-        mode = parameters.get('mode', 100)
-        iprint = parameters.get('iprint', 2)
-        if iprint > 3:
-            iprint = 3
-        miter = parameters.get('miter', 1000)
-        eps = parameters.get('eps', 6.05545e-06)
-
-        x, iters, nf, diag = self.theC.cfsqp(betas,
-                                             self.fixedBetaValues,
-                                             self.betaIds,
-                                             mode,
-                                             iprint,
-                                             miter,
-                                             eps)
-        messages = {'Algorithm': 'CFSQP',
-                    'Number of iterations': iters,
-                    'Number fo function evaluations': nf,
-                    'Cause of termination': diag}
-        return x, messages
-
 class negLikelihood(opt.functionToMinimize):
     """Provides the value of the function to be minimized, as well as its
         derivatives. To be used by the opimization package.
@@ -1313,4 +1284,3 @@ class negLikelihood(opt.functionToMinimize):
         return (-self.fv,
                 -self.gv,
                 -self.bhhhv)
-
