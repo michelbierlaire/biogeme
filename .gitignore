@@ -282,3 +282,6 @@ dist/biogeme-3.2.7b0-cp38-cp38-macosx_10_9_x86_64.whl
 dist/biogeme-3.2.7b0-py3.8-macosx-10.9-x86_64.egg
 dist/biogeme-3.2.7b0-py3.9-macosx-10.9-x86_64.egg
 dist/biogeme-3.2.7b0.tar.gz
+examples/assisted/.ipynb_checkpoints/paretoAirline-checkpoint.ipynb
+examples/assisted/.ipynb_checkpoints/paretoOptima-checkpoint.ipynb
+examples/assisted/__biogemeModelDefaultName.iter
