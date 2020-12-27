@@ -28,7 +28,7 @@ def isNumeric(obj):
 
 class Expression:
     """This is the general arithmetic expression in biogeme.
-       It serves as a base class for concrete expressions.
+    It serves as a base class for concrete expressions.
     """
     def __init__(self):
         """ Constructor
@@ -69,11 +69,12 @@ class Expression:
         self.fixedBetaValues = None
 
     def __repr__(self):
-        """
-        built-in function used to compute the 'official' string reputation of an object
+        """built-in function used to compute the 'official' string reputation
+        of an object
 
         :return: description of the expression
         :rtype: string
+
         """
         return self.__str__()
 
@@ -500,7 +501,7 @@ class Expression:
 
     def dictOfRandomVariables(self):
         """Recursively extract the random variables appearing in the
-            expression, and store them in a dictionary.
+        expression, and store them in a dictionary.
 
         :return: returns a dict with the random variables appearing in
                  the expression the keys being their names.
@@ -529,8 +530,8 @@ class Expression:
         return None
 
     def setRow(self, row):
-        """This function identifies the row of the database from which
-            the values of the variables must be obtained.
+        """This function identifies the row of the database from which the
+        values of the variables must be obtained.
 
         :param row: id of the row.
         :type row: int
@@ -680,14 +681,14 @@ class Expression:
 
     def isContainedIn(self, t):
         """Check if the expression is contained in an expression of type t.
+
         Typically, this would be used to check that a bioDraws
         expression is contained in a MonteCarlo expression. If not, it
         cannot be evaluated.
+        
+        :rtype: bool.
 
-        Return:
-           bool.
-
-        See: Expression.embedExpression
+        See: :func:`biogeme.expressions.Expression.embedExpression`
         """
         if self.parent is None:
             return False
@@ -697,6 +698,7 @@ class Expression:
 
     def embedExpression(self, t):
         """Check if the expression contains an expression of type t.
+
         Typically, this would be used to check that a MonteCarlo
         expression contains a bioDraws expression.
 
@@ -2118,7 +2120,7 @@ class RandomVariable(Elementary):
 
     def dictOfRandomVariables(self):
         """Recursively extract the random variables appearing in
-           the expression, and store them in a dictionary.
+        the expression, and store them in a dictionary.
 
         Overloads the generic function.
 
@@ -2554,7 +2556,8 @@ class LogLogit(Expression):
 
         if consistent:
             choiceAvailability = database.checkAvailabilityOfChosenAlt(self.av, self.choice)
-            indexOfUnavailableChoices = choiceAvailability.index[choiceAvailability == False].tolist()
+            indexOfUnavailableChoices = \
+                choiceAvailability.index[choiceAvailability == False].tolist()
             if indexOfUnavailableChoices:
                 incorrectChoices = choices[indexOfUnavailableChoices]
                 content = '-'.join('{}[{}]'.format(*t)\
@@ -2708,7 +2711,7 @@ class bioMultSum(Expression):
         """
         Expression.__init__(self)
         if isinstance(listOfExpressions, dict):
-            for k, e in listOfExpressions.items():
+            for e in listOfExpressions.values():
                 if isNumeric(e):
                     theExpression = Numeric(e)
                     theExpression.parent = self
@@ -2976,13 +2979,14 @@ class bioLinearUtility(Expression):
         return {x.name: x for x in self.variables}
 
     def dictOfRandomVariables(self):
-        """Recursively extract the random variables appearing
-           in the expression, and store them in a dictionary.
+        """Recursively extract the random variables appearing in the
+        expression, and store them in a dictionary.
 
         :return: returns a dict with the random variables appearing in
                  the expression the keys being their names.
 
         :rtype: dict(string:biogeme.expressions.Expression)
+
         """
         return dict()
 
