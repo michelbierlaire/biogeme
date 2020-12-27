@@ -464,6 +464,27 @@ class bioResults:
             self.data.largestSingularValue = max(self.data.singularValues)
             self.data.conditionNumber = self.data.largestEigenValue / self.data.smallestEigenValue
 
+    def shortSummary(self):
+        """Provides a short summary of the estimation results
+        """
+        r = ''
+        r += f'Results for model {self.data.modelName}\n'
+        r += f'Nbr of parameters:\t\t{self.data.nparam}\n'
+        r += f'Sample size:\t\t\t{self.data.sampleSize}\n'
+        if self.data.sampleSize != self.data.numberOfObservations:
+            r += f'Observations:\t\t\t{self.data.numberOfObservations}\n'
+        r += f'Excluded data:\t\t\t{self.data.excludedData}\n'
+        if self.data.nullLogLike is not None:
+            r += f'Null log likelihood:\t\t{self.data.nullLogLike:.7g}\n'
+        r += f'Final log likelihood:\t\t{self.data.logLike:.7g}\n'
+        if self.data.nullLogLike is not None:
+            r += f'Likelihood ratio test (null):\t\t{self.data.likelihoodRatioTestNull:.7g}\n'
+            r += f'Rho square (null):\t\t\t{self.data.rhoSquareNull:.3g}\n'
+            r += f'Rho bar square (null):\t\t\t{self.data.rhoBarSquareNull:.3g}\n'
+        r += f'Akaike Information Criterion:\t{self.data.akaike:.7g}\n'
+        r += f'Bayesian Information Criterion:\t{self.data.bayesian:.7g}\n'
+        return r
+        
     def __str__(self):
         r = '\n'
         r += f'Results for model {self.data.modelName}\n'
@@ -688,7 +709,7 @@ a Pandas dataframe.
         """ Get the statistics about pairs of coefficients as a Pandas dataframe
 
         :return: Pandas data frame with the correlation results
-        :rtpye: pandas.DataFrame
+        :rtype: pandas.DataFrame
         """
         columns = ['Covariance',
                    'Correlation',
