@@ -13,7 +13,6 @@ for specific services to Biogeme
 # Too constraining
 # pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements, too-many-branches, too-many-instance-attributes, too-many-lines, too-many-public-methods
 
-from datetime import datetime
 import numpy as np
 import pandas as pd
 
@@ -39,7 +38,6 @@ class Database:
 
         """
         self.logger = msg.bioMessage()
-        start_time = datetime.now()
         ## Name of the database. Used mainly for the file name when dumping data.
         self.name = name
 
@@ -381,7 +379,7 @@ class Database:
         :param choice: expression for the chosen alternative.
         :type choice: biogeme.expressions.Expression
 
-        :return: for each alternative, a tuple containing the number of time it is chosen, 
+        :return: for each alternative, a tuple containing the number of time it is chosen,
                  and the number of time it is available.
         :rtype: dict(int: (int, int))
 
@@ -405,7 +403,7 @@ class Database:
         return theResults
 
 
-    
+
     def sumFromDatabase(self, expression):
         """ Calculates the value of an expression for each entry
             in the database, and returns the sum.
@@ -435,7 +433,7 @@ class Database:
         """
         self.data[column] = self.data[column] * scale
 
-    def suggestScaling(self, columns=None, all=False):
+    def suggestScaling(self, columns=None, reportAll=False):
         """Suggest a scaling of the variables in the database.
 
         For each column, :math:`\\delta` is the difference between the
@@ -451,8 +449,8 @@ class Database:
                         If None, all of them will be considered.
         :type columns: list(str)
 
-        :param all: if False, remove entries where the suggested scale is 1, 0.1 or 10
-        :type all: bool
+        :param reportAll: if False, remove entries where the suggested scale is 1, 0.1 or 10
+        :type reportAll: bool
 
         :return: A Pandas dataframe where each row contains the name
                  of the variable and the suggested scale s. Ideally,
@@ -468,7 +466,7 @@ class Database:
                 if not c in self.data:
                     errorMsg = (f'Variable {c} not found.')
                     raise excep.biogemeError(errorMsg)
-                
+
         largestValue = [max(np.abs(self.data[col].max()),
                             np.abs(self.data[col].min())) for col in columns]
         res = [[col,
@@ -476,7 +474,7 @@ class Database:
                 lv]
                for col, lv in zip(columns, largestValue)]
         df = pd.DataFrame(res, columns=['Column', 'Scale', 'Largest'])
-        if not all:
+        if not reportAll:
             # Remove entries where the suggested scale is 1, 0.1 or 10
             remove = (df.Scale == 1) | (df.Scale == 0.1) | (df.Scale == 10)
             df.drop(df[remove].index, inplace=True)
@@ -800,7 +798,7 @@ class Database:
         :type slices: int
 
         :return: list of estimation and validation data sets
-        :rtype: tuple(pandas.DataFrame, pandas.DataFrame)
+        :rtype: list(tuple(pandas.DataFrame, pandas.DataFrame))
         """
         shuffled = self.data.sample(frac=1)
         theSlices = np.array_split(shuffled, slices)
