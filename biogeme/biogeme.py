@@ -1,5 +1,5 @@
 """Implementation of the main Biogeme class that combines the database
-   and the model specification.
+and the model specification.
 
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:45:15 2019
@@ -32,6 +32,7 @@ import biogeme.exceptions as excep
 import biogeme.filenames as bf
 import biogeme.messaging as msg
 import biogeme.optimization as opt
+from biogeme.algorithms import functionToMinimize
 
 logger = msg.bioMessage()
 
@@ -103,7 +104,10 @@ class BIOGEME:
            True.
         :type removeUnusedVariables: bool
 
-        :param suggestScales: if True, Biogeme suggests the scaling of the variables in the database. Default: True. See also :func:`biogeme.database.Database.suggestScaling`
+        :param suggestScales: if True, Biogeme suggests the scaling of
+        the variables in the database. Default: True.
+        See also :func:`biogeme.database.Database.suggestScaling`
+
         :type suggestScales: bool.
 
         :param missingData: if one variable has this value, it is
@@ -189,8 +193,8 @@ class BIOGEME:
 
         self.usedVariables = set()
         for k, f in self.formulas.items():
-            vars = f.setOfVariables()
-            missingVariables = [v for v in vars if v not in self.database.data]
+            myvars = f.setOfVariables()
+            missingVariables = [v for v in myvars if v not in self.database.data]
             if missingVariables:
                 errorMsg = (f'Variables in formula {k} missing in the database: '
                             f'{missingVariables}')
@@ -213,7 +217,7 @@ class BIOGEME:
             suggestedScales = self.database.suggestScaling(columns=self.usedVariables)
             if not suggestedScales.empty:
                 logger.detailed('It is suggested to scale the following variables.')
-                for index, row in suggestedScales.iterrows():
+                for _, row in suggestedScales.iterrows():
                     error_msg = (f'Multiply {row["Column"]} by\t{row["Scale"]} '
                                  'because the largest (abs) value is\t'
                                  f'{row["Largest"]}')
@@ -309,7 +313,7 @@ class BIOGEME:
 
         listOfErrors = []
         listOfWarnings = []
-        for k, v in self.formulas.items():
+        for v in self.formulas.values():
             err, war = v.audit(self.database)
             listOfErrors += err
             listOfWarnings += war
@@ -424,7 +428,7 @@ class BIOGEME:
 
     def calculateNullLoglikelihood(self, avail):
         """Calculate the log likelihood of the null model that predicts equal
-            probability for each alternative
+        probability for each alternative
 
         :param avail: list of expressions to evaluate the
                       availability conditions for each alternative.
@@ -729,7 +733,6 @@ formulas.
             results = biogeme.estimate()
 
         :raises biogemeError: if no expression has been provided for the likelihood
-7
         """
 
         if self.loglike is None:
@@ -816,8 +819,9 @@ formulas.
                       algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
                       algoParameters=None):
 
-        """Estimate the parameters of the model. Same as estimate, where any extra
-           calculation is skipped (init loglikelihood, t-statistics, etc.)
+        """| Estimate the parameters of the model. Same as estimate, where any
+             extra calculation is skipped (init loglikelihood,
+             t-statistics, etc.)
 
         :param algorithm: optimization algorithm to use for the
                maximum likelihood estimation.Default: Biogeme's
@@ -878,13 +882,11 @@ formulas.
         r = res.bioResults(rawResults)
         return r
 
-    def validate(self, estimationResults, slices=5):
+    def validate(self, estimationResults, validationData):
         """Perform out-of-sample validation.
 
         The function performs the following tasks:
 
-          - it shuffles the data set,
-          - it splits the data set into slices of (approximatively) the same size,
           - each slice defines a validation set (the slice itself)
             and an estimation set (the rest of the data),
           - the model is re-estimated on the estimation set,
@@ -894,8 +896,8 @@ formulas.
         :param estimationResults: results of the model estimation based on the full data.
         :type estimationResults: biogeme.results.bioResults
 
-        :param slices: number of slices.
-        :type slices: int
+        :param validationData: list of estimation and validation data sets
+        :type validationData: list(tuple(pandas.DataFrame, pandas.DataFrame))
 
         :return: a list containing as many items as slices. Each item
                  is the result of the simulation on the validation set.
@@ -904,8 +906,6 @@ formulas.
         """
         if self.database.isPanel():
             raise excep.biogemeError('Validation for panel data is not yet implemented')
-        # Split the database
-        validationData = self.database.split(slices)
 
         keepDatabase = self.database
 
@@ -1002,21 +1002,20 @@ formulas.
             betaValues = self.betaInitValues
         else:
             if not isinstance(theBetaValues, dict):
-                err = (f'Deprecated. A dictionary must be provided. '
-                       f'It can be obtained from results.getBetaValues()')
+                err = ('Deprecated. A dictionary must be provided. '
+                       'It can be obtained from results.getBetaValues()')
                 raise excep.biogemeError(err)
-            else:
-                for x in theBetaValues.keys():
-                    if not x in self.freeBetaNames:
-                        logger.warning(f'Parameter {x} not present in the model')
-                betaValues = list()
-                for i in range(len(self.freeBetaNames)):
-                    x = self.freeBetaNames[i]
-                    if x in theBetaValues:
-                        betaValues.append(theBetaValues[x])
-                    else:
-                        logger.warning(f'Simulation: initial value of {x} not provided.')
-                        betaValues.append(self.betaInitValues[i])
+            for x in theBetaValues.keys():
+                if not x in self.freeBetaNames:
+                    logger.warning(f'Parameter {x} not present in the model')
+            betaValues = list()
+            for i in range(len(self.freeBetaNames)):
+                x = self.freeBetaNames[i]
+                if x in theBetaValues:
+                    betaValues.append(theBetaValues[x])
+                else:
+                    logger.warning(f'Simulation: initial value of {x} not provided.')
+                    betaValues.append(self.betaInitValues[i])
 
         output = pd.DataFrame(index=self.database.data.index)
         formulas = [v.getSignature() for v in self.formulas.values()]
@@ -1064,21 +1063,20 @@ formulas.
             betaValues = self.betaInitValues
         else:
             if not isinstance(theBetaValues, dict):
-                err = (f'Deprecated. A dictionary must be provided. '
-                       f'It can be obtained from results.getBetaValues()')
+                err = ('Deprecated. A dictionary must be provided. '
+                       'It can be obtained from results.getBetaValues()')
                 raise excep.biogemeError(err)
-            else:
-                for x in theBetaValues.keys():
-                    if not x in self.freeBetaNames:
-                        logger.warning(f'Parameter {x} not present in the model')
-                betaValues = list()
-                for i in range(len(self.freeBetaNames)):
-                    x = self.freeBetaNames[i]
-                    if x in theBetaValues:
-                        betaValues.append(theBetaValues[x])
-                    else:
-                        logger.warning(f'Simulation: initial value of {x} not provided.')
-                        betaValues.append(self.betaInitValues[i])
+            for x in theBetaValues.keys():
+                if not x in self.freeBetaNames:
+                    logger.warning(f'Parameter {x} not present in the model')
+            betaValues = list()
+            for i in range(len(self.freeBetaNames)):
+                x = self.freeBetaNames[i]
+                if x in theBetaValues:
+                    betaValues.append(theBetaValues[x])
+                else:
+                    logger.warning(f'Simulation: initial value of {x} not provided.')
+                    betaValues.append(self.betaInitValues[i])
 
         output = pd.DataFrame(index=self.database.data.index)
         for k, v in self.formulas.items():
@@ -1170,7 +1168,7 @@ formulas.
         print(r)
         return r
 
-class negLikelihood(opt.functionToMinimize):
+class negLikelihood(functionToMinimize):
     """Provides the value of the function to be minimized, as well as its
         derivatives. To be used by the opimization package.
 
