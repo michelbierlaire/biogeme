@@ -12,6 +12,8 @@ import numpy as np
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
 
+logger = msg.bioMessage()
+
 
 from biogeme.expressions import (_bioLogLogit,
                                  _bioLogLogitFullChoiceSet,
@@ -1169,6 +1171,8 @@ def logcnl(V, availability, nests, choice):
     ok, message = checkValidityCNL(V, nests)
     if not ok:
         raise excep.biogemeError(message)
+    if message != '':
+        logger.warning(f'CNL: {message}')
     logGi = getMevForCrossNested(V, availability, nests)
     logP = logmev(V, logGi, availability, choice)
     return logP
@@ -1498,13 +1502,13 @@ def checkValidityCNL(V, nests):
             ok = False
         if len(ell) == 1 and isinstance(ell[0], Expression):
             problems_one.append(i)
-            ok = False
             
     if problems_zero:
         message += f'Alternative(s) not in any nest: {problems_zero}'
 
     if problems_one:
         message += (f' Alternative in exactly one nest, '
-                    f'and parameter alpha is not constant: {problems_one}')
+                    f'and parameter alpha is defined by an '
+                    f'expression, and may not be constant: {problems_one}')
     
     return ok, message
