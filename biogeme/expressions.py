@@ -89,7 +89,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during addition to {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Plus(self, other)
 
     def __radd__(self, other):
@@ -103,7 +104,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during addition to {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Plus(other, self)
 
 
@@ -118,7 +120,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during substraction to {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Minus(self, other)
 
     def __rsub__(self, other):
@@ -132,7 +135,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during substraction of {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Minus(other, self)
 
     def __mul__(self, other):
@@ -146,7 +150,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during multiplication to {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Times(self, other)
 
     def __rmul__(self, other):
@@ -160,7 +165,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during multiplication to {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Times(other, self)
 
     def __div__(self, other):
@@ -174,7 +180,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during division of {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Divide(self, other)
 
     def __rdiv__(self, other):
@@ -188,7 +195,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during division by {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Divide(other, self)
 
     def __truediv__(self, other):
@@ -203,7 +211,8 @@ class Expression:
 
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during division of {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Divide(self, other)
 
     def __rtruediv__(self, other):
@@ -217,7 +226,8 @@ class Expression:
         :rtype: biogeme.expressions.Expression
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(f'This is not a valid expression: {other}')
+            msg = 'Invalid expression during division by {self}: [{other}]'
+            raise excep.biogemeError(msg)
         return Divide(other, self)
 
     def __neg__(self):
