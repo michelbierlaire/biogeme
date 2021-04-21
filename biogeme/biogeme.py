@@ -54,6 +54,7 @@ class BIOGEME:
                  seed=None,
                  skipAudit=False,
                  removeUnusedVariables=True,
+                 displayUsedVariables=False,
                  suggestScales=True,
                  missingData=99999):
         """Constructor
@@ -103,6 +104,10 @@ class BIOGEME:
            in the expression are removed from the database. Default:
            True.
         :type removeUnusedVariables: bool
+
+        :param displayUsedVariables: if True, displays all the
+          variables used in the formulas. Default: False.
+        :type displayUsedVariables: bool
 
         :param suggestScales: if True, Biogeme suggests the scaling of
         the variables in the database. Default: True.
@@ -202,6 +207,8 @@ class BIOGEME:
             self.usedVariables |= f.setOfVariables()
         if self.database.isPanel():
             self.usedVariables.add(self.database.panelColumn)
+        if displayUsedVariables:
+            self.logger.general(f'List of used variables: {self.usedVariables}')
         if removeUnusedVariables:
             unusedVariables = set(self.database.data.columns) - self.usedVariables
             error_msg = (f'Remove {len(unusedVariables)} '
@@ -1022,7 +1029,8 @@ formulas.
         result = self.theC.simulateSeveralFormulas(formulas,
                                                    betaValues,
                                                    self.fixedBetaValues,
-                                                   self.database.data)
+                                                   self.database.data,
+                                                   self.numberOfThreads)
         for key, r in zip(self.formulas.keys(), result):
             output[key] = r
         return output
