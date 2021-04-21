@@ -215,7 +215,8 @@ class bioBounds:
         # Note that an exception with be raised at the creation of the
         # new 'bioBounds' object is the bounds are incompatible.
 
-        return bioBounds(newBounds)
+        result = bioBounds(newBounds)
+        return result
 
     def intersectionWithTrustRegion(self, x, delta):
         """ Create a bioBounds object representing the intersection
@@ -288,7 +289,7 @@ class bioBounds:
         return True
 
     def maximumStep(self, x, d):
-        """ Calculates the maximum step thatcan be performed
+        """ Calculates the maximum step that can be performed
         along a direction while staying feasible.
 
         :param x: reference point
@@ -306,7 +307,7 @@ class bioBounds:
         """
 
         if not self.feasible(x):
-            raise excep.biogemeError('Infeasible point.')
+            raise excep.biogemeError(f'Infeasible point: {x}')
 
         alpha = np.array([(self.upperBounds[i] - x[i]) / d[i]
                           if d[i] > np.finfo(float).eps
@@ -455,7 +456,6 @@ class bioBounds:
         fsecond = np.inner(d, H @ d)
 
         while len(J) < self.n:
-
             delta_t, ind = self.maximumStep(x, d)
             # J is the set of active variables
             J.update(ind)
@@ -1561,7 +1561,7 @@ def truncatedConjugateGradientSubspace(xk,
     :param bounds: bounds on the variables.
     :type bounds: class bioBounds
 
-    :param infeasibleIterate: if True, the algorithm may generate
+    :param infeasibleIterate: if True, the algorithm may continue
                               until termination.  The result will then
                               be projected on the feasible domain.  If
                               False, the algorithm stops as soon as an
@@ -1631,14 +1631,19 @@ def truncatedConjugateGradientSubspace(xk,
             pbar = rbar + beta * pbar
             ybar = Bbar @ pbar
 
-            alpha1, _ = boundsBar.maximumStep(xbar, pbar)
-
+            if boundsBar.feasible(xbar):
+                feasible = True
+                alpha1, _ = boundsBar.maximumStep(xbar, pbar)
+            else:
+                feasible = False
+            
             if np.inner(pbar, ybar) <= 0:
                 # Negative curvature has been detected.
-                x[freeVariables] = xbar + alpha1 * pbar
-                if infeasibleIterate:
-                    return bounds.project(x), 3
-                return x, 3
+                if feasible:
+                    x[freeVariables] = xbar + alpha1 * pbar
+                else:
+                    x[freeVariables] = xbar
+                return bounds.project(x), 3
 
             alpha2 = rho2 / np.inner(pbar, ybar)
             if not infeasibleIterate and alpha2 > alpha1:
@@ -1858,56 +1863,70 @@ def simpleBoundsNewtonAlgorithm(fct,
                    float(numberOfTrueHessian) / float(numberOfMatrices) \
                    <= proportionTrueHessian:
 
-                    fc, gc, Hc = fct.f_g_h()
-                    nfev += 1
-                    ngev += 1
-                    nhev += 1
-                    numberOfTrueHessian += 1
-                    numberOfMatrices += 1
-                    # If there is a numerical problem with the
-                    # Hessian, we apply BFGS
-                    if np.linalg.norm(Hc) > 1.0e100:
-                        logger.warning(f'Numerical problem with the second '
-                                       f'derivative matrix. '
-                                       f'Norm = {np.linalg.norm(Hc)}. '
-                                       f'Replaced by the identity matrix.')
+                    try:
+                        fc, gc, Hc = fct.f_g_h()
+                        nfev += 1
+                        ngev += 1
+                        nhev += 1
+                        numberOfTrueHessian += 1
+                        numberOfMatrices += 1
+                        # If there is a numerical problem with the
+                        # Hessian, we apply BFGS
+                        if np.linalg.norm(Hc) > 1.0e100:
+                            logger.warning(f'Numerical problem with the second '
+                                           f'derivative matrix. '
+                                           f'Norm = {np.linalg.norm(Hc)}. '
+                                           f'Replaced by the identity matrix.')
+                            y = gc - g
+                            Hc = bfgs(H, step, y)
+                        fghCalculated = True
+                    except excep.biogemeError:
+                        # Failure: reduce the trust region
+                        delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
+                        status = '-'
+                        fghCalculated = False
+                else:
+                    try:
+                        fc, gc = fct.f_g()
+                        nfev += 1
+                        ngev += 1
                         y = gc - g
                         Hc = bfgs(H, step, y)
-                else:
-                    fc, gc = fct.f_g()
+                        numberOfMatrices += 1
+                        fghCalculated = True
+                    except excep.biogemeError:
+                        # Failure: reduce the trust region
+                        delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
+                        status = '-'
+                        fghCalculated = False
+                if fghCalculated:
                     nfev += 1
-                    ngev += 1
-                    y = gc - g
-                    Hc = bfgs(H, step, y)
-                    numberOfMatrices += 1
+                    xpred = xk
+                    xk = xc
+                    f = fc
+                    g = gc
+                    H = Hc
+                    if rho >= eta2:
+                        # Enlarge the trust region
+                        delta = min(enlargingFactor * delta, maxDelta)
+                        status = '++'
+                    else:
+                        status = '+'
 
-                nfev += 1
-                xpred = xk
-                xk = xc
-                f = fc
-                g = gc
-                H = Hc
-                if rho >= eta2:
-                    # Enlarge the trust region
-                    delta = min(enlargingFactor * delta, maxDelta)
-                    status = '++'
-                else:
-                    status = '+'
-
-                projectedGradient = bounds.project(xk - g) - xk
-                relgrad = relativeGradient(xk,
-                                           f,
-                                           projectedGradient,
-                                           typx,
-                                           typf)
-                if relgrad <= tol:
-                    message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
-                    cont = False
-                relchange = relativeChange(xk, xpred, typx)
-                if relchange <= steptol:
-                    message = (f'Relative change = '
-                               f'{relchange:.3g} <= {steptol:.2g}')
-                    cont = False
+                    projectedGradient = bounds.project(xk - g) - xk
+                    relgrad = relativeGradient(xk,
+                                               f,
+                                               projectedGradient,
+                                               typx,
+                                               typf)
+                    if relgrad <= tol:
+                        message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
+                        cont = False
+                    relchange = relativeChange(xk, xpred, typx)
+                    if relchange <= steptol:
+                        message = (f'Relative change = '
+                                   f'{relchange:.3g} <= {steptol:.2g}')
+                        cont = False
             if delta <= minDelta:
                 message = f'Trust region is too small: {delta}'
                 cont = False
