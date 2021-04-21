@@ -705,12 +705,24 @@ a Pandas dataframe.
             table.loc[b.name] = pd.Series(arow)
         return table
 
-    def getCorrelationResults(self):
-        """ Get the statistics about pairs of coefficients as a Pandas dataframe
+    def getCorrelationResults(self, subset=None):
+        """Get the statistics about pairs of coefficients as a Pandas dataframe
+
+        :param subset: produce the results only for a subset of
+        parameters. If None, all the parameters are involved. Default: None
+        :type subset: list(str)
 
         :return: Pandas data frame with the correlation results
         :rtype: pandas.DataFrame
+
         """
+        if subset is not None:
+            unknown = []
+            for p in subset:
+                if p not in self.data.betaNames:
+                    unknown.append(p)
+            if unknown:        
+                self.logger.warning(f'Unknown parameters are ignored: {unknown}') 
         columns = ['Covariance',
                    'Correlation',
                    't-test',
@@ -723,20 +735,25 @@ a Pandas dataframe.
             columns += ['Boot. cov.', 'Boot. corr.', 'Boot. t-test', 'Boot. p-value']
         table = pd.DataFrame(columns=columns)
         for k, v in self.data.secondOrderTable.items():
-            arow = {'Covariance': v[0],
-                    'Correlation' :v[1],
-                    't-test': v[2],
-                    'p-value': v[3],
-                    'Rob. cov.': v[4],
-                    'Rob. corr.': v[5],
-                    'Rob. t-test': v[6],
-                    'Rob. p-value': v[7]}
-            if self.data.bootstrap is not None:
-                arow['Boot. cov.'] = v[8]
-                arow['Boot. corr.'] = v[9]
-                arow['Boot. t-test'] = v[10]
-                arow['Boot. p-value'] = v[11]
-            table.loc[f'{k[0]}-{k[1]}'] = pd.Series(arow)
+            if subset is None:
+                include = True
+            else:
+                include = k[0] in subset and k[1] in subset
+            if include:
+                arow = {'Covariance': v[0],
+                        'Correlation' :v[1],
+                        't-test': v[2],
+                        'p-value': v[3],
+                        'Rob. cov.': v[4],
+                        'Rob. corr.': v[5],
+                        'Rob. t-test': v[6],
+                        'Rob. p-value': v[7]}
+                if self.data.bootstrap is not None:
+                    arow['Boot. cov.'] = v[8]
+                    arow['Boot. corr.'] = v[9]
+                    arow['Boot. t-test'] = v[10]
+                    arow['Boot. p-value'] = v[11]
+                table.loc[f'{k[0]}-{k[1]}'] = pd.Series(arow)
         return table
 
     def getHtml(self):
