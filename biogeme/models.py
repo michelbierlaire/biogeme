@@ -540,9 +540,66 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
     """
     return exp(logmev_endogenousSampling(V, logGi, av, correction, choice))
 
+def getMevGeneratingForNested(V, availability, nests):
+    """ Implements the  MEV generating function for the nested logit model
+
+    :param V: dict of objects representing the utility functions of
+              each alternative, indexed by numerical ids.
+    :type V: dict(int:biogeme.expressions.Expression)
+
+    :param availability: dict of objects representing the availability of each
+               alternative, indexed
+               by numerical ids. Must be consistent with V, or
+               None. In this case, all alternatives are supposed to be
+               always available.
+
+    :type availability: dict(int:biogeme.expressions.Expression)
+
+    :param nests: A tuple containing as many items as nests.
+                  Each item is also a tuple containing two items:
+
+          - an object of type biogeme.expressions.Expression representing
+            the nest parameter,
+          - a list containing the list of identifiers of the alternatives
+            belonging to the nest.
+
+      Example::
+
+          nesta = MUA ,[1, 2, 3]
+          nestb = MUB ,[4, 5, 6]
+          nests = nesta, nestb
+
+
+
+    :type nests: tuple
+
+    :return: a dictionary mapping each alternative id with the function
+
+    .. math:: G(e^{V_1},
+              \\ldots,e^{V_J}) =  \\sum_m \\left( \\sum_{\\ell \\in C_m} 
+              y_\\ell^{\\mu_m}\\right)^{\\frac{\\mu}{\\mu_m}}
+
+    where :math:`G` is the MEV generating function.
+
+    :rtype: biogeme.expressions.Expression
+
+    """
+    
+    termsForNests = []
+    for m in nests:
+        if availability is None:
+            sumdict = [exp(m[0] * V[i]) for i in m[1]]
+        else:
+            sumdict = [Elem({0:0.0,
+                             1: exp(m[0] * V[i])},
+                            availability[i] != Numeric(0)) for i in m[1]]
+        theSum = bioMultSum(sumdict)
+        termsForNests.append(theSum ** 1.0/m[0])
+    return bioMultSum(termsForNests)
+
 
 def getMevForNested(V, availability, nests):
-    """ Implements the MEV generating function for the nested logit model
+    """ Implements the derivatives of MEV generating function for the nested logit model
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
