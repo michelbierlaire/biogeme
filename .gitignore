@@ -285,3 +285,4 @@ dist/biogeme-3.2.7b0.tar.gz
 examples/assisted/.ipynb_checkpoints/paretoAirline-checkpoint.ipynb
 examples/assisted/.ipynb_checkpoints/paretoOptima-checkpoint.ipynb
 examples/assisted/__biogemeModelDefaultName.iter
+biogeme/vns.modified
