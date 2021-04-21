@@ -1081,6 +1081,16 @@ class specificationProblem(vns.problemClass):
                 result += '\n'
         return result
 
+    def generatePythonCodeParameters(self):
+        """Generate Python partial code for the model parameters
+        
+        """
+        for v in self.theAlternatives.values():
+            altName = v.name
+            for t in v.terms:
+                theVar = t.var
+                theSegmentation = t.segmentation
+                
     def describe(self, solution):
         if solution.description is not None:
             return solution.description
