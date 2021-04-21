@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
+py = ">=1.10.0"
 
 [packages]
 numpy = "*"
@@ -16,4 +17,4 @@ Unidecode = "*"
 tqdm = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
