@@ -36,6 +36,10 @@ df.loc[df['Education'] <= 3, 'Education'] = 3
 df.loc[df['Education'] == 5, 'Education'] = 4
 df.loc[df['Education'] == 8, 'Education'] = 7
 
+df.loc[df['TripPurpose'] != 1, 'TripPurpose'] = 2
+
+df.loc[df['CarAvail'] != 3, 'CarAvail'] = 1
+
 database = db.Database('optima', df)
 
 globals().update(database.variables)
@@ -123,9 +127,7 @@ def distanceInteraction(x):
 
 # Define all possible segmentations
 all_segmentations = {'TripPurpose': (TripPurpose, {1: 'work',
-                                                   2: 'work_leisure',
-                                                   3: 'leisure',
-                                                   -1: 'missing'}),
+                                                   2: 'others'}),
                      'Urban': (UrbRur, {1: 'rural',
                                         2: 'urban'}),
                      'Language': (LangCode, {1: 'French', 2: 'German'}),
@@ -145,10 +147,8 @@ all_segmentations = {'TripPurpose': (TripPurpose, {1: 'work',
                      'Subscription': (subscription, {0: 'none',
                                                      1: 'GA',
                                                      2: 'other'}),
-                     'CarAvail': (CarAvail, {1: 'always',
-                                             2: 'sometimes',
-                                             3: 'never',
-                                             -1: 'unknown'}),
+                     'CarAvail': (CarAvail, {1: 'yes',
+                                             3: 'no'}),
                      'Education': (Education, {3: 'vocational',
                                                4: 'high_school',
                                                6: 'higher_edu',
@@ -185,7 +185,7 @@ groupsOfVariables = {'Travel time': ['PT travel time',
 genericForbiden = None
 
 # In this example, all the variables must be in the model
-forceActive = ['Travel time', 'Travel cost', 'Distance']
+forceActive = ['Travel time', 'Distance']
 
 # Associate a list of potential nonlinearities with each group of variable
 nonlinearSpecs = {'Travel time': [distanceInteraction,
@@ -202,22 +202,26 @@ nonlinearSpecs = {'Travel time': [distanceInteraction,
                                   square,
                                   boxcox_cost]}
 
+# Function verifying the negativity of the parameters
+def negativeParameter(val):
+    return val < 0
+
 # Specification of the utility function. For each term, it is possible
 # to define bounds on the coefficient, and to include a function that
 # verifies its validity a posteriori.
 
 utility_pt = [(None, 'Seg. cte', (None, None), None),
-              ('PT travel time', 'Seg. time', (None, 0), None),
-              ('PT travel cost', 'Seg. cost', (None, 0), None),
-              ('Transfers', 'Seg. transfers', (None, 0), None),
-              ('PT Waiting time', 'Seg. wait', (None, 0), None)]
+              ('PT travel time', 'Seg. time', (None, 0), negativeParameter),
+              ('PT travel cost', 'Seg. cost', (None, 0), negativeParameter),
+              ('Transfers', 'Seg. transfers', (None, 0), negativeParameter),
+              ('PT Waiting time', 'Seg. wait', (None, 0), negativeParameter)]
 
 
 utility_car = [(None, 'Seg. cte', (None, None), None),
-               ('Car travel time', 'Seg. time', (None, 0), None),
-               ('Car travel cost', 'Seg. cost', (None, 0), None)]
+               ('Car travel time', 'Seg. time', (None, 0), negativeParameter),
+               ('Car travel cost', 'Seg. cost', (None, 0), negativeParameter)]
 
-utility_sm = [('Distance', 'Seg. dist', (None, 0), None)]
+utility_sm = [('Distance', 'Seg. dist', (None, 0), negativeParameter)]
 
 
 utilities = {0: ('pt', utility_pt),
@@ -235,48 +239,44 @@ def logit(V, av, choice):
     return models.loglogit(V, av, choice)
 
 def nested1(V, av, choice):
-    motorized = Beta('mu_motorized', 1, 1, None, 0), [0, 1]
-    nonmotorized = 1.0, [2]
-    nests = motorized, nonmotorized
+    same = Beta('mu_same', 1, 1, None, 0), [0, 1]
+    multiple = 1.0, [2]
+    nests = same, multiple
     return models.lognested(V, av, nests, choice)
 
 
 def nested2(V, av, choice):
-    private = Beta('mu_private', 1, 1, None, 0), [1, 2]
-    public = 1.0, [0]
-    nests = private, public
+    onestop = Beta('mu_onestop', 1, 1, None, 0), [1, 2]
+    nostop = 1.0, [0]
+    nests = nostop, onestop
     return models.lognested(V, av, nests, choice)
 
 
 def cnl1(V, av, choice):
     """ Cross nested logit: fixed alphas """
-    mu_motorized = Beta('mu_motorized', 1, 1, None, 0)
-    mu_public = Beta('mu_public', 1, 1, None, 0)
-    alpha_motorized = {0: 1.0, 1: 0.5, 2:0}
-    alpha_public = {0: 0, 1: 0.5, 2:1}
-    nest_motorized = mu_motorized, alpha_motorized
-    nest_public = mu_public, alpha_public
-    nests = nest_motorized, nest_public
+    mu_same = Beta('mu_same', 1, 1, None, 0)
+    mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
+    alpha_same = {0: 1.0, 1: 0.5, 2:0}
+    alpha_onestop = {0: 0, 1: 0.5, 2:1}
+    nest_same = mu_same, alpha_same
+    nest_onestop = mu_onestop, alpha_onestop
+    nests = nest_onestop, nest_same
     return models.logcnl_avail(V, av, nests, choice)
 
 def cnl2(V, av, choice):
-    """ Cross nested logit: fixed alphas """
+    """ Cross nested logit: estimated alphas """
     alpha = Beta('alpha', 0.5, 0, 1, 0)
-    mu_motorized = Beta('mu_motorized', 1, 1, None, 0)
-    mu_public = Beta('mu_public', 1, 1, None, 0)
-    alpha_motorized = {0: 1.0, 1: alpha, 2:0}
-    alpha_public = {0: 0, 1: 1-alpha, 2:1}
-    nest_motorized = mu_motorized, alpha_motorized
-    nest_public = mu_public, alpha_public
-    nests = nest_motorized, nest_public
+    mu_same = Beta('mu_same', 1, 1, None, 0)
+    mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
+    alpha_same = {0: 1.0, 1: alpha, 2:0}
+    alpha_onestop = {0: 0, 1: 1-alpha, 2:1}
+    nest_same = mu_same, alpha_same
+    nest_onestop = mu_onestop, alpha_onestop
+    nests = nest_onestop, nest_same
     return models.logcnl_avail(V, av, nests, choice)
 
 # We provide names to these candidates
-myModels = {'Logit': logit,
-            'Nested one stop': nested1,
-            'Nested same': nested2,
-            'CNL alpha fixed': cnl1,
-            'CNL alpha est.': cnl2}
+myModels = {'Logit': logit}
 
 # Definition of the specification problem, gathering all information defined above.
 theProblem = assisted.specificationProblem('Optima',
@@ -296,36 +296,20 @@ theProblem.maximumNumberOfParameters = 100
 
 # We propose several specifications to initialize the algorithm.
 # For each group of attributes, we decide if it is nonlinear, and generic.
-nl1 = {'Travel time': (2, False),
-       'Travel cost': (None, False),
+nl1 = {'Travel time': (None, False),
        'Distance': (None, False)}
 
-nl2 = {'Travel time': (None, True),
-       'Travel cost': (3, False),
-       'Distance': (None, False),
-       'Transfers': (None, False),
-       'PT Waiting time': (0, False)}
-
-
-
 # For each segmentation, we decided which dimensions are active.
-sg1 = {'Seg. cte': ['CarAvail'],
-       'Seg. cost': ['Income'],
-       'Seg. dist': ['Urban']}
+sg1 = {'Seg. cte': ['Subscription'],
+       'Seg. time': [],
+       'Seg. cost': [],
+       'Seg. dist': []}
 
 
 
 initSolutions = [
-     theProblem.generateSolution(nl1, sg1, 'Logit'),
-     theProblem.generateSolution(nl1, sg1, 'Nested one stop'),
-     theProblem.generateSolution(nl1, sg1, 'Nested same'),
-     theProblem.generateSolution(nl1, sg1, 'CNL alpha fixed'),
-     theProblem.generateSolution(nl1, sg1, 'CNL alpha est.'),
-     theProblem.generateSolution(nl2, sg1, 'Logit'),
-     theProblem.generateSolution(nl2, sg1, 'Nested one stop'),
-     theProblem.generateSolution(nl2, sg1, 'Nested same'),
-     theProblem.generateSolution(nl2, sg1, 'CNL alpha fixed'),
-     theProblem.generateSolution(nl2, sg1, 'CNL alpha est.')]
+    theProblem.generateSolution(nl1, sg1, 'Logit')
+]
 
 # Optimization algorithm
 vns.vns(theProblem,
