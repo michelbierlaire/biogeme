@@ -11,6 +11,8 @@
 
 import numpy as np
 import biogeme.messaging as msg
+import biogeme.exceptions as excep
+from scipy.stats import chi2
 
 logger = msg.bioMessage()
 
@@ -89,11 +91,11 @@ def findiff_H(theFunction, x):
 
 
 def checkDerivatives(theFunction, x, names=None, logg=False):
-    """Verifies the analytical derivatives of a function by comparing them with finite
-       difference approximations.
+    """Verifies the analytical derivatives of a function by comparing
+    them with finite difference approximations.
 
-    :param theFunction:  A function object that takes a vector as an  argument, and
-                  returns a tuple.
+    :param theFunction: A function object that takes a vector as an argument, 
+        and returns a tuple:
 
           - The first element of the tuple is the value of the function :math:`f`,
           - the second is the gradient of the function,
@@ -116,11 +118,12 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
           - g is the analytical gradient,
           - h is the analytical hessian,
           - gdiff is the difference between the analytical gradient and the finite
-                 difference approximation
+            difference approximation
           - hdiff is the difference between the analytical hessian and the finite
-                 difference approximation
+            difference approximation
 
     :rtype: float, numpy.array,numpy.array,  numpy.array,numpy.array
+
     """
     f, g, h = theFunction(x)
     g_num = findiff_g(theFunction, x)
@@ -167,6 +170,10 @@ def calculatePrimeNumbers(upperBound):
 
     :return: array with prime numbers
     :rtype: list(int)
+
+    >>> tools.calculatePrimeNumbers(10)
+    [2, 3, 5, 7]
+
     """
     mywork = list(range(0, upperBound + 1))
     largest = int(np.ceil(np.sqrt(float(upperBound))))
@@ -184,8 +191,82 @@ def calculatePrimeNumbers(upperBound):
     return myprimes
 
 def countNumberOfGroups(df, column):
-    """ This function counts the number of groups of same value in a column.
-      For instance: 1,2,2,3,3,3,4,1,1  would give 5
+    """
+    This function counts the number of groups of same value in a column.
+    For instance: 1,2,2,3,3,3,4,1,1  would give 5. 
+
+    Example:: 
+
+        >>>df = pd.DataFrame({'ID': [1, 1, 2, 3, 3, 1, 2, 3], 
+                              'value':[1000, 
+                                       2000, 
+                                       3000, 
+                                       4000, 
+                                       5000, 
+                                       5000, 
+                                       10000, 
+                                       20000]})
+        >>>tools.countNumberOfGroups(df,'ID')
+        6
+
+        >>>tools.countNumberOfGroups(df,'value')
+        7
+
     """
     df['_biogroups'] = (df[column] != df[column].shift(1)).cumsum()
     return len(df['_biogroups'].unique())
+
+def likelihood_ratio_test(model1, model2, significance_level = 0.95):
+    """
+    This function performs a likelihood ratio test between a
+    restricted and an unrestricted model.
+
+    :param model1: the final loglikelood of one model, and the number of estimated parameters.
+    :type model1: tuple(float, int)
+
+    :param model2: the final loglikelood of the other model, and the number of estimated parameters.
+    :type model2: tuple(float, int)
+
+    :param significance_level: level of significance of the test. Default: 0.95
+    :type significance_level: float
+
+    :return: a tuple containing: 
+
+                  - a message with the outcome of the test
+                  - the statistic, that is minus two times the difference between 
+                    the loglikelihood  of the two models
+                  - the threshold of the chi square distribution. 
+
+    :rtype: (str, float, float)
+
+    """
+
+    loglike_m1, df_m1 = model1
+    loglike_m2, df_m2 = model2
+    if loglike_m1 > loglike_m2:
+        if df_m1 < df_m2:
+            raise excep.biogemeError(f'The unrestricted model {model2} has a '
+                                     f'lower loglikelihood than the restricted one {model1}')
+            return None
+        loglike_ur = loglike_m1
+        loglike_r = loglike_m2
+        df_ur = df_m1
+        df_r = df_m2
+    else:
+        if df_m1 >= df_m2:
+            raise excep.biogemeError(f'The unrestricted model {model1} has a '
+                                     f'lower loglikelihood than the restricted one {model2}')
+            return None
+        loglike_ur = loglike_m2
+        loglike_r = loglike_m1
+        df_ur = df_m2
+        df_r = df_m1
+        
+    stat = -2 * (loglike_r - loglike_ur)
+    chi_df = df_ur - df_r
+    threshold = chi2.ppf(significance_level, chi_df)
+    if stat <= threshold:
+        msg = f'H0 cannot be rejected at level {significance_level}'
+    else:
+        msg = f'H0 can be rejected at level {significance_level}'
+    return msg, stat, threshold
