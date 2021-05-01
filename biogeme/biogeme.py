@@ -101,17 +101,17 @@ class BIOGEME:
         :type skipAudit: bool
 
         :param removeUnusedVariables: if True, all variables not used
-           in the expression are removed from the database. Default:
-           True.
+            in the expression are removed from the database. Default:
+            True.
         :type removeUnusedVariables: bool
 
         :param displayUsedVariables: if True, displays all the
-          variables used in the formulas. Default: False.
+            variables used in the formulas. Default: False.
         :type displayUsedVariables: bool
 
         :param suggestScales: if True, Biogeme suggests the scaling of
-        the variables in the database. Default: True.
-        See also :func:`biogeme.database.Database.suggestScaling`
+            the variables in the database. Default: True.
+            See also :func:`biogeme.database.Database.suggestScaling`
 
         :type suggestScales: bool.
 
@@ -1050,13 +1050,6 @@ formulas.
 
         :rtype: Pandas data frame
 
-        Example::
-
-              # Read the estimation results from a file
-              results = res.bioResults(pickleFile = 'myModel.pickle')
-              # Simulate the formulas using the nominal values
-              simulatedValues = biogeme.simulate(betaValues)
-
         :raises biogemeError: if the number of parameters is incorrect
 
         """
@@ -1164,7 +1157,7 @@ formulas.
 
             Default: 3.
 
-        :type level: int
+        :type verbosity: int
 
         """
         self.logger.createLog(fileLevel=verbosity,
