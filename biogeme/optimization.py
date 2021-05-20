@@ -441,7 +441,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct,
     radius = 1.0
     eta1 = 0.1
     eta2 = 0.9
-    proportionTrueHessian = 0.0
+    proportionTrueHessian = 0.1
     enlargingFactor = 2
     infeasibleConjugateGradient = False
 
