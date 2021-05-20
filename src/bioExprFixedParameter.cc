@@ -38,6 +38,9 @@ bioString bioExprFixedParameter::print(bioBoolean hp) const {
 }
 
 bioReal bioExprFixedParameter::getLiteralValue() const {
+  if (fixedParameters == NULL) {
+    throw bioExceptNullPointer(__FILE__,__LINE__,"fixedParameters") ;
+  }
   if (theParameterId >= fixedParameters->size()) {
     throw bioExceptOutOfRange<bioUInt>(__FILE__,__LINE__,theParameterId,0,fixedParameters->size()  - 1) ;
   }

@@ -559,7 +559,6 @@ void bioFormula::setFixedParameters(std::vector<bioReal>* p) {
        ++i) {
     i->second->setFixedParameters(p) ;
   }
-
 }
 
 

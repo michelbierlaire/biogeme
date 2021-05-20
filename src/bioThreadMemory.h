@@ -64,4 +64,5 @@ class bioThreadMemory {
   std::vector<bioFormula> weights ;
 
 };
+
 #endif

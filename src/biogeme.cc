@@ -17,13 +17,17 @@
 #include "bioExceptions.h"
 #include "bioDebug.h"
 #include "bioThreadMemory.h"
+#include "bioThreadMemorySimul.h"
 #include "bioExpression.h"
+#include "bioSeveralExpressions.h"
 //#include "bioCfsqp.h"
 
 // Dealing with exceptions across threads
 static std::exception_ptr theExceptionPtr = nullptr ;
 
 void *computeFunctionForThread( void *ptr );
+
+void *simulFunctionForThread( void *ptr );
 
 biogeme::biogeme(): nbrOfThreads(1),
 		    fixedBetasDefined(false),
@@ -449,6 +453,49 @@ void *computeFunctionForThread(void* fctPtr) {
   return NULL ;
 }
 
+
+void *simulFunctionForThread(void* fctPtr) {
+  try {
+    bioThreadArgSimul *input = (bioThreadArgSimul *) fctPtr;
+    
+    bioSeveralExpressions* expressions = input->theFormulas.getExpressions() ;
+    if (input->panel) {
+      std::stringstream str ;
+      str << "Simulation of panel data is not yet implemented" ;
+      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+    }
+    else {
+      bioUInt row ;
+      if (expressions == NULL) {
+	throw bioExceptNullPointer(__FILE__,__LINE__,"thread memory") ;
+      }
+      expressions->setIndividualIndex(&row) ;
+      expressions->setRowIndex(&row) ;
+      
+      for (row = input->startData ;
+	   row < input->endData ;
+	   ++row) {
+	try {
+	  std::vector<bioReal > res = expressions->getValues() ;
+	  input->results.push_back(res) ;
+	}
+	catch(bioExceptions& e) {
+	  std::stringstream str ;
+	  str << "Error for data entry " << row << " : " << e.what() ;
+	  throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+	}
+      }
+    }
+    input->theFormulas.setRowIndex(NULL) ;
+    input->theFormulas.setIndividualIndex(NULL) ;
+  }
+  catch(...)  {
+    theExceptionPtr = std::current_exception() ;
+  }
+
+  return NULL ;
+}
+
 void biogeme::prepareMemoryForThreads(bioBoolean force) {
   theThreadMemory.resize(nbrOfThreads,literalIds.size()) ;
   theThreadMemory.setLoglike(theLoglikeString) ;
@@ -486,37 +533,100 @@ void biogeme::simulateFormula(std::vector<bioString> formula,
 }
 
 void biogeme::simulateSeveralFormulas(std::vector<std::vector<bioString> > formulas,
-				      std::vector<bioReal> beta,
-				      std::vector<bioReal> fixedBeta,
+				      std::vector<bioReal> betas,
+				      std::vector<bioReal> fixedBetas,
+				      bioUInt t,
 				      std::vector< std::vector<bioReal> > data,
 				      bioReal* results) {
 
-  std::vector<bioFormula> theFormulas(formulas.size()) ;
-  bioUInt N = data.size() ;
-  bioUInt row ;
-  for (bioUInt i = 0 ; i < formulas.size() ; ++i) {
-    theFormulas[i].setExpression(formulas[i]) ;
-    theFormulas[i].setParameters(&beta) ;
-    theFormulas[i].setFixedParameters(&fixedBeta) ;
-    if (!theDraws.empty()) {
-      theFormulas[i].setDraws(&theDraws) ;
-    }  
-    theFormulas[i].setData(&data) ;
-    theFormulas[i].setMissingData(missingData) ;
-    theFormulas[i].setRowIndex(&row) ;
-    theFormulas[i].setIndividualIndex(&row) ;
+  nbrOfThreads = t ;
+  theThreadMemorySimul.resize(nbrOfThreads) ;
+  theThreadMemorySimul.setFormulas(formulas) ;
+  prepareDataSimul() ;
+  theThreadMemorySimul.setParameters(&betas) ;
+  theThreadMemorySimul.setFixedParameters(&fixedBetas) ;
+  
+  std::vector<pthread_t> theThreads(nbrOfThreads) ;
+  for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
+    bioSeveralExpressions* theFormulas = theSimulInput[thread]->theFormulas.getExpressions() ;
+    theFormulas->setData(theSimulInput[thread]->data) ;
+    if (panel) {
+      theFormulas->setDataMap(theSimulInput[thread]->dataMap) ;
+    }
+    theFormulas->setMissingData(theSimulInput[thread]->missingData) ;
+    if (theSimulInput[thread] == NULL) {
+      throw bioExceptNullPointer(__FILE__,__LINE__,"thread") ;
+    }
+    bioUInt diagnostic = pthread_create(&(theThreads[thread]),
+					NULL,
+					simulFunctionForThread,
+					(void*) theSimulInput[thread]) ;
+    
+    if (diagnostic != 0) {
+      std::stringstream str ;
+      str << "Error " << diagnostic << " in creating thread " << thread << "/" << nbrOfThreads ;
+      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+    }
   }
-  for (row = 0 ;
-       row < N ;
-       ++row) {
-    for (bioUInt i = 0 ; i < formulas.size() ; ++i) {
-      //results[row * formulas.size() + i] = bioReal(theFormulas[i].getExpression()->getValue()) ;
-      results[i * N + row] = bioReal(theFormulas[i].getExpression()->getValue()) ;
+
+  bioUInt N = data.size() ;
+
+  for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
+    pthread_join( theThreads[thread], NULL);
+    if (theExceptionPtr != nullptr) {
+      std::rethrow_exception(theExceptionPtr);
+    }
+    if (theSimulInput[thread]->results.size() !=
+	theSimulInput[thread]->endData - theSimulInput[thread]->startData) {
+      std::stringstream str ;
+      str << "Inconsistent dimensions: "
+	  << theSimulInput[thread]->results.size()
+	  << " and "
+	  << theSimulInput[thread]->endData - theSimulInput[thread]->startData ;
+      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+    }
+    for (bioUInt i = 0 ; i < theSimulInput[thread]->results.size() ; ++i) {
+      bioUInt row = theSimulInput[thread]->startData + i ;
+      for (bioUInt j = 0 ; j < theSimulInput[thread]->results[i].size() ; ++j) {
+	results[j * N + row] = theSimulInput[thread]->results[i][j] ;
+      }
     }
   }
   return ;
 }
 
+// void biogeme::simulateSeveralFormulas(std::vector<std::vector<bioString> > formulas,
+// 				      std::vector<bioReal> beta,
+// 				      std::vector<bioReal> fixedBeta,
+// 				      std::vector< std::vector<bioReal> > data,
+// 				      bioReal* results) {
+
+
+//   bioSeveralFormulas theFormulas ;
+//   theFormulas.setExpressions(formulas) ;
+//   theFormulas.setParameters(&beta) ;
+//   theFormulas.setFixedParameters(&fixedBeta) ;
+//   if (!theDraws.empty()) {
+//     theFormulas.setDraws(&theDraws) ;
+//   }  
+
+//   bioUInt N = data.size() ;
+//   theFormulas.setData(&data) ;
+//   theFormulas.setMissingData(missingData) ;
+//   bioUInt row ;
+//   theFormulas.setRowIndex(&row) ;
+//   theFormulas.setIndividualIndex(&row) ;
+  
+//   for (row = 0 ;
+//        row < N ;
+//        ++row) {
+//     std::vector<bioReal > res = theFormulas.getExpressions()->getValues() ;
+//     for (bioUInt i = 0 ; i < res.size() ; ++i) {
+//       results[i * N + row] = res[i] ;
+//     }
+//   }
+//   return ;
+// }
 
 
 
@@ -613,6 +723,68 @@ void biogeme::prepareData() {
       }
       theInput[thread]->theWeight.setMissingData(theInput[thread]->missingData) ;
     }
+  }
+}
+
+void biogeme::prepareDataSimul() {
+
+  theThreadMemorySimul.setData(&theData) ;
+  if (panel) {
+    theThreadMemorySimul.setDataMap(&theDataMap) ;
+  }
+  theThreadMemorySimul.setMissingData(missingData) ;
+  if (!theDraws.empty()) {
+    theThreadMemorySimul.setDraws(&theDraws) ;
+  }
+
+  // Prepare the input for the threads
+
+  // Calculate the size of the block  of data to be sent to each thread
+  bioUInt sizeOfEachBlock ;
+  bioUInt numberOfBlocks ;
+  if (panel) {
+    sizeOfEachBlock = ceil(bioReal(theDataMap.size())/bioReal(nbrOfThreads)) ;
+    numberOfBlocks = ceil(bioReal(theDataMap.size()) / bioReal(sizeOfEachBlock)) ;
+  }
+  else {
+    sizeOfEachBlock = ceil(bioReal(theData.size())/bioReal(nbrOfThreads)) ;
+    numberOfBlocks = ceil(bioReal(theData.size()) / bioReal(sizeOfEachBlock)) ;
+  }
+  // For small data sets, there may be more threads than number of blocks.
+  if (numberOfBlocks < nbrOfThreads) {
+    nbrOfThreads = numberOfBlocks ;
+  }
+
+  theSimulInput.resize(nbrOfThreads, NULL) ;
+
+  for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
+    bioThreadArgSimul* ptr = theThreadMemorySimul.getInput(thread) ;
+    if (ptr == NULL) {
+      throw bioExceptNullPointer(__FILE__,__LINE__,"thread memory") ;
+    }
+    theSimulInput[thread] = ptr ;
+    theSimulInput[thread]->panel = panel ;
+    theSimulInput[thread]->data = &theData ;
+    if (panel) {
+      theSimulInput[thread]->dataMap = &theDataMap ;
+    }
+    theSimulInput[thread]->missingData = missingData ;
+    theSimulInput[thread]->startData = thread * sizeOfEachBlock ;
+    if (panel) {
+      theSimulInput[thread]->endData = (thread == nbrOfThreads-1) ? theDataMap.size() : (thread+1) * sizeOfEachBlock ;
+    }
+    else {
+      theSimulInput[thread]->endData = (thread == nbrOfThreads-1) ? theData.size() : (thread+1) * sizeOfEachBlock ;
+    }
+    bioSeveralExpressions* theFormulas = theSimulInput[thread]->theFormulas.getExpressions() ;
+    if (theFormulas == NULL) {
+      throw bioExceptNullPointer(__FILE__,__LINE__,"bioSeveralExpressions") ;
+    }
+    theFormulas->setData(theSimulInput[thread]->data) ;
+    if (panel) {
+      theFormulas->setDataMap(theSimulInput[thread]->dataMap) ;
+    }
+    theFormulas->setMissingData(theSimulInput[thread]->missingData) ;
   }
 }
 

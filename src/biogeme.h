@@ -16,9 +16,11 @@
 #include "bioTypes.h"
 #include "bioString.h"
 #include "bioThreadMemory.h"
+#include "bioThreadMemorySimul.h"
 
 class bioExpression ;
 class bioThreadMemory ;
+class bioThreadMemorySimul ;
 
 class biogeme {
  public:
@@ -77,6 +79,7 @@ class biogeme {
   void simulateSeveralFormulas(std::vector<std::vector<bioString> > formula,
 			       std::vector<bioReal> beta,
 			       std::vector<bioReal> fixedBeta,
+			       bioUInt t,
 			       std::vector< std::vector<bioReal> > data,
 			       bioReal* results) ;
 
@@ -96,7 +99,9 @@ class biogeme {
   void resetFunctionEvaluations() ;
 private: // methods
   void prepareData() ;
+  void prepareDataSimul() ;
   void prepareMemoryForThreads(bioBoolean force = false) ;
+  void prepareSimulMemoryForThreads(bioBoolean force = false) ;
   bioReal applyTheFormula(std::vector<bioReal>* g = NULL,
 			  std::vector< std::vector<bioReal> >* h = NULL,
 			  std::vector< std::vector<bioReal> >* bh = NULL) ;
@@ -111,11 +116,13 @@ private: // data
   bioBoolean calculateHessian ;
   bioBoolean calculateBhhh ;
   bioThreadMemory theThreadMemory ;
+  bioThreadMemorySimul theThreadMemorySimul ;
   std::vector< std::vector<bioReal> > theData ;
   std::vector< std::vector<bioUInt> > theDataMap ;
   std::vector< std::vector< std::vector<bioReal> > > theDraws ;
   bioReal missingData ;
   std::vector<bioThreadArg*> theInput ;
+  std::vector<bioThreadArgSimul*> theSimulInput ;
   std::vector<bioReal> lowerBounds ;
   std::vector<bioReal> upperBounds ;
   bioUInt nbrFctEvaluations ;

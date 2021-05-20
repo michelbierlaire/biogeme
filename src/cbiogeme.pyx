@@ -50,6 +50,7 @@ cdef extern from "biogeme.h":
 		void simulateSeveralFormulas(vector[string_vector] loglikeSignatures,
 				     double_vector betas, 
 				     double_vector fixedBetas,
+				     unsigned long numberOfThreads,
 				     double_matrix& data,
 				     double* results) except +
 
@@ -136,7 +137,7 @@ cdef class pyBiogeme:
 						&r_view[0])
 		return r
 	
-	def simulateSeveralFormulas(self, formulas, betas, fixedBetas, d):
+	def simulateSeveralFormulas(self, formulas, betas, fixedBetas, d, nThreads):
 		n = d.shape[0]
 		nf = len(formulas)
 		r = np.zeros([nf, n])
@@ -147,10 +148,11 @@ cdef class pyBiogeme:
 
 		cdef double_matrix_view r_view = r
 		self.theBiogeme.simulateSeveralFormulas(formulas,
-					        			 betas, 
-   									 fixedBetas, 
-									 d, 
-									 &r_view[0,0])
+					        	      betas, 
+   						      fixedBetas, 
+ 						      nThreads,
+						      d, 
+						      &r_view[0,0])
 		return r
 	
 	def setExpressions(self,loglikeFormulas,nbrOfThreads,weightFormulas=None):

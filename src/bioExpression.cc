@@ -10,7 +10,7 @@
 #include "bioExpression.h"
 #include "bioDebug.h"
 #include <sstream>
-bioExpression::bioExpression() : parameters(NULL), data(NULL), dataMap(NULL), draws(NULL), sampleSize(0), numberOfDraws(0), numberOfDrawVariables(0), rowIndex(NULL), individualIndex(NULL) {
+bioExpression::bioExpression() : parameters(NULL), fixedParameters(NULL), data(NULL), dataMap(NULL), draws(NULL), sampleSize(0), numberOfDraws(0), numberOfDrawVariables(0), rowIndex(NULL), individualIndex(NULL) {
 }
 
 bioExpression::~bioExpression() {

@@ -49,6 +49,8 @@ class bioExprLogLogitFullChoiceSet ;
 class bioExprMultSum ;
 class bioExprElem ;
 
+class bioSeveralExpressions ;
+
 class bioMemoryManagement {
 
 public:
@@ -102,6 +104,7 @@ public:
 								 std::map<bioUInt,bioExpression*> u) ;
   bioExprMultSum* get_bioExprMultSum(std::vector<bioExpression*> e) ;
   bioExprElem* get_bioExprElem(bioExpression* k, std::map<bioUInt,bioExpression*> d) ;
+  bioSeveralExpressions* get_bioSeveralExpressions(std::vector<bioExpression*> exprs) ;
 private:
   bioMemoryManagement() ;
   std::vector<bioExprFreeParameter*> a_bioExprFreeParameter ;
@@ -138,5 +141,6 @@ private:
   std::vector<bioExprLogLogitFullChoiceSet*> a_bioExprLogLogitFullChoiceSet ;
   std::vector<bioExprMultSum*> a_bioExprMultSum ;
   std::vector<bioExprElem*> a_bioExprElem ;
+  std::vector<bioSeveralExpressions*> a_bioSeveralExpressions ;
 };
 #endif

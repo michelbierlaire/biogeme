@@ -42,7 +42,7 @@
 #include "bioExprLogLogitFullChoiceSet.h"
 #include "bioExprMultSum.h"
 #include "bioExprElem.h"
-
+#include "bioSeveralExpressions.h"
 
 bioMemoryManagement::bioMemoryManagement() {
 
@@ -271,6 +271,12 @@ void bioMemoryManagement::releaseAllMemory() {
   }
   a_bioExprElem.clear() ;
   
+  for (std::vector<bioSeveralExpressions*>::iterator i = a_bioSeveralExpressions.begin() ;
+       i != a_bioSeveralExpressions.end() ;
+       ++i) {
+    delete(*i) ;
+  }
+  a_bioSeveralExpressions.clear() ;
   
 }
 
@@ -513,6 +519,12 @@ bioExprElem* bioMemoryManagement::get_bioExprElem(bioExpression* k,
 						  std::map<bioUInt,bioExpression*> d) {
   bioExprElem* ptr = new bioExprElem(k, d) ;
   a_bioExprElem.push_back(ptr) ;
+  return ptr ;
+}
+
+bioSeveralExpressions* bioMemoryManagement::get_bioSeveralExpressions(std::vector<bioExpression*> exprs) {
+  bioSeveralExpressions* ptr = new bioSeveralExpressions(exprs) ;
+  a_bioSeveralExpressions.push_back(ptr) ;
   return ptr ;
 }
 
