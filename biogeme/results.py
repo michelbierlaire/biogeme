@@ -348,16 +348,32 @@ class bioResults:
             if self.data.nullLogLike is not None else None
         self.data.likelihoodRatioTest = -2.0 * (self.data.initLogLike - self.data.logLike) \
             if self.data.initLogLike is not None else None
-        self.data.rhoSquare = np.nan_to_num(1.0 - self.data.logLike / self.data.initLogLike) \
-            if self.data.initLogLike is not None else None
-        self.data.rhoSquareNull = np.nan_to_num(1.0 - self.data.logLike / self.data.nullLogLike) \
-            if self.data.nullLogLike is not None else None
-        self.data.rhoBarSquare = np.nan_to_num(1.0 - (self.data.logLike-self.data.nparam) \
-                                               / self.data.initLogLike) \
-            if self.data.initLogLike is not None else None
-        self.data.rhoBarSquareNull = np.nan_to_num(1.0 - (self.data.logLike-self.data.nparam) \
-                                               / self.data.nullLogLike) \
-            if self.data.nullLogLike is not None else None
+        try:
+            self.data.rhoSquare = np.nan_to_num(1.0 - self.data.logLike / self.data.initLogLike) \
+                if self.data.initLogLike is not None else None
+        except ZeroDivisionError:
+            self.data.rhoSquare = None
+        try:
+            self.data.rhoSquareNull = (np.nan_to_num(1.0 - self.data.logLike /
+                                                     self.data.nullLogLike)
+                                       if self.data.nullLogLike is not None else None)
+        except ZeroDivisionError:
+            self.data.rhoSquareNull = None
+        try:
+            self.data.rhoBarSquare = (np.nan_to_num(1.0 -
+                                                    (self.data.logLike-self.data.nparam) /
+                                                    self.data.initLogLike)
+                                      if self.data.initLogLike is not None else None)
+        except ZeroDivisionError:
+            self.data.rhoBarSquare = None
+        try:
+            self.data.rhoBarSquareNull = (np.nan_to_num(1.0 -
+                                                        (self.data.logLike-self.data.nparam) /
+                                                        self.data.nullLogLike)
+                                          if self.data.nullLogLike is not None else None)
+        except ZeroDivisionError:
+            self.data.rhoBarSquareNull = None
+                                          
                                                
         self.data.akaike = 2.0 * self.data.nparam - 2.0 * self.data.logLike
         self.data.bayesian = - 2.0 * self.data.logLike + self.data.nparam * \
@@ -639,6 +655,13 @@ class bioResults:
         d['Nbr of threads'] = self.data.numberOfThreads, ''
         return d
 
+    def printGeneralStatistics(self):
+        d = self.getGeneralStatistics()
+        str = ''
+        for k, (v, p) in d.items():
+            str += f'{k}:\t{v:{p}}\n'
+        return str
+    
     def numberOfFreeParameters(self):
         """This is the number of estimated parameters, minus those that are at their bounds
         """
@@ -766,11 +789,6 @@ a Pandas dataframe.
         h = self._getHtmlHeader()
         h += bv.getHtml()
         h += f'<p>This file has automatically been generated on {now}</p>\n'
-        h += ('<p>If you drag this HTML file into the Calc application of '
-              '<a href="http://www.openoffice.org/" target="_blank">OpenOffice</a>, '
-              'or the spreadsheet of <a href="https://www.libreoffice.org/" '
-              'target="_blank">LibreOffice</a>, you will be able to perform additional '
-              'calculations.</p>\n')
         h += '<table>\n'
         h += (f'<tr class=biostyle><td align=right><strong>Report file</strong>:	</td>'
               f'<td>{self.data.htmlFileName}</td></tr>\n')
@@ -793,8 +811,9 @@ a Pandas dataframe.
         # v is the value
         # p is the precision to format it
         for k, (v, p) in d.items():
-            h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
-                  f'<td>{v:{p}}</td></tr>\n')
+            if v is not None:
+                h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
+                      f'<td>{v:{p}}</td></tr>\n')
         for k, v in self.data.optimizationMessages.items():
             if k == 'Relative projected gradient':
                 h += (f'<tr class=biostyle><td align=right ><strong>{k}</strong>: </td> '
@@ -985,33 +1004,42 @@ a Pandas dataframe.
         h += '<body bgcolor="#ffffff">\n'
         return h
 
-    def getBetasForSensitivityAnalysis(self, myBetas, size=100, useBootstrap=False):
+    def getBetasForSensitivityAnalysis(self, myBetas, size=100, useBootstrap=True):
         """Generate draws from the distribution of the estimates, for
         sensitivity analysis.
 
         :param myBetas: names of the parameters for which draws are requested.
         :type myBetas: list(string)
-        :param size: number of draws. Default: 100.
+        :param size: number of draws. If useBootstrap is True, the value is ignored 
+                  and a warning is issued. Default: 100.
         :type size: int
-        :param useBootstrap: if True, the variance-covariance matrix
-                  generated by the bootstrapping is used for simulation. If
-                  False, the robust variance-covariance matrix is used. Default: False.
+        :param useBootstrap: if True, the bootstrap estimates are
+                  directly used. The advantage is that it does not reyl on the
+                  assumption that the estimates follow a normal
+                  distribution. Default: True.  
         :type useBootstrap: bool
 
         :raise biogeme.exceptions.biogemeError: if useBootstrap is True and the bootstrap
-                          matrix is not available.
+                          results are not available
 
-        :return: numpy table with as many rows as draws, and as many
-           columns as parameters.
-        :rtype: numpy.array
+        :return: list of dict. Each dict has a many entries as parameters. 
+                The list has as many entries as draws.
+        :rtype: list(dict)
 
         """
         if useBootstrap and self.data.bootstrap is None:
-            err = (f'Bootstrap variance-covariance matrix not available for simulation. '
+            err = (f'Bootstrap results are not available for simulation. '
                    f'Use useBootstrap=False.')
             raise excep.biogemeError(err)
 
+        index = [self.data.betaNames.index(b) for b in myBetas]
 
+        if useBootstrap: 
+            results = [{myBetas[i]: value for i, value in enumerate(row)}
+                       for row in self.data.bootstrap[:, index]]
+
+            return results
+        
         theMatrix = self.data.bootstrap_varCovar if useBootstrap else self.data.robust_varCovar
         simulatedBetas = np.random.multivariate_normal(self.data.betaValues,
                                                        theMatrix,
