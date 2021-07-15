@@ -8,25 +8,26 @@
 # pylint: disable=invalid-name
 # pylint: disable=too-many-lines
 
-import numpy as np
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
 
+from biogeme.expressions import (
+    _bioLogLogit,
+    _bioLogLogitFullChoiceSet,
+    exp,
+    log,
+    Elem,
+    bioMin,
+    bioMax,
+    Numeric,
+    Beta,
+    bioMultSum,
+    Variable,
+    Expression,
+)
+
 logger = msg.bioMessage()
 
-
-from biogeme.expressions import (_bioLogLogit,
-                                 _bioLogLogitFullChoiceSet,
-                                 exp,
-                                 log,
-                                 Elem,
-                                 bioMin,
-                                 bioMax,
-                                 Numeric,
-                                 Beta,
-                                 bioMultSum,
-                                 Variable,
-                                 Expression)
 
 def loglogit(V, av, i):
     """The logarithm of the logit model
@@ -60,6 +61,7 @@ def loglogit(V, av, i):
         return _bioLogLogitFullChoiceSet(V, av=None, choice=i)
 
     return _bioLogLogit(V, av, i)
+
 
 def logit(V, av, i):
     """The logit model
@@ -112,29 +114,26 @@ def boxcox(x, ell):
     :return: the Box-Cox transform
     :rtype: biogeme.expressions.Expression
     """
-    if isinstance(ell, (float, int)):
-        if ell < 0:
-            errorMsg = (f'The parameter of a Box-Cox transform must '
-                        f'be non negative, and not {ell}.')
-            raise excep.biogemeError(errorMsg)
-        if ell < np.sqrt(np.finfo(np.float64).eps):
-            if isinstance(x, (float, int)):
-                return np.log(x)
-            return log(x)
-        return (x**ell - 1.0)/ell
 
-    return Elem({0:(x**ell - 1.0)/ell,
-                 1:log(x)},
-                ell < Numeric(np.sqrt(np.finfo(np.float64).eps)))
+    regular = (x ** ell - 1.0) / ell
+    mclaurin = (
+        log(x)
+        + ell * log(x) ** 2
+        + ell ** 2 * log(x) ** 3 / 6.0
+        + ell ** 3 * log(x) ** 4 / 24.0
+    )
+    return Elem({0: regular, 1: mclaurin}, ell < Numeric(1.0e-5))
 
 
 def piecewise(variable, thresholds):
-    """Obsolete function. Present for compatibility only
-    """
-    errorMsg = ('The function "piecewise" is obsolete and has been replaced '
-                'by "piecewiseVariables". Its use has changed. Please refer '
-                'to the documentation.')
+    """Obsolete function. Present for compatibility only"""
+    errorMsg = (
+        'The function "piecewise" is obsolete and has been replaced '
+        'by "piecewiseVariables". Its use has changed. Please refer '
+        'to the documentation.'
+    )
     raise excep.biogemeError(errorMsg)
+
 
 def piecewiseVariables(variable, thresholds):
     """Generate the variables to include in a piecewise linear specification.
@@ -163,14 +162,18 @@ def piecewiseVariables(variable, thresholds):
 
     .. seealso:: piecewiseFormula
     """
-    I = len(thresholds)
+    eye = len(thresholds)
     if all(t is None for t in thresholds):
-        errorMsg = ('All thresholds for the piecewise linear specification '
-                    'are set to None.')
+        errorMsg = (
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
+        )
         raise excep.biogemeError(errorMsg)
     if None in thresholds[1:-1]:
-        errorMsg = ('For piecewise linear specification, only the first and '
-                    'the last thresholds can be None')
+        errorMsg = (
+            'For piecewise linear specification, only the first and '
+            'the last thresholds can be None'
+        )
         raise excep.biogemeError(errorMsg)
 
     # If the name of the variable is given, we transform it into an expression.
@@ -181,20 +184,21 @@ def piecewiseVariables(variable, thresholds):
     if thresholds[0] is None:
         results = [bioMin(variable, thresholds[1])]
     else:
-        b = thresholds[1]-thresholds[0]
+        b = thresholds[1] - thresholds[0]
         results = [bioMax(Numeric(0), bioMin(variable - thresholds[0], b))]
 
-    for i in range(1, I-2):
-        b = thresholds[i+1]-thresholds[i]
+    for i in range(1, eye - 2):
+        b = thresholds[i + 1] - thresholds[i]
         results += [bioMax(Numeric(0), bioMin(variable - thresholds[i], b))]
 
     # Last variable
     if thresholds[-1] is None:
         results += [bioMax(0, variable - thresholds[-2])]
     else:
-        b = thresholds[-1]-thresholds[-2]
+        b = thresholds[-1] - thresholds[-2]
         results += [bioMax(Numeric(0), bioMin(variable - thresholds[-2], b))]
     return results
+
 
 def piecewiseFormula(variable, thresholds, initialBetas=None):
     """Generate the formula for a piecewise linear specification.
@@ -230,72 +234,88 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
 
     """
 
-    I = len(thresholds)
+    eye = len(thresholds)
     if all(t is None for t in thresholds):
-        errorMsg = (f'All thresholds for the piecewise linear specification '
-                    f'are set to None.')
+        errorMsg = (
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
+        )
         raise excep.biogemeError(errorMsg)
     if None in thresholds[1:-1]:
-        errorMsg = ('For piecewise linear specification, only the first and '
-                    'the last thresholds can be None')
+        errorMsg = (
+            'For piecewise linear specification, only the first and '
+            'the last thresholds can be None'
+        )
         raise excep.biogemeError(errorMsg)
     if initialBetas is not None:
-        if len(initialBetas) != I-1:
-            errorMsg = (f'As there are {I} thresholds, a total of {I-1} '
-                        f'values are needed to initialize the parameters. '
-                        f'But {len(initialBetas)} are provided')
+        if len(initialBetas) != eye - 1:
+            errorMsg = (
+                f'As there are {eye} thresholds, a total of {eye-1} '
+                f'values are needed to initialize the parameters. '
+                f'But {len(initialBetas)} are provided'
+            )
             raise excep.biogemeError(errorMsg)
 
     theVars = piecewiseVariables(Variable(f'{variable}'), thresholds)
     terms = []
 
     # First term
-    betaValues = [0 if initialBetas is None else initialBetas[i] \
-                  for i in range(I-1)]
+    betaValues = [
+        0 if initialBetas is None else initialBetas[i] for i in range(eye - 1)
+    ]
     if thresholds[0] is None:
-        beta = Beta(f'beta_{variable}_lessthan_{thresholds[1]}',
-                    betaValues[0],
-                    None,
-                    None,
-                    0)
+        beta = Beta(
+            f'beta_{variable}_lessthan_{thresholds[1]}',
+            betaValues[0],
+            None,
+            None,
+            0,
+        )
     else:
-        beta = Beta(f'beta_{variable}_{thresholds[0]}_{thresholds[1]}',
-                    betaValues[0],
-                    None,
-                    None,
-                    0)
+        beta = Beta(
+            f'beta_{variable}_{thresholds[0]}_{thresholds[1]}',
+            betaValues[0],
+            None,
+            None,
+            0,
+        )
 
     terms = [beta * theVars[0]]
 
     # All terms, except the last
-    for i in range(1, I-2):
-        beta = Beta(f'beta_{variable}_{thresholds[i]}_{thresholds[i+1]}',
-                    betaValues[i],
-                    None,
-                    None,
-                    0)
+    for i in range(1, eye - 2):
+        beta = Beta(
+            f'beta_{variable}_{thresholds[i]}_{thresholds[i+1]}',
+            betaValues[i],
+            None,
+            None,
+            0,
+        )
 
         terms += [beta * theVars[i]]
 
     # Last term
     if thresholds[-1] is None:
-        beta = Beta(f'beta_{variable}_{thresholds[-2]}_more',
-                    betaValues[-2],
-                    None,
-                    None,
-                    0)
+        beta = Beta(
+            f'beta_{variable}_{thresholds[-2]}_more',
+            betaValues[-2],
+            None,
+            None,
+            0,
+        )
     else:
-        beta = Beta(f'beta_{variable}_{thresholds[-2]}_{thresholds[-1]}',
-                    betaValues[-2],
-                    None,
-                    None,
-                    0)
+        beta = Beta(
+            f'beta_{variable}_{thresholds[-2]}_{thresholds[-1]}',
+            betaValues[-2],
+            None,
+            None,
+            0,
+        )
     terms += [beta * theVars[-1]]
     return bioMultSum(terms)
 
-def piecewiseFunction(x,
-                      thresholds,
-                      betas):
+
+def piecewiseFunction(x, thresholds, betas):
     """Plot a piecewise linear specification.
 
     If there are K thresholds, K-1 variables are generated. The first
@@ -323,19 +343,25 @@ def piecewiseFunction(x,
     :return: value of the numpy function
     :rtype: float
     """
-    I = len(thresholds)
+    eye = len(thresholds)
     if all(t is None for t in thresholds):
-        errorMsg = ('All thresholds for the piecewise linear specification '
-                    'are set to None.')
+        errorMsg = (
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
+        )
         raise excep.biogemeError(errorMsg)
     if None in thresholds[1:-1]:
-        errorMsg = ('For piecewise linear specification, only the first and '
-                    'the last thresholds can be None')
+        errorMsg = (
+            'For piecewise linear specification, only the first and '
+            'the last thresholds can be None'
+        )
         raise excep.biogemeError(errorMsg)
-    if len(betas) != I-1:
-        errorMsg = (f'As there are {I} thresholds, a total of {I-1} values '
-                    f'are needed to initialize the parameters. But '
-                    f'{len(betas)} are provided')
+    if len(betas) != eye - 1:
+        errorMsg = (
+            f'As there are {eye} thresholds, a total of {eye-1} values '
+            f'are needed to initialize the parameters. But '
+            f'{len(betas)} are provided'
+        )
         raise excep.biogemeError(errorMsg)
 
     # If the first threshold is not -infinity, we need to check if
@@ -346,20 +372,21 @@ def piecewiseFunction(x,
     rest = x
     total = 0
     for i, v in enumerate(betas):
-        if thresholds[i+1] is None:
+        if thresholds[i + 1] is None:
             total += v * rest
             return total
-        if x < thresholds[i+1]:
+        if x < thresholds[i + 1]:
             total += v * rest
             return total
-        total += v * (thresholds[i+1] - (0 if thresholds[i] is None \
-                                         else thresholds[i]))
-        rest = x - thresholds[i+1]
+        total += v * (
+            thresholds[i + 1] - (0 if thresholds[i] is None else thresholds[i])
+        )
+        rest = x - thresholds[i + 1]
     return total
 
 
 def logmev(V, logGi, av, choice):
-    """ Log of the choice probability for a MEV model.
+    """Log of the choice probability for a MEV model.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -401,8 +428,9 @@ def logmev(V, logGi, av, choice):
         logP = _bioLogLogit(H, av, choice)
     return logP
 
+
 def mev(V, logGi, av, choice):
-    """ Choice probability for a MEV model.
+    """Choice probability for a MEV model.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -412,7 +440,8 @@ def mev(V, logGi, av, choice):
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1}, \\ldots, e^{V_J})
+    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+              (e^{V_1}, \\ldots, e^{V_J})
 
     where :math:`G` is the MEV generating function. If an alternative
           :math:`i` is not available, then :math:`G_i = 0`.
@@ -438,6 +467,7 @@ def mev(V, logGi, av, choice):
     """
     return exp(logmev(V, logGi, av, choice))
 
+
 def logmev_endogenousSampling(V, logGi, av, correction, choice):
 
     """Log of choice probability for a MEV model, including the
@@ -453,7 +483,8 @@ def logmev_endogenousSampling(V, logGi, av, correction, choice):
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1}, \\ldots, e^{V_J})
+    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+              (e^{V_1}, \\ldots, e^{V_J})
 
     where :math:`G` is the MEV generating function. If an alternative
           :math:`i` is not available, then :math:`G_i = 0`.
@@ -491,7 +522,6 @@ def logmev_endogenousSampling(V, logGi, av, correction, choice):
     return logP
 
 
-
 def mev_endogenousSampling(V, logGi, av, correction, choice):
     """Choice probability for a MEV model, including the correction
        for endogenous sampling as proposed by
@@ -506,7 +536,8 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1}, \\ldots, e^{V_J})
+    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+              (e^{V_1}, \\ldots, e^{V_J})
 
     where :math:`G` is the MEV generating function. If an alternative
                 :math:`i` is not available, then :math:`G_i = 0`.
@@ -540,8 +571,9 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
     """
     return exp(logmev_endogenousSampling(V, logGi, av, correction, choice))
 
+
 def getMevGeneratingForNested(V, availability, nests):
-    """ Implements the  MEV generating function for the nested logit model
+    """Implements the  MEV generating function for the nested logit model
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -576,7 +608,7 @@ def getMevGeneratingForNested(V, availability, nests):
     :return: a dictionary mapping each alternative id with the function
 
     .. math:: G(e^{V_1},
-              \\ldots,e^{V_J}) =  \\sum_m \\left( \\sum_{\\ell \\in C_m} 
+              \\ldots,e^{V_J}) =  \\sum_m \\left( \\sum_{\\ell \\in C_m}
               y_\\ell^{\\mu_m}\\right)^{\\frac{\\mu}{\\mu_m}}
 
     where :math:`G` is the MEV generating function.
@@ -584,22 +616,27 @@ def getMevGeneratingForNested(V, availability, nests):
     :rtype: biogeme.expressions.Expression
 
     """
-    
+
     termsForNests = []
     for m in nests:
         if availability is None:
             sumdict = [exp(m[0] * V[i]) for i in m[1]]
         else:
-            sumdict = [Elem({0:0.0,
-                             1: exp(m[0] * V[i])},
-                            availability[i] != Numeric(0)) for i in m[1]]
+            sumdict = [
+                Elem(
+                    {0: 0.0, 1: exp(m[0] * V[i])},
+                    availability[i] != Numeric(0),
+                )
+                for i in m[1]
+            ]
         theSum = bioMultSum(sumdict)
-        termsForNests.append(theSum ** 1.0/m[0])
+        termsForNests.append(theSum ** 1.0 / m[0])
     return bioMultSum(termsForNests)
 
 
 def getMevForNested(V, availability, nests):
-    """ Implements the derivatives of MEV generating function for the nested logit model
+    """Implements the derivatives of MEV generating function for the
+        nested logit model
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -645,66 +682,69 @@ def getMevForNested(V, availability, nests):
 
     """
 
-
-
     logGi = {}
     for m in nests:
         if availability is None:
             sumdict = [exp(m[0] * V[i]) for i in m[1]]
         else:
-            sumdict = [Elem({0:0.0,
-                             1: exp(m[0] * V[i])},
-                            availability[i] != Numeric(0)) for i in m[1]]
+            sumdict = [
+                Elem(
+                    {0: 0.0, 1: exp(m[0] * V[i])},
+                    availability[i] != Numeric(0),
+                )
+                for i in m[1]
+            ]
         theSum = bioMultSum(sumdict)
         for i in m[1]:
-            logGi[i] = (m[0]-1.0) * V[i] + (1.0/m[0] - 1.0) * log(theSum)
+            logGi[i] = (m[0] - 1.0) * V[i] + (1.0 / m[0] - 1.0) * log(theSum)
     return logGi
+
 
 def getMevForNestedMu(V, availability, nests, mu):
     """Implements the MEV generating function for the nested logit model,
-including the scale parameter
+    including the scale parameter
 
-    :param V: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
-    :type V: dict(int:biogeme.expressions.Expression)
+        :param V: dict of objects representing the utility functions of
+                  each alternative, indexed by numerical ids.
+        :type V: dict(int:biogeme.expressions.Expression)
 
-    :param availability: dict of objects representing the availability of each
-               alternative, indexed
-               by numerical ids. Must be consistent with V, or
-               None. In this case, all alternatives are supposed to be
-               always available.
+        :param availability: dict of objects representing the availability of each
+                   alternative, indexed
+                   by numerical ids. Must be consistent with V, or
+                   None. In this case, all alternatives are supposed to be
+                   always available.
 
-    :type availability: dict(int:biogeme.expressions.Expression)
+        :type availability: dict(int:biogeme.expressions.Expression)
 
-    :param nests: A tuple containing as many items as nests.
-            Each item is also a tuple containing two items:
+        :param nests: A tuple containing as many items as nests.
+                Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression
-            representing the nest parameter,
-          - a list containing the list of identifiers of the alternatives
-            belonging to the nest.
+              - an object of type biogeme.expressions. Expression
+                representing the nest parameter,
+              - a list containing the list of identifiers of the alternatives
+                belonging to the nest.
 
-      Example::
+          Example::
 
-          nesta = MUA, [1, 2, 3]
-          nestb = MUB, [4, 5, 6]
-          nests = nesta, nestb
+              nesta = MUA, [1, 2, 3]
+              nestb = MUB, [4, 5, 6]
+              nests = nesta, nestb
 
-    :type nests: tuple
+        :type nests: tuple
 
-    :param mu: scale parameter
-    :type mu: biogeme.expressions.Expression
+        :param mu: scale parameter
+        :type mu: biogeme.expressions.Expression
 
-    :return: a dictionary mapping each alternative id with the function
+        :return: a dictionary mapping each alternative id with the function
 
-    .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
-              \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
-              e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
+        .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
+                  \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
+                  e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
 
-    where :math:`m` is the (only) nest containing alternative :math:`i`,
-          and :math:`G` is the MEV generating function.
+        where :math:`m` is the (only) nest containing alternative :math:`i`,
+              and :math:`G` is the MEV generating function.
 
-    :rtype: dict(int:biogeme.expressions.Expression)
+        :rtype: dict(int:biogeme.expressions.Expression)
 
     """
 
@@ -713,16 +753,16 @@ including the scale parameter
         if availability is None:
             sumdict = [exp(m[0] * V[i]) for i in m[1]]
         else:
-            sumdict = [Elem({0:0.0,
-                             1: exp(m[0] * V[i])},
-                            availability[i] != 0) for i in m[1]]
+            sumdict = [
+                Elem({0: 0.0, 1: exp(m[0] * V[i])}, availability[i] != 0)
+                for i in m[1]
+            ]
         theSum = bioMultSum(sumdict)
         for i in m[1]:
-            logGi[i] = log(mu) + (m[0]-1.0) * V[i] + \
-                (mu/m[0] - 1.0) * log(theSum)
+            logGi[i] = (
+                log(mu) + (m[0] - 1.0) * V[i] + (mu / m[0] - 1.0) * log(theSum)
+            )
     return logGi
-
-
 
 
 def nested(V, availability, nests, choice):
@@ -774,19 +814,20 @@ def nested(V, availability, nests, choice):
     P = mev(V, logGi, availability, choice)
     return P
 
+
 def lognested(V, availability, nests, choice):
     """Implements the log of a nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
+        each alternative, indexed by numerical ids.
 
     :type V: dict(int:biogeme.expressions.Expression)
 
     :param availability: dict of objects representing the availability of each
-               alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
-               None. In this case, all alternatives are supposed to be
-               always available.
+        alternative (:math:`a_i` in the above formula), indexed
+        by numerical ids. Must be consistent with V, or
+        None. In this case, all alternatives are supposed to be
+        always available.
 
     :type availability: dict(int:biogeme.expressions.Expression)
 
@@ -821,6 +862,7 @@ def lognested(V, availability, nests, choice):
     logGi = getMevForNested(V, availability, nests)
     logP = logmev(V, logGi, availability, choice)
     return logP
+
 
 def nestedMevMu(V, availability, nests, choice, mu):
     """Implements the nested logit model as a MEV model, where mu is also
@@ -878,6 +920,7 @@ def nestedMevMu(V, availability, nests, choice, mu):
     """
     return exp(lognestedMevMu(V, availability, nests, choice, mu))
 
+
 def lognestedMevMu(V, availability, nests, choice, mu):
     """Implements the log of the nested logit model as a MEV model, where
        mu is also a parameter, if the user wants to test different
@@ -885,7 +928,7 @@ def lognestedMevMu(V, availability, nests, choice, mu):
 
 
     :param V: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
+        each alternative, indexed by numerical ids.
 
     :type V: dict(int:biogeme.expressions.Expression)
 
@@ -920,15 +963,15 @@ def lognestedMevMu(V, availability, nests, choice, mu):
     :param mu: expression producing the value of the top-level scale parameter.
     :type mu:  biogeme.expressions.Expression
 
-    :return: the log of the nested logit choice probability based on the following derivatives
-             of the MEV generating function:
+    :return: the log of the nested logit choice probability based on the
+        following derivatives of the MEV generating function:
 
-    .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
-              \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
-              e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
+        .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
+                  \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
+                  e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
 
-    where :math:`m` is the (only) nest containing alternative :math:`i`, and
-    :math:`G` is the MEV generating function.
+        where :math:`m` is the (only) nest containing alternative :math:`i`, and
+        :math:`G` is the MEV generating function.
 
     :rtype: biogeme.expressions.Expression
 
@@ -938,8 +981,9 @@ def lognestedMevMu(V, availability, nests, choice, mu):
     logP = logmev(V, logGi, availability, choice)
     return logP
 
+
 def cnl_avail(V, availability, nests, choice):
-    """ Same as cnl. Maintained for backward compatibility
+    """Same as cnl. Maintained for backward compatibility
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -991,8 +1035,9 @@ def cnl_avail(V, availability, nests, choice):
     """
     return cnl(V, availability, nests, choice)
 
+
 def cnl(V, availability, nests, choice):
-    """ Implements the cross-nested logit model as a MEV model.
+    """Implements the cross-nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -1046,8 +1091,9 @@ def cnl(V, availability, nests, choice):
     """
     return exp(logcnl(V, availability, nests, choice))
 
+
 def logcnl_avail(V, availability, nests, choice):
-    """ Same as logcnl. Maintained for backward compatibility
+    """Same as logcnl. Maintained for backward compatibility
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -1099,8 +1145,9 @@ def logcnl_avail(V, availability, nests, choice):
     """
     return logcnl(V, availability, nests, choice)
 
+
 def getMevForCrossNested(V, availability, nests):
-    """ Implements the MEV generating function for the cross-nested logit
+    """Implements the MEV generating function for the cross-nested logit
         model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -1159,22 +1206,29 @@ def getMevForCrossNested(V, availability, nests):
     biosum = {}
     for m in nests:
         if availability is None:
-            biosum = \
-                bioMultSum([a**(m[0]) * exp(m[0] * (V[i])) \
-                            for i, a in m[1].items()])
+            biosum = bioMultSum(
+                [a ** (m[0]) * exp(m[0] * (V[i])) for i, a in m[1].items()]
+            )
         else:
-            biosum = \
-                bioMultSum([availability[i] * a**(m[0]) * exp(m[0] * (V[i])) \
-                            for i, a in m[1].items()])
+            biosum = bioMultSum(
+                [
+                    availability[i] * a ** (m[0]) * exp(m[0] * (V[i]))
+                    for i, a in m[1].items()
+                ]
+            )
         for i, a in m[1].items():
-            Gi_terms[i] += [a**(m[0])* exp((m[0]-1) * (V[i])) * \
-                            biosum **((1.0/m[0])-1.0)]
+            Gi_terms[i] += [
+                a ** (m[0])
+                * exp((m[0] - 1) * (V[i]))
+                * biosum ** ((1.0 / m[0]) - 1.0)
+            ]
     for k in V:
         logGi[k] = log(bioMultSum(Gi_terms[k]))
     return logGi
 
+
 def logcnl(V, availability, nests, choice):
-    """ Implements the log of the cross-nested logit model as a MEV model.
+    """Implements the log of the cross-nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -1236,7 +1290,7 @@ def logcnl(V, availability, nests, choice):
 
 
 def cnlmu(V, availability, nests, choice, mu):
-    """ Implements the cross-nested logit model as a MEV model with
+    """Implements the cross-nested logit model as a MEV model with
         the homogeneity parameters is explicitly involved
 
     :param V: dict of objects representing the utility functions of
@@ -1292,8 +1346,9 @@ def cnlmu(V, availability, nests, choice, mu):
     """
     return exp(logcnlmu(V, availability, nests, choice, mu))
 
+
 def getMevForCrossNestedMu(V, availability, nests, mu):
-    """ Implements the MEV generating function for the cross-nested logit
+    """Implements the MEV generating function for the cross-nested logit
         model as a MEV model with the homogeneity parameters is explicitly
         involved.
 
@@ -1356,24 +1411,32 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
     biosum = {}
     for m in nests:
         if availability is None:
-            biosum = \
-                bioMultSum([a**(m[0]/mu) * exp(m[0] * (V[i])) \
-                            for i, a in m[1].items()])
+            biosum = bioMultSum(
+                [
+                    a ** (m[0] / mu) * exp(m[0] * (V[i]))
+                    for i, a in m[1].items()
+                ]
+            )
         else:
-            biosum = \
-                bioMultSum([availability[i] * a**(m[0]/mu) * \
-                            exp(m[0] * (V[i])) \
-                            for i, a in m[1].items()])
+            biosum = bioMultSum(
+                [
+                    availability[i] * a ** (m[0] / mu) * exp(m[0] * (V[i]))
+                    for i, a in m[1].items()
+                ]
+            )
         for i, a in m[1].items():
-            Gi_terms[i] += \
-                [a**(m[0]/mu)* exp((m[0]-1) * (V[i])) * \
-                 biosum **((mu/m[0])-1.0)]
+            Gi_terms[i] += [
+                a ** (m[0] / mu)
+                * exp((m[0] - 1) * (V[i]))
+                * biosum ** ((mu / m[0]) - 1.0)
+            ]
     for k in V:
         logGi[k] = log(mu * bioMultSum(Gi_terms[k]))
     return logGi
 
+
 def logcnlmu(V, availability, nests, choice, mu):
-    """ Implements the log of the cross-nested logit model as a MEV model
+    """Implements the log of the cross-nested logit model as a MEV model
         with the homogeneity parameters is explicitly involved.
 
 
@@ -1436,6 +1499,7 @@ def logcnlmu(V, availability, nests, choice, mu):
     logP = logmev(V, logGi, availability, choice)
     return logP
 
+
 def checkValidityNestedLogit(V, nests):
     """Verifies if the nested logit model is indeed based on a partition
        of the choice set.
@@ -1475,11 +1539,15 @@ def checkValidityNestedLogit(V, nests):
         d1 = fullChoiceSet.difference(unionOfNests)
         d2 = unionOfNests.difference(fullChoiceSet)
         if d1:
-            message += (f'Alternative(s) in the choice set, but not in any nest:'
-                        f' {d1}\n')
+            message += (
+                f'Alternative(s) in the choice set, but not in any nest:'
+                f' {d1}\n'
+            )
         if d2:
-            message += (f'Alternative(s) in a nest, but not in the choice set: '
-                        f'{d2}\n')
+            message += (
+                f'Alternative(s) in a nest, but not in the choice set: '
+                f'{d2}\n'
+            )
 
     # Consider all pairs of nests and verify that the intersection is empty
 
@@ -1488,8 +1556,10 @@ def checkValidityNestedLogit(V, nests):
         inter = set(n1[1]).intersection(n2[1])
         if inter:
             ok = False
-            message += (f'Two nests contain the following alternative(s): '
-                        f'{inter}\n')
+            message += (
+                f'Two nests contain the following alternative(s): '
+                f'{inter}\n'
+            )
 
     if ok:
         message = 'The nested logit model is based on a partition. '
@@ -1540,8 +1610,6 @@ def checkValidityCNL(V, nests):
 
     ok = True
     message = ''
-    
-    fullChoiceSet = {i for i, v in V.items()}
 
     alt = {i: list() for i in V}
     number = 0
@@ -1559,13 +1627,15 @@ def checkValidityCNL(V, nests):
             ok = False
         if len(ell) == 1 and isinstance(ell[0], Expression):
             problems_one.append(i)
-            
+
     if problems_zero:
         message += f'Alternative(s) not in any nest: {problems_zero}'
 
     if problems_one:
-        message += (f' Alternative in exactly one nest, '
-                    f'and parameter alpha is defined by an '
-                    f'expression, and may not be constant: {problems_one}')
-    
+        message += (
+            f' Alternative in exactly one nest, '
+            f'and parameter alpha is defined by an '
+            f'expression, and may not be constant: {problems_one}'
+        )
+
     return ok, message

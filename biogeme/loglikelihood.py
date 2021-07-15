@@ -10,6 +10,7 @@
 
 from biogeme.expressions import exp, log, MonteCarlo
 
+
 def loglikelihood(prob):
     """
     Simply computes the log of the probability
@@ -22,6 +23,7 @@ def loglikelihood(prob):
 
     """
     return log(prob)
+
 
 def mixedloglikelihood(prob):
     """Compute a simulated loglikelihood function
@@ -47,11 +49,12 @@ def mixedloglikelihood(prob):
     :rtype: biogeme.expressions.Expression
 
     """
-    l = MonteCarlo(prob)
-    return log(l)
+    ell = MonteCarlo(prob)
+    return log(ell)
+
 
 def likelihoodregression(meas, model, sigma):
-    """ Computes likelihood function of a regression model.
+    """Computes likelihood function of a regression model.
 
     :param meas: An expression providing the value :math:`y` of the measure
                  for the current observation.
@@ -89,7 +92,8 @@ def loglikelihoodregression(meas, model, sigma):
                   the standard error :math:`\\sigma` of the error term.
     :type sigma: biogeme.expressions.Expression
 
-    :return: the likelihood of the regression, assuming a normal distribution, that is
+    :return: the likelihood of the regression, assuming a normal distribution,
+        that is
 
     .. math:: -\\left( \\frac{(y-m)^2}{2\\sigma^2} \\right) -
               \\log(\\sigma) - \\frac{1}{2}\\log(2\\pi)
@@ -97,5 +101,5 @@ def loglikelihoodregression(meas, model, sigma):
     :rtype: biogeme.expressions.Expression
     """
     t = (meas - model) / sigma
-    f = - (t ** 2) / 2 - log(sigma) -0.9189385332
+    f = -(t ** 2) / 2 - log(sigma) - 0.9189385332
     return f

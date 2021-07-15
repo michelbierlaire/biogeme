@@ -11,8 +11,9 @@
 import numpy as np
 import biogeme.exceptions as excep
 
+
 def getUniform(sampleSize, numberOfDraws, symmetric=False):
-    """ Uniform [0, 1] or [-1, 1] numbers
+    """Uniform [0, 1] or [-1, 1] numbers
 
     :param sampleSize: number of observations for which draws must be
                        generated. If None, a one dimensional array
@@ -49,7 +50,9 @@ def getUniform(sampleSize, numberOfDraws, symmetric=False):
         raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if sampleSize <= 0:
-        raise excep.biogemeError(f'Invalid sample size: {sampleSize} when generating draws.')
+        raise excep.biogemeError(
+            f'Invalid sample size: {sampleSize} when generating draws.'
+        )
     totalSize = numberOfDraws * sampleSize
 
     uniformNumbers = np.random.uniform(size=totalSize)
@@ -60,11 +63,10 @@ def getUniform(sampleSize, numberOfDraws, symmetric=False):
     return uniformNumbers
 
 
-def getLatinHypercubeDraws(sampleSize,
-                           numberOfDraws,
-                           symmetric=False,
-                           uniformNumbers=None):
-    """ Implementation of the Modified Latin Hypercube Sampling proposed
+def getLatinHypercubeDraws(
+    sampleSize, numberOfDraws, symmetric=False, uniformNumbers=None
+):
+    """Implementation of the Modified Latin Hypercube Sampling proposed
         by Hess et al, 2006.
 
 
@@ -99,20 +101,28 @@ def getLatinHypercubeDraws(sampleSize,
         raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if sampleSize <= 0:
-        raise excep.biogemeError(f'Invalid sample size: {sampleSize} when generating draws.')
+        raise excep.biogemeError(
+            f'Invalid sample size: {sampleSize} when generating draws.'
+        )
     totalSize = numberOfDraws * sampleSize
 
     if uniformNumbers is None:
         uniformNumbers = np.random.uniform(size=totalSize)
     else:
         if uniformNumbers.size != totalSize:
-            errorMsg = (f'A total of {totalSize} uniform draws '
-                        f'must be provided, and not {uniformNumbers.size}.')
+            errorMsg = (
+                f'A total of {totalSize} uniform draws '
+                f'must be provided, and not {uniformNumbers.size}.'
+            )
             raise excep.biogemeError(errorMsg)
 
-    uniformNumbers.shape = (totalSize, )
-    numbers = np.array([(float(i) + uniformNumbers[i]) / float(totalSize)
-                        for i in range(totalSize)])
+    uniformNumbers.shape = (totalSize,)
+    numbers = np.array(
+        [
+            (float(i) + uniformNumbers[i]) / float(totalSize)
+            for i in range(totalSize)
+        ]
+    )
     if symmetric:
         numbers = 2.0 * numbers - 1.0
 
@@ -120,13 +130,11 @@ def getLatinHypercubeDraws(sampleSize,
     numbers.shape = (sampleSize, numberOfDraws)
     return numbers
 
-def getHaltonDraws(sampleSize,
-                   numberOfDraws,
-                   symmetric=False,
-                   base=2,
-                   skip=0,
-                   shuffled=False):
-    """ Generate Halton draws
+
+def getHaltonDraws(
+    sampleSize, numberOfDraws, symmetric=False, base=2, skip=0, shuffled=False
+):
+    """Generate Halton draws
 
     :param sampleSize: number of observations for which draws must be
                        generated. If None, a one dimensional array
@@ -166,13 +174,15 @@ def getHaltonDraws(sampleSize,
         raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if sampleSize <= 0:
-        raise excep.biogemeError(f'Invalid sample size: {sampleSize} when generating draws.')
+        raise excep.biogemeError(
+            f'Invalid sample size: {sampleSize} when generating draws.'
+        )
     totalSize = numberOfDraws * sampleSize
 
     numbers = []
     skipped = 0
     for i in range(totalSize + 1 + skip):
-        n, denom = 0., 1.
+        n, denom = 0.0, 1.0
         while i > 0:
             i, remainder = divmod(i, base)
             denom *= base
@@ -191,6 +201,7 @@ def getHaltonDraws(sampleSize,
 
     numbers.shape = (sampleSize, numberOfDraws)
     return numbers
+
 
 def getAntithetic(unif, sampleSize, numberOfDraws):
     """Returns antithetic uniform draws
@@ -227,10 +238,10 @@ def getAntithetic(unif, sampleSize, numberOfDraws):
     draws = unif(sampleSize, R)
     return np.concatenate((draws, 1 - draws), axis=1)
 
-def getNormalWichuraDraws(sampleSize,
-                          numberOfDraws,
-                          uniformNumbers=None,
-                          antithetic=False):
+
+def getNormalWichuraDraws(
+    sampleSize, numberOfDraws, uniformNumbers=None, antithetic=False
+):
     """Generate pseudo-random numbers from a normal distribution N(0, 1)
 
     It uses the Algorithm AS241 Appl. Statist. (1988) Vol. 37, No. 3,
@@ -273,52 +284,56 @@ def getNormalWichuraDraws(sampleSize,
 
     if antithetic:
         if 2 * int(numberOfDraws / 2) != numberOfDraws:
-            errorMsg = (f'Please specify an even number of draws for '
-                        f'antithetic draws. Requested number of '
-                        f'{numberOfDraws}.')
+            errorMsg = (
+                f'Please specify an even number of draws for '
+                f'antithetic draws. Requested number of '
+                f'{numberOfDraws}.'
+            )
             raise excep.biogemeError(errorMsg)
         numberOfDraws = int(numberOfDraws / 2)
 
     if sampleSize <= 0:
-        raise excep.biogemeError(f'Invalid sample size: {sampleSize} when generating draws.')
+        raise excep.biogemeError(
+            f'Invalid sample size: {sampleSize} when generating draws.'
+        )
     totalSize = numberOfDraws * sampleSize
 
-    split2 = 5.e+00
-    const1 = 0.180625e+00
-    const2 = 1.6e+00
-    a0 = 3.3871328727963666080e+00
-    a1 = 1.3314166789178437745e+02
-    a2 = 1.9715909503065514427e+03
-    a3 = 1.3731693765509461125e+04
-    a4 = 4.5921953931549871457e+04
-    a5 = 6.7265770927008700853e+04
-    a6 = 3.3430575583588128105e+04
-    a7 = 2.5090809287301226727e+03
-    b1 = 4.2313330701600911252e+01
-    b2 = 6.8718700749205790830e+02
-    b3 = 5.3941960214247511077e+03
-    b4 = 2.1213794301586595867e+04
-    b5 = 3.9307895800092710610e+04
-    b6 = 2.8729085735721942674e+04
-    b7 = 5.2264952788528545610e+03
-    c0 = 1.42343711074968357734e+00
-    c1 = 4.63033784615654529590e+00
-    c2 = 5.76949722146069140550e+00
-    c3 = 3.64784832476320460504e+00
-    c4 = 1.27045825245236838258e+00
+    split2 = 5.0e00
+    const1 = 0.180625e00
+    const2 = 1.6e00
+    a0 = 3.3871328727963666080e00
+    a1 = 1.3314166789178437745e02
+    a2 = 1.9715909503065514427e03
+    a3 = 1.3731693765509461125e04
+    a4 = 4.5921953931549871457e04
+    a5 = 6.7265770927008700853e04
+    a6 = 3.3430575583588128105e04
+    a7 = 2.5090809287301226727e03
+    b1 = 4.2313330701600911252e01
+    b2 = 6.8718700749205790830e02
+    b3 = 5.3941960214247511077e03
+    b4 = 2.1213794301586595867e04
+    b5 = 3.9307895800092710610e04
+    b6 = 2.8729085735721942674e04
+    b7 = 5.2264952788528545610e03
+    c0 = 1.42343711074968357734e00
+    c1 = 4.63033784615654529590e00
+    c2 = 5.76949722146069140550e00
+    c3 = 3.64784832476320460504e00
+    c4 = 1.27045825245236838258e00
     c5 = 2.41780725177450611770e-01
     c6 = 2.27238449892691845833e-02
     c7 = 7.74545014278341407640e-04
-    d1 = 2.05319162663775882187e+00
-    d2 = 1.67638483018380384940e+00
+    d1 = 2.05319162663775882187e00
+    d2 = 1.67638483018380384940e00
     d3 = 6.89767334985100004550e-01
     d4 = 1.48103976427480074590e-01
     d5 = 1.51986665636164571966e-02
     d6 = 5.47593808499534494600e-04
     d7 = 1.05075007164441684324e-09
-    e0 = 6.65790464350110377720e+00
-    e1 = 5.46378491116411436990e+00
-    e2 = 1.78482653991729133580e+00
+    e0 = 6.65790464350110377720e00
+    e1 = 5.46378491116411436990e00
+    e2 = 1.78482653991729133580e00
     e3 = 2.96560571828504891230e-01
     e4 = 2.65321895265761230930e-02
     e5 = 1.24266094738807843860e-03
@@ -335,31 +350,61 @@ def getNormalWichuraDraws(sampleSize,
     if uniformNumbers is None:
         uniformNumbers = np.random.uniform(size=totalSize)
     elif uniformNumbers.size != totalSize:
-        errorMsg = (f'A total of {totalSize} uniform draws must be '
-                    f'provided, and not {uniformNumbers.size}.')
+        errorMsg = (
+            f'A total of {totalSize} uniform draws must be '
+            f'provided, and not {uniformNumbers.size}.'
+        )
         raise excep.biogemeError(errorMsg)
-    uniformNumbers.shape = (totalSize, )
+    uniformNumbers.shape = (totalSize,)
 
-    q = uniformNumbers-0.5
+    q = uniformNumbers - 0.5
     draws = np.zeros(uniformNumbers.shape)
     r = np.zeros(uniformNumbers.shape)
     cond1 = np.abs(uniformNumbers) <= 0.45
     r[cond1] = const1 - q[cond1] * q[cond1]
-    draws[cond1] = q[cond1] *\
-        (((((((a7 * r[cond1] + a6) *\
-              r[cond1] + a5) *\
-             r[cond1] + a4) *\
-            r[cond1] + a3) *\
-           r[cond1] + a2) *\
-          r[cond1] + a1) *\
-         r[cond1] + a0) /\
-         (((((((b7 * r[cond1] + b6) *\
-               r[cond1] + b5) *\
-              r[cond1] + b4) *\
-             r[cond1] + b3) *\
-            r[cond1] + b2) *\
-           r[cond1] + b1) *\
-          r[cond1] + 1)
+    draws[cond1] = (
+        q[cond1]
+        * (
+            (
+                (
+                    (
+                        (
+                            ((a7 * r[cond1] + a6) * r[cond1] + a5) * r[cond1]
+                            + a4
+                        )
+                        * r[cond1]
+                        + a3
+                    )
+                    * r[cond1]
+                    + a2
+                )
+                * r[cond1]
+                + a1
+            )
+            * r[cond1]
+            + a0
+        )
+        / (
+            (
+                (
+                    (
+                        (
+                            ((b7 * r[cond1] + b6) * r[cond1] + b5) * r[cond1]
+                            + b4
+                        )
+                        * r[cond1]
+                        + b3
+                    )
+                    * r[cond1]
+                    + b2
+                )
+                * r[cond1]
+                + b1
+            )
+            * r[cond1]
+            + 1
+        )
+    )
     cond2 = np.abs(uniformNumbers) > 0.45
     cond2a = np.logical_and(cond2, q < 0.0)
     cond2b = np.logical_and(cond2, q >= 0.0)
@@ -372,35 +417,89 @@ def getNormalWichuraDraws(sampleSize,
     cond2d_a = np.logical_and(cond2d, r <= split2)
     cond2d_b = np.logical_and(cond2d, r > split2)
     r[cond2d_a] = r[cond2d_a] - const2
-    draws[cond2d_a] = (((((((c7 * r[cond2d_a] + c6) *\
-                            r[cond2d_a] + c5) *\
-                           r[cond2d_a] + c4) *\
-                          r[cond2d_a] + c3) *\
-                         r[cond2d_a] + c2) *\
-                        r[cond2d_a] + c1) *\
-                       r[cond2d_a] + c0) /\
-                       (((((((d7 * r[cond2d_a] + d6) *\
-                             r[cond2d_a] + d5) *\
-                            r[cond2d_a] + d4) *\
-                           r[cond2d_a] + d3) *\
-                          r[cond2d_a] + d2) *\
-                         r[cond2d_a] + d1) *\
-                        r[cond2d_a] + 1)
+    draws[cond2d_a] = (
+        (
+            (
+                (
+                    (
+                        ((c7 * r[cond2d_a] + c6) * r[cond2d_a] + c5)
+                        * r[cond2d_a]
+                        + c4
+                    )
+                    * r[cond2d_a]
+                    + c3
+                )
+                * r[cond2d_a]
+                + c2
+            )
+            * r[cond2d_a]
+            + c1
+        )
+        * r[cond2d_a]
+        + c0
+    ) / (
+        (
+            (
+                (
+                    (
+                        ((d7 * r[cond2d_a] + d6) * r[cond2d_a] + d5)
+                        * r[cond2d_a]
+                        + d4
+                    )
+                    * r[cond2d_a]
+                    + d3
+                )
+                * r[cond2d_a]
+                + d2
+            )
+            * r[cond2d_a]
+            + d1
+        )
+        * r[cond2d_a]
+        + 1
+    )
     r[cond2d_b] = r[cond2d_b] - split2
-    draws[cond2d_b] = (((((((e7 * r[cond2d_b] + e6) *\
-                            r[cond2d_b] + e5) *\
-                           r[cond2d_b] + e4) *\
-                          r[cond2d_b] + e3) *\
-                         r[cond2d_b] + e2) *\
-                        r[cond2d_b] + e1) *\
-                       r[cond2d_b] + e0) /\
-                       (((((((f7 * r[cond2d_b] + f6) *\
-                             r[cond2d_b] + f5) *\
-                            r[cond2d_b] + f4) *\
-                           r[cond2d_b] + f3) *\
-                          r[cond2d_b] + f2) *\
-                         r[cond2d_b] + f1) *\
-                        r[cond2d_b] + 1)
+    draws[cond2d_b] = (
+        (
+            (
+                (
+                    (
+                        ((e7 * r[cond2d_b] + e6) * r[cond2d_b] + e5)
+                        * r[cond2d_b]
+                        + e4
+                    )
+                    * r[cond2d_b]
+                    + e3
+                )
+                * r[cond2d_b]
+                + e2
+            )
+            * r[cond2d_b]
+            + e1
+        )
+        * r[cond2d_b]
+        + e0
+    ) / (
+        (
+            (
+                (
+                    (
+                        ((f7 * r[cond2d_b] + f6) * r[cond2d_b] + f5)
+                        * r[cond2d_b]
+                        + f4
+                    )
+                    * r[cond2d_b]
+                    + f3
+                )
+                * r[cond2d_b]
+                + f2
+            )
+            * r[cond2d_b]
+            + f1
+        )
+        * r[cond2d_b]
+        + 1
+    )
     draws[cond2a] = -draws[cond2a]
 
     draws.shape = (sampleSize, numberOfDraws)

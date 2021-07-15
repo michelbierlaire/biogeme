@@ -24,9 +24,10 @@ import biogeme.tools as tools
 
 from biogeme.expressions import Variable, isNumeric, Numeric
 
+
 class Database:
-    """ Class that contains and prepare the database.
-    """
+    """Class that contains and prepare the database."""
+
     def __init__(self, name, pandasDatabase):
         """Constructor
 
@@ -103,32 +104,29 @@ class Database:
 
     def _initNativeRandomNumberGenerators(self):
         def uniform_antithetic(sampleSize, numberOfDraws):
-            return draws.getAntithetic(draws.getUniform,
-                                       sampleSize,
-                                       numberOfDraws)
+            return draws.getAntithetic(
+                draws.getUniform, sampleSize, numberOfDraws
+            )
 
         def halton2(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        base=2,
-                                        skip=10)
+            return draws.getHaltonDraws(
+                sampleSize, numberOfDraws, base=2, skip=10
+            )
 
         def halton3(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        base=3,
-                                        skip=10)
+            return draws.getHaltonDraws(
+                sampleSize, numberOfDraws, base=3, skip=10
+            )
 
         def halton5(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        base=5,
-                                        skip=10)
+            return draws.getHaltonDraws(
+                sampleSize, numberOfDraws, base=5, skip=10
+            )
 
         def MLHS_anti(sampleSize, numberOfDraws):
-            return draws.getAntithetic(draws.getLatinHypercubeDraws,
-                                       sampleSize,
-                                       numberOfDraws)
+            return draws.getAntithetic(
+                draws.getLatinHypercubeDraws, sampleSize, numberOfDraws
+            )
 
         def symm_uniform(sampleSize, numberOfDraws):
             return draws.getUniform(sampleSize, numberOfDraws, symmetric=True)
@@ -139,30 +137,24 @@ class Database:
             return np.concatenate((localDraws, -localDraws), axis=1)
 
         def symm_halton2(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        symmetric=True,
-                                        base=2,
-                                        skip=10)
+            return draws.getHaltonDraws(
+                sampleSize, numberOfDraws, symmetric=True, base=2, skip=10
+            )
 
         def symm_halton3(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        symmetric=True,
-                                        base=3,
-                                        skip=10)
+            return draws.getHaltonDraws(
+                sampleSize, numberOfDraws, symmetric=True, base=3, skip=10
+            )
 
         def symm_halton5(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        symmetric=True,
-                                        base=5,
-                                        skip=10)
+            return draws.getHaltonDraws(
+                sampleSize, numberOfDraws, symmetric=True, base=5, skip=10
+            )
 
         def symm_MLHS(sampleSize, numberOfDraws):
-            return draws.getLatinHypercubeDraws(sampleSize,
-                                                numberOfDraws,
-                                                symmetric=True)
+            return draws.getLatinHypercubeDraws(
+                sampleSize, numberOfDraws, symmetric=True
+            )
 
         def symm_MLHS_anti(sampleSize, numberOfDraws):
             R = int(numberOfDraws / 2)
@@ -170,104 +162,137 @@ class Database:
             return np.concatenate((localDraws, -localDraws), axis=1)
 
         def normal_antithetic(sampleSize, numberOfDraws):
-            return draws.getNormalWichuraDraws(sampleSize=sampleSize,
-                                               numberOfDraws=numberOfDraws,
-                                               antithetic=True)
+            return draws.getNormalWichuraDraws(
+                sampleSize=sampleSize,
+                numberOfDraws=numberOfDraws,
+                antithetic=True,
+            )
 
         def normal_halton2(sampleSize, numberOfDraws):
-            unif = draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        base=2,
-                                        skip=10)
-            return draws.getNormalWichuraDraws(sampleSize,
-                                               numberOfDraws,
-                                               uniformNumbers=unif,
-                                               antithetic=False)
+            unif = draws.getHaltonDraws(
+                sampleSize, numberOfDraws, base=2, skip=10
+            )
+            return draws.getNormalWichuraDraws(
+                sampleSize,
+                numberOfDraws,
+                uniformNumbers=unif,
+                antithetic=False,
+            )
 
         def normal_halton3(sampleSize, numberOfDraws):
-            unif = draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        base=2,
-                                        skip=10)
-            return draws.getNormalWichuraDraws(sampleSize,
-                                               numberOfDraws,
-                                               uniformNumbers=unif,
-                                               antithetic=False)
+            unif = draws.getHaltonDraws(
+                sampleSize, numberOfDraws, base=2, skip=10
+            )
+            return draws.getNormalWichuraDraws(
+                sampleSize,
+                numberOfDraws,
+                uniformNumbers=unif,
+                antithetic=False,
+            )
 
         def normal_halton5(sampleSize, numberOfDraws):
-            unif = draws.getHaltonDraws(sampleSize,
-                                        numberOfDraws,
-                                        base=2,
-                                        skip=10)
-            return draws.getNormalWichuraDraws(sampleSize,
-                                               numberOfDraws,
-                                               uniformNumbers=unif,
-                                               antithetic=False)
+            unif = draws.getHaltonDraws(
+                sampleSize, numberOfDraws, base=2, skip=10
+            )
+            return draws.getNormalWichuraDraws(
+                sampleSize,
+                numberOfDraws,
+                uniformNumbers=unif,
+                antithetic=False,
+            )
 
         def normal_MLHS(sampleSize, numberOfDraws):
-            unif = draws.getLatinHypercubeDraws(sampleSize,
-                                                numberOfDraws)
-            return draws.getNormalWichuraDraws(sampleSize,
-                                               numberOfDraws,
-                                               uniformNumbers=unif,
-                                               antithetic=False)
+            unif = draws.getLatinHypercubeDraws(sampleSize, numberOfDraws)
+            return draws.getNormalWichuraDraws(
+                sampleSize,
+                numberOfDraws,
+                uniformNumbers=unif,
+                antithetic=False,
+            )
 
         def normal_MLHS_anti(sampleSize, numberOfDraws):
-            unif = draws.getLatinHypercubeDraws(sampleSize,
-                                                int(numberOfDraws / 2))
-            return draws.getNormalWichuraDraws(sampleSize,
-                                               numberOfDraws,
-                                               uniformNumbers=unif,
-                                               antithetic=True)
+            unif = draws.getLatinHypercubeDraws(
+                sampleSize, int(numberOfDraws / 2)
+            )
+            return draws.getNormalWichuraDraws(
+                sampleSize, numberOfDraws, uniformNumbers=unif, antithetic=True
+            )
 
         ## Dictionary containing native random number generators.
         self.nativeRandomNumberGenerators = {
-            'UNIFORM': (draws.getUniform,
-                        'Uniform U[0, 1]'),
-            'UNIFORM_ANTI':(uniform_antithetic,
-                            'Antithetic uniform U[0, 1]'),
-            'UNIFORM_HALTON2':(halton2,
-                               'Halton draws with base 2, skipping the first 10'),
-            'UNIFORM_HALTON3':(halton3,
-                               'Halton draws with base 3, skipping the first 10'),
-            'UNIFORM_HALTON5':(halton5,
-                               'Halton draws with base 5, skipping the first 10'),
-            'UNIFORM_MLHS':(draws.getLatinHypercubeDraws,
-                            'Modified Latin Hypercube Sampling on [0, 1]'),
-            'UNIFORM_MLHS_ANTI':(MLHS_anti,
-                                 'Antithetic Modified Latin Hypercube Sampling on [0, 1]'),
-            'UNIFORMSYM': (symm_uniform,
-                           'Uniform U[-1, 1]'),
-            'UNIFORMSYM_ANTI':(symm_uniform_antithetic,
-                               'Antithetic uniform U[-1, 1]'),
-            'UNIFORMSYM_HALTON2':(symm_halton2,
-                                  'Halton draws on [-1, 1] with base 2, skipping the first 10'),
-            'UNIFORMSYM_HALTON3':(symm_halton3,
-                                  'Halton draws on [-1, 1] with base 3, skipping the first 10'),
-            'UNIFORMSYM_HALTON5':(symm_halton5,
-                                  'Halton draws on [-1, 1] with base 5, skipping the first 10'),
-            'UNIFORMSYM_MLHS':(symm_MLHS,
-                               'Modified Latin Hypercube Sampling on [-1, 1]'),
-            'UNIFORMSYM_MLHS_ANTI':(symm_MLHS_anti,
-                                    'Antithetic Modified Latin Hypercube Sampling on [-1, 1]'),
-            'NORMAL': (draws.getNormalWichuraDraws,
-                       'Normal N(0, 1) draws'),
-            'NORMAL_ANTI':(normal_antithetic,
-                           'Antithetic normal draws'),
-            'NORMAL_HALTON2':(normal_halton2,
-                              'Normal draws from Halton base 2 sequence'),
-            'NORMAL_HALTON3':(normal_halton3,
-                              'Normal draws from Halton base 3 sequence'),
-            'NORMAL_HALTON5':(normal_halton5,
-                              'Normal draws from Halton base 5 sequence'),
-            'NORMAL_MLHS':(normal_MLHS,
-                           'Normal draws from Modified Latin Hypercube Sampling'),
-            'NORMAL_MLHS_ANTI':(normal_MLHS_anti,
-                                'Antithetic normal draws from Modified Latin Hypercube Sampling')
-            }
+            'UNIFORM': (draws.getUniform, 'Uniform U[0, 1]'),
+            'UNIFORM_ANTI': (uniform_antithetic, 'Antithetic uniform U[0, 1]'),
+            'UNIFORM_HALTON2': (
+                halton2,
+                'Halton draws with base 2, skipping the first 10',
+            ),
+            'UNIFORM_HALTON3': (
+                halton3,
+                'Halton draws with base 3, skipping the first 10',
+            ),
+            'UNIFORM_HALTON5': (
+                halton5,
+                'Halton draws with base 5, skipping the first 10',
+            ),
+            'UNIFORM_MLHS': (
+                draws.getLatinHypercubeDraws,
+                'Modified Latin Hypercube Sampling on [0, 1]',
+            ),
+            'UNIFORM_MLHS_ANTI': (
+                MLHS_anti,
+                'Antithetic Modified Latin Hypercube Sampling on [0, 1]',
+            ),
+            'UNIFORMSYM': (symm_uniform, 'Uniform U[-1, 1]'),
+            'UNIFORMSYM_ANTI': (
+                symm_uniform_antithetic,
+                'Antithetic uniform U[-1, 1]',
+            ),
+            'UNIFORMSYM_HALTON2': (
+                symm_halton2,
+                'Halton draws on [-1, 1] with base 2, skipping the first 10',
+            ),
+            'UNIFORMSYM_HALTON3': (
+                symm_halton3,
+                'Halton draws on [-1, 1] with base 3, skipping the first 10',
+            ),
+            'UNIFORMSYM_HALTON5': (
+                symm_halton5,
+                'Halton draws on [-1, 1] with base 5, skipping the first 10',
+            ),
+            'UNIFORMSYM_MLHS': (
+                symm_MLHS,
+                'Modified Latin Hypercube Sampling on [-1, 1]',
+            ),
+            'UNIFORMSYM_MLHS_ANTI': (
+                symm_MLHS_anti,
+                'Antithetic Modified Latin Hypercube Sampling on [-1, 1]',
+            ),
+            'NORMAL': (draws.getNormalWichuraDraws, 'Normal N(0, 1) draws'),
+            'NORMAL_ANTI': (normal_antithetic, 'Antithetic normal draws'),
+            'NORMAL_HALTON2': (
+                normal_halton2,
+                'Normal draws from Halton base 2 sequence',
+            ),
+            'NORMAL_HALTON3': (
+                normal_halton3,
+                'Normal draws from Halton base 3 sequence',
+            ),
+            'NORMAL_HALTON5': (
+                normal_halton5,
+                'Normal draws from Halton base 5 sequence',
+            ),
+            'NORMAL_MLHS': (
+                normal_MLHS,
+                'Normal draws from Modified Latin Hypercube Sampling',
+            ),
+            'NORMAL_MLHS_ANTI': (
+                normal_MLHS_anti,
+                'Antithetic normal draws from Modified Latin Hypercube Sampling',
+            ),
+        }
 
     def descriptionOfNativeDraws(self):
-        """ Describe the draws available draws with Biogeme
+        """Describe the draws available draws with Biogeme
 
         :return: dict, where the keys are the names of the draws,
                  and the value their description
@@ -281,18 +306,21 @@ class Database:
         :rtype: dict
 
         """
-        return [f'{key}: {tuple[1]}' for key, tuple in self.nativeRandomNumberGenerators.items()]
+        return [
+            f'{key}: {tuple[1]}'
+            for key, tuple in self.nativeRandomNumberGenerators.items()
+        ]
 
     def _audit(self):
-        """ Performs a series of checks and reports warnings and errors.
-              - Check if there are non numerical entries.
-              - Check if there are NaN (not a number) entries.
-              - Check if there are strings.
-              - Check if the numbering of individuals are contiguous (panel data only).
+        """Performs a series of checks and reports warnings and errors.
+          - Check if there are non numerical entries.
+          - Check if there are NaN (not a number) entries.
+          - Check if there are strings.
+          - Check if the numbering of individuals are contiguous (panel data only).
 
-            Returns:
-                A tuple of two lists with the results of
-                the diagnostic: listOfErrors, listOfWarnings
+        Returns:
+            A tuple of two lists with the results of
+            the diagnostic: listOfErrors, listOfWarnings
         """
         listOfErrors = []
         listOfWarnings = []
@@ -305,8 +333,10 @@ class Database:
                 listOfErrors.append(theError)
 
         if self.data.isnull().values.any():
-            theError = ('The database contains NaN value(s). '
-                        'Detect where they are using the function isnan()')
+            theError = (
+                'The database contains NaN value(s). '
+                'Detect where they are using the function isnan()'
+            )
             listOfErrors.append(theError)
 
         self._auditDone = True
@@ -320,7 +350,7 @@ class Database:
         self.variables = {col: Variable(col) for col in self.data.columns}
 
     def valuesFromDatabase(self, expression):
-        """ Evaluates an expression for each entry of the database.
+        """Evaluates an expression for each entry of the database.
 
         :param expression: expression to evaluate
         :type expression:  biogeme.expressions.Expression.
@@ -331,10 +361,12 @@ class Database:
 
         """
         self._expression = expression
+
         def functionToApply(row):
             self._expression.setRow(row)
             res = self._expression.getValue()
             return res
+
         res = self.data.apply(functionToApply, axis=1)
         return res
 
@@ -355,6 +387,7 @@ class Database:
         """
         self._avail = avail
         self._choice = choice
+
         def functionToApply(row):
             self._choice.setRow(row)
             chosen = self._choice.getValue()
@@ -367,6 +400,7 @@ class Database:
             avExpression.setRow(row)
             av = avExpression.getValue()
             return av != 0
+
         res = self.data.apply(functionToApply, axis=1)
         return res
 
@@ -386,6 +420,7 @@ class Database:
         """
         self._avail = avail
         self._choice = choice
+
         def functionToApply(row):
             self._choice.setRow(row)
             chosen = self._choice.getValue()
@@ -394,7 +429,10 @@ class Database:
                 v.setRow(row)
                 av = v.getValue()
                 results.append(av)
-            return pd.Series(results, index=['Chosen'] + list(self._avail.keys()))
+            return pd.Series(
+                results, index=['Chosen'] + list(self._avail.keys())
+            )
+
         res = self.data.apply(functionToApply, axis=1)
         theResults = dict()
         for k in self._avail:
@@ -402,10 +440,8 @@ class Database:
             theResults[k] = c, res[k].sum()
         return theResults
 
-
-
     def sumFromDatabase(self, expression):
-        """ Calculates the value of an expression for each entry
+        """Calculates the value of an expression for each entry
             in the database, and returns the sum.
 
         :param expression: expression to evaluate
@@ -414,10 +450,12 @@ class Database:
         :rtype: float
         """
         self._expression = expression
+
         def functionToApply(row):
             self._expression.setRow(row)
             res = self._expression.getValue()
             return res
+
         res = np.nansum(self.data.apply(functionToApply, axis=1))
         return res
 
@@ -464,15 +502,17 @@ class Database:
         else:
             for c in columns:
                 if not c in self.data:
-                    errorMsg = (f'Variable {c} not found.')
+                    errorMsg = f'Variable {c} not found.'
                     raise excep.biogemeError(errorMsg)
 
-        largestValue = [max(np.abs(self.data[col].max()),
-                            np.abs(self.data[col].min())) for col in columns]
-        res = [[col,
-                1 / 10**np.round(np.log10(max(1.0, lv))),
-                lv]
-               for col, lv in zip(columns, largestValue)]
+        largestValue = [
+            max(np.abs(self.data[col].max()), np.abs(self.data[col].min()))
+            for col in columns
+        ]
+        res = [
+            [col, 1 / 10 ** np.round(np.log10(max(1.0, lv))), lv]
+            for col, lv in zip(columns, largestValue)
+        ]
         df = pd.DataFrame(res, columns=['Column', 'Scale', 'Largest'])
         if not reportAll:
             # Remove entries where the suggested scale is 1, 0.1 or 10
@@ -481,7 +521,7 @@ class Database:
         return df
 
     def sampleWithReplacement(self, size=None):
-        """ Extract a random sample from the database, with replacement.
+        """Extract a random sample from the database, with replacement.
 
         Useful for bootstrapping.
 
@@ -496,11 +536,13 @@ class Database:
         """
         if size is None:
             size = len(self.data)
-        sample = self.data.iloc[np.random.randint(0, len(self.data), size=size)]
+        sample = self.data.iloc[
+            np.random.randint(0, len(self.data), size=size)
+        ]
         return sample
 
     def sampleIndividualMapWithReplacement(self, size=None):
-        """ Extract a random sample of the individual map
+        """Extract a random sample of the individual map
             from a panel data database, with replacement.
 
         Useful for bootstrapping.
@@ -515,20 +557,23 @@ class Database:
 
         """
         if not self.isPanel():
-            errorMsg = ('Function sampleIndividualMapWithReplacement'
-                        ' is available only on panel data.')
+            errorMsg = (
+                'Function sampleIndividualMapWithReplacement'
+                ' is available only on panel data.'
+            )
             raise excep.biogemeError(errorMsg)
 
         if size is None:
             size = len(self.individualMap)
-        sample = self.individualMap.iloc[np.random.randint(0, len(self.individualMap), size=size)]
+        sample = self.individualMap.iloc[
+            np.random.randint(0, len(self.individualMap), size=size)
+        ]
         return sample
 
-
-    def sampleWithoutReplacement(self,
-                                 samplingRate,
-                                 columnWithSamplingWeights=None):
-        """ Replace the data set by a sample for stochastic algorithms
+    def sampleWithoutReplacement(
+        self, samplingRate, columnWithSamplingWeights=None
+    ):
+        """Replace the data set by a sample for stochastic algorithms
 
         :param samplingRate: the proportion of data to include in the sample.
         :type samplingRate: float
@@ -543,23 +588,29 @@ class Database:
                 self.fullIndividualMap = self.individualMap
             else:
                 # Check if the structure has not been modified since last sample
-                if set(self.fullIndividualMap.columns) != set(self.individualMap.columns):
+                if set(self.fullIndividualMap.columns) != set(
+                    self.individualMap.columns
+                ):
                     message = 'The structure of the database has been modified since last sample. '
-                    left = set(self.fullIndividualMap.columns).\
-                        difference(set(self.individualMap.columns))
+                    left = set(self.fullIndividualMap.columns).difference(
+                        set(self.individualMap.columns)
+                    )
                     if left:
                         message += f' Columns that disappeared: {left}'
-                    right = set(self.individualMap.columns).\
-                        difference(set(self.fullIndividualMap.columns))
+                    right = set(self.individualMap.columns).difference(
+                        set(self.fullIndividualMap.columns)
+                    )
                     if right:
                         message += f' Columns that were added: {right}'
                     raise excep.biogemeError(message)
 
-            self.individualMap = \
-                self.fullIndividualMap.sample(frac=samplingRate,
-                                              weights=columnWithSamplingWeights)
-            theMsg = (f'Full data: {self.fullIndividualMap.shape} '
-                      f'Sampled data: {self.individualMap.shape}')
+            self.individualMap = self.fullIndividualMap.sample(
+                frac=samplingRate, weights=columnWithSamplingWeights
+            )
+            theMsg = (
+                f'Full data: {self.fullIndividualMap.shape} '
+                f'Sampled data: {self.individualMap.shape}'
+            )
             self.logger.debug(theMsg)
 
         else:
@@ -570,24 +621,32 @@ class Database:
                 # Check if the structure has not been modified since last sample
                 if set(self.fullData.columns) != set(self.data.columns):
                     message = 'The structure of the database has been modified since last sample. '
-                    left = set(self.fullData.columns).difference(set(self.data.columns))
+                    left = set(self.fullData.columns).difference(
+                        set(self.data.columns)
+                    )
                     if left:
                         message += f' Columns that disappeared: {left}'
-                    right = set(self.data.columns).difference(set(self.fullData.columns))
+                    right = set(self.data.columns).difference(
+                        set(self.fullData.columns)
+                    )
                     if right:
                         message += f' Columns that were added: {right}'
                     raise excep.biogemeError(message)
 
-            self.data = self.fullData.sample(frac=samplingRate,
-                                             weights=columnWithSamplingWeights)
-            self.logger.debug(f'Full data: {self.fullData.shape} Sampled data: {self.data.shape}')
+            self.data = self.fullData.sample(
+                frac=samplingRate, weights=columnWithSamplingWeights
+            )
+            self.logger.debug(
+                f'Full data: {self.fullData.shape} Sampled data: {self.data.shape}'
+            )
 
     def useFullSample(self):
-        """ Re-establish the full sample for calculation of the likelihood
-        """
+        """Re-establish the full sample for calculation of the likelihood"""
         if self.isPanel():
             if self.fullIndividualMap is None:
-                raise excep.biogemeError('Full panel data set has not been saved.')
+                raise excep.biogemeError(
+                    'Full panel data set has not been saved.'
+                )
             self.individualMap = self.fullIndividualMap
         else:
             if self.fullData is None:
@@ -595,7 +654,7 @@ class Database:
             self.data = self.fullData
 
     def addColumn(self, expression, column):
-        """ Add a new column in the database, calculated from an expression.
+        """Add a new column in the database, calculated from an expression.
 
         :param expression:  expression to evaluate
         :type expression: biogeme.expressions.Expression
@@ -610,18 +669,21 @@ class Database:
 
         """
         if column in self.data.columns:
-            raise ValueError(f'Column {column} already exists in the database {self.name}')
+            raise ValueError(
+                f'Column {column} already exists in the database {self.name}'
+            )
 
         def functionToApply(row):
             self._expression.setRow(row)
             return self._expression.getValue()
+
         self._expression = expression
         self.data[column] = self.data.apply(functionToApply, axis=1)
         self.variables[column] = Variable(column)
         return self.data[column]
 
     def remove(self, expression):
-        """ Removes from the database all entries such that the value of the expression is not 0.
+        """Removes from the database all entries such that the value of the expression is not 0.
 
         :param expression: expression to evaluate
         :type expression: biogeme.expressions.Expression
@@ -633,11 +695,13 @@ class Database:
         else:
             self.addColumn(expression, columnName)
         self.excludedData = len(self.data[self.data[columnName] != 0].index)
-        self.data.drop(self.data[self.data[columnName] != 0].index, inplace=True)
+        self.data.drop(
+            self.data[self.data[columnName] != 0].index, inplace=True
+        )
         self.data.drop(columns=[columnName], inplace=True)
 
     def dumpOnFile(self):
-        """ Dumps the database in a CSV formatted file.
+        """Dumps the database in a CSV formatted file.
 
         :return:  name of the file
         :rtype: string
@@ -679,9 +743,11 @@ class Database:
         """
         for k in self.nativeRandomNumberGenerators:
             if k in rng:
-                errorMsg = (f'{k} is a reserved keyword for draws'
-                            f' and cannot be used for user-defined '
-                            f'generators')
+                errorMsg = (
+                    f'{k} is a reserved keyword for draws'
+                    f' and cannot be used for user-defined '
+                    f'generators'
+                )
                 raise ValueError(errorMsg)
 
         self.userRandomNumberGenerators = rng
@@ -725,7 +791,7 @@ class Database:
         # 1. number of variables
         # 2. number of individuals
         # 3. number of draws
-        listOfDraws = [None]*len(names)
+        listOfDraws = [None] * len(names)
         for i, v in enumerate(names):
             name = v
             drawType = types[name]
@@ -736,17 +802,23 @@ class Database:
                 if theGenerator is None:
                     native = self.nativeRandomNumberGenerators
                     user = self.userRandomNumberGenerators
-                    errorMsg = (f'Unknown type of draws for '
-                                f'variable {name}: {drawType}. '
-                                f'Native types: {native}. '
-                                f'User defined: {user}')
+                    errorMsg = (
+                        f'Unknown type of draws for '
+                        f'variable {name}: {drawType}. '
+                        f'Native types: {native}. '
+                        f'User defined: {user}'
+                    )
                     raise excep.biogemeError(errorMsg)
-            listOfDraws[i] = theGenerator[0](self.getSampleSize(), numberOfDraws)
+            listOfDraws[i] = theGenerator[0](
+                self.getSampleSize(), numberOfDraws
+            )
             if listOfDraws[i].shape != (self.getSampleSize(), numberOfDraws):
-                errorMsg = (f'The draw generator for {name} must'
-                            f' generate a numpy array of dimensions'
-                            f' ({self.getSampleSize()}, {numberOfDraws})'
-                            f' instead of {listOfDraws[i].shape}')
+                errorMsg = (
+                    f'The draw generator for {name} must'
+                    f' generate a numpy array of dimensions'
+                    f' ({self.getSampleSize()}, {numberOfDraws})'
+                    f' instead of {listOfDraws[i].shape}'
+                )
                 raise excep.biogemeError(errorMsg)
 
         self.theDraws = np.array(listOfDraws)
@@ -790,9 +862,8 @@ class Database:
 
         return self.data.shape[0]
 
-
     def split(self, slices):
-        """ Prepare estimation and validation sets for validation.
+        """Prepare estimation and validation sets for validation.
 
         :param slices: number of slices
         :type slices: int
@@ -805,12 +876,14 @@ class Database:
         estimationSets = []
         validationSets = []
         for i, v in enumerate(theSlices):
-            estimationSets.append(pd.concat(theSlices[:i]+theSlices[i+1:]))
+            estimationSets.append(
+                pd.concat(theSlices[:i] + theSlices[i + 1 :])
+            )
             validationSets.append(v)
         return zip(estimationSets, validationSets)
 
     def isPanel(self):
-        """ Tells if the data is panel or not.
+        """Tells if the data is panel or not.
 
         :return: True if the data is panel.
         :rtype: bool
@@ -818,7 +891,7 @@ class Database:
         return self.panelColumn is not None
 
     def panel(self, columnName):
-        """ Defines the data as panel data
+        """Defines the data as panel data
 
         :param columnName: name of the columns that identifies individuals.
         :type columnName: string
@@ -833,19 +906,21 @@ class Database:
         sortedData = self.data.sort_values(by=[self.panelColumn])
         nIndividuals = tools.countNumberOfGroups(sortedData, self.panelColumn)
         if nGroups != nIndividuals:
-            theError = (f'The data must be sorted so that the data'
-                        f' for the same individual are consecutive.'
-                        f' There are {nIndividuals} individuals '
-                        f'in the sample, and {nGroups} groups of '
-                        f'data for column {self.panelColumn}.')
+            theError = (
+                f'The data must be sorted so that the data'
+                f' for the same individual are consecutive.'
+                f' There are {nIndividuals} individuals '
+                f'in the sample, and {nGroups} groups of '
+                f'data for column {self.panelColumn}.'
+            )
             raise excep.biogemeError(theError)
 
         self.buildPanelMap()
 
     def buildPanelMap(self):
         """Sorts the data so that the observations for each individuals are
-contiguous, and builds a map that identifies the range of indices of
-the observations of each individuals.
+        contiguous, and builds a map that identifies the range of indices of
+        the observations of each individuals.
         """
         if self.panelColumn is not None:
             self.data = self.data.sort_values(by=self.panelColumn)
@@ -874,8 +949,7 @@ the observations of each individuals.
         return self.data[self.data[columnName] == value].count()[columnName]
 
     def __str__(self):
-        """ Allows to print the dabase
-        """
+        """Allows to print the dabase"""
         result = f'biogeme database {self.name}:\n{self.data}'
         if self.isPanel():
             result += f'\nPanel data\n{self.individualMap}'

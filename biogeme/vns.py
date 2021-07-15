@@ -5,6 +5,9 @@
 
 Multi-objective variable neighborhood search algorithm
 """
+
+# pylint: disable=invalid-name, too-many-statements, too-many-arguments, too-many-branches
+# pylint: disable=too-many-locals
 import random
 import abc
 import pickle
@@ -28,8 +31,8 @@ class problemClass(metaclass=abc.ABCMeta):
         :type solution: solutionClass
 
         :return: valid, why where valid is True if the solution is
-        valid, and False otherwise. why contains an explanation why it
-        is invalid.
+            valid, and False otherwise. why contains an explanation why it
+            is invalid.
         :rtype: tuple(bool, str)
         """
 
@@ -42,9 +45,10 @@ class problemClass(metaclass=abc.ABCMeta):
         :type solution: solutionClass
 
         """
+
     @abc.abstractmethod
     def describe(self, solution):
-        """ Short description of the solution. Used for reporting.
+        """Short description of the solution. Used for reporting.
 
         :param solution: solution to be described
         :type solution: solutionClass
@@ -77,8 +81,8 @@ class problemClass(metaclass=abc.ABCMeta):
         :param solution: solution  modified
         :type solution: solutionClass
 
-        :param solution: neighbor
-        :type solution: solutionClass
+        :param aNeighbor: neighbor
+        :type aNeighbor: solutionClass
         """
 
     @abc.abstractmethod
@@ -89,8 +93,8 @@ class problemClass(metaclass=abc.ABCMeta):
         :param solution: solution  modified
         :type solution: solutionClass
 
-        :param solution: neighbor
-        :type solution: solutionClass
+        :param aNeighbor: neighbor
+        :type aNeighbor: solutionClass
         """
 
 
@@ -98,6 +102,7 @@ class solutionClass(metaclass=abc.ABCMeta):
     """
     This is an abstract class defining a solution.
     """
+
     def __init__(self):
         self.objectives = None
         self.objectivesNames = None
@@ -118,7 +123,7 @@ class solutionClass(metaclass=abc.ABCMeta):
 
     def dominates(self, anotherSolution):
         """Checks if the current solution dominates another one. It is
-        assumed that all objectives are minimized.
+            assumed that all objectives are minimized.
 
         :param anotherSolution: the other solution to be compared with.
         :type anotherSolution: solutionClass
@@ -126,19 +131,34 @@ class solutionClass(metaclass=abc.ABCMeta):
         :return: True is self dominates anotherSolution, False otherwise.
         :rtype: bool
 
+        :raise biogemeError: if the value of no value is availaboe for
+            the objective functions of ego.
+
+        :raise biogemeError: if the value of no value is availaboe for
+            the objective functions of alter.
+
+        :raise biogemeError: if the number of objective functions are
+            incompatible.
+
         """
         if self.objectives[0] is None:
-            raise excep.biogemeError('No values are available for '
-                                     'the objective functions of ego.')
+            raise excep.biogemeError(
+                'No values are available for '
+                'the objective functions of ego.'
+            )
 
         if anotherSolution.objectives[0] is None:
-            raise excep.biogemeError('No values are available for '
-                                     'the objective functions of alter.')
+            raise excep.biogemeError(
+                'No values are available for '
+                'the objective functions of alter.'
+            )
 
         if len(self.objectives) != len(anotherSolution.objectives):
-            raise excep.biogemeError(f'Incompatible sizes: '
-                                     f'{len(self.objectives)}'
-                                     f' and {len(anotherSolution.objectives)}')
+            raise excep.biogemeError(
+                f'Incompatible sizes: '
+                f'{len(self.objectives)}'
+                f' and {len(anotherSolution.objectives)}'
+            )
 
         for my_f, her_f in zip(self.objectives, anotherSolution.objectives):
             if my_f > her_f:
@@ -158,7 +178,7 @@ class operatorsManagement:
         :type operators: list(str)
         """
         self.scores = {k: 0 for k in operatorNames}
-        self.names = [k for k in self.scores]
+        self.names = list(self.scores)
         self.available = {k: True for k in operatorNames}
 
     def increaseScore(self, operator):
@@ -166,11 +186,13 @@ class operatorsManagement:
 
         :param operator: name of the operator
         :type operator: str
+
+        :raise biogemeError: if the operator is not known.
         """
         try:
             self.scores[operator] += 1
-        except KeyError:
-            raise excep.biogemeError(f'Unknown operator: {operator}')
+        except KeyError as e:
+            raise excep.biogemeError(f'Unknown operator: {operator}') from e
 
     def decreaseScore(self, operator):
         """Decrease the score of an operator. If it has already the minimum
@@ -179,11 +201,12 @@ class operatorsManagement:
         :param operator: name of the operator
         :type operator: str
 
+        :raise biogemeError: if the operator is not known.
         """
         try:
             self.scores[operator] -= 1
-        except KeyError:
-            raise excep.biogemeError(f'Unknown operator: {operator}')
+        except KeyError as e:
+            raise excep.biogemeError(f'Unknown operator: {operator}') from e
 
     def selectOperator(self, minProbability=0.01, scale=0.1):
         """Select an operator based on the scores
@@ -201,17 +224,26 @@ class operatorsManagement:
         :return: name of the selected operator
         :rtype: str
 
+        :raise biogemeError: if the minimum probability is too large
+            for the number of operators. It must be less or equal to 1 /
+            N, where N is the number of operators.
+
         """
 
         if minProbability > 1.0 / len(self.scores):
-            raise excep.biogemeError(f'Cannot impose min. probability '
-                                     f'{minProbability} '
-                                     f'with {len(self.scores)} operators')
+            raise excep.biogemeError(
+                f'Cannot impose min. probability '
+                f'{minProbability} '
+                f'with {len(self.scores)} operators'
+            )
 
         maxscore = max(list(self.scores.values()))
-        listOfScores = np.array([np.exp(scale * (s-maxscore))
-                                 if self.available[k] else 0
-                                 for k, s in self.scores.items()])
+        listOfScores = np.array(
+            [
+                np.exp(scale * (s - maxscore)) if self.available[k] else 0
+                for k, s in self.scores.items()
+            ]
+        )
         if len(listOfScores) == 0:
             return None
         totalScore = sum(listOfScores)
@@ -230,13 +262,13 @@ class operatorsManagement:
 
 
 class paretoClass:
-    """ Class managing the solutions
-    """
+    """Class managing the solutions"""
+
     def __init__(self, maxNeighborhood, archiveInputFile=None):
         """
 
         :param maxNeighborhood: the maximum size of the neighborhood
-        that must be considered
+            that must be considered
         :type maxNeighborhood: int
 
         :param archiveInputFile: name of a pickle file contaning sets
@@ -252,16 +284,23 @@ class paretoClass:
             self.considered = set()
         else:
             if self.restore(archiveInputFile):
-                logger.general(f'Pareto set initialized from file with '
-                               f'{self.length()} elements.')
+                logger.general(
+                    f'Pareto set initialized from file with '
+                    f'{self.length()} elements.'
+                )
             else:
-                logger.general(f'Unable to read file {archiveInputFile}. '
-                               f'Pareto set empty.')
+                logger.general(
+                    f'Unable to read file {archiveInputFile}. '
+                    f'Pareto set empty.'
+                )
                 self.pareto = dict()
                 self.removed = set()
                 self.considered = set()
 
     def length(self):
+        """
+        Obtain the length of the parato set.
+        """
         return len(self.pareto)
 
     def changeNeighborhood(self, sol):
@@ -333,8 +372,9 @@ class paretoClass:
         # Candidates are members of the Pareto set that have not
         # reached the maximum neighborhood size.
 
-        candidates = [(k, v) for k, v in self.pareto.items()
-                      if v < self.maxNeighborhood]
+        candidates = [
+            (k, v) for k, v in self.pareto.items() if v < self.maxNeighborhood
+        ]
 
         if not candidates:
             return None, None
@@ -349,6 +389,8 @@ class paretoClass:
 
         :param fileName: name of the file where the sets must be saved.
         :type fileName: str
+
+        :raise biogemeError: if a problem has occured during dumping.
         """
 
         allSets = self.pareto, self.removed, self.considered
@@ -356,12 +398,15 @@ class paretoClass:
             pickle.dump(allSets, f)
 
         with open(fileName, 'rb') as f:
-            tmppareto, tmpremoved, tmpconsidered = pickle.load(f)
+            tmppareto, _, _ = pickle.load(f)
         if len(tmppareto) != len(self.pareto):
-            raise excep.biogemeError(f'Problem in dumping: {len(tmppareto)} '
-                                     f'instead of {len(self.pareto)}')
+            raise excep.biogemeError(
+                f'Problem in dumping: {len(tmppareto)} '
+                f'instead of {len(self.pareto)}'
+            )
 
     def restore(self, fileName):
+        """Restore the Pareto from a file"""
         try:
             with open(fileName, 'rb') as f:
                 self.pareto, self.removed, self.considered = pickle.load(f)
@@ -371,12 +416,14 @@ class paretoClass:
         return True
 
 
-def vns(problem,
-        firstSolutions,
-        maxNeighborhood=20,
-        numberOfNeighbors=10,
-        archiveInputFile=None,
-        pickleOutputFile=None):
+def vns(
+    problem,
+    firstSolutions,
+    maxNeighborhood=20,
+    numberOfNeighbors=10,
+    archiveInputFile=None,
+    pickleOutputFile=None,
+):
     """Multi objective Variable Neighborhood Search
 
     :param problem: problem description
@@ -399,13 +446,15 @@ def vns(problem,
                              algorithm. Default: None
     :type archiveInputFile: str
 
-    :param pickleOutputFiles: name of file where the set of models are stored:
-    :type pickleOutputFiles: str
+    :param pickleOutputFile: name of file where the set of models are stored:
+    :type pickleOutputFile: str
 
     :return: the pareto set, the set of models that have been in the
              pareto set and then removed, and the set of all models
              considered by the algorithm.
     :rtype: class pareto
+
+    :raise biogemeError: if the first Pareto set is empty.
 
     """
 
@@ -426,8 +475,9 @@ def vns(problem,
                 logger.warning(f'Default specification is invalid: {why}')
 
     if thePareto.length() == 0:
-        raise excep.biogemeError('Cannot start the algorithm '
-                                 'with an empty Pareto set.')
+        raise excep.biogemeError(
+            'Cannot start the algorithm ' 'with an empty Pareto set.'
+        )
 
     logger.general(f'Initial pareto: {thePareto.length()}')
     thePareto.dump(pickleOutputFile)
@@ -440,21 +490,26 @@ def vns(problem,
         while continueWithSolution:
             logger.debug(f'**** Size of pareto set: {len(thePareto.pareto)}')
             logger.general(f'----> Neighbor {n} of size {neighborhoodSize}')
-            aNeighbor, numberOfChanges = \
-                problem.generateNeighbor(solutionToImprove, neighborhoodSize)
+            aNeighbor, numberOfChanges = problem.generateNeighbor(
+                solutionToImprove, neighborhoodSize
+            )
             n += 1
             if n == numberOfNeighbors:
                 thePareto.changeNeighborhood(solutionToImprove)
                 continueWithSolution = False
 
             if numberOfChanges == 0:
-                logger.warning(f'Neighbor of size {neighborhoodSize}: '
-                               f'generation failed')
+                logger.warning(
+                    f'Neighbor of size {neighborhoodSize}: '
+                    f'generation failed'
+                )
                 continueWithSolution = False
             elif aNeighbor in thePareto.considered:
                 problem.neighborRejected(solutionToImprove, aNeighbor)
-                logger.general(f'*** Neighbor of size {neighborhoodSize}:'
-                               f' already considered***')
+                logger.general(
+                    f'*** Neighbor of size {neighborhoodSize}:'
+                    f' already considered***'
+                )
             else:
                 problem.evaluate(aNeighbor)
                 valid, why = problem.isValid(aNeighbor)
@@ -468,12 +523,16 @@ def vns(problem,
                         thePareto.resetNeighborhood(solutionToImprove)
                         continueWithSolution = False
                     else:
-                        logger.general(f'*** Neighbor of size '
-                                       f'{neighborhoodSize}: dominated***')
+                        logger.general(
+                            f'*** Neighbor of size '
+                            f'{neighborhoodSize}: dominated***'
+                        )
                         problem.neighborRejected(solutionToImprove, aNeighbor)
                 else:
-                    logger.general(f'*** Neighbor of size {neighborhoodSize}'
-                                   f' invalid: {why}***')
+                    logger.general(
+                        f'*** Neighbor of size {neighborhoodSize}'
+                        f' invalid: {why}***'
+                    )
                     problem.neighborRejected(solutionToImprove, aNeighbor)
 
         solutionToImprove, neighborhoodSize = thePareto.select()

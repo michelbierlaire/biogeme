@@ -34,8 +34,7 @@ def normalpdf(x, mu=0.0, s=1.0):
     :note: It is assumed that :math:`\\sigma > 0`, but it is not verified by the code.
 
     :return: value of the Normal pdf.
-    :rtype: float or biogeme.expression
-"""
+    :rtype: float or biogeme.expression"""
     d = -(x - mu) * (x - mu)
     n = 2.0 * s * s
     a = d / n
@@ -43,6 +42,7 @@ def normalpdf(x, mu=0.0, s=1.0):
     den = s * 2.506628275
     p = num / den
     return p
+
 
 def lognormalpdf(x, mu=0.0, s=1.0):
     """
@@ -73,6 +73,7 @@ def lognormalpdf(x, mu=0.0, s=1.0):
     p = (x > 0) * num / den
     return p
 
+
 def uniformpdf(x, a=-1, b=1.0):
     """
     Uniform pdf
@@ -95,6 +96,7 @@ def uniformpdf(x, a=-1, b=1.0):
  """
     result = (x < a) * 0.0 + (x >= b) * 0.0 + (x >= a) * (x < b) / (b - a)
     return result
+
 
 def triangularpdf(x, a=-1.0, b=1.0, c=0.0):
     """
@@ -121,11 +123,21 @@ def triangularpdf(x, a=-1.0, b=1.0, c=0.0):
     :rtype: float or biogeme.expression
 
     """
-    result = (x < a) * 0.0 + \
-        (x >= b) * 0.0 + \
-        (x >= a) * (x < c) * 2.0 * ((x - a)/((b - a) * (c - a))) * \
-        (x >= c) * (x < b)  * 2.0 * (b - x) / ((b - a) * (b - c))
+    result = (
+        (x < a) * 0.0
+        + (x >= b) * 0.0
+        + (x >= a)
+        * (x < c)
+        * 2.0
+        * ((x - a) / ((b - a) * (c - a)))
+        * (x >= c)
+        * (x < b)
+        * 2.0
+        * (b - x)
+        / ((b - a) * (b - c))
+    )
     return result
+
 
 def logisticcdf(x, mu=0.0, s=1.0):
     """

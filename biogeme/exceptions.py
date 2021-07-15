@@ -9,5 +9,6 @@
 # Too constraining
 # pylint: disable=invalid-name
 
+
 class biogemeError(Exception):
-    """ Defines a generic exception for Biogeme. """
+    """Defines a generic exception for Biogeme."""

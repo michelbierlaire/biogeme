@@ -29,14 +29,14 @@ logger = msg.bioMessage()
 
 class functionToMinimize:
     """This is an abstract class. The actual function to minimize must be
-       implemented in a concrete class deriving from this one.
+    implemented in a concrete class deriving from this one.
 
     """
 
     @abstractmethod
     def setVariables(self, x):
 
-        """ Set the values of the variables for which the function has to b calculated.
+        """Set the values of the variables for which the function has to b calculated.
 
         :param x: values
         :type x: numpy.array
@@ -116,9 +116,8 @@ class functionToMinimize:
 
 
 class bioBounds:
-    """ This class is designed for the management of simple bound constraints
+    """This class is designed for the management of simple bound constraints"""
 
-    """
     def __init__(self, b):
         """
 
@@ -130,6 +129,7 @@ class bioBounds:
         :raises biogeme.exceptions.biogemeError: if the bounds are incompatible
 
         """
+
         def noneToMinusInfinity(x):
             if x is None:
                 return -np.inf
@@ -147,12 +147,19 @@ class bioBounds:
         self.lowerBounds = [noneToMinusInfinity(bb[0]) for bb in b]
         self.upperBounds = [noneToPlusInfinity(bb[1]) for bb in b]
 
-        wrongBounds = np.array([bb[0] > bb[1] for bb in b
-                                if bb[0] is not None and bb[1] is not None])
+        wrongBounds = np.array(
+            [
+                bb[0] > bb[1]
+                for bb in b
+                if bb[0] is not None and bb[1] is not None
+            ]
+        )
         if wrongBounds.any():
-            errorMsg = (f'Incompatible bounds for indice(s) '
-                        f'{np.nonzero(wrongBounds)[0]}: '
-                        f'{[b[i] for i in np.nonzero(wrongBounds)[0]]}')
+            errorMsg = (
+                f'Incompatible bounds for indice(s) '
+                f'{np.nonzero(wrongBounds)[0]}: '
+                f'{[b[i] for i in np.nonzero(wrongBounds)[0]]}'
+            )
             raise excep.biogemeError(errorMsg)
 
     def __str__(self):
@@ -177,8 +184,9 @@ class bioBounds:
         """
 
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(x)}'
-                                     f' and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {len(x)}' f' and {self.n}'
+            )
 
         y = x
         for i in range(self.n):
@@ -203,14 +211,17 @@ class bioBounds:
         """
 
         if otherBounds.n != self.n:
-            raise excep.biogemeError(f'Incompatible size: {otherBounds.n} '
-                                     f'and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {otherBounds.n} ' f'and {self.n}'
+            )
 
-        newBounds = [(np.maximum(self.lowerBounds[i],
-                                 otherBounds.lowerBounds[i]),
-                      np.minimum(self.upperBounds[i],
-                                 otherBounds.upperBounds[i]))
-                     for i in range(self.n)]
+        newBounds = [
+            (
+                np.maximum(self.lowerBounds[i], otherBounds.lowerBounds[i]),
+                np.minimum(self.upperBounds[i], otherBounds.upperBounds[i]),
+            )
+            for i in range(self.n)
+        ]
 
         # Note that an exception with be raised at the creation of the
         # new 'bioBounds' object is the bounds are incompatible.
@@ -219,7 +230,7 @@ class bioBounds:
         return result
 
     def intersectionWithTrustRegion(self, x, delta):
-        """ Create a bioBounds object representing the intersection
+        """Create a bioBounds object representing the intersection
             between the feasible domain and the trust region.
 
         :param x: center of the trust region
@@ -228,12 +239,16 @@ class bioBounds:
         :param delta: radius of the tust region (infinity norm)
         :type delta: float
 
+        :return: intersection between the feasible region and the trus region
+        :rtype: class bioBounds
+
         :raises biogeme.exceptions.biogemeError: if the dimensions
                 are inconsistent
         """
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(x)}'
-                                     f' and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {len(x)}' f' and {self.n}'
+            )
 
         trustRegion = bioBounds([(xk - delta, xk + delta) for xk in x])
         return self.intersect(trustRegion)
@@ -245,12 +260,6 @@ class bioBounds:
                    the corresponding variables is considered.
         :type selectedVariables: numpy.array(bool)
 
-        :param x: center of the trust region
-        :type: numpy.array
-
-        :param delta: radius of the trust region (in infinity norm)
-        :type delta: float
-
         :return: bound object
         :rtype: class bioBounds
 
@@ -258,14 +267,16 @@ class bioBounds:
                 are inconsistent
         """
         if len(selectedVariables) != self.n:
-            raise excep.biogemeError(f'Incompatible size: '
-                                     f'{len(selectedVariables)} and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: ' f'{len(selectedVariables)} and {self.n}'
+            )
 
-        return bioBounds([i for i, j in zip(self.bounds,
-                                            selectedVariables) if j])
+        return bioBounds(
+            [i for i, j in zip(self.bounds, selectedVariables) if j]
+        )
 
     def feasible(self, x):
-        """ Check if point verifies the bound constraints
+        """Check if point verifies the bound constraints
 
         :param x: point to project
         :type x: numpy.array
@@ -277,19 +288,24 @@ class bioBounds:
                  are inconsistent
         """
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: '
-                                     f'{len(x)} and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: ' f'{len(x)} and {self.n}'
+            )
         for i in range(self.n):
-            if self.lowerBounds[i] is not None and \
-               self.lowerBounds[i] - x[i] > np.finfo(float).eps:
+            if (
+                self.lowerBounds[i] is not None
+                and self.lowerBounds[i] - x[i] > np.finfo(float).eps
+            ):
                 return False
-            if self.upperBounds[i] is not None and \
-               x[i] - self.upperBounds[i] > np.finfo(float).eps:
+            if (
+                self.upperBounds[i] is not None
+                and x[i] - self.upperBounds[i] > np.finfo(float).eps
+            ):
                 return False
         return True
 
     def maximumStep(self, x, d):
-        """ Calculates the maximum step that can be performed
+        """Calculates the maximum step that can be performed
         along a direction while staying feasible.
 
         :param x: reference point
@@ -309,11 +325,16 @@ class bioBounds:
         if not self.feasible(x):
             raise excep.biogemeError(f'Infeasible point: {x}')
 
-        alpha = np.array([(self.upperBounds[i] - x[i]) / d[i]
-                          if d[i] > np.finfo(float).eps
-                          else (self.lowerBounds[i] - x[i]) / d[i]
-                          if d[i] < -np.finfo(float).eps
-                          else np.inf for i in range(self.n)])
+        alpha = np.array(
+            [
+                (self.upperBounds[i] - x[i]) / d[i]
+                if d[i] > np.finfo(float).eps
+                else (self.lowerBounds[i] - x[i]) / d[i]
+                if d[i] < -np.finfo(float).eps
+                else np.inf
+                for i in range(self.n)
+            ]
+        )
         m = np.amin(alpha)
         return m, np.where(alpha == m)[0]
 
@@ -335,6 +356,8 @@ class bioBounds:
            - -1 if the lower bound is active
            - 1 if the upper bound is active
 
+        :rtype: numpy.array
+
         :raises biogeme.exceptions.biogemeError: if the vector x is
                     not feasible
 
@@ -343,19 +366,25 @@ class bioBounds:
 
         """
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(x)}'
-                                     f' and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {len(x)}' f' and {self.n}'
+            )
         if not self.feasible(x):
-            raise excep.biogemeError(f'{x} is not feasible for the '
-                                     f'bounds {self.bounds}')
+            raise excep.biogemeError(
+                f'{x} is not feasible for the ' f'bounds {self.bounds}'
+            )
 
         activity = np.zeros_like(x, dtype=int)
         for i in range(self.n):
-            if self.lowerBounds[i] != -np.inf and \
-               x[i] - self.lowerBounds[i] <= epsilon:
+            if (
+                self.lowerBounds[i] != -np.inf
+                and x[i] - self.lowerBounds[i] <= epsilon
+            ):
                 activity[i] = -1
-            elif self.upperBounds[i] != np.inf and \
-                    self.upperBounds[i] - x[i] <= epsilon:
+            elif (
+                self.upperBounds[i] != np.inf
+                and self.upperBounds[i] - x[i] <= epsilon
+            ):
                 activity[i] = 1
         return activity
 
@@ -381,14 +410,17 @@ class bioBounds:
 
         """
         if len(d) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {self.n}'
-                                     f' and {len(d)}')
-        bp = [(self.upperBounds[i] - x[i]) / d[i]
-              if d[i] > np.finfo(float).eps
-              else (self.lowerBounds[i] - x[i]) / d[i]
-              if d[i] < -np.finfo(float).eps
-              else 0
-              for i in range(self.n)]
+            raise excep.biogemeError(
+                f'Incompatible size: {self.n}' f' and {len(d)}'
+            )
+        bp = [
+            (self.upperBounds[i] - x[i]) / d[i]
+            if d[i] > np.finfo(float).eps
+            else (self.lowerBounds[i] - x[i]) / d[i]
+            if d[i] < -np.finfo(float).eps
+            else 0
+            for i in range(self.n)
+        ]
 
         if any(b < 0 for b in bp):
             raise excep.biogemeError('Infeasible point')
@@ -396,7 +428,7 @@ class bioBounds:
         return sorted(enumerate(bp), key=lambda x: x[1])
 
     def generalizedCauchyPoint(self, xk, gk, H, direction):
-        """ Implementation of Step 2 of the Specific Algorithm by
+        """Implementation of Step 2 of the Specific Algorithm by
             `Conn et al. (1988)`_.
 
         .. _`Conn et al. (1988)`: https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf
@@ -415,6 +447,9 @@ class bioBounds:
         :param H: matrix H involved in the quadratic model definition.
         :type H: numpy.array. Dimension n x n.
 
+        :param direction: direction along which the GCP is searched.
+        :type direction: numpy.array. Dimension n.
+
         :return: generalized Cauchy point based on inexact line search.
         :rtype: numpy.array. Dimension n.
 
@@ -424,14 +459,17 @@ class bioBounds:
         """
 
         if len(xk) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(xk)}'
-                                     f' and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {len(xk)}' f' and {self.n}'
+            )
         if len(gk) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(gk)}'
-                                     f' and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {len(gk)}' f' and {self.n}'
+            )
         if H.shape[0] != self.n or H.shape[1] != self.n:
-            raise excep.biogemeError(f'Incompatible size: {H.shape}'
-                                     f' and {self.n}')
+            raise excep.biogemeError(
+                f'Incompatible size: {H.shape}' f' and {self.n}'
+            )
 
         if not self.feasible(xk):
             raise excep.biogemeError('Infeasible iterate')
@@ -448,8 +486,10 @@ class bioBounds:
 
         if fprime >= 0:
             if n <= 10:
-                logger.warning(f'GCP: direction {d} is not a descent '
-                               f'direction at {x}.')
+                logger.warning(
+                    f'GCP: direction {d} is not a descent '
+                    f'direction at {x}.'
+                )
             else:
                 logger.warning('GCP: not a descent direction.')
 
@@ -488,10 +528,12 @@ class bioBounds:
         return x
 
 
-def schnabelEskow(A,
-                  tau=np.finfo(np.float64).eps**0.3333,
-                  taubar=np.finfo(np.float64).eps**0.6666,
-                  mu=0.1):
+def schnabelEskow(
+    A,
+    tau=np.finfo(np.float64).eps ** 0.3333,
+    taubar=np.finfo(np.float64).eps ** 0.6666,
+    mu=0.1,
+):
 
     """Modified Cholesky factorization by `Schnabel and Eskow (1999)`_.
 
@@ -525,12 +567,13 @@ def schnabelEskow(A,
     :raises biogeme.exceptions.biogemeError: if the matrix A is not square.
     :raises biogeme.exceptions.biogemeError: if the matrix A is not symmetric.
     """
+
     def pivot(j):
         A[j, j] = np.sqrt(A[j, j])
-        for i in range(j+1, dim):
+        for i in range(j + 1, dim):
             A[j, i] = A[i, j] = A[i, j] / A[j, j]
-            A[i, j+1:i+1] -= A[i, j]*A[j+1:i+1, j]
-            A[j+1:i+1, i] = A[i, j+1:i+1]
+            A[i, j + 1 : i + 1] -= A[i, j] * A[j + 1 : i + 1, j]
+            A[j + 1 : i + 1, i] = A[i, j + 1 : i + 1]
 
     def permute(i, j):
         A[[i, j]] = A[[j, i]]
@@ -554,7 +597,7 @@ def schnabelEskow(A,
     while j < dim and phaseOne is True:
         a_max = A.diagonal()[j:].max()
         a_min = A.diagonal()[j:].min()
-        if (a_max < taubar * gamma or a_min < -mu * a_max):
+        if a_max < taubar * gamma or a_min < -mu * a_max:
             phaseOne = False
             break
 
@@ -563,9 +606,12 @@ def schnabelEskow(A,
         if i != j:
             # Switch rows and columns of i and j of A
             permute(i, j)
-        if j < dim - 1 and \
-           ((A.diagonal()[j + 1:] - A[j + 1:, j]**2 /
-             A.diagonal()[j]).min() < -mu * gamma):
+        if j < dim - 1 and (
+            (
+                A.diagonal()[j + 1 :] - A[j + 1 :, j] ** 2 / A.diagonal()[j]
+            ).min()
+            < -mu * gamma
+        ):
             phaseOne = False  # go to phase two
         else:
             # perform jth iteration of factorization
@@ -575,8 +621,9 @@ def schnabelEskow(A,
     # Phase two, A not positive-definite
     if not phaseOne:
         if j == dim - 1:
-            E[-1] = delta = -A[-1, -1] + max(tau * (-A[-1, -1]) / (1 - tau),
-                                             taubar * gamma)
+            E[-1] = delta = -A[-1, -1] + max(
+                tau * (-A[-1, -1]) / (1 - tau), taubar * gamma
+            )
             A[-1, -1] += delta
             A[-1, -1] = np.sqrt(A[-1, -1])
         else:
@@ -585,8 +632,11 @@ def schnabelEskow(A,
             k = j - 1  # k = number of iterations performed in phase one
             # Calculate lower Gerschgorin bounds of A[k+1]
             for i in range(k + 1, dim):
-                g[i] = A[i, i] - abs(A[i, k + 1:i]).sum() \
-                    - abs(A[i + 1:dim, i]).sum()
+                g[i] = (
+                    A[i, i]
+                    - abs(A[i, k + 1 : i]).sum()
+                    - abs(A[i + 1 : dim, i]).sum()
+                )
             # Modified Cholesky Decomposition
             for j in range(k + 1, dim - 2):
                 # Pivot on maximum lower Gerschgorin bound estimate
@@ -595,34 +645,34 @@ def schnabelEskow(A,
                     # Switch rows and columns of i and j of A
                     permute(i, j)
                 # Calculate E[j, j] and add to diagonal
-                norm_j = abs(A[j + 1:dim, j]).sum()
-                E[j] = delta = max(0,
-                                   -A[j, j] + max(norm_j, taubar * gamma),
-                                   deltaPrev)
+                norm_j = abs(A[j + 1 : dim, j]).sum()
+                E[j] = delta = max(
+                    0, -A[j, j] + max(norm_j, taubar * gamma), deltaPrev
+                )
                 if delta > 0:
                     A[j, j] += delta
-                    deltaPrev = delta         # deltaPrev will contain E_inf
+                    deltaPrev = delta  # deltaPrev will contain E_inf
                 # Update Gerschgorin bound estimates
                 if A[j, j] != norm_j:
                     temp = 1.0 - norm_j / A[j, j]
-                    g[j + 1:] += abs(A[j + 1:, j]) * temp
+                    g[j + 1 :] += abs(A[j + 1 :, j]) * temp
                 # perform jth iteration of factorization
                 pivot(j)
 
             # Final 2 by 2 submatrix
             e = np.linalg.eigvalsh(A[-2:, -2:])
             e.sort()
-            E[-2] = E[-1] = delta = max(0,
-                                        -e[0] + max(tau * (e[1] - e[0])
-                                                    / (1 - tau),
-                                                    taubar * gamma),
-                                        deltaPrev)
+            E[-2] = E[-1] = delta = max(
+                0,
+                -e[0] + max(tau * (e[1] - e[0]) / (1 - tau), taubar * gamma),
+                deltaPrev,
+            )
             if delta > 0:
                 A[-2, -2] += delta
                 A[-1, -1] += delta
                 deltaPrev = delta
-            A[-2, -2] = np.sqrt(A[-2, -2])    # overwrites A[-2, -2]
-            A[-1, -2] = A[-1, -2] / A[-2, -2]   # overwrites A[-1, -2]
+            A[-2, -2] = np.sqrt(A[-2, -2])  # overwrites A[-2, -2]
+            A[-1, -2] = A[-1, -2] / A[-2, -2]  # overwrites A[-1, -2]
             A[-2, -1] = A[-1, -2]
             # overwrites A[-1, -1]
             A[-1, -1] = np.sqrt(A[-1, -1] - A[-1, -2] * A[-1, -2])
@@ -630,15 +680,7 @@ def schnabelEskow(A,
     return np.tril(A), np.diag(P @ E), P
 
 
-def lineSearch(fct,
-               x,
-               f,
-               g,
-               d,
-               alpha0=1.0,
-               beta1=1.0e-4,
-               beta2=0.99,
-               lbd=2.0):
+def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
     """
     Calculate a step along a direction that satisfies both Wolfe conditions
 
@@ -648,6 +690,12 @@ def lineSearch(fct,
 
     :param x: current iterate.
     :type x: numpy.array
+
+    :param f: value of the objective function at the current iterate.
+    :type f: float
+
+    :param g: value of the gradient at the current iterate.
+    :type g: numpy.array
 
     :param d: descent direction.
     :type d: numpy.array
@@ -678,9 +726,11 @@ def lineSearch(fct,
     if alpha0 <= 0:
         raise excep.biogemeError(f'alpha0 is {alpha0} and must be > 0')
     if beta1 >= beta2:
-        errorMsg = (f'Incompatible Wolfe cond. parameters: '
-                    f'beta1= {beta1} is greater than '
-                    f'beta2={beta2}')
+        errorMsg = (
+            f'Incompatible Wolfe cond. parameters: '
+            f'beta1= {beta1} is greater than '
+            f'beta2={beta2}'
+        )
         raise excep.biogemeError(errorMsg)
 
     nfev = 1
@@ -715,7 +765,7 @@ def lineSearch(fct,
 
 
 def relativeGradient(x, f, g, typx, typf):
-    """ Calculates the relative gradients.
+    """Calculates the relative gradients.
 
     It is typically used as stopping criterion.
 
@@ -738,8 +788,12 @@ def relativeGradient(x, f, g, typx, typf):
 
     :rtype: float
     """
-    relgrad = np.array([g[i] * max(abs(x[i]), typx[i]) / max(abs(f), typf)
-                        for i in range(len(x))])
+    relgrad = np.array(
+        [
+            g[i] * max(abs(x[i]), typx[i]) / max(abs(f), typf)
+            for i in range(len(x))
+        ]
+    )
     result = abs(relgrad).max()
     if np.isfinite(result):
         return result
@@ -747,10 +801,9 @@ def relativeGradient(x, f, g, typx, typf):
     return np.finfo(float).max
 
 
-def newtonLineSearch(fct,
-                     x0,
-                     eps=np.finfo(np.float64).eps**0.3333,
-                     maxiter=100):
+def newtonLineSearch(
+    fct, x0, eps=np.finfo(np.float64).eps ** 0.3333, maxiter=100
+):
     """
     Newton method with inexact line search (Wolfe conditions)
 
@@ -788,13 +841,15 @@ def newtonLineSearch(fct,
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
         message = f'Relative gradient = {relgrad:.3g} <= {eps:.2g}'
-        messages = {'Algorithm': 'Unconstrained Newton with line search',
-                    'Relative gradient': relgrad,
-                    'Number of iterations': 0,
-                    'Number of function evaluations': nfev,
-                    'Number of gradient evaluations': ngev,
-                    'Number of hessian evaluations': nhev,
-                    'Cause of termination': message}
+        messages = {
+            'Algorithm': 'Unconstrained Newton with line search',
+            'Relative gradient': relgrad,
+            'Number of iterations': 0,
+            'Number of function evaluations': nfev,
+            'Number of gradient evaluations': ngev,
+            'Number of hessian evaluations': nhev,
+            'Cause of termination': message,
+        }
         return xk, messages
 
     k = 0
@@ -823,16 +878,19 @@ def newtonLineSearch(fct,
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(f'{k} f={f:10.7g} relgrad={relgrad:6.2g}'
-                        f' alpha={alpha:6.2g}')
+        logger.detailed(
+            f'{k} f={f:10.7g} relgrad={relgrad:6.2g}' f' alpha={alpha:6.2g}'
+        )
 
-    messages = {'Algorithm': 'Unconstrained Newton with line search',
-                'Relative gradient': relgrad,
-                'Number of iterations': k,
-                'Number of function evaluations': nfev,
-                'Number of gradient evaluations': ngev,
-                'Number of hessian evaluations': nhev,
-                'Cause of termination': message}
+    messages = {
+        'Algorithm': 'Unconstrained Newton with line search',
+        'Relative gradient': relgrad,
+        'Number of iterations': k,
+        'Number of function evaluations': nfev,
+        'Number of gradient evaluations': ngev,
+        'Number of hessian evaluations': nhev,
+        'Cause of termination': message,
+    }
 
     return xk, messages
 
@@ -866,7 +924,7 @@ def trustRegionIntersection(dc, d, delta):
     b = 2 * np.inner(dc, d)
     c = np.inner(dc, dc) - delta ** 2
     discriminant = b * b - 4.0 * a * c
-    return (- b + np.sqrt(discriminant)) / (2 * a)
+    return (-b + np.sqrt(discriminant)) / (2 * a)
 
 
 def cauchyNewtonDogleg(g, H):
@@ -913,20 +971,21 @@ def cauchyNewtonDogleg(g, H):
     """
     alpha = np.inner(g, g)
     beta = np.inner(g, H @ g)
-    dc = - (alpha / beta) * g
+    dc = -(alpha / beta) * g
     L, E, P = schnabelEskow(H)
     negativeEigenvalue = E < 0
     if np.any(negativeEigenvalue):
         print(E)
-        raise excep.biogemeError('The dogleg method requires a '
-                                 'convex optimization problem.')
+        raise excep.biogemeError(
+            'The dogleg method requires a ' 'convex optimization problem.'
+        )
 
     y3 = -P.T @ g
     y2 = la.solve_triangular(L, y3, lower=True)
     y1 = la.solve_triangular(L.T, y2, lower=False)
     dn = P @ y1
     eta = 0.2 + (0.8 * alpha * alpha / (beta * abs(np.inner(g, dn))))
-    return dc, dn, eta*dn
+    return dc, dn, eta * dn
 
 
 def dogleg(g, H, delta):
@@ -1052,7 +1111,7 @@ def truncatedConjugateGradient(g, H, delta):
                 rho = b * b - 4 * a * c
                 step = xk + ((-b + np.sqrt(rho)) / (2 * a)) * dk
                 return step, diagnostic
-            alphak = - np.inner(dk, gk) / curv
+            alphak = -np.inner(dk, gk) / curv
             xkp1 = xk + alphak * dk
             if np.isnan(xkp1).any() or la.norm(xkp1) > delta:
                 # Out of the trust region
@@ -1086,14 +1145,16 @@ def truncatedConjugateGradient(g, H, delta):
     return step, diagnostic
 
 
-def newtonTrustRegion(fct,
-                      x0,
-                      delta0=1.0,
-                      eps=np.finfo(np.float64).eps**0.3333,
-                      dl=False,
-                      maxiter=1000,
-                      eta1=0.01,
-                      eta2=0.9):
+def newtonTrustRegion(
+    fct,
+    x0,
+    delta0=1.0,
+    eps=np.finfo(np.float64).eps ** 0.3333,
+    dl=False,
+    maxiter=1000,
+    eta1=0.01,
+    eta2=0.9,
+):
     """Newton method with trust region
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -1147,13 +1208,15 @@ def newtonTrustRegion(fct,
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
         message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
-        messages = {'Algorithm': 'Unconstrained Newton with trust region',
-                    'Relative gradient': relgrad,
-                    'Cause of termination': message,
-                    'Number of iterations': 0,
-                    'Number of function evaluations': nfev,
-                    'Number of gradient evaluations': ngev,
-                    'Number of hessian evaluations': nhev}
+        messages = {
+            'Algorithm': 'Unconstrained Newton with trust region',
+            'Relative gradient': relgrad,
+            'Cause of termination': message,
+            'Number of iterations': 0,
+            'Number of function evaluations': nfev,
+            'Number of gradient evaluations': ngev,
+            'Number of hessian evaluations': nhev,
+        }
         return xk, messages
     delta = delta0
     nfev = 0
@@ -1205,17 +1268,21 @@ def newtonTrustRegion(fct,
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(f'{k} f={f:10.7g} relgrad={relgrad:6.2g} '
-                        f'delta={delta:6.2g} '
-                        f'rho={rho:6.2g} {status}')
+        logger.detailed(
+            f'{k} f={f:10.7g} relgrad={relgrad:6.2g} '
+            f'delta={delta:6.2g} '
+            f'rho={rho:6.2g} {status}'
+        )
 
-    messages = {'Algorithm': 'Unconstrained Newton with trust region',
-                'Relative gradient': relgrad,
-                'Cause of termination': message,
-                'Number of iterations': k,
-                'Number of function evaluations': nfev,
-                'Number of gradient evaluations': ngev,
-                'Number of hessian evaluations': nhev}
+    messages = {
+        'Algorithm': 'Unconstrained Newton with trust region',
+        'Relative gradient': relgrad,
+        'Cause of termination': message,
+        'Number of iterations': k,
+        'Number of function evaluations': nfev,
+        'Number of gradient evaluations': ngev,
+        'Number of hessian evaluations': nhev,
+    }
 
     return xk, messages
 
@@ -1253,7 +1320,7 @@ def bfgs(H, d, y):
 
 
 def inverseBfgs(Hinv, d, y):
-    """ Update the inverse BFGS matrix. Formula (13.13) of `Bierlaire (2015)`_
+    """Update the inverse BFGS matrix. Formula (13.13) of `Bierlaire (2015)`_
 
     .. _`Bierlaire (2015)`: http://optimizationprinciplesalgorithms.com/
 
@@ -1282,11 +1349,13 @@ def inverseBfgs(Hinv, d, y):
     return ((eye - (dy / denom)) @ Hinv @ (eye - (yd / denom))) + dd / denom
 
 
-def bfgsLineSearch(fct,
-                   x0,
-                   initBfgs=None,
-                   eps=np.finfo(np.float64).eps ** 0.3333,
-                   maxiter=1000):
+def bfgsLineSearch(
+    fct,
+    x0,
+    initBfgs=None,
+    eps=np.finfo(np.float64).eps ** 0.3333,
+    maxiter=1000,
+):
     """BFGS method with inexact line search (Wolfe conditions)
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -1331,9 +1400,11 @@ def bfgsLineSearch(fct,
         Hinv = np.identity(n)
     else:
         if initBfgs.shape != (n, n):
-            errorMsg = (f'BFGS must be initialized with a {n}x{n} '
-                        f'matrix and not a {initBfgs.shape[0]}'
-                        'x{initBfgs.shape[1]} matrix.')
+            errorMsg = (
+                f'BFGS must be initialized with a {n}x{n} '
+                f'matrix and not a {initBfgs.shape[0]}'
+                'x{initBfgs.shape[1]} matrix.'
+            )
             raise excep.biogemeError(errorMsg)
         Hinv = initBfgs
     typx = np.ones(np.asarray(xk).shape)
@@ -1341,12 +1412,14 @@ def bfgsLineSearch(fct,
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
         message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
-        messages = {'Algorithm': 'Inverse BFGS with line search',
-                    'Relative gradient': relgrad,
-                    'Cause of termination': message,
-                    'Number of iterations': 0,
-                    'Number of function evaluations': nfev,
-                    'Number of gradient evaluations': ngev}
+        messages = {
+            'Algorithm': 'Inverse BFGS with line search',
+            'Relative gradient': relgrad,
+            'Cause of termination': message,
+            'Number of iterations': 0,
+            'Number of function evaluations': nfev,
+            'Number of gradient evaluations': ngev,
+        }
         return xk, messages
     k = 0
     nfev = 0
@@ -1372,27 +1445,32 @@ def bfgsLineSearch(fct,
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(f'{k} f={f:10.7g} relgrad={relgrad:6.2g}'
-                        f' alpha={alpha:6.2g}')
-    messages = {'Algorithm': 'Inverse BFGS with line search',
-                'Relative gradient': relgrad,
-                'Cause of termination': message,
-                'Number of iterations': k,
-                'Number of function evaluations': nfev,
-                'Number of gradient evaluations': ngev}
+        logger.detailed(
+            f'{k} f={f:10.7g} relgrad={relgrad:6.2g}' f' alpha={alpha:6.2g}'
+        )
+    messages = {
+        'Algorithm': 'Inverse BFGS with line search',
+        'Relative gradient': relgrad,
+        'Cause of termination': message,
+        'Number of iterations': k,
+        'Number of function evaluations': nfev,
+        'Number of gradient evaluations': ngev,
+    }
 
     return xk, messages
 
 
-def bfgsTrustRegion(fct,
-                    x0,
-                    initBfgs=None,
-                    delta0=1.0,
-                    eps=np.finfo(np.float64).eps ** 0.3333,
-                    dl=False,
-                    maxiter=1000,
-                    eta1=0.01,
-                    eta2=0.9):
+def bfgsTrustRegion(
+    fct,
+    x0,
+    initBfgs=None,
+    delta0=1.0,
+    eps=np.finfo(np.float64).eps ** 0.3333,
+    dl=False,
+    maxiter=1000,
+    eta1=0.01,
+    eta2=0.9,
+):
     """BFGS method with trust region
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -1451,9 +1529,11 @@ def bfgsTrustRegion(fct,
         H = np.identity(n)
     else:
         if initBfgs.shape != (n, n):
-            errorMsg = (f'BFGS must be initialized with a {n}x{n} '
-                        f'matrix and not a {initBfgs.shape[0]}'
-                        f'x{initBfgs.shape[1]} matrix.')
+            errorMsg = (
+                f'BFGS must be initialized with a {n}x{n} '
+                f'matrix and not a {initBfgs.shape[0]}'
+                f'x{initBfgs.shape[1]} matrix.'
+            )
             raise excep.biogemeError(errorMsg)
         H = initBfgs
     typx = np.ones(np.asarray(xk).shape)
@@ -1461,12 +1541,14 @@ def bfgsTrustRegion(fct,
     relgrad = relativeGradient(xk, f, g, typx, typf)
     if relgrad <= eps:
         message = f'Relative gradient = {relgrad:.2g} <= {eps:.2g}'
-        messages = {'Algorithm': 'BFGS with trust region',
-                    'Relative gradient': relgrad,
-                    'Cause of termination': message,
-                    'Number of iterations': 0,
-                    'Number of function evaluations': nfev,
-                    'Number of gradient evaluations': ngev}
+        messages = {
+            'Algorithm': 'BFGS with trust region',
+            'Relative gradient': relgrad,
+            'Cause of termination': message,
+            'Number of iterations': 0,
+            'Number of function evaluations': nfev,
+            'Number of gradient evaluations': ngev,
+        }
         return xk, messages
     delta = delta0
     cont = True
@@ -1522,38 +1604,47 @@ def bfgsTrustRegion(fct,
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(f'{k} f={f:10.7g} relgrad={relgrad:6.2g}'
-                        f' delta={delta:6.2g} '
-                        f'rho={rho:6.2g} {status}')
+        logger.detailed(
+            f'{k} f={f:10.7g} relgrad={relgrad:6.2g}'
+            f' delta={delta:6.2g} '
+            f'rho={rho:6.2g} {status}'
+        )
 
-    messages = {'Algorithm': 'BFGS with trust region',
-                'Relative gradient': relgrad,
-                'Cause of termination': message,
-                'Number of iterations': k,
-                'Number of function evaluations': nfev,
-                'Number of gradient evaluations': ngev}
+    messages = {
+        'Algorithm': 'BFGS with trust region',
+        'Relative gradient': relgrad,
+        'Cause of termination': message,
+        'Number of iterations': k,
+        'Number of function evaluations': nfev,
+        'Number of gradient evaluations': ngev,
+    }
 
     return xk, messages
 
 
-def truncatedConjugateGradientSubspace(xk,
-                                       gk,
-                                       Hk,
-                                       delta,
-                                       bounds,
-                                       infeasibleIterate=False,
-                                       tol=np.finfo(np.float64).eps ** 0.3333):
+def truncatedConjugateGradientSubspace(
+    xk,
+    gk,
+    Hk,
+    delta,
+    bounds,
+    infeasibleIterate=False,
+    tol=np.finfo(np.float64).eps ** 0.3333,
+):
     """Find an approximation of the solution of the trust region
        subproblem using the truncated conjugate gradient method within
        the subspace of free variables. Free variables are those
        corresponding to inactive constraints at the generalized Cauchy
        point.
 
-    :param g: gradient of the quadratic model.
-    :type g: numpy.array
+    :param xk: current iterate.
+    :type xk: numpy.array
 
-    :param H: hessian of the quadrartic model.
-    :type H: numpy.array
+    :param gk: gradient of the quadratic model.
+    :type gk: numpy.array
+
+    :param Hk: hessian of the quadrartic model.
+    :type Hk: numpy.array
 
     :param delta: radius of the trust region.
     :type delta: float
@@ -1569,6 +1660,9 @@ def truncatedConjugateGradientSubspace(xk,
                               Default: False.
 
     :type infeasibleIterate: bool
+
+    :param tol: tolerance used for stopping criterion.
+    :type tol: float
 
     :return: d, diagnostic, where
 
@@ -1636,7 +1730,7 @@ def truncatedConjugateGradientSubspace(xk,
                 alpha1, _ = boundsBar.maximumStep(xbar, pbar)
             else:
                 feasible = False
-            
+
             if np.inner(pbar, ybar) <= 0:
                 # Negative curvature has been detected.
                 if feasible:
@@ -1670,19 +1764,21 @@ def truncatedConjugateGradientSubspace(xk,
     return x, 1
 
 
-def simpleBoundsNewtonAlgorithm(fct,
-                                bounds,
-                                x0,
-                                proportionTrueHessian=1.0,
-                                infeasibleConjugateGradient=False,
-                                delta0=1.0,
-                                tol=np.finfo(np.float64).eps ** 0.3333,
-                                steptol=1.0e-5,
-                                cgtol=np.finfo(np.float64).eps ** 0.3333,
-                                maxiter=1000,
-                                eta1=0.01,
-                                eta2=0.9,
-                                enlargingFactor=10):
+def simpleBoundsNewtonAlgorithm(
+    fct,
+    bounds,
+    x0,
+    proportionTrueHessian=1.0,
+    infeasibleConjugateGradient=False,
+    delta0=1.0,
+    tol=np.finfo(np.float64).eps ** 0.3333,
+    steptol=1.0e-5,
+    cgtol=np.finfo(np.float64).eps ** 0.3333,
+    maxiter=1000,
+    eta1=0.01,
+    eta2=0.9,
+    enlargingFactor=10,
+):
     """Trust region algorithm for problems with simple bounds
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -1723,7 +1819,7 @@ def simpleBoundsNewtonAlgorithm(fct,
                 digits of x are needed, steptol should be set to
                 1.0e-p.  Default: :math:`10^{-5}`
 
-    :type tol: float
+    :type steptol: float
 
 
     :param cgtol: the conjugate gradient algorithm stops when this
@@ -1760,12 +1856,15 @@ def simpleBoundsNewtonAlgorithm(fct,
 
     """
     if len(x0) != bounds.n:
-        raise excep.biogemeError(f'Incompatible size:'
-                                 f' {len(x0)} and {len(bounds)}')
+        raise excep.biogemeError(
+            f'Incompatible size:' f' {len(x0)} and {len(bounds)}'
+        )
 
     if not bounds.feasible(x0):
-        logger.warning('Initial point not feasible. '
-                       'It will be projected onto the feasible domain.')
+        logger.warning(
+            'Initial point not feasible. '
+            'It will be projected onto the feasible domain.'
+        )
 
     numberOfTrueHessian = 0
     numberOfMatrices = 0
@@ -1775,8 +1874,10 @@ def simpleBoundsNewtonAlgorithm(fct,
     elif proportionTrueHessian == 0.0:
         algo = 'BFGS with trust region for simple bound constraints'
     else:
-        algo = (f'Hybrid Newton [{100*proportionTrueHessian}%] with trust '
-                f'region for simple bound constraints')
+        algo = (
+            f'Hybrid Newton [{100*proportionTrueHessian}%] with trust '
+            f'region for simple bound constraints'
+        )
 
     k = 0
     xk = bounds.project(x0)
@@ -1794,10 +1895,12 @@ def simpleBoundsNewtonAlgorithm(fct,
         numberOfMatrices += 1
         # If there is a numerical problem with the Hessian, we use BFGS instead
         if np.isnan(H).any() or np.linalg.norm(H) > 1.0e100:
-            logger.warning(f'Numerical problem with the second derivative'
-                           f' matrix at the starting point. Norm = '
-                           f'{np.linalg.norm(H)}. Replaced by the '
-                           f'identity matrix.')
+            logger.warning(
+                f'Numerical problem with the second derivative'
+                f' matrix at the starting point. Norm = '
+                f'{np.linalg.norm(H)}. Replaced by the '
+                f'identity matrix.'
+            )
             H = np.eye(len(xk))
     else:
         f, g = fct.f_g()
@@ -1813,13 +1916,15 @@ def simpleBoundsNewtonAlgorithm(fct,
     relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
     if relgrad <= tol:
         message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
-        messages = {'Algorithm': algo,
-                    'Relative projected gradient': relgrad,
-                    'Number of iterations': 0,
-                    'Number of function evaluations': nfev,
-                    'Number of gradient evaluations': ngev,
-                    'Number of hessian evaluations': nhev,
-                    'Cause of termination': message}
+        messages = {
+            'Algorithm': algo,
+            'Relative projected gradient': relgrad,
+            'Number of iterations': 0,
+            'Number of function evaluations': nfev,
+            'Number of gradient evaluations': ngev,
+            'Number of hessian evaluations': nhev,
+            'Cause of termination': message,
+        }
         return xk, messages
 
     delta = delta0
@@ -1832,13 +1937,9 @@ def simpleBoundsNewtonAlgorithm(fct,
 
         # Solve the quandratic problem in the subspace defined by the GCP
 
-        xc, _ = truncatedConjugateGradientSubspace(xk,
-                                                   g,
-                                                   H,
-                                                   delta,
-                                                   bounds,
-                                                   infeasibleConjugateGradient,
-                                                   cgtol)
+        xc, _ = truncatedConjugateGradientSubspace(
+            xk, g, H, delta, bounds, infeasibleConjugateGradient, cgtol
+        )
 
         if np.isnan(xc).any():
             delta = delta / 2.0
@@ -1859,9 +1960,11 @@ def simpleBoundsNewtonAlgorithm(fct,
                 status = '-'
             else:
                 # Candidate accepted
-                if proportionTrueHessian > 0 and \
-                   float(numberOfTrueHessian) / float(numberOfMatrices) \
-                   <= proportionTrueHessian:
+                if (
+                    proportionTrueHessian > 0
+                    and float(numberOfTrueHessian) / float(numberOfMatrices)
+                    <= proportionTrueHessian
+                ):
 
                     try:
                         fc, gc, Hc = fct.f_g_h()
@@ -1873,10 +1976,12 @@ def simpleBoundsNewtonAlgorithm(fct,
                         # If there is a numerical problem with the
                         # Hessian, we apply BFGS
                         if np.linalg.norm(Hc) > 1.0e100:
-                            logger.warning(f'Numerical problem with the second '
-                                           f'derivative matrix. '
-                                           f'Norm = {np.linalg.norm(Hc)}. '
-                                           f'Replaced by the identity matrix.')
+                            logger.warning(
+                                f'Numerical problem with the second '
+                                f'derivative matrix. '
+                                f'Norm = {np.linalg.norm(Hc)}. '
+                                f'Replaced by the identity matrix.'
+                            )
                             y = gc - g
                             Hc = bfgs(H, step, y)
                         fghCalculated = True
@@ -1914,18 +2019,20 @@ def simpleBoundsNewtonAlgorithm(fct,
                         status = '+'
 
                     projectedGradient = bounds.project(xk - g) - xk
-                    relgrad = relativeGradient(xk,
-                                               f,
-                                               projectedGradient,
-                                               typx,
-                                               typf)
+                    relgrad = relativeGradient(
+                        xk, f, projectedGradient, typx, typf
+                    )
                     if relgrad <= tol:
-                        message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
+                        message = (
+                            f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
+                        )
                         cont = False
                     relchange = relativeChange(xk, xpred, typx)
                     if relchange <= steptol:
-                        message = (f'Relative change = '
-                                   f'{relchange:.3g} <= {steptol:.2g}')
+                        message = (
+                            f'Relative change = '
+                            f'{relchange:.3g} <= {steptol:.2g}'
+                        )
                         cont = False
             if delta <= minDelta:
                 message = f'Trust region is too small: {delta}'
@@ -1934,31 +2041,36 @@ def simpleBoundsNewtonAlgorithm(fct,
                 message = f'Maximum number of iterations reached: {maxiter}'
                 cont = False
             if relchange is None:
-                logger.detailed(f'{k} f={f:10.7g} projected '
-                                f'rel. grad.={relgrad:6.2g} '
-                                f'delta={delta:6.2g} rho={rho:6.2g} {status}')
+                logger.detailed(
+                    f'{k} f={f:10.7g} projected '
+                    f'rel. grad.={relgrad:6.2g} '
+                    f'delta={delta:6.2g} rho={rho:6.2g} {status}'
+                )
             else:
-                logger.detailed(f'{k} f={f:10.7g} projected '
-                                f'rel. grad.={relgrad:6.2g} '
-                                f'rel. change={relchange:6.2g} '
-                                f'delta={delta:6.2g} rho={rho:6.2g} {status}')
+                logger.detailed(
+                    f'{k} f={f:10.7g} projected '
+                    f'rel. grad.={relgrad:6.2g} '
+                    f'rel. change={relchange:6.2g} '
+                    f'delta={delta:6.2g} rho={rho:6.2g} {status}'
+                )
     if numberOfMatrices != 0:
         actualProp = 100 * float(numberOfTrueHessian) / float(numberOfMatrices)
     else:
         actualProp = 0
-    m = (f'Proportion of Hessian calculation: '
-         f'{actualProp}%')
+    m = f'Proportion of Hessian calculation: ' f'{actualProp}%'
     logger.detailed(m)
 
-    messages = {'Algorithm': algo,
-                'Proportion analytical hessian': f'{actualProp:.1f}%',
-                'Relative projected gradient': relgrad,
-                'Relative change': relchange,
-                'Number of iterations': k,
-                'Number of function evaluations': nfev,
-                'Number of gradient evaluations': ngev,
-                'Number of hessian evaluations': nhev,
-                'Cause of termination': message}
+    messages = {
+        'Algorithm': algo,
+        'Proportion analytical hessian': f'{actualProp:.1f}%',
+        'Relative projected gradient': relgrad,
+        'Relative change': relchange,
+        'Number of iterations': k,
+        'Number of function evaluations': nfev,
+        'Number of gradient evaluations': ngev,
+        'Number of hessian evaluations': nhev,
+        'Cause of termination': message,
+    }
 
     return xk, messages
 
@@ -1986,8 +2098,9 @@ def relativeChange(x, xpred, typx):
 
     """
 
-    relx = np.array([abs(x[i] - xpred[i]) / max(abs(x[i]), typx[i])
-                     for i in range(len(x))])
+    relx = np.array(
+        [abs(x[i] - xpred[i]) / max(abs(x[i]), typx[i]) for i in range(len(x))]
+    )
     result = relx.max()
     if np.isfinite(result):
         return result

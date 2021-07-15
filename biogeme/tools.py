@@ -16,6 +16,7 @@ from scipy.stats import chi2
 
 logger = msg.bioMessage()
 
+
 def findiff_g(theFunction, x):
     """Calculates the gradient of a function :math`f` using finite differences
 
@@ -52,6 +53,7 @@ def findiff_g(theFunction, x):
         g[i] = (fp - f) / s
     return g
 
+
 def findiff_H(theFunction, x):
     """Calculates the hessian of a function :math:`f` using finite differences
 
@@ -67,7 +69,8 @@ def findiff_H(theFunction, x):
     :param x: argument of the function
     :type x: numpy.array
 
-    :return: numpy matrix containing the hessian calculated by finite differences.
+    :return: numpy matrix containing the hessian calculated by
+             finite differences.
     :rtype: numpy.array
 
     """
@@ -75,7 +78,7 @@ def findiff_H(theFunction, x):
     n = len(x)
     H = np.zeros((n, n))
     g = theFunction(x)[1]
-    I = np.eye(n, n)
+    eye = np.eye(n, n)
     for i in range(n):
         xi = x.item(i)
         if abs(xi) >= 1:
@@ -84,7 +87,7 @@ def findiff_H(theFunction, x):
             s = tau
         else:
             s = -tau
-        ei = I[i]
+        ei = eye[i]
         gp = theFunction(x + s * ei)[1]
         H[:, i] = (gp - g).flatten() / s
     return H
@@ -94,10 +97,11 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
     """Verifies the analytical derivatives of a function by comparing
     them with finite difference approximations.
 
-    :param theFunction: A function object that takes a vector as an argument, 
+    :param theFunction: A function object that takes a vector as an argument,
         and returns a tuple:
 
-          - The first element of the tuple is the value of the function :math:`f`,
+          - The first element of the tuple is the value of the
+            function :math:`f`,
           - the second is the gradient of the function,
           - the third is the hessian.
 
@@ -117,10 +121,10 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
           - f is the value of the function at x,
           - g is the analytical gradient,
           - h is the analytical hessian,
-          - gdiff is the difference between the analytical gradient and the finite
-            difference approximation
-          - hdiff is the difference between the analytical hessian and the finite
-            difference approximation
+          - gdiff is the difference between the analytical gradient
+            and the finite difference approximation
+          - hdiff is the difference between the analytical hessian
+            and the finite difference approximation
 
     :rtype: float, numpy.array,numpy.array,  numpy.array,numpy.array
 
@@ -141,12 +145,15 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
         logger.detailed('Row\t\tCol\t\tHessian\tFinDiff\t\tDifference')
         for row in range(len(hdiff)):
             for col in range(len(hdiff)):
-                logger.detailed(f'{names[row]:15}\t{names[col]:15}\t{h[row,col]:+E}\t'
-                                f'{h_num[row,col]:+E}\t{hdiff[row,col]:+E}')
+                logger.detailed(
+                    f'{names[row]:15}\t{names[col]:15}\t{h[row,col]:+E}\t'
+                    f'{h_num[row,col]:+E}\t{hdiff[row,col]:+E}'
+                )
     return f, g, h, gdiff, hdiff
 
+
 def getPrimeNumbers(n):
-    """ Get a given number of prime numbers
+    """Get a given number of prime numbers
 
     :param n: number of primes that are requested
     :type n: int
@@ -162,8 +169,9 @@ def getPrimeNumbers(n):
         total = len(primes)
     return primes[0:n]
 
+
 def calculatePrimeNumbers(upperBound):
-    """ Calculate prime numbers
+    """Calculate prime numbers
 
     :param upperBound: prime numbers up to this value will be computed
     :type upperBound: int
@@ -190,21 +198,22 @@ def calculatePrimeNumbers(upperBound):
 
     return myprimes
 
+
 def countNumberOfGroups(df, column):
     """
     This function counts the number of groups of same value in a column.
-    For instance: 1,2,2,3,3,3,4,1,1  would give 5. 
+    For instance: 1,2,2,3,3,3,4,1,1  would give 5.
 
-    Example:: 
+    Example::
 
-        >>>df = pd.DataFrame({'ID': [1, 1, 2, 3, 3, 1, 2, 3], 
-                              'value':[1000, 
-                                       2000, 
-                                       3000, 
-                                       4000, 
-                                       5000, 
-                                       5000, 
-                                       10000, 
+        >>>df = pd.DataFrame({'ID': [1, 1, 2, 3, 3, 1, 2, 3],
+                              'value':[1000,
+                                       2000,
+                                       3000,
+                                       4000,
+                                       5000,
+                                       5000,
+                                       10000,
                                        20000]})
         >>>tools.countNumberOfGroups(df,'ID')
         6
@@ -216,26 +225,29 @@ def countNumberOfGroups(df, column):
     df['_biogroups'] = (df[column] != df[column].shift(1)).cumsum()
     return len(df['_biogroups'].unique())
 
-def likelihood_ratio_test(model1, model2, significance_level = 0.95):
+
+def likelihood_ratio_test(model1, model2, significance_level=0.95):
     """
     This function performs a likelihood ratio test between a
     restricted and an unrestricted model.
 
-    :param model1: the final loglikelood of one model, and the number of estimated parameters.
+    :param model1: the final loglikelood of one model, and the number of
+                   estimated parameters.
     :type model1: tuple(float, int)
 
-    :param model2: the final loglikelood of the other model, and the number of estimated parameters.
+    :param model2: the final loglikelood of the other model, and
+                   the number of estimated parameters.
     :type model2: tuple(float, int)
 
     :param significance_level: level of significance of the test. Default: 0.95
     :type significance_level: float
 
-    :return: a tuple containing: 
+    :return: a tuple containing:
 
                   - a message with the outcome of the test
-                  - the statistic, that is minus two times the difference between 
-                    the loglikelihood  of the two models
-                  - the threshold of the chi square distribution. 
+                  - the statistic, that is minus two times the difference
+                    between the loglikelihood  of the two models
+                  - the threshold of the chi square distribution.
 
     :rtype: (str, float, float)
 
@@ -245,8 +257,10 @@ def likelihood_ratio_test(model1, model2, significance_level = 0.95):
     loglike_m2, df_m2 = model2
     if loglike_m1 > loglike_m2:
         if df_m1 < df_m2:
-            raise excep.biogemeError(f'The unrestricted model {model2} has a '
-                                     f'lower loglikelihood than the restricted one {model1}')
+            raise excep.biogemeError(
+                f'The unrestricted model {model2} has a '
+                f'lower loglikelihood than the restricted one {model1}'
+            )
             return None
         loglike_ur = loglike_m1
         loglike_r = loglike_m2
@@ -254,14 +268,16 @@ def likelihood_ratio_test(model1, model2, significance_level = 0.95):
         df_r = df_m2
     else:
         if df_m1 >= df_m2:
-            raise excep.biogemeError(f'The unrestricted model {model1} has a '
-                                     f'lower loglikelihood than the restricted one {model2}')
+            raise excep.biogemeError(
+                f'The unrestricted model {model1} has a '
+                f'lower loglikelihood than the restricted one {model2}'
+            )
             return None
         loglike_ur = loglike_m2
         loglike_r = loglike_m1
         df_ur = df_m2
         df_r = df_m1
-        
+
     stat = -2 * (loglike_r - loglike_ur)
     chi_df = df_ur - df_r
     threshold = chi2.ppf(significance_level, chi_df)
