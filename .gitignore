@@ -287,3 +287,9 @@ examples/assisted/.ipynb_checkpoints/paretoOptima-checkpoint.ipynb
 examples/assisted/__biogemeModelDefaultName.iter
 biogeme/vns.modified
 cp.log
+src/biogeme.cc.tmp
+src/biogeme.cc.work
+src/biogeme.h.work
+src/cbiogeme.pyx.ok
+src/cbiogeme.pyx.work
+biogeme/biogeme_orig.py
