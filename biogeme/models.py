@@ -106,10 +106,16 @@ def boxcox(x, ell):
 
     .. math:: \\lim_{\\ell \\to 0} B(x,\\ell)=\\log(x).
 
+    To avoid numerical difficulties, if :math:`\\ell < 10^{-5}`,
+    the McLaurin approximation is used:
+
+    .. math:: \\log(x) + \\ell \\log(x)^2 + \\frac{1}{6} \\ell^2 \\log(x)^3
+              + \\frac{1}{24} \\ell^3 \\log(x)^4.
+
     :param x: a variable to transform.
     :type x: biogeme.expressions.Expression
-    :param l: parameter of the transformation.
-    :type l: biogeme.expressions.Expression
+    :param ell: parameter of the transformation.
+    :type ell: biogeme.expressions.Expression
 
     :return: the Box-Cox transform
     :rtype: biogeme.expressions.Expression
@@ -160,7 +166,12 @@ def piecewiseVariables(variable, thresholds):
     :return: list of variables to for the piecewise linear specification.
     :rtype: list(biogeme.expressions.Expression)
 
-    .. seealso:: piecewiseFormula
+    :raise biogemeError: if the thresholds are not defined properly,
+        as only the first and the last thresholds can be set
+        to None.
+
+    .. seealso:: :meth:`piecewiseFormula`
+
     """
     eye = len(thresholds)
     if all(t is None for t in thresholds):
@@ -216,9 +227,9 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
 
     New variables and new parameters are automatically created.
 
-    :param variable: variable for which we need the piecewise linear
-       transform.
-    :type string: name of the variable.
+    :param variable: name of the variable for which we need the
+        piecewise linear transform.
+    :type variable: string
 
     :param thresholds: list of thresholds
     :type thresholds: list(float)
@@ -231,6 +242,15 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
 
     :return: expression of  the piecewise linear specification.
     :rtype: biogeme.expressions.Expression
+
+    :raise biogemeError: if the thresholds are not defined properly,
+        which means that only the first and the last threshold can be set
+        to None.
+
+    :raise biogemeError: if the length of list ``initialBetas`` is not equal to
+        the length of ``thresholds`` minus one.
+
+    .. seealso:: :meth:`piecewiseVariables`
 
     """
 
@@ -342,6 +362,12 @@ def piecewiseFunction(x, thresholds, betas):
 
     :return: value of the numpy function
     :rtype: float
+
+    :raise biogemeError: if the thresholds are not defined properly,
+        which means that only the first and the last threshold can be set
+        to None.
+
+
     """
     eye = len(thresholds)
     if all(t is None for t in thresholds):
@@ -395,10 +421,11 @@ def logmev(V, logGi, av, choice):
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J})
+        .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+            (e^{V_1},\\ldots,e^{V_J})
 
-    where :math:`G` is the MEV generating function. If an alternative
-          :math:`i` is not available, then :math:`G_i = 0`.
+        where :math:`G` is the MEV generating function. If an alternative
+        :math:`i` is not available, then :math:`G_i = 0`.
 
     :type logGi: dict(int:biogeme.expressions.Expression)
 
@@ -415,6 +442,7 @@ def logmev(V, logGi, av, choice):
     :type choice: biogeme.expressions.Expression
 
     :return: log of the choice probability of the MEV model, given by
+    :rtype: biogeme.expressions.Expression
 
     .. math:: V_i + \\ln G_i(e^{V_1},\\ldots,e^{V_J}) -
               \\ln\\left(\\sum_j e^{V_j + \\ln G_j(e^{V_1},
@@ -440,11 +468,13 @@ def mev(V, logGi, av, choice):
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+        .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
               (e^{V_1}, \\ldots, e^{V_J})
 
-    where :math:`G` is the MEV generating function. If an alternative
-          :math:`i` is not available, then :math:`G_i = 0`.
+        where :math:`G` is the MEV generating function. If an alternative
+        :math:`i` is not available, then :math:`G_i = 0`.
+
+    :type logGi: dict(int:biogeme.expressions.Expression)
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
@@ -464,6 +494,7 @@ def mev(V, logGi, av, choice):
               \\ldots,e^{V_J})}}{\\sum_j e^{V_j +
               \\ln G_j(e^{V_1},\\ldots,e^{V_J})}}
 
+    :rtype: biogeme.expressions.Expression
     """
     return exp(logmev(V, logGi, av, choice))
 
@@ -471,8 +502,8 @@ def mev(V, logGi, av, choice):
 def logmev_endogenousSampling(V, logGi, av, correction, choice):
 
     """Log of choice probability for a MEV model, including the
-       correction for endogenous sampling as proposed by `Bierlaire, Bolduc
-       and McFadden (2008)`_.
+    correction for endogenous sampling as proposed by `Bierlaire, Bolduc
+    and McFadden (2008)`_.
 
     .. _`Bierlaire, Bolduc and McFadden (2008)`:
        http://dx.doi.org/10.1016/j.trb.2007.09.003
@@ -480,14 +511,15 @@ def logmev_endogenousSampling(V, logGi, av, correction, choice):
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
+    :type V: dict(int:biogeme.expressions.Expression)
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
-              (e^{V_1}, \\ldots, e^{V_J})
+        .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+                  (e^{V_1}, \\ldots, e^{V_J})
 
-    where :math:`G` is the MEV generating function. If an alternative
-          :math:`i` is not available, then :math:`G_i = 0`.
+        where :math:`G` is the MEV generating function. If an alternative
+        :math:`i` is not available, then :math:`G_i = 0`.
 
     :type logGi: dict(int:biogeme.expressions.Expression)
 
@@ -516,6 +548,8 @@ def logmev_endogenousSampling(V, logGi, av, correction, choice):
 
     where :math:`\\omega_i` is the correction term for alternative :math:`i`.
 
+    :rtype: biogeme.expressions.Expression
+
     """
     H = {i: v + logGi[i] + correction[i] for i, v in V.items()}
     logP = _bioLogLogit(H, av, choice)
@@ -524,8 +558,8 @@ def logmev_endogenousSampling(V, logGi, av, correction, choice):
 
 def mev_endogenousSampling(V, logGi, av, correction, choice):
     """Choice probability for a MEV model, including the correction
-       for endogenous sampling as proposed by
-       `Bierlaire, Bolduc and McFadden (2008)`_.
+    for endogenous sampling as proposed by
+    `Bierlaire, Bolduc and McFadden (2008)`_.
 
     .. _`Bierlaire, Bolduc and McFadden (2008)`:
            http://dx.doi.org/10.1016/j.trb.2007.09.003
@@ -533,14 +567,15 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
+    :type V: dict(int:biogeme.expressions.Expression)
 
     :param logGi: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
+        .. math:: \\ln \\frac{\\partial G}{\\partial y_i}
               (e^{V_1}, \\ldots, e^{V_J})
 
-    where :math:`G` is the MEV generating function. If an alternative
-                :math:`i` is not available, then :math:`G_i = 0`.
+        where :math:`G` is the MEV generating function. If an alternative
+        :math:`i` is not available, then :math:`G_i = 0`.
 
     :type logGi: dict(int:biogeme.expressions.Expression)
 
@@ -568,6 +603,9 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
               \\omega_j}\\right)
 
     where :math:`\\omega_i` is the correction term for alternative :math:`i`.
+
+    :rtype: biogeme.expressions.Expression
+
     """
     return exp(logmev_endogenousSampling(V, logGi, av, correction, choice))
 
@@ -588,20 +626,18 @@ def getMevGeneratingForNested(V, availability, nests):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: A tuple containing as many items as nests.
-                  Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions.Expression representing
-            the nest parameter,
-          - a list containing the list of identifiers of the alternatives
-            belonging to the nest.
+        - an object of type biogeme.expressions.Expression representing
+          the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-      Example::
+        Example::
 
-          nesta = MUA ,[1, 2, 3]
-          nestb = MUB ,[4, 5, 6]
-          nests = nesta, nestb
-
-
+            nesta = MUA ,[1, 2, 3]
+            nestb = MUB ,[4, 5, 6]
+            nests = nesta, nestb
 
     :type nests: tuple
 
@@ -636,10 +672,10 @@ def getMevGeneratingForNested(V, availability, nests):
 
 def getMevForNested(V, availability, nests):
     """Implements the derivatives of MEV generating function for the
-        nested logit model
+    nested logit model
 
     :param V: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
+        each alternative, indexed by numerical ids.
     :type V: dict(int:biogeme.expressions.Expression)
 
     :param availability: dict of objects representing the availability of each
@@ -651,32 +687,30 @@ def getMevForNested(V, availability, nests):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: A tuple containing as many items as nests.
-                  Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions.Expression representing
-            the nest parameter,
-          - a list containing the list of identifiers of the alternatives
-            belonging to the nest.
+        - an object of type biogeme.expressions.Expression representing
+          the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-      Example::
+        Example::
 
-          nesta = MUA ,[1, 2, 3]
-          nestb = MUB ,[4, 5, 6]
-          nests = nesta, nestb
-
-
+            nesta = MUA ,[1, 2, 3]
+            nestb = MUB ,[4, 5, 6]
+            nests = nesta, nestb
 
     :type nests: tuple
 
     :return: a dictionary mapping each alternative id with the function
 
-    .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1},
+        .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1},
               \\ldots,e^{V_J}) = e^{(\\mu_m-1)V_i}
               \\left(\\sum_{i=1}^{J_m} e^{\\mu_m V_i}\\right)^
               {\\frac{1}{\\mu_m}-1}
 
-    where :math:`m` is the (only) nest containing alternative :math:`i`,
-          and :math:`G` is the MEV generating function.
+        where :math:`m` is the (only) nest containing alternative :math:`i`,
+        and :math:`G` is the MEV generating function.
 
     :rtype: dict(int:biogeme.expressions.Expression)
 
@@ -704,47 +738,48 @@ def getMevForNestedMu(V, availability, nests, mu):
     """Implements the MEV generating function for the nested logit model,
     including the scale parameter
 
-        :param V: dict of objects representing the utility functions of
-                  each alternative, indexed by numerical ids.
-        :type V: dict(int:biogeme.expressions.Expression)
+    :param V: dict of objects representing the utility functions of
+        each alternative, indexed by numerical ids.
 
-        :param availability: dict of objects representing the availability of each
-                   alternative, indexed
-                   by numerical ids. Must be consistent with V, or
-                   None. In this case, all alternatives are supposed to be
-                   always available.
+    :type V: dict(int:biogeme.expressions.Expression)
 
-        :type availability: dict(int:biogeme.expressions.Expression)
+    :param availability: dict of objects representing the availability
+        of each alternative, indexed
+        by numerical ids. Must be consistent with V, or
+        None. In this case, all alternatives are supposed to be
+        always available.
 
-        :param nests: A tuple containing as many items as nests.
-                Each item is also a tuple containing two items:
+    :type availability: dict(int:biogeme.expressions.Expression)
 
-              - an object of type biogeme.expressions. Expression
-                representing the nest parameter,
-              - a list containing the list of identifiers of the alternatives
-                belonging to the nest.
+    :param nests: A tuple containing as many items as nests.
+        Each item is also a tuple containing two items:
 
-          Example::
+        - an object of type biogeme.expressions. Expression
+          representing the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-              nesta = MUA, [1, 2, 3]
-              nestb = MUB, [4, 5, 6]
-              nests = nesta, nestb
+        Example::
 
-        :type nests: tuple
+            nesta = MUA, [1, 2, 3]
+           nestb = MUB, [4, 5, 6]
+            nests = nesta, nestb
 
-        :param mu: scale parameter
-        :type mu: biogeme.expressions.Expression
+    :type nests: tuple
 
-        :return: a dictionary mapping each alternative id with the function
+    :param mu: scale parameter
+    :type mu: biogeme.expressions.Expression
+
+    :return: a dictionary mapping each alternative id with the function
 
         .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
                   \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
                   e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
 
         where :math:`m` is the (only) nest containing alternative :math:`i`,
-              and :math:`G` is the MEV generating function.
+        and :math:`G` is the MEV generating function.
 
-        :rtype: dict(int:biogeme.expressions.Expression)
+    :rtype: dict(int:biogeme.expressions.Expression)
 
     """
 
@@ -781,18 +816,18 @@ def nested(V, availability, nests, choice):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: A tuple containing as many items as nests. Each item is also
-                  a tuple containing two items:
+        a tuple containing two items:
 
-                  - an object of type biogeme.expressions. Expression
-                    representing the nest parameter,
-                  - a list containing the list of identifiers of the
-                    alternatives belonging to the nest.
+        - an object of type biogeme.expressions. Expression
+          representing the nest parameter,
+        - a list containing the list of identifiers of the
+          alternatives belonging to the nest.
 
-      Example::
+        Example::
 
-          nesta = MUA, [1, 2, 3]
-          nestb = MUB, [4, 5, 6]
-          nests = nesta, nestb
+            nesta = MUA, [1, 2, 3]
+            nestb = MUB, [4, 5, 6]
+            nests = nesta, nestb
 
     :type nests: tuple
 
@@ -804,6 +839,9 @@ def nested(V, availability, nests, choice):
              based on the derivatives of the MEV generating function produced
              by the function getMevForNested
 
+    :rtype: biogeme.expressions.Expression
+
+    :raise biogemeError: if the definition of the nests is invalid.
     """
 
     ok, message = checkValidityNestedLogit(V, nests)
@@ -832,18 +870,18 @@ def lognested(V, availability, nests, choice):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: A tuple containing as many items as nests.
-                 Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression representing
-            the nest parameter,
-          - a list containing the list of identifiers of the alternatives
-            belonging to the nest.
+        - an object of type biogeme.expressions. Expression representing
+          the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-      Example::
+        Example::
 
-          nesta = MUA, [1, 2, 3]
-          nestb = MUB, [4, 5, 6]
-          nests = nesta, nestb
+            nesta = MUA, [1, 2, 3]
+            nestb = MUB, [4, 5, 6]
+            nests = nesta, nestb
 
     :type nests: tuple
 
@@ -855,6 +893,9 @@ def lognested(V, availability, nests, choice):
              based on the derivatives of the MEV generating function produced
              by the function getMevForNested
 
+    :rtype: biogeme.expressions.Expression
+
+    :raise biogemeError: if the definition of the nests is invalid.
     """
     ok, message = checkValidityNestedLogit(V, nests)
     if not ok:
@@ -883,18 +924,18 @@ def nestedMevMu(V, availability, nests, choice, mu):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: A tuple containing as many items as nests.
-            Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions.Expression  representing
-            the nest parameter,
-          - a list containing the list of identifiers of the alternatives
-             belonging to the nest.
+        - an object of type biogeme.expressions.Expression  representing
+          the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-      Example::
+        Example::
 
-          nesta = MUA ,[1, 2, 3]
-          nestb = MUB ,[4, 5, 6]
-          nests = nesta, nestb
+            nesta = MUA ,[1, 2, 3]
+            nestb = MUB ,[4, 5, 6]
+            nests = nesta, nestb
 
     :type nests: tuple
 
@@ -923,8 +964,8 @@ def nestedMevMu(V, availability, nests, choice, mu):
 
 def lognestedMevMu(V, availability, nests, choice, mu):
     """Implements the log of the nested logit model as a MEV model, where
-       mu is also a parameter, if the user wants to test different
-       normalization schemes.
+    mu is also a parameter, if the user wants to test different
+    normalization schemes.
 
 
     :param V: dict of objects representing the utility functions of
@@ -941,18 +982,18 @@ def lognestedMevMu(V, availability, nests, choice, mu):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: A tuple containing as many items as nests.
-             Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions.Expression  representing
-            the nest parameter,
-          - a list containing the list of identifiers of the alternatives
-            belonging to the nest.
+        - an object of type biogeme.expressions.Expression  representing
+          the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-      Example::
+        Example::
 
-          nesta = MUA, [1, 2, 3]
-          nestb = MUB, [4, 5, 6]
-          nests = nesta, nestb
+            nesta = MUA, [1, 2, 3]
+            nestb = MUB, [4, 5, 6]
+            nests = nesta, nestb
 
     :type nests: tuple
 
@@ -970,8 +1011,8 @@ def lognestedMevMu(V, availability, nests, choice, mu):
                   \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
                   e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
 
-        where :math:`m` is the (only) nest containing alternative :math:`i`, and
-        :math:`G` is the MEV generating function.
+        where :math:`m` is the (only) nest containing alternative :math:`i`,
+        and :math:`G` is the MEV generating function.
 
     :rtype: biogeme.expressions.Expression
 
@@ -997,14 +1038,14 @@ def cnl_avail(V, availability, nests, choice):
 
     :type availability: dict(int:biogeme.expressions.Expression)
 
-    :param nests: a tuple containing as many items as nests.
-                  Each item is also a tuple containing two items
+    :param nests: a tuple containing as many items as nests. Each item is
+        also a tuple containing two items
 
-          - an object of type biogeme.expressions.Expression  representing
-            the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions.Expression  representing
+          the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1049,16 +1090,16 @@ def cnl(V, availability, nests, choice):
                None. In this case, all alternatives are supposed to be
                always available.
 
-    :type available: dict(int:biogeme.expressions.Expression)
+    :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
-            Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression
-            representing the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionaray, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression
+          representing the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionaray, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1108,13 +1149,13 @@ def logcnl_avail(V, availability, nests, choice):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
-                  Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression
-            representing the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression
+          representing the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1147,29 +1188,29 @@ def logcnl_avail(V, availability, nests, choice):
 
 
 def getMevForCrossNested(V, availability, nests):
-    """Implements the MEV generating function for the cross-nested logit
-        model as a MEV model.
+    """Implements the MEV generating function for the cross nested logit
+    model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
-    :type V: dict(int:biogeme.expressions.Expression)
+    :type V: dict(int: biogeme.expressions.Expression)
 
     :param availability: dict of objects representing the availability of each
-               alternative, indexed
-               by numerical ids. Must be consistent with V, or
-               None. In this case, all alternatives are supposed to be
-               always available.
+        alternative, indexed
+        by numerical ids. Must be consistent with V, or
+        None. In this case, all alternatives are supposed to be
+        always available.
 
-    :type availability: dict(int:biogeme.expressions.Expression)
+    :type availability: dict(int: biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
-            Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression
-            representing the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression
+          representing the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1191,14 +1232,11 @@ def getMevForCrossNested(V, availability, nests):
 
     :type nests: tuple
 
-    :param choice: id of the alternative for which the probability must be
-              calculated.
-    :type choice: biogeme.expressions.Expression
-
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.Expression
 
     """
+
     Gi_terms = {}
     logGi = {}
     for i in V:
@@ -1243,13 +1281,13 @@ def logcnl(V, availability, nests, choice):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
-            Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression
-            representing the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionaray, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression
+          representing the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionaray, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1278,6 +1316,7 @@ def logcnl(V, availability, nests, choice):
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.Expression
 
+    :raise biogemeError: if the definition of the nests is invalid.
     """
     ok, message = checkValidityCNL(V, nests)
     if not ok:
@@ -1291,7 +1330,7 @@ def logcnl(V, availability, nests, choice):
 
 def cnlmu(V, availability, nests, choice, mu):
     """Implements the cross-nested logit model as a MEV model with
-        the homogeneity parameters is explicitly involved
+    the homogeneity parameters is explicitly involved
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -1305,14 +1344,14 @@ def cnlmu(V, availability, nests, choice, mu):
 
     :type availability: dict(int:biogeme.expressions.Expression)
 
-    :param nests: a tuple containing as many items as nests.
-           Each item is also a tuple containing two items:
+    :param nests: a tuple containing as many items as nests. Each
+        item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression representing
-            the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression representing
+          the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1349,8 +1388,8 @@ def cnlmu(V, availability, nests, choice, mu):
 
 def getMevForCrossNestedMu(V, availability, nests, mu):
     """Implements the MEV generating function for the cross-nested logit
-        model as a MEV model with the homogeneity parameters is explicitly
-        involved.
+    model as a MEV model with the homogeneity parameters is explicitly
+    involved.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
@@ -1365,13 +1404,13 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
-                  Each item is also a tuple containing two items:
+        Each item is also a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression representing
-            the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression representing
+          the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1392,10 +1431,6 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
             nests = nesta, nestb
 
     :type nests: tuple
-
-    :param choice: id of the alternative for which the probability must be
-              calculated.
-    :type choice: biogeme.expressions.Expression
 
     :param mu: Homogeneity parameter :math:`\\mu`.
     :type mu: biogeme.expressions.Expression
@@ -1437,7 +1472,7 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
 
 def logcnlmu(V, availability, nests, choice, mu):
     """Implements the log of the cross-nested logit model as a MEV model
-        with the homogeneity parameters is explicitly involved.
+    with the homogeneity parameters is explicitly involved.
 
 
     :param V: dict of objects representing the utility functions of
@@ -1453,13 +1488,13 @@ def logcnlmu(V, availability, nests, choice, mu):
     :type availability: dict(int:biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests. Each item is
-                  also a tuple containing two items
+        also a tuple containing two items
 
-          - an object of type biogeme.expressions. Expression representing
-            the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions. Expression representing
+          the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1491,6 +1526,8 @@ def logcnlmu(V, availability, nests, choice, mu):
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.Expression
 
+    :raise biogemeError: if the definition of the nests is invalid.
+
     """
     ok, message = checkValidityCNL(V, nests)
     if not ok:
@@ -1502,20 +1539,20 @@ def logcnlmu(V, availability, nests, choice, mu):
 
 def checkValidityNestedLogit(V, nests):
     """Verifies if the nested logit model is indeed based on a partition
-       of the choice set.
+    of the choice set.
 
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
     :type V: dict(int:biogeme.expressions.Expression)
     :param nests: A tuple containing as many items as nests. Each item is also
-                  a tuple containing two items:
+        a tuple containing two items:
 
-          - an object of type biogeme.expressions. Expression representing the
-            nest parameter,
-          - a list containing the list of identifiers of the alternatives
-            belonging to the nest.
+        - an object of type biogeme.expressions. Expression representing the
+          nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
 
-      Example::
+        Example::
 
           nesta = MUA, [1, 2, 3]
           nestb = MUB, [4, 5, 6]
@@ -1575,13 +1612,13 @@ def checkValidityCNL(V, nests):
     :type V: dict(int:biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
-                  Each item is also a tuple containing two items
+        Each item is also a tuple containing two items
 
-          - an object of type biogeme.expressions.Expression  representing
-            the nest parameter,
-          - a dictionary mapping the alternative ids with the cross-nested
-            parameters for the corresponding nest. If an alternative is
-            missing in the dictionary, the corresponding alpha is set to zero.
+        - an object of type biogeme.expressions.Expression  representing
+          the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 

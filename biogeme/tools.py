@@ -10,9 +10,9 @@
 # pylint: disable=invalid-name, too-many-locals
 
 import numpy as np
+from scipy.stats import chi2
 import biogeme.messaging as msg
 import biogeme.exceptions as excep
-from scipy.stats import chi2
 
 logger = msg.bioMessage()
 
@@ -100,10 +100,10 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
     :param theFunction: A function object that takes a vector as an argument,
         and returns a tuple:
 
-          - The first element of the tuple is the value of the
-            function :math:`f`,
-          - the second is the gradient of the function,
-          - the third is the hessian.
+        - The first element of the tuple is the value of the
+          function :math:`f`,
+        - the second is the gradient of the function,
+        - the third is the hessian.
 
     :type theFunction: function
 
@@ -227,8 +227,7 @@ def countNumberOfGroups(df, column):
 
 
 def likelihood_ratio_test(model1, model2, significance_level=0.95):
-    """
-    This function performs a likelihood ratio test between a
+    """This function performs a likelihood ratio test between a
     restricted and an unrestricted model.
 
     :param model1: the final loglikelood of one model, and the number of
@@ -251,6 +250,9 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
 
     :rtype: (str, float, float)
 
+    :raise biogemeError: if the unrestricted model has a lower log
+        likelihood than the restricted model.
+
     """
 
     loglike_m1, df_m1 = model1
@@ -259,9 +261,8 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
         if df_m1 < df_m2:
             raise excep.biogemeError(
                 f'The unrestricted model {model2} has a '
-                f'lower loglikelihood than the restricted one {model1}'
+                f'lower log likelihood than the restricted one {model1}'
             )
-            return None
         loglike_ur = loglike_m1
         loglike_r = loglike_m2
         df_ur = df_m1
@@ -270,9 +271,8 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
         if df_m1 >= df_m2:
             raise excep.biogemeError(
                 f'The unrestricted model {model1} has a '
-                f'lower loglikelihood than the restricted one {model2}'
+                f'lower log likelihood than the restricted one {model2}'
             )
-            return None
         loglike_ur = loglike_m2
         loglike_r = loglike_m1
         df_ur = df_m2
@@ -282,7 +282,7 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
     chi_df = df_ur - df_r
     threshold = chi2.ppf(significance_level, chi_df)
     if stat <= threshold:
-        msg = f'H0 cannot be rejected at level {significance_level}'
+        final_msg = f'H0 cannot be rejected at level {significance_level}'
     else:
-        msg = f'H0 can be rejected at level {significance_level}'
-    return msg, stat, threshold
+        final_msg = f'H0 can be rejected at level {significance_level}'
+    return final_msg, stat, threshold

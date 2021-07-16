@@ -24,11 +24,11 @@ class problemClass(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def isValid(self, solution):
+    def isValid(self, aSolution):
         """Evaluate  the validity of the solution.
 
-        :param solution: solution to be checked
-        :type solution: solutionClass
+        :param aSolution: solution to be checked
+        :type aSolution: solutionClass
 
         :return: valid, why where valid is True if the solution is
             valid, and False otherwise. why contains an explanation why it
@@ -37,33 +37,33 @@ class problemClass(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def evaluate(self, solution):
+    def evaluate(self, aSolution):
         """Evaluate the objectives functions of the solution and store them in
         the solution object.
 
-        :param solution: solution to be evaluated
-        :type solution: solutionClass
+        :param aSolution: solution to be evaluated
+        :type aSolution: solutionClass
 
         """
 
     @abc.abstractmethod
-    def describe(self, solution):
+    def describe(self, aSolution):
         """Short description of the solution. Used for reporting.
 
-        :param solution: solution to be described
-        :type solution: solutionClass
+        :param aSolution: solution to be described
+        :type aSolution: solutionClass
 
         :return: short description of the solution.
         :rtype: str
         """
 
     @abc.abstractmethod
-    def generateNeighbor(self, solution, neighborhoodSize):
+    def generateNeighbor(self, aSolution, neighborhoodSize):
         """
         Generates a neighbor of the solution.
 
-        :param solution: solution to be modified
-        :type solution: solutionClass
+        :param aSolution: solution to be modified
+        :type aSolution: solutionClass
 
         :param neighborhoodSize: size of the neighborhood to be applied
         :type neighborhoodSize: int
@@ -74,24 +74,24 @@ class problemClass(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def neighborRejected(self, solution, aNeighbor):
+    def neighborRejected(self, aSolution, aNeighbor):
         """Notify that a neighbor has been rejected by the
         algorithm. Used to update the statistics on the operators.
 
-        :param solution: solution  modified
-        :type solution: solutionClass
+        :param aSolution: solution  modified
+        :type aSolution: solutionClass
 
         :param aNeighbor: neighbor
         :type aNeighbor: solutionClass
         """
 
     @abc.abstractmethod
-    def neighborAccepted(self, solution, aNeighbor):
-        """Notify that a neighbor has  been accepted by the
+    def neighborAccepted(self, aSolution, aNeighbor):
+        """Notify that a neighbor has been accepted by the
         algorithm. Used to update the statistics on the operators.
 
-        :param solution: solution  modified
-        :type solution: solutionClass
+        :param aSolution: solution modified
+        :type aSolution: solutionClass
 
         :param aNeighbor: neighbor
         :type aNeighbor: solutionClass
@@ -123,7 +123,7 @@ class solutionClass(metaclass=abc.ABCMeta):
 
     def dominates(self, anotherSolution):
         """Checks if the current solution dominates another one. It is
-            assumed that all objectives are minimized.
+        assumed that all objectives are minimized.
 
         :param anotherSolution: the other solution to be compared with.
         :type anotherSolution: solutionClass

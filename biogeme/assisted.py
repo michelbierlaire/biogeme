@@ -148,7 +148,7 @@ class groupOfVariables:
 
     def activate(self, yes):
         """A group of variables can have two status: activated or not. This
-            function changes the status.
+        function changes the status.
 
         :param yes: if True, activates the group. If False,
             desactivate the group.
@@ -362,8 +362,8 @@ class term:
 
     def getDecisions(self):
         """The decision is a dict, where the keys are the name of the
-            socioeconomic variables, and the value are a boolean mentioning if it
-            is active or not.
+        socioeconomic variables, and the value are a boolean mentioning if
+        it is active or not.
 
         :return: decision of activation of the socio-eco variables for
             the segmentation.
@@ -376,8 +376,8 @@ class term:
 
     def setDecisions(self, decisions):
         """Implement the specification decisions, represented as a dict,
-            where the keys are the name of the socioeconomic variables,
-            and the value are a boolean mentioning if it is active or not.
+        where the keys are the name of the socioeconomic variables,
+        and the value are a boolean mentioning if it is active or not.
 
         :param decisions: decision of activation of the socio-eco variables for
             the segmentation.
@@ -558,7 +558,9 @@ class socioEconomic:
         self.active = False
 
     def combine(self, existingValues):
-        """Generates the possible combinations of values, corresponding to segments."""
+        """Generates the possible combinations of values,
+        corresponding to segments.
+        """
         if existingValues is None:
             return [
                 ([self.expression], [k], [v]) for k, v in self.values.items()
@@ -596,8 +598,8 @@ class segmentation:
 
     def getDecisions(self):
         """The decision is a dict, where the keys are the name of the
-            socioeconomic variables, and the value are a boolean mentioning if it
-            is active or not.
+        socioeconomic variables, and the value are a boolean mentioning
+        if it is active or not.
 
         :return: decision of activation of the socio-eco variables for
             the segmentation.
@@ -609,8 +611,8 @@ class segmentation:
 
     def setDecisions(self, decisions):
         """Implement the specification decisions, represented as a dict,
-            where the keys are the name of the socioeconomic variables,
-            and the value are a boolean mentioning if it is active or not.
+        where the keys are the name of the socioeconomic variables,
+        and the value are a boolean mentioning if it is active or not.
 
         :param decisions: decision of activation of the socio-eco variables for
             the segmentation.
@@ -807,17 +809,27 @@ class specificationProblem(vns.problemClass):
             Example::
 
                 utility_pt = [('PT cte', 'Seg. cte', (None, None), None),
-                      ('PT travel time', 'Seg. time', (None, 0), None),
-                      ('PT travel cost', 'Seg. PT cost', (None, None), isNegative),
-                      ('PT Waiting time', 'Seg. wait', (None, 0), None)]
+                  ('PT travel time', 'Seg. time', (None, 0), None),
+                  ('PT travel cost', 'Seg. PT cost', (None, None), isNegative),
+                  ('PT Waiting time', 'Seg. wait', (None, 0), None)]
 
 
                 utility_car = [('Car cte', 'Seg. cte', (None, None), None),
-                       ('Car travel time', 'Seg. time', (None, 0), None),
-                       ('Car travel cost', 'Seg. car cost', (None, None), isNegative),
-                       ('Nbr of cars', 'Seg nbr cars', (None, None), None)]
+                  ('Car travel time', 'Seg. time', (None, 0), None),
+                  (
+                   'Car travel cost',
+                   'Seg. car cost',
+                   (None, None),
+                   isNegative
+                  ),
+                  ('Nbr of cars', 'Seg nbr cars', (None, None), None)]
 
-                utility_sm = [('Distance', 'Seg. dist', (None, None), isNegative)]
+                utility_sm = [(
+                               'Distance',
+                               'Seg. dist',
+                               (None, None),
+                               isNegative
+                              )]
 
                 choiceModel = {0: ('pt', utility_pt),
                                1: ('car', utility_car),
@@ -850,7 +862,8 @@ class specificationProblem(vns.problemClass):
 
         :raise biogemeError: if some variables are not in any group.
 
-        :raise biogemeError: if a segmentation in a utility function is unknown.
+        :raise biogemeError: if a segmentation in a utility function is
+            unknown.
 
         :raise biogemeError: if a variable in a utility function is unknown.
 
@@ -1109,7 +1122,7 @@ class specificationProblem(vns.problemClass):
         """
         Deasactivate variables from the model, that can be deactivated.
         """
-        for k, g in self.theGroups.items():
+        for g in self.theGroups.values():
             g.activate(False)
         for seg in self.theSegmentations.values():
             decisions = seg.getDecisions()
@@ -1119,27 +1132,52 @@ class specificationProblem(vns.problemClass):
     def generateSolution(self, nonlinearSpecs, segmentations, model):
         """Generate a solution for the VNS algorithm
 
-        :param nonlinearSpecs: nonlinear specifications. It is a dictionary where
+        :param nonlinearSpecs: nonlinear specifications. It is a dictionary
+            where
 
             - the keys correspond to groups of variables,
             - the values are tuple with two entries:
 
                 - index in the list self.nonlinearSpecs corresponding to
                   the nonlinear spec, or None if linear,
-                - a boolean that is True if the coefficient is generic, False otherwise.
+                - a boolean that is True if the coefficient is generic,
+                  False otherwise.
+
+            Example::
+
+                nl = {'Travel time': (0, False),
+                      'Travel cost': (0, False),
+                      'Headway': (0, False)}
+
         :type nonlinearSpecs: dict(str: tuple(int, bool))
 
         :param segmentations: dictionary where the keys are the name
             of the segmentations, and the values are lists of
             socio-economic characteristics that must be activated.
+
+            Example::
+
+                sg = {'Seg. cte': ['GA'],
+                      'Seg. cost': ['class', 'who'],
+                      'Seg. time': ['gender'],
+                      'Seg. headway': ['class']}
         :type segmentations: dict(str: list(str))
 
-        Example::
+        :param model: selected model
+        :type model: str
 
-            sg = {'Seg. cte': ['GA'],
-                  'Seg. cost': ['class', 'who'],
-                  'Seg. time': ['gender'],
-                  'Seg. headway': ['class']}
+        :return: the solution that has been generated
+        :rtype: class solution
+
+        :raise biogemeError: if a variable is set ot generic. Only groups of
+            variables can be made generic.
+
+        :raise biogemeError: if a group of variables is unknown
+
+        :raise biogemeError: if an error occurs in setting the segmentation
+            decisions
+
+        :raise biogemeError: if the model is unknown.
 
         """
         self.reset()
@@ -1170,8 +1208,8 @@ class specificationProblem(vns.problemClass):
             try:
                 self.theSegmentations[k].setDecisions(decisions)
             except excep.biogemeError as e:
-                msg = f'Error in segmentation of {k}: {e}'
-                raise excep.biogemeError(msg)
+                error_msg = f'Error in segmentation of {k}: {e}'
+                raise excep.biogemeError(error_msg) from e
         self.selectedModel = None
         for i, pair in enumerate(self.models):
             if pair[0] == model:
@@ -1181,20 +1219,32 @@ class specificationProblem(vns.problemClass):
         return self.getSolution()
 
     def getSolution(self):
+        """Generate an object of the class ``solution``
+
+        :return: the solution that has been generated
+        :rtype: class solution
+        """
         s = solution()
         s.decisions = self.getDecisions()
         s.description = self.describeCurrentModel()
         s.objectives = self.archive.get(s)
         return s
 
-    def setSolution(self, solution):
-        if not isinstance(solution, vns.solutionClass):
+    def setSolution(self, aSolution):
+        """Import a solution defined as an object of class ``solution``.
+
+        :param aSolution: solution to be imported.
+        :type aSolution: class solution
+
+        :raise biogemeError: if the object has the wrong type.
+        """
+        if not isinstance(aSolution, vns.solutionClass):
             raise excep.biogemeError(
-                f'Wrong type: {type(solution)} '
+                f'Wrong type: {type(aSolution)} '
                 f'instead of vns.solutionClass'
             )
 
-        self.setDecisions(solution.decisions)
+        self.setDecisions(aSolution.decisions)
 
     def clone(self):
         """Clone the model, in order to generate neighbors
@@ -1206,6 +1256,11 @@ class specificationProblem(vns.problemClass):
         return c
 
     def describeCurrentModel(self):
+        """Generates a description of the current model
+
+        :return: model description.
+        :rtype: str
+        """
         result = f'{self.models[self.selectedModel][0]}'
         for v in self.theAlternatives.values():
             title = f'Alternative {v.name} [{v.id}]\n'
@@ -1219,13 +1274,28 @@ class specificationProblem(vns.problemClass):
                 result += '\n'
         return result
 
-    def describe(self, solution):
-        if solution.description is not None:
-            return solution.description
+    def describe(self, aSolution):
+        """Generates (if necessary) and returns a short description of
+            the solution
+
+        :param aSolution: solution that must be described.
+        :type aSolution: class solution
+
+        :return: description of the solution
+        :rtype: str
+        """
+        if aSolution.description is not None:
+            return aSolution.description
         solution.description = self.describeCurrentModel()
         return solution.description
 
     def describeHtml(self):
+        """Generates a description of the model in HTML format.
+
+        :return: description of the model in HTML format.
+        :rtype: str
+
+        """
         result = (
             f'<p><strong>Model: {self.models[self.selectedModel][0]}'
             f'</strong></p>'
@@ -1240,58 +1310,77 @@ class specificationProblem(vns.problemClass):
                 result += '\n'
         return result
 
-    def isValid(self, solution):
-        if solution.valid is not None:
-            return solution.valid, solution.causeInvalidity
+    def isValid(self, aSolution):
+        """Evaluate  the validity of the solution.
+
+        :param aSolution: solution to be checked
+        :type aSolution: class solution
+
+        :return: valid, why where valid is True if the solution is
+            valid, and False otherwise. ``why`` contains an explanation why it
+            is invalid.
+        :rtype: tuple(bool, str)
+        """
+        if aSolution.valid is not None:
+            return aSolution.valid, aSolution.causeInvalidity
 
         try:
-            self.setSolution(solution)
+            self.setSolution(aSolution)
         except excep.biogemeError as e:
             logger.warning(f'Exception raised: {e}')
-            solution.valid = False
-            solution.causeInvalidity = e
+            aSolution.valid = False
+            aSolution.causeInvalidity = e
             return False, e
 
-        estimationResults = self.archive.get(solution)
+        estimationResults = self.archive.get(aSolution)
         if estimationResults is None:
-            estimationResults = self.evaluate(solution)
-            if solution.valid is not None:
-                return solution.valid, solution.causeInvalidity
+            estimationResults = self.evaluate(aSolution)
+            if aSolution.valid is not None:
+                return aSolution.valid, aSolution.causeInvalidity
 
         if estimationResults is None:
-            solution.valid = False
+            aSolution.valid = False
             e = 'Failed estimation'
-            solution.causeInvalidity = e
+            aSolution.causeInvalidity = e
             return False, e
 
         if estimationResults.numberOfFreeParameters() == 0:
-            solution.valid = False
+            aSolution.valid = False
             e = 'No parameter has been estimated'
-            solution.causeInvalidity = e
+            aSolution.causeInvalidity = e
             return False, e
 
-        msg = ''
+        error_msg = ''
         ok = True
-        for k, u in self.theAlternatives.items():
+        for u in self.theAlternatives.values():
             for t in u.terms:
                 tok, tmsg = t.isValid(u.name, estimationResults)
                 if not tok:
                     ok = False
-                    msg += f', {tmsg}'
+                    error_msg += f', {tmsg}'
         if ok:
-            solution.valid = True
+            aSolution.valid = True
             return True, None
 
-        solution.valid = False
-        solution.causeInvalidity = msg
-        return False, msg
+        aSolution.valid = False
+        aSolution.causeInvalidity = error_msg
+        return False, error_msg
 
-    def evaluate(self, solution):
-        estimationResults = self.archive.get(solution)
+    def evaluate(self, aSolution):
+        """Evaluate the objectives functions of the solution and store them in
+        the solution object.
+
+        :param aSolution: solution to be evaluated
+        :type aSolution: solutionClass
+
+        :return: results of the estimation
+        :rtype: class biogeme.results
+        """
+        estimationResults = self.archive.get(aSolution)
         if estimationResults is not None:
             return estimationResults
 
-        self.setSolution(solution)
+        self.setSolution(aSolution)
 
         b = self.getBiogemeModel()
         logger.detailed(
@@ -1299,16 +1388,16 @@ class specificationProblem(vns.problemClass):
         )
         if len(b.freeBetaNames) == 0:
             estimationResults = None
-            self.archive[solution] = estimationResults
-            solution.valid = False
-            solution.causeInvalidity = 'Model with 0 parameters'
+            self.archive[aSolution] = estimationResults
+            aSolution.valid = False
+            aSolution.causeInvalidity = 'Model with 0 parameters'
             return estimationResults
 
         if len(b.freeBetaNames) > self.maximumNumberOfParameters:
             estimationResults = None
-            self.archive[solution] = estimationResults
-            solution.valid = False
-            solution.causeInvalidity = (
+            self.archive[aSolution] = estimationResults
+            aSolution.valid = False
+            aSolution.causeInvalidity = (
                 f'More than {self.maximumNumberOfParameters}'
                 f' parameters: {len(b.freeBetaNames)}'
             )
@@ -1319,7 +1408,7 @@ class specificationProblem(vns.problemClass):
             logger.temporarySilence()
             estimationResults = b.quickEstimate(algoParameters=algoParameters)
             logger.resume()
-            solution.objectives = [
+            aSolution.objectives = [
                 -estimationResults.data.logLike,
                 estimationResults.numberOfFreeParameters(),
             ]
@@ -1327,19 +1416,38 @@ class specificationProblem(vns.problemClass):
         except excep.biogemeError as e:
             logger.warning(f'Exception raised: {e}')
             estimationResults = None
-            solution.valid = False
-            solution.causeInvalidity = (
+            aSolution.valid = False
+            aSolution.causeInvalidity = (
                 f'Exception raised during estimation: {e}'
             )
-        self.archive[solution] = estimationResults
+        self.archive[aSolution] = estimationResults
         return estimationResults
 
     def checkAvailability(self):
+        """Check the availability of each operator.
+
+        :return: a dictionary with the availability status of each operator
+        :rtype: dict(str: bool)
+
+        """
         av = {k: v(audit=True) != 0 for k, v in self.operators.items()}
         return av
 
-    def generateNeighbor(self, solution, neighborhoodSize):
-        self.setSolution(solution)
+    def generateNeighbor(self, aSolution, neighborhoodSize):
+        """
+        Generates a neighbor of the solution.
+
+        :param aSolution: solution to be modified
+        :type aSolution: class solution
+
+        :param neighborhoodSize: size of the neighborhood to be applied
+        :type neighborhoodSize: int
+
+        :return: a neighbor solution, and the number of changes that have been
+                 actually applied.
+        :rtype: tuple(class solution, int)
+        """
+        self.setSolution(aSolution)
         # Identify the operators available for the current specification
         self.operatorsManagement.available = self.checkAvailability()
         # Select one operator.
@@ -1348,17 +1456,53 @@ class specificationProblem(vns.problemClass):
         changes = self.applyOperator(self.lastOperator, neighborhoodSize)
         return self.getSolution(), changes
 
-    def neighborRejected(self, solution, aNeighbor):
+    def neighborRejected(self, aSolution, aNeighbor):
+        """Notify that a neighbor has been rejected by the
+        algorithm. Used to update the statistics on the operators.
+
+        :param aSolution: solution modified. Not used in this implementation.
+        :type aSolution: class solution
+
+        :param aNeighbor: neighbor
+        :type aNeighbor: solutionClass
+
+        :raise biogemeError: if no operator has been used yet.
+        """
         if self.lastOperator is None:
             raise excep.biogemeError('No operator has been used yet.')
         self.operatorsManagement.decreaseScore(self.lastOperator)
 
-    def neighborAccepted(self, solution, aNeighbor):
+    def neighborAccepted(self, aSolution, aNeighbor):
+        """Notify that a neighbor has been accepted by the
+        algorithm. Used to update the statistics on the operators.
+
+        :param aSolution: solution modified. Not used in this implementation.
+        :type aSolution: solutionClass
+
+        :param aNeighbor: neighbor
+        :type aNeighbor: solutionClass
+
+        :raise biogemeError: if no operator has been used yet.
+
+        """
         if self.lastOperator is None:
             raise excep.biogemeError('No operator has been used yet.')
         self.operatorsManagement.increaseScore(self.lastOperator)
 
     def applyOperator(self, name, size=1):
+        """Apply an operator.
+
+        :param name: name of the operator to apply
+        :type name: str
+
+        :param size: size of the neighborhood
+        :type size: int
+
+        :return: total number of changes actually made on the solution
+        :rtype: int
+
+        :raise biogemeError: if the name of the operator is unknown.
+        """
         op = self.operators.get(name)
         if op is None:
             raise excep.biogemeError(f'Unknowns operator: {name}')
@@ -1507,11 +1651,26 @@ class specificationProblem(vns.problemClass):
         return changes
 
     def changeModel(self, size=1, audit=False):
+        """
+        Select randomly another model from the list
+
+        :param size: not used here. Muxt be there for compliance with the
+            call of operators.
+        :type size: int
+
+        :param audit: if True, returns the number of changes without
+            actually implementing them.
+        :type audit: bool
+
+        :return: 0 if no other model could be found. 1 otherwise.
+        :rtype: int
+        """
         candidates = set(range(len(self.models)))
         candidates.remove(self.selectedModel)
         if not candidates:
             return 0
-        self.selectedModel = random.choice(list(candidates))
+        if not audit:
+            self.selectedModel = random.choice(list(candidates))
         return 1
 
 
@@ -1521,6 +1680,7 @@ class solution(vns.solutionClass):
     """
 
     def __init__(self):
+        super().__init__()
         self.objectivesNames = ['Neg. log likelihood', '#parameters']
         self.objectives = None
         self.valid = None
@@ -1534,17 +1694,9 @@ class solution(vns.solutionClass):
     def __str__(self):
         if self.description is None:
             raise excep.biogemeError(
-                'Description of the ' 'solution not available'
+                'Description of the solution not available'
             )
         res = self.description
         for t, r in zip(self.objectivesNames, self.objectives):
             res += f'\n{t}: {r}'
         return res
-
-    def estimated(self):
-        """Mentions if the model has been estimated
-
-        :return: True if it has been estimated. False otherwise.
-        :rtype: bool
-        """
-        return self.estimationResults is not None

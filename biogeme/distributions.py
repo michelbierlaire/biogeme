@@ -1,8 +1,8 @@
 """ Implementation of the pdf and CDF of common distributions
 
-:author:Michel Bierlaire
+:author: Michel Bierlaire
 
-:data: Thu Apr 23 12:01:49 2015
+:date: Thu Apr 23 12:01:49 2015
 
 """
 
@@ -26,12 +26,17 @@ def normalpdf(x, mu=0.0, s=1.0):
     .. math:: f(x;\\mu, \\sigma) =
         \\frac{1}{\\sigma \\sqrt{2\\pi}} \\exp{-\\frac{(x-\\mu)^2}{2\\sigma^2}}
 
-    :param x: location parameter :math:`\\mu` of the Normal distribution. Default: 0.
+    :param x: value at which the pdf is evaluated.
     :type x: float or biogeme.expression
-    :param s: scale parameter :math:`\\sigma` of the Normal distribution. Default: 1.
+    :param mu: location parameter :math:`\\mu` of the Normal distribution.
+        Default: 0.
+    :type mu: float or biogeme.expression
+    :param s: scale parameter :math:`\\sigma` of the Normal distribution.
+        Default: 1.
     :type s: float or biogeme.expression
 
-    :note: It is assumed that :math:`\\sigma > 0`, but it is not verified by the code.
+    :note: It is assumed that :math:`\\sigma > 0`, but it is not
+        verified by the code.
 
     :return: value of the Normal pdf.
     :rtype: float or biogeme.expression"""
@@ -54,12 +59,18 @@ def lognormalpdf(x, mu=0.0, s=1.0):
               \\frac{1}{x\\sigma \\sqrt{2\\pi}}
               \\exp{-\\frac{(\\ln x-\\mu)^2}{2\\sigma^2}}
 
-    :param x: location parameter :math:`\\mu` of the lognormal distribution. Default: 0.
+
+    :param x: value at which the pdf is evaluated.
     :type x: float or biogeme.expression
-    :param s: scale parameter :math:`\\sigma` of the lognormal distribution. Default: 1.
+    :param mu: location parameter :math:`\\mu` of the lognormal distribution.
+        Default: 0.
+    :type mu: float or biogeme.expression
+    :param s: scale parameter :math:`\\sigma` of the lognormal distribution.
+        Default: 1.
     :type s: float or biogeme.expression
 
-    :note: It is assumed that :math:`\\sigma > 0`, but it is not verified by the code.
+    :note: It is assumed that :math:`\\sigma > 0`, but it is not
+        verified by the code.
 
     :return: value of the lognormal pdf.
     :rtype: float or biogeme.expression
@@ -90,7 +101,8 @@ def uniformpdf(x, a=-1, b=1.0):
     :type a: float or biogeme.expression
     :param b: upper bound :math:`b` of the distribution. Default: 1.
     :type b: float or biogeme.expression
-    :note: It is assumed that :math:`a < b`, but it is not verified by the code.
+    :note: It is assumed that :math:`a < b`, but it is
+        not verified by the code.
     :return: value of the uniform pdf.
     :rtype: float or biogeme.expression
  """
@@ -118,7 +130,8 @@ def triangularpdf(x, a=-1.0, b=1.0, c=0.0):
     :type b: float or biogeme.expression
     :param c: mode :math:`c` of the distribution. Default: 0.
     :type c: float or biogeme.expression
-    :note: It is assumed that :math:`a <  c < b`, but it is not verified by the code.
+    :note: It is assumed that :math:`a <  c < b`, but it is
+        not verified by the code.
     :return: value of the triangular pdf.
     :rtype: float or biogeme.expression
 
@@ -145,13 +158,19 @@ def logisticcdf(x, mu=0.0, s=1.0):
 
     Cumulative distribution function of a logistic distribution
 
-    .. math:: f(x;\\mu, \\sigma) = \\frac{1}{1+\\exp\\left(-\\frac{x-\\mu}{\\sigma} \\right)}
+    .. math:: f(x;\\mu, \\sigma) = \\frac{1}
+        {1+\\exp\\left(-\\frac{x-\\mu}{\\sigma} \\right)}
 
-    :param x: location parameter :math:`\\mu` of the logistic distribution. Default: 0.
+    :param x: value at which the CDF is evaluated.
     :type x: float or biogeme.expression
-    :param x: scale parameter :math:`\\sigma` of the logistic distribution. Default: 1.
-    :type x: float or biogeme.expression
-    :note: It is assumed that :math:`\\sigma > 0`, but it is not verified by the code.
+    :param mu: location parameter :math:`\\mu` of the logistic distribution.
+        Default: 0.
+    :type mu: float or biogeme.expression
+    :param s: scale parameter :math:`\\sigma` of the logistic distribution.
+        Default: 1.
+    :type s: float or biogeme.expression
+    :note: It is assumed that :math:`\\sigma > 0`, but it is
+        not verified by the code.
 
     :return: value of the logistic CDF.
     :rtype: float or biogeme.expression

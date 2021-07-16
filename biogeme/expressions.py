@@ -18,14 +18,15 @@ import biogeme.exceptions as excep
 import biogeme.cbiogeme as cb
 import biogeme.messaging as msg
 
-logger = msg.bioMessage()
-
 
 def isNumeric(obj):
     """Identifies if an object is numeric, that is int, float or bool.
 
     :param obj: any object
     :type obj: object
+
+    :return: True if the object is int, float or bool.
+    :rtype: bool
     """
     return isinstance(obj, (int, float, bool))
 
@@ -91,10 +92,16 @@ class Expression:
 
         :return: self + other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during addition to {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during addition to {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Plus(self, other)
 
     def __radd__(self, other):
@@ -106,10 +113,17 @@ class Expression:
 
         :return: other + self
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during addition to {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during addition to {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Plus(other, self)
 
     def __sub__(self, other):
@@ -121,10 +135,17 @@ class Expression:
 
         :return: self - other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during substraction to {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during substraction to {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Minus(self, other)
 
     def __rsub__(self, other):
@@ -136,10 +157,17 @@ class Expression:
 
         :return: other - self
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during substraction of {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during substraction of {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Minus(other, self)
 
     def __mul__(self, other):
@@ -151,12 +179,18 @@ class Expression:
 
         :return: self * other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = (
-                'Invalid expression during multiplication to {self}: [{other}]'
+            error_msg = (
+                f'Invalid expression during multiplication '
+                f'to {self}: [{other}]'
             )
-            raise excep.biogemeError(msg)
+            raise excep.biogemeError(error_msg)
         return Times(self, other)
 
     def __rmul__(self, other):
@@ -168,12 +202,17 @@ class Expression:
 
         :return: other * self
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = (
-                'Invalid expression during multiplication to {self}: [{other}]'
+            error_msg = (
+                f'Invalid expression during multiplication '
+                f'to {self}: [{other}]'
             )
-            raise excep.biogemeError(msg)
+            raise excep.biogemeError(error_msg)
         return Times(other, self)
 
     def __div__(self, other):
@@ -185,10 +224,17 @@ class Expression:
 
         :return: self / other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during division of {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during division of {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Divide(self, other)
 
     def __rdiv__(self, other):
@@ -200,10 +246,16 @@ class Expression:
 
         :return: other / self
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during division by {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during division by {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Divide(other, self)
 
     def __truediv__(self, other):
@@ -216,10 +268,15 @@ class Expression:
         :return: self / other
         :rtype: biogeme.expressions.Expression
 
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during division of {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during division of {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Divide(self, other)
 
     def __rtruediv__(self, other):
@@ -231,10 +288,16 @@ class Expression:
 
         :return: other / self
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            msg = 'Invalid expression during division by {self}: [{other}]'
-            raise excep.biogemeError(msg)
+            error_msg = (
+                f'Invalid expression during division by {self}: [{other}]'
+            )
+            raise excep.biogemeError(error_msg)
         return Divide(other, self)
 
     def __neg__(self):
@@ -255,6 +318,11 @@ class Expression:
 
         :return: self ^ other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -271,6 +339,10 @@ class Expression:
 
         :return: other ^ self
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -287,6 +359,10 @@ class Expression:
 
         :return: self and other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -303,6 +379,10 @@ class Expression:
 
         :return: self or other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -319,6 +399,10 @@ class Expression:
 
         :return: self == other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -335,6 +419,10 @@ class Expression:
 
         :return: self != other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -351,6 +439,10 @@ class Expression:
 
         :return: self <= other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -367,6 +459,10 @@ class Expression:
 
         :return: self >= other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -383,6 +479,10 @@ class Expression:
 
         :return: self < other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -399,6 +499,10 @@ class Expression:
 
         :return: self > other
         :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             raise excep.biogemeError(
@@ -621,7 +725,8 @@ class Expression:
         indicesOfRandomVariables,
         indicesOfDraws,
     ):
-        """Provides an index to all elementary expressions, specific to their type
+        """Provides an index to all elementary expressions,
+        specific to their type
 
         :param indicesOfFreeBetas: dictionary mapping the name of the
                                free betas with their index
@@ -736,6 +841,8 @@ class Expression:
         expression is contained in a MonteCarlo expression. If not, it
         cannot be evaluated.
 
+        :return: True if the expression is contained in an expression
+            of type t.
         :rtype: bool.
 
         See: :func:`biogeme.expressions.Expression.embedExpression`
@@ -752,8 +859,8 @@ class Expression:
         Typically, this would be used to check that a MonteCarlo
         expression contains a bioDraws expression.
 
-        Return:
-           bool.
+        :return: True if the expression contains an expression of type t.
+        :rtype: bool
 
         See: Expression.isContainedIn
         """
@@ -768,6 +875,10 @@ class Expression:
         """Count the number of times the PanelLikelihoodTrajectory
         is used in the formula. It should trigger an error if it
         is used more than once.
+
+        :return: number of times the PanelLikelihoodTrajectory
+            is used in the formula
+        :rtype: int
         """
         nbr = 0
         for e in self.children:
@@ -822,6 +933,11 @@ class BinaryOperator(Expression):
 
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         Expression.__init__(self)
         if isNumeric(left):
@@ -1302,6 +1418,11 @@ class UnaryOperator(Expression):
 
         :param child: first arithmetic expression
         :type child: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+
         """
         Expression.__init__(self)
         if isNumeric(child):
@@ -1530,17 +1651,18 @@ class Derive(UnaryOperator):
                 of the elementary expression with their id.
         :type idsOfElementaryExpressions: dict(string:int)
 
+        :raise biogemeError: if no index is available for an expression.
         """
         if self.elementaryName in idsOfElementaryExpressions:
             self.elementaryIndex = idsOfElementaryExpressions[
                 self.elementaryName
             ]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No index is available for elementary '
                 f'expression {self.elementaryName}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         self.child.setUniqueId(idsOfElementaryExpressions)
 
     def getSignature(self):
@@ -1639,25 +1761,25 @@ class Integrate(UnaryOperator):
         return listOfErrors, listOfWarnings
 
     def setUniqueId(self, idsOfElementaryExpressions):
-        """
-        Provides a unique id to the elementary expressions. Overloads the
-            generic function
+        """Provides a unique id to the elementary expressions. Overloads the
+        generic function
 
         :param idsOfElementaryExpressions: dictionary mapping the name of
                 the elementary expression with their id.
         :type idsOfElementaryExpressions: dict(string:int)
 
+        :raise biogemeError: if no index is available for a random variable.
         """
         if self.randomVariableName in idsOfElementaryExpressions:
             self.randomVariableIndex = idsOfElementaryExpressions[
                 self.randomVariableName
             ]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No index is available for random variable '
                 f'{self.randomVariableName}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         self.child.setUniqueId(idsOfElementaryExpressions)
 
     def setSpecificIndices(
@@ -1686,18 +1808,20 @@ class Integrate(UnaryOperator):
                             their index
         :type indicesOfDraws: dict(string:int)
 
+        :raise biogemeError: if no index is available for a random variable.
+
         """
         if self.randomVariableName in indicesOfRandomVariables:
             self.randomVariableIndex = indicesOfRandomVariables[
                 self.randomVariableName
             ]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No index is available for random variable '
                 f'{self.randomVariableName}. Known random variables:'
                 f' {indicesOfRandomVariables.keys()}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         self.child.setSpecificIndices(
             indicesOfFreeBetas,
             indicesOfFixedBetas,
@@ -1791,11 +1915,19 @@ class Elementary(Expression):
         self.uniqueId = None
 
     def __str__(self):
+        """string method
+
+        :return: name of the expression
+        :rtype: str
+        """
         return self.name
 
     def getElementaryExpression(self, name):
-        """Return: an elementary expression from its name if it appears in the
-        expression. None otherwise.
+        """
+
+        :return: an elementary expression from its name if it appears in the
+            expression. None otherwise.
+        :rtype: biogeme.Expression
         """
         if self.name == name:
             return self
@@ -1811,16 +1943,17 @@ class Elementary(Expression):
               of the elementary expression with their id.
         :type idsOfElementaryExpressions: dict(string:int)
 
+        :raise biogemeError: if no index is available for an expression.
         """
         if self.name in idsOfElementaryExpressions:
             self.uniqueId = idsOfElementaryExpressions[self.name]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No index is available for expression {self.name}.'
                 f' List of available indices: '
                 f'{[n for n, i in idsOfElementaryExpressions.items() ]}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
 
 
 class bioDraws(Elementary):
@@ -1869,16 +2002,16 @@ class bioDraws(Elementary):
                             their index
         :type indicesOfDraws: dict(string:int)
 
-
+        :raise biogemeError: if no index is available for one draw type.
         """
         if self.name in indicesOfDraws:
             self.drawId = indicesOfDraws[self.name]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No index is available for draw {self.drawType}.'
                 f' Known types of draws: {indicesOfDraws.keys()}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -1933,14 +2066,14 @@ class bioDraws(Elementary):
             draw
         """
         if self.uniqueId is None:
-            errorMsg = (
+            error_msg = (
                 f'No id has been defined for elementary '
                 f'expression {self.name}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         if self.drawId is None:
-            errorMsg = f'No id has been defined for draw {self.name}.'
-            raise excep.biogemeError(errorMsg)
+            error_msg = f'No id has been defined for draw {self.name}.'
+            raise excep.biogemeError(error_msg)
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
         signature += f'"{self.name}",{self.uniqueId},{self.drawId}'
@@ -1960,22 +2093,23 @@ class bioDraws(Elementary):
     def setDrawIndex(self, idsOfDraws):
         """
         Provide an index to a series of draw for a random variable. Overload
-            the generic function.
+        the generic function.
 
         :param idsOfDraws: dictionary mapping the name of the draws with
             their id.
         :type idsOfDraws: dict(string:int)
 
+        :raise biogemeError: if no id is available for a draw.
         """
         if self.name in idsOfDraws:
             self.drawId = idsOfDraws[self.name]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No id is available for draw {self.name}. '
                 f'List of available indices: '
                 f'{[n for n, i in idsOfDraws.items()]}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
 
     def audit(self, database=None):
         """Performs various checks on the expressions.
@@ -2122,6 +2256,10 @@ class Variable(Elementary):
         :return: tuple listOfErrors, listOfWarnings
         :rtype: list(string), list(string)
 
+        :raise biogemeError: if no database is provided.
+
+        :raise biogemeError: if the name of the variable does not appear
+            in the database.
         """
         listOfErrors = []
         listOfWarnings = []
@@ -2199,14 +2337,14 @@ class Variable(Elementary):
             variable
         """
         if self.uniqueId is None:
-            errorMsg = (
+            error_msg = (
                 f'No id has been defined for elementary expression '
                 f'{self.name}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         if self.variableId is None:
-            errorMsg = f'No id has been defined for variable {self.name}.'
-            raise excep.biogemeError(errorMsg)
+            error_msg = f'No id has been defined for variable {self.name}.'
+            raise excep.biogemeError(error_msg)
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
         signature += f'"{self.name}",{self.uniqueId},{self.variableId}'
@@ -2231,6 +2369,9 @@ class DefineVariable(Variable):
         :param database: object identifying the database.
         :type database: biogeme.database.Database
 
+        :raise biogemeError: if the expression is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         Variable.__init__(self, name)
         if isNumeric(expression):
@@ -2317,17 +2458,17 @@ class RandomVariable(Elementary):
                             their index
         :type indicesOfDraws: dict(string:int)
 
-
+        :raise biogemeError: if no index is available for a random variable.
         """
         if self.name in indicesOfRandomVariables:
             self.rvId = indicesOfRandomVariables[self.name]
         else:
-            errorMsg = (
+            error_msg = (
                 f'No index is available for random variable '
                 f'{self.name}. Known random variables: '
                 f'{indicesOfRandomVariables.keys()}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2382,16 +2523,16 @@ class RandomVariable(Elementary):
             random variable
         """
         if self.uniqueId is None:
-            errorMsg = (
+            error_msg = (
                 f'No id has been defined for elementary '
                 f'expression {self.name}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         if self.rvId is None:
-            errorMsg = (
+            error_msg = (
                 f'No id has been defined for random variable {self.name}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
 
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
@@ -2420,20 +2561,24 @@ class Beta(Elementary):
         :param status: if different from 0, the parameter is fixed to
           its default value, and not modified by the optimization algorithm.
         :type status: int
+
+        :raise biogemeError: if the first parameter is not a str.
+
+        :raise biogemeError: if the second parameter is not a int or a float.
         """
 
         if not isinstance(value, (int, float)):
-            errorMsg = (
+            error_msg = (
                 f'The second parameter for {name} must be '
                 f'a float and not a {type(value)}: {value}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         if not isinstance(name, str):
-            errorMsg = (
+            error_msg = (
                 f'The first parameter must be a string and '
                 f'not a {type(name)}: {name}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         Elementary.__init__(self, name)
         self.initValue = value
         self.lb = lowerbound
@@ -2445,9 +2590,8 @@ class Beta(Elementary):
         return f'{self.name}({self.initValue})'
 
     def setOfBetas(self, free=True, fixed=False):
-        """
-        Extract the set of parameters from the expression. Overload the
-            generic function.
+        """Extract the set of parameters from the expression. Overload the
+        generic function.
 
         :param free: if True, the free parameters are included. Default: True.
         :type free: bool
@@ -2492,33 +2636,34 @@ class Beta(Elementary):
                             their index
         :type indicesOfDraws: dict(string:int)
 
+        :raise biogemeError: if no index is available for one of the parameters
+
         """
 
         if self.status != 0:
             if self.name in indicesOfFixedBetas:
                 self.betaId = indicesOfFixedBetas[self.name]
             else:
-                errorMsg = (
+                error_msg = (
                     f'No index is available for fixed parameter '
                     f'{self.name}. Known fixed parameters: '
                     '{indicesOfFixedBetas.keys()}'
                 )
-                raise excep.biogemeError(errorMsg)
+                raise excep.biogemeError(error_msg)
         else:
             if self.name in indicesOfFreeBetas:
                 self.betaId = indicesOfFreeBetas[self.name]
             else:
-                errorMsg = (
+                error_msg = (
                     f'No index is available for free parameter '
                     f'{self.name}. Known free parameters: '
                     f'{indicesOfFreeBetas.keys()}'
                 )
-                raise excep.biogemeError(errorMsg)
+                raise excep.biogemeError(error_msg)
 
     def dictOfBetas(self, free=True, fixed=False):
-        """
-        Extract the set of parameters from the expression. Overload the
-            generic function.
+        """Extract the set of parameters from the expression. Overload the
+        generic function.
 
         :param free: if True, the free parameters are included. Default: True.
         :type free: bool
@@ -2615,11 +2760,11 @@ class Beta(Elementary):
             parameter
         """
         if self.uniqueId is None:
-            errorMsg = (
+            error_msg = (
                 f'No id has been defined for elementary '
                 f'expression {self.name}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.biogemeError(error_msg)
         if self.betaId is None:
             raise excep.biogemeError(
                 f'No id has been defined for parameter {self.name}.'
@@ -2639,6 +2784,7 @@ class LogLogit(Expression):
     It contains one formula for the target alternative, a dict of
     formula for the availabilities and a dict of formulas for the
     utilities
+
     """
 
     def __init__(self, util, av, choice):
@@ -2662,6 +2808,9 @@ class LogLogit(Expression):
                        logit probability must be calculated.
         :type choice: biogeme.expressions.Expression
 
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
         self.util = {}
@@ -2837,7 +2986,7 @@ class LogLogit(Expression):
             3. the id of the expression between { }
             4. the number of alternatives between ( )
             5. the id of the expression for the chosen alternative, preceeded
-                 by a comma.
+               by a comma.
             6. for each alternative, separated by commas:
 
                  a. the number of the alternative, as defined by the user,
@@ -2924,6 +3073,9 @@ class bioMultSum(Expression):
 
         :type listOfExpressions: list(biogeme.expressions.Expression)
 
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
         if isinstance(listOfExpressions, dict):
@@ -2989,6 +3141,9 @@ class Elem(Expression):
                               to be evaluated.
         :type keyExpression: biogeme.expressions.Expression
 
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
 
@@ -3319,12 +3474,12 @@ def defineNumberingOfElementaryExpressions(
         (iv) random variables for Monte-Carlo integration,
         (v) variables
 
-      The numbering convention will be performed for all expressions
-      together, so that the same elementary expressions in several
-      expressions will have the same index.
+    The numbering convention will be performed for all expressions
+    together, so that the same elementary expressions in several
+    expressions will have the same index.
 
-    :param collectionOfFormula: collection of Biogeme expressions.
-    :type collectionOfFormula: list(biogeme.expressions.Expression)
+    :param collectionOfFormulas: collection of Biogeme expressions.
+    :type collectionOfFormulas: list(biogeme.expressions.Expression)
     :param variableNames: list of the names of the variables
     :type variableNames: list(string)
     :return: dict, free, freeNames, fixed, fixedNames, rv, rvNames, draws,
@@ -3340,6 +3495,19 @@ def defineNumberingOfElementaryExpressions(
          - rvNames is a list with their names,
          - draws is a dict of the draws, and
          - drawsNames is a list with their names.
+
+    :rtype: tuple(dict(str: class Expression),
+                  dict(str: class Beta),
+                  list(str),
+                  dict(str: class Beta),
+                  list(str),
+                  dict(str: class RandomVariable),
+                  list(str),
+                  dict(str: class bioDraws),
+                  list(str))
+
+    :raise biogemeError: if some elementary expressions are defined
+        more than once.
     """
     # Free parameters (to be estimated), sorted by alphatical order.
     allFreeBetas = dict()
@@ -3406,11 +3574,11 @@ def defineNumberingOfElementaryExpressions(
             for x in allElementaryExpressions
             if allElementaryExpressions.count(x) > 1
         }
-        errorMsg = (
+        error_msg = (
             f'The following elementary expressions are defined '
             f'more than once: {duplicates}.'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.biogemeError(error_msg)
 
     elementaryExpressionIndex = {}
     for i, v in enumerate(allElementaryExpressions):

@@ -4,7 +4,7 @@ Implementation of class contaning and processing the estimation results.
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:50:01 2019
 
-... todo:: rawResults should be a dict and not a class.
+.. todo:: rawResults should be a dict and not a class.
 """
 
 # Too constraining
@@ -12,7 +12,7 @@ Implementation of class contaning and processing the estimation results.
 # pylint: disable=too-many-instance-attributes, too-many-locals
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements, too-few-public-methods
-
+# pylint: disable=too-many-lines
 #
 
 import pickle
@@ -37,7 +37,7 @@ def calcPValue(t):
     where :math:`\\Phi(\\cdot)` is the CDF of a normal distribution.
 
     :param t: t-statistics
-    :type: float
+    :type t: float
 
     :return: p-value
     :rtype: float
@@ -47,7 +47,9 @@ def calcPValue(t):
 
 
 class beta:
-    """Class gathering the information related to the parameters of the model"""
+    """Class gathering the information related to the parameters
+    of the model
+    """
 
     def __init__(self, name, value, bounds):
         """
@@ -89,14 +91,17 @@ class beta:
 
     def isBoundActive(self, threshold=1.0e-6):
         """Check if one of the two bound is 'numerically' active. Being
-            numerically active means that the distance between the value of
-            the parameter and one of its bounds is below the threshold.
+        numerically active means that the distance between the value of
+        the parameter and one of its bounds is below the threshold.
 
         :param threshold: distance below which the bound is considered to be
             active. Default: :math:`10^{-6}`
+        :type threshold: float
 
         :return: True is one of the two bounds is numericall y active.
         :rtype: bool
+
+        :raise biogemeError: if ``threshold`` is negative.
 
         """
         if threshold < 0:
@@ -112,7 +117,7 @@ class beta:
 
     def setStdErr(self, se):
         """Records the standard error, and calculates and records
-            the corresponding t-statistic and p-value
+        the corresponding t-statistic and p-value
 
         :param se: standard error.
         :type se: float
@@ -127,7 +132,7 @@ class beta:
 
     def setRobustStdErr(self, se):
         """Records the robust standard error, and calculates and records
-            the corresponding t-statistic and p-value
+        the corresponding t-statistic and p-value
 
 
         :param se: robust standard error
@@ -143,7 +148,7 @@ class beta:
 
     def setBootstrapStdErr(self, se):
         """Records the robust standard error calculated by bootstrap, and
-            calculates and records the corresponding t-statistic and p-value
+        calculates and records the corresponding t-statistic and p-value
 
         :param se: standard error calculated by bootstrap.
         :type se: float
@@ -195,10 +200,10 @@ class rawResults:
         :param bootstrap: output of the bootstrapping. numpy array, of
             size B x K,  where
 
-                - B is the number of bootstrap iterations
-                - K is the number of parameters to estimate
+            - B is the number of bootstrap iterations
+            - K is the number of parameters to estimate
 
-                          Default: None.
+            Default: None.
         :type bootstrap: numpy.array
         """
 
@@ -328,9 +333,11 @@ class bioResults:
            j: index of second coefficient \f$\\beta_i\f$.
            matrix: estimate of the variance-covariance matrix \f$m\f$.
 
-        Returns:
-           t test
-           \f[\\frac{\\beta_i-\\beta_j}{\\sqrt{m_{ii}+m_{jj} - 2 m_{ij} }}\f]
+        :return: t test
+            ..math::  \f[\\frac{\\beta_i-\\beta_j}
+                  {\\sqrt{m_{ii}+m_{jj} - 2 m_{ij} }}\f]
+        :rtype: float
+
         """
         vi = self.data.betaValues[i]
         vj = self.data.betaValues[j]
@@ -347,12 +354,12 @@ class bioResults:
     def _calculateStats(self):
         """Calculates the following statistics:
 
-            - likelihood ratio test between the initial and the estimated
-              models: :math:`-2(L_0-L^*)`
-            - Rho square: :math:`1 - \\frac{L^*}{L^0}`
-            - Rho bar square: :math:`1 - \\frac{L^* - K}{L^0}`
-            - AIC: :math:`2(K - L^*)`
-            - BIC: :math:`-2 L^* + K  \\log(N)`
+        - likelihood ratio test between the initial and the estimated
+          models: :math:`-2(L_0-L^*)`
+        - Rho square: :math:`1 - \\frac{L^*}{L^0}`
+        - Rho bar square: :math:`1 - \\frac{L^* - K}{L^0}`
+        - AIC: :math:`2(K - L^*)`
+        - BIC: :math:`-2 L^* + K  \\log(N)`
 
         Estimates for the variance-covariance matrix (Rao-Cramer,
         robust, and bootstrap) are also calculated, as well as t-tests and
@@ -624,8 +631,8 @@ class bioResults:
         """Prepare the header for the LaTeX file, containing comments and the
         version of Biogeme.
 
-        Return:
-           string containing the header.
+        :return: string containing the header.
+        :rtype: str
         """
         h = ''
         h += '%% This file is designed to be included into a LaTeX document\n'
@@ -671,7 +678,7 @@ class bioResults:
                 v = v.replace('_', '\\_')
             h += f'{k} & {v:{p}} \\\\\n'
         for k, v in self.data.optimizationMessages.items():
-            if k == 'Relative projected gradient' or k == 'Relative change':
+            if k in ('Relative projected gradient', 'Relative change'):
                 h += f'{k} & \\verb${v:.7g}$ \\\\\n'
             else:
                 h += f'{k} & \\verb${v}$ \\\\\n'
@@ -755,11 +762,34 @@ class bioResults:
         return d
 
     def printGeneralStatistics(self):
+        """Print the general statistics of the estimation.
+
+        :return: general statistics
+
+            Example::
+
+                Number of estimated parameters:	2
+                Sample size:	5
+                Excluded observations:	0
+                Init log likelihood:	-67.08858
+                Final log likelihood:	-67.06549
+                Likelihood ratio test for the init. model:	0.04618175
+                Rho-square for the init. model:	0.000344
+                Rho-square-bar for the init. model:	-0.0295
+                Akaike Information Criterion:	138.131
+                Bayesian Information Criterion:	137.3499
+                Final gradient norm:	3.9005E-07
+                Bootstrapping time:	0:00:00.042713
+                Nbr of threads:	16
+
+
+        :rtype: str
+        """
         d = self.getGeneralStatistics()
-        str = ''
+        output = ''
         for k, (v, p) in d.items():
-            str += f'{k}:\t{v:{p}}\n'
-        return str
+            output += f'{k}:\t{v:{p}}\n'
+        return output
 
     def numberOfFreeParameters(self):
         """This is the number of estimated parameters, minus those that are at
@@ -769,7 +799,7 @@ class bioResults:
 
     def getEstimatedParameters(self):
         """Gather the estimated parameters and the corresponding statistics in
-            a Pandas dataframe.
+        a Pandas dataframe.
 
         :return: Pandas dataframe with the results
         :rtype: pandas.DataFrame
@@ -1011,10 +1041,10 @@ class bioResults:
                 'Variables involved:'
             )
             h += '<table>'
-            for i in range(len(self.data.smallestEigenVector)):
-                if np.abs(self.data.smallestEigenVector[i]) > 1.0e-5:
+            for i, ev in enumerate(self.data.smallestEigenVector):
+                if np.abs(ev) > 1.0e-5:
                     h += (
-                        f'<tr><td>{self.data.smallestEigenVector[i]:.3g}</td>'
+                        f'<tr><td>{ev:.3g}</td>'
                         f'<td> *</td>'
                         f'<td> {self.data.betaNames[i]}</td></tr>\n'
                     )
@@ -1045,7 +1075,7 @@ class bioResults:
             try:
                 index = self.data.betaNames.index(b)
                 values[b] = self.data.betas[index].value
-            except KeyError:
+            except KeyError as e:
                 keys = ''
                 for k in self.data.betaNames:
                     keys += f' {k}'
@@ -1053,22 +1083,21 @@ class bioResults:
                     f'The value of {b} is not available in the results. '
                     f'The following parameters are available: {keys}'
                 )
-                raise excep.biogemeError(err)
+                raise excep.biogemeError(err) from e
         return values
 
     def getVarCovar(self):
-        """Obtain the Rao-Cramer variance covariance matrix as a Pandas data frame.
+        """Obtain the Rao-Cramer variance covariance matrix as a
+        Pandas data frame.
 
         :return: Rao-Cramer variance covariance matrix
         :rtype: pandas.DataFrame
         """
         names = [b.name for b in self.data.betas]
         vc = pd.DataFrame(index=names, columns=names)
-        for i in range(len(self.data.betas)):
-            for j in range(len(self.data.betas)):
-                vc.at[
-                    self.data.betas[i].name, self.data.betas[j].name
-                ] = self.data.varCovar[i, j]
+        for i, betai in enumerate(self.data.betas):
+            for j, betaj in enumerate(self.data.betas):
+                vc.at[betai.name, betaj.name] = self.data.varCovar[i, j]
         return vc
 
     def getRobustVarCovar(self):
@@ -1079,15 +1108,14 @@ class bioResults:
         """
         names = [b.name for b in self.data.betas]
         vc = pd.DataFrame(index=names, columns=names)
-        for i in range(len(self.data.betas)):
-            for j in range(len(self.data.betas)):
-                vc.at[
-                    self.data.betas[i].name, self.data.betas[j].name
-                ] = self.data.robust_varCovar[i, j]
+        for i, betai in enumerate(self.data.betas):
+            for j, betaj in enumerate(self.data.betas):
+                vc.at[betai.name, betaj.name] = self.data.robust_varCovar[i, j]
         return vc
 
     def getBootstrapVarCovar(self):
-        """Obtain the bootstrap variance covariance matrix as a Pandas data frame.
+        """Obtain the bootstrap variance covariance matrix as
+        a Pandas data frame.
 
         :return: bootstrap variance covariance matrix, or None if not available
         :rtype: pandas.DataFrame
@@ -1097,34 +1125,33 @@ class bioResults:
 
         names = [b.name for b in self.data.betas]
         vc = pd.DataFrame(index=names, columns=names)
-        for i in range(len(self.data.betas)):
-            for j in range(len(self.data.betas)):
-                vc.at[
-                    self.data.betas[i].name, self.data.betas[j].name
-                ] = self.data.bootstrap_varCovar[i, j]
+        for i, betai in enumerate(self.data.betas):
+            for j, betaj in enumerate(self.data.betas):
+                vc.at[betai.name, betaj.name] = self.data.bootstrap_varCovar[
+                    i, j
+                ]
         return vc
 
     def writeHtml(self):
         """Write the results in an HTML file."""
         self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
-        f = open(self.data.htmlFileName, 'w')
-        f.write(self.getHtml())
+        with open(self.data.htmlFileName, 'w') as f:
+            f.write(self.getHtml())
         self.logger.general(f'Results saved in file {self.data.htmlFileName}')
-        f.close()
 
     def writeLaTeX(self):
         """Write the results in a LaTeX file."""
         self.data.latexFileName = bf.getNewFileName(self.data.modelName, 'tex')
-        f = open(self.data.latexFileName, 'w')
-        f.write(self.getLaTeX())
-        f.close()
+        with open(self.data.latexFileName, 'w') as f:
+            f.write(self.getLaTeX())
+        self.logger.general(f'Results saved in file {self.data.latexFileName}')
 
     def _getHtmlHeader(self):
         """Prepare the header for the HTML file, containing comments and the
         version of Biogeme.
 
-        Return:
-           string containing the header.
+        :return: string containing the header.
+        :rtype: str
         """
         h = ''
         h += '<html>\n'
@@ -1229,7 +1256,8 @@ class bioResults:
         return results
 
     def getF12(self, robustStdErr=True):
-        """F12 is a format used by the software ALOGIT to report estimation results.
+        """F12 is a format used by the software ALOGIT to
+        report estimation results.
 
         :param robustStdErr: if True, the robust standard errors are reports.
                              If False, the Rao-Cramer are.
@@ -1276,7 +1304,7 @@ class bioResults:
         #  characters 19-38, coefficient value   20 chars
         #  characters 39-58, standard error      20 chars
 
-        stats = self.getGeneralStatistics()
+        mystats = self.getGeneralStatistics()
         table = self.getEstimatedParameters()
         coefNames = list(table.index.values)
         for name in coefNames:
@@ -1310,14 +1338,14 @@ class bioResults:
         #   characters 28-47, null likelihood            20 chars
         #   characters 48-67, final likelihood           20 chars
 
-        results += f'{stats["Sample size"][0]: >8}'
+        results += f'{mystats["Sample size"][0]: >8}'
         # The cte log likelihood is not available. We put 0 instead.
         results += f' {0: >18}'
         if self.data.nullLogLike is not None:
-            results += f' {stats["Null log likelihood"][0]: >+19.12e}'
+            results += f' {mystats["Null log likelihood"][0]: >+19.12e}'
         else:
             results += f' {0: >19}'
-        results += f' {stats["Final log likelihood"][0]: >+19.12e}'
+        results += f' {mystats["Final log likelihood"][0]: >+19.12e}'
         results += '\n'
 
         # results += f'{checkline1}\n'
@@ -1328,8 +1356,8 @@ class bioResults:
         #   characters 5-8, error code (please use 0)                   4 chars
         #   characters 9-29, time and date (sugg. repeat from line 2)  21 chars
 
-        if "Number of iterations" in stats:
-            results += f'{stats["Number of iterations"][0]: >4}'
+        if "Number of iterations" in mystats:
+            results += f'{mystats["Number of iterations"][0]: >4}'
         else:
             results += f'{0: >4}'
         results += f'{0: >4}'
@@ -1346,9 +1374,9 @@ class bioResults:
         #   (2,1) (3,1) (3,2) (4,1) etc.
 
         count = 0
-        for i in range(len(coefNames)):
+        for i, coefi in enumerate(coefNames):
             for j in range(0, i):
-                name = (coefNames[i], coefNames[j])
+                name = (coefi, coefNames[j])
                 if robustStdErr:
                     corr = int(100000 * self.data.secondOrderTable[name][5])
                 else:
@@ -1363,7 +1391,6 @@ class bioResults:
     def writeF12(self, robustStdErr=True):
         """Write the results in F12 file."""
         self.data.F12FileName = bf.getNewFileName(self.data.modelName, 'F12')
-        f = open(self.data.F12FileName, 'w')
-        f.write(self.getF12(robustStdErr))
+        with open(self.data.F12FileName, 'w') as f:
+            f.write(self.getF12(robustStdErr))
         self.logger.general(f'Results saved in file {self.data.F12FileName}')
-        f.close()

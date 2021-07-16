@@ -28,15 +28,16 @@ logger = msg.bioMessage()
 
 
 class functionToMinimize:
-    """This is an abstract class. The actual function to minimize must be
-    implemented in a concrete class deriving from this one.
+    """This is an abstract class. The actual function to minimize
+    must be implemented in a concrete class deriving from this one.
 
     """
 
     @abstractmethod
     def setVariables(self, x):
 
-        """Set the values of the variables for which the function has to b calculated.
+        """Set the values of the variables for which the function
+        has to be calculated.
 
         :param x: values
         :type x: numpy.array
@@ -98,7 +99,8 @@ class functionToMinimize:
 
     @abstractmethod
     def f_g_bhhh(self, batch=None):
-        """Calculate the value of the function, the gradient and the BHHH matrix
+        """Calculate the value of the function, the gradient and
+        the BHHH matrix
 
         :param batch: for data driven functions (such as a log
                       likelikood function), it is possible to
@@ -231,7 +233,7 @@ class bioBounds:
 
     def intersectionWithTrustRegion(self, x, delta):
         """Create a bioBounds object representing the intersection
-            between the feasible domain and the trust region.
+        between the feasible domain and the trust region.
 
         :param x: center of the trust region
         :type x: numpy.array
@@ -350,11 +352,11 @@ class bioBounds:
         :type epsilon: float
 
         :return: a vector, same length as x, where each entry reports
-                 the activity of the corresponding variable:
+            the activity of the corresponding variable:
 
-           - 0 if no bound is active
-           - -1 if the lower bound is active
-           - 1 if the upper bound is active
+            - 0 if no bound is active
+            - -1 if the lower bound is active
+            - 1 if the upper bound is active
 
         :rtype: numpy.array
 
@@ -429,7 +431,7 @@ class bioBounds:
 
     def generalizedCauchyPoint(self, xk, gk, H, direction):
         """Implementation of Step 2 of the Specific Algorithm by
-            `Conn et al. (1988)`_.
+        `Conn et al. (1988)`_.
 
         .. _`Conn et al. (1988)`: https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf
 
@@ -715,10 +717,10 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
     :return: a step verifing both Wolfe conditions
     :rtype: float
 
-    :raises biogeme.exceptions.biogemeError: if lbd :math:`\\leq` 1
-    :raises biogeme.exceptions.biogemeError: if alpha0 :math:`\\leq` 0
-    :raises biogeme.exceptions.biogemeError: if beta1 :math:`\\geq` beta2
-    :raises biogeme.exceptions.biogemeError: if d is not a descent direction
+    :raises biogeme.exceptions.biogemeError: if ``lbd`` :math:`\\leq` 1
+    :raises biogeme.exceptions.biogemeError: if ``alpha0`` :math:`\\leq` 0
+    :raises biogeme.exceptions.biogemeError: if ``beta1`` :math:`\\geq` beta2
+    :raises biogeme.exceptions.biogemeError: if ``d`` is not a descent direction
 
     """
     if lbd <= 1:
@@ -941,7 +943,7 @@ def cauchyNewtonDogleg(g, H):
     .. math:: H_s d_n = - \\nabla f(x)
 
     where :math:`H_s` is a positive definite matrix generated with the
-                method by `Schnabel and Eskow (1999)`_.
+    method by `Schnabel and Eskow (1999)`_.
 
     The Dogleg point is
 
@@ -952,7 +954,7 @@ def cauchyNewtonDogleg(g, H):
     .. math:: \\eta = 0.2 + 0.8 \\frac{\\alpha^2}{\\beta |\\nabla f(x)^T d_n|}
 
     and :math:`\\alpha= \\nabla f(x)^T \\nabla f(x)`,
-    :math:`\\beta=\\nabla f(x)^T \\nabla^2 f(x)\\nabla f(x)`
+    :math:`\\beta=\\nabla f(x)^T \\nabla^2 f(x)\\nabla f(x).`
 
     :param g: gradient :math:`\\nabla f(x)`
 
@@ -1007,7 +1009,7 @@ def dogleg(g, H, delta):
 
              * -2 if negative curvature along Newton direction
              * -1 if negative curvature along Cauchy direction
-                        (i.e. along the gradient)
+               (i.e. along the gradient)
              * 1 if partial Cauchy step
              * 2 if Newton step
              * 3 if partial Newton step
@@ -1071,8 +1073,7 @@ def dogleg(g, H, delta):
 
 
 def truncatedConjugateGradient(g, H, delta):
-    """
-    Find an approximation of the trust region subproblem using the
+    """Find an approximation of the trust region subproblem using the
     truncated conjugate gradient method
 
     :param g: gradient of the quadratic model.
@@ -1093,6 +1094,7 @@ def truncatedConjugateGradient(g, H, delta):
             * 4 if a numerical problem has been encountered
 
     :rtype: numpy.array, int
+
     """
     tol = 1.0e-6
     n = len(g)
@@ -1289,7 +1291,7 @@ def newtonTrustRegion(
 
 def bfgs(H, d, y):
     """Update the BFGS matrix. Formula (13.12) of `Bierlaire (2015)`_
-            where the method proposed by `Powell (1977)`_ is applied
+    where the method proposed by `Powell (1977)`_ is applied
 
     .. _`Bierlaire (2015)`: http://optimizationprinciplesalgorithms.com/
     .. _`Powell (1977)`: https://link.springer.com/content/pdf/10.1007/BFb0067703.pdf
@@ -1381,7 +1383,7 @@ def bfgsLineSearch(
             - x is the solution found,
 
             - messages is a dictionary reporting various aspects
-                         related to the run of the algorithm.
+              related to the run of the algorithm.
 
     :rtype: numpy.array, dict(str:object)
 
@@ -1632,10 +1634,10 @@ def truncatedConjugateGradientSubspace(
     tol=np.finfo(np.float64).eps ** 0.3333,
 ):
     """Find an approximation of the solution of the trust region
-       subproblem using the truncated conjugate gradient method within
-       the subspace of free variables. Free variables are those
-       corresponding to inactive constraints at the generalized Cauchy
-       point.
+    subproblem using the truncated conjugate gradient method within
+    the subspace of free variables. Free variables are those
+    corresponding to inactive constraints at the generalized Cauchy
+    point.
 
     :param xk: current iterate.
     :type xk: numpy.array

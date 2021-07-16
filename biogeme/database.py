@@ -18,9 +18,9 @@ import pandas as pd
 
 import biogeme.exceptions as excep
 import biogeme.filenames as bf
-import biogeme.draws as draws
 import biogeme.messaging as msg
-import biogeme.tools as tools
+from biogeme import tools
+from biogeme import draws
 
 from biogeme.expressions import Variable, isNumeric, Numeric
 
@@ -37,9 +37,11 @@ class Database:
         :param pandasDatabase: data stored in a pandas data frame.
         :type pandasDatabase: pandas.DataFrame
 
+        :raise biogemeError: if the audit function detects errors.
         """
         self.logger = msg.bioMessage()
-        ## Name of the database. Used mainly for the file name when dumping data.
+        ## Name of the database. Used mainly for the file name when
+        ## dumping data.
         self.name = name
 
         ## Pandas data frame containing the data.
@@ -287,7 +289,10 @@ class Database:
             ),
             'NORMAL_MLHS_ANTI': (
                 normal_MLHS_anti,
-                'Antithetic normal draws from Modified Latin Hypercube Sampling',
+                (
+                    'Antithetic normal draws from '
+                    'Modified Latin Hypercube Sampling'
+                ),
             ),
         }
 
@@ -316,11 +321,12 @@ class Database:
           - Check if there are non numerical entries.
           - Check if there are NaN (not a number) entries.
           - Check if there are strings.
-          - Check if the numbering of individuals are contiguous (panel data only).
+          - Check if the numbering of individuals are contiguous
+            (panel data only).
 
-        Returns:
-            A tuple of two lists with the results of
-            the diagnostic: listOfErrors, listOfWarnings
+        :return: A tuple of two lists with the results of the diagnostic:
+            listOfErrors, listOfWarnings
+        :rtype: tuple(list(str), list(str))
         """
         listOfErrors = []
         listOfWarnings = []
@@ -371,7 +377,8 @@ class Database:
         return res
 
     def checkAvailabilityOfChosenAlt(self, avail, choice):
-        """Check if the chosen alternative is available for each entry in the database.
+        """Check if the chosen alternative is available for each entry
+        in the database.
 
         :param avail: list of expressions to evaluate the
                       availability conditions for each alternative.
@@ -413,8 +420,8 @@ class Database:
         :param choice: expression for the chosen alternative.
         :type choice: biogeme.expressions.Expression
 
-        :return: for each alternative, a tuple containing the number of time it is chosen,
-                 and the number of time it is available.
+        :return: for each alternative, a tuple containing the number of time
+            it is chosen, and the number of time it is available.
         :rtype: dict(int: (int, int))
 
         """
@@ -442,7 +449,7 @@ class Database:
 
     def sumFromDatabase(self, expression):
         """Calculates the value of an expression for each entry
-            in the database, and returns the sum.
+        in the database, and returns the sum.
 
         :param expression: expression to evaluate
         :type expression: biogeme.expressions.Expression
@@ -487,7 +494,8 @@ class Database:
                         If None, all of them will be considered.
         :type columns: list(str)
 
-        :param reportAll: if False, remove entries where the suggested scale is 1, 0.1 or 10
+        :param reportAll: if False, remove entries where the suggested
+            scale is 1, 0.1 or 10
         :type reportAll: bool
 
         :return: A Pandas dataframe where each row contains the name
@@ -496,6 +504,7 @@ class Database:
 
         :rtype: pandas.DataFrame
 
+        :raise biogemeError: if a variable in ``columns`` is unknown.
         """
         if columns is None:
             columns = self.data.columns
@@ -543,7 +552,7 @@ class Database:
 
     def sampleIndividualMapWithReplacement(self, size=None):
         """Extract a random sample of the individual map
-            from a panel data database, with replacement.
+        from a panel data database, with replacement.
 
         Useful for bootstrapping.
 
@@ -555,6 +564,7 @@ class Database:
         :return: pandas dataframe with the sample.
         :rtype: pandas.DataFrame
 
+        :raise biogemeError: if the database in not in panel mode.
         """
         if not self.isPanel():
             errorMsg = (
@@ -579,19 +589,24 @@ class Database:
         :type samplingRate: float
         :param columnWithSamplingWeights: name of the column with
               the sampling weights. If None, each row has equal probability.
-        :param columnWithSamplingWeights: string
+        :type columnWithSamplingWeights: string
 
-        :return: None
+        :raise biogemeError: if the structure of the database has been modified
+            since last sample.
         """
         if self.isPanel():
             if self.fullIndividualMap is None:
                 self.fullIndividualMap = self.individualMap
             else:
-                # Check if the structure has not been modified since last sample
+                # Check if the structure has not been modified since
+                # last sample
                 if set(self.fullIndividualMap.columns) != set(
                     self.individualMap.columns
                 ):
-                    message = 'The structure of the database has been modified since last sample. '
+                    message = (
+                        'The structure of the database has been '
+                        'modified since last sample. '
+                    )
                     left = set(self.fullIndividualMap.columns).difference(
                         set(self.individualMap.columns)
                     )
@@ -618,9 +633,13 @@ class Database:
             if self.fullData is None:
                 self.fullData = self.data
             else:
-                # Check if the structure has not been modified since last sample
+                # Check if the structure has not been modified since
+                # last sample
                 if set(self.fullData.columns) != set(self.data.columns):
-                    message = 'The structure of the database has been modified since last sample. '
+                    message = (
+                        'The structure of the database has been modified '
+                        'since last sample. '
+                    )
                     left = set(self.fullData.columns).difference(
                         set(self.data.columns)
                     )
@@ -637,7 +656,8 @@ class Database:
                 frac=samplingRate, weights=columnWithSamplingWeights
             )
             self.logger.debug(
-                f'Full data: {self.fullData.shape} Sampled data: {self.data.shape}'
+                f'Full data: {self.fullData.shape} '
+                f'Sampled data: {self.data.shape}'
             )
 
     def useFullSample(self):
@@ -683,7 +703,8 @@ class Database:
         return self.data[column]
 
     def remove(self, expression):
-        """Removes from the database all entries such that the value of the expression is not 0.
+        """Removes from the database all entries such that the value
+        of the expression is not 0.
 
         :param expression: expression to evaluate
         :type expression: biogeme.expressions.Expression
@@ -739,6 +760,8 @@ class Database:
                            'Draws from exponential distributions')}
             myData.setRandomNumberGenerators(dict)
 
+        :raise ValueError: if a reserved keyword is used for a
+             user-defined draws.
 
         """
         for k in self.nativeRandomNumberGenerators:
@@ -762,7 +785,8 @@ class Database:
                       function database.setRandomNumberGenerators
         :type types: dict
 
-        :param names: the list of names of the variables that require draws to be generated.
+        :param names: the list of names of the variables that require draws
+            to be generated.
         :type names: list of strings
 
         :param numberOfDraws: number of draws to generate.
@@ -784,6 +808,11 @@ class Database:
               theDrawsTable = myData.generateDraws(types,
                   ['randomDraws1', 'randomDraws2', 'randomDraws3'], 10)
 
+
+        :raise biogemeError: if a type of sdraw is unknown.
+
+        :raise biogemeError: if the output of the draw generator does not
+            have the requested dimensions.
         """
 
         self.numberOfDraws = numberOfDraws
@@ -822,8 +851,8 @@ class Database:
                 raise excep.biogemeError(errorMsg)
 
         self.theDraws = np.array(listOfDraws)
-        ## Draws as a three-dimensional numpy series. The dimensions are organized to be more
-        # suited for calculation.
+        ## Draws as a three-dimensional numpy series. The dimensions
+        ## are organized to be more suited for calculation.
         # 1. number of individuals
         # 2. number of draws
         # 3. number of variables
@@ -832,7 +861,7 @@ class Database:
 
     def getNumberOfObservations(self):
         """
-          Reports the number of observations in the database.
+        Reports the number of observations in the database.
 
         Note that it returns the same value, irrespectively
         if the database contains panel data or not.
@@ -895,6 +924,9 @@ class Database:
 
         :param columnName: name of the columns that identifies individuals.
         :type columnName: string
+
+        :raise biogemeError: if the data are not sorted properly, that
+            is if the data for the one individuals are not consecutive.
 
         """
 

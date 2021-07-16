@@ -41,10 +41,11 @@ def mixedloglikelihood(prob):
 
     :return: the simulated loglikelihood, given by
 
-    .. math:: \\ln\\left(\\sum_{r=1}^R P(i|\\xi^r_1,\\ldots,\\xi^r_L) \\right)
+        .. math:: \\ln\\left(\\sum_{r=1}^R 
+            P(i|\\xi^r_1,\\ldots,\\xi^r_L) \\right)
 
-    where :math:`R` is the number of draws, and :math:`\\xi_j^r`
-          is the rth draw of the random variable :math:`\\xi_j`.
+        where :math:`R` is the number of draws, and :math:`\\xi_j^r`
+        is the rth draw of the random variable :math:`\\xi_j`.
 
     :rtype: biogeme.expressions.Expression
 
@@ -66,11 +67,11 @@ def likelihoodregression(meas, model, sigma):
                   standard error :math:`\\sigma` of the error term.
     :type sigma: biogeme.expressions.Expression
     :return: The likelihood of the regression, assuming a normal distribution,
-             that is
+        that is
 
-    .. math:: \\frac{1}{\\sigma} \\phi\\left( \\frac{y-m}{\\sigma} \\right)
+        .. math:: \\frac{1}{\\sigma} \\phi\\left( \\frac{y-m}{\\sigma} \\right)
 
-             Where :math:`\\phi(\\cdot)` is the pdf of the normal distribution.
+        where :math:`\\phi(\\cdot)` is the pdf of the normal distribution.
 
     :rtype: biogeme.expressions.Expression
     """

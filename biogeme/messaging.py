@@ -23,14 +23,14 @@ class bioMessage(metaclass=Singleton):
         :param screenLevel: level of message that must be displayed on the
             screen:
 
-           - 0: no output (default)
-           - 1: warnings only
-           - 2: only warnings and general information
-           - 3: more verbose
-           - 4: debug messages
+            - 0: no output (default)
+            - 1: warnings only
+            - 2: only warnings and general information
+            - 3: more verbose
+            - 4: debug messages
 
 
-        :type screenlevel: int
+        :type screenLevel: int
         """
         self.screenLevel = screenLevel
         self.types = {
@@ -46,12 +46,13 @@ class bioMessage(metaclass=Singleton):
         self.lastLevel = None
 
     def resetMessages(self):
+        """Erase all messages"""
         self.messages = []
 
     def allMessages(self, screenLevel=None):
         """Report all the messages up to a given level.
 
-        :param fileLevel: level of message that must be reported in the file:
+        :param screenLevel: level of message that must be reported in the file:
 
            - 0: no output
            - 1: warnings only
@@ -61,7 +62,7 @@ class bioMessage(metaclass=Singleton):
 
              If None (default), all messages are reported.
 
-        :type screenlevel: int
+        :type screenLevel: int
 
         :return: all messages.
         :rtype: str.
@@ -86,29 +87,34 @@ class bioMessage(metaclass=Singleton):
            - 4: debug messages
 
              If None (default), all messages are reported.
-        :type screenlevel: int
+        :type fileLevel: int
 
         :param fileName: name of the file (without extension).
                          Default: '_biogeme'. A file called _biogeme.log
                          will be created.
         :type fileName: string
+
+        :return: name of the file
+        :rtype: str
         """
         completeFileName = bf.getNewFileName(fileName, 'log')
-        f = open(completeFileName, 'w')
-        self.general(f'Log file created: {completeFileName}')
-        print(f'*** File created {datetime.datetime.now()} ***', file=f)
-        print(
-            f'*** Log file from biogeme {bv.getVersion()} [{bv.versionDate}]',
-            file=f,
-        )
-        for m, i in self.messages:
-            if fileLevel is None or i <= fileLevel:
-                print(m, file=f)
-        f.close()
+        with open(completeFileName, 'w') as f:
+            self.general(f'Log file created: {completeFileName}')
+            print(f'*** File created {datetime.datetime.now()} ***', file=f)
+            print(
+                f'*** Log file from biogeme {bv.getVersion()}'
+                f' [{bv.versionDate}]',
+                file=f,
+            )
+            for m, i in self.messages:
+                if fileLevel is None or i <= fileLevel:
+                    print(m, file=f)
         return completeFileName
 
     def temporarySilence(self):
-        """Temporarily turns off the message, remembering the current screen level."""
+        """Temporarily turns off the message, remembering the current
+        screen level.
+        """
         self.lastLevel = self.screenLevel
         self.screenLevel = 0
 
@@ -167,6 +173,8 @@ class bioMessage(metaclass=Singleton):
            - 2: general information
            - 3: detailed information
            - 4: debug message
+
+        :type level: int
 
         :note: adding a message of level 0 is meaningless, as it correspond to
             silentmode.
