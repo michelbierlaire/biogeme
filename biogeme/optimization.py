@@ -33,7 +33,7 @@ def scipy(fct, initBetas, bounds, parameters=None):
     minimize function.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the beta parameters
     :type initBetas: numpy.array
@@ -89,7 +89,7 @@ def newtonLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
     """Optimization interface for Biogeme, based on Newton method.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
     :type initBetas: numpy.array
@@ -147,7 +147,7 @@ def newtonTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
     """Optimization interface for Biogeme, based on Newton method with TR.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
     :type initBetas: numpy.array
@@ -223,7 +223,7 @@ def bfgsLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
 
     :param fct: object to calculate the objective function and its derivatives.
 
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
 
@@ -294,7 +294,7 @@ def bfgsTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
     """Optimization interface for Biogeme, based on Newton method with TR.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
     :type initBetas: numpy.array
@@ -382,7 +382,7 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
     method with simple bounds.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
     :type initBetas: numpy.array
@@ -504,7 +504,7 @@ def bioNewton(fct, initBetas, bounds, parameters=None):
     bounds.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
     :type initBetas: numpy.array
@@ -565,7 +565,7 @@ def bioBfgs(fct, initBetas, bounds, parameters=None):
     method with simple bounds.
 
     :param fct: object to calculate the objective function and its derivatives.
-    :type fct: optimization.functionToMinimize
+    :type fct: algorithms.functionToMinimize
 
     :param initBetas: initial value of the parameters.
     :type initBetas: numpy.array
