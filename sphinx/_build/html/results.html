@@ -1,252 +1,180 @@
 
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Results &mdash; Biogeme 3.2.7 documentation</title>
+  
 
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Results &#8212; Biogeme 3.2.7 documentation</title>
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
     
-  <link href="_static/css/theme.css" rel="stylesheet" />
-  <link href="_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-  <link rel="stylesheet"
-    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
-
-    
-      
-
-    
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/sphinx-book-theme.acff12b8f9c144ce68a297486a2fa670.css" type="text/css" />
-    
-  <link rel="preload" as="script" href="_static/js/index.1c5a1a01449ed65a7b51.js">
-
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Singleton" href="singleton.html" />
-    <link rel="prev" title="Optimization" href="optimization.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en" />
+    <link rel="prev" title="Optimization" href="optimization.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
     
-  </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
-    
-    <div class="container-fluid" id="banner"></div>
-
-    
-
-    <div class="container-xl">
-      <div class="row">
-          
-<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
-    
-        <div class="navbar-brand-box">
-    <a class="navbar-brand text-wrap" href="index.html">
-      
-      
-      <h1 class="site-logo" id="site-title">Biogeme 3.2.7 documentation</h1>
-      
-    </a>
-</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-    <div class="bd-toc-item active">
-        <p class="caption">
- <span class="caption-text">
-  Contents:
- </span>
-</p>
-<ul class="current nav bd-sidenav">
- <li class="toctree-l1">
-  <a class="reference internal" href="algorithms.html">
-   Algorithms
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="assisted.html">
-   Assisted specification
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="biogeme.html">
-   Biogeme
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="database.html">
-   Database
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="distributions.html">
-   Distributions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="draws.html">
-   Draws
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="exceptions.html">
-   Exceptions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="expressions.html">
-   Expressions
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="filenames.html">
-   Filenames
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="loglikelihood.html">
-   Log likelihood
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="messaging.html">
-   Messaging
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="models.html">
-   Models
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="optimization.html">
-   Optimization
-  </a>
- </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Results
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="singleton.html">
-   Singleton
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="tools.html">
-   Tools
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="version.html">
-   Version
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="vns.html">
-   Variable Neighborhood Search
-  </a>
- </li>
-</ul>
-
-    </div>
-</nav> <!-- To handle the deprecated key -->
-
-<div class="navbar_extra_footer">
-  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
-</div>
-
-</div>
-
-
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
 
+          
+            <a href="index.html" class="icon icon-home"> Biogeme
+          
 
           
-<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
-    
-    <div class="topbar container-xl fixed-top">
-    <div class="topbar-contents row">
-        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
-        <div class="col pl-md-4 topbar-main">
-            
-            <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
-                data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
-                aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
-                title="Toggle navigation" data-toggle="tooltip" data-placement="left">
-                <i class="fas fa-bars"></i>
-                <i class="fas fa-arrow-left"></i>
-                <i class="fas fa-arrow-up"></i>
-            </button>
-            
-            
-<div class="dropdown-buttons-trigger">
-    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
-            class="fas fa-download"></i></button>
+          </a>
 
-    <div class="dropdown-buttons">
-        <!-- ipynb file if we had a myst markdown file -->
-        
-        <!-- Download raw file -->
-        <a class="dropdown-buttons" href="_sources/results.rst.txt"><button type="button"
-                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
-                data-placement="left">.rst</button></a>
-        <!-- Download PDF via print -->
-        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
-            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
-    </div>
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
 </div>
 
-            <!-- Source interaction buttons -->
-
-            <!-- Full screen (wrap in <a> to have style consistency -->
-
-<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
-        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
-        title="Fullscreen mode"><i
-            class="fas fa-expand"></i></button></a>
-
-            <!-- Launch buttons -->
-
+          
         </div>
 
-        <!-- Table of contents -->
-        <div class="d-none d-md-block col-md-2 bd-toc show">
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
             
-            <div class="tocsection onthispage pt-5 pb-3">
-                <i class="fas fa-list"></i> Contents
-            </div>
-            <nav id="bd-toc-nav">
-                <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#module-biogeme.results">
-   biogeme.results module
-  </a>
- </li>
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Results</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.results">biogeme.results module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            </nav>
+            
+          
         </div>
-    </div>
-</div>
-    <div id="main-content" class="row">
-        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
         
-              <div>
-                
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Results</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/results.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
   <div class="section" id="results">
 <h1>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h1>
 <p>Estimation results</p>
@@ -282,6 +210,24 @@ of the model</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="biogeme.results.beta.bootstrap_pValue">
+<code class="sig-name descname"><span class="pre">bootstrap_pValue</span></code><a class="headerlink" href="#biogeme.results.beta.bootstrap_pValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>p-value calculated from bootstrap</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.bootstrap_stdErr">
+<code class="sig-name descname"><span class="pre">bootstrap_stdErr</span></code><a class="headerlink" href="#biogeme.results.beta.bootstrap_stdErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Std error calculated from bootstrap</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.bootstrap_tTest">
+<code class="sig-name descname"><span class="pre">bootstrap_tTest</span></code><a class="headerlink" href="#biogeme.results.beta.bootstrap_tTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>t-test calculated from bootstrap</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="biogeme.results.beta.isBoundActive">
 <code class="sig-name descname"><span class="pre">isBoundActive</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/results.html#beta.isBoundActive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.results.beta.isBoundActive" title="Permalink to this definition">¶</a></dt>
@@ -303,6 +249,42 @@ active. Default: <span class="math notranslate nohighlight">\(10^{-6}\)</span></
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">threshold</span></code> is negative.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.lb">
+<code class="sig-name descname"><span class="pre">lb</span></code><a class="headerlink" href="#biogeme.results.beta.lb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lower bound</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.name">
+<code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#biogeme.results.beta.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the parameter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.pValue">
+<code class="sig-name descname"><span class="pre">pValue</span></code><a class="headerlink" href="#biogeme.results.beta.pValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>p-value</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.robust_pValue">
+<code class="sig-name descname"><span class="pre">robust_pValue</span></code><a class="headerlink" href="#biogeme.results.beta.robust_pValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Robust p-value</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.robust_stdErr">
+<code class="sig-name descname"><span class="pre">robust_stdErr</span></code><a class="headerlink" href="#biogeme.results.beta.robust_stdErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Robust standard error</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.robust_tTest">
+<code class="sig-name descname"><span class="pre">robust_tTest</span></code><a class="headerlink" href="#biogeme.results.beta.robust_tTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Robust t-test</p>
 </dd></dl>
 
 <dl class="py method">
@@ -341,6 +323,30 @@ the corresponding t-statistic and p-value</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="biogeme.results.beta.stdErr">
+<code class="sig-name descname"><span class="pre">stdErr</span></code><a class="headerlink" href="#biogeme.results.beta.stdErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard error</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.tTest">
+<code class="sig-name descname"><span class="pre">tTest</span></code><a class="headerlink" href="#biogeme.results.beta.tTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>t-test</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.ub">
+<code class="sig-name descname"><span class="pre">ub</span></code><a class="headerlink" href="#biogeme.results.beta.ub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upper bound</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.beta.value">
+<code class="sig-name descname"><span class="pre">value</span></code><a class="headerlink" href="#biogeme.results.beta.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current value</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -365,6 +371,13 @@ pickle format. Default: None.</p></li>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogeme.exceptions.biogemeError</strong></a> – if no data is provided.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.bioResults.data">
+<code class="sig-name descname"><span class="pre">data</span></code><a class="headerlink" href="#biogeme.results.bioResults.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object of type <a class="reference internal" href="#biogeme.results.rawResults" title="biogeme.results.rawResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.results.rawResults</span></code></a> contaning the
+raw estimation results.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -670,6 +683,18 @@ their bounds</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.results.</span></code><code class="sig-name descname"><span class="pre">rawResults</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betaValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fgHb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/results.html#rawResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.results.rawResults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class containing the raw results from the estimation</p>
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.F12FileName">
+<code class="sig-name descname"><span class="pre">F12FileName</span></code><a class="headerlink" href="#biogeme.results.rawResults.F12FileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the F12 output file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.H">
+<code class="sig-name descname"><span class="pre">H</span></code><a class="headerlink" href="#biogeme.results.rawResults.H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of the hessian of the loglikelihood function</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="biogeme.results.rawResults.__init__">
 <code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betaValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fgHb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/results.html#rawResults.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.results.rawResults.__init__" title="Permalink to this definition">¶</a></dt>
@@ -701,42 +726,231 @@ size B x K,  where</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.betaNames">
+<code class="sig-name descname"><span class="pre">betaNames</span></code><a class="headerlink" href="#biogeme.results.rawResults.betaNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names of the parameters</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.betaValues">
+<code class="sig-name descname"><span class="pre">betaValues</span></code><a class="headerlink" href="#biogeme.results.rawResults.betaValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Values of the parameters</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.betas">
+<code class="sig-name descname"><span class="pre">betas</span></code><a class="headerlink" href="#biogeme.results.rawResults.betas" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of objects of type results.beta</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.bhhh">
+<code class="sig-name descname"><span class="pre">bhhh</span></code><a class="headerlink" href="#biogeme.results.rawResults.bhhh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of the BHHH matrix of the loglikelihood function</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.bootstrap">
+<code class="sig-name descname"><span class="pre">bootstrap</span></code><a class="headerlink" href="#biogeme.results.rawResults.bootstrap" title="Permalink to this definition">¶</a></dt>
+<dd><p>output of the bootstrapping. numpy array, of size B x K,
+where</p>
+<ul class="simple">
+<li><p>B is the number of bootstrap iterations</p></li>
+<li><p>K is the number of parameters to estimate</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.bootstrap_time">
+<code class="sig-name descname"><span class="pre">bootstrap_time</span></code><a class="headerlink" href="#biogeme.results.rawResults.bootstrap_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time needed to perform the bootstrap</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.dataname">
+<code class="sig-name descname"><span class="pre">dataname</span></code><a class="headerlink" href="#biogeme.results.rawResults.dataname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the database</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.drawsProcessingTime">
+<code class="sig-name descname"><span class="pre">drawsProcessingTime</span></code><a class="headerlink" href="#biogeme.results.rawResults.drawsProcessingTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time needed to process the draws</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.excludedData">
+<code class="sig-name descname"><span class="pre">excludedData</span></code><a class="headerlink" href="#biogeme.results.rawResults.excludedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of excluded data</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.g">
+<code class="sig-name descname"><span class="pre">g</span></code><a class="headerlink" href="#biogeme.results.rawResults.g" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of the gradient of the loglikelihood function</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.gradientNorm">
+<code class="sig-name descname"><span class="pre">gradientNorm</span></code><a class="headerlink" href="#biogeme.results.rawResults.gradientNorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Norm of the gradient</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.htmlFileName">
+<code class="sig-name descname"><span class="pre">htmlFileName</span></code><a class="headerlink" href="#biogeme.results.rawResults.htmlFileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the HTML output file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.initLogLike">
+<code class="sig-name descname"><span class="pre">initLogLike</span></code><a class="headerlink" href="#biogeme.results.rawResults.initLogLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of the likelihood function with the initial value of the
+parameters</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.latexFileName">
+<code class="sig-name descname"><span class="pre">latexFileName</span></code><a class="headerlink" href="#biogeme.results.rawResults.latexFileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the LaTeX output file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.logLike">
+<code class="sig-name descname"><span class="pre">logLike</span></code><a class="headerlink" href="#biogeme.results.rawResults.logLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of the loglikelihood function</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.modelName">
+<code class="sig-name descname"><span class="pre">modelName</span></code><a class="headerlink" href="#biogeme.results.rawResults.modelName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the model</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.monteCarlo">
+<code class="sig-name descname"><span class="pre">monteCarlo</span></code><a class="headerlink" href="#biogeme.results.rawResults.monteCarlo" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the model involved Monte Carlo integration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.nparam">
+<code class="sig-name descname"><span class="pre">nparam</span></code><a class="headerlink" href="#biogeme.results.rawResults.nparam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of parameters</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.nullLogLike">
+<code class="sig-name descname"><span class="pre">nullLogLike</span></code><a class="headerlink" href="#biogeme.results.rawResults.nullLogLike" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of the likelihood function with equal probability model</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.numberOfDraws">
+<code class="sig-name descname"><span class="pre">numberOfDraws</span></code><a class="headerlink" href="#biogeme.results.rawResults.numberOfDraws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of draws for Monte Carlo integration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.numberOfObservations">
+<code class="sig-name descname"><span class="pre">numberOfObservations</span></code><a class="headerlink" href="#biogeme.results.rawResults.numberOfObservations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of observations</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.numberOfThreads">
+<code class="sig-name descname"><span class="pre">numberOfThreads</span></code><a class="headerlink" href="#biogeme.results.rawResults.numberOfThreads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of threads used for parallel computing</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.optimizationMessages">
+<code class="sig-name descname"><span class="pre">optimizationMessages</span></code><a class="headerlink" href="#biogeme.results.rawResults.optimizationMessages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diagnostics given by the optimization algorithm</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.pickleFileName">
+<code class="sig-name descname"><span class="pre">pickleFileName</span></code><a class="headerlink" href="#biogeme.results.rawResults.pickleFileName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of the pickle outpt file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.sampleSize">
+<code class="sig-name descname"><span class="pre">sampleSize</span></code><a class="headerlink" href="#biogeme.results.rawResults.sampleSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample size (number of individuals if panel data)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.secondOrderTable">
+<code class="sig-name descname"><span class="pre">secondOrderTable</span></code><a class="headerlink" href="#biogeme.results.rawResults.secondOrderTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Second order statistics</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.typesOfDraws">
+<code class="sig-name descname"><span class="pre">typesOfDraws</span></code><a class="headerlink" href="#biogeme.results.rawResults.typesOfDraws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Types of draws for Monte Carlo integration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="biogeme.results.rawResults.userNotes">
+<code class="sig-name descname"><span class="pre">userNotes</span></code><a class="headerlink" href="#biogeme.results.rawResults.userNotes" title="Permalink to this definition">¶</a></dt>
+<dd><p>User notes</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
 </div>
 
 
-              </div>
-              
-        
-        <div class='prev-next-bottom'>
-            
-    <a class='left-prev' id="prev-link" href="optimization.html" title="previous page">Optimization</a>
-    <a class='right-next' id="next-link" href="singleton.html" title="next page">Singleton</a>
-
-        </div>
-        
-        </div>
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="singleton.html" class="btn btn-neutral float-right" title="Singleton" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="optimization.html" class="btn btn-neutral float-left" title="Optimization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-    <footer class="footer mt-5 mt-md-0">
-    <div class="container">
-      <p>
-        
-          By Michel Bierlaire<br/>
-        
-            &copy; Copyright 2021, Michel Bierlaire.<br/>
-      </p>
-    </div>
-  </footer>
-</main>
 
+  <hr/>
 
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
       </div>
-    </div>
+
+    </section>
+
+  </div>
   
-  <script src="_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
 
   
-  </body>
+  
+    
+   
+
+</body>
 </html>

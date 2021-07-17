@@ -28,7 +28,7 @@ class problemClass(metaclass=abc.ABCMeta):
         """Evaluate  the validity of the solution.
 
         :param aSolution: solution to be checked
-        :type aSolution: solutionClass
+        :type aSolution: :class:`biogeme.vns.solutionClass`
 
         :return: valid, why where valid is True if the solution is
             valid, and False otherwise. why contains an explanation why it
@@ -42,7 +42,7 @@ class problemClass(metaclass=abc.ABCMeta):
         the solution object.
 
         :param aSolution: solution to be evaluated
-        :type aSolution: solutionClass
+        :type aSolution: :class:`biogeme.vns.solutionClass`
 
         """
 
@@ -51,7 +51,7 @@ class problemClass(metaclass=abc.ABCMeta):
         """Short description of the solution. Used for reporting.
 
         :param aSolution: solution to be described
-        :type aSolution: solutionClass
+        :type aSolution: :class:`biogeme.vns.solutionClass`
 
         :return: short description of the solution.
         :rtype: str
@@ -63,14 +63,14 @@ class problemClass(metaclass=abc.ABCMeta):
         Generates a neighbor of the solution.
 
         :param aSolution: solution to be modified
-        :type aSolution: solutionClass
+        :type aSolution: :class:`biogeme.vns.solutionClass`
 
         :param neighborhoodSize: size of the neighborhood to be applied
         :type neighborhoodSize: int
 
         :return: a neighbor solution, and the number of changes that have been
                  actually applied.
-        :rtype: tuple(solutionClass, int)
+        :rtype: tuple(:class:`biogeme.vns.solutionClass`, int)
         """
 
     @abc.abstractmethod
@@ -79,10 +79,10 @@ class problemClass(metaclass=abc.ABCMeta):
         algorithm. Used to update the statistics on the operators.
 
         :param aSolution: solution  modified
-        :type aSolution: solutionClass
+        :type aSolution: :class:`biogeme.vns.solutionClass`
 
         :param aNeighbor: neighbor
-        :type aNeighbor: solutionClass
+        :type aNeighbor: :class:`biogeme.vns.solutionClass`
         """
 
     @abc.abstractmethod
@@ -91,10 +91,10 @@ class problemClass(metaclass=abc.ABCMeta):
         algorithm. Used to update the statistics on the operators.
 
         :param aSolution: solution modified
-        :type aSolution: solutionClass
+        :type aSolution: :class:`biogeme.vns.solutionClass`
 
         :param aNeighbor: neighbor
-        :type aNeighbor: solutionClass
+        :type aNeighbor: :class:`biogeme.vns.solutionClass`
         """
 
 
@@ -178,8 +178,13 @@ class operatorsManagement:
         :type operators: list(str)
         """
         self.scores = {k: 0 for k in operatorNames}
+        """ dict of scores obtained by the operators"""
+
         self.names = list(self.scores)
+        """ Names of the operators """
+
         self.available = {k: True for k in operatorNames}
+        """ dict of availability of the operators """
 
     def increaseScore(self, operator):
         """Increase the score of an operator.
@@ -278,10 +283,27 @@ class paretoClass:
         """
 
         self.maxNeighborhood = maxNeighborhood
+        """the maximum size of the neighborhood that must be considered
+        """
+
         if archiveInputFile is None:
             self.pareto = dict()
+            """dict containing the pareto set. The keys are the solutions
+            (class :class:`biogeme.vns.solutionClass`), and the values are
+            the size of the neighborhood that must be applied the next
+            time tat the solution is selected by the algorithm.
+
+            """
+
             self.removed = set()
+            """set of solutions that have been in the Pareto set ar some point,
+            but have been removed because dominated by another
+            solution.
+            """
             self.considered = set()
+            """set of solutions that have been considered at some point by the
+            algorithm
+            """
         else:
             if self.restore(archiveInputFile):
                 logger.general(
@@ -452,7 +474,7 @@ def vns(
     :return: the pareto set, the set of models that have been in the
              pareto set and then removed, and the set of all models
              considered by the algorithm.
-    :rtype: class pareto
+    :rtype: class :class:`biogeme.vns.paretoClass`
 
     :raise biogemeError: if the first Pareto set is empty.
 

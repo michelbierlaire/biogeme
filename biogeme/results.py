@@ -62,32 +62,32 @@ class beta:
         :param bounds: tuple (l,b) with lower and upper bounds
         :type bounds: float,float
         """
-        # Name of the parameter
-        self.name = name
-        # Current value
-        self.value = value
-        # Lower bound
-        self.lb = bounds[0]
-        # Upper bound
-        self.ub = bounds[1]
-        # Standard error
-        self.stdErr = None
-        # t-test
-        self.tTest = None
-        # p-value
-        self.pValue = None
-        # Robust standard error
-        self.robust_stdErr = None
-        # Robust t-test
-        self.robust_tTest = None
-        # Robust p-value
-        self.robust_pValue = None
-        # Standard error calculated from bootstrap
-        self.bootstrap_stdErr = None
-        # t-test  calculated from bootstrap
-        self.bootstrap_tTest = None
-        # p-value calculated from bootstrap
-        self.bootstrap_pValue = None
+
+        self.name = name #: Name of the parameter
+
+        self.value = value #: Current value
+
+        self.lb = bounds[0] #: Lower bound
+
+        self.ub = bounds[1] #: Upper bound
+
+        self.stdErr = None #: Standard error
+
+        self.tTest = None #: t-test
+
+        self.pValue = None #: p-value
+
+        self.robust_stdErr = None #: Robust standard error
+
+        self.robust_tTest = None #: Robust t-test
+
+        self.robust_pValue = None #: Robust p-value
+
+        self.bootstrap_stdErr = None #: Std error calculated from bootstrap
+
+        self.bootstrap_tTest = None #: t-test calculated from bootstrap
+
+        self.bootstrap_pValue = None #: p-value calculated from bootstrap
 
     def isBoundActive(self, threshold=1.0e-6):
         """Check if one of the two bound is 'numerically' active. Being
@@ -207,75 +207,95 @@ class rawResults:
         :type bootstrap: numpy.array
         """
 
-        # Name of the model
-        self.modelName = theModel.modelName
-        # User notes
-        self.userNotes = theModel.userNotes
-        # Number of parameters
-        self.nparam = len(betaValues)
-        # Values of the parameters
-        self.betaValues = betaValues
-        # Names of the parameters
-        self.betaNames = theModel.freeBetaNames
-        # Value of the likelihood function with the initial value of the
-        # parameters
+
+        self.modelName = theModel.modelName #: Name of the model
+
+        self.userNotes = theModel.userNotes #: User notes
+
+        self.nparam = len(betaValues) #: Number of parameters
+
+        self.betaValues = betaValues #: Values of the parameters
+
+        self.betaNames = theModel.freeBetaNames #: Names of the parameters
+
         self.initLogLike = theModel.initLogLike
-        # Value of the likelihood function with equal probability model
+        """Value of the likelihood function with the initial value of the
+        parameters
+        """
+
         self.nullLogLike = theModel.nullLogLike
-        # List of objects of type results.beta
-        self.betas = list()
+        """Value of the likelihood function with equal probability model
+        """
+
+        self.betas = list() #: List of objects of type results.beta
+
         for b, n in zip(betaValues, self.betaNames):
             bounds = theModel.getBoundsOnBeta(n)
             self.betas.append(beta(n, b, bounds))
-        # Value of the loglikelihood function
-        self.logLike = fgHb[0]
-        # Value of the gradient of the loglikelihood function
-        self.g = fgHb[1]
-        # Value of the hessian of the loglikelihood function
-        self.H = fgHb[2]
-        # Value of the BHHH matrix of the loglikelihood function
-        self.bhhh = fgHb[3]
-        # Name of the database
-        self.dataname = theModel.database.name
-        # Sample size (number of individuals if panel data)
-        self.sampleSize = theModel.database.getSampleSize()
-        # NUmber of observations
-        self.numberOfObservations = theModel.database.getNumberOfObservations()
-        # True if the model involved Monte Carlo integration
-        self.monteCarlo = theModel.monteCarlo
-        # Number of draws for Monte Carlo integration
-        self.numberOfDraws = theModel.numberOfDraws
-        # Types of draws for Monte Carlo integration
-        self.typesOfDraws = theModel.database.typesOfDraws
-        # Number of excluded data
-        self.excludedData = theModel.database.excludedData
-        # Time needed to process the draws
-        self.drawsProcessingTime = theModel.drawsProcessingTime
-        # Norm of the gradient
-        self.gradientNorm = linalg.norm(self.g) if self.g is not None else None
-        # Diagnostics given by the optimization algorithm
-        self.optimizationMessages = theModel.optimizationMessages
-        # Number of threads used for parallel computing
-        self.numberOfThreads = theModel.numberOfThreads
-        # Name of the HTML output file
-        self.htmlFileName = None
-        # Name of the F12 output file
-        self.F12FileName = None
-        # Name of the LaTeX output file
-        self.latexFileName = None
-        # Name of the pickle outpt file
-        self.pickleFileName = None
-        #  output of the bootstrapping. numpy array, of size B x K,
-        #    where
-        #        - B is the number of bootstrap iterations
-        #        - K is the number of parameters to estimate
-        self.bootstrap = bootstrap
-        if bootstrap is not None:
-            # Time needed to perform the bootstrap
-            self.bootstrap_time = theModel.bootstrap_time
 
-        # Second order statistics
-        self.secondOrderTable = None
+        self.logLike = fgHb[0] #: Value of the loglikelihood function
+
+        self.g = fgHb[1] #: Value of the gradient of the loglikelihood function
+
+        self.H = fgHb[2] #: Value of the hessian of the loglikelihood function
+
+        self.bhhh = fgHb[3]
+        """Value of the BHHH matrix of the loglikelihood function"""
+
+        self.dataname = theModel.database.name #: Name of the database
+
+        self.sampleSize = theModel.database.getSampleSize()
+        """Sample size (number of individuals if panel data)"""
+
+        self.numberOfObservations = theModel.database.getNumberOfObservations()
+        """Number of observations"""
+
+        self.monteCarlo = theModel.monteCarlo
+        """True if the model involved Monte Carlo integration"""
+
+        self.numberOfDraws = theModel.numberOfDraws
+        """Number of draws for Monte Carlo integration"""
+
+        self.typesOfDraws = theModel.database.typesOfDraws
+        """Types of draws for Monte Carlo integration"""
+
+        self.excludedData = theModel.database.excludedData
+        """Number of excluded data"""
+
+        self.drawsProcessingTime = theModel.drawsProcessingTime
+        """Time needed to process the draws"""
+
+        self.gradientNorm = linalg.norm(self.g) if self.g is not None else None
+        """Norm of the gradient"""
+
+        self.optimizationMessages = theModel.optimizationMessages
+        """Diagnostics given by the optimization algorithm"""
+
+        self.numberOfThreads = theModel.numberOfThreads
+        """Number of threads used for parallel computing"""
+
+        self.htmlFileName = None #: Name of the HTML output file
+
+        self.F12FileName = None #: Name of the F12 output file
+
+        self.latexFileName = None #: Name of the LaTeX output file
+
+        self.pickleFileName = None #: Name of the pickle outpt file
+
+        self.bootstrap = bootstrap
+        """output of the bootstrapping. numpy array, of size B x K,
+        where
+
+        - B is the number of bootstrap iterations
+        - K is the number of parameters to estimate
+        """
+
+        if bootstrap is not None:
+            self.bootstrap_time = theModel.bootstrap_time
+            """ Time needed to perform the bootstrap"""
+
+        self.secondOrderTable = None #: Second order statistics
+
 
 
 class bioResults:
@@ -297,9 +317,10 @@ class bioResults:
         self.logger = msg.bioMessage()
 
         if theRawResults is not None:
-            # Object of type results.rawResults contaning the raw
-            # estimation results.
             self.data = theRawResults
+            """Object of type :class:`biogeme.results.rawResults` contaning the
+            raw estimation results.
+            """
         elif pickleFile is not None:
             with open(pickleFile, 'rb') as f:
                 self.data = pickle.load(f)

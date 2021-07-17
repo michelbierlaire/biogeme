@@ -145,9 +145,17 @@ class bioBounds:
             return x
 
         self.bounds = b
-        self.n = len(b)
+        """list of tuples (ell,u) containing the lower and upper bounds for
+        each free parameter.
+        """
+
+        self.n = len(b) #: number of optimization variables
+
         self.lowerBounds = [noneToMinusInfinity(bb[0]) for bb in b]
+        """ List of lower bounds """
+
         self.upperBounds = [noneToPlusInfinity(bb[1]) for bb in b]
+        """ List of upper bounds """
 
         wrongBounds = np.array(
             [
@@ -720,7 +728,8 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
     :raises biogeme.exceptions.biogemeError: if ``lbd`` :math:`\\leq` 1
     :raises biogeme.exceptions.biogemeError: if ``alpha0`` :math:`\\leq` 0
     :raises biogeme.exceptions.biogemeError: if ``beta1`` :math:`\\geq` beta2
-    :raises biogeme.exceptions.biogemeError: if ``d`` is not a descent direction
+    :raises biogeme.exceptions.biogemeError: if ``d`` is not a descent
+                                             direction
 
     """
     if lbd <= 1:

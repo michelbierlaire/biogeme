@@ -66,57 +66,67 @@
       </div>
       
       <div class="panel panel-default">
-	<div class="panel-heading">What's new in Biogeme 3.2.6</div>
+	<div class="panel-heading">What's new in Biogeme 3.2.7</div>
 	<div class="panel-body">
 	  <dl>
+	    <dt>Assisted specification</dt>
+	    The asssisted specification algorithm
+	    by <a href="https://dx.doi.org/10.1016/j.jocm.2021.100285">Ortelli
+	    et al. (2021)</a> is now available. 
 	    <dt>Optimization</dt>
-	    <dd>New optimization algorithms are
-	      available for estimation See the documentation of
-	      the <a href="sphinx/biogeme.html?highlight=algorithm#biogeme.biogeme.BIOGEME.estimate"><code>estimate</code></a>
-	      function, and
-	      the <a href="sphinx/biogeme.html#module-biogeme.optimization"><code>optimization</code>
-		module</a>. See also an
+	    <dd>The optimization algorithms have been organized into
+	      two modules. The
+	      module <a href="sphinx/algorithms.html"><code>algorithms.py</code></a>
+	      contains generic optimization algorithms. The
+	      module <a href="sphinx/optimization.html"><code>optimization.py</code></a>
+	      contains the functions that can be called directly by
+	      Biogeme (see the documentation of
+	      the <a href="sphinx/biogeme.html?highlight=estimate#biogeme.biogeme.BIOGEME.estimate"><code>estimate</code></a>
+	      function. See also an
 	      <a href="examples/swissmetro/01logit_allAlgos.py">example.</a></dd>
-	    <dt>Stochastic log likelihood</dt>
-	    <dd>It is now possible to calculate the log likelihood
-	      function on a sample (a batch) of the full data
-	      file. This is particularly useful with large
-	      databases. It can be used in the implementation of a
-	      stochastic gradient algorithm, for instance. See <a href="sphinx/biogeme.html?highlight=calculatelikelihood#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">documentation</a>.</dd>
-	    <dt>User's notes</dt>
-	    <dd>It is possible to include your own notes in the HTML
-	      file using the <code>userNotes</code> parameter of the
-	      <code>biogeme</code>
-	      object. See <a href="sphinx/biogeme.html?highlight=usernotes#biogeme.biogeme.BIOGEME"
-			     target="_blank">documentation</a>. See
-	      <a href="examples/swissmetro/01logitBis.py">example</a>.</dd>
-	    <dt>Scaling</dt>
-	    <dd>It is possible to have Biogeme suggesting the scales
-	      of the variables in the database using
-	      the <code>suggestScales</code> parameter of
-	      the <code>biogeme</code>
-	      object. See <a href="sphinx/biogeme.html?highlight=suggestscales#biogeme.biogeme.BIOGEME.__init__"
-			     target="_blank">documentation</a>.</dd>
-	    <dt>Estimation</dt>
-	    <dd>A new function <code>quickEstimate</code> performs
-	      the estimation of the parameters, and skips the
-	      calculation of the
-	      statistics. See <a href="sphinx/biogeme.html?highlight=quickestimate#biogeme.biogeme.BIOGEME.quickEstimate">documentation</a>. </dd>
-	    <dt>Validation</dt>
-	    <dd>A new function in the <code>database</code> module allows to split the database in order to
-	      prepare an estimation and a validation sets, for
-	      out-of-sample
-	      validation. See <a href="sphinx/biogeme.html?highlight=split#biogeme.database.Database.split">documentation</a>. It
-	      is used by the new function <code>validate</code> in the
-	      <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/04validation.py">example</a>.</dd>
-	    <dt>Messages</dt>
-	    <dd>A new function allows to extract all the messages
-	      generated during a
-	      run. See <a href="sphinx/biogeme.html?highlight=allmessages#biogeme.messaging.bioMessage.allMessages">documentation</a>. See
-	      <a href
-		 ="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.messaging.ipynb">example</a>. It
-	      is also possible to make the logger temporarily silent
-	      using the functions <a href="sphinx/biogeme.html?highlight=temporarysilent#biogeme.messaging.bioMessage.temporarySilence"><code>temporarySilence</code></a> and <a href="sphinx/biogeme.html?highlight=resume#biogeme.messaging.bioMessage.resume"><code>resume</code>.</a></dd>
+	    <dt>CFSQP</dt>
+	    The CFSQP algorithm has been removed from the
+	    distribution. 
+	    <dt>Null log likelihood</dt>
+	    <dd>The log likelihood is calculated. The null model
+	    predicts equal probability for each alternative.</dd>
+	    <dt>Saved iterations</dt>
+	    <dd>Iterations are saved in a file with
+	    extension <code>.iter</code>. If the file exists, Biogeme
+	    will initialize the paramerters from this files, and
+	    ignore the starting values provided. To turn this feature
+	      off, set <code>biogeme.saveIterations=False</code></dd>
+	    <dt>Randon starting values</dt>
+	    <dd>It is possible to modify the initial values of the parameters in all formulas,
+            using randomly generated values. The value is drawn from a
+            uniform distribution on the interval defined by the
+            bounds (by default [-100, 100].)
+              See <a href="sphinx/biogeme.html?highlight=setrandominitvalue#biogeme.biogeme.BIOGEME.setRandomInitValues">documentation</a>.
+	      <dt>Sensitivity analysis</dt>
+	      <dd>The betas for sensitivity analysis are now generated
+	      by bootstrapping
+		(see <a href="sphinx/results.html?highlight=sensitivityanalysis#biogeme.results.bioResults.getBetasForSensitivityAnalysis">documentation</a>.</dd>
+	    <dt>Box-Cox</dt>
+	    <dd>The implementation of
+	    the <a href="sphinx/models.html?highlight=boxcox#biogeme.models.boxcox">Box-Cox
+		transform</a> was  incorrect and has been corrected.
+	      <dt>Validation</dt>
+	      <dd>The out-of-sample validation has been improved. See
+	      <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. It
+	      has to be compined with the <a href="sphinx/database.html?highlight=split#biogeme.database.Database.split"><code>split</code></a> function
+	      of the database object.
+		<dt>Statistics about chosen alternatives</dt>
+		<dd>It is now possible to calculate the number of time
+		an alternative is chosen and available in the
+		  sample. See <a href="sphinx/database.html?highlight=choiceavailability#biogeme.database.Database.choiceAvailabilityStatistics">documentation</a>.</dd>
+		  <dt>Validity check for the nests</dt>
+		 <dd> The validity of the specification of the nests
+		  for nested and cross nested logit models is new
+		   checked.</dd>
+	    <dt>ALOGIT file</dt>
+	    <dd>Output files in F12 format compatible with ALOGIT can
+	    now be produced. See <a href="sphinx/results.html?highlight=f12#biogeme.results.bioResults.writeF12">documentation</a>. </dd>
+		 
 	  </dl>
 
 	</div>

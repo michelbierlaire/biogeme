@@ -33,15 +33,24 @@ class variable:
         :type name: str
 
         :param expression: Biogeme expression of the variable.
-        :type expression: biogeme.expressions.Expression
+        :type expression: :class:`biogeme.expressions.Expression`
         """
-        self.name = name
-        self.expression = expression
-        self.active = False
-        self.generic = False
-        self.genericName = None
+
+        self.name = name #: name of the variable
+
+        self.expression = expression #: Biogeme expression for the variable
+
+        self.active = False #: True if variable is active
+
+        self.generic = False #: True if the variable is generic.
+
+        self.genericName = None #: Name of the generic variable
+
         self.nonlinearSpec = None
-        self.used = False
+        """ Function with the nonlinear specifications.
+        """
+
+        self.used = False #: True if variable used in the model.
 
     def __str__(self):
         """
@@ -86,7 +95,7 @@ class variable:
 
         :return: expression accozunting for the status and the
             nonlinear specification.
-        :rtype: biogeme.expressions.Expression
+        :rtype: :class:`biogeme.expressions.Expression`
 
         """
         if not self.active:
@@ -116,15 +125,33 @@ class groupOfVariables:
         :param nonlinearSpecs: list of possible nonlinear specifications
         :type nonlinearSpecs: list(function)
         """
-        self.name = name
-        self.variables = variables
+        self.name = name #: name of the group of variables.
+
+        self.variables = variables #: list of variables in the group.
+
         self.genericForbiden = len(self.variables) <= 1
+        """ True of the group cannot be made generic
+        """
+
         self.generic = not self.genericForbiden
+        """ True if the group is generic.
+        """
+
         self.alwaysActive = False
-        self.active = False
+        """ True if the group is always active.
+        """
+
+        self.active = False #: True if the group is active.
+
         self.nonlinearSpecs = nonlinearSpecs
+        """ list of possible nonlinear specifications
+        """
+
         self.selection = 0
-        self.linear = True
+        """Index of the selected non linear specification.
+        """
+
+        self.linear = True #: True if linear specification.
 
     def __str__(self):
         v = [s.__str__() for s in self.variables]
@@ -350,13 +377,26 @@ class term:
         :type validity: bool f(float)
 
         """
-        self.var = var
+        self.var = var #: variable of the term
+
         self.segmentation = aSegmentation
+        """ discrete segmentation of the parameter
+        """
+
         self.coef_names = None
+        """names of the Beta parameters involved in the specification of the
+        term.
+        """
+
         self.validity = validity
-        self.bounds = bounds
+        """ function checking the validity of the coefficient.
+        """
+
+        self.bounds = bounds #: bounds on the coefficient
+
         if self.var is not None:
             self.var.used = True
+
         if self.segmentation is not None:
             self.segmentation.used = True
 
@@ -413,7 +453,7 @@ class term:
         :type altname: str
 
         :param estimationResults: results of the estimation with Biogeme
-        :type estimationResults: biogeme.results.bioResults
+        :type estimationResults: :class:`biogeme.results.bioResults`
 
         :return: True if the valus is valid, False otherwise.
         :rtype: bool
@@ -454,7 +494,7 @@ class term:
         :type altname: str
 
         :return: eypression for the term
-        :rtype: biogeme.expressions.Expression
+        :rtype: :class:`biogeme.expressions.Expression`
         """
         if self.var is None:
             coef_name = self.getBeta(altname)
@@ -516,16 +556,18 @@ class utility:
         :type terms: list(term)
 
         """
-        self.name = name
-        self.id = alternativeId
-        self.terms = terms
+        self.name = name #: name of the alternative
+
+        self.id = alternativeId #: id of the alternative
+
+        self.terms = terms #: list of terms in the utility function
 
     def getExpression(self):
         """
         Obtain the Biogeme expression for the utility function.
 
         :return: Biogeme expression
-        :rtype: biogeme.expressions.Expression
+        :rtype: :class:`biogeme.expressions.Expression`
         """
         theTerms = [
             t.getExpression(self.name)
@@ -545,17 +587,23 @@ class socioEconomic:
         :type name: str
 
         :param expression: Biogeme expression of the variable
-        :type expression: biogeme.expressions.Expression
+        :type expression: meth:`biogeme.expressions.Expression`
 
-        :param values: list of values that it can take, with a name
-            describing them.
-        :type values: dict(int:str)
+        :param values: dict with values that it can take as keys, and a name
+            describing them as values.
+        :type values: dict(int: str)
 
         """
-        self.name = name
-        self.expression = expression
+        self.name = name #: name of the segmentation variable
+
+        self.expression = expression #: Biogeme expression of the variable
+
         self.values = values
-        self.active = False
+        """dict with values that it can take as keys, and a name
+        describing them as values.
+        """
+
+        self.active = False #: True if the segmentation variable is active.
 
     def combine(self, existingValues):
         """Generates the possible combinations of values,
@@ -589,9 +637,15 @@ class segmentation:
         self.dictOfSocioEco = {
             k: socioEconomic(k, v[0], v[1]) for k, v in dictOfSocioEco.items()
         }
-        self.listOfVariables = []
-        self.alwaysActive = False
-        self.used = False
+        """dict of object of class socioEconomic characterizing the
+        segmentation.
+        """
+
+        self.listOfVariables = [] #: list of variables involved
+
+        self.alwaysActive = False #: True if it must always be active
+
+        self.used = False #: True if used.
 
     def __str__(self):
         return f'{self.dictOfSocioEco}'
@@ -668,7 +722,7 @@ class segmentation:
         :type bounds: tuple(float, float)
 
         :return: biogeme  expression for the segmentation
-        :rtype: biogeme.expressions.bioMultSum
+        :rtype: :class:`biogeme.expressions.bioMultSum`
         """
         combinations = None
         for v in self.dictOfSocioEco.values():
@@ -727,10 +781,10 @@ class specificationProblem(vns.problemClass):
         :type name: str
 
         :param database: data for the estimation
-        :type database: biogeme.database.Database
+        :type database: :class:`biogeme.database.Database`
 
         :param theVariables: variables involved in the model and their names
-        :type theVariables: dict(str: biogeme.expressions.Expression)
+        :type theVariables: dict(str: :class:`biogeme.expressions.Expression`)
 
         :param theGroups: variables in the same groups share the same
             transforms and activation status. Each group is characterized
@@ -841,10 +895,10 @@ class specificationProblem(vns.problemClass):
         :param availabilities: dict describing the availability of the
             alternatives.
 
-        :type availabilities: dict(int, biogeme.expressions.Expression)
+        :type availabilities: dict(int, :class:`biogeme.expressions.Expression`)
 
         :param choice: expression for the observed choice
-        :type choice: biogeme.expressions.Expression
+        :type choice: :class:`biogeme.expressions.Expression`
 
         :param models: dict of possible models. A model is a function
             that takes the utilities and the availabilities, and return
@@ -872,9 +926,20 @@ class specificationProblem(vns.problemClass):
 
 
         """
+
         self.archive = {}
-        self.name = name
+        """Dictionary, where the keys are solutions (objects of type
+        :class:`biogeme.vns.solutionClass`) and the values are the
+        estimation results (objects of type
+        :class:`biogeme.results.bioResults`).
+        """
+
+        self.name = name #: name of the problem.
+
         self.database = database
+        """object of type :class:`biogeme.database.Database`, containing the
+        data.
+        """
 
         # First check if all the variables are in a group. For those
         # who are not, create a group with a single variable
@@ -898,12 +963,20 @@ class specificationProblem(vns.problemClass):
         self.theVariables = {
             k: variable(k, v) for k, v in theVariables.items()
         }
+        """dict of variables, where the keys are the names, and the values are
+        objects of class ``variable``
+        """
+
         self.theGroups = {
             k: groupOfVariables(
                 k, [self.theVariables[i] for i in v], theNonlinearSpecs.get(k)
             )
             for k, v in theGroups.items()
         }
+        """dict of groups of variables, where the keys are the names, and the
+        values are objects of class ``groupOfVariables``
+        """
+
         if genericForbiden is not None:
             for k in genericForbiden:
                 try:
@@ -937,20 +1010,50 @@ class specificationProblem(vns.problemClass):
                     f'{[k for k, c in check.items() if not c]}'
                 )
                 raise excep.biogemeError(error_msg)
+
         self.theSegmentations = {
             k: segmentation(v) for k, v in theSegmentations.items()
         }
+        """dict of segmentations, where the keys are the names, and the
+        values are objects of class ``segmentation``
+        """
+
         self.utilities = utilities
-        self.choice = choice
+        """specification of the utility functions. See
+        :class:`biogeme.assisted.specificationProblem.__init__`
+        """
+
+        self.choice = choice #: expression for the observed choice
+
         self.availability = availabilities
+        """dict describing the availability of the alternatives.
+        """
+
         self.theAlternatives = {}
+        """Dict of utility functions, where the keys are the id of the
+        alternatives, and the values are objects of type
+        :class:`biogeme.assisted.utility`
+
+        """
+
         # self.models = [(k, v) for k, v in models.items()]
+
         self.models = list(models.items())
-        self.selectedModel = 0
+        """ List tuple (name, model).  A model is a function
+        that takes the utilities and the availabilities, and return
+        the loglikelihood expression.
+        """
+
+        self.selectedModel = 0 #: index of the selected model
 
         self.maximumNumberOfParameters = 200
+        """maximum number of parameters allowed in a specification. If the
+        current model has more parameters, it is declared invalid and
+        rejected by the algorithm.
+        """
 
-        self.lastOperator = None
+        self.lastOperator = None #: Last operator used
+
         self.operators = {
             'Change segmentation': self.changeSegmentation,
             'Increase segmentation': self.increaseSegmentation,
@@ -961,10 +1064,15 @@ class specificationProblem(vns.problemClass):
             'Change nonlinearity': self.changeNonlinearity,
             'Change model': self.changeModel,
         }
+        """Dict of operators, where the keys are the names, and the values are
+        the function imple,enting the operators.
+        """
 
         self.operatorsManagement = vns.operatorsManagement(
             self.operators.keys()
         )
+        """ Object of type :class:`biogeme.vns.operatorsManagement`
+        """
 
         # Check the consistency of the input
         for k, u in self.utilities.items():
@@ -1006,6 +1114,15 @@ class specificationProblem(vns.problemClass):
                     self.theSegmentations[t[1]].alwaysActive = True
 
         self.decisions = self.getDecisions()
+        """
+        The decisions consist of:
+
+        - a dict of decisions for each group of variables.
+        - for each utility, a list of decisions for each term.
+        - the selected model
+
+        Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)
+        """
 
         unused = list()
         for v in self.theVariables.values():
@@ -1374,7 +1491,7 @@ class specificationProblem(vns.problemClass):
         :type aSolution: solutionClass
 
         :return: results of the estimation
-        :rtype: class biogeme.results
+        :rtype: class :class:`biogeme.results.bioResults`
         """
         estimationResults = self.archive.get(aSolution)
         if estimationResults is not None:
@@ -1681,12 +1798,31 @@ class solution(vns.solutionClass):
 
     def __init__(self):
         super().__init__()
+
         self.objectivesNames = ['Neg. log likelihood', '#parameters']
-        self.objectives = None
-        self.valid = None
+        """ Names of the objective functions
+        """
+
+        self.objectives = None #: values of the objectives
+
+        self.valid = None #: True if the solution is valid
+
         self.causeInvalidity = None
+        """If the solution is invalid, contains the cause of the invalidity
+        """
+
         self.decisions = None
-        self.description = None
+        """
+        The decisions consist of:
+
+        - a dict of decisions for each group of variables.
+        - for each utility, a list of decisions for each term.
+        - the selected model
+
+        Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)
+        """
+
+        self.description = None #: description of the solution
 
     def __repr__(self):
         return str(self.decisions)

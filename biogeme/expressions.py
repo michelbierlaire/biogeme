@@ -38,40 +38,53 @@ class Expression:
 
     def __init__(self):
         """Constructor"""
-        # Logger
+
         self.logger = msg.bioMessage()
-        # Parent expression
-        self.parent = None
-        # List of children expressions
-        self.children = list()
-        # Indices of the elementary expressions (dict)
+        """Logger that controls the output of
+        messages to the screen and log file.
+        Type: class :class:`biogeme.messaging.bioMessage`.
+        """
+
+        self.parent = None #: Parent expression
+
+        self.children = list() #: List of children expressions
+
         self.elementaryExpressionIndex = None
-        # dict of free parameters
-        self.allFreeBetas = dict()
-        # list of names of free parameters
-        self.freeBetaNames = list()
-        # dict of fixed parameters
-        self.allFixedBetas = dict()
-        # list of names of fixed parameters
-        self.fixedBetaNames = list()
-        # dict of random variables
-        self.allRandomVariables = None
-        # list of variables names
-        self.variableNames = None
-        # list of random variables names
-        self.randomVariableNames = None
-        # dict of draws
-        self.allDraws = None
-        # list of draw types
-        self.drawNames = None
-        # Row of the database where the values of the variables are found
+        """Indices of the elementary expressions (dict)"""
+
+        self.allFreeBetas = dict() #: dict of free parameters
+
+        self.freeBetaNames = list() #: list of names of free parameters
+
+        self.allFixedBetas = dict() #: dict of fixed parameters
+
+        self.fixedBetaNames = list() #: list of names of fixed parameters
+
+        self.allRandomVariables = None #: dict of random variables
+
+        self.variableNames = None #: list of variables names
+
+        self.randomVariableNames = None #: list of random variables names
+
+        self.allDraws = None #: dict of draws
+
+        self.drawNames = None #: list of draw types
+
         self._row = None
-        # List of ids of the free beta parameters (those to be estimated)
+        """Row of the database where the values of the variables are found
+        """
+
         self.betaIds = None
-        # List of values of the free beta parameters (those to be estimated)
+        """List of ids of the free beta parameters (those to be estimated)
+        """
+
         self.freeBetaValues = None
-        # List of values of the fixed beta parameters (those to be estimated)
+        """List of values of the free beta parameters (those to be estimated)
+        """
+
         self.fixedBetaValues = None
+        """ List of values of the fixed beta parameters (those to be estimated)
+        """
 
     def __repr__(self):
         """built-in function used to compute the 'official' string reputation
@@ -941,7 +954,7 @@ class BinaryOperator(Expression):
         """
         Expression.__init__(self)
         if isNumeric(left):
-            self.left = Numeric(left)
+            self.left = Numeric(left) #: left parent
         else:
             if not isinstance(left, Expression):
                 raise excep.biogemeError(
@@ -949,7 +962,7 @@ class BinaryOperator(Expression):
                 )
             self.left = left
         if isNumeric(right):
-            self.right = Numeric(right)
+            self.right = Numeric(right) #: right parent
         else:
             if not isinstance(right, Expression):
                 raise excep.biogemeError(
@@ -1426,7 +1439,7 @@ class UnaryOperator(Expression):
         """
         Expression.__init__(self)
         if isNumeric(child):
-            self.child = Numeric(child)
+            self.child = Numeric(child) #: child
         else:
             if not isinstance(child, Expression):
                 raise excep.biogemeError(
@@ -1908,11 +1921,12 @@ class Elementary(Expression):
 
         """
         Expression.__init__(self)
-        self.name = name
+        self.name = name #: name of the elementary expressiom
 
-        # The id should be unique for all elementary expressions
-        # appearing in a given set of formulas.
         self.uniqueId = None
+        """The id should be unique for all elementary expressions
+        appearing in a given set of formulas.
+        """
 
     def __str__(self):
         """string method
@@ -2144,7 +2158,7 @@ class Numeric(Expression):
         :type value: float
         """
         Expression.__init__(self)
-        self.value = value
+        self.value = value #: numeric value
 
     def __str__(self):
         return '`' + str(self.value) + '`'
@@ -2813,7 +2827,7 @@ class LogLogit(Expression):
             biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
-        self.util = {}
+        self.util = {} #: dict of utility functions
         for i, e in util.items():
             if isNumeric(e):
                 self.util[i] = Numeric(e)
@@ -2823,7 +2837,7 @@ class LogLogit(Expression):
                         f'This is not a valid expression: {e}'
                     )
                 self.util[i] = e
-        self.av = {}
+        self.av = {} #: dict of availability formulas
         if av is None:
             self.av = {k: Numeric(1) for k, v in util.items()}
         else:
@@ -2838,6 +2852,7 @@ class LogLogit(Expression):
                     self.av[i] = e
         if isNumeric(choice):
             self.choice = Numeric(choice)
+            """expression for the chosen alternative"""
         else:
             if not isinstance(choice, Expression):
                 raise excep.biogemeError(
@@ -3147,7 +3162,7 @@ class Elem(Expression):
         """
         Expression.__init__(self)
 
-        self.dictOfExpressions = {}
+        self.dictOfExpressions = {} #: dict of expressions
         for k, v in dictOfExpressions.items():
             if isNumeric(v):
                 self.dictOfExpressions[k] = Numeric(v)
@@ -3169,7 +3184,7 @@ class Elem(Expression):
                 raise excep.biogemeError(
                     f'This is not a valid expression: {keyExpression}'
                 )
-            self.keyExpression = keyExpression
+            self.keyExpression = keyExpression #: expression for the key
         self.keyExpression.parent = self
         self.children.append(self.keyExpression)
 
@@ -3304,9 +3319,14 @@ class bioLinearUtility(Expression):
             raise excep.biogemeError(theError)
 
         self.betas, self.variables = zip(*listOfTerms)
-        self.betas = list(self.betas)
-        self.variables = list(self.variables)
+
+        self.betas = list(self.betas) #: list of parameters
+
+        self.variables = list(self.variables) #: list of variables
+
         self.listOfTerms = list(zip(self.betas, self.variables))
+        """ List of terms """
+
         self.children += self.betas + self.variables
 
     def __str__(self):

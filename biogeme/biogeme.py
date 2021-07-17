@@ -32,7 +32,6 @@ import biogeme.optimization as opt
 from biogeme import tools
 from biogeme.algorithms import functionToMinimize
 
-logger = msg.bioMessage()
 
 # import yep
 
@@ -61,7 +60,7 @@ class BIOGEME:
         """Constructor
 
         :param database: choice data.
-        :type database: biogeme.database
+        :type database: :class:`biogeme.database.Database`
 
         :param formulas: expression or dictionary of expressions that
              define the model specification.  The concept is that each
@@ -74,8 +73,8 @@ class BIOGEME:
              of each piece of data is supposed to be 1.0. In the
              simulation mode, the labels of each formula are used as
              labels of the resulting database.
-        :type formulas: biogeme.expressions.Expression, or
-                        dict(biogeme.expressions.Expression)
+        :type formulas: :class:`biogeme.expressions.Expression`, or
+                        dict(:class:`biogeme.expressions.Expression`)
 
         :param userNotes: these notes will be included in the report file.
         :type userNotes: str
@@ -128,9 +127,11 @@ class BIOGEME:
 
         """
 
-        # Logger that controls the output of messages to the screen and
-        # log file.
-        self.logger = logger
+        self.logger = msg.bioMessage()
+        """Logger that controls the output of
+        messages to the screen and log file.
+        Type: class :class:`biogeme.messaging.bioMessage`."""
+
         if not skipAudit:
             database.data = database.data.replace({True: 1, False: 0})
             listOfErrors, listOfWarnings = database._audit()
@@ -140,20 +141,34 @@ class BIOGEME:
                 self.logger.warning('\n'.join(listOfErrors))
                 raise excep.biogemeError('\n'.join(listOfErrors))
 
-        # Keyword used for the name of the loglikelihood formula.
-        # Default: 'loglike'
         self.loglikeName = 'loglike'
-        # Keyword used for the name of the weight formula. Default: 'weight'
+        """ Keyword used for the name of the loglikelihood formula.
+        Default: 'loglike'"""
+
+
         self.weightName = 'weight'
-        # Name of the model. Default: 'biogemeModelDefaultName'
+        """Keyword used for the name of the weight formula. Default: 'weight'
+        """
+
         self.modelName = 'biogemeModelDefaultName'
-        # monteCarlo is True if one of the expression involves a
-        # Monte-Carlo integration.
+        """Name of the model. Default: 'biogemeModelDefaultName'
+        """
         self.monteCarlo = False
+        """ ``monteCarlo`` is True if one of the expressions involves a
+        Monte-Carlo integration.
+        """
+
         if seed is not None:
             np.random.seed(seed)
 
         self.saveIterations = True
+        """If True, the current iterate is saved after each iteration, in a
+        file named ``__[modelName].iter``, where ``[modelName]`` is the
+        name given to the model. If such a file exists, the starting
+        values for the estimation are replaced by the values saved in
+        the file.
+        """
+
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -162,19 +177,22 @@ class BIOGEME:
                     f'It is of type {type(formulas)}'
                 )
 
-            # Object of type biogeme.expressions.Expression
-            # calculating the formula for the loglikelihood
             self.loglike = formulas
+            """ Object of type :class:`biogeme.expressions.Expression`
+            calculating the formula for the loglikelihood
+            """
 
-            # Object of type biogeme.expressions.Expression
-            # calculating the weight of each observation in the
-            # sample
             self.weight = None
+            """ Object of type :class:`biogeme.expressions.Expression`
+            calculating the weight of each observation in the
+            sample.
+            """
 
-            # Dictionary containing Biogeme formulas of type
-            # biogeme.expressions.Expression.
-            # The keys are the names of the formulas.
             self.formulas = dict({self.loglikeName: formulas})
+            """ Dictionary containing Biogeme formulas of type
+            :class:`biogeme.expressions.Expression`.
+            The keys are the names of the formulas.
+            """
         else:
             # Verify the validity of the formulas
             for k, f in formulas.items():
@@ -188,26 +206,23 @@ class BIOGEME:
             self.weight = formulas.get(self.weightName)
             self.formulas = formulas
 
-        # biogeme.database object
-        self.database = database
+        self.database = database #: :class:`biogeme.database.Database` object
 
-        # User notes
-        self.userNotes = userNotes
+        self.userNotes = userNotes #: User notes
 
-        # Missing data
-        self.missingData = missingData
+        self.missingData = missingData #: code for missing data
 
-        # keep track of the sample of data used to calculate the
-        # stochastic gradient / hessian
+
         self.lastSample = None
+        """ keeps track of the sample of data used to calculate the
+        stochastic gradient / hessian
+        """
 
-        # Init value of the likelihood function
-        self.initLogLike = None
+        self.initLogLike = None #: Init value of the likelihood function
 
-        # Log likelihood of the null model
-        self.nullLogLike = None
+        self.nullLogLike = None #: Log likelihood of the null model
 
-        self.usedVariables = set()
+        self.usedVariables = set() #: set of variables used in the formulas.
         for k, f in self.formulas.items():
             myvars = f.setOfVariables()
             missingVariables = [
@@ -275,63 +290,72 @@ class BIOGEME:
         self.theC.setData(self.database.data)
         self.theC.setMissingData(self.missingData)
 
-        # Boolean variable, True if the HTML file with the results must
-        # be generated.
         self.generateHtml = True
+        """ Boolean variable, True if the HTML file with the results must
+        be generated.
+        """
 
-        # Boolean variable, True if the pickle file with the results must
-        # be generated.
         self.generatePickle = True
+        """ Boolean variable, True if the pickle file with the results must
+        be generated.
+        """
 
-        # Name of the column defining weights for batch sampling in
-        # stochastic optimization.
         self.columnForBatchSamplingWeights = None
+        """ Name of the column defining weights for batch sampling in
+        stochastic optimization.
+        """
 
-        # Number of threads used for parallel computing. Default: the number
-        # of CPU available.
         self.numberOfThreads = (
             mp.cpu_count() if numberOfThreads is None else numberOfThreads
         )
+        """ Number of threads used for parallel computing. Default: the number
+        of available CPU.
+        """
+
         start_time = datetime.now()
         self._generateDraws(numberOfDraws)
         if self.monteCarlo:
             self.theC.setDraws(self.database.theDraws)
-        # Time needed to generate the draws.
         self.drawsProcessingTime = datetime.now() - start_time
+        """ Time needed to generate the draws. """
+
         if self.loglike is not None:
 
-            # Internal signature of the formula for the loglikelihood
             self.loglikeSignatures = self.loglike.getSignature()
+            """ Internal signature of the formula for the loglikelihood."""
             if self.weight is None:
                 self.theC.setExpressions(
                     self.loglikeSignatures, self.numberOfThreads
                 )
             else:
-                # Internal signature of the formula for the weight
                 self.weightSignatures = self.weight.getSignature()
+                """ Internal signature of the formula for the weight."""
                 self.theC.setExpressions(
                     self.loglikeSignatures,
                     self.numberOfThreads,
                     self.weightSignatures,
                 )
 
-        # Time needed to calculate the bootstrap standard errors
         self.bootstrap_time = None
+        """ Time needed to calculate the bootstrap standard errors"""
 
-        # Results of the bootstrap calculation.
-        self.bootstrap_results = None
 
-        # Information provided by the optimization algorithm after completion.
+        self.bootstrap_results = None #: Results of the bootstrap calculation.
+
         self.optimizationMessages = None
+        """ Information provided by the optimization algorithm
+        after completion.
+        """
 
-        # Parameters to be transferred to the optimization algorithm
         self.algoParameters = None
+        """ Parameters to be transferred to the optimization algorithm
+        """
 
-        # Optimization algorithm
-        self.algorithm = None
 
-        # Store the best iteration found so far.
-        self.bestIteration = None
+        self.algorithm = None #: Optimization algorithm
+
+        self.bestIteration = None #: Store the best iteration found so far.
+
 
     def _saveIterationsFileName(self):
         """
@@ -478,7 +502,7 @@ class BIOGEME:
 
         :param avail: list of expressions to evaluate the
                       availability conditions for each alternative.
-        :type avail: list of biogeme.expressions.Expression
+        :type avail: list of :class:`biogeme.expressions.Expression`
 
         :return: value of the log likelihood
         :rtype: float
@@ -509,7 +533,7 @@ class BIOGEME:
         :param x: vector of values for the parameters.
         :type x: list(float)
 
-        :param scaled: if True, the value is diviced by the number of
+        :param scaled: if True, the value is divided by the number of
                        observations used to calculate it. In this
                        case, the values with different sample sizes
                        are comparable. Default: True
@@ -1294,15 +1318,36 @@ class negLikelihood(functionToMinimize):
     def __init__(self, like, like_deriv, scaled):
         """Constructor"""
         self.recalculate = True
-        self.x = None
+        """True if the log likelihood must be recalculated
+        """
+
+        self.x = None #: Vector of unknown parameters values
+
         self.batch = None
-        self.fv = None
-        self.gv = None
-        self.hv = None
-        self.bhhhv = None
-        self.like = like
+        """Value betwen 0 and 1 defining the size of the batch, that is the
+        percentage of the data that should be used to approximate the
+        log likelihood.
+        """
+
+        self.fv = None #: value of the function
+
+        self.gv = None #: vector with the gradient
+
+        self.hv = None #: second derivatives matrix
+
+        self.bhhhv = None #: BHHH matrix
+
+        self.like = like #: function calculating the log likelihood
+
         self.like_deriv = like_deriv
+        """function calculating the log likelihood and its derivatives.
+        """
+
         self.scaled = scaled
+        """if True, the value of the log likelihood is divided by the number
+        of observations used to calculate it. In this case, the values
+        with different sample sizes are comparable.
+        """
 
     def setVariables(self, x):
         self.recalculate = True
