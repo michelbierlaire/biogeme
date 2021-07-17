@@ -260,7 +260,7 @@ class BIOGEME:
                 columns=self.usedVariables
             )
             if not suggestedScales.empty:
-                logger.detailed(
+                self.logger.detailed(
                     'It is suggested to scale the following variables.'
                 )
                 for _, row in suggestedScales.iterrows():
@@ -269,13 +269,13 @@ class BIOGEME:
                         'because the largest (abs) value is\t'
                         f'{row["Largest"]}'
                     )
-                    logger.detailed(error_msg)
+                    self.logger.detailed(error_msg)
                 error_msg = (
                     'To remove this feature, set the parameter '
                     'suggestScales to False when creating the '
                     'BIOGEME object.'
                 )
-                logger.detailed(error_msg)
+                self.logger.detailed(error_msg)
 
         if not skipAudit:
             self._audit()
@@ -757,9 +757,9 @@ class BIOGEME:
                     ell = line.split('=')
                     betas[ell[0].strip()] = float(ell[1])
             self.changeInitValues(betas)
-            logger.detailed(f'Parameter values restored from {filename}')
+            self.logger.detailed(f'Parameter values restored from {filename}')
         except IOError:
-            logger.warning(
+            self.logger.warning(
                 f'Cannot read file {filename}. Statement is ignored.'
             )
 
@@ -1145,13 +1145,13 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    logger.warning(f'Parameter {x} not present in the model')
+                    self.logger.warning(f'Parameter {x} not present in the model')
             betaValues = list()
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])
                 else:
-                    logger.warning(
+                    self.logger.warning(
                         f'Simulation: initial value of {x} not provided.'
                     )
                     betaValues.append(self.betaInitValues[i])
@@ -1207,20 +1207,20 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    logger.warning(f'Parameter {x} not present in the model')
+                    self.logger.warning(f'Parameter {x} not present in the model')
             betaValues = list()
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])
                 else:
-                    logger.warning(
+                    self.logger.warning(
                         f'Simulation: initial value of {x} not provided.'
                     )
                     betaValues.append(self.betaInitValues[i])
 
         output = pd.DataFrame(index=self.database.data.index)
         for k, v in self.formulas.items():
-            logger.detailed(f'Simulate {k}')
+            self.logger.detailed(f'Simulate {k}')
             signature = v.getSignature()
             result = self.theC.simulateFormula(
                 signature, betaValues, self.fixedBetaValues, self.database.data
