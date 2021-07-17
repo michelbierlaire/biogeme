@@ -14,6 +14,7 @@ Test the biogeme module
 # Not needed in test
 # pylint: disable=missing-function-docstring, missing-class-docstring
 
+import os
 import unittest
 import random as rnd
 import numpy as np
@@ -37,8 +38,11 @@ class testBiogeme(unittest.TestCase):
                              'simul':simul}
 
         self.myBiogeme = bio.BIOGEME(myData1, dictOfExpressions)
+        self.myBiogeme.generateHtml = False
+        self.myBiogeme.generatePickle = False
         self.myBiogeme.modelName = 'simpleExample'
 
+        
     def test_calculateInitLikelihood(self):
         res = self.myBiogeme.calculateInitLikelihood()
         self.assertAlmostEqual(res, -115.30029248549191, 5)
@@ -87,11 +91,13 @@ class testBiogeme(unittest.TestCase):
     def test_estimate(self):
         results = self.myBiogeme.estimate(bootstrap=10)
         self.assertAlmostEqual(results.data.logLike, -67.0654904797005, 5)
+        os.remove(self.myBiogeme._saveIterationsFileName())
 
     def test_simulate(self):
         results = self.myBiogeme.estimate()
+        os.remove(self.myBiogeme._saveIterationsFileName())
         s = self.myBiogeme.simulate(results.getBetaValues())
-        self.assertAlmostEqual(s.loc[0, 'loglike'], -6.09223388037049, 5)
+        self.assertAlmostEqual(s.loc[0, 'loglike'], -6.092208083991222, 3)
 
     def test_confidenceIntervals(self):
         results = self.myBiogeme.estimate(bootstrap=10)
