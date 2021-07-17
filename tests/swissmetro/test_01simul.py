@@ -88,6 +88,9 @@ simulate = {'P1': prob1,
 class test_01simul(unittest.TestCase):
     def testSimulation(self):
         biogeme  = bio.BIOGEME(database,simulate)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         biogeme.modelName = "01logit_simul"
         results = biogeme.simulate()
         self.assertAlmostEqual(sum(results['P1']),907.9992101964821,2)

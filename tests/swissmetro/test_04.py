@@ -73,6 +73,9 @@ class test_04(unittest.TestCase):
     def testEstimation(self):
         logprob = models.loglogit(V,av,CHOICE)
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5423.299,2)
 

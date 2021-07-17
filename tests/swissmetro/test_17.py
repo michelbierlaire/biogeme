@@ -84,6 +84,9 @@ logprob = log(MonteCarlo(prob))
 class test_17(unittest.TestCase):
     def testEstimation(self):
         biogeme = bio.BIOGEME(database,logprob,numberOfDraws=5,seed=10)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5312.735685567558,2)
     

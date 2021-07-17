@@ -78,6 +78,9 @@ logprob = models.lognestedMevMu(V,av,nests,CHOICE,MU)
 class test_10(unittest.TestCase):
     def testEstimation(self):
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5236.9,2)
     

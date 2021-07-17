@@ -83,6 +83,9 @@ logprob = log(Integrate(condprobIndiv * density,'omega'))
 class test_12integral(unittest.TestCase):
     def testEstimation(self):
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-4359.520517074624,2)
     

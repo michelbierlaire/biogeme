@@ -96,10 +96,13 @@ simulate = {'Prob. train': prob1,
 class test_11(unittest.TestCase):
     def testEstimationAndSimulation(self):
         biogeme  = bio.BIOGEME(database,logprob,numberOfThreads=1)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5214.049,2)
         biosim  = bio.BIOGEME(database,simulate)
-        simresults = biosim.simulate(results.data.betaValues)
+        simresults = biosim.simulate(results.getBetaValues())
         self.assertAlmostEqual(sum(simresults['Prob. train']),888.3883902853023,1)
         self.assertAlmostEqual(sum(simresults['Elas. 1']),-17897.702976576973, 0)
     
