@@ -293,3 +293,4 @@ src/biogeme.h.work
 src/cbiogeme.pyx.ok
 src/cbiogeme.pyx.work
 biogeme/biogeme_orig.py
+*.iter
