@@ -11,7 +11,7 @@
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 from biogeme.expressions import Beta
 
 # Read the data
@@ -44,30 +44,35 @@ TimeCar_scaled = TimeCar / 200
 MarginalCostPT_scaled = MarginalCostPT / 10
 CostCarCHF_scaled = CostCarCHF / 10
 distance_km_scaled = distance_km / 5
-male = (Gender == 1)
-female = (Gender == 2)
-unreportedGender = (Gender == -1)
+male = Gender == 1
+female = Gender == 2
+unreportedGender = Gender == -1
 
-fulltime = (OccupStat == 1)
-notfulltime = (OccupStat != 1)
+fulltime = OccupStat == 1
+notfulltime = OccupStat != 1
 
 # Definition of utility functions:
-V_PT = ASC_PT + BETA_TIME_FULLTIME * TimePT_scaled * fulltime + \
-    BETA_TIME_OTHER * TimePT_scaled * notfulltime + \
-    BETA_COST * MarginalCostPT_scaled
-V_CAR = ASC_CAR + \
-    BETA_TIME_FULLTIME * TimeCar_scaled * fulltime + \
-    BETA_TIME_OTHER * TimeCar_scaled * notfulltime + \
-    BETA_COST * CostCarCHF_scaled
-V_SM = ASC_SM + \
-    BETA_DIST_MALE * distance_km_scaled * male + \
-    BETA_DIST_FEMALE * distance_km_scaled * female + \
-    BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+V_PT = (
+    ASC_PT
+    + BETA_TIME_FULLTIME * TimePT_scaled * fulltime
+    + BETA_TIME_OTHER * TimePT_scaled * notfulltime
+    + BETA_COST * MarginalCostPT_scaled
+)
+V_CAR = (
+    ASC_CAR
+    + BETA_TIME_FULLTIME * TimeCar_scaled * fulltime
+    + BETA_TIME_OTHER * TimeCar_scaled * notfulltime
+    + BETA_COST * CostCarCHF_scaled
+)
+V_SM = (
+    ASC_SM
+    + BETA_DIST_MALE * distance_km_scaled * male
+    + BETA_DIST_FEMALE * distance_km_scaled * female
+    + BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+)
 
 # Associate utility functions with the numbering of alternatives
-V = {0: V_PT,
-     1: V_CAR,
-     2: V_SM}
+V = {0: V_PT, 1: V_CAR, 2: V_SM}
 
 # Definition of the nests:
 # 1: nests parameter

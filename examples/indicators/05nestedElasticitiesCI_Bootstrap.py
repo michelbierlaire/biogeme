@@ -57,8 +57,9 @@ numberOfFemales = database.count('Gender', 2)
 print(f'Number of females: {numberOfFemales}')
 
 # For more complex conditions, using directly Pandas
-unreportedGender = database.data[(database.data['Gender'] != 1)
-                                 & (database.data['Gender'] != 2)].count()['Gender']
+unreportedGender = database.data[
+    (database.data['Gender'] != 1) & (database.data['Gender'] != 2)
+].count()['Gender']
 print(f'Unreported gender: {unreportedGender}')
 
 # List of parameters. Their value will be set later.
@@ -78,29 +79,34 @@ TimeCar_scaled = TimeCar / 200
 MarginalCostPT_scaled = MarginalCostPT / 10
 CostCarCHF_scaled = CostCarCHF / 10
 distance_km_scaled = distance_km / 5
-male = (Gender == 1)
-female = (Gender == 2)
-unreportedGender = (Gender == -1)
-fulltime = (OccupStat == 1)
-notfulltime = (OccupStat != 1)
+male = Gender == 1
+female = Gender == 2
+unreportedGender = Gender == -1
+fulltime = OccupStat == 1
+notfulltime = OccupStat != 1
 
 # Definition of utility functions:
-V_PT = ASC_PT + BETA_TIME_FULLTIME * TimePT_scaled * fulltime + \
-    BETA_TIME_OTHER * TimePT_scaled * notfulltime + \
-    BETA_COST * MarginalCostPT_scaled
-V_CAR = ASC_CAR + \
-    BETA_TIME_FULLTIME * TimeCar_scaled * fulltime + \
-    BETA_TIME_OTHER * TimeCar_scaled * notfulltime + \
-    BETA_COST * CostCarCHF_scaled
-V_SM = ASC_SM + \
-    BETA_DIST_MALE * distance_km_scaled * male + \
-    BETA_DIST_FEMALE * distance_km_scaled * female + \
-    BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+V_PT = (
+    ASC_PT
+    + BETA_TIME_FULLTIME * TimePT_scaled * fulltime
+    + BETA_TIME_OTHER * TimePT_scaled * notfulltime
+    + BETA_COST * MarginalCostPT_scaled
+)
+V_CAR = (
+    ASC_CAR
+    + BETA_TIME_FULLTIME * TimeCar_scaled * fulltime
+    + BETA_TIME_OTHER * TimeCar_scaled * notfulltime
+    + BETA_COST * CostCarCHF_scaled
+)
+V_SM = (
+    ASC_SM
+    + BETA_DIST_MALE * distance_km_scaled * male
+    + BETA_DIST_FEMALE * distance_km_scaled * female
+    + BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+)
 
 # Associate utility functions with the numbering of alternatives
-V = {0: V_PT,
-     1: V_CAR,
-     2: V_SM}
+V = {0: V_PT, 1: V_CAR, 2: V_SM}
 
 # Definition of the nests:
 # 1: nests parameter
@@ -121,15 +127,15 @@ delta_dist = 1.0
 distance_km_scaled_after = (distance_km + delta_dist) / 5
 
 # Utility of the slow mode whem the distance increases by 1 kilometer.
-V_SM_after = ASC_SM + \
-    BETA_DIST_MALE * distance_km_scaled_after * male + \
-    BETA_DIST_FEMALE * distance_km_scaled_after * female + \
-    BETA_DIST_UNREPORTED * distance_km_scaled_after * unreportedGender
+V_SM_after = (
+    ASC_SM
+    + BETA_DIST_MALE * distance_km_scaled_after * male
+    + BETA_DIST_FEMALE * distance_km_scaled_after * female
+    + BETA_DIST_UNREPORTED * distance_km_scaled_after * unreportedGender
+)
 
 # Associate utility functions with the numbering of alternatives
-V_after = {0: V_PT,
-           1: V_CAR,
-           2: V_SM_after}
+V_after = {0: V_PT, 1: V_CAR, 2: V_SM_after}
 
 # Definition of the nests:
 # 1: nests parameter
@@ -137,12 +143,15 @@ V_after = {0: V_PT,
 
 prob_sm_after = models.nested(V_after, None, nests, 2)
 
-direct_elas_sm_dist = (prob_sm_after - prob_sm) * \
-    distance_km / (prob_sm * delta_dist)
+direct_elas_sm_dist = (
+    (prob_sm_after - prob_sm) * distance_km / (prob_sm * delta_dist)
+)
 
-simulate = {'weight': normalizedWeight,
-            'Prob. slow modes': prob_sm,
-            'direct_elas_sm_dist': direct_elas_sm_dist}
+simulate = {
+    'weight': normalizedWeight,
+    'Prob. slow modes': prob_sm,
+    'direct_elas_sm_dist': direct_elas_sm_dist,
+}
 
 biogeme = bio.BIOGEME(database, simulate)
 biogeme.modelName = '05nestedElasticitiesCI_Bootstrap'
@@ -155,15 +164,21 @@ results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 simulatedValues = biogeme.simulate(results.getBetaValues())
 
 # We calculate the elasticities
-simulatedValues['Weighted prob. slow modes'] = simulatedValues['weight'] * \
-    simulatedValues['Prob. slow modes']
+simulatedValues['Weighted prob. slow modes'] = (
+    simulatedValues['weight'] * simulatedValues['Prob. slow modes']
+)
 
 denominator_sm = simulatedValues['Weighted prob. slow modes'].sum()
 
-direct_elas_sm_dist = (simulatedValues['Weighted prob. slow modes'] *
-                       simulatedValues['direct_elas_sm_dist'] / denominator_sm).sum()
-print(f'Aggregate direct elasticity of slow modes wrt distance: '
-      f'{direct_elas_sm_dist:.7f}')
+direct_elas_sm_dist = (
+    simulatedValues['Weighted prob. slow modes']
+    * simulatedValues['direct_elas_sm_dist']
+    / denominator_sm
+).sum()
+print(
+    f'Aggregate direct elasticity of slow modes wrt distance: '
+    f'{direct_elas_sm_dist:.7f}'
+)
 
 
 print('Calculating confidence interval...')
@@ -175,15 +190,17 @@ print('Calculating confidence interval...')
 size = 100
 
 # All betas are simulated
-simulatedBetas = np.random.multivariate_normal(results.data.betaValues,
-                                               results.data.bootstrap_varCovar,
-                                               size)
+simulatedBetas = np.random.multivariate_normal(
+    results.data.betaValues, results.data.bootstrap_varCovar, size
+)
 
 # Only those necessary for the simulation are selected.
 # The values are also associated with their name
 index = [results.data.betaNames.index(b) for b in biogeme.freeBetaNames]
-b = [{biogeme.freeBetaNames[i]: value for i, value in enumerate(row)}
-     for row in simulatedBetas[:, index]]
+b = [
+    {biogeme.freeBetaNames[i]: value for i, value in enumerate(row)}
+    for row in simulatedBetas[:, index]
+]
 
 # Returns data frame containing, for each simulated value, the left
 # and right bounds of the confidence interval calculated by
@@ -191,7 +208,9 @@ b = [{biogeme.freeBetaNames[i]: value for i, value in enumerate(row)}
 left, right = biogeme.confidenceIntervals(b, 0.9)
 
 left['Weighted prob. slow modes'] = left['weight'] * left['Prob. slow modes']
-right['Weighted prob. slow modes'] = right['weight'] * right['Prob. slow modes']
+right['Weighted prob. slow modes'] = (
+    right['weight'] * right['Prob. slow modes']
+)
 denominator_left = left['Weighted prob. slow modes'].sum()
 denominator_right = right['Weighted prob. slow modes'].sum()
 
@@ -199,17 +218,24 @@ denominator_right = right['Weighted prob. slow modes'].sum()
 denominator_interval = ia.interval[(denominator_left, denominator_right)]
 
 # Build a list of interval objects, one for each disaggregate elasticity
-elas_interval = [ia.interval([l, r]) for l, r in zip(left['direct_elas_sm_dist'],
-                                                     right['direct_elas_sm_dist'])]
+elas_interval = [
+    ia.interval([l, r])
+    for l, r in zip(left['direct_elas_sm_dist'], right['direct_elas_sm_dist'])
+]
 
 # Build a list of interval objects, one for each term of the numerator
-numerator_interval = [ia.interval([l, r])
-                      for l, r in zip(left['Weighted prob. slow modes'],
-                                      right['Weighted prob. slow modes'])]
+numerator_interval = [
+    ia.interval([l, r])
+    for l, r in zip(
+        left['Weighted prob. slow modes'], right['Weighted prob. slow modes']
+    )
+]
 
 # Build a list of interval objects, one for each term of the sum
-terms_of_the_sum_interval = [e * wp / denominator_interval
-                             for e, wp in zip(elas_interval, numerator_interval)]
+terms_of_the_sum_interval = [
+    e * wp / denominator_interval
+    for e, wp in zip(elas_interval, numerator_interval)
+]
 
 # The interval package apparently does not provide a tool to sum a
 # list of intervals. We do it manually. Note that the object interval

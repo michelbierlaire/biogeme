@@ -9,10 +9,11 @@
  We calculate disaggregate and aggregate direct point elasticities.
 """
 
+import sys
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 import biogeme.results as res
 from biogeme.expressions import Beta, Derive
 
@@ -41,8 +42,9 @@ numberOfFemales = database.count('Gender', 2)
 print(f'Number of females: {numberOfFemales}')
 
 # For more complex conditions, we use Pandas
-unreportedGender = database.data[(database.data['Gender'] != 1) & \
-                                 (database.data['Gender'] != 2)].count()['Gender']
+unreportedGender = database.data[
+    (database.data['Gender'] != 1) & (database.data['Gender'] != 2)
+].count()['Gender']
 print(f'Unreported gender: {unreportedGender}')
 
 # List of parameters. Their value will be set later.
@@ -62,29 +64,34 @@ TimeCar_scaled = TimeCar / 200
 MarginalCostPT_scaled = MarginalCostPT / 10
 CostCarCHF_scaled = CostCarCHF / 10
 distance_km_scaled = distance_km / 5
-male = (Gender == 1)
-female = (Gender == 2)
-unreportedGender = (Gender == -1)
-fulltime = (OccupStat == 1)
-notfulltime = (OccupStat != 1)
+male = Gender == 1
+female = Gender == 2
+unreportedGender = Gender == -1
+fulltime = OccupStat == 1
+notfulltime = OccupStat != 1
 
 # Definition of utility functions:
-V_PT = ASC_PT + BETA_TIME_FULLTIME * TimePT_scaled * fulltime + \
-    BETA_TIME_OTHER * TimePT_scaled * notfulltime + \
-    BETA_COST * MarginalCostPT_scaled
-V_CAR = ASC_CAR + \
-    BETA_TIME_FULLTIME * TimeCar_scaled * fulltime + \
-    BETA_TIME_OTHER * TimeCar_scaled * notfulltime + \
-    BETA_COST * CostCarCHF_scaled
-V_SM = ASC_SM + \
-    BETA_DIST_MALE * distance_km_scaled * male + \
-    BETA_DIST_FEMALE * distance_km_scaled * female + \
-    BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+V_PT = (
+    ASC_PT
+    + BETA_TIME_FULLTIME * TimePT_scaled * fulltime
+    + BETA_TIME_OTHER * TimePT_scaled * notfulltime
+    + BETA_COST * MarginalCostPT_scaled
+)
+V_CAR = (
+    ASC_CAR
+    + BETA_TIME_FULLTIME * TimeCar_scaled * fulltime
+    + BETA_TIME_OTHER * TimeCar_scaled * notfulltime
+    + BETA_COST * CostCarCHF_scaled
+)
+V_SM = (
+    ASC_SM
+    + BETA_DIST_MALE * distance_km_scaled * male
+    + BETA_DIST_FEMALE * distance_km_scaled * female
+    + BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+)
 
 # Associate utility functions with the numbering of alternatives
-V = {0: V_PT,
-     1: V_CAR,
-     2: V_SM}
+V = {0: V_PT, 1: V_CAR, 2: V_SM}
 
 # Definition of the nests:
 # 1: nests parameter
@@ -104,20 +111,24 @@ prob_sm = models.nested(V, None, nests, 2)
 # Calculation of the direct elasticities.
 # We use the 'Derive' operator to calculate the derivatives.
 direct_elas_pt_time = Derive(prob_pt, 'TimePT') * TimePT / prob_pt
-direct_elas_pt_cost = Derive(prob_pt, 'MarginalCostPT') * MarginalCostPT / prob_pt
+direct_elas_pt_cost = (
+    Derive(prob_pt, 'MarginalCostPT') * MarginalCostPT / prob_pt
+)
 direct_elas_car_time = Derive(prob_car, 'TimeCar') * TimeCar / prob_car
 direct_elas_car_cost = Derive(prob_car, 'CostCarCHF') * CostCarCHF / prob_car
 direct_elas_sm_dist = Derive(prob_sm, 'distance_km') * distance_km / prob_sm
 
-simulate = {'weight': normalizedWeight,
-            'Prob. car': prob_car,
-            'Prob. public transportation': prob_pt,
-            'Prob. slow modes': prob_sm,
-            'direct_elas_pt_time': direct_elas_pt_time,
-            'direct_elas_pt_cost': direct_elas_pt_cost,
-            'direct_elas_car_time': direct_elas_car_time,
-            'direct_elas_car_cost': direct_elas_car_cost,
-            'direct_elas_sm_dist': direct_elas_sm_dist}
+simulate = {
+    'weight': normalizedWeight,
+    'Prob. car': prob_car,
+    'Prob. public transportation': prob_pt,
+    'Prob. slow modes': prob_sm,
+    'direct_elas_pt_time': direct_elas_pt_time,
+    'direct_elas_pt_cost': direct_elas_pt_cost,
+    'direct_elas_car_time': direct_elas_car_time,
+    'direct_elas_car_cost': direct_elas_car_cost,
+    'direct_elas_sm_dist': direct_elas_sm_dist,
+}
 
 biogeme = bio.BIOGEME(database, simulate)
 biogeme.modelName = '03nestedElasticties'
@@ -126,51 +137,76 @@ biogeme.modelName = '03nestedElasticties'
 try:
     results = res.bioResults(pickleFile='01nestedEstimation.pickle')
 except FileNotFoundError:
-    sys.exit('Run first the script 01nestedEstimation.py in order to generate '
-             'the file 01nestedEstimation.pickle.')
+    sys.exit(
+        'Run first the script 01nestedEstimation.py in order to generate '
+        'the file 01nestedEstimation.pickle.'
+    )
 
 # simulatedValues is a Panda dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
 simulatedValues = biogeme.simulate(results.getBetaValues())
 
 # We calculate the elasticities
-simulatedValues['Weighted prob. car'] = simulatedValues['weight'] * \
-    simulatedValues['Prob. car']
-simulatedValues['Weighted prob. PT'] = simulatedValues['weight'] * \
-    simulatedValues['Prob. public transportation']
-simulatedValues['Weighted prob. SM'] = simulatedValues['weight'] * \
-    simulatedValues['Prob. slow modes']
+simulatedValues['Weighted prob. car'] = (
+    simulatedValues['weight'] * simulatedValues['Prob. car']
+)
+simulatedValues['Weighted prob. PT'] = (
+    simulatedValues['weight'] * simulatedValues['Prob. public transportation']
+)
+simulatedValues['Weighted prob. SM'] = (
+    simulatedValues['weight'] * simulatedValues['Prob. slow modes']
+)
 
 denominator_car = simulatedValues['Weighted prob. car'].sum()
 denominator_pt = simulatedValues['Weighted prob. PT'].sum()
 denominator_sm = simulatedValues['Weighted prob. SM'].sum()
 
-direct_elas_term_car_time = (simulatedValues['Weighted prob. car']
-                             * simulatedValues['direct_elas_car_time']
-                             / denominator_car).sum()
-print(f'Aggregate direct point elasticity of car wrt time: '
-      f'{direct_elas_term_car_time:.3g}')
+direct_elas_term_car_time = (
+    simulatedValues['Weighted prob. car']
+    * simulatedValues['direct_elas_car_time']
+    / denominator_car
+).sum()
+print(
+    f'Aggregate direct point elasticity of car wrt time: '
+    f'{direct_elas_term_car_time:.3g}'
+)
 
-direct_elas_term_car_cost = (simulatedValues['Weighted prob. car']
-                             * simulatedValues['direct_elas_car_cost']
-                             / denominator_car).sum()
-print(f'Aggregate direct point elasticity of car wrt cost: '
-      f'{direct_elas_term_car_cost:.3g}')
+direct_elas_term_car_cost = (
+    simulatedValues['Weighted prob. car']
+    * simulatedValues['direct_elas_car_cost']
+    / denominator_car
+).sum()
+print(
+    f'Aggregate direct point elasticity of car wrt cost: '
+    f'{direct_elas_term_car_cost:.3g}'
+)
 
-direct_elas_term_pt_time = (simulatedValues['Weighted prob. PT']
-                            * simulatedValues['direct_elas_pt_time']
-                            / denominator_pt).sum()
-print(f'Aggregate direct point elasticity of PT wrt time: '
-      f'{direct_elas_term_pt_time:.3g}')
+direct_elas_term_pt_time = (
+    simulatedValues['Weighted prob. PT']
+    * simulatedValues['direct_elas_pt_time']
+    / denominator_pt
+).sum()
+print(
+    f'Aggregate direct point elasticity of PT wrt time: '
+    f'{direct_elas_term_pt_time:.3g}'
+)
 
-direct_elas_term_pt_cost = (simulatedValues['Weighted prob. PT']
-                            * simulatedValues['direct_elas_pt_cost']
-                            / denominator_pt).sum()
-print(f'Aggregate direct point elasticity of PT wrt cost: '
-      f'{direct_elas_term_pt_cost:.3g}')
+direct_elas_term_pt_cost = (
+    simulatedValues['Weighted prob. PT']
+    * simulatedValues['direct_elas_pt_cost']
+    / denominator_pt
+).sum()
+print(
+    f'Aggregate direct point elasticity of PT wrt cost: '
+    f'{direct_elas_term_pt_cost:.3g}'
+)
 
-direct_elas_term_sm_dist = (simulatedValues['Weighted prob. SM']
-                            * simulatedValues['direct_elas_sm_dist']
-                            / denominator_sm).sum()
-print(f'Aggregate direct point elasticity of SM wrt distance: '
-      f'{direct_elas_term_sm_dist:.3g}')
+direct_elas_term_sm_dist = (
+    simulatedValues['Weighted prob. SM']
+    * simulatedValues['direct_elas_sm_dist']
+    / denominator_sm
+).sum()
+print(
+    f'Aggregate direct point elasticity of SM wrt distance: '
+    f'{direct_elas_term_sm_dist:.3g}'
+)
