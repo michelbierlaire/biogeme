@@ -144,4 +144,4 @@ biogeme.modelName = 'm01_latent_variable'
 # Estimate the parameters
 results = biogeme.estimate()
 
-print(results.getBetaValues())
+print(results.getEstimatedParameters())
