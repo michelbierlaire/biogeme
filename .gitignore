@@ -294,3 +294,4 @@ src/cbiogeme.pyx.ok
 src/cbiogeme.pyx.work
 biogeme/biogeme_orig.py
 *.iter
+examples/swissmetro/01logitBis.F12
