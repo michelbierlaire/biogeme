@@ -310,5 +310,7 @@ biogeme.modelName = 'm03_simultaneous_estimation'
 
 # Estimate the parameters
 results = biogeme.estimate()
+print(results.getEstimatedParameters())
 
-print(results.getBetaValues())
+print(f'Final log likelihood: {results.data.logLike:.3f}')
+print(f'Output file: {results.data.htmlFileName}')
