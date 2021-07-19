@@ -198,9 +198,7 @@ biogeme.modelName = 'm02_sequential_estimation'
 
 # Estimate the parameters
 results = biogeme.estimate()
+print(results.getEstimatedParameters())
 
-print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
-results.writeLaTeX()
-print(f'LaTeX file: {results.data.latexFileName}')
