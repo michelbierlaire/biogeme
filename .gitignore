@@ -295,3 +295,4 @@ src/cbiogeme.pyx.work
 biogeme/biogeme_orig.py
 *.iter
 examples/swissmetro/01logitBis.F12
+examples/assisted/.ipynb_checkpoints/paretoTest-checkpoint.ipynb
