@@ -11,11 +11,11 @@
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 from biogeme.expressions import Beta
 
 # Read the data
-df = pd.read_csv('swissmetro.dat', '\t')
+df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
 # The following statement allows you to use the names of the variable
@@ -47,25 +47,15 @@ CAR_TT_SCALED = CAR_TT / 100
 CAR_CO_SCALED = CAR_CO / 100
 
 # Definition of the utility functions
-V1 = ASC_TRAIN + \
-     B_TIME * TRAIN_TT_SCALED + \
-     B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + \
-     B_TIME * SM_TT_SCALED + \
-     B_COST * SM_COST_SCALED
-V3 = ASC_CAR + \
-     B_TIME * CAR_TT_SCALED + \
-     B_COST * CAR_CO_SCALED
+V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
+V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
-V = {1: V1,
-     2: V2,
-     3: V3}
+V = {1: V1, 2: V2, 3: V3}
 
 # Associate the availability conditions with the alternatives
-av = {1: TRAIN_AV_SP,
-      2: SM_AV,
-      3: CAR_AV_SP}
+av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
@@ -87,7 +77,12 @@ results = biogeme.estimate()
 # dataframe. As this is done for each slice, the output is a list of
 # dataframes, each corresponding to one of these exercises.
 
-validation_results = biogeme.validate(results)
+validationData = database.split(slices=5)
+
+validation_results = biogeme.validate(results, validationData)
 
 for slide in validation_results:
-    print(f'Log likelihood for {slide.shape[0]} validation data: {slide["Loglikelihood"].sum()}')
+    print(
+        f'Log likelihood for {slide.shape[0]} validation data: '
+        f'{slide["Loglikelihood"].sum()}'
+    )

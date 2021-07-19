@@ -4,36 +4,37 @@
 :date: Thu Sep  6 15:14:39 2018
 
  Example of a logit model.
-Same as 01logit, using bioLinearUtility, and introducing some options and features.
- Three alternatives: Train, Car and Swissmetro
- SP data
+
+Same as 01logit, using bioLinearUtility, and introducing some options
+ and features.  Three alternatives: Train, Car and Swissmetro SP data
+
 """
 import pandas as pd
 
 import biogeme.biogeme as bio
 import biogeme.database as db
-import biogeme.models as models
+from biogeme import models
 import biogeme.optimization as opt
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable, bioLinearUtility
 
 # Read the data
-df = pd.read_csv('swissmetro.dat', '\t')
+df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to investigate the database. For example:
-#print(database.data.describe())
+# print(database.data.describe())
 
 # The following statement allows you to use the names of the variable
 # as Python variable.
 globals().update(database.variables)
 
 # Removing some observations can be done directly using pandas.
-#remove = (((database.data.PURPOSE != 1) &
+# remove = (((database.data.PURPOSE != 1) &
 #           (database.data.PURPOSE != 3)) |
 #          (database.data.CHOICE == 0))
-#database.data.drop(database.data[remove].index,inplace=True)
+# database.data.drop(database.data[remove].index,inplace=True)
 
 # Here we use the "biogeme" way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -43,8 +44,10 @@ database.remove(exclude)
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+
+# We use starting values estimated from a previous run
+B_TIME = Beta('B_TIME', -1.28, None, None, 0)
+B_COST = Beta('B_COST', -1.08, None, None, 0)
 
 # Definition of new variables
 SM_COST = SM_CO * (GA == 0)
@@ -55,7 +58,9 @@ TRAIN_COST = TRAIN_CO * (GA == 0)
 CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
 TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
 TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100, database)
+TRAIN_COST_SCALED = DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+)
 SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
 SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
 CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
@@ -72,14 +77,10 @@ terms3 = [(B_TIME, CAR_TT_SCALED), (B_COST, CAR_CO_SCALED)]
 V3 = ASC_CAR + bioLinearUtility(terms3)
 
 # Associate utility functions with the numbering of alternatives
-V = {1: V1,
-     2: V2,
-     3: V3}
+V = {1: V1, 2: V2, 3: V3}
 
 # Associate the availability conditions with the alternatives
-av = {1: TRAIN_AV_SP,
-      2: SM_AV,
-      3: CAR_AV_SP}
+av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
@@ -87,26 +88,38 @@ logprob = models.loglogit(V, av, CHOICE)
 
 # Define level of verbosity
 logger = msg.bioMessage()
-#logger.setSilent()
-#logger.setWarning()
+# logger.setSilent()
+# logger.setWarning()
 logger.setGeneral()
-#logger.setDetailed()
+# logger.setDetailed()
 
 
 # These notes will be included as such in the report file.
-userNotes = ('Example of a logit model with three alternatives: Train, Car and Swissmetro.'
-             ' Same as 01logit, using bioLinearUtility, and introducing some options '
-             'and features.')
+userNotes = (
+    'Example of a logit model with three alternatives: Train, Car and'
+    ' Swissmetro. Same as 01logit, using bioLinearUtility, and '
+    'introducing some options and features.'
+)
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfThreads=2, userNotes=userNotes)
+biogeme = bio.BIOGEME(
+    database, logprob, numberOfThreads=2, userNotes=userNotes
+)
+
+# As we have used starting values different from 0, the initial model
+# is not the equal probability model. If we want to include the latter
+# in the results, we need to calculate its log likelihood.
+biogeme.calculateNullLoglikelihood(av)
+
 biogeme.modelName = '01logitBis'
+biogeme.saveIterations = False
 
 # Estimate the parameters
-results = biogeme.estimate(bootstrap=100,
-                           algorithm=opt.bioNewton,
-                           algoParameters={'hamabs': True},
-                           saveIterations=True)
+results = biogeme.estimate(
+    bootstrap=100,
+    algorithm=opt.bioNewton,
+    algoParameters={'maxiter': 1000},
+)
 
 biogeme.createLogFile(verbosity=3)
 
@@ -128,3 +141,7 @@ print('Optimization algorithm')
 print('----------------------')
 for description, message in results.data.optimizationMessages.items():
     print(f'{description}:\t{message}')
+
+# Generate the file in Alogit format
+results.writeF12(robustStdErr=True)
+results.writeF12(robustStdErr=False)
