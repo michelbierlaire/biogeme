@@ -28,7 +28,7 @@ logger = msg.bioMessage()
 logger.setDebug()
 
 # Read the data
-df = pd.read_csv('airline.dat', '\t')
+df = pd.read_csv('airline.dat', sep='\t')
 
 # Update some data
 df.loc[df['q17_Gender'] == 99, 'q17_Gender'] = -1
