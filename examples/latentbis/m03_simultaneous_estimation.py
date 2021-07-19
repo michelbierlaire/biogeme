@@ -66,7 +66,6 @@ except FileNotFoundError:
     )
     sys.exit()
 structBetas = structResults.getBetaValues()
-print(structBetas.keys())
 
 
 ### Variables
