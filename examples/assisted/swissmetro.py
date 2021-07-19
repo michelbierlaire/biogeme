@@ -311,9 +311,9 @@ theProblem = assisted.specificationProblem('Swissmetro',
 theProblem.maximumNumberOfParameters = 300
 
 # First model: three alternative specific attributes
-nl = {'Travel time': (None, False), 
-      'Travel cost':  (None, False), 
-      'Headway':  (None, False)}
+nl = {'Travel time': (0, False), 
+      'Travel cost':  (0, False), 
+      'Headway':  (0, False)}
 
 sg = {'Seg. cte': ['GA'],
                  'Seg. cost': ['class', 'who'],
