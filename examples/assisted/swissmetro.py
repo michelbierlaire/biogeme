@@ -27,7 +27,7 @@ logger = msg.bioMessage()
 logger.setDebug()
 
 # Read the data
-df = pd.read_csv('swissmetro.dat', '\t')
+df = pd.read_csv('swissmetro.dat', sep='\t')
 
 # Update some data
 df['TRAIN_TT_SCALED'] = df['TRAIN_TT'] / 100
