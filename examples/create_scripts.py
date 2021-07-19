@@ -26,6 +26,11 @@ def script(model):
     text += 'echo FINISHED AT `date`\n'
     return text
 
+def python_script(model):
+    text = f'echo "{model}.py"\n'
+    text += f'python {model}.py >&  {model}.err\n'
+    return text
+    
 directory = sys.argv[1]
 print(f'Generate scripts for directory {directory}')
 
@@ -40,3 +45,8 @@ for themodel in models:
 with open(f'{directory}/sbatch.csh', 'w') as batchfile:
     for themodel in models:
         print(f'sbatch {themodel}.run', file=batchfile)
+
+with open(f'{directory}/run.csh', 'w') as runfile:
+    for themodel in models:
+        print(f'{python_script(themodel)}', file=runfile)
+        
