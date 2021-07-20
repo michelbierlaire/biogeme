@@ -1,4 +1,4 @@
-\"""File 04latentChoiceSeq_mc.py
+"""File 04latentChoiceSeq_mc.py
 
 Choice model with the latent variable.
 Mixture of logit, with Monte-Carlo integration
