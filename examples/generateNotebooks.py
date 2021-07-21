@@ -1,3 +1,4 @@
+import sys
 import os, shutil
 import pathlib
 import subprocess
@@ -19,8 +20,7 @@ with os.scandir('.') as root_dir:
                                 read_file = f.read()
                             with open(tmp_file, 'w') as f:
                                 f.write(f'#%%\n{read_file}')
-                            subprocess.call([('/Users/michelbierlaire/opt/anaconda3/envs/'
-                                              'python38/bin/ipynb-py-convert'),
+                            subprocess.call([(f'{sys.prefix}/bin/ipynb-py-convert'),
                                              tmp_file,
                                              notebook_fname])
                             

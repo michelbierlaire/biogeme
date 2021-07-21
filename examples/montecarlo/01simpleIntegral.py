@@ -26,15 +26,17 @@ trueI = exp(1.0) - 1.0
 
 R = 2000
 
-sampleVariance = MonteCarlo(integrand*integrand) - simulatedI * simulatedI
-stderr = (sampleVariance / R)**0.5
+sampleVariance = MonteCarlo(integrand * integrand) - simulatedI * simulatedI
+stderr = (sampleVariance / R) ** 0.5
 error = simulatedI - trueI
 
-simulate = {'Analytical Integral': trueI,
-            'Simulated Integral': simulatedI,
-            'Sample variance   ': sampleVariance,
-            'Std Error         ': stderr,
-            'Error             ': error}
+simulate = {
+    'Analytical Integral': trueI,
+    'Simulated Integral': simulatedI,
+    'Sample variance   ': sampleVariance,
+    'Std Error         ': stderr,
+    'Error             ': error,
+}
 
 biogeme = bio.BIOGEME(database, simulate, numberOfDraws=R)
 biogeme.modelName = f'01simpleIntegral_{R}'
