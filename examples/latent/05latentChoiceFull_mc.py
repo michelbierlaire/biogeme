@@ -14,6 +14,7 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
+import biogeme.optimization as opt
 import biogeme.results as res
 import biogeme.messaging as msg
 from biogeme.expressions import (
@@ -402,7 +403,7 @@ biogeme = bio.BIOGEME(database, loglike, numberOfDraws=10000)
 biogeme.modelName = '05latentChoiceFull_mc'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = biogeme.estimate(algorithm=opt.bioBfgs)
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')
