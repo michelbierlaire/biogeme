@@ -1833,6 +1833,14 @@ class solution(vns.solutionClass):
                 'Description of the solution not available'
             )
         res = self.description
+        if self.objectivesNames is None:
+            raise excep.biogemeError(
+                'The attribute objectivesNames is not defined'
+            )
+        if self.objectives is None:
+            raise excep.biogemeError(
+                'The attribute objectives is not defined'
+            )
         for t, r in zip(self.objectivesNames, self.objectives):
             res += f'\n{t}: {r}'
         return res
