@@ -296,3 +296,13 @@ biogeme/biogeme_orig.py
 *.iter
 examples/swissmetro/01logitBis.F12
 examples/assisted/.ipynb_checkpoints/paretoTest-checkpoint.ipynb
+dist/biogeme-3.2.7.tar.gz
+dist/biogeme-3.2.7-py3.9-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.7-cp39-cp39-win_amd64.whl
+dist/biogeme-3.2.7-cp39-cp39-macosx_10_9_x86_64.whl
+dist/biogeme-3.2.7-cp38-cp38-win_amd64.whl
+dist/biogeme-3.2.7-cp38-cp38-macosx_10_9_x86_64.whl
+dist/biogeme-3.2.7-cp37-cp37m-win_amd64.whl
+dist/biogeme-3.2.7-cp37-cp37m-macosx_10_9_x86_64.whl
+dist/biogeme-3.2.7-cp36-cp36m-win_amd64.whl
+dist/biogeme-3.2.7-cp36-cp36m-macosx_10_9_x86_64.whl
