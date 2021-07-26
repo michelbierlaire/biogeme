@@ -6,7 +6,36 @@ ignoreDirectory = [
     './montecarlo',
 ]
 
-htmlToCheck = []
+htmlToCheck = [
+    './swissmetro/05normalMixture_allAlgos_CFSQP.html',
+    './swissmetro/05normalMixture_allAlgos_LS-BFGS.html',
+    './swissmetro/05normalMixture_allAlgos_Line search.html',
+    './swissmetro/05normalMixture_allAlgos_Simple bounds BFGS fCG.html',
+    './swissmetro/05normalMixture_allAlgos_Simple bounds BFGS iCG.html',
+    './swissmetro/05normalMixture_allAlgos_Simple bounds Newton fCG.html',
+    './swissmetro/05normalMixture_allAlgos_Simple bounds Newton iCG.html',
+    './swissmetro/05normalMixture_allAlgos_Simple bounds hybrid fCG.html',
+    './swissmetro/05normalMixture_allAlgos_Simple bounds hybrid iCG.html',
+    './swissmetro/05normalMixture_allAlgos_TR-BFGS.html',
+    './swissmetro/05normalMixture_allAlgos_Trust region (cg).html',
+    './swissmetro/05normalMixture_allAlgos_Trust region (dogleg).html',
+    './swissmetro/05normalMixture_allAlgos_scipy.html',
+    './swissmetro/01logit_allAlgos_LS-BFGS.html',
+    './swissmetro/01logit_allAlgos_Line search.html',
+    './swissmetro/01logit_allAlgos_Simple bounds BFGS.html',
+    './swissmetro/01logit_allAlgos_Simple bounds Newton.html',
+    './swissmetro/01logit_allAlgos_Simple bounds hybrid.html',
+    './swissmetro/01logit_allAlgos_TR-BFGS.html',
+    './swissmetro/01logit_allAlgos_Trust region (cg).html',
+    './swissmetro/01logit_allAlgos_Trust region (dogleg).html',
+    './swissmetro/01logit_allAlgos_scipy.html',
+    './swissmetro/09nested_allAlgos_Simple bounds BFGS.html',
+    './swissmetro/09nested_allAlgos_Simple bounds Newton.html',
+    './swissmetro/09nested_allAlgos_Simple bounds hybrid 20%.html',
+    './swissmetro/09nested_allAlgos_Simple bounds hybrid 50%.html',
+    './swissmetro/09nested_allAlgos_Simple bounds hybrid 80%.html',
+    './swissmetro/09nested_allAlgos_scipy.html',
+]
 htmlNotNeed = [
     './vns/runknapsack.html',
     './vns/knapsack.html',
