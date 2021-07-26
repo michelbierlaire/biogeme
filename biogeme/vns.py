@@ -377,8 +377,8 @@ class paretoClass:
         if S_dominated:
             return False
         self.pareto[elem] = 1
-        for k in D_dominating:
-            self.pareto.pop(k)
+        self.pareto = {k: v for k, v in self.pareto.items()
+                       if k not in D_dominating}
         self.removed |= D_dominating
         return True
 
@@ -510,11 +510,11 @@ def vns(
         continueWithSolution = True
         n = 0
         while continueWithSolution:
-            logger.debug(f'**** Size of pareto set: {len(thePareto.pareto)}')
             logger.general(f'----> Neighbor {n} of size {neighborhoodSize}')
             aNeighbor, numberOfChanges = problem.generateNeighbor(
                 solutionToImprove, neighborhoodSize
             )
+
             n += 1
             if n == numberOfNeighbors:
                 thePareto.changeNeighborhood(solutionToImprove)
@@ -525,6 +525,7 @@ def vns(
                     f'Neighbor of size {neighborhoodSize}: '
                     f'generation failed'
                 )
+                thePareto.changeNeighborhood(solutionToImprove)
                 continueWithSolution = False
             elif aNeighbor in thePareto.considered:
                 problem.neighborRejected(solutionToImprove, aNeighbor)
@@ -532,11 +533,11 @@ def vns(
                     f'*** Neighbor of size {neighborhoodSize}:'
                     f' already considered***'
                 )
+                thePareto.changeNeighborhood(solutionToImprove)
             else:
                 problem.evaluate(aNeighbor)
                 valid, why = problem.isValid(aNeighbor)
                 if valid:
-
                     if thePareto.add(aNeighbor):
                         logger.general('*** New pareto solution: ')
                         logger.detailed(problem.describe(aNeighbor))
@@ -550,12 +551,14 @@ def vns(
                             f'{neighborhoodSize}: dominated***'
                         )
                         problem.neighborRejected(solutionToImprove, aNeighbor)
+                        thePareto.changeNeighborhood(solutionToImprove)
                 else:
                     logger.general(
                         f'*** Neighbor of size {neighborhoodSize}'
                         f' invalid: {why}***'
                     )
                     problem.neighborRejected(solutionToImprove, aNeighbor)
+                    thePareto.changeNeighborhood(solutionToImprove)
 
         solutionToImprove, neighborhoodSize = thePareto.select()
 
