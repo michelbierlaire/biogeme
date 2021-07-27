@@ -7,10 +7,27 @@ Welcome to Biogeme's documentation!
 ***********************************
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-   biogeme.rst
+  :maxdepth: 2
+  :caption: Contents:
+	     
+  algorithms.rst
+  assisted.rst
+  biogeme.rst
+  database.rst
+  distributions.rst
+  draws.rst
+  exceptions.rst
+  expressions.rst
+  filenames.rst
+  loglikelihood.rst
+  messaging.rst
+  models.rst
+  optimization.rst
+  results.rst
+  singleton.rst
+  tools.rst
+  version.rst
+  vns.rst
 
 Indices and tables
 ==================
