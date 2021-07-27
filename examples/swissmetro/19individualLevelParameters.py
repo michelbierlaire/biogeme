@@ -89,3 +89,8 @@ else:
     sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
     with open(pickleFile, 'wb') as f:
         pickle.dump(sim, f)
+
+htmlFile = '19individualLevelParameters.html'
+with open(htmlFile, 'w') as h:
+    print(sim.to_html(), file=h)
+print(f'Simulated values available in {htmlFile}')
