@@ -1,0 +1,17 @@
+sbatch 01simpleIntegral.run
+sbatch 02simpleIntegral.run
+sbatch 03antithetic.run
+sbatch 03antitheticExplicit.run
+sbatch 04normalMixtureNumerical.run
+sbatch 05normalMixtureMonteCarlo.run
+sbatch 06estimationIntegral.run
+sbatch 07estimationMonteCarlo.run
+sbatch 07estimationMonteCarlo_500.run
+sbatch 07estimationMonteCarlo_anti.run
+sbatch 07estimationMonteCarlo_anti_500.run
+sbatch 07estimationMonteCarlo_halton.run
+sbatch 07estimationMonteCarlo_halton_500.run
+sbatch 07estimationMonteCarlo_mlhs.run
+sbatch 07estimationMonteCarlo_mlhs_500.run
+sbatch 07estimationMonteCarlo_mlhs_anti.run
+sbatch 07estimationMonteCarlo_mlhs_anti_500.run
