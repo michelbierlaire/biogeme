@@ -1,0 +1,1651 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>biogeme.biogeme &mdash; Biogeme 3.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Biogeme
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>biogeme.biogeme</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for biogeme.biogeme</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Implementation of the main Biogeme class that combines the database</span>
+<span class="sd">and the model specification.</span>
+
+<span class="sd">:author: Michel Bierlaire</span>
+<span class="sd">:date: Tue Mar 26 16:45:15 2019</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Too constraining</span>
+<span class="c1"># pylint: disable=invalid-name,</span>
+<span class="c1"># pylint: disable=too-many-arguments, too-many-locals,</span>
+<span class="c1"># pylint: disable=too-many-statements, too-many-branches,</span>
+<span class="c1"># pylint: disable=too-many-instance-attributes, too-many-lines,</span>
+<span class="c1"># pylint: disable=too-many-function-args, invalid-unary-operand-type</span>
+
+
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+
+<span class="kn">import</span> <span class="nn">biogeme.database</span> <span class="k">as</span> <span class="nn">db</span>
+<span class="kn">import</span> <span class="nn">biogeme.cbiogeme</span> <span class="k">as</span> <span class="nn">cb</span>
+<span class="kn">import</span> <span class="nn">biogeme.expressions</span> <span class="k">as</span> <span class="nn">eb</span>
+<span class="kn">import</span> <span class="nn">biogeme.results</span> <span class="k">as</span> <span class="nn">res</span>
+<span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
+<span class="kn">import</span> <span class="nn">biogeme.filenames</span> <span class="k">as</span> <span class="nn">bf</span>
+<span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
+<span class="kn">import</span> <span class="nn">biogeme.optimization</span> <span class="k">as</span> <span class="nn">opt</span>
+<span class="kn">from</span> <span class="nn">biogeme</span> <span class="kn">import</span> <span class="n">tools</span>
+<span class="kn">from</span> <span class="nn">biogeme.algorithms</span> <span class="kn">import</span> <span class="n">functionToMinimize</span>
+
+
+<span class="c1"># import yep</span>
+
+
+<div class="viewcode-block" id="BIOGEME"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME">[docs]</a><span class="k">class</span> <span class="nc">BIOGEME</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Main class that combines the database and the model specification.</span>
+
+<span class="sd">    It works in two modes: estimation and simulation.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BIOGEME.__init__"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">database</span><span class="p">,</span>
+        <span class="n">formulas</span><span class="p">,</span>
+        <span class="n">userNotes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">numberOfThreads</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">skipAudit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">removeUnusedVariables</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">displayUsedVariables</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">suggestScales</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">missingData</span><span class="o">=</span><span class="mi">99999</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor</span>
+
+<span class="sd">        :param database: choice data.</span>
+<span class="sd">        :type database: :class:`biogeme.database.Database`</span>
+
+<span class="sd">        :param formulas: expression or dictionary of expressions that</span>
+<span class="sd">             define the model specification.  The concept is that each</span>
+<span class="sd">             expression is applied to each entry of the database. The</span>
+<span class="sd">             keys of the dictionary allow to provide a name to each</span>
+<span class="sd">             formula.  In the estimation mode, two formulas are</span>
+<span class="sd">             needed, with the keys &#39;loglike&#39; and &#39;weight&#39;. If only one</span>
+<span class="sd">             formula is provided, it is associated with the label</span>
+<span class="sd">             &#39;loglike&#39;. If no formula is labeled &#39;weight&#39;, the weight</span>
+<span class="sd">             of each piece of data is supposed to be 1.0. In the</span>
+<span class="sd">             simulation mode, the labels of each formula are used as</span>
+<span class="sd">             labels of the resulting database.</span>
+<span class="sd">        :type formulas: :class:`biogeme.expressions.Expression`, or</span>
+<span class="sd">                        dict(:class:`biogeme.expressions.Expression`)</span>
+
+<span class="sd">        :param userNotes: these notes will be included in the report file.</span>
+<span class="sd">        :type userNotes: str</span>
+
+<span class="sd">        :param numberOfThreads: multi-threading can be used for</span>
+<span class="sd">            estimation. This parameter defines the number of threads</span>
+<span class="sd">            to be used. If the parameter is set to None, the number of</span>
+<span class="sd">            available threads is calculated using</span>
+<span class="sd">            cpu_count(). Ignored in simulation mode. Defaults: None.</span>
+<span class="sd">        :type numberOfThreads:  int</span>
+
+<span class="sd">        :param numberOfDraws: number of draws used for Monte-Carlo</span>
+<span class="sd">            integration. Default: 1000.</span>
+<span class="sd">        :type numberOfDraws: int</span>
+
+<span class="sd">        :param seed: seed used for the pseudo-random number</span>
+<span class="sd">            generation. It is useful only when each run should</span>
+<span class="sd">            generate the exact same result. If None, a new seed is</span>
+<span class="sd">            used at each run. Default: None.</span>
+<span class="sd">        :type seed: int</span>
+
+<span class="sd">        :param skipAudit: if True, does not check the validity of the</span>
+<span class="sd">            formulas. It may save significant amount of time for large</span>
+<span class="sd">            models and large data sets. Default: False.</span>
+<span class="sd">        :type skipAudit: bool</span>
+
+<span class="sd">        :param removeUnusedVariables: if True, all variables not used</span>
+<span class="sd">            in the expression are removed from the database. Default:</span>
+<span class="sd">            True.</span>
+<span class="sd">        :type removeUnusedVariables: bool</span>
+
+<span class="sd">        :param displayUsedVariables: if True, displays all the</span>
+<span class="sd">            variables used in the formulas. Default: False.</span>
+<span class="sd">        :type displayUsedVariables: bool</span>
+
+<span class="sd">        :param suggestScales: if True, Biogeme suggests the scaling of</span>
+<span class="sd">            the variables in the database. Default: True.</span>
+<span class="sd">            See also :func:`biogeme.database.Database.suggestScaling`</span>
+
+<span class="sd">        :type suggestScales: bool.</span>
+
+<span class="sd">        :param missingData: if one variable has this value, it is</span>
+<span class="sd">           assumed that a data is missing and an exception will be</span>
+<span class="sd">           triggered. Default: 99999.</span>
+<span class="sd">        :type missingData: float</span>
+
+<span class="sd">        :raise biogemeError: an audit of the formulas is performed.</span>
+<span class="sd">           If a formula has issues, an error is detected and an</span>
+<span class="sd">           exception is raised.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;Logger that controls the output of</span>
+<span class="sd">        messages to the screen and log file.</span>
+<span class="sd">        Type: class :class:`biogeme.messaging.bioMessage`.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skipAudit</span><span class="p">:</span>
+            <span class="n">database</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="kc">True</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+            <span class="n">listOfErrors</span><span class="p">,</span> <span class="n">listOfWarnings</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">_audit</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">listOfWarnings</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfWarnings</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">listOfErrors</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfErrors</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfErrors</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loglikeName</span> <span class="o">=</span> <span class="s1">&#39;loglike&#39;</span>
+        <span class="sd">&quot;&quot;&quot; Keyword used for the name of the loglikelihood formula.</span>
+<span class="sd">        Default: &#39;loglike&#39;&quot;&quot;&quot;</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">weightName</span> <span class="o">=</span> <span class="s1">&#39;weight&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Keyword used for the name of the weight formula. Default: &#39;weight&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelName</span> <span class="o">=</span> <span class="s1">&#39;biogemeModelDefaultName&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Name of the model. Default: &#39;biogemeModelDefaultName&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monteCarlo</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot; ``monteCarlo`` is True if one of the expressions involves a</span>
+<span class="sd">        Monte-Carlo integration.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveIterations</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot;If True, the current iterate is saved after each iteration, in a</span>
+<span class="sd">        file named ``__[modelName].iter``, where ``[modelName]`` is the</span>
+<span class="sd">        name given to the model. If such a file exists, the starting</span>
+<span class="sd">        values for the estimation are replaced by the values saved in</span>
+<span class="sd">        the file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">formulas</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">formulas</span><span class="p">,</span> <span class="n">eb</span><span class="o">.</span><span class="n">Expression</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Expression </span><span class="si">{</span><span class="n">formulas</span><span class="si">}</span><span class="s1"> is not of type &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;biogeme.expressions.Expression. &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;It is of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">formulas</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="o">=</span> <span class="n">formulas</span>
+            <span class="sd">&quot;&quot;&quot; Object of type :class:`biogeme.expressions.Expression`</span>
+<span class="sd">            calculating the formula for the loglikelihood</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="sd">&quot;&quot;&quot; Object of type :class:`biogeme.expressions.Expression`</span>
+<span class="sd">            calculating the weight of each observation in the</span>
+<span class="sd">            sample.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">loglikeName</span><span class="p">:</span> <span class="n">formulas</span><span class="p">})</span>
+            <span class="sd">&quot;&quot;&quot; Dictionary containing Biogeme formulas of type</span>
+<span class="sd">            :class:`biogeme.expressions.Expression`.</span>
+<span class="sd">            The keys are the names of the formulas.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Verify the validity of the formulas</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">formulas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">eb</span><span class="o">.</span><span class="n">Expression</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Expression for &quot;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&quot; is not of type &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;biogeme.expressions.Expression. &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;It is of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="o">=</span> <span class="n">formulas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loglikeName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">formulas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">weightName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span> <span class="o">=</span> <span class="n">formulas</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span> <span class="c1">#: :class:`biogeme.database.Database` object</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">userNotes</span> <span class="o">=</span> <span class="n">userNotes</span> <span class="c1">#: User notes</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">missingData</span> <span class="o">=</span> <span class="n">missingData</span> <span class="c1">#: code for missing data</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastSample</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; keeps track of the sample of data used to calculate the</span>
+<span class="sd">        stochastic gradient / hessian</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogLike</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Init value of the likelihood function</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nullLogLike</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Log likelihood of the null model</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span> <span class="c1">#: set of variables used in the formulas.</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">myvars</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">setOfVariables</span><span class="p">()</span>
+            <span class="n">missingVariables</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">myvars</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">missingVariables</span><span class="p">:</span>
+                <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Variables in formula </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> missing in the database: &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">missingVariables</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span> <span class="o">|=</span> <span class="n">f</span><span class="o">.</span><span class="n">setOfVariables</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">displayUsedVariables</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;List of used variables: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">removeUnusedVariables</span><span class="p">:</span>
+            <span class="n">unusedVariables</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span>
+            <span class="p">)</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Remove </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unusedVariables</span><span class="p">)</span><span class="si">}</span><span class="s1"> &#39;</span>
+                <span class="s1">&#39;unused variables from the database &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;as only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span><span class="p">)</span><span class="si">}</span><span class="s1"> are used.&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+                <span class="n">columns</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">unusedVariables</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">suggestScales</span><span class="p">:</span>
+            <span class="n">suggestedScales</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">suggestScaling</span><span class="p">(</span>
+                <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">usedVariables</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">suggestedScales</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+                    <span class="s1">&#39;It is suggested to scale the following variables.&#39;</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">suggestedScales</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                    <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Multiply </span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Column&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> by</span><span class="se">\t</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Scale&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1"> &#39;</span>
+                        <span class="s1">&#39;because the largest (abs) value is</span><span class="se">\t</span><span class="s1">&#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Largest&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s1">&#39;To remove this feature, set the parameter &#39;</span>
+                    <span class="s1">&#39;suggestScales to False when creating the &#39;</span>
+                    <span class="s1">&#39;BIOGEME object.&#39;</span>
+                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skipAudit</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_audit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepareDatabaseForFormula</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepareLiterals</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theC</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">pyBiogeme</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setPanel</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setDataMap</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">individualMap</span><span class="p">)</span>
+        <span class="c1"># Transfer the data to the C++ formula</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setMissingData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missingData</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">generateHtml</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot; Boolean variable, True if the HTML file with the results must</span>
+<span class="sd">        be generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">generatePickle</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot; Boolean variable, True if the pickle file with the results must</span>
+<span class="sd">        be generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">columnForBatchSamplingWeights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; Name of the column defining weights for batch sampling in</span>
+<span class="sd">        stochastic optimization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfThreads</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mp</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="k">if</span> <span class="n">numberOfThreads</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">numberOfThreads</span>
+        <span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot; Number of threads used for parallel computing. Default: the number</span>
+<span class="sd">        of available CPU.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generateDraws</span><span class="p">(</span><span class="n">numberOfDraws</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monteCarlo</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setDraws</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">theDraws</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawsProcessingTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="sd">&quot;&quot;&quot; Time needed to generate the draws. &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">loglikeSignatures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="o">.</span><span class="n">getSignature</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot; Internal signature of the formula for the loglikelihood.&quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setExpressions</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">loglikeSignatures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberOfThreads</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">weightSignatures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">getSignature</span><span class="p">()</span>
+                <span class="sd">&quot;&quot;&quot; Internal signature of the formula for the weight.&quot;&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setExpressions</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">loglikeSignatures</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">numberOfThreads</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">weightSignatures</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; Time needed to calculate the bootstrap standard errors&quot;&quot;&quot;</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_results</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Results of the bootstrap calculation.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationMessages</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; Information provided by the optimization algorithm</span>
+<span class="sd">        after completion.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algoParameters</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot; Parameters to be transferred to the optimization algorithm</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Optimization algorithm</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestIteration</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Store the best iteration found so far.</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_saveIterationsFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The name of the file where the iterations are saved.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;__</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="si">}</span><span class="s1">.iter&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_audit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Each expression provides an audit function, that verifies its</span>
+<span class="sd">        validity. Each formula is audited, and the list of errors</span>
+<span class="sd">        and warnings reported.</span>
+
+<span class="sd">        :raise biogemeError: if the formula has issues, an error is</span>
+<span class="sd">                             detected and an exception is raised.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">listOfErrors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">listOfWarnings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">err</span><span class="p">,</span> <span class="n">war</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">audit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">)</span>
+            <span class="n">listOfErrors</span> <span class="o">+=</span> <span class="n">err</span>
+            <span class="n">listOfWarnings</span> <span class="o">+=</span> <span class="n">war</span>
+        <span class="k">if</span> <span class="n">listOfWarnings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfWarnings</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">listOfErrors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfErrors</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfErrors</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_generateDraws</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If Monte-Carlo integration is involved in one of the formulas, this</span>
+<span class="sd">           function instructs the database to generate the draws.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            numberOfDraws: self explanatory (int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Number of draws for Monte-Carlo integration.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfDraws</span> <span class="o">=</span> <span class="n">numberOfDraws</span>
+        <span class="c1"># Draws</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monteCarlo</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allDraws</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">monteCarlo</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">generateDraws</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">allDraws</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawNames</span><span class="p">,</span> <span class="n">numberOfDraws</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_prepareDatabaseForFormula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Prepare the dataset.</span>
+        <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastSample</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="c1"># We continue to use the full data set. Nothing to be done.</span>
+                <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastSample</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">useFullSample</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check if the sample size is valid</span>
+            <span class="k">if</span> <span class="n">sample</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sample</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;The value of the parameter sample must be &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;strictly between 0.0 and 1.0,&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; and not </span><span class="si">{</span><span class="n">sample</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sample</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">useFullSample</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Use </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">sample</span><span class="si">}</span><span class="s1">% of the data.&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sampleIndividualMapWithoutReplacement</span><span class="p">(</span>
+                        <span class="n">sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnForBatchSamplingWeights</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sampleWithoutReplacement</span><span class="p">(</span>
+                        <span class="n">sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnForBatchSamplingWeights</span>
+                    <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastSample</span> <span class="o">=</span> <span class="n">sample</span>
+
+        <span class="c1"># Rebuild the map for panel data</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">buildPanelMap</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BIOGEME.getBoundsOnBeta"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.getBoundsOnBeta">[docs]</a>    <span class="k">def</span> <span class="nf">getBoundsOnBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">betaName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the bounds on the parameter as defined by the user.</span>
+
+<span class="sd">        :param betaName: name of the parameter</span>
+<span class="sd">        :type betaName: string</span>
+<span class="sd">        :return: lower bound, upper bound</span>
+<span class="sd">        :rtype: tuple</span>
+<span class="sd">        :raises biogemeError: if the name of the parameter is not found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">betaName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown parameter </span><span class="si">{</span><span class="n">betaName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">betaName</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_prepareLiterals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract from the formulas the literals (parameters,</span>
+<span class="sd">        variables, random variables) and decide a numbering convention.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">collectionOfFormulas</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="n">variableNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">elementaryExpressionIndex</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allFreeBetas</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allFixedBetas</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaNames</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allRandomVariables</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">randomVariableNames</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allDraws</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawNames</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">eb</span><span class="o">.</span><span class="n">defineNumberingOfElementaryExpressions</span><span class="p">(</span>
+            <span class="n">collectionOfFormulas</span><span class="p">,</span> <span class="n">variableNames</span>
+        <span class="p">)</span>
+
+        <span class="c1"># List of tuples (ell, u) containing the lower and upper bounds</span>
+        <span class="c1"># for each free parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allFreeBetas</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allFreeBetas</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">ub</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># List of ids of the free beta parameters (those to be estimated)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">betaIds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">)))</span>
+
+        <span class="c1"># List of initial values of the free beta parameters (those to be</span>
+        <span class="c1"># estimated)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allFreeBetas</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">initValue</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span>
+        <span class="p">]</span>
+        <span class="c1"># Values of the fixed parameters (not estimated).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaValues</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allFixedBetas</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">initValue</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaNames</span>
+        <span class="p">]</span>
+
+<div class="viewcode-block" id="BIOGEME.calculateNullLoglikelihood"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.calculateNullLoglikelihood">[docs]</a>    <span class="k">def</span> <span class="nf">calculateNullLoglikelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">avail</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the log likelihood of the null model that predicts equal</span>
+<span class="sd">        probability for each alternative</span>
+
+<span class="sd">        :param avail: list of expressions to evaluate the</span>
+<span class="sd">                      availability conditions for each alternative.</span>
+<span class="sd">        :type avail: list of :class:`biogeme.expressions.Expression`</span>
+
+<span class="sd">        :return: value of the log likelihood</span>
+<span class="sd">        :rtype: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="o">-</span><span class="n">eb</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">eb</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">avail</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nullLogLike</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sumFromDatabase</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nullLogLike</span></div>
+
+<div class="viewcode-block" id="BIOGEME.calculateInitLikelihood"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.calculateInitLikelihood">[docs]</a>    <span class="k">def</span> <span class="nf">calculateInitLikelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the value of the log likelihood function</span>
+
+<span class="sd">        The default values of the parameters are used.</span>
+
+<span class="sd">        :return: value of the log likelihood.</span>
+<span class="sd">        :rtype: float.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Value of the loglikelihood for the default values of the parameters.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogLike</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihood</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">initLogLike</span></div>
+
+<div class="viewcode-block" id="BIOGEME.calculateLikelihood"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.calculateLikelihood">[docs]</a>    <span class="k">def</span> <span class="nf">calculateLikelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the value of the log likelihood function</span>
+
+<span class="sd">        :param x: vector of values for the parameters.</span>
+<span class="sd">        :type x: list(float)</span>
+
+<span class="sd">        :param scaled: if True, the value is divided by the number of</span>
+<span class="sd">                       observations used to calculate it. In this</span>
+<span class="sd">                       case, the values with different sample sizes</span>
+<span class="sd">                       are comparable. Default: True</span>
+<span class="sd">        :type scaled: bool</span>
+
+<span class="sd">        :param batch: if not None, calculates the likelihood on a</span>
+<span class="sd">                       random sample of the data. The value of the</span>
+<span class="sd">                       parameter must be strictly between 0 and 1, and</span>
+<span class="sd">                       represents the share of the data that will be</span>
+<span class="sd">                       used. Default: None</span>
+<span class="sd">        :type batch: float</span>
+
+<span class="sd">        :return: the calculated value of the log likelihood</span>
+<span class="sd">        :rtype: float.</span>
+
+<span class="sd">        :raises ValueError: if the length of the list x is incorrect.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">):</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Input vector must be of length &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">)</span><span class="si">}</span><span class="s1"> and &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;not </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepareDatabaseForFormula</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">calculateLikelihood</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaValues</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Log likelihood (N = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">()</span><span class="si">}</span><span class="s1">): </span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scaled</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="BIOGEME.calculateLikelihoodAndDerivatives"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">[docs]</a>    <span class="k">def</span> <span class="nf">calculateLikelihoodAndDerivatives</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">scaled</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the value of the log likelihood function</span>
+<span class="sd">        and its derivatives.</span>
+
+<span class="sd">        :param x: vector of values for the parameters.</span>
+<span class="sd">        :type x: list(float)</span>
+
+<span class="sd">        :param scaled: if True, the results are devided by the number of</span>
+<span class="sd">            observations.</span>
+<span class="sd">        :type scaled: bool</span>
+
+<span class="sd">        :param hessian: if True, the hessian is calculated. Default: False.</span>
+<span class="sd">        :type hessian: bool</span>
+
+<span class="sd">        :param bhhh: if True, the BHHH matrix is calculated. Default: False.</span>
+<span class="sd">        :type bhhh: bool</span>
+
+<span class="sd">        :param batch: if not None, calculates the likelihood on a</span>
+<span class="sd">                       random sample of the data. The value of the</span>
+<span class="sd">                       parameter must be strictly between 0 and 1, and</span>
+<span class="sd">                       represents the share of the data that will be</span>
+<span class="sd">                       used. Default: None</span>
+<span class="sd">        :type batch: float</span>
+
+
+<span class="sd">        :return: f, g, h, bh where</span>
+
+<span class="sd">                - f is the value of the function (float)</span>
+<span class="sd">                - g is the gradient (numpy.array)</span>
+<span class="sd">                - h is the hessian (numpy.array)</span>
+<span class="sd">                - bh is the BHHH matrix (numpy.array)</span>
+
+<span class="sd">        :rtype: tuple  float, numpy.array, numpy.array, numpy.array</span>
+
+<span class="sd">        :raises ValueError: if the length of the list x is incorrect</span>
+
+<span class="sd">        :raises biogemeError: if the norm of the gradient is not finite, an</span>
+<span class="sd">            error is raised.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">):</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Input vector must be of length &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">)</span><span class="si">}</span><span class="s1"> and not </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepareDatabaseForFormula</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span>
+
+        <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">])</span>
+        <span class="n">bh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">])</span>
+
+        <span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">bh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">calculateLikelihoodAndDerivatives</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaIds</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">bh</span><span class="p">,</span> <span class="n">hessian</span><span class="p">,</span> <span class="n">bhhh</span>
+        <span class="p">)</span>
+
+        <span class="n">hmsg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">hessian</span><span class="p">:</span>
+            <span class="n">hmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Hessian norm:  </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="si">:</span><span class="s1">10.1g</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">bhhhmsg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">bhhh</span><span class="p">:</span>
+            <span class="n">bhhhmsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;BHHH norm:  </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">bh</span><span class="p">)</span><span class="si">:</span><span class="s1">10.1g</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">gradnorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Log likelihood (N = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">()</span><span class="si">}</span><span class="s1">): </span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; Gradient norm: </span><span class="si">{</span><span class="n">gradnorm</span><span class="si">:</span><span class="s1">10.1g</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">hmsg</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">bhhhmsg</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">gradnorm</span><span class="p">):</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;The norm of the gradient is </span><span class="si">{</span><span class="n">gradnorm</span><span class="si">}</span><span class="s1">: g=</span><span class="si">{</span><span class="n">g</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveIterations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestIteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bestIteration</span> <span class="o">=</span> <span class="n">f</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestIteration</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveIterationsFileName</span><span class="p">(),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">pf</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">pf</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scaled</span><span class="p">:</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">N</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sample size is </span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">f</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">g</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bh</span><span class="p">)</span> <span class="o">/</span> <span class="n">N</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">h</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">bh</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BIOGEME.likelihoodFiniteDifferenceHessian"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.likelihoodFiniteDifferenceHessian">[docs]</a>    <span class="k">def</span> <span class="nf">likelihoodFiniteDifferenceHessian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the hessian of the log likelihood function using finite</span>
+<span class="sd">        differences.</span>
+
+<span class="sd">        May be useful when the analytical hessian has numerical issues.</span>
+
+<span class="sd">        :param x: vector of values for the parameters.</span>
+<span class="sd">        :type x: list(float)</span>
+
+<span class="sd">        :return: finite differences approximation of the hessian.</span>
+<span class="sd">        :rtype: numpy.array</span>
+
+<span class="sd">        :raises ValueError: if the length of the list x is incorrect</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">theFunction</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihoodAndDerivatives</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tools</span><span class="o">.</span><span class="n">findiff_H</span><span class="p">(</span><span class="n">theFunction</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BIOGEME.checkDerivatives"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.checkDerivatives">[docs]</a>    <span class="k">def</span> <span class="nf">checkDerivatives</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Verifies the implementation of the derivatives.</span>
+
+<span class="sd">        It compares the analytical version with the finite differences</span>
+<span class="sd">        approximation.</span>
+
+<span class="sd">        :param verbose: if True, the comparisons are reported. Default: False.</span>
+<span class="sd">        :type verbose: bool</span>
+
+<span class="sd">        :rtype: tuple.</span>
+
+<span class="sd">        :return: f, g, h, gdiff, hdiff where</span>
+
+<span class="sd">            - f is the value of the function,</span>
+<span class="sd">            - g is the analytical gradient,</span>
+<span class="sd">            - h is the analytical hessian,</span>
+<span class="sd">            - gdiff is the difference between the analytical and the</span>
+<span class="sd">              finite differences gradient,</span>
+<span class="sd">            - hdiff is the difference between the analytical and the</span>
+<span class="sd">              finite differences hessian,</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">theFunction</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Wrapper function to use tools.checkDerivatives&quot;&quot;&quot;</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihoodAndDerivatives</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">g</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">tools</span><span class="o">.</span><span class="n">checkDerivatives</span><span class="p">(</span>
+            <span class="n">theFunction</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BIOGEME.loadSavedIteration"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.loadSavedIteration">[docs]</a>    <span class="k">def</span> <span class="nf">loadSavedIteration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;__savedIterations.txt&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Obsolete function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;The function loadSavedIterations is obsolete. It is &#39;</span>
+            <span class="s1">&#39;sufficient to set the parameter saveIterations to True &#39;</span>
+            <span class="s1">&#39;or False to control the process. Therefore, there &#39;</span>
+            <span class="s1">&#39;is no need to call the function loadSavedIteration anymore.&#39;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_loadSavedIteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reads the values of the parameters from a text file where each line</span>
+<span class="sd">        has the form name_of_beta = value_of_beta, and use these values in all</span>
+<span class="sd">        formulas.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveIterationsFileName</span><span class="p">()</span>
+        <span class="n">betas</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fp</span><span class="p">:</span>
+                    <span class="n">ell</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
+                    <span class="n">betas</span><span class="p">[</span><span class="n">ell</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ell</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parameter values restored from </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Cannot read file </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">. Statement is ignored.&#39;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="BIOGEME.setRandomInitValues"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.setRandomInitValues">[docs]</a>    <span class="k">def</span> <span class="nf">setRandomInitValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defaultBound</span><span class="o">=</span><span class="mf">100.0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Modifies the initial values of the parameters in all formulas,</span>
+<span class="sd">        using randomly generated values. The value is drawn from a</span>
+<span class="sd">        uniform distribution on the interval defined by the</span>
+<span class="sd">        bounds.</span>
+
+<span class="sd">        :param defaultBound: If the upper bound is missing, it is</span>
+<span class="sd">            replaced by this value. If the lower bound is missing, it is</span>
+<span class="sd">            replaced by the opposite of this value. Default: 100.</span>
+<span class="sd">        :type defaultBound: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">randomBetas</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                <span class="n">low</span><span class="o">=-</span><span class="n">defaultBound</span> <span class="k">if</span> <span class="n">beta</span><span class="o">.</span><span class="n">lb</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">beta</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span>
+                <span class="n">high</span><span class="o">=</span><span class="n">defaultBound</span> <span class="k">if</span> <span class="n">beta</span><span class="o">.</span><span class="n">ub</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">beta</span><span class="o">.</span><span class="n">ub</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">beta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allFreeBetas</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">randomBetas</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BIOGEME.changeInitValues"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.changeInitValues">[docs]</a>    <span class="k">def</span> <span class="nf">changeInitValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">betas</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Modifies the initial values of the pameters in all formula</span>
+
+<span class="sd">        :param betas: dictionary where the keys are the names of the</span>
+<span class="sd">                      parameters, and the values are the new value for</span>
+<span class="sd">                      the parameters.</span>
+<span class="sd">        :type betas: dict(string:float)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">betas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="BIOGEME.estimate"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.estimate">[docs]</a>    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bootstrap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">,</span>
+        <span class="n">algoParameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;Estimate the parameters of the model.</span>
+
+<span class="sd">        :param bootstrap: number of bootstrap resampling used to</span>
+<span class="sd">               calculate the variance-covariance matrix using</span>
+<span class="sd">               bootstrapping. If the number is 0, bootstrapping is not</span>
+<span class="sd">               applied. Default: 0.</span>
+<span class="sd">        :type bootstrap: int</span>
+
+<span class="sd">        :param algorithm: optimization algorithm to use for the</span>
+<span class="sd">               maximum likelihood estimation. Default: Biogeme&#39;s</span>
+<span class="sd">               Newton&#39;s algorithm with simple bounds.</span>
+<span class="sd">        :type algorithm: function</span>
+
+<span class="sd">        :param algoParameters: parameters to transfer to the optimization</span>
+<span class="sd">            algorithm</span>
+<span class="sd">        :type algoParameters: dict</span>
+
+<span class="sd">        :return: object containing the estimation results.</span>
+<span class="sd">        :rtype: biogeme.bioResults</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            # Create an instance of biogeme</span>
+<span class="sd">            biogeme  = bio.BIOGEME(database, logprob)</span>
+
+<span class="sd">            # Gives a name to the model</span>
+<span class="sd">            biogeme.modelName = &#39;mymodel&#39;</span>
+
+<span class="sd">            # Estimate the parameters</span>
+<span class="sd">            results = biogeme.estimate()</span>
+
+<span class="sd">        :raises biogemeError: if no expression has been provided for the</span>
+<span class="sd">            likelihood</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="s1">&#39;No log likelihood function has been specificed&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;There is no parameter to estimate&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; in the formula: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveIterations</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;*** Initial values of the parameters are &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;obtained from the file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveIterationsFileName</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loadSavedIteration</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algoParameters</span> <span class="o">=</span> <span class="n">algoParameters</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculateInitLikelihood</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestIteration</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="c1">#        yep.start(&#39;profile.out&#39;)</span>
+
+        <span class="c1">#        yep.stop()</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">)</span>
+        <span class="n">xstar</span><span class="p">,</span> <span class="n">optimizationMessages</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="c1"># Running time of the optimization algorithm</span>
+        <span class="n">optimizationMessages</span><span class="p">[</span><span class="s1">&#39;Optimization time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="c1"># Information provided by the optimization algorithm after completion.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationMessages</span> <span class="o">=</span> <span class="n">optimizationMessages</span>
+
+        <span class="n">fgHb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihoodAndDerivatives</span><span class="p">(</span>
+            <span class="n">xstar</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">fgHb</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">warning_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;Numerical problems in calculating &#39;</span>
+                <span class="s1">&#39;the analytical hessian. Finite differences&#39;</span>
+                <span class="s1">&#39; is tried instead.&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">warning_msg</span><span class="p">)</span>
+            <span class="n">finDiffHessian</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihoodFiniteDifferenceHessian</span><span class="p">(</span><span class="n">xstar</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">fgHb</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s1">&#39;Numerical problems with finite &#39;</span>
+                    <span class="s1">&#39;difference hessian as well.&#39;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fgHb</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">finDiffHessian</span><span class="p">,</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="c1"># numpy array, of size B x K,</span>
+        <span class="c1"># where</span>
+        <span class="c1">#        - B is the number of bootstrap iterations</span>
+        <span class="c1">#        - K is the number pf parameters to estimate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">bootstrap</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Re-estimate the model </span><span class="si">{</span><span class="n">bootstrap</span><span class="si">}</span><span class="s1"> times for bootstrapping&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">bootstrap</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">xstar</span><span class="p">)])</span>
+            <span class="n">hideProgress</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">temporarySilence</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">bootstrap</span><span class="p">),</span> <span class="n">disable</span><span class="o">=</span><span class="n">hideProgress</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+                    <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sampleIndividualMapWithReplacement</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setDataMap</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">sampleWithReplacement</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+                <span class="n">x_br</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">xstar</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_results</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_br</span>
+
+            <span class="c1"># Time needed to generate the bootstrap results</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">resume</span><span class="p">()</span>
+        <span class="n">rawResults</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">rawResults</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">xstar</span><span class="p">,</span> <span class="n">fgHb</span><span class="p">,</span> <span class="n">bootstrap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_results</span>
+        <span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">bioResults</span><span class="p">(</span><span class="n">rawResults</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generateHtml</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">writeHtml</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generatePickle</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">writePickle</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+<div class="viewcode-block" id="BIOGEME.quickEstimate"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.quickEstimate">[docs]</a>    <span class="k">def</span> <span class="nf">quickEstimate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">algorithm</span><span class="o">=</span><span class="n">opt</span><span class="o">.</span><span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">,</span>
+        <span class="n">algoParameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="sd">&quot;&quot;&quot;| Estimate the parameters of the model. Same as estimate, where any</span>
+<span class="sd">             extra calculation is skipped (init loglikelihood,</span>
+<span class="sd">             t-statistics, etc.)</span>
+
+<span class="sd">        :param algorithm: optimization algorithm to use for the</span>
+<span class="sd">               maximum likelihood estimation.Default: Biogeme&#39;s</span>
+<span class="sd">               Newton&#39;s algorithm with simple bounds.</span>
+<span class="sd">        :type algorithm: function</span>
+
+<span class="sd">        :param algoParameters: parameters to transfer to the optimization</span>
+<span class="sd">            algorithm</span>
+<span class="sd">        :type algoParameters: dict</span>
+
+<span class="sd">        :return: object containing the estimation results.</span>
+<span class="sd">        :rtype: biogeme.results.bioResults</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            # Create an instance of biogeme</span>
+<span class="sd">            biogeme  = bio.BIOGEME(database, logprob)</span>
+
+<span class="sd">            # Gives a name to the model</span>
+<span class="sd">            biogeme.modelName = &#39;mymodel&#39;</span>
+
+<span class="sd">            # Estimate the parameters</span>
+<span class="sd">            results = biogeme.quickEstimate()</span>
+
+<span class="sd">        :raises biogemeError: if no expression has been provided for the</span>
+<span class="sd">            likelihood</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="s1">&#39;No log likelihood function has been specificed&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;There is no parameter to estimate&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; in the formula: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithm</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">algoParameters</span> <span class="o">=</span> <span class="n">algoParameters</span>
+
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="c1">#        yep.start(&#39;profile.out&#39;)</span>
+
+        <span class="c1">#        yep.stop()</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">)</span>
+        <span class="n">xstar</span><span class="p">,</span> <span class="n">optimizationMessages</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="c1"># Running time of the optimization algorithm</span>
+        <span class="n">optimizationMessages</span><span class="p">[</span><span class="s1">&#39;Optimization time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="c1"># Information provided by the optimization algorithm after completion.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationMessages</span> <span class="o">=</span> <span class="n">optimizationMessages</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihood</span><span class="p">(</span><span class="n">xstar</span><span class="p">,</span> <span class="n">scaled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">fgHb</span> <span class="o">=</span> <span class="n">f</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">rawResults</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">rawResults</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">xstar</span><span class="p">,</span> <span class="n">fgHb</span><span class="p">,</span> <span class="n">bootstrap</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_results</span>
+        <span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">bioResults</span><span class="p">(</span><span class="n">rawResults</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+<div class="viewcode-block" id="BIOGEME.validate"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.validate">[docs]</a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimationResults</span><span class="p">,</span> <span class="n">validationData</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Perform out-of-sample validation.</span>
+
+<span class="sd">        The function performs the following tasks:</span>
+
+<span class="sd">          - each slice defines a validation set (the slice itself)</span>
+<span class="sd">            and an estimation set (the rest of the data),</span>
+<span class="sd">          - the model is re-estimated on the estimation set,</span>
+<span class="sd">          - the estimated model is applied on the validation set,</span>
+<span class="sd">          - the value of the log likelihood for each observation is reported.</span>
+
+<span class="sd">        :param estimationResults: results of the model estimation based on the</span>
+<span class="sd">            full data.</span>
+<span class="sd">        :type estimationResults: biogeme.results.bioResults</span>
+
+<span class="sd">        :param validationData: list of estimation and validation data sets</span>
+<span class="sd">        :type validationData: list(tuple(pandas.DataFrame, pandas.DataFrame))</span>
+
+<span class="sd">        :return: a list containing as many items as slices. Each item</span>
+<span class="sd">                 is the result of the simulation on the validation set.</span>
+<span class="sd">        :rtype: list(pandas.DataFrame)</span>
+
+<span class="sd">        :raises biogemeError: An error is raised if the database is structured</span>
+<span class="sd">            as panel data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="s1">&#39;Validation for panel data is not yet implemented&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">keepDatabase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
+
+        <span class="n">allSimulationResults</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">validationData</span><span class="p">:</span>
+            <span class="c1"># v[0] is the estimation data set</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Database</span><span class="p">(</span><span class="s1">&#39;Estimation data&#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">estimationResults</span><span class="o">.</span><span class="n">getBetaValues</span><span class="p">())</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimate</span><span class="p">()</span>
+            <span class="n">simulate</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Loglikelihood&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">loglike</span><span class="p">}</span>
+            <span class="n">simBiogeme</span> <span class="o">=</span> <span class="n">BIOGEME</span><span class="p">(</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">Database</span><span class="p">(</span><span class="s1">&#39;Validation data&#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">simulate</span>
+            <span class="p">)</span>
+            <span class="n">simResult</span> <span class="o">=</span> <span class="n">simBiogeme</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">getBetaValues</span><span class="p">())</span>
+            <span class="n">allSimulationResults</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simResult</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">keepDatabase</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">generatePickle</span><span class="p">:</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="si">}</span><span class="s1">_validation&#39;</span>
+            <span class="n">pickleFileName</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">getNewFileName</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s1">&#39;pickle&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickleFileName</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">allSimulationResults</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Simulation results saved in file </span><span class="si">{</span><span class="n">pickleFileName</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">allSimulationResults</span></div>
+
+<div class="viewcode-block" id="BIOGEME.optimize"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startingValues</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calls the optimization algorithm. The function self.algorithm</span>
+<span class="sd">        is called.</span>
+
+<span class="sd">        :param startingValues: starting point for the algorithm</span>
+<span class="sd">        :type startingValues: list(float)</span>
+
+<span class="sd">        :return: x, messages</span>
+
+<span class="sd">           - x is the solution generated by the algorithm,</span>
+<span class="sd">           - messages is a dictionary describing several information about the</span>
+<span class="sd">             algorithm</span>
+
+<span class="sd">        :rtype: numpay.array, dict(str:object)</span>
+
+
+<span class="sd">        :raises biogemeError: an error is raised if no algorithm is specified.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">theFunction</span> <span class="o">=</span> <span class="n">negLikelihood</span><span class="p">(</span>
+            <span class="n">like</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihood</span><span class="p">,</span>
+            <span class="n">like_deriv</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">calculateLikelihoodAndDerivatives</span><span class="p">,</span>
+            <span class="n">scaled</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">startingValues</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">startingValues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;An algorithm must be specified. The CFSQP algorithm &#39;</span>
+                <span class="s1">&#39;is not available anymore.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span>
+            <span class="n">theFunction</span><span class="p">,</span> <span class="n">startingValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">algoParameters</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+
+<div class="viewcode-block" id="BIOGEME.simulate"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.simulate">[docs]</a>    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theBetaValues</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the formulas to each row of the database.</span>
+
+<span class="sd">        :param theBetaValues: values of the parameters to be used in</span>
+<span class="sd">                the calculations. If None, the default values are</span>
+<span class="sd">                used. Default: None.</span>
+<span class="sd">        :type theBetaValues: dict(str, float)</span>
+
+<span class="sd">        :return: a pandas data frame with the simulated value. Each</span>
+<span class="sd">              row corresponds to a row in the database, and each</span>
+<span class="sd">              column to a formula.</span>
+
+<span class="sd">        :rtype: Pandas data frame</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">              # Read the estimation results from a file</span>
+<span class="sd">              results = res.bioResults(pickleFile = &#39;myModel.pickle&#39;)</span>
+<span class="sd">              # Simulate the formulas using the nominal values</span>
+<span class="sd">              simulatedValues = biogeme.simulate(betaValues)</span>
+
+<span class="sd">        :raises biogemeError: if the number of parameters is incorrect</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;Simulation for panel data is not yet&#39;</span>
+                <span class="s1">&#39; implemented. Remove the &quot;panel&quot; &#39;</span>
+                <span class="s1">&#39;statement to simulate each observation.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">theBetaValues</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">betaValues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theBetaValues</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s1">&#39;Deprecated. A dictionary must be provided. &#39;</span>
+                    <span class="s1">&#39;It can be obtained from results.getBetaValues()&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">theBetaValues</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parameter </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> not present in the model&#39;</span><span class="p">)</span>
+            <span class="n">betaValues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">theBetaValues</span><span class="p">:</span>
+                    <span class="n">betaValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theBetaValues</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Simulation: initial value of </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> not provided.&#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">betaValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">formulas</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">getSignature</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">simulateSeveralFormulas</span><span class="p">(</span>
+            <span class="n">formulas</span><span class="p">,</span>
+            <span class="n">betaValues</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaValues</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">numberOfThreads</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">result</span><span class="p">):</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="BIOGEME.oldsimulate"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.oldsimulate">[docs]</a>    <span class="k">def</span> <span class="nf">oldsimulate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theBetaValues</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Applies the formulas to each row of the database. This is the old</span>
+<span class="sd">        implementation. To be removed in future versions.</span>
+
+<span class="sd">        :param theBetaValues: values of the parameters to be used in</span>
+<span class="sd">                the calculations. If None, the default values are</span>
+<span class="sd">                used. Default: None.</span>
+<span class="sd">        :type theBetaValues: dict(str, float)</span>
+
+<span class="sd">        :return: a pandas data frame with the simulated value. Each</span>
+<span class="sd">              row corresponds to a row in the database, and each</span>
+<span class="sd">              column to a formula.</span>
+
+<span class="sd">        :rtype: Pandas data frame</span>
+
+<span class="sd">        :raises biogemeError: if the number of parameters is incorrect</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;Simulation for panel data is not yet&#39;</span>
+                <span class="s1">&#39; implemented. Remove the &quot;panel&quot; &#39;</span>
+                <span class="s1">&#39;statement to simulate each observation.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">theBetaValues</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">betaValues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">theBetaValues</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s1">&#39;Deprecated. A dictionary must be provided. &#39;</span>
+                    <span class="s1">&#39;It can be obtained from results.getBetaValues()&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">theBetaValues</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parameter </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> not present in the model&#39;</span><span class="p">)</span>
+            <span class="n">betaValues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freeBetaNames</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">theBetaValues</span><span class="p">:</span>
+                    <span class="n">betaValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theBetaValues</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Simulation: initial value of </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> not provided.&#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">betaValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">betaInitValues</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Simulate </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">getSignature</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">theC</span><span class="o">.</span><span class="n">simulateFormula</span><span class="p">(</span>
+                <span class="n">signature</span><span class="p">,</span> <span class="n">betaValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixedBetaValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">data</span>
+            <span class="p">)</span>
+            <span class="n">output</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="BIOGEME.confidenceIntervals"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.confidenceIntervals">[docs]</a>    <span class="k">def</span> <span class="nf">confidenceIntervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">betaValues</span><span class="p">,</span> <span class="n">intervalSize</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate confidence intervals on the simulated quantities</span>
+
+
+<span class="sd">        :param betaValues: array of parameters values to be used in</span>
+<span class="sd">               the calculations. Typically, it is a sample drawn from</span>
+<span class="sd">               a distribution.</span>
+<span class="sd">        :type betaValues: list(dict(str: float))</span>
+
+<span class="sd">        :param intervalSize: size of the reported confidence interval,</span>
+<span class="sd">                    in percentage. If it is denoted by s, the interval</span>
+<span class="sd">                    is calculated for the quantiles (1-s)/2 and</span>
+<span class="sd">                    (1+s)/2. The default (0.9) corresponds to</span>
+<span class="sd">                    quantiles for the confidence interval [0.05, 0.95].</span>
+<span class="sd">        :type intervalSize: float</span>
+
+<span class="sd">        :return: two pandas data frames &#39;left&#39; and &#39;right&#39; with the</span>
+<span class="sd">            same dimensions. Each row corresponds to a row in the</span>
+<span class="sd">            database, and each column to a formula. &#39;left&#39; contains the</span>
+<span class="sd">            left value of the confidence interval, and &#39;right&#39; the right</span>
+<span class="sd">            value</span>
+
+<span class="sd">            Example::</span>
+
+<span class="sd">                # Read the estimation results from a file</span>
+<span class="sd">                results = res.bioResults(pickleFile = &#39;myModel.pickle&#39;)</span>
+<span class="sd">                # Retrieve the names of the betas parameters that have been</span>
+<span class="sd">                # estimated</span>
+<span class="sd">                betas = biogeme.freeBetaNames</span>
+
+<span class="sd">                # Draw 100 realization of the distribution of the estimators</span>
+<span class="sd">                b = results.getBetasForSensitivityAnalysis(betas, size = 100)</span>
+
+<span class="sd">                # Simulate the formulas using the nominal values</span>
+<span class="sd">                simulatedValues = biogeme.simulate(betaValues)</span>
+
+<span class="sd">                # Calculate the confidence intervals for each formula</span>
+<span class="sd">                left, right = biogeme.confidenceIntervals(b, 0.9)</span>
+
+<span class="sd">        :rtype: tuple of two Pandas dataframes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">listOfResults</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">betaValues</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">listOfResults</span> <span class="o">+=</span> <span class="p">[</span><span class="n">r</span><span class="p">]</span>
+        <span class="n">allResults</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">listOfResults</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">intervalSize</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="n">allResults</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="n">allResults</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span></div>
+
+<div class="viewcode-block" id="BIOGEME.createLogFile"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.BIOGEME.createLogFile">[docs]</a>    <span class="k">def</span> <span class="nf">createLogFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a log file with the messages produced by Biogeme.</span>
+
+<span class="sd">        The name of the file is the name of the model with an extension .log</span>
+
+<span class="sd">        :param verbosity: types of messages to be captured</span>
+
+<span class="sd">            - 0: no output</span>
+<span class="sd">            - 1: warnings</span>
+<span class="sd">            - 2: only general information</span>
+<span class="sd">            - 3: more verbose</span>
+<span class="sd">            - 4: debug messages</span>
+
+<span class="sd">            Default: 3.</span>
+
+<span class="sd">        :type verbosity: int</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">createLog</span><span class="p">(</span><span class="n">fileLevel</span><span class="o">=</span><span class="n">verbosity</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelName</span><span class="si">}</span><span class="s1">: database [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="n">r</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formulas</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+
+<div class="viewcode-block" id="negLikelihood"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood">[docs]</a><span class="k">class</span> <span class="nc">negLikelihood</span><span class="p">(</span><span class="n">functionToMinimize</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Provides the value of the function to be minimized, as well as its</span>
+<span class="sd">    derivatives. To be used by the opimization package.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># pylint: disable=too-many-instance-attributes</span>
+
+<div class="viewcode-block" id="negLikelihood.__init__"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">like</span><span class="p">,</span> <span class="n">like_deriv</span><span class="p">,</span> <span class="n">scaled</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="sd">&quot;&quot;&quot;True if the log likelihood must be recalculated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Vector of unknown parameters values</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;Value betwen 0 and 1 defining the size of the batch, that is the</span>
+<span class="sd">        percentage of the data that should be used to approximate the</span>
+<span class="sd">        log likelihood.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: value of the function</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gv</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: vector with the gradient</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hv</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: second derivatives matrix</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: BHHH matrix</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">like</span> <span class="o">=</span> <span class="n">like</span> <span class="c1">#: function calculating the log likelihood</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">like_deriv</span> <span class="o">=</span> <span class="n">like_deriv</span>
+        <span class="sd">&quot;&quot;&quot;function calculating the log likelihood and its derivatives.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaled</span> <span class="o">=</span> <span class="n">scaled</span>
+        <span class="sd">&quot;&quot;&quot;if True, the value of the log likelihood is divided by the number</span>
+<span class="sd">        of observations used to calculate it. In this case, the values</span>
+<span class="sd">        with different sample sizes are comparable.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="negLikelihood.setVariables"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood.setVariables">[docs]</a>    <span class="k">def</span> <span class="nf">setVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hv</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="negLikelihood.f"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The variables must be set first.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">gv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fv</span></div>
+
+<div class="viewcode-block" id="negLikelihood.f_g"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood.f_g">[docs]</a>    <span class="k">def</span> <span class="nf">f_g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The variables must be set first.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">gv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gv</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">like_deriv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hv</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fv</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gv</span></div>
+
+<div class="viewcode-block" id="negLikelihood.f_g_h"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood.f_g_h">[docs]</a>    <span class="k">def</span> <span class="nf">f_g_h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The variables must be set first.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">gv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">hv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hv</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">like_deriv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fv</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gv</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">hv</span></div>
+
+<div class="viewcode-block" id="negLikelihood.f_g_bhhh"><a class="viewcode-back" href="../../biogeme.html#biogeme.biogeme.negLikelihood.f_g_bhhh">[docs]</a>    <span class="k">def</span> <span class="nf">f_g_bhhh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The variables must be set first.&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">gv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gv</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">like_deriv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled</span><span class="p">,</span> <span class="n">hessian</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bhhh</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hv</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">fv</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">gv</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">bhhhv</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

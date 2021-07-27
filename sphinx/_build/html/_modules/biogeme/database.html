@@ -1,0 +1,1224 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>biogeme.database &mdash; Biogeme 3.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Biogeme
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>biogeme.database</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for biogeme.database</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Implementation of the class Database, wrapping a pandas dataframe</span>
+<span class="sd">for specific services to Biogeme</span>
+
+<span class="sd">:author: Michel Bierlaire</span>
+
+<span class="sd">:date: Tue Mar 26 16:42:54 2019</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># There seems to be a bug in PyLint.</span>
+<span class="c1"># pylint: disable=invalid-unary-operand-type, too-many-function-args</span>
+
+<span class="c1"># Too constraining</span>
+<span class="c1"># pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements, too-many-branches, too-many-instance-attributes, too-many-lines, too-many-public-methods</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
+<span class="kn">import</span> <span class="nn">biogeme.filenames</span> <span class="k">as</span> <span class="nn">bf</span>
+<span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
+<span class="kn">from</span> <span class="nn">biogeme</span> <span class="kn">import</span> <span class="n">tools</span>
+<span class="kn">from</span> <span class="nn">biogeme</span> <span class="kn">import</span> <span class="n">draws</span>
+
+<span class="kn">from</span> <span class="nn">biogeme.expressions</span> <span class="kn">import</span> <span class="n">Variable</span><span class="p">,</span> <span class="n">isNumeric</span><span class="p">,</span> <span class="n">Numeric</span>
+
+
+<div class="viewcode-block" id="Database"><a class="viewcode-back" href="../../database.html#biogeme.database.Database">[docs]</a><span class="k">class</span> <span class="nc">Database</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class that contains and prepare the database.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Database.__init__"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pandasDatabase</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor</span>
+
+<span class="sd">        :param name: name of the database.</span>
+<span class="sd">        :type name: string</span>
+
+<span class="sd">        :param pandasDatabase: data stored in a pandas data frame.</span>
+<span class="sd">        :type pandasDatabase: pandas.DataFrame</span>
+
+<span class="sd">        :raise biogemeError: if the audit function detects errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;Logger that controls the output of</span>
+<span class="sd">        messages to the screen and log file.</span>
+<span class="sd">        Type: class :class:`biogeme.messaging.bioMessage`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="sd">&quot;&quot;&quot; Name of the database. Used mainly for the file name when</span>
+<span class="sd">        dumping data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pandasDatabase</span> <span class="c1">#: Pandas data frame containing the data.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullData</span> <span class="o">=</span> <span class="n">pandasDatabase</span>
+        <span class="sd">&quot;&quot;&quot;Pandas data frame containing the full data. Useful when batches of</span>
+<span class="sd">        the sample are used for approximating the log likelihood.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;names of the headers of the database so that they can be used as</span>
+<span class="sd">        an object of type biogeme.expressions.Expression. Initialized</span>
+<span class="sd">        by _generateHeaders()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generateHeaders</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">excludedData</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;Number of observations removed by the function</span>
+<span class="sd">        :meth:`biogeme.Database.remove`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;Name of the column identifying the individuals in a panel</span>
+<span class="sd">        data context. None if data is not panel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;map identifying the range of observations for each individual in a</span>
+<span class="sd">        panel data context. None if data is not panel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="sd">&quot;&quot;&quot;complete map identifying the range of observations for each</span>
+<span class="sd">        individual in a panel data context. None if data is not</span>
+<span class="sd">        panel. Useful when batches of the sample are used to</span>
+<span class="sd">        approximate the log likelihood function.</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
+
+        <span class="c1">## Initialize the dictionary containing random number</span>
+        <span class="c1">## generators with a series of native generators.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initNativeRandomNumberGenerators</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">userRandomNumberGenerators</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary containing user defined random number</span>
+<span class="sd">        generators. Defined by the function</span>
+<span class="sd">        Database.setRandomNumberGenerators that checks that reserved</span>
+<span class="sd">        keywords are not used. The element of the dictionary is a</span>
+<span class="sd">        tuple with two elements: (0) the function generating the</span>
+<span class="sd">        draws, and (1) a string describing the type of draws</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfDraws</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="sd">&quot;&quot;&quot;Number of draws generated by the function Database.generateDraws.</span>
+<span class="sd">        Value 0 if this function is not called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">typesOfDraws</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#: Types of draws for Monte Carlo integration</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_auditDone</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">theDraws</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#:Draws for Monte-Carlo integration</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avail</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Availability expression to check</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Choice expression to check</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Expression to check</span>
+
+        <span class="n">listOfErrors</span><span class="p">,</span> <span class="n">listOfWarnings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_audit</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">listOfWarnings</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfWarnings</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">listOfErrors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfErrors</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">listOfErrors</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_initNativeRandomNumberGenerators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">uniform_antithetic</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getAntithetic</span><span class="p">(</span>
+                <span class="n">draws</span><span class="o">.</span><span class="n">getUniform</span><span class="p">,</span> <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">halton2</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">halton3</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">halton5</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">MLHS_anti</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getAntithetic</span><span class="p">(</span>
+                <span class="n">draws</span><span class="o">.</span><span class="n">getLatinHypercubeDraws</span><span class="p">,</span> <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_uniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getUniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_uniform_antithetic</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">localDraws</span> <span class="o">=</span> <span class="n">symm_uniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">localDraws</span><span class="p">,</span> <span class="o">-</span><span class="n">localDraws</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_halton2</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_halton3</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_halton5</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_MLHS</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getLatinHypercubeDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">symm_MLHS_anti</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">localDraws</span> <span class="o">=</span> <span class="n">symm_MLHS</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">localDraws</span><span class="p">,</span> <span class="o">-</span><span class="n">localDraws</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">normal_antithetic</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="o">=</span><span class="n">sampleSize</span><span class="p">,</span>
+                <span class="n">numberOfDraws</span><span class="o">=</span><span class="n">numberOfDraws</span><span class="p">,</span>
+                <span class="n">antithetic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">normal_halton2</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">unif</span> <span class="o">=</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span>
+                <span class="n">numberOfDraws</span><span class="p">,</span>
+                <span class="n">uniformNumbers</span><span class="o">=</span><span class="n">unif</span><span class="p">,</span>
+                <span class="n">antithetic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">normal_halton3</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">unif</span> <span class="o">=</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span>
+                <span class="n">numberOfDraws</span><span class="p">,</span>
+                <span class="n">uniformNumbers</span><span class="o">=</span><span class="n">unif</span><span class="p">,</span>
+                <span class="n">antithetic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">normal_halton5</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">unif</span> <span class="o">=</span> <span class="n">draws</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">10</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span>
+                <span class="n">numberOfDraws</span><span class="p">,</span>
+                <span class="n">uniformNumbers</span><span class="o">=</span><span class="n">unif</span><span class="p">,</span>
+                <span class="n">antithetic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">normal_MLHS</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">unif</span> <span class="o">=</span> <span class="n">draws</span><span class="o">.</span><span class="n">getLatinHypercubeDraws</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span>
+                <span class="n">numberOfDraws</span><span class="p">,</span>
+                <span class="n">uniformNumbers</span><span class="o">=</span><span class="n">unif</span><span class="p">,</span>
+                <span class="n">antithetic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">normal_MLHS_anti</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+            <span class="n">unif</span> <span class="o">=</span> <span class="n">draws</span><span class="o">.</span><span class="n">getLatinHypercubeDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span>
+                <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">uniformNumbers</span><span class="o">=</span><span class="n">unif</span><span class="p">,</span> <span class="n">antithetic</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+
+        <span class="c1">## Dictionary containing native random number generators.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nativeRandomNumberGenerators</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;UNIFORM&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">draws</span><span class="o">.</span><span class="n">getUniform</span><span class="p">,</span> <span class="s1">&#39;Uniform U[0, 1]&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;UNIFORM_ANTI&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">uniform_antithetic</span><span class="p">,</span> <span class="s1">&#39;Antithetic uniform U[0, 1]&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;UNIFORM_HALTON2&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">halton2</span><span class="p">,</span>
+                <span class="s1">&#39;Halton draws with base 2, skipping the first 10&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORM_HALTON3&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">halton3</span><span class="p">,</span>
+                <span class="s1">&#39;Halton draws with base 3, skipping the first 10&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORM_HALTON5&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">halton5</span><span class="p">,</span>
+                <span class="s1">&#39;Halton draws with base 5, skipping the first 10&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORM_MLHS&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">draws</span><span class="o">.</span><span class="n">getLatinHypercubeDraws</span><span class="p">,</span>
+                <span class="s1">&#39;Modified Latin Hypercube Sampling on [0, 1]&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORM_MLHS_ANTI&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">MLHS_anti</span><span class="p">,</span>
+                <span class="s1">&#39;Antithetic Modified Latin Hypercube Sampling on [0, 1]&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">symm_uniform</span><span class="p">,</span> <span class="s1">&#39;Uniform U[-1, 1]&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM_ANTI&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">symm_uniform_antithetic</span><span class="p">,</span>
+                <span class="s1">&#39;Antithetic uniform U[-1, 1]&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM_HALTON2&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">symm_halton2</span><span class="p">,</span>
+                <span class="s1">&#39;Halton draws on [-1, 1] with base 2, skipping the first 10&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM_HALTON3&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">symm_halton3</span><span class="p">,</span>
+                <span class="s1">&#39;Halton draws on [-1, 1] with base 3, skipping the first 10&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM_HALTON5&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">symm_halton5</span><span class="p">,</span>
+                <span class="s1">&#39;Halton draws on [-1, 1] with base 5, skipping the first 10&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM_MLHS&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">symm_MLHS</span><span class="p">,</span>
+                <span class="s1">&#39;Modified Latin Hypercube Sampling on [-1, 1]&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;UNIFORMSYM_MLHS_ANTI&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">symm_MLHS_anti</span><span class="p">,</span>
+                <span class="s1">&#39;Antithetic Modified Latin Hypercube Sampling on [-1, 1]&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;NORMAL&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">draws</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">,</span> <span class="s1">&#39;Normal N(0, 1) draws&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;NORMAL_ANTI&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">normal_antithetic</span><span class="p">,</span> <span class="s1">&#39;Antithetic normal draws&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;NORMAL_HALTON2&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">normal_halton2</span><span class="p">,</span>
+                <span class="s1">&#39;Normal draws from Halton base 2 sequence&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;NORMAL_HALTON3&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">normal_halton3</span><span class="p">,</span>
+                <span class="s1">&#39;Normal draws from Halton base 3 sequence&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;NORMAL_HALTON5&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">normal_halton5</span><span class="p">,</span>
+                <span class="s1">&#39;Normal draws from Halton base 5 sequence&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;NORMAL_MLHS&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">normal_MLHS</span><span class="p">,</span>
+                <span class="s1">&#39;Normal draws from Modified Latin Hypercube Sampling&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;NORMAL_MLHS_ANTI&#39;</span><span class="p">:</span> <span class="p">(</span>
+                <span class="n">normal_MLHS_anti</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="s1">&#39;Antithetic normal draws from &#39;</span>
+                    <span class="s1">&#39;Modified Latin Hypercube Sampling&#39;</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="Database.descriptionOfNativeDraws"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.descriptionOfNativeDraws">[docs]</a>    <span class="k">def</span> <span class="nf">descriptionOfNativeDraws</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Describe the draws available draws with Biogeme</span>
+
+<span class="sd">        :return: dict, where the keys are the names of the draws,</span>
+<span class="sd">                 and the value their description</span>
+
+<span class="sd">        Example of output::</span>
+
+<span class="sd">            {&#39;UNIFORM: Uniform U[0, 1]&#39;,</span>
+<span class="sd">             &#39;UNIFORM_ANTI: Antithetic uniform U[0, 1]&#39;],</span>
+<span class="sd">             &#39;NORMAL: Normal N(0, 1) draws&#39;}</span>
+
+<span class="sd">        :rtype: dict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="nb">tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nativeRandomNumberGenerators</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_audit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Performs a series of checks and reports warnings and errors.</span>
+<span class="sd">          - Check if there are non numerical entries.</span>
+<span class="sd">          - Check if there are NaN (not a number) entries.</span>
+<span class="sd">          - Check if there are strings.</span>
+<span class="sd">          - Check if the numbering of individuals are contiguous</span>
+<span class="sd">            (panel data only).</span>
+
+<span class="sd">        :return: A tuple of two lists with the results of the diagnostic:</span>
+<span class="sd">            listOfErrors, listOfWarnings</span>
+<span class="sd">        :rtype: tuple(list(str), list(str))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">listOfErrors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">listOfWarnings</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_auditDone</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">listOfErrors</span><span class="p">,</span> <span class="n">listOfWarnings</span>
+
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
+                <span class="n">theError</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Column </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1"> in the database does contain </span><span class="si">{</span><span class="n">dtype</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">listOfErrors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theError</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">theError</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;The database contains NaN value(s). &#39;</span>
+                <span class="s1">&#39;Detect where they are using the function isnan()&#39;</span>
+            <span class="p">)</span>
+            <span class="n">listOfErrors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theError</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_auditDone</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">listOfErrors</span><span class="p">,</span> <span class="n">listOfWarnings</span>
+
+    <span class="k">def</span> <span class="nf">_generateHeaders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Record the names of the headers</span>
+<span class="sd">        of the database so that they can be used as an object of type</span>
+<span class="sd">        biogeme.expressions.Expression</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="p">{</span><span class="n">col</span><span class="p">:</span> <span class="n">Variable</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
+
+<div class="viewcode-block" id="Database.valuesFromDatabase"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.valuesFromDatabase">[docs]</a>    <span class="k">def</span> <span class="nf">valuesFromDatabase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluates an expression for each entry of the database.</span>
+
+<span class="sd">        :param expression: expression to evaluate</span>
+<span class="sd">        :type expression:  biogeme.expressions.Expression.</span>
+
+<span class="sd">        :return: numpy series, long as the number of entries</span>
+<span class="sd">                 in the database, containing the calculated quantities.</span>
+<span class="sd">        :rtype: numpy.Series</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span> <span class="o">=</span> <span class="n">expression</span>
+
+        <span class="k">def</span> <span class="nf">functionToApply</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">functionToApply</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="Database.checkAvailabilityOfChosenAlt"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.checkAvailabilityOfChosenAlt">[docs]</a>    <span class="k">def</span> <span class="nf">checkAvailabilityOfChosenAlt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">avail</span><span class="p">,</span> <span class="n">choice</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if the chosen alternative is available for each entry</span>
+<span class="sd">        in the database.</span>
+
+<span class="sd">        :param avail: list of expressions to evaluate the</span>
+<span class="sd">                      availability conditions for each alternative.</span>
+<span class="sd">        :type avail: list of biogeme.expressions.Expression</span>
+<span class="sd">        :param choice: expression for the chosen alternative.</span>
+<span class="sd">        :type choice: biogeme.expressions.Expression</span>
+
+<span class="sd">        :return: numpy series of bool, long as the number of entries</span>
+<span class="sd">                 in the database, containing True is the chosen alternative is</span>
+<span class="sd">                 available, False otherwise.</span>
+<span class="sd">        :rtype: numpy.Series</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avail</span> <span class="o">=</span> <span class="n">avail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span> <span class="o">=</span> <span class="n">choice</span>
+
+        <span class="k">def</span> <span class="nf">functionToApply</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">avExpression</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_avail</span><span class="p">[</span><span class="n">chosen</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">avExpression</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">av</span> <span class="o">=</span> <span class="n">avExpression</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">av</span> <span class="o">!=</span> <span class="mi">0</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">functionToApply</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="Database.choiceAvailabilityStatistics"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.choiceAvailabilityStatistics">[docs]</a>    <span class="k">def</span> <span class="nf">choiceAvailabilityStatistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">avail</span><span class="p">,</span> <span class="n">choice</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the number of time an alternative is chosen and available</span>
+
+<span class="sd">        :param avail: list of expressions to evaluate the</span>
+<span class="sd">                      availability conditions for each alternative.</span>
+<span class="sd">        :type avail: list of biogeme.expressions.Expression</span>
+<span class="sd">        :param choice: expression for the chosen alternative.</span>
+<span class="sd">        :type choice: biogeme.expressions.Expression</span>
+
+<span class="sd">        :return: for each alternative, a tuple containing the number of time</span>
+<span class="sd">            it is chosen, and the number of time it is available.</span>
+<span class="sd">        :rtype: dict(int: (int, int))</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_avail</span> <span class="o">=</span> <span class="n">avail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span> <span class="o">=</span> <span class="n">choice</span>
+
+        <span class="k">def</span> <span class="nf">functionToApply</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">chosen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_choice</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">chosen</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_avail</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">v</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                <span class="n">av</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">av</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                <span class="n">results</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Chosen&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_avail</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">functionToApply</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">theResults</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_avail</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">&#39;Chosen&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">theResults</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">,</span> <span class="n">res</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">theResults</span></div>
+
+<div class="viewcode-block" id="Database.sumFromDatabase"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.sumFromDatabase">[docs]</a>    <span class="k">def</span> <span class="nf">sumFromDatabase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the value of an expression for each entry</span>
+<span class="sd">        in the database, and returns the sum.</span>
+
+<span class="sd">        :param expression: expression to evaluate</span>
+<span class="sd">        :type expression: biogeme.expressions.Expression</span>
+<span class="sd">        :return: sum of the expressions over the database.</span>
+<span class="sd">        :rtype: float</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span> <span class="o">=</span> <span class="n">expression</span>
+
+        <span class="k">def</span> <span class="nf">functionToApply</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">functionToApply</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="Database.scaleColumn"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.scaleColumn">[docs]</a>    <span class="k">def</span> <span class="nf">scaleColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Multiply an entire column by a scale value</span>
+
+<span class="sd">        :param column: name of the column</span>
+<span class="sd">        :type column: string</span>
+<span class="sd">        :param scale: value of the scale. All values of the column will</span>
+<span class="sd">              be multiplied by that scale.</span>
+<span class="sd">        :type scale: float</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">*</span> <span class="n">scale</span></div>
+
+<div class="viewcode-block" id="Database.suggestScaling"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.suggestScaling">[docs]</a>    <span class="k">def</span> <span class="nf">suggestScaling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reportAll</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Suggest a scaling of the variables in the database.</span>
+
+<span class="sd">        For each column, :math:`\\delta` is the difference between the</span>
+<span class="sd">        largest and the smallest value, or one if the difference is</span>
+<span class="sd">        smaller than one. The level of magnitude is evaluated as a</span>
+<span class="sd">        power of 10. The suggested scale is the inverse of this value.</span>
+
+<span class="sd">        .. math:: s = \\frac{1}{10^{|\\log_{10} \\delta|}}</span>
+
+<span class="sd">        where :math:`|x|` is the integer closest to :math:`x`.</span>
+
+<span class="sd">        :param columns: list of columns to be considered.</span>
+<span class="sd">                        If None, all of them will be considered.</span>
+<span class="sd">        :type columns: list(str)</span>
+
+<span class="sd">        :param reportAll: if False, remove entries where the suggested</span>
+<span class="sd">            scale is 1, 0.1 or 10</span>
+<span class="sd">        :type reportAll: bool</span>
+
+<span class="sd">        :return: A Pandas dataframe where each row contains the name</span>
+<span class="sd">                 of the variable and the suggested scale s. Ideally,</span>
+<span class="sd">                 the column should be multiplied by s.</span>
+
+<span class="sd">        :rtype: pandas.DataFrame</span>
+
+<span class="sd">        :raise biogemeError: if a variable in ``columns`` is unknown.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="n">errorMsg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Variable </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1"> not found.&#39;</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+
+        <span class="n">largestValue</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span>
+        <span class="p">]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="n">col</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lv</span><span class="p">))),</span> <span class="n">lv</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">lv</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">largestValue</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Column&#39;</span><span class="p">,</span> <span class="s1">&#39;Scale&#39;</span><span class="p">,</span> <span class="s1">&#39;Largest&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reportAll</span><span class="p">:</span>
+            <span class="c1"># Remove entries where the suggested scale is 1, 0.1 or 10</span>
+            <span class="n">remove</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Scale</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Scale</span> <span class="o">==</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Scale</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">remove</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Database.sampleWithReplacement"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.sampleWithReplacement">[docs]</a>    <span class="k">def</span> <span class="nf">sampleWithReplacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract a random sample from the database, with replacement.</span>
+
+<span class="sd">        Useful for bootstrapping.</span>
+
+<span class="sd">        :param size: size of the sample. If None, a sample of</span>
+<span class="sd">               the same size as the database will be generated.</span>
+<span class="sd">               Default: None.</span>
+<span class="sd">        :type size: int</span>
+
+<span class="sd">        :return: pandas dataframe with the sample.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">sample</span></div>
+
+<div class="viewcode-block" id="Database.sampleIndividualMapWithReplacement"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.sampleIndividualMapWithReplacement">[docs]</a>    <span class="k">def</span> <span class="nf">sampleIndividualMapWithReplacement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract a random sample of the individual map</span>
+<span class="sd">        from a panel data database, with replacement.</span>
+
+<span class="sd">        Useful for bootstrapping.</span>
+
+<span class="sd">        :param size: size of the sample. If None, a sample of</span>
+<span class="sd">                   the same size as the database will be generated.</span>
+<span class="sd">                   Default: None.</span>
+<span class="sd">        :type size: int</span>
+
+<span class="sd">        :return: pandas dataframe with the sample.</span>
+<span class="sd">        :rtype: pandas.DataFrame</span>
+
+<span class="sd">        :raise biogemeError: if the database in not in panel mode.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;Function sampleIndividualMapWithReplacement&#39;</span>
+                <span class="s1">&#39; is available only on panel data.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">sample</span></div>
+
+<div class="viewcode-block" id="Database.sampleWithoutReplacement"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.sampleWithoutReplacement">[docs]</a>    <span class="k">def</span> <span class="nf">sampleWithoutReplacement</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">samplingRate</span><span class="p">,</span> <span class="n">columnWithSamplingWeights</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace the data set by a sample for stochastic algorithms</span>
+
+<span class="sd">        :param samplingRate: the proportion of data to include in the sample.</span>
+<span class="sd">        :type samplingRate: float</span>
+<span class="sd">        :param columnWithSamplingWeights: name of the column with</span>
+<span class="sd">              the sampling weights. If None, each row has equal probability.</span>
+<span class="sd">        :type columnWithSamplingWeights: string</span>
+
+<span class="sd">        :raise biogemeError: if the structure of the database has been modified</span>
+<span class="sd">            since last sample.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check if the structure has not been modified since</span>
+                <span class="c1"># last sample</span>
+                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="o">.</span><span class="n">columns</span>
+                <span class="p">):</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="s1">&#39;The structure of the database has been &#39;</span>
+                        <span class="s1">&#39;modified since last sample. &#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">left</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">left</span><span class="p">:</span>
+                        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; Columns that disappeared: </span><span class="si">{</span><span class="n">left</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">right</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">right</span><span class="p">:</span>
+                        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; Columns that were added: </span><span class="si">{</span><span class="n">right</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                <span class="n">frac</span><span class="o">=</span><span class="n">samplingRate</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">columnWithSamplingWeights</span>
+            <span class="p">)</span>
+            <span class="n">theMsg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Full data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Sampled data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">theMsg</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Cross sectional data</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullData</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fullData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check if the structure has not been modified since</span>
+                <span class="c1"># last sample</span>
+                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullData</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="s1">&#39;The structure of the database has been modified &#39;</span>
+                        <span class="s1">&#39;since last sample. &#39;</span>
+                    <span class="p">)</span>
+                    <span class="n">left</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullData</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">left</span><span class="p">:</span>
+                        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; Columns that disappeared: </span><span class="si">{</span><span class="n">left</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">right</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullData</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">right</span><span class="p">:</span>
+                        <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; Columns that were added: </span><span class="si">{</span><span class="n">right</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullData</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                <span class="n">frac</span><span class="o">=</span><span class="n">samplingRate</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">columnWithSamplingWeights</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Full data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fullData</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1"> &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Sampled data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.useFullSample"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.useFullSample">[docs]</a>    <span class="k">def</span> <span class="nf">useFullSample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Re-establish the full sample for calculation of the likelihood&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                    <span class="s1">&#39;Full panel data set has not been saved.&#39;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullData</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;Full data set has not been saved.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullData</span></div>
+
+<div class="viewcode-block" id="Database.addColumn"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.addColumn">[docs]</a>    <span class="k">def</span> <span class="nf">addColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new column in the database, calculated from an expression.</span>
+
+<span class="sd">        :param expression:  expression to evaluate</span>
+<span class="sd">        :type expression: biogeme.expressions.Expression</span>
+
+<span class="sd">        :param column: name of the column to add</span>
+<span class="sd">        :type column: string</span>
+
+<span class="sd">        :return: the added column</span>
+<span class="sd">        :rtype: numpy.Series</span>
+
+<span class="sd">        :raises ValueError: if the column name already exists.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Column </span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1"> already exists in the database </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">functionToApply</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="o">.</span><span class="n">setRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span> <span class="o">=</span> <span class="n">expression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">functionToApply</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">column</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Database.remove"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Removes from the database all entries such that the value</span>
+<span class="sd">        of the expression is not 0.</span>
+
+<span class="sd">        :param expression: expression to evaluate</span>
+<span class="sd">        :type expression: biogeme.expressions.Expression</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">columnName</span> <span class="o">=</span> <span class="s1">&#39;__bioRemove__&#39;</span>
+        <span class="k">if</span> <span class="n">isNumeric</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addColumn</span><span class="p">(</span><span class="n">Numeric</span><span class="p">(</span><span class="n">expression</span><span class="p">),</span> <span class="n">columnName</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addColumn</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">columnName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">excludedData</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">columnName</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">columnName</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">columnName</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.dumpOnFile"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.dumpOnFile">[docs]</a>    <span class="k">def</span> <span class="nf">dumpOnFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dumps the database in a CSV formatted file.</span>
+
+<span class="sd">        :return:  name of the file</span>
+<span class="sd">        :rtype: string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">theName</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_dumped&#39;</span>
+        <span class="n">dataFileName</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">getNewFileName</span><span class="p">(</span><span class="n">theName</span><span class="p">,</span> <span class="s1">&#39;dat&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">dataFileName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index_label</span><span class="o">=</span><span class="s1">&#39;__rowId&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">dataFileName</span><span class="si">}</span><span class="s1"> has been created&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataFileName</span></div>
+
+<div class="viewcode-block" id="Database.setRandomNumberGenerators"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.setRandomNumberGenerators">[docs]</a>    <span class="k">def</span> <span class="nf">setRandomNumberGenerators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Defines user-defined random numbers generators.</span>
+
+<span class="sd">        :param rng: a dictionary of generators. The keys of the dictionary</span>
+<span class="sd">           characterize the name of the generators, and must be</span>
+<span class="sd">           different from the pre-defined generators in Biogeme:</span>
+<span class="sd">           NORMAL, UNIFORM and UNIFORMSYM. The elements of the</span>
+<span class="sd">           dictionary are functions that take two arguments: the</span>
+<span class="sd">           number of series to generate (typically, the size of the</span>
+<span class="sd">           database), and the number of draws per series.</span>
+<span class="sd">        :type rng: dict</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            def logNormalDraws(sampleSize, numberOfDraws):</span>
+<span class="sd">                return np.exp(np.random.randn(sampleSize, numberOfDraws))</span>
+
+<span class="sd">            def exponentialDraws(sampleSize, numberOfDraws):</span>
+<span class="sd">                return -1.0 * np.log(np.random.rand(sampleSize, numberOfDraws))</span>
+
+<span class="sd">            # We associate these functions with a name</span>
+<span class="sd">            dict = {&#39;LOGNORMAL&#39;:(logNormalDraws,</span>
+<span class="sd">                                 &#39;Draws from lognormal distribution&#39;),</span>
+<span class="sd">                    &#39;EXP&#39;:(exponentialDraws,</span>
+<span class="sd">                           &#39;Draws from exponential distributions&#39;)}</span>
+<span class="sd">            myData.setRandomNumberGenerators(dict)</span>
+
+<span class="sd">        :raise ValueError: if a reserved keyword is used for a</span>
+<span class="sd">             user-defined draws.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nativeRandomNumberGenerators</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rng</span><span class="p">:</span>
+                <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> is a reserved keyword for draws&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; and cannot be used for user-defined &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;generators&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">userRandomNumberGenerators</span> <span class="o">=</span> <span class="n">rng</span></div>
+
+<div class="viewcode-block" id="Database.generateDraws"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.generateDraws">[docs]</a>    <span class="k">def</span> <span class="nf">generateDraws</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate draws for each variable.</span>
+
+
+<span class="sd">        :param types: A dict indexed by the names of the variables,</span>
+<span class="sd">                      describing the types of draws. Each of them can</span>
+<span class="sd">                      be a native type or any type defined by the</span>
+<span class="sd">                      function database.setRandomNumberGenerators</span>
+<span class="sd">        :type types: dict</span>
+
+<span class="sd">        :param names: the list of names of the variables that require draws</span>
+<span class="sd">            to be generated.</span>
+<span class="sd">        :type names: list of strings</span>
+
+<span class="sd">        :param numberOfDraws: number of draws to generate.</span>
+<span class="sd">        :type numberOfDraws: int</span>
+
+<span class="sd">        :return: a 3-dimensional table with draws. The 3 dimensions are</span>
+
+<span class="sd">              1. number of individuals</span>
+<span class="sd">              2. number of draws</span>
+<span class="sd">              3. number of variables</span>
+
+<span class="sd">        :rtype: numpy.array</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">              types = {&#39;randomDraws1&#39;: &#39;NORMAL_MLHS_ANTI&#39;,</span>
+<span class="sd">                       &#39;randomDraws2&#39;: &#39;UNIFORM_MLHS_ANTI&#39;,</span>
+<span class="sd">                       &#39;randomDraws3&#39;: &#39;UNIFORMSYM_MLHS_ANTI&#39;}</span>
+<span class="sd">              theDrawsTable = myData.generateDraws(types,</span>
+<span class="sd">                  [&#39;randomDraws1&#39;, &#39;randomDraws2&#39;, &#39;randomDraws3&#39;], 10)</span>
+
+
+<span class="sd">        :raise biogemeError: if a type of sdraw is unknown.</span>
+
+<span class="sd">        :raise biogemeError: if the output of the draw generator does not</span>
+<span class="sd">            have the requested dimensions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">numberOfDraws</span> <span class="o">=</span> <span class="n">numberOfDraws</span>
+        <span class="c1"># Dimensions of the draw table:</span>
+        <span class="c1"># 1. number of variables</span>
+        <span class="c1"># 2. number of individuals</span>
+        <span class="c1"># 3. number of draws</span>
+        <span class="n">listOfDraws</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="n">drawType</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">typesOfDraws</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">drawType</span>
+            <span class="n">theGenerator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nativeRandomNumberGenerators</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">drawType</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">theGenerator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">theGenerator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userRandomNumberGenerators</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">drawType</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">theGenerator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">native</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nativeRandomNumberGenerators</span>
+                    <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">userRandomNumberGenerators</span>
+                    <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Unknown type of draws for &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;variable </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">drawType</span><span class="si">}</span><span class="s1">. &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;Native types: </span><span class="si">{</span><span class="n">native</span><span class="si">}</span><span class="s1">. &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;User defined: </span><span class="si">{</span><span class="n">user</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="n">listOfDraws</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">theGenerator</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">(),</span> <span class="n">numberOfDraws</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">listOfDraws</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">(),</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+                <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;The draw generator for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> must&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; generate a numpy array of dimensions&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">()</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">)&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; instead of </span><span class="si">{</span><span class="n">listOfDraws</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">theDraws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">listOfDraws</span><span class="p">)</span>
+        <span class="c1">## Draws as a three-dimensional numpy series. The dimensions</span>
+        <span class="c1">## are organized to be more suited for calculation.</span>
+        <span class="c1"># 1. number of individuals</span>
+        <span class="c1"># 2. number of draws</span>
+        <span class="c1"># 3. number of variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">theDraws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theDraws</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theDraws</span></div>
+
+<div class="viewcode-block" id="Database.getNumberOfObservations"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.getNumberOfObservations">[docs]</a>    <span class="k">def</span> <span class="nf">getNumberOfObservations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reports the number of observations in the database.</span>
+
+<span class="sd">        Note that it returns the same value, irrespectively</span>
+<span class="sd">        if the database contains panel data or not.</span>
+
+<span class="sd">        :return: Number of observations.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        See also:  getSampleSize()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Database.getSampleSize"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.getSampleSize">[docs]</a>    <span class="k">def</span> <span class="nf">getSampleSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reports the size of the sample.</span>
+
+<span class="sd">        If the data is cross-sectional, it is the number of</span>
+<span class="sd">        observations in the database. If the data is panel, it is the</span>
+<span class="sd">        number of individuals.</span>
+
+<span class="sd">        :return: Sample size.</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        See also: getNumberOfObservations()</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Database.split"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slices</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prepare estimation and validation sets for validation.</span>
+
+<span class="sd">        :param slices: number of slices</span>
+<span class="sd">        :type slices: int</span>
+
+<span class="sd">        :return: list of estimation and validation data sets</span>
+<span class="sd">        :rtype: list(tuple(pandas.DataFrame, pandas.DataFrame))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shuffled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">theSlices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">shuffled</span><span class="p">,</span> <span class="n">slices</span><span class="p">)</span>
+        <span class="n">estimationSets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">validationSets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">theSlices</span><span class="p">):</span>
+            <span class="n">estimationSets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">theSlices</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">theSlices</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:])</span>
+            <span class="p">)</span>
+            <span class="n">validationSets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">zip</span><span class="p">(</span><span class="n">estimationSets</span><span class="p">,</span> <span class="n">validationSets</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Database.isPanel"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.isPanel">[docs]</a>    <span class="k">def</span> <span class="nf">isPanel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tells if the data is panel or not.</span>
+
+<span class="sd">        :return: True if the data is panel.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Database.panel"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.panel">[docs]</a>    <span class="k">def</span> <span class="nf">panel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Defines the data as panel data</span>
+
+<span class="sd">        :param columnName: name of the columns that identifies individuals.</span>
+<span class="sd">        :type columnName: string</span>
+
+<span class="sd">        :raise biogemeError: if the data are not sorted properly, that</span>
+<span class="sd">            is if the data for the one individuals are not consecutive.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span> <span class="o">=</span> <span class="n">columnName</span>
+
+        <span class="c1"># Check if the data is organized in consecutive entries</span>
+        <span class="c1"># Number of groups of data</span>
+        <span class="n">nGroups</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">countNumberOfGroups</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">)</span>
+        <span class="n">sortedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">])</span>
+        <span class="n">nIndividuals</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">countNumberOfGroups</span><span class="p">(</span><span class="n">sortedData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nGroups</span> <span class="o">!=</span> <span class="n">nIndividuals</span><span class="p">:</span>
+            <span class="n">theError</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;The data must be sorted so that the data&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; for the same individual are consecutive.&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; There are </span><span class="si">{</span><span class="n">nIndividuals</span><span class="si">}</span><span class="s1"> individuals &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;in the sample, and </span><span class="si">{</span><span class="n">nGroups</span><span class="si">}</span><span class="s1"> groups of &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;data for column </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">theError</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">buildPanelMap</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Database.buildPanelMap"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.buildPanelMap">[docs]</a>    <span class="k">def</span> <span class="nf">buildPanelMap</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sorts the data so that the observations for each individuals are</span>
+<span class="sd">        contiguous, and builds a map that identifies the range of indices of</span>
+<span class="sd">        the observations of each individuals.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">)</span>
+            <span class="c1"># It is necessary to renumber the row to reflect the new ordering</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+            <span class="n">local_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">individuals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">individuals</span><span class="p">:</span>
+                <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">panelColumn</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+                <span class="n">local_map</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">local_map</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fullIndividualMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span></div>
+
+<div class="viewcode-block" id="Database.count"><a class="viewcode-back" href="../../database.html#biogeme.database.Database.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnName</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Counts the number of observations that have a specific value in a</span>
+<span class="sd">        given column.</span>
+
+<span class="sd">        :param columnName: name of the column.</span>
+<span class="sd">        :type columnName: string</span>
+<span class="sd">        :param value: value that is seeked.</span>
+<span class="sd">        :type value: float</span>
+
+<span class="sd">        :return: Number of times that the value appears in the column.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">columnName</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">]</span><span class="o">.</span><span class="n">count</span><span class="p">()[</span><span class="n">columnName</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Allows to print the dabase&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;biogeme database </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">:</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Panel data</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">individualMap</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

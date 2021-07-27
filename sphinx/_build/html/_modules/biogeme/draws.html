@@ -1,0 +1,758 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>biogeme.draws &mdash; Biogeme 3.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Biogeme
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>biogeme.draws</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for biogeme.draws</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot; Generation of various types of draws.</span>
+
+<span class="sd">:author: Michel Bierlaire</span>
+
+<span class="sd">:date: Tue Jun 18 19:05:13 2019</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Too constraining</span>
+<span class="c1"># pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
+
+
+<div class="viewcode-block" id="getUniform"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getUniform">[docs]</a><span class="k">def</span> <span class="nf">getUniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Uniform [0, 1] or [-1, 1] numbers</span>
+
+<span class="sd">    :param sampleSize: number of observations for which draws must be</span>
+<span class="sd">                       generated. If None, a one dimensional array</span>
+<span class="sd">                       will be generated. If it has a values k, then k</span>
+<span class="sd">                       series of draws will be generated</span>
+<span class="sd">    :type sampleSize: int</span>
+<span class="sd">    :param numberOfDraws: number of draws to generate.</span>
+<span class="sd">    :type numberOfDraws: int</span>
+<span class="sd">    :param symmetric: if True, draws from [-1: 1] are generated.</span>
+<span class="sd">        If False, draws from [0: 1] are generated.  Default: False</span>
+<span class="sd">    :type symmetric: bool</span>
+<span class="sd">    :return: numpy array with the draws</span>
+<span class="sd">    :rtype: numpy.array</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        draws = dr.getUniform(sampleSize=3, numberOfDraws=10, symmetric=False)</span>
+<span class="sd">        array(</span>
+<span class="sd">            [[0.13053817, 0.63892308, 0.55031567, 0.26347854, 0.16730932,</span>
+<span class="sd">              0.77745367, 0.48283887, 0.84247501, 0.20550219, 0.02373537],</span>
+<span class="sd">             [0.68935846, 0.03363595, 0.36006669, 0.26709364, 0.54907706,</span>
+<span class="sd">              0.22492104, 0.2494399 , 0.17323209, 0.52370401, 0.54091257],</span>
+<span class="sd">             [0.40310204, 0.89916711, 0.86065005, 0.94277699, 0.09077065,</span>
+<span class="sd">              0.40107731, 0.22554722, 0.47693135, 0.14058265, 0.17397031]]</span>
+<span class="sd">        )</span>
+
+<span class="sd">        draws = dr.getUniform(sampleSize=3, numberOfDraws=10, symmetric=True)</span>
+<span class="sd">        array(</span>
+<span class="sd">            [[ 0.74403237, -0.27995692,  0.33997421, -0.89405035, -0.129761  ,</span>
+<span class="sd">               0.86593325,  0.30657422,  0.82435619,  0.498482  ,  0.24561616],</span>
+<span class="sd">             [-0.48239607, -0.29257815, -0.98342034,  0.68392813, -0.25379429,</span>
+<span class="sd">               0.49359859, -0.26459883,  0.14569724, -0.68860467, -0.40903446],</span>
+<span class="sd">             [ 0.93251627, -0.85166912,  0.58096917,  0.39289882, -0.65088635,</span>
+<span class="sd">               0.40114744, -0.61327161,  0.08900539, -0.20985417,  0.67542226]]</span>
+<span class="sd">        )</span>
+
+<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+
+<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
+        <span class="p">)</span>
+    <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
+
+    <span class="n">uniformNumbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">totalSize</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
+        <span class="n">uniformNumbers</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">uniformNumbers</span> <span class="o">-</span> <span class="mf">1.0</span>
+
+    <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">uniformNumbers</span></div>
+
+
+<div class="viewcode-block" id="getLatinHypercubeDraws"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getLatinHypercubeDraws">[docs]</a><span class="k">def</span> <span class="nf">getLatinHypercubeDraws</span><span class="p">(</span>
+    <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">uniformNumbers</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Implementation of the Modified Latin Hypercube Sampling proposed</span>
+<span class="sd">    by `Hess et al., (2006)`_.</span>
+
+<span class="sd">    .. _`Hess et al., (2006)`:</span>
+<span class="sd">       https://doi.org/10.1016/j.trb.2004.10.005</span>
+
+<span class="sd">    :param sampleSize: number of observations for which draws must be</span>
+<span class="sd">                       generated. If None, a one dimensional array</span>
+<span class="sd">                       will be generated. If it has a values k, then k</span>
+<span class="sd">                       series of draws will be generated</span>
+<span class="sd">    :type sampleSize: int</span>
+<span class="sd">    :param numberOfDraws: number of draws to generate.</span>
+<span class="sd">    :type numberOfDraws: int</span>
+<span class="sd">    :param symmetric: if True, draws from [-1: 1] are generated.</span>
+<span class="sd">       If False, draws from [0: 1] are generated.  Default: False</span>
+<span class="sd">    :type symmetric: bool</span>
+<span class="sd">    :param uniformNumbers: numpy with uniformly distributed numbers.</span>
+<span class="sd">       If None, the numpy uniform number generator is used.</span>
+<span class="sd">    :type uniformNumbers: numpy.array</span>
+
+<span class="sd">    :return: numpy array with the draws</span>
+<span class="sd">    :rtype: numpy.array</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        latinHypercube = dr.getLatinHypercubeDraws(sampleSize=3,</span>
+<span class="sd">                                                   numberOfDraws=10)</span>
+<span class="sd">        array([[0.43362897, 0.5275741 , 0.09215663, 0.94056236, 0.34376868,</span>
+<span class="sd">                0.87195551, 0.41495219, 0.71736691, 0.23198736, 0.145561  ],</span>
+<span class="sd">               [0.30520544, 0.78082964, 0.83591146, 0.2733167 , 0.53890906,</span>
+<span class="sd">                0.61607469, 0.00699715, 0.17179441, 0.7557228 , 0.39733102],</span>
+<span class="sd">               [0.49676864, 0.67073483, 0.9788854 , 0.5726069 , 0.11894558,</span>
+<span class="sd">                0.05515471, 0.2640275 , 0.82093696, 0.92034628, 0.64866597]])</span>
+
+<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+
+<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+
+<span class="sd">    :raise biogemeError: if the number of uniform draws is inconsistent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
+        <span class="p">)</span>
+    <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
+
+    <span class="k">if</span> <span class="n">uniformNumbers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">uniformNumbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">totalSize</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">totalSize</span><span class="p">:</span>
+            <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;A total of </span><span class="si">{</span><span class="n">totalSize</span><span class="si">}</span><span class="s1"> uniform draws &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;must be provided, and not </span><span class="si">{</span><span class="n">uniformNumbers</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+
+    <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">totalSize</span><span class="p">,)</span>
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">uniformNumbers</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">numbers</span> <span class="o">-</span> <span class="mf">1.0</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+    <span class="n">numbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">numbers</span></div>
+
+
+<div class="viewcode-block" id="getHaltonDraws"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getHaltonDraws">[docs]</a><span class="k">def</span> <span class="nf">getHaltonDraws</span><span class="p">(</span>
+    <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">shuffled</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate Halton draws</span>
+
+<span class="sd">    :param sampleSize: number of observations for which draws must be</span>
+<span class="sd">                       generated. If None, a one dimensional array</span>
+<span class="sd">                       will be generated. If it has a values k, then k</span>
+<span class="sd">                       series of draws will be generated</span>
+<span class="sd">    :type sampleSize: int</span>
+
+<span class="sd">    :param numberOfDraws: number of draws to generate.</span>
+<span class="sd">    :type numberOfDraws: int</span>
+
+<span class="sd">    :param symmetric: if True, draws from [-1: 1] are generated.</span>
+<span class="sd">           If False, draws from [0: 1] are generated.  Default: False</span>
+<span class="sd">    :type symmetric: bool</span>
+
+<span class="sd">    :param base: generate Halton draws for a given basis.</span>
+<span class="sd">            Ideally, it should be a prime number. Default: 2.</span>
+<span class="sd">    :type base: int</span>
+
+<span class="sd">    :param skip: the number of  elements of the sequence to be discarded.</span>
+<span class="sd">    :type skip: int</span>
+
+<span class="sd">    :param shuffled: if True, each series is shuffled</span>
+<span class="sd">    :type shuffled: bool</span>
+
+<span class="sd">    :return: numpy array with the draws</span>
+<span class="sd">    :rtype: numpy.array</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        halton = dr.getHaltonDraws(sampleSize=2, numberOfDraws=10, base=3)</span>
+<span class="sd">        array([[0.33333333, 0.66666667, 0.11111111, 0.44444444, 0.77777778,</span>
+<span class="sd">                0.22222222, 0.55555556, 0.88888889, 0.03703704, 0.37037037],</span>
+<span class="sd">               [0.7037037 , 0.14814815, 0.48148148, 0.81481481, 0.25925926,</span>
+<span class="sd">                0.59259259, 0.92592593, 0.07407407, 0.40740741, 0.74074074]])</span>
+
+<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+
+<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
+        <span class="p">)</span>
+    <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
+
+    <span class="n">numbers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skipped</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">totalSize</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">skip</span><span class="p">):</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">i</span><span class="p">,</span> <span class="n">remainder</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+            <span class="n">denom</span> <span class="o">*=</span> <span class="n">base</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="n">remainder</span> <span class="o">/</span> <span class="n">denom</span>
+        <span class="k">if</span> <span class="n">skipped</span> <span class="o">&lt;</span> <span class="n">skip</span><span class="p">:</span>
+            <span class="n">skipped</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">numbers</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">if</span> <span class="n">shuffled</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">numbers</span> <span class="o">-</span> <span class="mf">1.0</span>
+
+    <span class="n">numbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">numbers</span></div>
+
+
+<div class="viewcode-block" id="getAntithetic"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getAntithetic">[docs]</a><span class="k">def</span> <span class="nf">getAntithetic</span><span class="p">(</span><span class="n">unif</span><span class="p">,</span> <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns antithetic uniform draws</span>
+
+<span class="sd">    :param unif: function taking two arguments (sampleSize, numberOfDraws)</span>
+<span class="sd">                 and returning U[0, 1] draws</span>
+<span class="sd">    :type unif: function</span>
+
+<span class="sd">    :param sampleSize: number of observations for which draws must be</span>
+<span class="sd">                       generated. If None, a one dimensional array</span>
+<span class="sd">                       will be generated. If it has a values k, then k</span>
+<span class="sd">                       series of draws will be generated</span>
+<span class="sd">    :type sampleSize: int</span>
+
+<span class="sd">    :param numberOfDraws: number of draws to generate.</span>
+<span class="sd">    :type numberOfDraws: int</span>
+
+<span class="sd">    :return: numpy array with the antithetic draws</span>
+<span class="sd">    :rtype: numpy.array</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">          draws = dr.getAntithetic(dr.getUniform,</span>
+<span class="sd">                                   sampleSize=3,</span>
+<span class="sd">                                   numberOfDraws=10)</span>
+
+<span class="sd">          array([[0.48592363, 0.13648133, 0.35925946, 0.32431338, 0.32997936,</span>
+<span class="sd">                  0.51407637, 0.86351867, 0.64074054, 0.67568662, 0.67002064],</span>
+<span class="sd">                 [0.89261997, 0.0331808 , 0.30767182, 0.93433648, 0.17196124,</span>
+<span class="sd">                  0.10738003, 0.9668192 , 0.69232818, 0.06566352, 0.82803876],</span>
+<span class="sd">                 [0.81095587, 0.96171364, 0.40984817, 0.72177258, 0.16481096,</span>
+<span class="sd">                  0.18904413, 0.03828636, 0.59015183, 0.27822742, 0.83518904]])</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">draws</span> <span class="o">=</span> <span class="n">unif</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">draws</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">draws</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getNormalWichuraDraws"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getNormalWichuraDraws">[docs]</a><span class="k">def</span> <span class="nf">getNormalWichuraDraws</span><span class="p">(</span>
+    <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">uniformNumbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">antithetic</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate pseudo-random numbers from a normal distribution N(0, 1)</span>
+
+<span class="sd">    It uses the Algorithm AS241 by `Wichura (1988)`_</span>
+<span class="sd">    which produces the normal deviate z corresponding to a given lower</span>
+<span class="sd">    tail area of p; z is accurate to about 1 part in :math:`10^{16}`.</span>
+
+<span class="sd">    .. _`Wichura (1988)`:</span>
+<span class="sd">       http://www.jstor.org/stable/2347330 </span>
+
+<span class="sd">    :param sampleSize: number of observations for which draws must be</span>
+<span class="sd">                       generated. If None, a one dimensional array</span>
+<span class="sd">                       will be generated. If it has a values k, then k</span>
+<span class="sd">                       series of draws will be generated</span>
+<span class="sd">    :type sampleSize: int</span>
+
+<span class="sd">    :param numberOfDraws: number of draws to generate.</span>
+<span class="sd">    :type numberOfDraws: int</span>
+
+<span class="sd">    :param uniformNumbers: numpy with uniformly distributed numbers.</span>
+<span class="sd">               If None, the numpy uniform number generator is used.</span>
+<span class="sd">    :type uniformNumbers: numpy.array</span>
+<span class="sd">    :param antithetic: if True, only half of the draws are</span>
+<span class="sd">                       actually generated, and the series are completed</span>
+<span class="sd">                       with their antithetic version.</span>
+<span class="sd">    :type antithetic: bool</span>
+
+<span class="sd">    :return: numpy array with the draws</span>
+<span class="sd">    :rtype: numpy.array</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        draws = dr.getNormalWichuraDraws(sampleSize=3, numberOfDraws=10)</span>
+<span class="sd">        array(</span>
+<span class="sd">            [[ 0.52418458, -1.04344204, -2.11642482,  0.48257162, -2.67188279,</span>
+<span class="sd">              -1.89993283,  0.28251041, -0.38424425,  1.53182226,  0.30651874],</span>
+<span class="sd">             [-0.7937038 , -0.07884121, -0.91005616, -0.98855175,  1.09405753,</span>
+<span class="sd">              -0.5997651 , -1.70785113,  1.57571384, -0.33208723, -1.03510102],</span>
+<span class="sd">             [-0.13853654,  0.92595498, -0.80136586,  1.68454196,  0.9955927 ,</span>
+<span class="sd">              -0.28615154,  2.10635541,  0.0436191 , -0.25417774,  0.01026933]]</span>
+<span class="sd">        )</span>
+
+<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+
+<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">antithetic</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numberOfDraws</span><span class="p">:</span>
+            <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Please specify an even number of draws for &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;antithetic draws. Requested number of &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+        <span class="n">numberOfDraws</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
+        <span class="p">)</span>
+    <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
+
+    <span class="n">split2</span> <span class="o">=</span> <span class="mf">5.0e00</span>
+    <span class="n">const1</span> <span class="o">=</span> <span class="mf">0.180625e00</span>
+    <span class="n">const2</span> <span class="o">=</span> <span class="mf">1.6e00</span>
+    <span class="n">a0</span> <span class="o">=</span> <span class="mf">3.3871328727963666080e00</span>
+    <span class="n">a1</span> <span class="o">=</span> <span class="mf">1.3314166789178437745e02</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="mf">1.9715909503065514427e03</span>
+    <span class="n">a3</span> <span class="o">=</span> <span class="mf">1.3731693765509461125e04</span>
+    <span class="n">a4</span> <span class="o">=</span> <span class="mf">4.5921953931549871457e04</span>
+    <span class="n">a5</span> <span class="o">=</span> <span class="mf">6.7265770927008700853e04</span>
+    <span class="n">a6</span> <span class="o">=</span> <span class="mf">3.3430575583588128105e04</span>
+    <span class="n">a7</span> <span class="o">=</span> <span class="mf">2.5090809287301226727e03</span>
+    <span class="n">b1</span> <span class="o">=</span> <span class="mf">4.2313330701600911252e01</span>
+    <span class="n">b2</span> <span class="o">=</span> <span class="mf">6.8718700749205790830e02</span>
+    <span class="n">b3</span> <span class="o">=</span> <span class="mf">5.3941960214247511077e03</span>
+    <span class="n">b4</span> <span class="o">=</span> <span class="mf">2.1213794301586595867e04</span>
+    <span class="n">b5</span> <span class="o">=</span> <span class="mf">3.9307895800092710610e04</span>
+    <span class="n">b6</span> <span class="o">=</span> <span class="mf">2.8729085735721942674e04</span>
+    <span class="n">b7</span> <span class="o">=</span> <span class="mf">5.2264952788528545610e03</span>
+    <span class="n">c0</span> <span class="o">=</span> <span class="mf">1.42343711074968357734e00</span>
+    <span class="n">c1</span> <span class="o">=</span> <span class="mf">4.63033784615654529590e00</span>
+    <span class="n">c2</span> <span class="o">=</span> <span class="mf">5.76949722146069140550e00</span>
+    <span class="n">c3</span> <span class="o">=</span> <span class="mf">3.64784832476320460504e00</span>
+    <span class="n">c4</span> <span class="o">=</span> <span class="mf">1.27045825245236838258e00</span>
+    <span class="n">c5</span> <span class="o">=</span> <span class="mf">2.41780725177450611770e-01</span>
+    <span class="n">c6</span> <span class="o">=</span> <span class="mf">2.27238449892691845833e-02</span>
+    <span class="n">c7</span> <span class="o">=</span> <span class="mf">7.74545014278341407640e-04</span>
+    <span class="n">d1</span> <span class="o">=</span> <span class="mf">2.05319162663775882187e00</span>
+    <span class="n">d2</span> <span class="o">=</span> <span class="mf">1.67638483018380384940e00</span>
+    <span class="n">d3</span> <span class="o">=</span> <span class="mf">6.89767334985100004550e-01</span>
+    <span class="n">d4</span> <span class="o">=</span> <span class="mf">1.48103976427480074590e-01</span>
+    <span class="n">d5</span> <span class="o">=</span> <span class="mf">1.51986665636164571966e-02</span>
+    <span class="n">d6</span> <span class="o">=</span> <span class="mf">5.47593808499534494600e-04</span>
+    <span class="n">d7</span> <span class="o">=</span> <span class="mf">1.05075007164441684324e-09</span>
+    <span class="n">e0</span> <span class="o">=</span> <span class="mf">6.65790464350110377720e00</span>
+    <span class="n">e1</span> <span class="o">=</span> <span class="mf">5.46378491116411436990e00</span>
+    <span class="n">e2</span> <span class="o">=</span> <span class="mf">1.78482653991729133580e00</span>
+    <span class="n">e3</span> <span class="o">=</span> <span class="mf">2.96560571828504891230e-01</span>
+    <span class="n">e4</span> <span class="o">=</span> <span class="mf">2.65321895265761230930e-02</span>
+    <span class="n">e5</span> <span class="o">=</span> <span class="mf">1.24266094738807843860e-03</span>
+    <span class="n">e6</span> <span class="o">=</span> <span class="mf">2.71155556874348757815e-05</span>
+    <span class="n">e7</span> <span class="o">=</span> <span class="mf">2.01033439929228813265e-07</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="mf">5.99832206555887937690e-01</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="mf">1.36929880922735805310e-01</span>
+    <span class="n">f3</span> <span class="o">=</span> <span class="mf">1.48753612908506148525e-02</span>
+    <span class="n">f4</span> <span class="o">=</span> <span class="mf">7.86869131145613259100e-04</span>
+    <span class="n">f5</span> <span class="o">=</span> <span class="mf">1.84631831751005468180e-05</span>
+    <span class="n">f6</span> <span class="o">=</span> <span class="mf">1.42151175831644588870e-07</span>
+    <span class="n">f7</span> <span class="o">=</span> <span class="mf">2.04426310338993978564e-15</span>
+
+    <span class="k">if</span> <span class="n">uniformNumbers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">uniformNumbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">totalSize</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">totalSize</span><span class="p">:</span>
+        <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;A total of </span><span class="si">{</span><span class="n">totalSize</span><span class="si">}</span><span class="s1"> uniform draws must be &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;provided, and not </span><span class="si">{</span><span class="n">uniformNumbers</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s1">.&#39;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+    <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">totalSize</span><span class="p">,)</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="n">uniformNumbers</span> <span class="o">-</span> <span class="mf">0.5</span>
+    <span class="n">draws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">cond1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">uniformNumbers</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.45</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">=</span> <span class="n">const1</span> <span class="o">-</span> <span class="n">q</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">*</span> <span class="n">q</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+    <span class="n">draws</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">q</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="p">((</span><span class="n">a7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">a4</span>
+                        <span class="p">)</span>
+                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="n">a3</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">a2</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">a1</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">a0</span>
+        <span class="p">)</span>
+        <span class="o">/</span> <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="p">((</span><span class="n">b7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">b4</span>
+                        <span class="p">)</span>
+                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="n">b3</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">b2</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">b1</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
+            <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">cond2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">uniformNumbers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.45</span>
+    <span class="n">cond2a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cond2</span><span class="p">,</span> <span class="n">q</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">cond2b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cond2</span><span class="p">,</span> <span class="n">q</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">cond2a</span><span class="p">]</span> <span class="o">=</span> <span class="n">uniformNumbers</span><span class="p">[</span><span class="n">cond2a</span><span class="p">]</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">cond2b</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">uniformNumbers</span><span class="p">[</span><span class="n">cond2b</span><span class="p">]</span>
+    <span class="n">cond2c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cond2</span><span class="p">,</span> <span class="n">r</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">cond2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cond2</span><span class="p">,</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">draws</span><span class="p">[</span><span class="n">cond2c</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">cond2d</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">cond2d</span><span class="p">]))</span>
+    <span class="n">cond2d_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cond2d</span><span class="p">,</span> <span class="n">r</span> <span class="o">&lt;=</span> <span class="n">split2</span><span class="p">)</span>
+    <span class="n">cond2d_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cond2d</span><span class="p">,</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="n">split2</span><span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">-</span> <span class="n">const2</span>
+    <span class="n">draws</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">((</span><span class="n">c7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c5</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="n">c4</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">c3</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">c2</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">c1</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">c0</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">((</span><span class="n">d7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d5</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="n">d4</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">d3</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">d2</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">d1</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
+        <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">-</span> <span class="n">split2</span>
+    <span class="n">draws</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">((</span><span class="n">e7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e5</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="n">e4</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">e3</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">e2</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">e1</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">e0</span>
+    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="p">(</span>
+            <span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="p">((</span><span class="n">f7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f5</span><span class="p">)</span>
+                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+                        <span class="o">+</span> <span class="n">f4</span>
+                    <span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="n">f3</span>
+                <span class="p">)</span>
+                <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">f2</span>
+            <span class="p">)</span>
+            <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">f1</span>
+        <span class="p">)</span>
+        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
+        <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">draws</span><span class="p">[</span><span class="n">cond2a</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">draws</span><span class="p">[</span><span class="n">cond2a</span><span class="p">]</span>
+
+    <span class="n">draws</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">antithetic</span><span class="p">:</span>
+        <span class="n">draws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">draws</span><span class="p">,</span> <span class="o">-</span><span class="n">draws</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">draws</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
