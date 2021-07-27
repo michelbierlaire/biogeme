@@ -14,6 +14,7 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.messaging as msg
+import biogeme.exceptions as excep
 from biogeme.expressions import Beta, DefineVariable, bioDraws, log, MonteCarlo
 
 # Read the data
@@ -144,14 +145,20 @@ msg = ''
 for name, algo in algos.items():
     biogeme.modelName = f'05normalMixture_allAlgos_{name}'.strip()
     p = algoParameters.get(name)
-    results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
-    msg += (
-        f'{name}\t{results[name].data.logLike:.2f}\t'
-        f'{results[name].data.gradientNorm:.2g}\t'
-        f'{results[name].data.optimizationMessages["Optimization time"]}'
-        f'\t{results[name].data.optimizationMessages["Cause of termination"]}'
-        f'\n'
-    )
+    try:
+        results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
+        msg += (
+            f'{name}\t{results[name].data.logLike:.2f}\t'
+            f'{results[name].data.gradientNorm:.2g}\t'
+            f'{results[name].data.optimizationMessages["Optimization time"]}'
+            f'\t{results[name].data.optimizationMessages["Cause of termination"]}'
+            f'\n'
+        )
+    except excep.biogemeError as e:
+        print(e)
+        results[name] = None
+        msg += f'{name}\tFailed to estimate the model'
+
 
 print('Algorithm\t\tloglike\t\tnormg\ttime\t\tdiagnostic')
 print('+++++++++\t\t+++++++\t\t+++++\t++++\t\t++++++++++')
