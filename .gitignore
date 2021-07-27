@@ -308,3 +308,4 @@ dist/biogeme-3.2.7-cp36-cp36m-win_amd64.whl
 dist/biogeme-3.2.7-cp36-cp36m-macosx_10_9_x86_64.whl
 sphinx/biogeme.rst.keep
 sphinx/tmp
+dist/biogeme-3.2.post7-py3.9-macosx-10.9-x86_64.egg
