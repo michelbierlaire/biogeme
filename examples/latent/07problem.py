@@ -18,6 +18,7 @@
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
+import biogeme.optimization as opt
 from biogeme import models
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable, log, Elem, bioNormalCdf
@@ -266,7 +267,7 @@ biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
 biogeme.modelName = '07problem'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = biogeme.estimate(algorithm=opt.bioBfgs)
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'final log likelihood: {results.data.logLike:.3f}')
