@@ -125,7 +125,7 @@ logger.setDetailed()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
-biogeme.modelName = '13panel'
+biogeme.modelName = '13panelNormalized'
 
 # Estimate the parameters.
 results = biogeme.estimate()
