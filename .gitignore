@@ -313,3 +313,8 @@ examples/swissmetro/sbatch.csh
 examples/swissmetro/run.csh
 examples/swissmetro/run.csh
 examples/latent/run.csh
+examples/latent/sbatch.csh
+examples/latent/scitas.ipynb
+examples/latent/scitas.ipynb
+examples/latentbis/sbatch.csh
+examples/latent/scitas.ipynb
