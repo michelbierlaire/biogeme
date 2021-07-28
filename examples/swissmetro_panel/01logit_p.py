@@ -21,7 +21,7 @@ from biogeme import models
 from biogeme.expressions import Beta, Variable, DefineVariable, bioMultSum
 
 # Read the data
-df = pd.read_csv('swissmetro_panel.dat', '\t')
+df = pd.read_csv('swissmetro_panel.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
 # Number of observations for each individual. The are numbered from 0
@@ -144,7 +144,7 @@ logprob = [
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, bioMultSum(logprob))
-biogeme.modelName = '01logit'
+biogeme.modelName = '01logit_p'
 
 # Estimate the parameters
 results = biogeme.estimate()
