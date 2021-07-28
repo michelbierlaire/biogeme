@@ -57,7 +57,7 @@ htmlNotNeed = [
     './latent/00factorAnalysis.html',
 ]
 
-version = '3.2.7'
+version = '3.2.8'
 
 def checkFile(theFile):
     if theFile.is_file() and theFile.name.endswith('py'):
