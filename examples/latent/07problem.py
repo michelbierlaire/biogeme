@@ -267,7 +267,7 @@ biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
 biogeme.modelName = '07problem'
 
 # Estimate the parameters
-results = biogeme.estimate(algorithm=opt.bioBfgs)
+results = biogeme.estimate()
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'final log likelihood: {results.data.logLike:.3f}')
