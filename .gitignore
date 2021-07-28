@@ -320,3 +320,4 @@ examples/latentbis/sbatch.csh
 examples/latent/scitas.ipynb
 examples/latent/scitas.ipynb
 examples/swissmetro_panel/12panel_p.run
+examples/swissmetro/run.csh
