@@ -368,6 +368,6 @@ initSolutions = [
 vns.vns(
     theProblem,
     initSolutions,
-    archiveInputFile='airlinePareto.pickle',
-    pickleOutputFile='airlinePareto.pickle',
+    archiveInputFile='swissmetroPareto.pickle',
+    pickleOutputFile='swissmetroPareto.pickle',
 )
