@@ -321,3 +321,5 @@ examples/latent/scitas.ipynb
 examples/swissmetro_panel/12panel_p.run
 examples/swissmetro/run.csh
 examples/swissmetro_panel/12panel_p.run
+examples/swissmetro/19individualLevelParameters.pickle
+examples/indicators/01nestedEstimation.pickle
