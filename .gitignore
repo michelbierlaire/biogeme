@@ -225,7 +225,6 @@ examples/swissmetro/scitas.csh
 examples/swissmetro/scitas.py
 examples/swissmetro/.ipynb_checkpoints/Untitled-checkpoint.ipynb
 examples/swissmetro/__savedIterations.txt
-*.pickle
 examples/latent/01oneLatentRegression.tex
 examples/latent/scitas.py
 examples/montecarlo/scitas.py
