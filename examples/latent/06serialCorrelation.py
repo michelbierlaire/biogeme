@@ -17,6 +17,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.results as res
 import biogeme.messaging as msg
+import biogeme.optimization as opt
 from biogeme.expressions import (
     Beta,
     DefineVariable,
@@ -410,7 +411,7 @@ biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
 biogeme.modelName = '06serialCorrelation'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = biogeme.estimate(algorithm=opt.bioBfgs)
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
