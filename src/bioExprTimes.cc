@@ -23,25 +23,19 @@ bioExprTimes::~bioExprTimes() {
 
 }
 
-bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
 
   //  DEBUG_MESSAGE("Derivatives of " << print());
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  bioDerivatives* rightResult = NULL ;
+  const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* rightResult = NULL ;
   bioReal rightValue ;
   if (leftResult->f == 0.0 && !hessian) {
     // No need to calculate the derivatives of the other term
@@ -63,23 +57,23 @@ bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> litera
     // l = 0
     if (rightValue == 0) {
       // l = 0, r = 0
-      theDerivatives->f = 0.0 ;
+      theDerivatives.f = 0.0 ;
       if (gradient) {
 	for (bioUInt i = 0 ; i < n ; ++i) {
-	  theDerivatives->g[i] = 0.0 ;
+	  theDerivatives.g[i] = 0.0 ;
 	}
       }
     }
     else {
       // l = 0, r != 0
-      theDerivatives->f = 0.0 ;
+      theDerivatives.f = 0.0 ;
       if (gradient) {
 	for (bioUInt i = 0 ; i < n ; ++i) {
 	  if (leftResult->g[i] == 0.0) {
-	    theDerivatives->g[i] = 0.0 ;
+	    theDerivatives.g[i] = 0.0 ;
 	  }
 	  else {
-	    theDerivatives->g[i] = leftResult->g[i] * rightValue ;
+	    theDerivatives.g[i] = leftResult->g[i] * rightValue ;
 	  }
 	}
       }
@@ -89,7 +83,7 @@ bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> litera
     // l != 0 
     if (rightValue == 0) {
       // l != 0, r = 0
-      theDerivatives->f = 0.0 ;
+      theDerivatives.f = 0.0 ;
       if (rightResult == NULL) {
 	throw bioExceptNullPointer(__FILE__,__LINE__,"Right result of multiplication") ;
       }
@@ -97,23 +91,23 @@ bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> litera
       if (gradient) {
 	for (bioUInt i = 0 ; i < n ; ++i) {
 	  if (rightResult->g[i] == 0.0) {
-	    theDerivatives->g[i] = 0.0 ;
+	    theDerivatives.g[i] = 0.0 ;
 	  }
 	  else {
-	    theDerivatives->g[i] = rightResult->g[i] * leftResult->f ;
+	    theDerivatives.g[i] = rightResult->g[i] * leftResult->f ;
 	  }
 	}
       }
     }
     else {
       // l != 0, r != 0
-      theDerivatives->f = leftResult->f * rightValue ;
+      theDerivatives.f = leftResult->f * rightValue ;
       if (gradient) {
 	if (rightResult == NULL) {
 	  throw bioExceptNullPointer(__FILE__,__LINE__,"Right result of multiplication") ;
 	}
 	for (bioUInt i = 0 ; i < n ; ++i) {
-	  theDerivatives->g[i] = leftResult->g[i] * rightResult->f + 
+	  theDerivatives.g[i] = leftResult->g[i] * rightResult->f + 
 	    rightResult->g[i] * leftResult->f ;
 	}
       }
@@ -144,13 +138,13 @@ bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> litera
 	if (leftResult->g[j] != 0.0 && rightResult->g[i] != 0.0) {
 	  v += leftResult->g[j] * rightResult->g[i] ;
 	}
-	theDerivatives->h[i][j] = theDerivatives->h[j][i] = v ;
+	theDerivatives.h[i][j] = theDerivatives.h[j][i] = v ;
       }
     }    
   }
 
   
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprTimes::print(bioBoolean hp) const {

@@ -16,7 +16,9 @@
 
 class bioDerivatives {
  public:
-  bioDerivatives(bioUInt n) ;
+  bioDerivatives() ;
+  void clear() ;
+  void resize(bioUInt n) ;
   void setDerivativesToZero() ;
   void setGradientToZero() ;
   void setHessianToZero() ;

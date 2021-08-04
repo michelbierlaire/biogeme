@@ -23,35 +23,29 @@ bioExprMinus::~bioExprMinus() {
 
 }
 
-bioDerivatives* bioExprMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  theDerivatives->f = leftResult->f - rightResult->f ;
+  const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  theDerivatives.f = leftResult->f - rightResult->f ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] = leftResult->g[i] - rightResult->g[i] ;
+      theDerivatives.g[i] = leftResult->g[i] - rightResult->g[i] ;
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
-	  theDerivatives->h[i][j] = leftResult->h[i][j] - rightResult->h[i][j] ;
+	  theDerivatives.h[i][j] = leftResult->h[i][j] - rightResult->h[i][j] ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprMinus::print(bioBoolean hp) const {

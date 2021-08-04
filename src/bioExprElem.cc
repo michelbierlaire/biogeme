@@ -33,18 +33,12 @@ bioExprElem::~bioExprElem() {
 
 }
 
-bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						    bioBoolean gradient,
 				      bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
 
@@ -64,11 +58,11 @@ bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literal
   if (found->second == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"expression") ;
   }
-  bioDerivatives* fgh =  found->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* fgh =  found->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
   if (fgh == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"derivatives") ;
   }
-  theDerivatives->f = fgh->f ;
+  theDerivatives.f = fgh->f ;
   if (!std::isfinite(fgh->f)) {
     std::stringstream str ;
     str << "Invalid value for expression <" << found->second->print(true) << ">: " << fgh->f ;
@@ -76,15 +70,15 @@ bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literal
   }
   if (gradient) {
     for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-      theDerivatives->g[k] = fgh->g[k] ;
+      theDerivatives.g[k] = fgh->g[k] ;
       if (hessian) {
 	for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-	  theDerivatives->h[k][l] = fgh->h[k][l] ;
+	  theDerivatives.h[k][l] = fgh->h[k][l] ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprElem::print(bioBoolean hp) const {

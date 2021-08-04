@@ -13,27 +13,27 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 import biogeme.optimization as opt
-import biogeme.models as models
+from biogeme import models
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable
 
 # Read the data
-df = pd.read_csv('swissmetro.dat', '\t')
+df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database
-#print(database.data.describe())
+# print(database.data.describe())
 
 # The following statement allows you to use the names of the variable
 # as Python variable.
 globals().update(database.variables)
 
 # Removing some observations can be done directly using pandas.
-#remove = (((database.data.PURPOSE != 1) &
+# remove = (((database.data.PURPOSE != 1) &
 #           (database.data.PURPOSE != 3)) |
 #          (database.data.CHOICE == 0))
-#database.data.drop(database.data[remove].index,inplace=True)
+# database.data.drop(database.data[remove].index,inplace=True)
 
 # Here we use the "biogeme" way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -55,34 +55,26 @@ TRAIN_COST = TRAIN_CO * (GA == 0)
 CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
 TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
 TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100, database)
+TRAIN_COST_SCALED = DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+)
 SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
 SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
 CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
 CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
 
 # Definition of the utility functions
-V1 = ASC_TRAIN + \
-     B_TIME * TRAIN_TT_SCALED + \
-     B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + \
-     B_TIME * SM_TT_SCALED + \
-     B_COST * SM_COST_SCALED
-V3 = ASC_CAR + \
-     B_TIME * CAR_TT_SCALED + \
-     B_COST * CAR_CO_SCALED
+V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
+V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
-V = {1: V1,
-     2: V2,
-     3: V3}
+V = {1: V1, 2: V2, 3: V3}
 
 # Associate the availability conditions with the alternatives
-av = {1: TRAIN_AV_SP,
-      2: SM_AV,
-      3: CAR_AV_SP}
+av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
-#Definition of nests:
+# Definition of nests:
 # 1: nests parameter
 # 2: list of alternatives
 existing = MU, [1, 3]
@@ -96,27 +88,30 @@ logprob = models.lognested(V, av, nests, CHOICE)
 
 # Define level of verbosity
 logger = msg.bioMessage()
-#logger.setSilent()
-#logger.setWarning()
+# logger.setSilent()
+# logger.setWarning()
 logger.setGeneral()
-#logger.setDetailed()
+# logger.setDetailed()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)
 
-algos = {'CFSQP                   ': None,
-         'scipy                   ': opt.scipy,
-         'Simple bounds Newton    ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds BFGS      ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds hybrid 20%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds hybrid 50%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds hybrid 80%': opt.simpleBoundsNewtonAlgorithmForBiogeme}
+algos = {
+    'scipy                   ': opt.scipy,
+    'Simple bounds Newton    ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds BFGS      ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds hybrid 20%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds hybrid 50%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds hybrid 80%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+}
 
-algoParameters = {'Simple bounds Newton': {'proportionAnalyticalHessian': 1.0},
-                  'Simple bounds BFGS': {'proportionAnalyticalHessian': 0.0},
-                  'Simple bounds hybrid 20%': {'proportionAnalyticalHessian': 0.2},
-                  'Simple bounds hybrid 50%': {'proportionAnalyticalHessian': 0.5},
-                  'Simple bounds hybrid 80%': {'proportionAnalyticalHessian': 0.8}}
+algoParameters = {
+    'Simple bounds Newton': {'proportionAnalyticalHessian': 1.0},
+    'Simple bounds BFGS': {'proportionAnalyticalHessian': 0.0},
+    'Simple bounds hybrid 20%': {'proportionAnalyticalHessian': 0.2},
+    'Simple bounds hybrid 50%': {'proportionAnalyticalHessian': 0.5},
+    'Simple bounds hybrid 80%': {'proportionAnalyticalHessian': 0.8},
+}
 
 results = {}
 msg = ''
@@ -124,11 +119,13 @@ for name, algo in algos.items():
     biogeme.modelName = f'09nested_allAlgos_{name}'.strip()
     p = algoParameters.get(name)
     results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
-    g = results[name].data.g
-    msg += (f'{name}\t{results[name].data.logLike:.2f}\t'
-            f'{results[name].data.gradientNorm:.2g}\t'
-            f'{results[name].data.optimizationMessages["Optimization time"]}'
-            f'\t{results[name].data.optimizationMessages["Cause of termination"]}\n')
+    msg += (
+        f'{name}\t{results[name].data.logLike:.2f}\t'
+        f'{results[name].data.gradientNorm:.2g}\t'
+        f'{results[name].data.optimizationMessages["Optimization time"]}'
+        f'\t{results[name].data.optimizationMessages["Cause of termination"]}'
+        f'\n'
+    )
 
 print("Algorithm\t\t\tloglike\t\tnormg\ttime\t\tdiagnostic")
 print("+++++++++\t\t\t+++++++\t\t+++++\t++++\t\t++++++++++")
@@ -139,7 +136,6 @@ Here are the results.
 
 Algorithm		        loglike		normg	time		diagnostic
 +++++++++		        +++++++		+++++	++++		++++++++++
-CFSQP                   	-5236.90	0.00036	0:00:01.342914	b'Normal termination. Obj: 6.05545e-06 Const: 6.05545e-06'
 scipy                   	-5236.90	0.00017	0:00:00.549708	b'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
 Simple bounds Newton    	-5236.90	0.0027	0:00:00.412040	Relative gradient = 3.5e-07 <= 6.1e-06
 Simple bounds BFGS      	-5236.90	0.0027	0:00:00.403998	Relative gradient = 3.5e-07 <= 6.1e-06

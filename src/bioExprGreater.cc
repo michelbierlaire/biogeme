@@ -23,18 +23,12 @@ bioExprGreater::~bioExprGreater() {
 
 }
 
-bioDerivatives* bioExprGreater::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						       bioBoolean gradient,
-						   bioBoolean hessian) {
-
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+const bioDerivatives* bioExprGreater::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+							     bioBoolean gradient,
+							     bioBoolean hessian) {
+  
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   if (gradient || hessian) {
@@ -46,23 +40,23 @@ bioDerivatives* bioExprGreater::getValueAndDerivatives(std::vector<bioUInt> lite
   }
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
 
   
   if (left->getValue() > right->getValue()) {
-    theDerivatives->f = 1.0 ;
+    theDerivatives.f = 1.0 ;
   }
   else {
-    theDerivatives->f = 0.0 ;
+    theDerivatives.f = 0.0 ;
   }
 
   
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprGreater::print(bioBoolean hp) const {

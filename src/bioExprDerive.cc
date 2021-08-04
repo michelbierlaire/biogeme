@@ -21,13 +21,10 @@ bioExprDerive::~bioExprDerive() {
 
 }
 
-bioDerivatives* bioExprDerive::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprDerive::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
   if (gradient || hessian) {
     throw bioExceptions(__FILE__,__LINE__,"No derivatives are available for this expression, yet.") ;
   }
@@ -35,12 +32,12 @@ bioDerivatives* bioExprDerive::getValueAndDerivatives(std::vector<bioUInt> liter
   std::vector<bioUInt> theIds ;
   theIds.push_back(literalId) ;
 
-  bioDerivatives* childResult = child->getValueAndDerivatives(theIds,true,false) ;
+  const bioDerivatives* childResult = child->getValueAndDerivatives(theIds,true,false) ;
   if (childResult == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"derivatives") ;
   }
-  theDerivatives->f = childResult->g[0] ;
-  return theDerivatives ;
+  theDerivatives.f = childResult->g[0] ;
+  return &theDerivatives ;
 }
 
 bioString bioExprDerive::print(bioBoolean hp) const {

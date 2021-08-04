@@ -91,6 +91,9 @@ logprob = models.logmev_endogenousSampling(V,Gi,av,correction,CHOICE)
 class test_14(unittest.TestCase):
     def testEstimation(self):
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5169.641517407234,2)
     

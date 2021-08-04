@@ -64,8 +64,8 @@ class testExpressions(unittest.TestCase):
     def test_expr2(self):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(-self.beta2 * self.Variable2) / \
             (self.beta3 * (self.beta2 >= self.beta1))
-        res = expr2.getValue_c(self.myData)
-        self.assertListEqual(res, [20.0, 40.0, 60.0, 80.0, 100.0])
+        res = list(expr2.getValue_c(self.myData))
+        self.assertListEqual(res, [20., 40., 60., 80., 100.])
 
 
     def test_dictOfBetas(self):
@@ -114,7 +114,7 @@ class testExpressions(unittest.TestCase):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(-self.beta2 * self.Variable2) / \
             (self.beta3 * (self.beta2 >= self.beta1))
         expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
-        res = expr5.getValue_c(self.myData)
+        res = list(expr5.getValue_c(self.myData))
         self.assertListEqual(res, [0.19548882389211292,
                                    0.19548882389211292,
                                    0.19548882389211292,
@@ -133,7 +133,7 @@ class testExpressions(unittest.TestCase):
         integrand = x * x
         expr4 = ex.Integrate(integrand * dx /(b - a), 'omega')
         expr6 = ex.bioMultSum([expr1, expr2, expr4])
-        res = expr6.getValue_c(self.myData)
+        res = list(expr6.getValue_c(self.myData))
         self.assertListEqual(res, [22.28822055098741,
                                    42.28822055098741,
                                    62.28822055098741,

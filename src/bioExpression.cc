@@ -10,7 +10,7 @@
 #include "bioExpression.h"
 #include "bioDebug.h"
 #include <sstream>
-bioExpression::bioExpression() : parameters(NULL), theDerivatives(NULL), data(NULL), dataMap(NULL), draws(NULL), sampleSize(0), numberOfDraws(0), numberOfDrawVariables(0), rowIndex(NULL), individualIndex(NULL) {
+bioExpression::bioExpression() : parameters(NULL), fixedParameters(NULL), data(NULL), dataMap(NULL), draws(NULL), sampleSize(0), numberOfDraws(0), numberOfDrawVariables(0), rowIndex(NULL), individualIndex(NULL) {
 }
 
 bioExpression::~bioExpression() {
@@ -19,11 +19,9 @@ bioExpression::~bioExpression() {
 
 
 void bioExpression::resetDerivatives() {
-  if (theDerivatives != NULL) {
-    delete(theDerivatives) ;
-    theDerivatives = NULL ;
-  }
+  theDerivatives.clear() ;
 }
+
 void bioExpression::setParameters(std::vector<bioReal>* p) {
   parameters = p ;
 }
@@ -98,7 +96,7 @@ void bioExpression::setRandomVariableValuePtr(bioUInt rvId, bioReal* v) {
 }
 
 bioReal bioExpression::getValue() {
-  bioDerivatives* r = getValueAndDerivatives(std::vector<bioUInt>(),false,false) ;
+  const bioDerivatives* r = getValueAndDerivatives(std::vector<bioUInt>(),false,false) ;
   return r->f ;
 
 }

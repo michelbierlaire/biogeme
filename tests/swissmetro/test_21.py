@@ -72,6 +72,9 @@ prob = Elem(P,CHOICE)
 class test_02(unittest.TestCase):
     def testEstimation(self):
         biogeme  = bio.BIOGEME(database,log(prob))
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-986.1888,2)
     

@@ -11,51 +11,48 @@
 import datetime
 import biogeme.filenames as bf
 import biogeme.version as bv
+from biogeme.singleton import Singleton
 
-class Singleton(type):
-    """
-    A singleton is a class with only one instance
-    """
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
 class bioMessage(metaclass=Singleton):
-    """ Manages the Biogeme messages
-    """
+    """Manages the Biogeme messages"""
+
     def __init__(self, screenLevel=0):
-        """ Constructor
+        """Constructor
 
-        :param screenLevel: level of message that must be displayed on the screen:
+        :param screenLevel: level of message that must be displayed on the
+            screen:
 
-           - 0: no output (default)
-           - 1: warnings only
-           - 2: only warnings and general information
-           - 3: more verbose
-           - 4: debug messages
+            - 0: no output (default)
+            - 1: warnings only
+            - 2: only warnings and general information
+            - 3: more verbose
+            - 4: debug messages
 
 
-        :type screenlevel: int
+        :type screenLevel: int
         """
-        self.screenLevel = screenLevel
-        self.types = {0:'Silent',
-                      1:'Warning',
-                      2:'General',
-                      3:'Detailed',
-                      4:'Debug'}
+        self.screenLevel = screenLevel #: screen verbosity level
+        self.types = {
+            0: 'Silent',
+            1: 'Warning',
+            2: 'General',
+            3: 'Detailed',
+            4: 'Debug',
+        } #: names of verbosity levels
 
         self.resetMessages()
 
+        self.lastLevel = None #: last level used
 
     def resetMessages(self):
+        """Erase all messages"""
         self.messages = []
-        
-    def allMessages(self, screenLevel=None):
-        """ Report all the messages up to a given level.
 
-        :param fileLevel: level of message that must be reported in the file:
+    def allMessages(self, screenLevel=None):
+        """Report all the messages up to a given level.
+
+        :param screenLevel: level of message that must be reported in the file:
 
            - 0: no output
            - 1: warnings only
@@ -64,20 +61,22 @@ class bioMessage(metaclass=Singleton):
            - 4: debug messages
 
              If None (default), all messages are reported.
-        
-        :type screenlevel: int
+
+        :type screenLevel: int
 
         :return: all messages.
         :rtype: str.
         """
-        result = f'*** Messages from biogeme {bv.getVersion()} [{bv.versionDate}]\n'
+        result = (
+            f'*** Messages from biogeme {bv.getVersion()} [{bv.versionDate}]\n'
+        )
         for m, i in self.messages:
             if screenLevel is None or i <= screenLevel:
                 result += f'{m}\n'
         return result
-        
+
     def createLog(self, fileLevel=None, fileName='_biogeme'):
-        """ Creates a log file
+        """Creates a log file
 
         :param fileLevel: level of message that must be reported in the file:
 
@@ -88,59 +87,66 @@ class bioMessage(metaclass=Singleton):
            - 4: debug messages
 
              If None (default), all messages are reported.
-        :type screenlevel: int
+        :type fileLevel: int
 
         :param fileName: name of the file (without extension).
                          Default: '_biogeme'. A file called _biogeme.log
                          will be created.
         :type fileName: string
+
+        :return: name of the file
+        :rtype: str
         """
         completeFileName = bf.getNewFileName(fileName, 'log')
-        f = open(completeFileName, 'w')
-        self.general(f'Log file created: {completeFileName}')
-        print(f'*** File created {datetime.datetime.now()} ***', file=f)
-        print(f'*** Log file from biogeme {bv.getVersion()} [{bv.versionDate}]',
-              file=f)
-        for m, i in self.messages:
-            if fileLevel is None or i <= fileLevel:
-                print(m, file=f)
-        f.close()
+        with open(completeFileName, 'w') as f:
+            self.general(f'Log file created: {completeFileName}')
+            print(f'*** File created {datetime.datetime.now()} ***', file=f)
+            print(
+                f'*** Log file from biogeme {bv.getVersion()}'
+                f' [{bv.versionDate}]',
+                file=f,
+            )
+            for m, i in self.messages:
+                if fileLevel is None or i <= fileLevel:
+                    print(m, file=f)
         return completeFileName
 
-
     def temporarySilence(self):
-        """ Temporarily turns off the message, remembering the current screen level. 
+        """Temporarily turns off the message, remembering the current
+        screen level.
         """
         self.lastLevel = self.screenLevel
         self.screenLevel = 0
 
     def resume(self):
-        """ Resume the regular operations of the logger after the use of temporarySilence
+        """Resume the regular operations of the logger after the use of
+        temporarySilence
         """
-        self.screenLevel = self.lastLevel
-        
+        if self.lastLevel is not None:
+            self.screenLevel = self.lastLevel
+
     def setSilent(self):
-        """ Set both screen and file levels to 0 """
+        """Set both screen and file levels to 0"""
         self.screenLevel = 0
 
     def setWarning(self):
-        """ Set both screen and file levels to 1 """
+        """Set both screen and file levels to 1"""
         self.screenLevel = 1
 
     def setGeneral(self):
-        """ Set both screen and file levels to 2 """
+        """Set both screen and file levels to 2"""
         self.screenLevel = 2
 
     def setDetailed(self):
-        """ Set both screen and file levels to 3 """
+        """Set both screen and file levels to 3"""
         self.screenLevel = 3
 
     def setDebug(self):
-        """ Set both screen and file levels to 4 """
+        """Set both screen and file levels to 4"""
         self.screenLevel = 4
 
     def setScreenLevel(self, level):
-        """ Change the level of messaging for the screen
+        """Change the level of messaging for the screen
 
         :param level: level of message that must be displayed on the screen:
 
@@ -156,7 +162,7 @@ class bioMessage(metaclass=Singleton):
         self.screenLevel = level
 
     def addMessage(self, text, level):
-        """ Add a message
+        """Add a message
 
         :param text: text of the message.
         :type text: string
@@ -168,18 +174,23 @@ class bioMessage(metaclass=Singleton):
            - 3: detailed information
            - 4: debug message
 
-        :note: adding a message of level 0 is meaningless, as it correspond to silentmode.
+        :type level: int
+
+        :note: adding a message of level 0 is meaningless, as it correspond to
+            silentmode.
         """
         theLevel = f'< {self.types[level]} >'
-        theMessage = (f'[{datetime.datetime.now().strftime("%H:%M:%S")}] '
-                      f'{theLevel:13} {text}')
+        theMessage = (
+            f'[{datetime.datetime.now().strftime("%H:%M:%S")}] '
+            f'{theLevel:13} {text}'
+        )
         if level != 0:
             self.messages.append((theMessage, level))
             if level <= self.screenLevel:
                 print(theMessage)
 
     def warning(self, text):
-        """ Add a warning
+        """Add a warning
 
         :param text: text of the message.
         :type text: string
@@ -188,7 +199,7 @@ class bioMessage(metaclass=Singleton):
         self.addMessage(text, 1)
 
     def general(self, text):
-        """ Add a general message
+        """Add a general message
 
         :param text: text of the message.
         :type text: string
@@ -197,7 +208,7 @@ class bioMessage(metaclass=Singleton):
         self.addMessage(text, 2)
 
     def detailed(self, text):
-        """ Add a detailed message
+        """Add a detailed message
 
         :param text: text of the message.
         :type text: string
@@ -206,7 +217,7 @@ class bioMessage(metaclass=Singleton):
         self.addMessage(text, 3)
 
     def debug(self, text):
-        """ Add a debug message
+        """Add a debug message
 
         :param text: text of the message.
         :type text: string

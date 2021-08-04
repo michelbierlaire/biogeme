@@ -1,0 +1,639 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Optimization &mdash; Biogeme 3.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Results" href="results.html" />
+    <link rel="prev" title="Models" href="models.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Biogeme
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Optimization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.optimization">biogeme.optimization module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Optimization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/optimization.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="optimization">
+<h1>Optimization<a class="headerlink" href="#optimization" title="Permalink to this headline">¶</a></h1>
+<p>Optimization algorithms for Biogeme</p>
+<div class="section" id="module-biogeme.optimization">
+<span id="biogeme-optimization-module"></span><h2>biogeme.optimization module<a class="headerlink" href="#module-biogeme.optimization" title="Permalink to this headline">¶</a></h2>
+<p>Optimization algorithms for Biogeme</p>
+<dl class="field-list simple">
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Michel Bierlaire</p>
+</dd>
+<dt class="field-even">date</dt>
+<dd class="field-even"><p>Mon Dec 21 10:24:24 2020</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt id="biogeme.optimization.bfgsLineSearchForBiogeme">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">bfgsLineSearchForBiogeme</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#bfgsLineSearchForBiogeme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.bfgsLineSearchForBiogeme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on BFGS
+quasi-Newton method with LS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell,u) containing the lower and
+upper bounds for each free parameter. Note that
+this algorithm does not support bound constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that
+threshold, the algorithm has reached convergence
+(default: <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 100).</p></li>
+<li><div class="line-block">
+<div class="line">initBfgs: the positive definite matrix that initalizes the
+BFGS updates. If None, the identity matrix is
+used. Default: None.</div>
+</div>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>tuple x, messages, where</p>
+<ul class="simple">
+<li><p>x is the solution found,</p></li>
+<li><p>messages is a dictionary reporting various aspects
+related to the run of the algorithm.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array, dict(str:object)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogeme.exceptions.biogemeError</strong></a> – if bounds are imposed on
+the variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.bfgsTrustRegionForBiogeme">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">bfgsTrustRegionForBiogeme</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#bfgsTrustRegionForBiogeme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.bfgsTrustRegionForBiogeme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on Newton method with TR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell,u) containing the lower and
+upper bounds for each free parameter. Note that
+this algorithm does not support bound constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that
+threshold, the algorithm has reached convergence
+(default: <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 100).</p></li>
+<li><p>dogleg: if True, the trust region subproblem is solved using
+the Dogleg method. If False, it is solved using the
+truncated conjugate gradient method (default: False).</p></li>
+<li><p>radius: the initial radius of the truat region (default: 1.0).</p></li>
+<li><p>initBfgs: the positive definite matrix that initalizes the
+BFGS updates. If None, the identity matrix is
+used. Default: None.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>tuple x, messages, where</p>
+<ul class="simple">
+<li><p>x is the solution found,</p></li>
+<li><p>messages is a dictionary reporting various aspects
+related to the run of the algorithm.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array, dict(str:object)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogeme.exceptions.biogemeError</strong></a> – if bounds are imposed on
+the variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.bioBfgs">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">bioBfgs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#bioBfgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.bioBfgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on BFGS quasi-Newton
+method with simple bounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell,u) containing the lower and upper
+bounds for each free
+parameter. Note that this algorithm does not support bound
+constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that threshold,
+the algorithm has reached convergence
+(default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>steptol: the algorithm stops when the relative change in x
+is below this threshold. Basically, if p significant digits
+of x are needed, steptol should be set to 1.0e-p. Default:
+<span class="math notranslate nohighlight">\(10^{-5}\)</span></p></li>
+<li><p>cgtolerance: when the norm of the residual is below that
+threshold, the conjugate gradient algorithm has reached
+convergence (default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>infeasibleConjugateGradient: if True, the conjugate
+gradient algorithm may generate until termination.  The
+result will then be projected on the feasible domain.  If
+False, the algorithm stops as soon as an infeasible iterate
+is generated (default: False).</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 1000).</p></li>
+<li><p>radius: the initial radius of the truat region (default: 1.0).</p></li>
+<li><p>eta1: threshold for failed iterations (default: 0.01).</p></li>
+<li><p>eta2: threshold for very successful iteration (default 0.9).</p></li>
+<li><p>enlargingFactor: factor used to enlarge the trust region
+during very successful iterations (default 10).</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>x, messages</p>
+<ul class="simple">
+<li><p>x is the solution generated by the algorithm,</p></li>
+<li><p>messages is a dictionary describing information about the lagorithm</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpay.array, dict(str:object)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.bioNewton">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">bioNewton</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#bioNewton"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.bioNewton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on Newton’s method with simple
+bounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell,u) containing the lower and upper
+bounds for each free
+parameter. Note that this algorithm does not support bound
+constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that threshold,
+the algorithm has reached convergence
+(default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>steptol: the algorithm stops when the relative change in x
+is below this threshold. Basically, if p significant digits
+of x are needed, steptol should be set to 1.0e-p. Default:
+<span class="math notranslate nohighlight">\(10^{-5}\)</span></p></li>
+<li><p>cgtolerance: when the norm of the residual is below that
+threshold, the conjugate gradient algorithm has reached
+convergence (default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>infeasibleConjugateGradient: if True, the conjugate
+gradient algorithm may generate until termination.  The
+result will then be projected on the feasible domain.  If
+False, the algorithm stops as soon as an infeasible iterate
+is generated (default: False).</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 1000).</p></li>
+<li><p>radius: the initial radius of the truat region (default: 1.0).</p></li>
+<li><p>eta1: threshold for failed iterations (default: 0.01).</p></li>
+<li><p>eta2: threshold for very successful iteration (default 0.9).</p></li>
+<li><p>enlargingFactor: factor used to enlarge the trust region
+during very successful iterations (default 10).</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>x, messages</p>
+<ul class="simple">
+<li><p>x is the solution generated by the algorithm,</p></li>
+<li><p>messages is a dictionary describing information about the lagorithm</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpay.array, dict(str:object)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.newtonLineSearchForBiogeme">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">newtonLineSearchForBiogeme</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#newtonLineSearchForBiogeme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.newtonLineSearchForBiogeme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on Newton method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell,u) containing the lower and
+upper bounds for each free parameter. Note that
+this algorithm does not support bound constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that
+threshold, the algorithm has reached convergence
+(default: <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 100).</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>tuple x, nit, nfev, message, where</p>
+<ul class="simple">
+<li><p>x is the solution found,</p></li>
+<li><p>messages is a dictionary reporting various aspects
+related to the run of the algorithm.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array, dict(str:object)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogeme.exceptions.biogemeError</strong></a> – if bounds are imposed on
+the variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.newtonTrustRegionForBiogeme">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">newtonTrustRegionForBiogeme</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#newtonTrustRegionForBiogeme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.newtonTrustRegionForBiogeme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on Newton method with TR.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell, u) containing the lower and
+upper bounds for each free parameter. Note that
+this algorithm does not support bound constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that threshold,
+the algorithm has reached convergence
+(default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 100).</p></li>
+<li><p>dogleg: if True, the trust region subproblem is solved using
+the Dogleg method. If False, it is solved using the
+truncated conjugate gradient method (default: False).</p></li>
+<li><p>radius: the initial radius of the truat region (default: 1.0).</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>tuple x, messages, where</p>
+<ul class="simple">
+<li><p>x is the solution found,</p></li>
+<li><p>messages is a dictionary reporting various aspects
+related to the run of the algorithm.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array, dict(str:object)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogeme.exceptions.biogemeError</strong></a> – if bounds are imposed on
+the variables.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.scipy">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">scipy</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#scipy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.scipy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on the scipy 
+minimize function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the beta parameters</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuple</em><em>)</em>) – list of tuples (ell,u) containing the lower and upper bounds
+for each free parameter</p></li>
+<li><p><strong>parameters</strong> – dict of parameters to be transmitted to the
+optimization routine. See the <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html">scipy</a> documentation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>x, messages</p>
+<ul class="simple">
+<li><p>x is the solution generated by the algorithm,</p></li>
+<li><p>messages is a dictionary describing several information
+about the algorithm</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>numpay.array, dict(str:object)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.optimization.simpleBoundsNewtonAlgorithmForBiogeme">
+<code class="sig-prename descclassname"><span class="pre">biogeme.optimization.</span></code><code class="sig-name descname"><span class="pre">simpleBoundsNewtonAlgorithmForBiogeme</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBetas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/optimization.html#simpleBoundsNewtonAlgorithmForBiogeme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.optimization.simpleBoundsNewtonAlgorithmForBiogeme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimization interface for Biogeme, based on variants of Newton
+method with simple bounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fct</strong> (<em>optimization.functionToMinimize</em>) – object to calculate the objective function and its derivatives.</p></li>
+<li><p><strong>initBetas</strong> (<em>numpy.array</em>) – initial value of the parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>list</em><em>(</em><em>tuples</em><em>)</em>) – list of tuples (ell,u) containing the lower and upper
+bounds for each free
+parameter. Note that this algorithm does not support bound
+constraints.
+Therefore, all the bounds must be None.</p></li>
+<li><p><strong>parameters</strong> (<em>dict</em><em>(</em><em>string:float</em><em> or </em><em>int</em><em>)</em>) – <p>dict of parameters to be transmitted to the
+optimization routine:</p>
+<ul>
+<li><p>tolerance: when the relative gradient is below that threshold,
+the algorithm has reached convergence
+(default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>steptol: the algorithm stops when the relative change in x
+is below this threshold. Basically, if p significant digits
+of x are needed, steptol should be set to 1.0e-p. Default:
+<span class="math notranslate nohighlight">\(10^{-5}\)</span></p></li>
+<li><p>cgtolerance: when the norm of the residual is below that
+threshold, the conjugate gradient algorithm has reached
+convergence (default:  <span class="math notranslate nohighlight">\(\varepsilon^{\frac{1}{3}}\)</span>);</p></li>
+<li><p>proportionAnalyticalHessian: proportion (between 0 and 1) of
+iterations when the analytical Hessian is calculated (default: 1).</p></li>
+<li><p>infeasibleConjugateGradient: if True, the conjugate
+gradient algorithm may generate until termination.  The
+result will then be projected on the feasible domain.  If
+False, the algorithm stops as soon as an infeasible iterate
+is generated (default: False).</p></li>
+<li><p>maxiter: the maximum number of iterations (default: 1000).</p></li>
+<li><p>radius: the initial radius of the trust region (default: 1.0).</p></li>
+<li><p>eta1: threshold for failed iterations (default: 0.01).</p></li>
+<li><p>eta2: threshold for very successful iteration (default 0.9).</p></li>
+<li><p>enlargingFactor: factor used to enlarge the trust region
+during very successful iterations (default 10).</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>x, messages</p>
+<ul class="simple">
+<li><p>x is the solution generated by the algorithm,</p></li>
+<li><p>messages is a dictionary describing information about the lagorithm</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpay.array, dict(str:object)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="results.html" class="btn btn-neutral float-right" title="Results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="models.html" class="btn btn-neutral float-left" title="Models" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -22,27 +22,22 @@ bioExprLog::~bioExprLog() {
   
 }
 
-bioDerivatives* bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						   bioBoolean gradient,
 						   bioBoolean hessian) {
   
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  if (childResult->f < 0) {
-    if (std::abs(childResult->f) < 1.0e-6) {
-      childResult->f = 0.0 ;
+  const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  bioReal cf = childResult->f ;
+  if (cf < 0) {
+    if (std::abs(cf) < 1.0e-6) {
+      cf = 0.0 ;
     }
     else {
       std::stringstream str ;
@@ -61,24 +56,24 @@ bioDerivatives* bioExprLog::getValueAndDerivatives(std::vector<bioUInt> literalI
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
   }
-  if (childResult->f == 0.0) {
-    theDerivatives->f = -std::numeric_limits<bioReal>::max() / 2.0 ;
+  if (cf == 0.0) {
+    theDerivatives.f = -std::numeric_limits<bioReal>::max() / 2.0 ;
   }
   else {    
-    theDerivatives->f = log(childResult->f) ;
+    theDerivatives.f = log(cf) ;
   }
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] = childResult->g[i] / childResult->f ;
+      theDerivatives.g[i] = childResult->g[i] / cf ;
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
-	  bioReal fsquare = childResult->f * childResult->f ;
-	  theDerivatives->h[i][j] = childResult->h[i][j] / childResult->f -  childResult->g[i] *  childResult->g[j] / fsquare ;
+	  bioReal fsquare = cf * cf ;
+	  theDerivatives.h[i][j] = childResult->h[i][j] / cf -  childResult->g[i] *  childResult->g[j] / fsquare ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprLog::print(bioBoolean hp) const {

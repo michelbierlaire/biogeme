@@ -24,18 +24,12 @@ bioExprOr::~bioExprOr() {
 }
 
   
-bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   if (gradient) {
@@ -45,18 +39,13 @@ bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalId
       throw(bioExceptions(__FILE__,__LINE__,str.str())) ;
     }
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
-
-
   
-  if (theDerivatives == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
-  }
   if (left == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"left") ;
   }
@@ -64,20 +53,20 @@ bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> literalId
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
+  const bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
   if (l->f != 0.0) {
-    theDerivatives->f = 1.0 ;
+    theDerivatives.f = 1.0 ;
   }
   else { 
-    bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
+    const bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
     if (r->f != 0.0) {
-      theDerivatives->f = 1.0 ;
+      theDerivatives.f = 1.0 ;
     }
     else {
-      theDerivatives->f = 0.0 ;
+      theDerivatives.f = 0.0 ;
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprOr::print(bioBoolean hp) const {

@@ -19,34 +19,28 @@ bioExprUnaryMinus::~bioExprUnaryMinus() {
 
 }
 
-bioDerivatives* bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  theDerivatives->f = - childResult->f ;
+  const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  theDerivatives.f = - childResult->f ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] = - childResult->g[i] ;
+      theDerivatives.g[i] = - childResult->g[i] ;
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
-	  theDerivatives->h[i][j] = - childResult->h[i][j] ;
+	  theDerivatives.h[i][j] = - childResult->h[i][j] ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprUnaryMinus::print(bioBoolean hp) const {

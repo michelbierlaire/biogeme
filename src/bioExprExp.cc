@@ -23,44 +23,38 @@ bioExprExp::~bioExprExp() {
 
 }
 
-bioDerivatives* bioExprExp::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprExp::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						   bioBoolean gradient,
 						   bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   // if (childResult->f <= -10) {
   //   std::stringstream str ;
   //   str << "Low argument for exp " << childResult->f << "for " << child->print() ;
   //   throw bioExceptions(__FILE__,__LINE__,str.str()) ;
   // }
   if (childResult->f <= bioLogMaxReal::the()) { 
-    theDerivatives->f = exp(childResult->f) ;
+    theDerivatives.f = exp(childResult->f) ;
   }
   else {
-    theDerivatives->f = std::numeric_limits<bioReal>::max() ;
+    theDerivatives.f = std::numeric_limits<bioReal>::max() ;
   }
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] = theDerivatives->f * childResult->g[i] ;
+      theDerivatives.g[i] = theDerivatives.f * childResult->g[i] ;
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
-	  theDerivatives->h[i][j] = theDerivatives->f * (childResult->h[i][j] +  childResult->g[i] *  childResult->g[j]);
+	  theDerivatives.h[i][j] = theDerivatives.f * (childResult->h[i][j] +  childResult->g[i] *  childResult->g[j]);
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprExp::print(bioBoolean hp) const {

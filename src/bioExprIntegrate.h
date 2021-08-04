@@ -17,7 +17,7 @@ class bioExprIntegrate: public bioExpression {
  public:
   bioExprIntegrate(bioExpression* c, bioUInt lid) ;
   ~bioExprIntegrate() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
 

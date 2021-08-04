@@ -12,7 +12,7 @@
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 from biogeme.expressions import Beta, DefineVariable, Elem, bioNormalCdf
 
 # Read the data
@@ -27,12 +27,14 @@ globals().update(database.variables)
 database.remove(Choice == -1.0)
 
 # Piecewise linear definition of income
-ScaledIncome = DefineVariable('ScaledIncome', CalculatedIncome / 1000, database)
+ScaledIncome = DefineVariable(
+    'ScaledIncome', CalculatedIncome / 1000, database
+)
 
 thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(ScaledIncome,
-                                        thresholds,
-                                        [0.0, 0.0, 0.0, 0.0, 0.0])
+formulaIncome = models.piecewiseFormula(
+    ScaledIncome, thresholds, [0.0, 0.0, 0.0, 0.0, 0.0]
+)
 
 # Definition of other variables
 age_65_more = DefineVariable('age_65_more', age >= 65, database)
@@ -40,15 +42,15 @@ moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
 moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
 individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
 male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable('haveChildren', \
-                              ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database)
+haveChildren = DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+)
 haveGA = DefineVariable('haveGA', GenAbST == 1, database)
 highEducation = DefineVariable('highEducation', Education >= 6, database)
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
 coef_age_65_more = Beta('coef_age_65_more', 0.0, None, None, 0)
-coef_age_unknown = Beta('coef_age_unknown', 0.0, None, None, 0)
 coef_haveGA = Beta('coef_haveGA', 0.0, None, None, 0)
 coef_moreThanOneCar = Beta('coef_moreThanOneCar', 0.0, None, None, 0)
 coef_moreThanOneBike = Beta('coef_moreThanOneBike', 0.0, None, None, 0)
@@ -59,20 +61,18 @@ coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
 ### Latent variable: structural equation
 
-# Note that the expression must be on a single line. In order to
-# write it across several lines, each line must terminate with
-# the \ symbol
-
-CARLOVERS = coef_intercept +\
-            coef_age_65_more * age_65_more +\
-            formulaIncome + \
-            coef_moreThanOneCar * moreThanOneCar +\
-            coef_moreThanOneBike * moreThanOneBike +\
-            coef_individualHouse * individualHouse +\
-            coef_male * male +\
-            coef_haveChildren * haveChildren +\
-            coef_haveGA * haveGA +\
-            coef_highEducation * highEducation
+CARLOVERS = (
+    coef_intercept
+    + coef_age_65_more * age_65_more
+    + formulaIncome
+    + coef_moreThanOneCar * moreThanOneCar
+    + coef_moreThanOneBike * moreThanOneBike
+    + coef_individualHouse * individualHouse
+    + coef_male * male
+    + coef_haveChildren * haveChildren
+    + coef_haveGA * haveGA
+    + coef_highEducation * highEducation
+)
 
 ### Measurement equations
 
@@ -128,7 +128,8 @@ IndEnvir01 = {
     5: 1 - bioNormalCdf(Envir01_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0}
+    -2: 1.0,
+}
 
 P_Envir01 = Elem(IndEnvir01, Envir01)
 
@@ -144,7 +145,8 @@ IndEnvir02 = {
     5: 1 - bioNormalCdf(Envir02_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0}
+    -2: 1.0,
+}
 
 P_Envir02 = Elem(IndEnvir02, Envir02)
 
@@ -160,7 +162,8 @@ IndEnvir03 = {
     5: 1 - bioNormalCdf(Envir03_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0}
+    -2: 1.0,
+}
 
 P_Envir03 = Elem(IndEnvir03, Envir03)
 
@@ -176,7 +179,7 @@ IndMobil11 = {
     5: 1 - bioNormalCdf(Mobil11_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0
+    -2: 1.0,
 }
 
 P_Mobil11 = Elem(IndMobil11, Mobil11)
@@ -193,7 +196,8 @@ IndMobil14 = {
     5: 1 - bioNormalCdf(Mobil14_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0}
+    -2: 1.0,
+}
 
 P_Mobil14 = Elem(IndMobil14, Mobil14)
 
@@ -209,7 +213,8 @@ IndMobil16 = {
     5: 1 - bioNormalCdf(Mobil16_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0}
+    -2: 1.0,
+}
 
 P_Mobil16 = Elem(IndMobil16, Mobil16)
 
@@ -225,25 +230,30 @@ IndMobil17 = {
     5: 1 - bioNormalCdf(Mobil17_tau_4),
     6: 1.0,
     -1: 1.0,
-    -2: 1.0}
+    -2: 1.0,
+}
 
 P_Mobil17 = Elem(IndMobil17, Mobil17)
 
-simulate = {'P_Envir01': P_Envir01,
-            'P_Envir02': P_Envir02,
-            'P_Envir03': P_Envir03,
-            'P_Mobil11': P_Mobil11,
-            'P_Mobil14': P_Mobil14,
-            'P_Mobil16': P_Mobil16,
-            'P_Mobil17': P_Mobil17}
+simulate = {
+    'P_Envir01': P_Envir01,
+    'P_Envir02': P_Envir02,
+    'P_Envir03': P_Envir03,
+    'P_Mobil11': P_Mobil11,
+    'P_Mobil14': P_Mobil14,
+    'P_Mobil16': P_Mobil16,
+    'P_Mobil17': P_Mobil17,
+}
 
 
 biogeme = bio.BIOGEME(database, simulate)
 biogeme.modelName = '07problem_simul'
 
 simulatedValues = biogeme.simulate()
-print('We identify the entries for which the likelihood is zero, '
-      'so that the log likelihood cannot be computed')
+print(
+    'We identify the entries for which the likelihood is zero, '
+    'so that the log likelihood cannot be computed'
+)
 zeroValues = simulatedValues.where(simulatedValues == 0, other='')
 print(zeroValues)
 print('The problematic model is Envir02')

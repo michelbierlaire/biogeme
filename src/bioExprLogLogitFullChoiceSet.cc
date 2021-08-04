@@ -27,7 +27,7 @@ bioExprLogLogitFullChoiceSet::~bioExprLogLogitFullChoiceSet() {
 
 }
 
-bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							bioBoolean gradient,
 							bioBoolean hessian) {
 
@@ -36,34 +36,28 @@ bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::vector
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
   
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
   
   bioUInt n = literalIds.size() ;
   bioUInt chosen = bioUInt(choice->getValue()) ;
-  std::vector<bioDerivatives*> Vs ;
-  bioDerivatives* chosenUtility(NULL) ;
-  bioDerivatives* V;
+  std::vector<bioDerivatives> Vs ;
+  const bioDerivatives* chosenUtility(NULL) ;
+  const bioDerivatives* V;
   bioReal largestUtility(-bioMaxReal) ;
   for (std::map<bioUInt,bioExpression*>::iterator theUtil = utilities.begin() ;
        theUtil != utilities.end() ;
        ++theUtil) {
-      V = theUtil->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
-      if (V->f > largestUtility) {
-	largestUtility = V->f ;
-      }
-      if (theUtil->first == chosen) {
-	chosenUtility = V ;
-      }
-      Vs.push_back(V) ;
+    V = theUtil->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    if (V->f > largestUtility) {
+      largestUtility = V->f ;
     }
+    if (theUtil->first == chosen) {
+      chosenUtility = V ;
+    }
+    Vs.push_back(*V) ;
+  }
 
   if (chosenUtility == NULL) {
     std::stringstream str ;
@@ -79,32 +73,26 @@ bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::vector
   }
   bioReal maxexp = ceil(largestUtility / 10.0) * 10.0 ;
 
-  for (std::vector<bioDerivatives*>::iterator i = Vs.begin() ;
-       i != Vs.end() ;
-       ++i) {
-    (*i)->f -= maxexp ;
-  }
-
   std::vector<bioReal> expi(Vs.size()) ; ;
     
   bioReal denominator(0.0) ;
   for (bioUInt k = 0 ; k < Vs.size() ; ++k) {
-    expi[k] = exp(Vs[k]->f) ;
+    expi[k] = exp(Vs[k].f - maxexp) ;
     denominator += expi[k] ;
   }
 
-  theDerivatives->f = chosenUtility->f - log(denominator) ;
+  theDerivatives.f = chosenUtility->f - log(denominator) - maxexp ;
   if (gradient) {
-    std::vector<bioReal> weightedSum(n,0.0) ;
+    std::vector<bioReal> weightedSum(n, 0.0) ;
     for (bioUInt j = 0 ; j < n ; ++j) {
       for (bioUInt k = 0 ; k < Vs.size() ; ++k) {
-	if (Vs[k]->g[j] != 0.0) {
-	  weightedSum[j] += Vs[k]->g[j] * expi[k] ;
+	if (Vs[k].g[j] != 0.0) {
+	  weightedSum[j] += Vs[k].g[j] * expi[k] ;
 	}
       }
-      theDerivatives->g[j] = chosenUtility->g[j] ;
+      theDerivatives.g[j] = chosenUtility->g[j] ;
       if (weightedSum[j] != 0.0) {
-	theDerivatives->g[j] -= weightedSum[j] / denominator ;
+	theDerivatives.g[j] -= weightedSum[j] / denominator ;
       }
     }
     
@@ -114,10 +102,10 @@ bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::vector
 	for (bioUInt j = i ; j < n ; ++j) {
 	  bioReal dsecond(0.0) ;
 	  for (bioUInt k = 0 ; k < Vs.size() ; ++k ) {
-	    if (Vs[k]->g[i] != 0 && Vs[k]->g[j] != 0.0) {
-	      dsecond += expi[k] * Vs[k]->g[i] * Vs[k]->g[j] ;
+	    if (Vs[k].g[i] != 0 && Vs[k].g[j] != 0.0) {
+	      dsecond += expi[k] * Vs[k].g[i] * Vs[k].g[j] ;
 	    }
-	    bioReal vih = Vs[k]->h[i][j] ;
+	    bioReal vih = Vs[k].h[i][j] ;
 	    if (vih != 0.0) {
 	      dsecond += expi[k] * vih ;
 	    }
@@ -128,12 +116,12 @@ bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::vector
 	    v1 = weightedSum[i] * weightedSum[j] / dsquare ;
 	  }
 	  bioReal v2 = dsecond / denominator ;
-	  theDerivatives->h[i][j] = theDerivatives->h[j][i] = v+v1-v2 ;
+	  theDerivatives.h[i][j] = theDerivatives.h[j][i] = v+v1-v2 ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprLogLogitFullChoiceSet::print(bioBoolean hp) const {

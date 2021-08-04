@@ -18,7 +18,7 @@ class bioExprLogLogit: public bioExpression {
  public:
   bioExprLogLogit(bioExpression* c, std::map<bioUInt,bioExpression*> u, std::map<bioUInt,bioExpression*> a) ;
   ~bioExprLogLogit() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;

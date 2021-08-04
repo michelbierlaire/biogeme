@@ -17,7 +17,7 @@ class bioExprNormalPdf: public bioExpression {
  public:
   bioExprNormalPdf(bioExpression* c) ;
   ~bioExprNormalPdf() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
   

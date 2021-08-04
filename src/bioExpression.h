@@ -36,14 +36,14 @@ class bioExpression {
   // Returns true is the expression contains at least one literal in
   // the list. Used to simplify the calculation of the derivatives
   virtual bioBoolean containsLiterals(std::vector<bioUInt> literalIds) const ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) = PURE_VIRTUAL ;
   virtual std::map<bioString,bioReal> getAllLiteralValues() ;
  protected:
   std::vector<bioReal>* parameters ;
   std::vector<bioReal>* fixedParameters ;
-  bioDerivatives* theDerivatives ;
+  bioDerivatives theDerivatives ;
   // Dimensons of the data
   // 1. number of rows
   // 2. number of variables

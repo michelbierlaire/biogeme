@@ -20,27 +20,21 @@ bioExprMontecarlo::~bioExprMontecarlo() {
 
 }
 
-bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
-  theDerivatives->f = 0.0 ;
+  theDerivatives.f = 0.0 ;
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
 
@@ -51,27 +45,27 @@ bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> l
   bioUInt n = literalIds.size() ;
   child->setDrawIndex(&drawIndex) ;
   for (drawIndex = 0 ; drawIndex < numberOfDraws ; ++drawIndex) {
-    bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-    theDerivatives->f += childResult->f ;
+    const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    theDerivatives.f += childResult->f ;
     if (gradient) {
       for (bioUInt i = 0 ; i < n ; ++i) {
-	theDerivatives->g[i] += childResult->g[i] ;
+	theDerivatives.g[i] += childResult->g[i] ;
 	if (hessian) {
 	  for (bioUInt j = i ; j < n ; ++j) {
-	    theDerivatives->h[i][j] += childResult->h[i][j] ;
+	    theDerivatives.h[i][j] += childResult->h[i][j] ;
 	  }
 	}
       }
     }
   }
   
-  theDerivatives->f /= bioReal(numberOfDraws) ;
+  theDerivatives.f /= bioReal(numberOfDraws) ;
   if (gradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] /= bioReal(numberOfDraws) ;
+      theDerivatives.g[i] /= bioReal(numberOfDraws) ;
       if (hessian) {
 	for (bioUInt j = i ; j < n ; ++j) {
-	  theDerivatives->h[i][j] /= bioReal(numberOfDraws) ;
+	  theDerivatives.h[i][j] /= bioReal(numberOfDraws) ;
 	}
       }
     }
@@ -79,11 +73,11 @@ bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioUInt> l
   if (hessian) {
     for (bioUInt i = 0 ; i < n ; ++i) {
       for (bioUInt j = i ; j < n ; ++j) {
-	theDerivatives->h[j][i] = theDerivatives->h[i][j] ;
+	theDerivatives.h[j][i] = theDerivatives.h[i][j] ;
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprMontecarlo::print(bioBoolean hp) const {

@@ -21,7 +21,7 @@ bioExprMultSum::~bioExprMultSum() {
 
 }
 
-bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						       bioBoolean gradient,
 						       bioBoolean hessian) {
 
@@ -29,42 +29,31 @@ bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> lite
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
-  theDerivatives->f = 0.0 ;
+  theDerivatives.f = 0.0 ;
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
   for (std::vector<bioExpression*>::iterator i = expressions.begin();
        i != expressions.end() ;
        ++i) {
-    // if (str.length() == 1003) {
-    //   DEBUG_MESSAGE("-> " << (*i)->print(true)) ;
-    // } 
-    bioDerivatives* fgh = (*i)->getValueAndDerivatives(literalIds,gradient,hessian) ;
-    // if (str.length() == 1003) {
-    //   DEBUG_MESSAGE("-> OK " << fgh->f) ;
-    // } 
-    theDerivatives->f += fgh->f ;
+    const bioDerivatives* fgh = (*i)->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    
+    theDerivatives.f += fgh->f ;
     if (gradient) {
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-	theDerivatives->g[k] += fgh->g[k] ;
+	theDerivatives.g[k] += fgh->g[k] ;
 	if (hessian) {
 	  for (std::size_t l = k ; l < literalIds.size() ; ++l) {
-	    theDerivatives->h[k][l] += fgh->h[k][l] ;
+	    theDerivatives.h[k][l] += fgh->h[k][l] ;
 	  }
 	}
       }
@@ -74,12 +63,12 @@ bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> lite
     // Fill the symmetric part of the matrix
     for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
       for (std::size_t l = k+1 ; l < literalIds.size() ; ++l) {
-	theDerivatives->h[l][k]  = theDerivatives->h[k][l] ;
+	theDerivatives.h[l][k]  = theDerivatives.h[k][l] ;
       }
     }
   }
   //  DEBUG_MESSAGE("MultiSum calculated " << str.length()) ;
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprMultSum::print(bioBoolean hp) const {

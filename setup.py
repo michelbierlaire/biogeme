@@ -81,9 +81,12 @@ ext = '.pyx' if USE_CYTHON else '.cpp'
 cmdclass = {}
 
 source = ['src/biogeme.cc',
+          'src/bioMemoryManagement.cc',
           'src/bioNormalCdf.cc',
           'src/bioFormula.cc',
+          'src/bioSeveralFormulas.cc',
           'src/bioThreadMemory.cc',
+          'src/bioThreadMemorySimul.cc',
           'src/bioString.cc',
           'src/bioExprNormalCdf.cc',
           'src/bioExprIntegrate.cc',
@@ -122,13 +125,11 @@ source = ['src/biogeme.cc',
           'src/bioExprLogLogitFullChoiceSet.cc',
           'src/bioExprLinearUtility.cc',
           'src/bioExpression.cc',
+          'src/bioSeveralExpressions.cc',
           'src/bioExceptions.cc',
           'src/bioDerivatives.cc',
           'src/bioGaussHermite.cc',
-          'src/bioGhFunction.cc',
-          'src/mycfsqp.cc',
-          'src/myqld.cc',
-          'src/bioCfsqp.cc']
+          'src/bioGhFunction.cc']
 
 
 extra_compile_args = ['-std=c++11', '-Wall']
@@ -156,6 +157,8 @@ extensions = [setuptools.Extension('biogeme.cbiogeme',
                                    include_dirs=[numpy.get_include()],
                                    extra_compile_args=extra_compile_args,
                                    language='c++11',
+                                   define_macros=[('NPY_NO_DEPRECATED_API',
+                                                   'NPY_1_7_API_VERSION')],
                                    extra_link_args=extra_link_args)]
 
 #extensions = [Extension('biogeme.cbiogeme',
@@ -170,7 +173,10 @@ extensions = [setuptools.Extension('biogeme.cbiogeme',
 #extra_link_args=['-fsanitize=address','-O1','-fno-omit-frame-pointer','-g']
 
 if USE_CYTHON:
-    extensions = cythonize(extensions, language='c++', include_path=[numpy.get_include()])
+#    extensions = cythonize(extensions, language='c++', include_path=[numpy.get_include()])
+    extensions = cythonize(extensions,
+                           compiler_directives={'language_level' : "3"},
+                           include_path=[numpy.get_include()])
     cmdclass.update({'build_ext': build_ext})
 
 #exec(open('biogeme/version.py').read())
@@ -189,7 +195,7 @@ setuptools.setup(name='biogeme',
                  author_email='michel.bierlaire@epfl.ch',
                  long_description=long_description,
                  long_description_content_type='text/markdown',
-                 install_requires=['numpy', 'cython', 'unidecode', 'scipy', 'pandas'],
+                 install_requires=['numpy', 'cython', 'unidecode', 'scipy', 'pandas', 'tqdm'],
                  packages=setuptools.find_packages(),
                  include_package_data=True,
                  package_data={'biogeme': ['_biogeme.pyd']},

@@ -73,6 +73,9 @@ class test_02(unittest.TestCase):
         weight = 8.890991e-01 * (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
         formulas = {'loglike':logprob,'weight':weight}
         biogeme  = bio.BIOGEME(database,formulas)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5273.743,2)
     

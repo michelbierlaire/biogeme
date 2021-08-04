@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = "*"
+py = ">=1.10.0"
+
+[packages]
+numpy = "*"
+pandas = "*"
+scipy = "*"
+interval = "*"
+Cython = "*"
+Unidecode = "*"
+tqdm = "*"
+
+[requires]
+python_version = "3.9"

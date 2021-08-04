@@ -17,7 +17,7 @@ class bioExprLessOrEqual: public bioExpression {
  public:
   bioExprLessOrEqual(bioExpression* l, bioExpression* r) ;
   ~bioExprLessOrEqual() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
 

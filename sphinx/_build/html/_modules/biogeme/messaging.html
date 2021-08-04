@@ -1,0 +1,442 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>biogeme.messaging &mdash; Biogeme 3.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Biogeme
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>biogeme.messaging</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for biogeme.messaging</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Singleton managing the various levels of messages</span>
+
+<span class="sd">:author: Michel Bierlaire</span>
+<span class="sd">:date: Mon Jul 22 16:12:00 2019</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Too constraining</span>
+<span class="c1"># pylint: disable=invalid-name,</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">biogeme.filenames</span> <span class="k">as</span> <span class="nn">bf</span>
+<span class="kn">import</span> <span class="nn">biogeme.version</span> <span class="k">as</span> <span class="nn">bv</span>
+<span class="kn">from</span> <span class="nn">biogeme.singleton</span> <span class="kn">import</span> <span class="n">Singleton</span>
+
+
+<div class="viewcode-block" id="bioMessage"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage">[docs]</a><span class="k">class</span> <span class="nc">bioMessage</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">Singleton</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Manages the Biogeme messages&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="bioMessage.__init__"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screenLevel</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor</span>
+
+<span class="sd">        :param screenLevel: level of message that must be displayed on the</span>
+<span class="sd">            screen:</span>
+
+<span class="sd">            - 0: no output (default)</span>
+<span class="sd">            - 1: warnings only</span>
+<span class="sd">            - 2: only warnings and general information</span>
+<span class="sd">            - 3: more verbose</span>
+<span class="sd">            - 4: debug messages</span>
+
+
+<span class="sd">        :type screenLevel: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="n">screenLevel</span> <span class="c1">#: screen verbosity level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;Silent&#39;</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;Warning&#39;</span><span class="p">,</span>
+            <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;General&#39;</span><span class="p">,</span>
+            <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;Detailed&#39;</span><span class="p">,</span>
+            <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;Debug&#39;</span><span class="p">,</span>
+        <span class="p">}</span> <span class="c1">#: names of verbosity levels</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetMessages</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastLevel</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: last level used</span></div>
+
+<div class="viewcode-block" id="bioMessage.resetMessages"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.resetMessages">[docs]</a>    <span class="k">def</span> <span class="nf">resetMessages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Erase all messages&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">messages</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="bioMessage.allMessages"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.allMessages">[docs]</a>    <span class="k">def</span> <span class="nf">allMessages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screenLevel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Report all the messages up to a given level.</span>
+
+<span class="sd">        :param screenLevel: level of message that must be reported in the file:</span>
+
+<span class="sd">           - 0: no output</span>
+<span class="sd">           - 1: warnings only</span>
+<span class="sd">           - 2: only warnings and general information</span>
+<span class="sd">           - 3: more verbose (default)</span>
+<span class="sd">           - 4: debug messages</span>
+
+<span class="sd">             If None (default), all messages are reported.</span>
+
+<span class="sd">        :type screenLevel: int</span>
+
+<span class="sd">        :return: all messages.</span>
+<span class="sd">        :rtype: str.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;*** Messages from biogeme </span><span class="si">{</span><span class="n">bv</span><span class="o">.</span><span class="n">getVersion</span><span class="p">()</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">bv</span><span class="o">.</span><span class="n">versionDate</span><span class="si">}</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">messages</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">screenLevel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">screenLevel</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">m</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="bioMessage.createLog"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.createLog">[docs]</a>    <span class="k">def</span> <span class="nf">createLog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileLevel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="s1">&#39;_biogeme&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a log file</span>
+
+<span class="sd">        :param fileLevel: level of message that must be reported in the file:</span>
+
+<span class="sd">           - 0: no output</span>
+<span class="sd">           - 1: warnings only</span>
+<span class="sd">           - 2: only warnings and general information</span>
+<span class="sd">           - 3: more verbose (default)</span>
+<span class="sd">           - 4: debug messages</span>
+
+<span class="sd">             If None (default), all messages are reported.</span>
+<span class="sd">        :type fileLevel: int</span>
+
+<span class="sd">        :param fileName: name of the file (without extension).</span>
+<span class="sd">                         Default: &#39;_biogeme&#39;. A file called _biogeme.log</span>
+<span class="sd">                         will be created.</span>
+<span class="sd">        :type fileName: string</span>
+
+<span class="sd">        :return: name of the file</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">completeFileName</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">getNewFileName</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;log&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">completeFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Log file created: </span><span class="si">{</span><span class="n">completeFileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;*** File created </span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="si">}</span><span class="s1"> ***&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;*** Log file from biogeme </span><span class="si">{</span><span class="n">bv</span><span class="o">.</span><span class="n">getVersion</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; [</span><span class="si">{</span><span class="n">bv</span><span class="o">.</span><span class="n">versionDate</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">,</span>
+                <span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">messages</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">fileLevel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">fileLevel</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">completeFileName</span></div>
+
+<div class="viewcode-block" id="bioMessage.temporarySilence"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.temporarySilence">[docs]</a>    <span class="k">def</span> <span class="nf">temporarySilence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Temporarily turns off the message, remembering the current</span>
+<span class="sd">        screen level.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastLevel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="bioMessage.resume"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.resume">[docs]</a>    <span class="k">def</span> <span class="nf">resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resume the regular operations of the logger after the use of</span>
+<span class="sd">        temporarySilence</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastLevel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastLevel</span></div>
+
+<div class="viewcode-block" id="bioMessage.setSilent"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.setSilent">[docs]</a>    <span class="k">def</span> <span class="nf">setSilent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set both screen and file levels to 0&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="bioMessage.setWarning"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.setWarning">[docs]</a>    <span class="k">def</span> <span class="nf">setWarning</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set both screen and file levels to 1&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="bioMessage.setGeneral"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.setGeneral">[docs]</a>    <span class="k">def</span> <span class="nf">setGeneral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set both screen and file levels to 2&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="bioMessage.setDetailed"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.setDetailed">[docs]</a>    <span class="k">def</span> <span class="nf">setDetailed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set both screen and file levels to 3&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="mi">3</span></div>
+
+<div class="viewcode-block" id="bioMessage.setDebug"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.setDebug">[docs]</a>    <span class="k">def</span> <span class="nf">setDebug</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set both screen and file levels to 4&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+<div class="viewcode-block" id="bioMessage.setScreenLevel"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.setScreenLevel">[docs]</a>    <span class="k">def</span> <span class="nf">setScreenLevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change the level of messaging for the screen</span>
+
+<span class="sd">        :param level: level of message that must be displayed on the screen:</span>
+
+<span class="sd">           - 0: no output</span>
+<span class="sd">           - 1: warnings only</span>
+<span class="sd">           - 2: only warnings and general information</span>
+<span class="sd">           - 3: more verbose</span>
+<span class="sd">           - 4: debug messages</span>
+
+
+<span class="sd">        :type level: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span> <span class="o">=</span> <span class="n">level</span></div>
+
+<div class="viewcode-block" id="bioMessage.addMessage"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.addMessage">[docs]</a>    <span class="k">def</span> <span class="nf">addMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a message</span>
+
+<span class="sd">        :param text: text of the message.</span>
+<span class="sd">        :type text: string</span>
+
+<span class="sd">        :param level: level of the message</span>
+
+<span class="sd">           - 1: warning</span>
+<span class="sd">           - 2: general information</span>
+<span class="sd">           - 3: detailed information</span>
+<span class="sd">           - 4: debug message</span>
+
+<span class="sd">        :type level: int</span>
+
+<span class="sd">        :note: adding a message of level 0 is meaningless, as it correspond to</span>
+<span class="sd">            silentmode.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">theLevel</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&lt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">[</span><span class="n">level</span><span class="p">]</span><span class="si">}</span><span class="s1"> &gt;&#39;</span>
+        <span class="n">theMessage</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%H:%M:%S&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">] &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">theLevel</span><span class="si">:</span><span class="s1">13</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">theMessage</span><span class="p">,</span> <span class="n">level</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screenLevel</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">theMessage</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bioMessage.warning"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.warning">[docs]</a>    <span class="k">def</span> <span class="nf">warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a warning</span>
+
+<span class="sd">        :param text: text of the message.</span>
+<span class="sd">        :type text: string</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addMessage</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bioMessage.general"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.general">[docs]</a>    <span class="k">def</span> <span class="nf">general</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a general message</span>
+
+<span class="sd">        :param text: text of the message.</span>
+<span class="sd">        :type text: string</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addMessage</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bioMessage.detailed"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.detailed">[docs]</a>    <span class="k">def</span> <span class="nf">detailed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a detailed message</span>
+
+<span class="sd">        :param text: text of the message.</span>
+<span class="sd">        :type text: string</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addMessage</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bioMessage.debug"><a class="viewcode-back" href="../../messaging.html#biogeme.messaging.bioMessage.debug">[docs]</a>    <span class="k">def</span> <span class="nf">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a debug message</span>
+
+<span class="sd">        :param text: text of the message.</span>
+<span class="sd">        :type text: string</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addMessage</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

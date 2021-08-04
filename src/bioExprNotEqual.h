@@ -17,7 +17,7 @@ class bioExprNotEqual: public bioExpression {
  public:
   bioExprNotEqual(bioExpression* l, bioExpression* r) ;
   ~bioExprNotEqual() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						bioBoolean hessian) ;
 

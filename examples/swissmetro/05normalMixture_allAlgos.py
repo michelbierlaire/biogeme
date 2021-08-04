@@ -12,27 +12,28 @@ import pandas as pd
 import biogeme.optimization as opt
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 import biogeme.messaging as msg
+import biogeme.exceptions as excep
 from biogeme.expressions import Beta, DefineVariable, bioDraws, log, MonteCarlo
 
 # Read the data
-df = pd.read_csv('swissmetro.dat', '\t')
+df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to investigate the database. For example:
-#print(database.data.describe())
+# print(database.data.describe())
 
 # The following statement allows you to use the names of the variable
 # as Python variable.
 globals().update(database.variables)
 
 # Removing some observations can be done directly using pandas.
-#remove = (((database.data.PURPOSE != 1) &
+# remove = (((database.data.PURPOSE != 1) &
 #           (database.data.PURPOSE != 3)) |
 #          (database.data.CHOICE == 0))
-#database.data.drop(database.data[remove].index,inplace=True)
+# database.data.drop(database.data[remove].index,inplace=True)
 
 # Here we use the "biogeme" way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -60,32 +61,24 @@ TRAIN_COST = TRAIN_CO * (GA == 0)
 CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
 TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
 TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100, database)
+TRAIN_COST_SCALED = DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+)
 SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
 SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
 CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
 CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
 
 # Definition of the utility functions
-V1 = ASC_TRAIN + \
-     B_TIME_RND * TRAIN_TT_SCALED + \
-     B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + \
-     B_TIME_RND * SM_TT_SCALED + \
-     B_COST * SM_COST_SCALED
-V3 = ASC_CAR + \
-     B_TIME_RND * CAR_TT_SCALED + \
-     B_COST * CAR_CO_SCALED
+V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
+V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
-V = {1: V1,
-     2: V2,
-     3: V3}
+V = {1: V1, 2: V2, 3: V3}
 
 # Associate the availability conditions with the alternatives
-av = {1: TRAIN_AV_SP,
-      2: SM_AV,
-      3: CAR_AV_SP}
+av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Conditional to B_TIME_RND, we have a logit model (called the kernel)
 prob = models.logit(V, av, CHOICE)
@@ -95,55 +88,77 @@ logprob = log(MonteCarlo(prob))
 
 # Define level of verbosity
 logger = msg.bioMessage()
-#logger.setSilent()
-#logger.setWarning()
+# logger.setSilent()
+# logger.setWarning()
 logger.setGeneral()
-#logger.setDetailed()
+# logger.setDetailed()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
 
-algos = {'CFSQP                   ': None,
-         'scipy                   ': opt.scipy,
-         'Line search             ': opt.newtonLineSearchForBiogeme,
-         'Trust region (dogleg)   ': opt.newtonTrustRegionForBiogeme,
-         'Trust region (cg)       ': opt.newtonTrustRegionForBiogeme,
-         'LS-BFGS                 ': opt.bfgsLineSearchForBiogeme,
-         'TR-BFGS                 ': opt.bfgsTrustRegionForBiogeme,
-         'Simple bounds Newton fCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds BFGS fCG  ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds hybrid fCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds Newton iCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds BFGS iCG  ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-         'Simple bounds hybrid iCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+algos = {
+    'scipy                   ': opt.scipy,
+    'Line search             ': opt.newtonLineSearchForBiogeme,
+    'Trust region (dogleg)   ': opt.newtonTrustRegionForBiogeme,
+    'Trust region (cg)       ': opt.newtonTrustRegionForBiogeme,
+    'LS-BFGS                 ': opt.bfgsLineSearchForBiogeme,
+    'TR-BFGS                 ': opt.bfgsTrustRegionForBiogeme,
+    'Simple bounds Newton fCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds BFGS fCG  ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds hybrid fCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds Newton iCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds BFGS iCG  ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'Simple bounds hybrid iCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
 }
 
-algoParameters = {'Trust region (dogleg)   ': {'dogleg':True},
-                  'Trust region (cg)       ': {'dogleg':False},
-                  'Simple bounds Newton fCG': {'proportionAnalyticalHessian': 1.0,
-                                               'infeasibleConjugateGradient': False},
-                  'Simple bounds BFGS fCG  ': {'proportionAnalyticalHessian': 0.0,
-                                               'infeasibleConjugateGradient': False},
-                  'Simple bounds hybrid fCG': {'proportionAnalyticalHessian': 0.5,
-                                               'infeasibleConjugateGradient': False},
-                  'Simple bounds Newton iCG': {'proportionAnalyticalHessian': 1.0,
-                                               'infeasibleConjugateGradient': True},
-                  'Simple bounds BFGS iCG  ': {'proportionAnalyticalHessian': 0.0,
-                                               'infeasibleConjugateGradient': True},
-                  'Simple bounds hybrid iCG': {'proportionAnalyticalHessian': 0.5,
-                                               'infeasibleConjugateGradient': True}}
+algoParameters = {
+    'Trust region (dogleg)   ': {'dogleg': True},
+    'Trust region (cg)       ': {'dogleg': False},
+    'Simple bounds Newton fCG': {
+        'proportionAnalyticalHessian': 1.0,
+        'infeasibleConjugateGradient': False,
+    },
+    'Simple bounds BFGS fCG  ': {
+        'proportionAnalyticalHessian': 0.0,
+        'infeasibleConjugateGradient': False,
+    },
+    'Simple bounds hybrid fCG': {
+        'proportionAnalyticalHessian': 0.5,
+        'infeasibleConjugateGradient': False,
+    },
+    'Simple bounds Newton iCG': {
+        'proportionAnalyticalHessian': 1.0,
+        'infeasibleConjugateGradient': True,
+    },
+    'Simple bounds BFGS iCG  ': {
+        'proportionAnalyticalHessian': 0.0,
+        'infeasibleConjugateGradient': True,
+    },
+    'Simple bounds hybrid iCG': {
+        'proportionAnalyticalHessian': 0.5,
+        'infeasibleConjugateGradient': True,
+    },
+}
 
 results = {}
 msg = ''
 for name, algo in algos.items():
     biogeme.modelName = f'05normalMixture_allAlgos_{name}'.strip()
     p = algoParameters.get(name)
-    results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
-    g = results[name].data.g
-    msg += (f'{name}\t{results[name].data.logLike:.2f}\t'
+    try:
+        results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
+        msg += (
+            f'{name}\t{results[name].data.logLike:.2f}\t'
             f'{results[name].data.gradientNorm:.2g}\t'
             f'{results[name].data.optimizationMessages["Optimization time"]}'
-            f'\t{results[name].data.optimizationMessages["Cause of termination"]}\n')
+            f'\t{results[name].data.optimizationMessages["Cause of termination"]}'
+            f'\n'
+        )
+    except excep.biogemeError as e:
+        print(e)
+        results[name] = None
+        msg += f'{name}\tFailed to estimate the model'
+
 
 print('Algorithm\t\tloglike\t\tnormg\ttime\t\tdiagnostic')
 print('+++++++++\t\t+++++++\t\t+++++\t++++\t\t++++++++++')
@@ -161,7 +176,6 @@ increased, the two local solutions will (asymptotically) become identical.
 
 Algorithm               loglike         normg   time            diagnostic
 +++++++++               +++++++         +++++   ++++            ++++++++++
-CFSQP                           -5215.59        0.00037 0:01:32.434504  b'Normal termination. Obj: 6.05545e-06 Const: 6.05545e-06'
 scipy                           -5215.59        0.00024 0:00:26.443081  b'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
 Line search                     -5215.59        3.8e-06 0:01:39.359296  Relative gradient = 9e-10 <= 6.1e-06
 Trust region (dogleg)           -5215.20        0.0066  0:00:27.050893  Relative gradient = 1.5e-06 <= 6.1e-06

@@ -13,7 +13,7 @@ Latin Hypercube Sampling draws.
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 from biogeme.expressions import Beta, bioDraws, MonteCarlo, log
 
 pandas = pd.read_csv('swissmetro.dat', sep='\t')
@@ -52,25 +52,15 @@ CAR_TT_SCALED = CAR_TT / 100
 CAR_CO_SCALED = CAR_CO / 100
 
 # Definition of the utility functions
-V1 = ASC_TRAIN + \
-     B_TIME_RND * TRAIN_TT_SCALED + \
-     B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + \
-     B_TIME_RND * SM_TT_SCALED + \
-     B_COST * SM_COST_SCALED
-V3 = ASC_CAR + \
-     B_TIME_RND * CAR_TT_SCALED + \
-     B_COST * CAR_CO_SCALED
+V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
+V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
-V = {1: V1,
-     2: V2,
-     3: V3}
+V = {1: V1, 2: V2, 3: V3}
 
 # Associate the availability conditions with the alternatives
-av = {1: TRAIN_AV_SP,
-      2: SM_AV,
-      3: CAR_AV_SP}
+av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # The choice model is a logit, with availability conditions
 prob = models.logit(V, av, CHOICE)

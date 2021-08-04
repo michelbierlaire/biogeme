@@ -11,14 +11,14 @@
 
 import datetime
 
-### Release date
+# Release date
 versionDate = f'{datetime.date.today()}'
-### Major version number
+# Major version number
 versionMajor = 3
-### Minor version number
+# Minor version number
 versionMinor = 2
-### Release name
-versionRelease = '6'
+# Release name
+versionRelease = '8'
 author = 'Michel Bierlaire'
 urlAuthor = 'http://people.epfl.ch/michel.bierlaire'
 department = 'Transport and Mobility Laboratory'
@@ -27,6 +27,7 @@ university = 'Ecole Polytechnique Fédérale de Lausanne (EPFL)'
 urlUniversity = 'http://www.epfl.ch'
 urlBiogeme = 'http://biogeme.epfl.ch'
 urlForum = 'https://groups.google.com/d/forum/biogeme'
+
 
 def getVersion():
     """
@@ -38,19 +39,30 @@ def getVersion():
     v = f'{versionMajor}.{versionMinor}.{versionRelease}'
     return v
 
+
 __version__ = getVersion()
 
+
 def getHtml():
-    """ Package information in HTML format
+    """Package information in HTML format
 
     :return: HTML code.
     :rtype: string
 
     """
     h = f'<p>biogeme {getVersion()} [{versionDate}]</p>\n'
-    h += '<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>\n'
-    h += f'<p>Home page: <a href="{urlBiogeme}" target="_blank">{urlBiogeme}</a></p>\n'
-    h += f'<p>Submit questions to <a href="{urlForum}" target="_blank">{urlForum}</a></p>\n'
+    h += (
+        '<p><a href="https://www.python.org/" '
+        'target="_blank">Python</a> package</p>\n'
+    )
+    h += (
+        f'<p>Home page: <a href="{urlBiogeme}" '
+        f'target="_blank">{urlBiogeme}</a></p>\n'
+    )
+    h += (
+        f'<p>Submit questions to <a href="{urlForum}" '
+        f'target="_blank">{urlForum}</a></p>\n'
+    )
     h += f'<p><a href="{urlAuthor}">'
     h += author
     h += '</a>, <a href="'
@@ -64,8 +76,9 @@ def getHtml():
     h += '</a></p>\n'
     return h
 
+
 def getText():
-    """ Package information in text format
+    """Package information in text format
 
     :return: package information
     :rtype: string
@@ -80,13 +93,13 @@ def getText():
 
 
 def getLaTeX():
-    """ Package information in LaTeX format
+    """Package information in LaTeX format
 
     :return: LaTeX comments
     :rtype: string
     """
     h = f'%% biogeme {getVersion()} [{versionDate}]\n'
-    h += f'%% Version entirely written in Python\n'
+    h += '%% Version entirely written in Python\n'
     h += f'%% Home page: {urlBiogeme}\n'
     h += f'%% Submit questions to {urlForum}\n'
     h += f'%% {author}, {department}, {university}\n'

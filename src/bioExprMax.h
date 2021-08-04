@@ -17,7 +17,7 @@ class bioExprMax: public bioExpression {
  public:
   bioExprMax(bioExpression* l, bioExpression* r) ;
   ~bioExprMax() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
   

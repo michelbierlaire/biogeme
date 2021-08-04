@@ -68,17 +68,12 @@ av = {1: TRAIN_AV_SP,
       3: CAR_AV_SP}
 
 class test_01(unittest.TestCase):
-    def testEstimationCfsqp(self):
-        logprob = models.loglogit(V,av,CHOICE)
-        biogeme  = bio.BIOGEME(database,logprob,seed=10,numberOfThreads=1)
-        biogeme.modelName = "test_01"
-        results = biogeme.estimate(bootstrap=10,algorithm=None)
-        self.assertAlmostEqual(results.data.logLike,-5331.252,2)
-        self.assertAlmostEqual(results.data.betas[0].bootstrap_stdErr,0.04773096176427237,2)
-
     def testEstimationScipy(self):
         logprob = models.loglogit(V,av,CHOICE)
         biogeme  = bio.BIOGEME(database,logprob,seed=10,numberOfThreads=1)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         biogeme.modelName = "test_01"
         results = biogeme.estimate(bootstrap=10,algorithm=opt.scipy)
         self.assertAlmostEqual(results.data.logLike,-5331.252,2)
@@ -87,6 +82,9 @@ class test_01(unittest.TestCase):
     def testEstimationLineSearch(self):
         logprob = models.loglogit(V,av,CHOICE)
         biogeme  = bio.BIOGEME(database,logprob,seed=10,numberOfThreads=1)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         biogeme.modelName = "test_01"
         results = biogeme.estimate(bootstrap=10,algorithm=opt.newtonLineSearchForBiogeme)
         self.assertAlmostEqual(results.data.logLike,-5331.252,2)
@@ -96,6 +94,9 @@ class test_01(unittest.TestCase):
     def testEstimationTrustRegion(self):
         logprob = models.loglogit(V,av,CHOICE)
         biogeme  = bio.BIOGEME(database,logprob,seed=10,numberOfThreads=1)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         biogeme.modelName = "test_01"
         results = biogeme.estimate(bootstrap=10,algorithm=opt.newtonTrustRegionForBiogeme)
         self.assertAlmostEqual(results.data.logLike,-5331.252,2)

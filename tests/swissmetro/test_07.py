@@ -89,6 +89,9 @@ logprob = log(prob)
 class test_07(unittest.TestCase):
     def testEstimation(self):
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5208.4980304812725,2)
 

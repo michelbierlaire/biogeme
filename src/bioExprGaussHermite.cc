@@ -34,7 +34,7 @@ std::vector<bioReal> bioExprGaussHermite::getValue(bioReal x) {
   std::vector<bioReal> result ;
   theValue = x ;
   bioUInt n = derivLiteralIds.size() ;
-  bioDerivatives* fgh = theExpression->getValueAndDerivatives(derivLiteralIds,withGradient,withHessian) ;
+  const bioDerivatives* fgh = theExpression->getValueAndDerivatives(derivLiteralIds,withGradient,withHessian) ;
   result.push_back(fgh->f) ;
   if (withGradient) {
     for (bioUInt i = 0 ; i < n ; ++i) {

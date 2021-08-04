@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Draws &mdash; Biogeme 3.2.7 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Exceptions" href="exceptions.html" />
+    <link rel="prev" title="Distributions" href="distributions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Biogeme
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distributions.html">Distributions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Draws</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.draws">biogeme.draws module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Biogeme</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Draws</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/draws.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="draws">
+<h1>Draws<a class="headerlink" href="#draws" title="Permalink to this headline">¶</a></h1>
+<p>Draws for Monte-Carlo integration</p>
+<div class="section" id="module-biogeme.draws">
+<span id="biogeme-draws-module"></span><h2>biogeme.draws module<a class="headerlink" href="#module-biogeme.draws" title="Permalink to this headline">¶</a></h2>
+<p>Generation of various types of draws.</p>
+<dl class="field-list simple">
+<dt class="field-odd">author</dt>
+<dd class="field-odd"><p>Michel Bierlaire</p>
+</dd>
+<dt class="field-even">date</dt>
+<dd class="field-even"><p>Tue Jun 18 19:05:13 2019</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt id="biogeme.draws.getAntithetic">
+<code class="sig-prename descclassname"><span class="pre">biogeme.draws.</span></code><code class="sig-name descname"><span class="pre">getAntithetic</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unif</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleSize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/draws.html#getAntithetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.draws.getAntithetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns antithetic uniform draws</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unif</strong> (<em>function</em>) – function taking two arguments (sampleSize, numberOfDraws)
+and returning U[0, 1] draws</p></li>
+<li><p><strong>sampleSize</strong> (<em>int</em>) – number of observations for which draws must be
+generated. If None, a one dimensional array
+will be generated. If it has a values k, then k
+series of draws will be generated</p></li>
+<li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws to generate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array with the antithetic draws</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">draws</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">getAntithetic</span><span class="p">(</span><span class="n">dr</span><span class="o">.</span><span class="n">getUniform</span><span class="p">,</span>
+                         <span class="n">sampleSize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                         <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">array</span><span class="p">([[</span><span class="mf">0.48592363</span><span class="p">,</span> <span class="mf">0.13648133</span><span class="p">,</span> <span class="mf">0.35925946</span><span class="p">,</span> <span class="mf">0.32431338</span><span class="p">,</span> <span class="mf">0.32997936</span><span class="p">,</span>
+        <span class="mf">0.51407637</span><span class="p">,</span> <span class="mf">0.86351867</span><span class="p">,</span> <span class="mf">0.64074054</span><span class="p">,</span> <span class="mf">0.67568662</span><span class="p">,</span> <span class="mf">0.67002064</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.89261997</span><span class="p">,</span> <span class="mf">0.0331808</span> <span class="p">,</span> <span class="mf">0.30767182</span><span class="p">,</span> <span class="mf">0.93433648</span><span class="p">,</span> <span class="mf">0.17196124</span><span class="p">,</span>
+        <span class="mf">0.10738003</span><span class="p">,</span> <span class="mf">0.9668192</span> <span class="p">,</span> <span class="mf">0.69232818</span><span class="p">,</span> <span class="mf">0.06566352</span><span class="p">,</span> <span class="mf">0.82803876</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.81095587</span><span class="p">,</span> <span class="mf">0.96171364</span><span class="p">,</span> <span class="mf">0.40984817</span><span class="p">,</span> <span class="mf">0.72177258</span><span class="p">,</span> <span class="mf">0.16481096</span><span class="p">,</span>
+        <span class="mf">0.18904413</span><span class="p">,</span> <span class="mf">0.03828636</span><span class="p">,</span> <span class="mf">0.59015183</span><span class="p">,</span> <span class="mf">0.27822742</span><span class="p">,</span> <span class="mf">0.83518904</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.draws.getHaltonDraws">
+<code class="sig-prename descclassname"><span class="pre">biogeme.draws.</span></code><code class="sig-name descname"><span class="pre">getHaltonDraws</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampleSize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/draws.html#getHaltonDraws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.draws.getHaltonDraws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate Halton draws</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampleSize</strong> (<em>int</em>) – number of observations for which draws must be
+generated. If None, a one dimensional array
+will be generated. If it has a values k, then k
+series of draws will be generated</p></li>
+<li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws to generate.</p></li>
+<li><p><strong>symmetric</strong> (<em>bool</em>) – if True, draws from [-1: 1] are generated.
+If False, draws from [0: 1] are generated.  Default: False</p></li>
+<li><p><strong>base</strong> (<em>int</em>) – generate Halton draws for a given basis.
+Ideally, it should be a prime number. Default: 2.</p></li>
+<li><p><strong>skip</strong> (<em>int</em>) – the number of  elements of the sequence to be discarded.</p></li>
+<li><p><strong>shuffled</strong> (<em>bool</em>) – if True, each series is shuffled</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array with the draws</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">halton</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">getHaltonDraws</span><span class="p">(</span><span class="n">sampleSize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">0.33333333</span><span class="p">,</span> <span class="mf">0.66666667</span><span class="p">,</span> <span class="mf">0.11111111</span><span class="p">,</span> <span class="mf">0.44444444</span><span class="p">,</span> <span class="mf">0.77777778</span><span class="p">,</span>
+        <span class="mf">0.22222222</span><span class="p">,</span> <span class="mf">0.55555556</span><span class="p">,</span> <span class="mf">0.88888889</span><span class="p">,</span> <span class="mf">0.03703704</span><span class="p">,</span> <span class="mf">0.37037037</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.7037037</span> <span class="p">,</span> <span class="mf">0.14814815</span><span class="p">,</span> <span class="mf">0.48148148</span><span class="p">,</span> <span class="mf">0.81481481</span><span class="p">,</span> <span class="mf">0.25925926</span><span class="p">,</span>
+        <span class="mf">0.59259259</span><span class="p">,</span> <span class="mf">0.92592593</span><span class="p">,</span> <span class="mf">0.07407407</span><span class="p">,</span> <span class="mf">0.40740741</span><span class="p">,</span> <span class="mf">0.74074074</span><span class="p">]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of draws is not positive.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the sample size is not positive.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.draws.getLatinHypercubeDraws">
+<code class="sig-prename descclassname"><span class="pre">biogeme.draws.</span></code><code class="sig-name descname"><span class="pre">getLatinHypercubeDraws</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampleSize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniformNumbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/draws.html#getLatinHypercubeDraws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.draws.getLatinHypercubeDraws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the Modified Latin Hypercube Sampling proposed
+by <a class="reference external" href="https://doi.org/10.1016/j.trb.2004.10.005">Hess et al., (2006)</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampleSize</strong> (<em>int</em>) – number of observations for which draws must be
+generated. If None, a one dimensional array
+will be generated. If it has a values k, then k
+series of draws will be generated</p></li>
+<li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws to generate.</p></li>
+<li><p><strong>symmetric</strong> (<em>bool</em>) – if True, draws from [-1: 1] are generated.
+If False, draws from [0: 1] are generated.  Default: False</p></li>
+<li><p><strong>uniformNumbers</strong> (<em>numpy.array</em>) – numpy with uniformly distributed numbers.
+If None, the numpy uniform number generator is used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array with the draws</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">latinHypercube</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">getLatinHypercubeDraws</span><span class="p">(</span><span class="n">sampleSize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                                           <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">array</span><span class="p">([[</span><span class="mf">0.43362897</span><span class="p">,</span> <span class="mf">0.5275741</span> <span class="p">,</span> <span class="mf">0.09215663</span><span class="p">,</span> <span class="mf">0.94056236</span><span class="p">,</span> <span class="mf">0.34376868</span><span class="p">,</span>
+        <span class="mf">0.87195551</span><span class="p">,</span> <span class="mf">0.41495219</span><span class="p">,</span> <span class="mf">0.71736691</span><span class="p">,</span> <span class="mf">0.23198736</span><span class="p">,</span> <span class="mf">0.145561</span>  <span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.30520544</span><span class="p">,</span> <span class="mf">0.78082964</span><span class="p">,</span> <span class="mf">0.83591146</span><span class="p">,</span> <span class="mf">0.2733167</span> <span class="p">,</span> <span class="mf">0.53890906</span><span class="p">,</span>
+        <span class="mf">0.61607469</span><span class="p">,</span> <span class="mf">0.00699715</span><span class="p">,</span> <span class="mf">0.17179441</span><span class="p">,</span> <span class="mf">0.7557228</span> <span class="p">,</span> <span class="mf">0.39733102</span><span class="p">],</span>
+       <span class="p">[</span><span class="mf">0.49676864</span><span class="p">,</span> <span class="mf">0.67073483</span><span class="p">,</span> <span class="mf">0.9788854</span> <span class="p">,</span> <span class="mf">0.5726069</span> <span class="p">,</span> <span class="mf">0.11894558</span><span class="p">,</span>
+        <span class="mf">0.05515471</span><span class="p">,</span> <span class="mf">0.2640275</span> <span class="p">,</span> <span class="mf">0.82093696</span><span class="p">,</span> <span class="mf">0.92034628</span><span class="p">,</span> <span class="mf">0.64866597</span><span class="p">]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of draws is not positive.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the sample size is not positive.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of uniform draws is inconsistent.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.draws.getNormalWichuraDraws">
+<code class="sig-prename descclassname"><span class="pre">biogeme.draws.</span></code><code class="sig-name descname"><span class="pre">getNormalWichuraDraws</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampleSize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniformNumbers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antithetic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/draws.html#getNormalWichuraDraws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.draws.getNormalWichuraDraws" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate pseudo-random numbers from a normal distribution N(0, 1)</p>
+<p>It uses the Algorithm AS241 by <a class="reference external" href="http://www.jstor.org/stable/2347330">Wichura (1988)</a>
+which produces the normal deviate z corresponding to a given lower
+tail area of p; z is accurate to about 1 part in <span class="math notranslate nohighlight">\(10^{16}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampleSize</strong> (<em>int</em>) – number of observations for which draws must be
+generated. If None, a one dimensional array
+will be generated. If it has a values k, then k
+series of draws will be generated</p></li>
+<li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws to generate.</p></li>
+<li><p><strong>uniformNumbers</strong> (<em>numpy.array</em>) – numpy with uniformly distributed numbers.
+If None, the numpy uniform number generator is used.</p></li>
+<li><p><strong>antithetic</strong> (<em>bool</em>) – if True, only half of the draws are
+actually generated, and the series are completed
+with their antithetic version.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array with the draws</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">draws</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">getNormalWichuraDraws</span><span class="p">(</span><span class="n">sampleSize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">array</span><span class="p">(</span>
+    <span class="p">[[</span> <span class="mf">0.52418458</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.04344204</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.11642482</span><span class="p">,</span>  <span class="mf">0.48257162</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.67188279</span><span class="p">,</span>
+      <span class="o">-</span><span class="mf">1.89993283</span><span class="p">,</span>  <span class="mf">0.28251041</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.38424425</span><span class="p">,</span>  <span class="mf">1.53182226</span><span class="p">,</span>  <span class="mf">0.30651874</span><span class="p">],</span>
+     <span class="p">[</span><span class="o">-</span><span class="mf">0.7937038</span> <span class="p">,</span> <span class="o">-</span><span class="mf">0.07884121</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.91005616</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.98855175</span><span class="p">,</span>  <span class="mf">1.09405753</span><span class="p">,</span>
+      <span class="o">-</span><span class="mf">0.5997651</span> <span class="p">,</span> <span class="o">-</span><span class="mf">1.70785113</span><span class="p">,</span>  <span class="mf">1.57571384</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.33208723</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.03510102</span><span class="p">],</span>
+     <span class="p">[</span><span class="o">-</span><span class="mf">0.13853654</span><span class="p">,</span>  <span class="mf">0.92595498</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.80136586</span><span class="p">,</span>  <span class="mf">1.68454196</span><span class="p">,</span>  <span class="mf">0.9955927</span> <span class="p">,</span>
+      <span class="o">-</span><span class="mf">0.28615154</span><span class="p">,</span>  <span class="mf">2.10635541</span><span class="p">,</span>  <span class="mf">0.0436191</span> <span class="p">,</span> <span class="o">-</span><span class="mf">0.25417774</span><span class="p">,</span>  <span class="mf">0.01026933</span><span class="p">]]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of draws is not positive.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the sample size is not positive.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="biogeme.draws.getUniform">
+<code class="sig-prename descclassname"><span class="pre">biogeme.draws.</span></code><code class="sig-name descname"><span class="pre">getUniform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sampleSize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/draws.html#getUniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.draws.getUniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uniform [0, 1] or [-1, 1] numbers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampleSize</strong> (<em>int</em>) – number of observations for which draws must be
+generated. If None, a one dimensional array
+will be generated. If it has a values k, then k
+series of draws will be generated</p></li>
+<li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws to generate.</p></li>
+<li><p><strong>symmetric</strong> (<em>bool</em>) – if True, draws from [-1: 1] are generated.
+If False, draws from [0: 1] are generated.  Default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>numpy array with the draws</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">draws</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">getUniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">array</span><span class="p">(</span>
+    <span class="p">[[</span><span class="mf">0.13053817</span><span class="p">,</span> <span class="mf">0.63892308</span><span class="p">,</span> <span class="mf">0.55031567</span><span class="p">,</span> <span class="mf">0.26347854</span><span class="p">,</span> <span class="mf">0.16730932</span><span class="p">,</span>
+      <span class="mf">0.77745367</span><span class="p">,</span> <span class="mf">0.48283887</span><span class="p">,</span> <span class="mf">0.84247501</span><span class="p">,</span> <span class="mf">0.20550219</span><span class="p">,</span> <span class="mf">0.02373537</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.68935846</span><span class="p">,</span> <span class="mf">0.03363595</span><span class="p">,</span> <span class="mf">0.36006669</span><span class="p">,</span> <span class="mf">0.26709364</span><span class="p">,</span> <span class="mf">0.54907706</span><span class="p">,</span>
+      <span class="mf">0.22492104</span><span class="p">,</span> <span class="mf">0.2494399</span> <span class="p">,</span> <span class="mf">0.17323209</span><span class="p">,</span> <span class="mf">0.52370401</span><span class="p">,</span> <span class="mf">0.54091257</span><span class="p">],</span>
+     <span class="p">[</span><span class="mf">0.40310204</span><span class="p">,</span> <span class="mf">0.89916711</span><span class="p">,</span> <span class="mf">0.86065005</span><span class="p">,</span> <span class="mf">0.94277699</span><span class="p">,</span> <span class="mf">0.09077065</span><span class="p">,</span>
+      <span class="mf">0.40107731</span><span class="p">,</span> <span class="mf">0.22554722</span><span class="p">,</span> <span class="mf">0.47693135</span><span class="p">,</span> <span class="mf">0.14058265</span><span class="p">,</span> <span class="mf">0.17397031</span><span class="p">]]</span>
+<span class="p">)</span>
+
+<span class="n">draws</span> <span class="o">=</span> <span class="n">dr</span><span class="o">.</span><span class="n">getUniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">array</span><span class="p">(</span>
+    <span class="p">[[</span> <span class="mf">0.74403237</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.27995692</span><span class="p">,</span>  <span class="mf">0.33997421</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.89405035</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.129761</span>  <span class="p">,</span>
+       <span class="mf">0.86593325</span><span class="p">,</span>  <span class="mf">0.30657422</span><span class="p">,</span>  <span class="mf">0.82435619</span><span class="p">,</span>  <span class="mf">0.498482</span>  <span class="p">,</span>  <span class="mf">0.24561616</span><span class="p">],</span>
+     <span class="p">[</span><span class="o">-</span><span class="mf">0.48239607</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.29257815</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.98342034</span><span class="p">,</span>  <span class="mf">0.68392813</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.25379429</span><span class="p">,</span>
+       <span class="mf">0.49359859</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.26459883</span><span class="p">,</span>  <span class="mf">0.14569724</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.68860467</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.40903446</span><span class="p">],</span>
+     <span class="p">[</span> <span class="mf">0.93251627</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.85166912</span><span class="p">,</span>  <span class="mf">0.58096917</span><span class="p">,</span>  <span class="mf">0.39289882</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.65088635</span><span class="p">,</span>
+       <span class="mf">0.40114744</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.61327161</span><span class="p">,</span>  <span class="mf">0.08900539</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.20985417</span><span class="p">,</span>  <span class="mf">0.67542226</span><span class="p">]]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of draws is not positive.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the sample size is not positive.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="exceptions.html" class="btn btn-neutral float-right" title="Exceptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="distributions.html" class="btn btn-neutral float-left" title="Distributions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Michel Bierlaire.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

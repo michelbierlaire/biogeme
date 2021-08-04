@@ -23,57 +23,51 @@ bioExprPower::~bioExprPower() {
 
 }
 
-bioDerivatives* bioExprPower::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprPower::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   
 
   bioUInt n = literalIds.size() ;
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
   
   if (rightResult->f == 0.0) {
-    theDerivatives->f = 1.0 ;
+    theDerivatives.f = 1.0 ;
   }
   else if (rightResult->f == 1.0) {
-    theDerivatives->f = leftResult->f ;
+    theDerivatives.f = leftResult->f ;
   }
   else if (leftResult->f == 0) {
-    theDerivatives->f = 0.0 ;
+    theDerivatives.f = 0.0 ;
   }
   else {
     bioUInt rint = bioUInt(rightResult->f) ;
     if (bioReal(rint) == rightResult->f) {
       for (bioUInt i = 0 ; i < rint ; ++i) {
 	if (i == 0) {
-	  theDerivatives->f = leftResult->f ;
+	  theDerivatives.f = leftResult->f ;
 	}
 	else {
-	  theDerivatives->f *= leftResult->f ;
+	  theDerivatives.f *= leftResult->f ;
 	}
       }
     }
     else {
-      theDerivatives->f = pow(leftResult->f,rightResult->f) ;
+      theDerivatives.f = pow(leftResult->f,rightResult->f) ;
     }
   }
 
   if (gradient) {
     std::vector<bioReal> G(n,0.0) ;
     for (bioUInt i = 0 ; i < n ; ++i) {
-      theDerivatives->g[i] = 0.0 ;
-      if (theDerivatives->f != 0.0) {
+      theDerivatives.g[i] = 0.0 ;
+      if (theDerivatives.f != 0.0) {
 	if (leftResult->g[i] != 0.0 && rightResult->f != 0.0) {
 	  bioReal term = leftResult->g[i] * rightResult->f / leftResult->f ;  
 	  G[i] += term ;
@@ -82,14 +76,14 @@ bioDerivatives* bioExprPower::getValueAndDerivatives(std::vector<bioUInt> litera
 	if (rightResult->g[i] != 0.0) {
 	  G[i] += rightResult->g[i] * log(leftResult->f) ;
 	}
-	theDerivatives->g[i] = theDerivatives->f * G[i] ;
+	theDerivatives.g[i] = theDerivatives.f * G[i] ;
       }
     }
     if (hessian) {
       for (bioUInt i = 0 ; i < n ; ++i) {
 	for (bioUInt j = i ; j < n ; ++j) {
-	  bioReal v = G[i] * theDerivatives->g[j] ;
-	  if (theDerivatives->f != 0 && rightResult != NULL) {
+	  bioReal v = G[i] * theDerivatives.g[j] ;
+	  if (theDerivatives.f != 0 && rightResult != NULL) {
 	    bioReal term(0.0) ;
 	    bioReal hright = rightResult->h[i][j] ;
 	    if (hright != 0.0) {
@@ -110,15 +104,15 @@ bioDerivatives* bioExprPower::getValueAndDerivatives(std::vector<bioUInt> litera
 	      term += hleft * rightResult->f / leftResult->f ;
 	    }
 	    if (term != 0.0) {
-	      v += term * theDerivatives->f ;
+	      v += term * theDerivatives.f ;
 	    }
 	  }
-	  theDerivatives->h[i][j] = theDerivatives->h[j][i] = v ;
+	  theDerivatives.h[i][j] = theDerivatives.h[j][i] = v ;
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprPower::print(bioBoolean hp) const {

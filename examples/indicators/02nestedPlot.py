@@ -9,11 +9,12 @@
  We simulate pricing scenarios and their impact on the revenues.
 """
 
+import sys
 import numpy as np
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 import biogeme.results as res
 from biogeme.expressions import Beta
 
@@ -36,16 +37,17 @@ TimePT_scaled = TimePT / 200
 TimeCar_scaled = TimeCar / 200
 CostCarCHF_scaled = CostCarCHF / 10
 distance_km_scaled = distance_km / 5
-male = (Gender == 1)
-female = (Gender == 2)
-unreportedGender = (Gender == -1)
-fulltime = (OccupStat == 1)
-notfulltime = (OccupStat != 1)
+male = Gender == 1
+female = Gender == 2
+unreportedGender = Gender == -1
+fulltime = OccupStat == 1
+notfulltime = OccupStat != 1
 
 # Normalize the weights
 sumWeight = database.data['Weight'].sum()
 numberOfRows = database.data.shape[0]
 normalizedWeight = Weight * numberOfRows / sumWeight
+
 
 def scenario(scale):
     """Simulate a scenarios modifying the price of public transportation
@@ -71,28 +73,34 @@ def scenario(scale):
     BETA_DIST_UNREPORTED = Beta('BETA_DIST_UNREPORTED', 0, None, None, 0)
     BETA_COST = Beta('BETA_COST', 0, None, None, 0)
     # Utility functions
-    V_PT = ASC_PT + BETA_TIME_FULLTIME * TimePT_scaled * fulltime + \
-        BETA_TIME_OTHER * TimePT_scaled * notfulltime + \
-        BETA_COST * MarginalCostPT_scaled
-    V_CAR = ASC_CAR + \
-        BETA_TIME_FULLTIME * TimeCar_scaled * fulltime + \
-        BETA_TIME_OTHER * TimeCar_scaled * notfulltime + \
-        BETA_COST * CostCarCHF_scaled
-    V_SM = ASC_SM + \
-        BETA_DIST_MALE * distance_km_scaled * male + \
-        BETA_DIST_FEMALE * distance_km_scaled * female + \
-        BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
-    V = {0: V_PT,
-         1: V_CAR,
-         2: V_SM}
+    V_PT = (
+        ASC_PT
+        + BETA_TIME_FULLTIME * TimePT_scaled * fulltime
+        + BETA_TIME_OTHER * TimePT_scaled * notfulltime
+        + BETA_COST * MarginalCostPT_scaled
+    )
+    V_CAR = (
+        ASC_CAR
+        + BETA_TIME_FULLTIME * TimeCar_scaled * fulltime
+        + BETA_TIME_OTHER * TimeCar_scaled * notfulltime
+        + BETA_COST * CostCarCHF_scaled
+    )
+    V_SM = (
+        ASC_SM
+        + BETA_DIST_MALE * distance_km_scaled * male
+        + BETA_DIST_FEMALE * distance_km_scaled * female
+        + BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+    )
+    V = {0: V_PT, 1: V_CAR, 2: V_SM}
     MU_NOCAR = Beta('MU_NOCAR', 1.0, 1.0, None, 0)
     CAR_NEST = 1.0, [1]
     NO_CAR_NEST = MU_NOCAR, [0, 2]
     nests = CAR_NEST, NO_CAR_NEST
     prob_pt = models.nested(V, None, nests, 0)
-    simulate = {'weight': normalizedWeight,
-                'Revenue public transportation':
-                prob_pt * MarginalCostScenario}
+    simulate = {
+        'weight': normalizedWeight,
+        'Revenue public transportation': prob_pt * MarginalCostScenario,
+    }
 
     biogeme = bio.BIOGEME(database, simulate)
     biogeme.modelName = '02nestedPlot'
@@ -101,15 +109,20 @@ def scenario(scale):
     try:
         results = res.bioResults(pickleFile='01nestedEstimation.pickle')
     except FileNotFoundError:
-        sys.exit('Run first the script 01nestedEstimation.py in order to generate '
-                 'the file 01nestedEstimation.pickle.')
+        sys.exit(
+            'Run first the script 01nestedEstimation.py in order to generate '
+            'the file 01nestedEstimation.pickle.'
+        )
     # Simulation
     simulatedValues = biogeme.simulate(results.getBetaValues())
 
     # We calculate the sum for all individuals of the generated revenues.
-    revenues_pt = (simulatedValues['Revenue public transportation'] *
-                   simulatedValues['weight']).sum()
+    revenues_pt = (
+        simulatedValues['Revenue public transportation']
+        * simulatedValues['weight']
+    ).sum()
     return revenues_pt
+
 
 # We now plot the relationship between the cost and the revenues
 scales = np.arange(0.0, 5.0, 0.1)

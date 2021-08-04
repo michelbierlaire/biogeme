@@ -24,18 +24,12 @@ bioExprMax::~bioExprMax() {
 }
 
   
-bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   if (gradient) {
@@ -45,9 +39,6 @@ bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalI
     }
   }
   
-  if (theDerivatives == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
-  }
   if (left == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"left") ;
   }
@@ -55,35 +46,35 @@ bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> literalI
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
-  bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds, gradient, hessian) ;
+  const bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds, gradient, hessian) ;
   if (leftResult->f > rightResult->f) {
-    theDerivatives->f = leftResult->f ;
+    theDerivatives.f = leftResult->f ;
     if (gradient) {
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-	theDerivatives->g[k] = leftResult->g[k] ;
+	theDerivatives.g[k] = leftResult->g[k] ;
 	if (hessian) {
 	  for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-	    theDerivatives->h[k][l] = leftResult->h[k][l] ;
+	    theDerivatives.h[k][l] = leftResult->h[k][l] ;
 	  }
 	}
       }
     }
   }
   else { 
-    theDerivatives->f = rightResult->f ;
+    theDerivatives.f = rightResult->f ;
     if (gradient) {
       for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-	theDerivatives->g[k] = rightResult->g[k] ;
+	theDerivatives.g[k] = rightResult->g[k] ;
 	if (hessian) {
 	  for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-	    theDerivatives->h[k][l] = rightResult->h[k][l] ;
+	    theDerivatives.h[k][l] = rightResult->h[k][l] ;
 	  }
 	}
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprMax::print(bioBoolean hp) const {

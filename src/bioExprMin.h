@@ -17,7 +17,7 @@ class bioExprMin: public bioExpression {
  public:
   bioExprMin(bioExpression* l, bioExpression* r) ;
   ~bioExprMin() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
   

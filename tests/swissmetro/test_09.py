@@ -83,6 +83,9 @@ logprob = models.lognested(V,av,nests,CHOICE)
 class test_09(unittest.TestCase):
     def testEstimation(self):
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5236.9,2)
     

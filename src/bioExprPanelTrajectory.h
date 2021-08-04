@@ -19,7 +19,7 @@ class bioExprPanelTrajectory: public bioExpression {
   ~bioExprPanelTrajectory() ;
   bioExprPanelTrajectory(const bioExprPanelTrajectory&) = delete;
   void operator=(const bioExprPanelTrajectory&) = delete;  
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						 bioBoolean hessian) ;
 

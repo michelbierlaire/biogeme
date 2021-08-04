@@ -143,6 +143,7 @@ class test_biogeme(unittest.TestCase):
         biogeme = bio.BIOGEME(self.database, logprob)
         biogeme.modelName = 'test'
         biogeme.generateHtml = False
+        biogeme.saveIterations = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike, -6.166042, 2)
 

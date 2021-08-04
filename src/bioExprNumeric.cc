@@ -18,31 +18,25 @@ bioExprNumeric::~bioExprNumeric() {
 
 }
 
-bioDerivatives* bioExprNumeric::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprNumeric::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						       bioBoolean gradient,
 						       bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
-  theDerivatives->f = value ;
+  theDerivatives.f = value ;
   
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprNumeric::print(bioBoolean hp) const {

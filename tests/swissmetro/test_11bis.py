@@ -95,15 +95,18 @@ genelas1 = Derive(prob1,'TRAIN_TT') * TRAIN_TT / prob1
 simulate = {'Prob. train': prob1,
             'Elas. 1':genelas1}
 
-class test_11(unittest.TestCase):
+class test_11bis(unittest.TestCase):
     def testEstimationAndSimulation(self):
         biogeme  = bio.BIOGEME(database,logprob)
+        biogeme.saveIterations = False
+        biogeme.generateHtml = False
+        biogeme.generatePickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike,-5214.049202307744,1)
         biosim  = bio.BIOGEME(database,simulate)
-        simresults = biosim.simulate(results.data.betaValues)
+        simresults = biosim.simulate(results.getBetaValues())
         self.assertAlmostEqual(sum(simresults['Prob. train']),888.3883902853023,1)
-        self.assertAlmostEqual(sum(simresults['Elas. 1']),-17898.420882021313, 0)
+        self.assertAlmostEqual(sum(simresults['Elas. 1']),-17897.111326151, 0)
     
         
 if __name__ == '__main__':

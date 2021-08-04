@@ -24,19 +24,13 @@ bioExprEqual::~bioExprEqual() {
 }
 
   
-bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
+    if (gradient && theDerivatives.getSize() != literalIds.size()) {
+      theDerivatives.resize(literalIds.size()) ;
     }
-  }
 
   if (gradient) {
     if (containsLiterals(literalIds)) {
@@ -45,16 +39,13 @@ bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> litera
       throw(bioExceptions(__FILE__,__LINE__,str.str())) ;
     }
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
   }
   
-  if (theDerivatives == NULL) {
-    throw bioExceptNullPointer(__FILE__,__LINE__,"theDerivatives") ;
-  }
   if (left == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"left") ;
   }
@@ -62,15 +53,15 @@ bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> litera
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
   
-  bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
-  bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
+  const bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
+  const bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
   if (l->f == r->f) {
-    theDerivatives->f = 1.0 ;
+    theDerivatives.f = 1.0 ;
   }
   else {
-    theDerivatives->f = 0.0 ;
+    theDerivatives.f = 0.0 ;
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprEqual::print(bioBoolean hp) const {

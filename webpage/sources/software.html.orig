@@ -52,6 +52,19 @@ and David Palma.
 	     target="_blank">apollochoicemodelling.com</a>
 	</div>
       </div>
+
+      <div class="panel panel-default">
+	<div class="panel-heading">Pylogit</div>
+	<div class="panel-body">
+PyLogit is a Python package developed by Timothy Brathwaite for
+performing maximum likelihood estimation of conditional logit models
+and similar discrete choice models.
+	</div>
+	<div class="panel-footer">
+	  <a href="https://github.com/timothyb0912/pylogit"
+	     target="_blank">github.com/timothyb0912/pylogit</a>
+	</div>
+      </div>
       
     </div>
     
@@ -59,3 +72,6 @@ and David Palma.
     
   </body>
 </html>
+
+
+https://github.com/timothyb0912/pylogit

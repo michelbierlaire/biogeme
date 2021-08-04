@@ -21,23 +21,27 @@ class bioFormula {
   friend std::ostream& operator<<(std::ostream &str, const bioFormula& x) ;
 
  public:
-  bioFormula(std::vector<bioString> expressionsStrings) ;
-  ~bioFormula() ;
+  bioFormula() ;
+  virtual ~bioFormula() ;
+  void setExpression(std::vector<bioString> expressionsStrings) ;
+  void resetExpression() ;
+  virtual bioBoolean isDefined() const ;
   bioExpression* getExpression() ;
-  void setParameters(std::vector<bioReal>* p) ;
-  void setFixedParameters(std::vector<bioReal>* p) ;
-  void setRowIndex(bioUInt* r) ;
-  void setIndividualIndex(bioUInt* i) ;
-  void setData(std::vector< std::vector<bioReal> >* d) ;
-  void setMissingData(bioReal md) ;
-  void setDataMap(std::vector< std::vector<bioUInt> >* dm) ;
-  void setDraws(std::vector< std::vector< std::vector<bioReal> > >* d) ;
- private:
-  bioExpression* processFormula(bioString f) ;
+  virtual void setParameters(std::vector<bioReal>* p) ;
+  virtual void setFixedParameters(std::vector<bioReal>* p) ;
+  virtual void setRowIndex(bioUInt* r) ;
+  virtual void setIndividualIndex(bioUInt* i) ;
+  virtual void setData(std::vector< std::vector<bioReal> >* d) ;
+  virtual void setMissingData(bioReal md) ;
+  virtual void setDataMap(std::vector< std::vector<bioUInt> >* dm) ;
+  virtual void setDraws(std::vector< std::vector< std::vector<bioReal> > >* d) ;
+protected:
   std::map<bioString,bioExpression*> expressions ;
   std::map<bioString,bioExpression*> literals ;
-  bioExpression* theFormula ;
   bioReal missingData ;
+  bioExpression* processFormula(bioString f) ;
+private:
+  bioExpression* theFormula ;
 
 
 };

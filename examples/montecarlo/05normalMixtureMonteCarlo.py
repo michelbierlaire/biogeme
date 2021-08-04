@@ -14,7 +14,7 @@ with various types of draws.
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
+from biogeme import models
 import biogeme.distributions as dist
 from biogeme.expressions import Integrate, RandomVariable, MonteCarlo, bioDraws
 
@@ -27,7 +27,7 @@ database = db.Database('swissmetro', p)
 # as Python variable.
 globals().update(database.variables)
 
-#Parameters
+# Parameters
 ASC_CAR = 0.137
 ASC_TRAIN = -0.402
 ASC_SM = 0
@@ -42,7 +42,9 @@ B_TIME_RND_normal = B_TIME + B_TIME_S * bioDraws('B_NORMAL', 'NORMAL')
 B_TIME_RND_anti = B_TIME + B_TIME_S * bioDraws('B_ANTI', 'NORMAL_ANTI')
 B_TIME_RND_halton = B_TIME + B_TIME_S * bioDraws('B_HALTON', 'NORMAL_HALTON2')
 B_TIME_RND_mlhs = B_TIME + B_TIME_S * bioDraws('B_MLHS', 'NORMAL_MLHS')
-B_TIME_RND_antimlhs = B_TIME + B_TIME_S * bioDraws('B_ANTIMLHS', 'NORMAL_MLHS_ANTI')
+B_TIME_RND_antimlhs = B_TIME + B_TIME_S * bioDraws(
+    'B_ANTIMLHS', 'NORMAL_MLHS_ANTI'
+)
 
 # Definition of new variables
 SM_COST = SM_CO * (GA == 0)
@@ -56,33 +58,29 @@ SM_COST_SCALED = SM_COST / 100
 CAR_TT_SCALED = CAR_TT / 100
 CAR_CO_SCALED = CAR_CO / 100
 
+
 def logit(THE_B_TIME_RND):
     """
     Calculate the conditional logit model for a given random parameter.
     """
-    V1 = ASC_TRAIN + \
-         THE_B_TIME_RND * TRAIN_TT_SCALED + \
-         B_COST * TRAIN_COST_SCALED
-    V2 = ASC_SM + \
-         THE_B_TIME_RND * SM_TT_SCALED + \
-         B_COST * SM_COST_SCALED
-    V3 = ASC_CAR + \
-         THE_B_TIME_RND * CAR_TT_SCALED + \
-         B_COST * CAR_CO_SCALED
+    V1 = (
+        ASC_TRAIN
+        + THE_B_TIME_RND * TRAIN_TT_SCALED
+        + B_COST * TRAIN_COST_SCALED
+    )
+    V2 = ASC_SM + THE_B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
+    V3 = ASC_CAR + THE_B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
     # Associate utility functions with the numbering of alternatives
-    V = {1: V1,
-         2: V2,
-         3: V3}
+    V = {1: V1, 2: V2, 3: V3}
 
     # Associate the availability conditions with the alternatives
-    av = {1: TRAIN_AV_SP,
-          2: SM_AV,
-          3: CAR_AV_SP}
+    av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
     # The choice model is a logit, with availability conditions
     integrand = models.logit(V, av, CHOICE)
     return integrand
+
 
 numericalI = Integrate(logit(B_TIME_RND) * density, 'omega')
 normal = MonteCarlo(logit(B_TIME_RND_normal))
@@ -91,12 +89,14 @@ halton = MonteCarlo(logit(B_TIME_RND_halton))
 mlhs = MonteCarlo(logit(B_TIME_RND_mlhs))
 antimlhs = MonteCarlo(logit(B_TIME_RND_antimlhs))
 
-simulate = {'Numerical': numericalI,
-            'MonteCarlo': normal,
-            'Antithetic': anti,
-            'Halton': halton,
-            'MLHS':mlhs,
-            'Antithetic MLHS': antimlhs}
+simulate = {
+    'Numerical': numericalI,
+    'MonteCarlo': normal,
+    'Antithetic': anti,
+    'Halton': halton,
+    'MLHS': mlhs,
+    'Antithetic MLHS': antimlhs,
+}
 
 R = 20000
 biogeme = bio.BIOGEME(database, simulate, numberOfDraws=R)

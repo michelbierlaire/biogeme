@@ -29,7 +29,7 @@ bioExprLinearUtility::~bioExprLinearUtility() {
 
 }
 
-bioDerivatives* bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 							bioBoolean gradient,
 							bioBoolean hessian) {
 
@@ -37,39 +37,32 @@ bioDerivatives* bioExprLinearUtility::getValueAndDerivatives(std::vector<bioUInt
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
   
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
   
-  bioUInt n = literalIds.size() ;
-  theDerivatives->f = 0.0 ;
+  theDerivatives.f = 0.0 ;
   std::map<bioString,bioReal> values = getAllLiteralValues() ;
   for (std::vector<bioLinearTerm>::iterator i =
 	 listOfTerms.begin() ;
        i != listOfTerms.end() ;
        ++i) {
     if ((values[i->theBetaName] != 0.0) &&  (values[i->theVarName] != 0.0)) {
-      theDerivatives->f += values[i->theBetaName] * values[i->theVarName] ;
+      theDerivatives.f += values[i->theBetaName] * values[i->theVarName] ;
     }
   }
   if (gradient) {
     if (hessian) {
-      theDerivatives->setDerivativesToZero() ;
+      theDerivatives.setDerivativesToZero() ;
     }
     else {
-      theDerivatives->setGradientToZero() ;
+      theDerivatives.setGradientToZero() ;
     }
     for (std::size_t i = 0 ; i < literalIds.size() ; ++i) {
-      theDerivatives->g[i] = values[theFriend[i]] ;
+      theDerivatives.g[i] = values[theFriend[i]] ;
     }
   } 
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprLinearUtility::print(bioBoolean hp) const {

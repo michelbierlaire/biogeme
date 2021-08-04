@@ -17,7 +17,7 @@ class bioExprLogLogitFullChoiceSet: public bioExpression {
  public:
   bioExprLogLogitFullChoiceSet(bioExpression* c, std::map<bioUInt,bioExpression*> u) ;
   ~bioExprLogLogitFullChoiceSet() ;
-  virtual bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
+  virtual const bioDerivatives* getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						 bioBoolean gradient,
 						bioBoolean hessian) ;
   virtual bioString print(bioBoolean hp = false) const ;

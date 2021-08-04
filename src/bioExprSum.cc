@@ -21,35 +21,29 @@ bioExprSum::~bioExprSum() {
 
 }
   
-bioDerivatives* bioExprSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+const bioDerivatives* bioExprSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
 						   bioBoolean gradient,
 						   bioBoolean hessian) {
 
   bioString str = print(true) ;
-  if (theDerivatives == NULL) {
-    theDerivatives = new bioDerivatives(literalIds.size()) ;
-  }
-  else {
-    if (gradient && theDerivatives->getSize() != literalIds.size()) {
-      delete(theDerivatives) ;
-      theDerivatives = new bioDerivatives(literalIds.size()) ;
-    }
+  if (gradient && theDerivatives.getSize() != literalIds.size()) {
+    theDerivatives.resize(literalIds.size()) ;
   }
 
   bioUInt n = literalIds.size() ;
-  theDerivatives->setToZero() ;
+  theDerivatives.setToZero() ;
   for (std::vector< std::vector<bioReal> >::iterator rowIterator = data->begin() ;
        rowIterator != data->end() ;
        ++rowIterator) {
     child->setVariables(&(*rowIterator)) ;
-    bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-    theDerivatives->f += childResult->f ;
+    const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
+    theDerivatives.f += childResult->f ;
     if (gradient) {
       for (bioUInt i = 0 ; i < n ; ++i) {
-	theDerivatives->g[i] += childResult->g[i] ;
+	theDerivatives.g[i] += childResult->g[i] ;
 	if (hessian) {
 	  for (bioUInt j = i ; j < n ; ++j) {
-	    theDerivatives->h[i][j] += childResult->h[i][j] ;
+	    theDerivatives.h[i][j] += childResult->h[i][j] ;
 	  }
 	}
       }
@@ -59,11 +53,11 @@ bioDerivatives* bioExprSum::getValueAndDerivatives(std::vector<bioUInt> literalI
   if (hessian) {
     for (bioUInt i = 0 ; i < n ; ++i) {
       for (bioUInt j = 0 ; j < i ; ++j) {
-	theDerivatives->h[i][j] = theDerivatives->h[j][i] ;
+	theDerivatives.h[i][j] = theDerivatives.h[j][i] ;
       }
     }
   }
-  return theDerivatives ;
+  return &theDerivatives ;
 }
 
 bioString bioExprSum::print(bioBoolean hp) const {

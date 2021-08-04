@@ -33,8 +33,8 @@ typedef struct{
   bioReal result ;
   bioUInt startData ;
   bioUInt endData ;
-  bioFormula* theLoglike ;
-  bioFormula* theWeight ;
+  bioFormula theLoglike ;
+  bioFormula theWeight ;
   std::vector<bioUInt>* literalIds ;
   bioBoolean panel ;
 } bioThreadArg ;
@@ -43,8 +43,9 @@ typedef struct{
 class bioThreadMemory {
 
  public:
-  bioThreadMemory(bioUInt nThreads,bioUInt dim) ;
+  bioThreadMemory() ;
   ~bioThreadMemory() ;
+  void resize(bioUInt nThreads, bioUInt dim) ;
   bioThreadArg* getInput(bioUInt t) ;
   void setLoglike(std::vector<bioString> f) ;
   void setWeight(std::vector<bioString> w) ;
@@ -59,8 +60,9 @@ class bioThreadMemory {
   
  private:
   std::vector<bioThreadArg> inputStructures ;
-  std::vector<bioFormula*> loglikes ;
-  std::vector<bioFormula*> weights ;
+  std::vector<bioFormula> loglikes ;
+  std::vector<bioFormula> weights ;
 
 };
+
 #endif

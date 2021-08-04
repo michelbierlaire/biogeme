@@ -18,22 +18,22 @@ import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable, log, Elem
 
 # Read the data
-df = pd.read_csv('swissmetro.dat', '\t')
+df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database
-#print(database.data.describe())
+# print(database.data.describe())
 
 # The following statement allows you to use the names of the variable
 # as Python variable.
 globals().update(database.variables)
 
 # Removing some observations can be done directly using pandas.
-#remove = (((database.data.PURPOSE != 1) &
+# remove = (((database.data.PURPOSE != 1) &
 #           (database.data.PURPOSE != 3)) |
 #          (database.data.CHOICE == 0))
-#database.data.drop(database.data[remove].index,inplace=True)
+# database.data.drop(database.data[remove].index,inplace=True)
 
 # Here we use the "biogeme" way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -53,7 +53,9 @@ tau2 = tau1 + delta2
 # Definition of new variables
 TRAIN_COST = TRAIN_CO * (GA == 0)
 TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100, database)
+TRAIN_COST_SCALED = DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+)
 
 #  Utility
 U = B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -66,7 +68,8 @@ U = B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 ChoiceProba = {
     1: 1 - dist.logisticcdf(U - tau1),
     2: dist.logisticcdf(U - tau1) - dist.logisticcdf(U - tau2),
-    3: dist.logisticcdf(U - tau2)}
+    3: dist.logisticcdf(U - tau2),
+}
 
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
@@ -75,9 +78,9 @@ logprob = log(Elem(ChoiceProba, CHOICE))
 # Define level of verbosity
 logger = msg.bioMessage()
 logger.setSilent()
-#logger.setWarning()
-#logger.setGeneral()
-#logger.setDetailed()
+# logger.setWarning()
+# logger.setGeneral()
+# logger.setDetailed()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)
