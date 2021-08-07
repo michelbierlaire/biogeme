@@ -198,15 +198,19 @@ If it does not work... I don't know :-(
   </p>
   If you select the "Download files", you will see the list of files
   available. What you need to look at are the "Wheel" files. For
-  instance, the following files are available for version 3.2.1:
+  instance, the following files are available for version 3.2.8:
   <ul>
-    <li>Python 3.6 for MacOSX: <code>biogeme-3.2.1-cp36-cp36m-macosx_10_7_x86_64.whl</code></li>
-    <li>Python 3.6 for Windows: <code>biogeme-3.2.1-cp36-cp36m-win_amd64.whl</code></li>
-    <li>Python 3.7 for MacOSX: <code>biogeme-3.2.1-cp37-cp37m-macosx_10_9_x86_64.whl</code></li>
-    <li>Python 3.7 for Windows: <code>biogeme-3.2.1-cp37-cp37m-win_amd64.whl</code></li>
-    <li>Source: <code>biogeme-3.2.1.tar.gz</code></li>
+<li>Python 3.6  for MacOSX  : <code>biogeme-3.2.8-cp36-cp36m-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.6  for Windows  : <code>biogeme-3.2.8-cp36-cp36m-win_amd64.whl</code></li>
+<li>Python 3.7  for MacOSX  : <code>biogeme-3.2.8-cp37-cp37m-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.7  for Windows  : <code>biogeme-3.2.8-cp37-cp37m-win_amd64.whl</code></li>
+<li>Python 3.8  for MacOSX  : <code>biogeme-3.2.8-cp38-cp38-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.8  for Windows  : <code>biogeme-3.2.8-cp38-cp38-win_amd64.whl</code></li>
+<li>Python 3.9  for MacOSX  : <code>biogeme-3.2.8-cp39-cp39-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.9  for Windows  : <code>biogeme-3.2.8-cp39-cp39-win_amd64.whl</code></li>
+<li>Source: <code>biogeme-3.2.8.tar.gz</code></li>
   </ul>
-  It means that you must use Python 3.6 or 3.7.
+  It means that you must use Python 3.6, 3.7, 3.8 or 3.9.
 </dd>
 </dl>
 </div>
@@ -229,16 +233,17 @@ If it does not work... I don't know :-(
     </ul>
     The result should look like the following:
     <pre>
-      Python 3.8.0 (default, Nov  6 2019, 15:49:01)
-      [Clang 4.0.1 (tags/RELEASE_401/final)] :: Anaconda, Inc. on darwin
+      Python 3.9.5 (default, May 18 2021, 12:31:01)
+      [Clang 10.0.0 ] :: Anaconda, Inc. on darwin
       Type "help", "copyright", "credits" or "license" for more information.
       >>> import biogeme.version as ver
       >>> print(ver.getText())
-      biogeme 3.2.6 [2020-06-04]
+      biogeme 3.2.8 [2021-08-05]
       Version entirely written in Python
       Home page: http://biogeme.epfl.ch
       Submit questions to https://groups.google.com/d/forum/biogeme
       Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
+      
     </pre>
 
   </div>

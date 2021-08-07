@@ -37,7 +37,32 @@ Documentation on Biogeme</div>
 	</div>
 	</div>
 
+	<div class="panel panel-default">
+	<div class="panel-heading">
+	  Lectures on discrete choice models</div>
+	<div class="panel-body">
+	  <p>
+	    These videos have been prepared in the context of two
+	    online courses available on
+	    the <a href="https://www.edx.org" target="_blank">edX</a>
+	    platform. 
+	  </p>
+	  <p>
+	    <ul>
+	      <li><a href="https://youtube.com/playlist?list=PL10NOnsbP5Q5HBREfnabBaYBVaPnGcN1E"
+		     target="_blank">Introduction to choice models</a></li>
+	      <li><a href="https://youtube.com/playlist?list=PL10NOnsbP5Q7JDxvvHYToc9-HDl3Gien5">Selected 
+		  topics on discrete choice models</a></li> 
+	    </ul>
+	  </p>
+	</div>
+	<div class="panel-footer">
+	  The above links give you access to the YouTube playlists.
+	</div>
+	</div>
 
+
+	
 	<div class="panel panel-default">
 	<div class="panel-heading">
 Common mistakes in discrete choice modeling</div>

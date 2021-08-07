@@ -68,13 +68,15 @@
       <div class="panel panel-default">
 	<div class="panel-heading">What's new in Biogeme 3.2.8</div>
 	<div class="panel-body">
-	  <p>Note that version 3.2.7 and 3.2.8 are almost
-	  identical. The description belows compares to version 3.2.6.
+	  <p>Note that versions 3.2.7 and 3.2.8 are almost
+	  identical. The description below compares to version 3.2.6.
 	  <dl>
 	    <dt>Assisted specification</dt>
 	    <dd>The asssisted specification algorithm
 	    by <a href="https://dx.doi.org/10.1016/j.jocm.2021.100285">Ortelli
-	      et al. (2021)</a> is now available. </dd>
+	      et al. (2021)</a> is now available. The multi-objective
+	    Variable Neighborhood Search algorithm is available
+	    separately, and can be used in any context.</dd>
 	    <dt>Optimization</dt>
 	    <dd>The optimization algorithms have been organized into
 	      two modules. The
@@ -119,7 +121,8 @@
 	      improved. [<a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">Click
 	      here for the documentation</a>]. It
 	      has to be compined with the <a href="sphinx/database.html?highlight=split#biogeme.database.Database.split"><code>split</code></a> function
-	      of the database object.
+	      of the database
+	      object. [<a href="examples/swissmetro/04validation.py">Click here for an example</a>]
 	      <dt>Statistics about chosen alternatives</dt>
 	    <dd>It is now possible to calculate the number of time
 	      each alternative is chosen and available in the
@@ -127,13 +130,13 @@
 	      here for the documentation</a>].</dd>
 	    <dt>Validity check for the nests</dt>
 	    <dd> The validity of the specification of the nests
-	      for nested and cross nested logit models is new
+	      for nested and cross nested logit models is now
 	      checked.</dd>
 	    <dt>ALOGIT file</dt>
 	    <dd>Output files in F12 format compatible with ALOGIT can
 	      now be
 	      produced. [<a href="sphinx/results.html?highlight=f12#biogeme.results.bioResults.writeF12">Click
-	      here for the documentation</a>. </dd>
+	      here for the documentation</a>]. </dd>
 	    <dt>Likelihood ratio test</dt>
 	    <dd>A function to perform the likelihood ratio test has
 	      been
