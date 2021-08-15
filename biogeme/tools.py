@@ -160,14 +160,28 @@ def getPrimeNumbers(n):
 
     :return: array with prime numbers
     :rtype: list(int)
+
+    :raise biogemeError: if the requested number is non positive or a float
+
     """
     total = 0
     upperBound = 100
+    if n <= 0:
+        raise excep.biogemeError(
+            f'Incorrect number: {n}'
+        )
+        
     while total < n:
         upperBound *= 10
         primes = calculatePrimeNumbers(upperBound)
         total = len(primes)
-    return primes[0:n]
+    try:
+        return primes[0:n]
+    except TypeError as e:
+        raise excep.biogemeError(
+            f'Incorrect number: {n}'
+        ) from e
+        
 
 
 def calculatePrimeNumbers(upperBound):
@@ -179,12 +193,26 @@ def calculatePrimeNumbers(upperBound):
     :return: array with prime numbers
     :rtype: list(int)
 
+    :raise biogemeError: if the upperBound is incorrectly defined (negative number
+    
     >>> tools.calculatePrimeNumbers(10)
     [2, 3, 5, 7]
 
     """
-    mywork = list(range(0, upperBound + 1))
-    largest = int(np.ceil(np.sqrt(float(upperBound))))
+    try:
+        mywork = list(range(0, upperBound + 1))
+    except TypeError as e: 
+        raise excep.biogemeError(
+            f'Incorrect value: {upperBound}'
+        ) from e
+    
+    try:
+        largest = int(np.ceil(np.sqrt(float(upperBound))))
+    except ValueError as e: 
+        raise excep.biogemeError(
+            f'Incorrect value: {upperBound}'
+        ) from e
+
     # Remove all multiples
     for i in range(2, largest + 1):
         if mywork[i] != 0:
