@@ -18,7 +18,7 @@ versionMajor = 3
 # Minor version number
 versionMinor = 2
 # Release name
-versionRelease = '8'
+versionRelease = '9a'
 author = 'Michel Bierlaire'
 urlAuthor = 'http://people.epfl.ch/michel.bierlaire'
 department = 'Transport and Mobility Laboratory'
