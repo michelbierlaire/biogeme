@@ -383,6 +383,26 @@ class Expression:
             )
         return And(self, other)
 
+    def __rand__(self, other):
+        """
+        Operator overloading. Generate an expression for logical and.
+
+        :param other: expression for logical and
+        :type other: biogeme.expressions.Expression
+
+        :return: other and self 
+        :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+        """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(
+                f'This is not a valid expression: {other}'
+            )
+        return And(other, self)
+
     def __or__(self, other):
         """
         Operator overloading. Generate an expression for logical or.
@@ -402,6 +422,26 @@ class Expression:
                 f'This is not a valid expression: {other}'
             )
         return Or(self, other)
+
+    def __ror__(self, other):
+        """
+        Operator overloading. Generate an expression for logical or.
+
+        :param other: expression for logical or
+        :type other: biogeme.expressions.Expression
+
+        :return: other or self 
+        :rtype: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+        """
+        if not (isNumeric(other) or isinstance(other, Expression)):
+            raise excep.biogemeError(
+                f'This is not a valid expression: {other}'
+            )
+        return Or(other, self)
 
     def __eq__(self, other):
         """
@@ -695,8 +735,8 @@ class Expression:
         """This function identifies the row of the database from which the
         values of the variables must be obtained.
 
-        :param row: id of the row.
-        :type row: int
+        :param row: row from the database
+        :type row: pandas.core.series.Serie
 
         """
         # Row of the database where the values of the variables are found
@@ -1961,6 +2001,14 @@ class Elementary(Expression):
         """
         if self.name in idsOfElementaryExpressions:
             self.uniqueId = idsOfElementaryExpressions[self.name]
+            if not isinstance(self.uniqueId, int):
+                error_msg = (
+                    f'An integer is required as an ID for [{self.name}]. '
+                    f'The value [{self.uniqueId}] is of type '
+                    f'{type(self.uniqueId)}'
+                )
+                raise excep.biogemeError(error_msg)
+                
         else:
             error_msg = (
                 f'No index is available for expression {self.name}.'
@@ -2018,6 +2066,13 @@ class bioDraws(Elementary):
 
         :raise biogemeError: if no index is available for one draw type.
         """
+        if indicesOfDraws is None:
+            error_msg = (
+                f'No index is available for draw {self.drawType}.'
+                f' Actually, no draws have been identified.'
+            )
+            raise excep.biogemeError(error_msg)
+            
         if self.name in indicesOfDraws:
             self.drawId = indicesOfDraws[self.name]
         else:
@@ -2245,7 +2300,17 @@ class Variable(Elementary):
         :return: value of the expression
         :rtype: float
         """
-        return self._row[self.name]
+        try:
+            result = self._row[self.name]
+        except TypeError as e:
+            error_msg = (
+                f'{e}. Check the call of function '
+                f'biogeme.expressions.setRow(). It should take a '
+                f'pandas.core.series.Serie object as argument, not a '
+                f'{type(self._row)}.'
+            )
+            raise excep.biogemeError(error_msg) from e
+        return result
 
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
@@ -2474,6 +2539,12 @@ class RandomVariable(Elementary):
 
         :raise biogemeError: if no index is available for a random variable.
         """
+        if indicesOfRandomVariables is None:
+            error_msg = (
+                f'No index is available for random variable '
+                f'{self.name}. Actually, no random variable has been identified'
+            )
+            raise excep.biogemeError(error_msg)
         if self.name in indicesOfRandomVariables:
             self.rvId = indicesOfRandomVariables[self.name]
         else:
@@ -2655,6 +2726,13 @@ class Beta(Elementary):
         """
 
         if self.status != 0:
+            if indicesOfFixedBetas is None:
+                error_msg = (
+                    f'No index is available for fixed parameter '
+                    f'{self.name}. Actually, no fixed parameter '
+                    f'has been identified.'
+                )
+                raise excep.biogemeError(error_msg)
             if self.name in indicesOfFixedBetas:
                 self.betaId = indicesOfFixedBetas[self.name]
             else:
@@ -2665,6 +2743,14 @@ class Beta(Elementary):
                 )
                 raise excep.biogemeError(error_msg)
         else:
+            if indicesOfFreeBetas is None:
+                error_msg = (
+                    f'No index is available for free parameter '
+                    f'{self.name}. Actually, no free parameter '
+                    f'has been identified.'
+                )
+                raise excep.biogemeError(error_msg)
+            
             if self.name in indicesOfFreeBetas:
                 self.betaId = indicesOfFreeBetas[self.name]
             else:
