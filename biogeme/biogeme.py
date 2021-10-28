@@ -52,7 +52,6 @@ class BIOGEME:
         numberOfDraws=1000,
         seed=None,
         skipAudit=False,
-        removeUnusedVariables=True,
         displayUsedVariables=False,
         suggestScales=True,
         missingData=99999,
@@ -101,11 +100,6 @@ class BIOGEME:
             models and large data sets. Default: False.
         :type skipAudit: bool
 
-        :param removeUnusedVariables: if True, all variables not used
-            in the expression are removed from the database. Default:
-            True.
-        :type removeUnusedVariables: bool
-
         :param displayUsedVariables: if True, displays all the
             variables used in the formulas. Default: False.
         :type displayUsedVariables: bool
@@ -132,6 +126,11 @@ class BIOGEME:
         messages to the screen and log file.
         Type: class :class:`biogeme.messaging.bioMessage`."""
 
+
+        self.logger.warning(
+            'The possibility to remove unused variables has been '
+            'temporarily turned off'
+        )
         if not skipAudit:
             database.data = database.data.replace({True: 1, False: 0})
             listOfErrors, listOfWarnings = database._audit()
@@ -144,7 +143,6 @@ class BIOGEME:
         self.loglikeName = 'loglike'
         """ Keyword used for the name of the loglikelihood formula.
         Default: 'loglike'"""
-
 
         self.weightName = 'weight'
         """Keyword used for the name of the weight formula. Default: 'weight'
@@ -169,6 +167,8 @@ class BIOGEME:
         the file.
         """
 
+        self.missingData = missingData  #: code for missing data
+
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -187,7 +187,7 @@ class BIOGEME:
             calculating the weight of each observation in the
             sample.
             """
-
+            
             self.formulas = dict({self.loglikeName: formulas})
             """ Dictionary containing Biogeme formulas of type
             :class:`biogeme.expressions.Expression`.
@@ -206,59 +206,25 @@ class BIOGEME:
             self.weight = formulas.get(self.weightName)
             self.formulas = formulas
 
-        self.database = database #: :class:`biogeme.database.Database` object
+        for f in self.formulas.values():
+            f.missingData = self.missingData
+            
+        self.database = database  #: :class:`biogeme.database.Database` object
 
-        self.userNotes = userNotes #: User notes
+        self.userNotes = userNotes  #: User notes
 
-        self.missingData = missingData #: code for missing data
-
-
+            
         self.lastSample = None
         """ keeps track of the sample of data used to calculate the
         stochastic gradient / hessian
         """
 
-        self.initLogLike = None #: Init value of the likelihood function
+        self.initLogLike = None  #: Init value of the likelihood function
 
-        self.nullLogLike = None #: Log likelihood of the null model
-
-        self.usedVariables = set() #: set of variables used in the formulas.
-        for k, f in self.formulas.items():
-            myvars = f.setOfVariables()
-            missingVariables = [
-                v for v in myvars if v not in self.database.data
-            ]
-            if missingVariables:
-                errorMsg = (
-                    f'Variables in formula {k} missing in the database: '
-                    f'{missingVariables}'
-                )
-                raise excep.biogemeError(errorMsg)
-            self.usedVariables |= f.setOfVariables()
-        if self.database.isPanel():
-            self.usedVariables.add(self.database.panelColumn)
-        if displayUsedVariables:
-            self.logger.general(
-                f'List of used variables: {self.usedVariables}'
-            )
-        if removeUnusedVariables:
-            unusedVariables = (
-                set(self.database.data.columns) - self.usedVariables
-            )
-            error_msg = (
-                f'Remove {len(unusedVariables)} '
-                'unused variables from the database '
-                f'as only {len(self.usedVariables)} are used.'
-            )
-            self.logger.general(error_msg)
-            self.database.data = self.database.data.drop(
-                columns=list(unusedVariables)
-            )
+        self.nullLogLike = None  #: Log likelihood of the null model
 
         if suggestScales:
-            suggestedScales = self.database.suggestScaling(
-                columns=self.usedVariables
-            )
+            suggestedScales = self.database.suggestScaling()
             if not suggestedScales.empty:
                 self.logger.detailed(
                     'It is suggested to scale the following variables.'
@@ -339,8 +305,7 @@ class BIOGEME:
         self.bootstrap_time = None
         """ Time needed to calculate the bootstrap standard errors"""
 
-
-        self.bootstrap_results = None #: Results of the bootstrap calculation.
+        self.bootstrap_results = None  #: Results of the bootstrap calculation.
 
         self.optimizationMessages = None
         """ Information provided by the optimization algorithm
@@ -351,11 +316,9 @@ class BIOGEME:
         """ Parameters to be transferred to the optimization algorithm
         """
 
+        self.algorithm = None  #: Optimization algorithm
 
-        self.algorithm = None #: Optimization algorithm
-
-        self.bestIteration = None #: Store the best iteration found so far.
-
+        self.bestIteration = None  #: Store the best iteration found so far.
 
     def _saveIterationsFileName(self):
         """
@@ -380,7 +343,21 @@ class BIOGEME:
             err, war = v.audit(self.database)
             listOfErrors += err
             listOfWarnings += war
+        if self.weight is not None:
+            total = self.weight.getValue_c(database=self.database, aggregation=True)
+            s_size = self.database.getSampleSize()
+            ratio = s_size / total
+            if np.abs(ratio - 1) >= 0.01:
+                theWarning = (
+                    f'The sum of the weights ({total}) is different from '
+                    f'the sample size ({self.database.getSampleSize()}). '
+                    f'Multiply the weights by {ratio} to reconcile the two.'
+                )
+                listOfWarnings.append(theWarning)
         if listOfWarnings:
+            if self.logger.screenLevel < 1:
+                self.logger.setWarning()
+                self.logger.warning('Logger status has been set to "warning"')
             self.logger.warning('\n'.join(listOfWarnings))
         if listOfErrors:
             self.logger.warning('\n'.join(listOfErrors))
@@ -500,8 +477,9 @@ class BIOGEME:
         """Calculate the log likelihood of the null model that predicts equal
         probability for each alternative
 
-        :param avail: list of expressions to evaluate the
-                      availability conditions for each alternative.
+        :param avail: list of expressions to evaluate the availability
+                      conditions for each alternative. If None, all
+                      alternatives are always available.
         :type avail: list of :class:`biogeme.expressions.Expression`
 
         :return: value of the log likelihood
@@ -509,7 +487,11 @@ class BIOGEME:
 
         """
         expression = -eb.log(eb.bioMultSum(avail))
-        self.nullLogLike = self.database.sumFromDatabase(expression)
+    
+        self.nullLogLike = expression.getValue_c(
+            database=self.database,
+            aggregation=True,
+        )
         return self.nullLogLike
 
     def calculateInitLikelihood(self):
@@ -520,7 +502,6 @@ class BIOGEME:
         :return: value of the log likelihood.
         :rtype: float.
         """
-
         # Value of the loglikelihood for the default values of the parameters.
         self.initLogLike = self.calculateLikelihood(
             self.betaInitValues, scaled=False
@@ -614,7 +595,6 @@ class BIOGEME:
         :raises biogemeError: if the norm of the gradient is not finite, an
             error is raised.
         """
-
         n = len(x)
         if n != len(self.betaInitValues):
             error_msg = (
@@ -843,10 +823,9 @@ class BIOGEME:
         :raises biogemeError: if no expression has been provided for the
             likelihood
         """
-
         if self.loglike is None:
             raise excep.biogemeError(
-                'No log likelihood function has been specificed'
+                'No log likelihood function has been specified'
             )
         if len(self.freeBetaNames) == 0:
             raise excep.biogemeError(
@@ -877,7 +856,7 @@ class BIOGEME:
         optimizationMessages['Optimization time'] = datetime.now() - start_time
         # Information provided by the optimization algorithm after completion.
         self.optimizationMessages = optimizationMessages
-
+        
         fgHb = self.calculateLikelihoodAndDerivatives(
             xstar, scaled=False, hessian=True, bhhh=True
         )
@@ -896,12 +875,14 @@ class BIOGEME:
                 )
             else:
                 fgHb = fgHb[0], fgHb[1], finDiffHessian, fgHb[3]
+
         # numpy array, of size B x K,
         # where
         #        - B is the number of bootstrap iterations
         #        - K is the number pf parameters to estimate
         self.bootstrap_results = None
         if bootstrap > 0:
+
             start_time = datetime.now()
 
             self.logger.general(
@@ -1049,6 +1030,7 @@ class BIOGEME:
             )
             simResult = simBiogeme.simulate(results.getBetaValues())
             allSimulationResults.append(simResult)
+
         self.database = keepDatabase
         if self.generatePickle:
             fname = f'{self.modelName}_validation'
@@ -1099,6 +1081,7 @@ class BIOGEME:
         results = self.algorithm(
             theFunction, startingValues, self.bounds, self.algoParameters
         )
+        
         return results
 
     def simulate(self, theBetaValues=None):
@@ -1145,7 +1128,9 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    self.logger.warning(f'Parameter {x} not present in the model')
+                    self.logger.warning(
+                        f'Parameter {x} not present in the model'
+                    )
             betaValues = list()
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
@@ -1207,7 +1192,9 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    self.logger.warning(f'Parameter {x} not present in the model')
+                    self.logger.warning(
+                        f'Parameter {x} not present in the model'
+                    )
             betaValues = list()
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
@@ -1321,7 +1308,7 @@ class negLikelihood(functionToMinimize):
         """True if the log likelihood must be recalculated
         """
 
-        self.x = None #: Vector of unknown parameters values
+        self.x = None  #: Vector of unknown parameters values
 
         self.batch = None
         """Value betwen 0 and 1 defining the size of the batch, that is the
@@ -1329,15 +1316,15 @@ class negLikelihood(functionToMinimize):
         log likelihood.
         """
 
-        self.fv = None #: value of the function
+        self.fv = None  #: value of the function
 
-        self.gv = None #: vector with the gradient
+        self.gv = None  #: vector with the gradient
 
-        self.hv = None #: second derivatives matrix
+        self.hv = None  #: second derivatives matrix
 
-        self.bhhhv = None #: BHHH matrix
+        self.bhhhv = None  #: BHHH matrix
 
-        self.like = like #: function calculating the log likelihood
+        self.like = like  #: function calculating the log likelihood
 
         self.like_deriv = like_deriv
         """function calculating the log likelihood and its derivatives.
@@ -1397,6 +1384,7 @@ class negLikelihood(functionToMinimize):
         return -self.fv, -self.gv
 
     def f_g_h(self, batch=None):
+        logger = msg.bioMessage()
         if self.x is None:
             raise excep.biogemeError('The variables must be set first.')
 
