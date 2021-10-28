@@ -36,21 +36,21 @@ class variable:
         :type expression: :class:`biogeme.expressions.Expression`
         """
 
-        self.name = name #: name of the variable
+        self.name = name  #: name of the variable
 
-        self.expression = expression #: Biogeme expression for the variable
+        self.expression = expression  #: Biogeme expression for the variable
 
-        self.active = False #: True if variable is active
+        self.active = False  #: True if variable is active
 
-        self.generic = False #: True if the variable is generic.
+        self.generic = False  #: True if the variable is generic.
 
-        self.genericName = None #: Name of the generic variable
+        self.genericName = None  #: Name of the generic variable
 
         self.nonlinearSpec = None
         """ Function with the nonlinear specifications.
         """
 
-        self.used = False #: True if variable used in the model.
+        self.used = False  #: True if variable used in the model.
 
     def __str__(self):
         """
@@ -125,9 +125,9 @@ class groupOfVariables:
         :param nonlinearSpecs: list of possible nonlinear specifications
         :type nonlinearSpecs: list(function)
         """
-        self.name = name #: name of the group of variables.
+        self.name = name  #: name of the group of variables.
 
-        self.variables = variables #: list of variables in the group.
+        self.variables = variables  #: list of variables in the group.
 
         self.genericForbiden = len(self.variables) <= 1
         """ True of the group cannot be made generic
@@ -141,7 +141,7 @@ class groupOfVariables:
         """ True if the group is always active.
         """
 
-        self.active = False #: True if the group is active.
+        self.active = False  #: True if the group is active.
 
         self.nonlinearSpecs = nonlinearSpecs
         """ list of possible nonlinear specifications
@@ -151,7 +151,7 @@ class groupOfVariables:
         """Index of the selected non linear specification.
         """
 
-        self.linear = True #: True if linear specification.
+        self.linear = True  #: True if linear specification.
 
     def __str__(self):
         v = [s.__str__() for s in self.variables]
@@ -377,7 +377,7 @@ class term:
         :type validity: bool f(float)
 
         """
-        self.var = var #: variable of the term
+        self.var = var  #: variable of the term
 
         self.segmentation = aSegmentation
         """ discrete segmentation of the parameter
@@ -392,7 +392,7 @@ class term:
         """ function checking the validity of the coefficient.
         """
 
-        self.bounds = bounds #: bounds on the coefficient
+        self.bounds = bounds  #: bounds on the coefficient
 
         if self.var is not None:
             self.var.used = True
@@ -556,11 +556,11 @@ class utility:
         :type terms: list(term)
 
         """
-        self.name = name #: name of the alternative
+        self.name = name  #: name of the alternative
 
-        self.id = alternativeId #: id of the alternative
+        self.id = alternativeId  #: id of the alternative
 
-        self.terms = terms #: list of terms in the utility function
+        self.terms = terms  #: list of terms in the utility function
 
     def getExpression(self):
         """
@@ -594,16 +594,16 @@ class socioEconomic:
         :type values: dict(int: str)
 
         """
-        self.name = name #: name of the segmentation variable
+        self.name = name  #: name of the segmentation variable
 
-        self.expression = expression #: Biogeme expression of the variable
+        self.expression = expression  #: Biogeme expression of the variable
 
         self.values = values
         """dict with values that it can take as keys, and a name
         describing them as values.
         """
 
-        self.active = False #: True if the segmentation variable is active.
+        self.active = False  #: True if the segmentation variable is active.
 
     def combine(self, existingValues):
         """Generates the possible combinations of values,
@@ -641,11 +641,11 @@ class segmentation:
         segmentation.
         """
 
-        self.listOfVariables = [] #: list of variables involved
+        self.listOfVariables = []  #: list of variables involved
 
-        self.alwaysActive = False #: True if it must always be active
+        self.alwaysActive = False  #: True if it must always be active
 
-        self.used = False #: True if used.
+        self.used = False  #: True if used.
 
     def __str__(self):
         return f'{self.dictOfSocioEco}'
@@ -895,7 +895,8 @@ class specificationProblem(vns.problemClass):
         :param availabilities: dict describing the availability of the
             alternatives.
 
-        :type availabilities: dict(int, :class:`biogeme.expressions.Expression`)
+        :type availabilities: 
+            dict(int, :class:`biogeme.expressions.Expression`)
 
         :param choice: expression for the observed choice
         :type choice: :class:`biogeme.expressions.Expression`
@@ -934,7 +935,7 @@ class specificationProblem(vns.problemClass):
         :class:`biogeme.results.bioResults`).
         """
 
-        self.name = name #: name of the problem.
+        self.name = name  #: name of the problem.
 
         self.database = database
         """object of type :class:`biogeme.database.Database`, containing the
@@ -1023,7 +1024,7 @@ class specificationProblem(vns.problemClass):
         :class:`biogeme.assisted.specificationProblem.__init__`
         """
 
-        self.choice = choice #: expression for the observed choice
+        self.choice = choice  #: expression for the observed choice
 
         self.availability = availabilities
         """dict describing the availability of the alternatives.
@@ -1044,7 +1045,7 @@ class specificationProblem(vns.problemClass):
         the loglikelihood expression.
         """
 
-        self.selectedModel = 0 #: index of the selected model
+        self.selectedModel = 0  #: index of the selected model
 
         self.maximumNumberOfParameters = 200
         """maximum number of parameters allowed in a specification. If the
@@ -1052,7 +1053,7 @@ class specificationProblem(vns.problemClass):
         rejected by the algorithm.
         """
 
-        self.lastOperator = None #: Last operator used
+        self.lastOperator = None  #: Last operator used
 
         self.operators = {
             'Change segmentation': self.changeSegmentation,
@@ -1803,9 +1804,9 @@ class solution(vns.solutionClass):
         """ Names of the objective functions
         """
 
-        self.objectives = None #: values of the objectives
+        self.objectives = None  #: values of the objectives
 
-        self.valid = None #: True if the solution is valid
+        self.valid = None  #: True if the solution is valid
 
         self.causeInvalidity = None
         """If the solution is invalid, contains the cause of the invalidity
@@ -1822,7 +1823,7 @@ class solution(vns.solutionClass):
         Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)
         """
 
-        self.description = None #: description of the solution
+        self.description = None  #: description of the solution
 
     def __repr__(self):
         return str(self.decisions)
