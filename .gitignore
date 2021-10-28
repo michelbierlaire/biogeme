@@ -325,3 +325,9 @@ examples/swissmetro/19individualLevelParameters.pickle
 examples/indicators/01nestedEstimation.pickle
 examples/assisted/.ipynb_checkpoints/paretoSwissmetro-checkpoint.ipynb
 biogeme/flycheck_biogeme (1).py
+dist/biogeme-3.2.9a0-py3.10-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.9a0-py3.8-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.9a0-py3.9-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.9a0.tar.gz
+examples/indicators/.ipynb_checkpoints/Untitled-checkpoint.ipynb
+examples/indicators/Untitled.ipynb
