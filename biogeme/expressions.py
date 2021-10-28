@@ -15,8 +15,8 @@
 
 import numpy as np
 import biogeme.exceptions as excep
-import biogeme.cbiogeme as cb
 import biogeme.messaging as msg
+import biogeme.cexpressions as ee
 
 
 def isNumeric(obj):
@@ -45,30 +45,34 @@ class Expression:
         Type: class :class:`biogeme.messaging.bioMessage`.
         """
 
-        self.parent = None #: Parent expression
+        self.parent = None  #: Parent expression
 
-        self.children = list() #: List of children expressions
+        self.children = list()  #: List of children expressions
 
         self.elementaryExpressionIndex = None
         """Indices of the elementary expressions (dict)"""
 
-        self.allFreeBetas = dict() #: dict of free parameters
+        self.allFreeBetas = dict()  #: dict of free parameters
 
-        self.freeBetaNames = list() #: list of names of free parameters
+        self.freeBetaNames = list()  #: list of names of free parameters
 
-        self.allFixedBetas = dict() #: dict of fixed parameters
+        self.allFixedBetas = dict()  #: dict of fixed parameters
 
-        self.fixedBetaNames = list() #: list of names of fixed parameters
+        self.fixedBetaNames = list()  #: list of names of fixed parameters
 
-        self.allRandomVariables = None #: dict of random variables
+        self.allRandomVariables = None  #: dict of random variables
 
-        self.variableNames = None #: list of variables names
+        self.variableNames = None  #: list of variables names
 
-        self.randomVariableNames = None #: list of random variables names
+        self.randomVariableNames = None  #: list of random variables names
 
-        self.allDraws = None #: dict of draws
+        self.allDraws = None  #: dict of draws
 
-        self.drawNames = None #: list of draw types
+        self.drawNames = None  #: list of draw types
+
+        self.numberOfDraws = None
+        """number of draws for Monte Carlo integration
+        """
 
         self._row = None
         """Row of the database where the values of the variables are found
@@ -84,6 +88,18 @@ class Expression:
 
         self.fixedBetaValues = None
         """ List of values of the fixed beta parameters (those to be estimated)
+        """
+
+        self.expression_prepared = False
+        """ If True, the expression is prepared to be used.
+        """
+
+        self.cpp = ee.pyEvaluateOneExpression()
+        """ Interface to the C++ implementation
+        """
+
+        self.missingData = 99999
+        """ Value interpreted as missing data
         """
 
     def __repr__(self):
@@ -390,7 +406,7 @@ class Expression:
         :param other: expression for logical and
         :type other: biogeme.expressions.Expression
 
-        :return: other and self 
+        :return: other and self
         :rtype: biogeme.expressions.Expression
 
         :raise biogemeError: if one of the expressions is invalid, that is
@@ -430,7 +446,7 @@ class Expression:
         :param other: expression for logical or
         :type other: biogeme.expressions.Expression
 
-        :return: other or self 
+        :return: other or self
         :rtype: biogeme.expressions.Expression
 
         :raise biogemeError: if one of the expressions is invalid, that is
@@ -566,9 +582,28 @@ class Expression:
     def _prepareFormulaForEvaluation(self, database):
         """Extract from the formula the elementary expressions (parameters,
         variables, random parameters) and decide a numbering convention.
+
+        :raise biogemeError: if no database is given and the
+            expressions involves variables.
+
+        :raise biogemeError: if the expression involves MonteCarlo integration,
+           and no database is provided.
+
         """
 
-        self.variableNames = list(database.data.columns.values)
+        if self.expression_prepared:
+            return
+
+        if database is not None:
+            self.variableNames = list(database.data.columns.values)
+        else:
+            variables = self.setOfVariables()
+            if variables:
+                raise excep.biogemeError(
+                    f'No database is provided and the expression '
+                    f'contains variables: {variables}'
+                )
+            self.variableNames = list()
 
         (
             self.elementaryExpressionIndex,
@@ -594,9 +629,151 @@ class Expression:
             self.allFixedBetas[x].initValue for x in self.fixedBetaNames
         ]
 
-    def getValue_c(self, database, numberOfDraws=1000):
+        # Draws
+        if self.requiresDraws():
+            if database is None:
+                error_msg = (
+                    'An expression involving MonteCarlo integration '
+                    'must be associated with a database.'
+                )
+                raise excep.biogemeError(error_msg)
+            database.generateDraws(
+                self.allDraws, self.drawNames, self.numberOfDraws
+            )
+
+        self.expression_prepared = True
+
+    def createFunction(
+            self, database=None, numberOfDraws=1000, gradient=True, hessian=True, bhhh=False,
+    ):
+        """Create a function based on the expression. The function takes as
+            argument an array for the free parameters, and return the
+            value of the function, the gradient, the hessian and the BHHH. The
+            calculation of the derivatives is optional.
+
+        :param database: database. If no database is provided, the
+            expression must not contain any variable.
+        :type database:  biogeme.database.Database
+
+        :param numberOfDraws: number of draws if needed by Monte-Carlo
+            integration.
+        :type numberOfDraws: int
+
+        :param gradient: if True, the gradient is calculated.
+        :type gradient: bool
+
+        :param hessian: if True, the hessian is calculated.
+        :type hessian: bool
+
+        :param bhhh: if True, the BHHH matrix is calculated.
+        :type bhhh: bool
+
+        :return: the function. It will return, in that order, the
+            value of the function, the gradient, the hessian and the
+            BHHH matrix. Only requested quantities will be
+            returned. For instance, if the gradient and the BHHH
+            matrix are requested, and not the hessian, the tuple that
+            is returned is f, g, bhhh.
+
+        :rtype: fct(np.array)
+
+        :raise biogemeError: if gradient is False and hessian or BHHH is True.
+
         """
-        Evaluation of the expression
+        if (hessian or bhhh) and not gradient:
+            raise excep.biogemeError(
+                'If the hessian or BHHH is calculated, so is the gradient. '
+                'The provided parameters are inconsistent.'
+            )
+
+        if not self.expression_prepared:
+            self._prepareFormulaForEvaluation(database)
+
+        #variables = self.setOfVariables()
+        #if variables:
+        #    raise excep.biogemeError(
+        #        'Functions can be generated only for simple expressions '
+        #        'that do not involve any variable'
+        #    )
+
+        def my_function(x):
+            self.freeBetaValues = np.array(x, dtype=float)
+            f, g, h, b = self.getValueAndDerivatives(
+                database=database,
+                numberOfDraws=numberOfDraws,
+                gradient=gradient,
+                hessian=hessian,
+                bhhh=bhhh,
+                aggregation=True,
+            )
+
+            results = [f]
+            if gradient:
+                results.append(g)
+                if hessian:
+                    results.append(h)
+                if bhhh:
+                    results.append(b)
+                return tuple(results)
+            return f    
+
+
+        return my_function
+
+    def getValue_c(
+        self,
+        betas=None,
+        database=None,
+        numberOfDraws=1000,
+        aggregation=False,
+    ):
+
+        """Evaluation of the expression, without the derivatives
+
+        :param database: database. If no database is provided, the
+            expression must not contain any variable.
+        :type database:  biogeme.database.Database
+
+        :param numberOfDraws: number of draws if needed by Monte-Carlo
+            integration.
+        :type numberOfDraws: int
+
+        :param aggregation: if a database is provided, and this
+            parameter is True, the expression is applied on each entry
+            of the database, and all values are aggregated, so that
+            the sum is returned. If False, the list of all values is returned.
+        :type aggregation: bool
+
+        :return: if a database is provided, a list where each entry is
+            the result of applying the expression on one entry of the
+            dsatabase. It returns a float.
+
+        :rtype: np.array or float
+
+        """
+
+        f, _, _, _ = self.getValueAndDerivatives(
+            betas=betas,
+            database=database,
+            numberOfDraws=numberOfDraws,
+            gradient=False,
+            hessian=False,
+            bhhh=False,
+            aggregation=aggregation,
+        )
+        return f
+
+    def getValueAndDerivatives(
+        self,
+        betas=None,
+        database=None,
+        numberOfDraws=1000,
+        gradient=True,
+        hessian=True,
+        bhhh=True,
+        aggregation=True,
+    ):
+        """Evaluation of the expression
 
         In Biogeme the complexity of some expressions requires a
         specific implementation, in C++. This function invokes the
@@ -604,39 +781,142 @@ class Expression:
         series of entries in a database. Note that this function
         will generate draws if needed.
 
-
-        :param database: database
+        :param database: database. If no database is provided, the
+            expression must not contain any variable.
         :type database:  biogeme.database.Database
+
         :param numberOfDraws: number of draws if needed by Monte-Carlo
             integration.
         :type numberOfDraws: int
 
-        :return: a list where each entry is the result of applying the
-                 expression on one entry of the dsatabase.
-        :rtype: numpy.array
+        :param gradient: If True, the gradient is calculated.
+        :type gradient: bool
+
+        :param hessian: if True, the hessian is  calculated.
+        :type hessian: bool
+
+        :param bhhh: if True, the BHHH matrix is calculated.
+        :type bhhh: bool
+
+        :param aggregation: if a database is provided, and this
+            parameter is True, the expression is applied on each entry
+            of the database, and all values are aggregated, so that
+            the sum is returned. If False, the list of all values is returned.
+        :type aggregation: bool
+
+        :return: if a database is provided, a list where each entry is
+            the result of applying the expression on one entry of the
+            dsatabase. It returns a float, a vector, and a matrix,
+            depedending if derivatives are requested.
+
+        :rtype: np.array or float, numpy.array, numpy.array
+
+        :raise biogemeError: if no database is given and the
+            expressions involves variables.
+
+        :raise biogemeError: if gradient is False and hessian or BHHH is True.
+
+        :raise biogemeError: if derivatives are asked, and the expression
+            is not simple.
+
+        :raise biogemeError: if the expression involves MonteCarlo integration,
+           and no database is provided.
         """
-        self._prepareFormulaForEvaluation(database)
 
-        if database.isPanel():
-            # Object containing the C++ implementation used by Biogeme.
-            theC = cb.pyPanelBiogeme()
-            theC.setDataMap(database.individualMap)
-        else:
-            theC = cb.pyBiogeme()
-        theC.setData(database.data)
-        if self.allDraws:
-            database.generateDraws(
-                self.allDraws, self.drawNames, numberOfDraws
+        errors, warnings = self.audit(database)
+        if warnings:
+            if self.logger.screenLevel < 1:
+                self.logger.setWarning()
+                self.logger.warning('Logger status has been set to "warning"')
+            self.logger.warning('\n'.join(warnings))
+        if errors:
+            error_msg = '\n'.join(errors)
+            self.logger.warning(error_msg)
+            raise excep.biogemeError(error_msg)
+
+        if (hessian or bhhh) and not gradient:
+            raise excep.biogemeError(
+                'If the hessian or the BHHH matrix is calculated, '
+                'so is the gradient. The provided parameters are inconsistent.'
             )
-            theC.setDraws(database.theDraws)
+        if database is None:
+            variables = self.setOfVariables()
+            if variables:
+                raise excep.biogemeError(
+                    f'No database is provided and the expression '
+                    f'contains variables: {variables}'
+                )
 
-        result = theC.simulateFormula(
-            self.getSignature(),
-            self.freeBetaValues,
-            self.fixedBetaValues,
-            database.data,
+        self.numberOfDraws = numberOfDraws
+
+        if not self.expression_prepared:
+            self._prepareFormulaForEvaluation(database)
+        if database is not None:
+            self.cpp.setData(database.data)
+            if self.embedExpression('PanelLikelihoodTrajectory'):
+                if database.isPanel():
+                    self.cpp.setDataMap(database.individualMap)
+                else:
+                    error_msg = (
+                        'The expression involves '
+                        '"PanelLikelihoodTrajectory" '
+                        'that requires panel data'
+                    )
+                    raise excep.biogemeError(error_msg)
+
+        if betas is not None:
+            self.freeBetaValues = [
+                betas[x] if x in betas else self.allFreeBetas[x].initValue for x in self.freeBetaNames
+            ]
+            # List of values of the fixed beta parameters (those to be estimated)
+            self.fixedBetaValues = [
+                betas[x] if x in betas else self.allFixedBetas[x].initValue for x in self.fixedBetaNames
+            ]
+
+                
+        self.cpp.setExpression(self.getSignature())
+        self.cpp.setFreeBetas(self.freeBetaValues)
+        self.cpp.setFixedBetas(self.fixedBetaValues)
+        self.cpp.setMissingData(self.missingData)
+
+        if self.requiresDraws():
+            if database is None:
+                error_msg = (
+                    'An expression involving MonteCarlo integration '
+                    'must be associated with a database.'
+                )
+                raise excep.biogemeError(error_msg)
+            self.cpp.setDraws(database.theDraws)
+
+        self.cpp.calculate(
+            gradient=gradient,
+            hessian=hessian,
+            bhhh=bhhh,
+            aggregation=aggregation,
         )
-        return result
+
+        f, g, h, b = self.cpp.getResults()
+
+        gres = g if gradient else None
+        hres = h if hessian else None
+        bhhhres = b if bhhh else None
+
+        if aggregation:
+            return (
+                f[0],
+                None if gres is None else g[0],
+                None if hres is None else h[0],
+                None if bhhhres is None else b[0],
+            )
+        return f, gres, hres, bhhhres
+
+    def requiresDraws(self):
+        """Checks if the expression requires draws
+
+        :return: True if it requires draws.
+        :rtype: bool
+        """
+        return self.embedExpression('MonteCarlo')
 
     def setOfBetas(self, free=True, fixed=False):
         """
@@ -732,17 +1012,16 @@ class Expression:
         return None
 
     def setRow(self, row):
-        """This function identifies the row of the database from which the
+        """Obsolete function.
+        This function identifies the row of the database from which the
         values of the variables must be obtained.
 
         :param row: row from the database
         :type row: pandas.core.series.Serie
 
+        :raise biogemeError: if the function is called, because it is obsolete.
         """
-        # Row of the database where the values of the variables are found
-        self._row = row
-        for e in self.children:
-            e.setRow(row)
+        raise excep.biogemeError("The function setRow is now obsolete.")
 
     def dictOfDraws(self):
         """Recursively extract the random variables
@@ -915,7 +1194,7 @@ class Expression:
         :return: True if the expression contains an expression of type t.
         :rtype: bool
 
-        See: Expression.isContainedIn
+        See: :func:`biogeme.expressions.Expression.isContainedIn`
         """
         if self.getClassName() == t:
             return True
@@ -994,7 +1273,7 @@ class BinaryOperator(Expression):
         """
         Expression.__init__(self)
         if isNumeric(left):
-            self.left = Numeric(left) #: left parent
+            self.left = Numeric(left)  #: left parent
         else:
             if not isinstance(left, Expression):
                 raise excep.biogemeError(
@@ -1002,7 +1281,7 @@ class BinaryOperator(Expression):
                 )
             self.left = left
         if isNumeric(right):
-            self.right = Numeric(right) #: right parent
+            self.right = Numeric(right)  #: right parent
         else:
             if not isinstance(right, Expression):
                 raise excep.biogemeError(
@@ -1479,7 +1758,7 @@ class UnaryOperator(Expression):
         """
         Expression.__init__(self)
         if isNumeric(child):
-            self.child = Numeric(child) #: child
+            self.child = Numeric(child)  #: child
         else:
             if not isinstance(child, Expression):
                 raise excep.biogemeError(
@@ -1542,15 +1821,23 @@ class MonteCarlo(UnaryOperator):
 
         """
         listOfErrors, listOfWarnings = self.child.audit(database)
-        if database.isPanel() and not self.child.embedExpression(
-            'PanelLikelihoodTrajectory'
-        ):
-            theError = (
-                f'As the database is panel, the argument '
-                f'of MonteCarlo must contain a'
-                f' PanelLikelihoodTrajectory: {self}'
-            )
-            listOfErrors.append(theError)
+        if database is None:
+            if self.child.embedExpression('PanelLikelihoodTrajectory'):
+                theWarning = (
+                    'The formula contains a PanelLikelihoodTrajectory '
+                    'expression, and no database is given'
+                )
+                listOfWarnings.append(theWarning)
+        else:
+            if database.isPanel() and not self.child.embedExpression(
+                'PanelLikelihoodTrajectory'
+            ):
+                theError = (
+                    f'As the database is panel, the argument '
+                    f'of MonteCarlo must contain a'
+                    f' PanelLikelihoodTrajectory: {self}'
+                )
+                listOfErrors.append(theError)
 
         if not self.child.embedExpression('bioDraws'):
             theError = (
@@ -1616,8 +1903,7 @@ class PanelLikelihoodTrajectory(UnaryOperator):
         :rtype: list(string), list(string)
 
         """
-        listOfErrors = []
-        listOfWarnings = []
+        listOfErrors, listOfWarnings = self.child.audit(database)
         if not database.isPanel():
             theError = (
                 f'Expression PanelLikelihoodTrajectory can '
@@ -1961,7 +2247,7 @@ class Elementary(Expression):
 
         """
         Expression.__init__(self)
-        self.name = name #: name of the elementary expressiom
+        self.name = name  #: name of the elementary expressiom
 
         self.uniqueId = None
         """The id should be unique for all elementary expressions
@@ -2008,7 +2294,7 @@ class Elementary(Expression):
                     f'{type(self.uniqueId)}'
                 )
                 raise excep.biogemeError(error_msg)
-                
+
         else:
             error_msg = (
                 f'No index is available for expression {self.name}.'
@@ -2072,7 +2358,7 @@ class bioDraws(Elementary):
                 f' Actually, no draws have been identified.'
             )
             raise excep.biogemeError(error_msg)
-            
+
         if self.name in indicesOfDraws:
             self.drawId = indicesOfDraws[self.name]
         else:
@@ -2213,7 +2499,7 @@ class Numeric(Expression):
         :type value: float
         """
         Expression.__init__(self)
-        self.value = value #: numeric value
+        self.value = value  #: numeric value
 
     def __str__(self):
         return '`' + str(self.value) + '`'
@@ -2295,22 +2581,17 @@ class Variable(Elementary):
         self.variableId = None
 
     def getValue(self):
-        """Evaluates the value of the expression
+        """The evaluation of a Variable requires a database. Therefore, this
+            function triggers an exception.
 
-        :return: value of the expression
-        :rtype: float
+        :raise biogemeError: each time the function is calles
+
         """
-        try:
-            result = self._row[self.name]
-        except TypeError as e:
-            error_msg = (
-                f'{e}. Check the call of function '
-                f'biogeme.expressions.setRow(). It should take a '
-                f'pandas.core.series.Serie object as argument, not a '
-                f'{type(self._row)}.'
-            )
-            raise excep.biogemeError(error_msg) from e
-        return result
+        error_msg = (
+            f'Evaluating Variable {self.name} requires a database. Use the '
+            f'function getValue_c instead.'
+        )
+        raise excep.biogemeError(error_msg)
 
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
@@ -2359,9 +2640,13 @@ class Variable(Elementary):
                                 variables with their index
         :type indicesOfVariables: dict(string:int)
 
+        :raise biogemeError: if no index is provided for the variable
         """
-        if self.name in indicesOfVariables:
+        try:
             self.variableId = indicesOfVariables[self.name]
+        except KeyError as e:
+            error_msg = f'No ID has been provided for variable {self.name}'
+            raise excep.biogemeError(error_msg) from e
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2541,8 +2826,8 @@ class RandomVariable(Elementary):
         """
         if indicesOfRandomVariables is None:
             error_msg = (
-                f'No index is available for random variable '
-                f'{self.name}. Actually, no random variable has been identified'
+                f'No index is available for random variable {self.name}.'
+                f' Actually, no random variable has been identified.'
             )
             raise excep.biogemeError(error_msg)
         if self.name in indicesOfRandomVariables:
@@ -2750,7 +3035,7 @@ class Beta(Elementary):
                     f'has been identified.'
                 )
                 raise excep.biogemeError(error_msg)
-            
+
             if self.name in indicesOfFreeBetas:
                 self.betaId = indicesOfFreeBetas[self.name]
             else:
@@ -2913,7 +3198,7 @@ class LogLogit(Expression):
             biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
-        self.util = {} #: dict of utility functions
+        self.util = {}  #: dict of utility functions
         for i, e in util.items():
             if isNumeric(e):
                 self.util[i] = Numeric(e)
@@ -2923,7 +3208,7 @@ class LogLogit(Expression):
                         f'This is not a valid expression: {e}'
                     )
                 self.util[i] = e
-        self.av = {} #: dict of availability formulas
+        self.av = {}  #: dict of availability formulas
         if av is None:
             self.av = {k: Numeric(1) for k, v in util.items()}
         else:
@@ -2994,11 +3279,9 @@ class LogLogit(Expression):
             consistent = True
         listOfAlternatives = list(self.util)
         choices = database.valuesFromDatabase(self.choice)
-        correctChoices = choices.isin(listOfAlternatives)
-        indexOfIncorrectChoices = correctChoices.index[
-            correctChoices == False
-        ].tolist()
-        if indexOfIncorrectChoices:
+        correctChoices = np.isin(choices, listOfAlternatives)
+        indexOfIncorrectChoices = np.argwhere(~correctChoices)
+        if indexOfIncorrectChoices.any():
             incorrectChoices = choices[indexOfIncorrectChoices]
             content = '-'.join(
                 '{}[{}]'.format(*t)
@@ -3018,10 +3301,8 @@ class LogLogit(Expression):
             choiceAvailability = database.checkAvailabilityOfChosenAlt(
                 self.av, self.choice
             )
-            indexOfUnavailableChoices = choiceAvailability.index[
-                choiceAvailability == False
-            ].tolist()
-            if indexOfUnavailableChoices:
+            indexOfUnavailableChoices = np.where(~choiceAvailability)[0]
+            if indexOfUnavailableChoices.size > 0:
                 incorrectChoices = choices[indexOfUnavailableChoices]
                 content = '-'.join(
                     '{}[{}]'.format(*t)
@@ -3044,14 +3325,27 @@ class LogLogit(Expression):
 
         :return: value of the expression
         :rtype: float
+
+        :raise biogemeError: if the chosen alternative does not correspond
+            to any of the utility functions
+
+        :raise biogemeError: if the chosen alternative does not correspond
+            to any of entry in the availability condition
+
         """
         choice = int(self.choice.getValue())
         if choice not in self.util:
-            self.logger.warning(
-                f'Choice is {choice}. List of alternatives '
-                f'is {self.util.keys()}'
+            error_msg = (
+                f'Alternative {choice} for not appear in the list '
+                f'of utility functions: {self.util.keys()}'
             )
-            return np.nan
+            raise excep.biogemeError(error_msg)
+        if choice not in self.av:
+            error_msg = (
+                f'Alternative {choice} for not appear in the list '
+                f'of availabilities: {self.av.keys()}'
+            )
+            raise excep.biogemeError(error_msg)
         if self.av[choice].getValue() == 0.0:
             return -np.log(0)
         Vchosen = self.util[choice].getValue()
@@ -3248,7 +3542,7 @@ class Elem(Expression):
         """
         Expression.__init__(self)
 
-        self.dictOfExpressions = {} #: dict of expressions
+        self.dictOfExpressions = {}  #: dict of expressions
         for k, v in dictOfExpressions.items():
             if isNumeric(v):
                 self.dictOfExpressions[k] = Numeric(v)
@@ -3270,7 +3564,7 @@ class Elem(Expression):
                 raise excep.biogemeError(
                     f'This is not a valid expression: {keyExpression}'
                 )
-            self.keyExpression = keyExpression #: expression for the key
+            self.keyExpression = keyExpression  #: expression for the key
         self.keyExpression.parent = self
         self.children.append(self.keyExpression)
 
@@ -3406,9 +3700,9 @@ class bioLinearUtility(Expression):
 
         self.betas, self.variables = zip(*listOfTerms)
 
-        self.betas = list(self.betas) #: list of parameters
+        self.betas = list(self.betas)  #: list of parameters
 
-        self.variables = list(self.variables) #: list of variables
+        self.variables = list(self.variables)  #: list of variables
 
         self.listOfTerms = list(zip(self.betas, self.variables))
         """ List of terms """
@@ -3708,3 +4002,4 @@ def defineNumberingOfElementaryExpressions(
         allDraws,
         drawNames,
     )
+
