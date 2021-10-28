@@ -19,6 +19,8 @@ import pickle
 import datetime
 import pandas as pd
 import numpy as np
+import urllib.request as urlr
+import urllib.error as urle
 from scipy import linalg
 from scipy import stats
 import biogeme.version as bv
@@ -63,31 +65,31 @@ class beta:
         :type bounds: float,float
         """
 
-        self.name = name #: Name of the parameter
+        self.name = name  #: Name of the parameter
 
-        self.value = value #: Current value
+        self.value = value  #: Current value
 
-        self.lb = bounds[0] #: Lower bound
+        self.lb = bounds[0]  #: Lower bound
 
-        self.ub = bounds[1] #: Upper bound
+        self.ub = bounds[1]  #: Upper bound
 
-        self.stdErr = None #: Standard error
+        self.stdErr = None  #: Standard error
 
-        self.tTest = None #: t-test
+        self.tTest = None  #: t-test
 
-        self.pValue = None #: p-value
+        self.pValue = None  #: p-value
 
-        self.robust_stdErr = None #: Robust standard error
+        self.robust_stdErr = None  #: Robust standard error
 
-        self.robust_tTest = None #: Robust t-test
+        self.robust_tTest = None  #: Robust t-test
 
-        self.robust_pValue = None #: Robust p-value
+        self.robust_pValue = None  #: Robust p-value
 
-        self.bootstrap_stdErr = None #: Std error calculated from bootstrap
+        self.bootstrap_stdErr = None  #: Std error calculated from bootstrap
 
-        self.bootstrap_tTest = None #: t-test calculated from bootstrap
+        self.bootstrap_tTest = None  #: t-test calculated from bootstrap
 
-        self.bootstrap_pValue = None #: p-value calculated from bootstrap
+        self.bootstrap_pValue = None  #: p-value calculated from bootstrap
 
     def isBoundActive(self, threshold=1.0e-6):
         """Check if one of the two bound is 'numerically' active. Being
@@ -207,16 +209,15 @@ class rawResults:
         :type bootstrap: numpy.array
         """
 
+        self.modelName = theModel.modelName  #: Name of the model
 
-        self.modelName = theModel.modelName #: Name of the model
+        self.userNotes = theModel.userNotes  #: User notes
 
-        self.userNotes = theModel.userNotes #: User notes
+        self.nparam = len(betaValues)  #: Number of parameters
 
-        self.nparam = len(betaValues) #: Number of parameters
+        self.betaValues = betaValues  #: Values of the parameters
 
-        self.betaValues = betaValues #: Values of the parameters
-
-        self.betaNames = theModel.freeBetaNames #: Names of the parameters
+        self.betaNames = theModel.freeBetaNames  #: Names of the parameters
 
         self.initLogLike = theModel.initLogLike
         """Value of the likelihood function with the initial value of the
@@ -227,22 +228,22 @@ class rawResults:
         """Value of the likelihood function with equal probability model
         """
 
-        self.betas = list() #: List of objects of type results.beta
+        self.betas = list()  #: List of objects of type results.beta
 
         for b, n in zip(betaValues, self.betaNames):
             bounds = theModel.getBoundsOnBeta(n)
             self.betas.append(beta(n, b, bounds))
 
-        self.logLike = fgHb[0] #: Value of the loglikelihood function
+        self.logLike = fgHb[0]  #: Value of the loglikelihood function
 
-        self.g = fgHb[1] #: Value of the gradient of the loglikelihood function
+        self.g = fgHb[1]  #: Value of the gradient of the loglik. function
 
-        self.H = fgHb[2] #: Value of the hessian of the loglikelihood function
+        self.H = fgHb[2]  #: Value of the hessian of the loglik. function
 
         self.bhhh = fgHb[3]
         """Value of the BHHH matrix of the loglikelihood function"""
 
-        self.dataname = theModel.database.name #: Name of the database
+        self.dataname = theModel.database.name  #: Name of the database
 
         self.sampleSize = theModel.database.getSampleSize()
         """Sample size (number of individuals if panel data)"""
@@ -274,13 +275,13 @@ class rawResults:
         self.numberOfThreads = theModel.numberOfThreads
         """Number of threads used for parallel computing"""
 
-        self.htmlFileName = None #: Name of the HTML output file
+        self.htmlFileName = None  #: Name of the HTML output file
 
-        self.F12FileName = None #: Name of the F12 output file
+        self.F12FileName = None  #: Name of the F12 output file
 
-        self.latexFileName = None #: Name of the LaTeX output file
+        self.latexFileName = None  #: Name of the LaTeX output file
 
-        self.pickleFileName = None #: Name of the pickle outpt file
+        self.pickleFileName = None  #: Name of the pickle outpt file
 
         self.bootstrap = bootstrap
         """output of the bootstrapping. numpy array, of size B x K,
@@ -294,8 +295,7 @@ class rawResults:
             self.bootstrap_time = theModel.bootstrap_time
             """ Time needed to perform the bootstrap"""
 
-        self.secondOrderTable = None #: Second order statistics
-
+        self.secondOrderTable = None  #: Second order statistics
 
 
 class bioResults:
@@ -308,7 +308,7 @@ class bioResults:
             Default: None.
         :type theRawResults: biogeme.results.rawResults
         :param pickleFile: name of the file containing the raw results in
-            pickle format. Default: None.
+            pickle format. It can be a URL. Default: None.
         :type pickleFile: string
 
         :raise biogeme.exceptions.biogemeError: if no data is provided.
@@ -322,8 +322,20 @@ class bioResults:
             raw estimation results.
             """
         elif pickleFile is not None:
-            with open(pickleFile, 'rb') as f:
-                self.data = pickle.load(f)
+            try:
+                with urlr.urlopen(pickleFile) as p:
+                    self.data = pickle.load(p)
+            except Exception:
+                pass
+            try:
+                with open(pickleFile, 'rb') as f:
+                    self.data = pickle.load(f)
+            except FileNotFoundError as e:
+                error_msg = (
+                    f'File {pickleFile} not found'
+                )
+                raise excep.biogemeError(error_msg) from e
+                    
         else:
             raise excep.biogemeError('No data provided.')
 
