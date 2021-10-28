@@ -324,3 +324,4 @@ examples/swissmetro_panel/12panel_p.run
 examples/swissmetro/19individualLevelParameters.pickle
 examples/indicators/01nestedEstimation.pickle
 examples/assisted/.ipynb_checkpoints/paretoSwissmetro-checkpoint.ipynb
+biogeme/flycheck_biogeme (1).py
