@@ -24,10 +24,9 @@ const bioDerivatives* bioExprNormalCdf::getValueAndDerivatives(std::vector<bioUI
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
-
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+  theDerivatives.resize(literalIds.size()) ;
 
   const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   theDerivatives.f = theNormalCdf.compute(childResult->f) ;

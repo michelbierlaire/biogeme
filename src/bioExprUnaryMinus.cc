@@ -23,11 +23,13 @@ const bioDerivatives* bioExprUnaryMinus::getValueAndDerivatives(std::vector<bioU
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
 
   bioUInt n = literalIds.size() ;
+
+  theDerivatives.resize(n) ;
+
   const bioDerivatives* childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
   theDerivatives.f = - childResult->f ;
   if (gradient) {

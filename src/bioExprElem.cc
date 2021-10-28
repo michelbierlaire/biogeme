@@ -37,9 +37,10 @@ const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> l
 						    bioBoolean gradient,
 				      bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
 
   bioUInt k = bioUInt(key->getValue()) ;

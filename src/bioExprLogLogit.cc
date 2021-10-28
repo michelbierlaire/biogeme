@@ -42,11 +42,12 @@ const bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUIn
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
   
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
-  
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
   bioUInt n = literalIds.size() ;
+  theDerivatives.resize(n) ;
+  
   bioUInt chosen = bioUInt(choice->getValue()) ;
   std::vector<bioDerivatives> Vs ;
   const bioDerivatives* chosenUtility(NULL) ;
@@ -60,14 +61,7 @@ const bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUIn
     bioReal av = i->second->getValue() ;
     if (av == 0.0) {
       if (i->first == chosen) {
-	if (gradient) {
-	  if (hessian) {
-	    theDerivatives.setDerivativesToZero() ;
-	  }
-	  else {
-	    theDerivatives.setGradientToZero() ;
-	  }
-	}
+	theDerivatives.setDerivativesToZero() ;
 	if (std::numeric_limits<bioReal>::has_infinity) {
 	  theDerivatives.f = -std::numeric_limits<bioReal>::infinity() ;
 	}

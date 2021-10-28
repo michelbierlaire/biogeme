@@ -27,18 +27,14 @@ const bioDerivatives* bioExprPanelTrajectory::getValueAndDerivatives(std::vector
 							  bioBoolean hessian) {
 
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   theDerivatives.f = 0.0 ;
   if (gradient) {
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
+    theDerivatives.setDerivativesToZero() ;
   }
 
   if (dataMap == NULL) {
@@ -59,12 +55,7 @@ const bioDerivatives* bioExprPanelTrajectory::getValueAndDerivatives(std::vector
   for (theRowIndex = (*dataMap)[*individualIndex][0]  ; theRowIndex <= (*dataMap)[*individualIndex][1] ; ++theRowIndex) {
     const bioDerivatives* childResult(NULL) ;
     try {
-      childResult = child->getValueAndDerivatives(literalIds,gradient,hessian) ;
-      // if (childResult->f <= 1.0e-6) {
-      // 	std::stringstream str ;
-      // 	str << "Error for data entry " << theRowIndex << ": probability " << childResult->f << "for " << child->print() ;
-      // 	throw bioExceptions(__FILE__,__LINE__,str.str()) ;
-      // }
+      childResult = child->getValueAndDerivatives(literalIds, gradient, hessian) ;
       theDerivatives.f += log(childResult->f) ;
       if (gradient) {
 	for (bioUInt i = 0 ; i < n ; ++i) {

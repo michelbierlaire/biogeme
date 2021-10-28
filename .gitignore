@@ -335,3 +335,4 @@ examples/notebooks/test_dumped.dat
 examples/notebooks/test~01.dat
 examples/notebooks/test~02.dat
 examples/notebooks/Untitled.ipynb
+src/bioDerivatives.pyx

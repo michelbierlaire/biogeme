@@ -8,6 +8,7 @@
 //--------------------------------------------------------------------
 
 #include <iostream>
+#include <cmath>
 #include "bioDebug.h"
 #include "bioDerivatives.h"
 #include "bioExceptions.h"
@@ -21,96 +22,226 @@ static std::exception_ptr theExceptionPtr = nullptr ;
 */
 
 
-bioDerivatives::bioDerivatives() {
+bioDerivatives::bioDerivatives(): with_g(true), with_h(true), with_bhhh(true) {
 
 }
 
 void bioDerivatives::resize(bioUInt n) {
-  if (n == getSize()) {
+  if (n == 0) {
+    clear() ;
     return ;
   }
-  clear() ;
-  try {
-    g.resize(n) ;
+  if (with_g) {
+    try {
+      g.resize(n) ;
+    }
+    catch (std::exception& e) {
+      throw bioExceptions(__FILE__, __LINE__, e.what()) ;
+    }
+    catch (const std::bad_alloc&) {
+      std::stringstream str ;
+      str << "Impossible to allocate memory for vector of size " << n ;  
+      throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+    }
   }
-  catch (std::exception& e) {
-    throw bioExceptions(__FILE__, __LINE__, e.what()) ;
+  if (with_h) {
+    try {
+      // **** WARNING ****
+      // Mon Oct  5 11:51:41 2020
+      // Bug with STL.
+      
+      // When n is large, the following statement kills the process (with
+      // a message "bad_alloc") without trigerring an exception.
+      // The only way to deal with it would be to abandon the use of STL vectors.
+      // This would require a significant re-engineering of the code.
+      // This may be considered in the future.
+      
+      h.resize(n, std::vector<bioReal>(n, 0.0)) ;
+    }
+    catch (std::exception& e) {
+      throw bioExceptions(__FILE__, __LINE__, e.what()) ;
+    }
+    catch (const std::bad_alloc&) {
+      std::stringstream str ;
+      str << "Impossible to allocate memory for matrix of size " << n << "x" << n;  
+      throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+    }
+    catch (...) {
+      std::stringstream str ;
+      str << "Impossible to allocate memory for matrix of size " << n << "x" << n;  
+      throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+    }
   }
-  catch (const std::bad_alloc&) {
-    std::stringstream str ;
-    str << "Impossible to allocate memory for vector of size " << n ;  
-    throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+
+  if (with_bhhh) {
+    try {
+      // **** WARNING ****
+      // Mon Oct  5 11:51:41 2020
+      // Bug with STL.
+      
+      // When n is large, the following statement kills the process (with
+      // a message "bad_alloc") without trigerring an exception.
+      // The only way to deal with it would be to abandon the use of STL vectors.
+      // This would require a significant re-engineering of the code.
+      // This may be considered in the future.
+      
+      bhhh.resize(n, std::vector<bioReal>(n, 0.0)) ;
+    }
+    catch (std::exception& e) {
+      throw bioExceptions(__FILE__, __LINE__, e.what()) ;
+    }
+    catch (const std::bad_alloc&) {
+      std::stringstream str ;
+      str << "Impossible to allocate memory for matrix of size " << n << "x" << n;  
+      throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+    }
+    catch (...) {
+      std::stringstream str ;
+      str << "Impossible to allocate memory for matrix of size " << n << "x" << n;  
+      throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+    }
   }
-  try {
-    // **** WARNING ****
-    // Mon Oct  5 11:51:41 2020
-    // Bug with STL.
-    
-    // When n is large, the following statement kills the process (with
-    // a message "bad_alloc") without trigerring an exception.
-    // The only way to deal with it would be to abandon the use of STL vectors.
-    // This would require a significant re-engineering of the code.
-    // This may be considered in the future.
-    
-    h.resize(n, std::vector<bioReal>(n, 0.0)) ;
-  }
-  catch (std::exception& e) {
-    throw bioExceptions(__FILE__, __LINE__, e.what()) ;
-  }
-  catch (const std::bad_alloc&) {
-    std::stringstream str ;
-    str << "Impossible to allocate memory for matrix of size " << n << "x" << n;  
-    throw bioExceptions(__FILE__, __LINE__, str.str()) ;
-  }
-  catch (...) {
-    std::stringstream str ;
-    str << "Impossible to allocate memory for matrix of size " << n << "x" << n;  
-    throw bioExceptions(__FILE__, __LINE__, str.str()) ;
-  }
-  
+
 }
 
 void bioDerivatives::clear() {
   g.clear() ;
   h.clear() ;
+  bhhh.clear() ;
 }
 
 bioUInt bioDerivatives::getSize() const {
-  return g.size();
+  if (with_g) {
+    return g.size();
+  }
+  return 0 ;
+}
+
+void bioDerivatives::setEverythingToZero() {
+  f = 0 ;
+  setDerivativesToZero() ;
 }
 
 void bioDerivatives::setDerivativesToZero() {
-  std::fill(g.begin(),g.end(),0.0) ;
-  std::fill(h.begin(),h.end(),g) ;
-}
-
-void bioDerivatives::setGradientToZero() {
-  std::fill(g.begin(),g.end(),0.0) ;
+  if (with_g) {
+    std::fill(g.begin(),g.end(),0.0) ;
+  }
+  if (with_h) {
+    std::fill(h.begin(),h.end(),g) ;
+  }
+  if (with_bhhh) {
+    std::fill(bhhh.begin(),bhhh.end(),g) ;
+  }
 }
 
 std::ostream& operator<<(std::ostream &str, const bioDerivatives& x) {
   str << "f = " << x.f << std::endl ;
-  str << "g = [" ; 
-  for (std::vector<bioReal>::const_iterator i = x.g.begin() ; i != x.g.end() ; ++i) {
-    if (i != x.g.begin()) {
-      str << ", " ;
-    }
-    str << *i ;
-  }
-  str << "]" << std::endl ;
-  str << "h = [ " ;
-  for (std::vector<std::vector<bioReal> >::const_iterator row = x.h.begin() ; row != x.h.end() ; ++row) {
-    if (row != x.h.begin()) {
-      str << std::endl ;
-    }
-    str << " [ " ;
-    for (std::vector<bioReal>::const_iterator col = row->begin() ; col != row->end() ; ++col) {
-      if (col != row->begin()) {
+  if (x.with_g) {
+    str << "g = [" ; 
+    for (std::vector<bioReal>::const_iterator i = x.g.begin() ; i != x.g.end() ; ++i) {
+      if (i != x.g.begin()) {
 	str << ", " ;
       }
-      str << *col ;
+      str << *i ;
     }
-    str << " ] " << std::endl ;
+    str << "]" << std::endl ;
+  }
+  if (x.with_h) {
+    str << "h = [ " ;
+    for (std::vector<std::vector<bioReal> >::const_iterator row = x.h.begin() ; row != x.h.end() ; ++row) {
+      if (row != x.h.begin()) {
+	str << std::endl ;
+      }
+      str << " [ " ;
+      for (std::vector<bioReal>::const_iterator col = row->begin() ; col != row->end() ; ++col) {
+	if (col != row->begin()) {
+	  str << ", " ;
+	}
+	str << *col ;
+      }
+      str << " ] " << std::endl ;
+    }
+  }
+  if (x.with_bhhh) {
+    str << "BHHH = [ " ;
+    for (std::vector<std::vector<bioReal> >::const_iterator row = x.bhhh.begin() ; row != x.bhhh.end() ; ++row) {
+      if (row != x.bhhh.begin()) {
+	str << std::endl ;
+      }
+      str << " [ " ;
+      for (std::vector<bioReal>::const_iterator col = row->begin() ; col != row->end() ; ++col) {
+	if (col != row->begin()) {
+	  str << ", " ;
+	}
+	str << *col ;
+      }
+      str << " ] " << std::endl ;
+    }
   }
   return str ;
+}
+
+bioDerivatives& bioDerivatives::operator+=(const bioDerivatives& rhs) {
+  bioUInt n = getSize() ;
+  if (n != rhs.getSize()) {
+    std::stringstream str ;
+    str << "Incompatible sizes: " << n << " and " << rhs.getSize();  
+    throw bioExceptions(__FILE__, __LINE__, str.str()) ;
+  }
+  f += rhs.f ;
+  if (with_g) {
+    for (bioUInt i = 0 ; i < n ; ++i) {
+      g[i] += rhs.g[i] ;
+      if (with_h) {
+	for (bioUInt j = 0 ; j < n ; ++j) {
+	  h[i][j] += rhs.h[i][j] ;
+	}
+      }
+      if (with_bhhh) {
+	for (bioUInt j = 0 ; j < n ; ++j) {
+	  bhhh[i][j] += rhs.bhhh[i][j] ;
+	}
+      }
+    }
+  }
+  return *this ;
+}
+
+void bioDerivatives::dealWithNumericalIssues() {
+  bioUInt n = getSize() ;
+  if (!std::isfinite(f)) {
+    f = -std::numeric_limits<bioReal>::max() ;
+  }
+  if (with_g) {
+    for (bioUInt i = 0 ; i < n ; ++i) {
+      if (!std::isfinite(g[i])) {
+	g[i] = -std::numeric_limits<bioReal>::max() ;
+      }
+      if (with_h) {
+	for (bioUInt j = i ; j < n ; ++j) {
+	  if (!std::isfinite(h[i][j])) {
+	    h[i][j] = -std::numeric_limits<bioReal>::max() ;
+	  }
+	}
+      }
+      if (with_bhhh) {
+	for (bioUInt j = i ; j < n ; ++j) {
+	  if (!std::isfinite(bhhh[i][j])) {
+	    bhhh[i][j] = -std::numeric_limits<bioReal>::max() ;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void bioDerivatives::computeBhhh() {
+  bioUInt n = getSize() ;
+  if (with_bhhh) {
+    for (bioUInt i = 0 ; i < n ; ++i) {
+      for (bioUInt j = i ; j < n ; ++j) {
+	bhhh[i][j] = g[i] * g[j] ;
+      }
+    }
+  }
 }

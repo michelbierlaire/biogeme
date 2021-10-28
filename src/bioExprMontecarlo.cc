@@ -24,20 +24,13 @@ const bioDerivatives* bioExprMontecarlo::getValueAndDerivatives(std::vector<bioU
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
 
-  theDerivatives.f = 0.0 ;
-  if (gradient) {
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
-  }
+  theDerivatives.resize(literalIds.size()) ;
 
+  theDerivatives.setEverythingToZero() ;
+    
   if (numberOfDraws == 0) {
     throw bioExceptions(__FILE__,__LINE__,"Cannot perform Monte-Carlo integration with no draws.") ;
   }

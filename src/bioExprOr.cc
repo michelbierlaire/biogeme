@@ -28,9 +28,10 @@ const bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> lit
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {
@@ -38,12 +39,7 @@ const bioDerivatives* bioExprOr::getValueAndDerivatives(std::vector<bioUInt> lit
       str << "Expression "+print()+" is not differentiable" << std::endl ; 
       throw(bioExceptions(__FILE__,__LINE__,str.str())) ;
     }
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
+    theDerivatives.setDerivativesToZero() ;
   }
   
   if (left == NULL) {

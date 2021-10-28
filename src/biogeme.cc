@@ -65,7 +65,6 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 				   std::vector< std::vector<bioReal> >* h,
 				   std::vector< std::vector<bioReal> >* bh) {
 
-
   if ( g != NULL) {
     if (g->size() != theThreadMemory.dimension()) {
       std::stringstream str ;
@@ -88,6 +87,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
     }
   }
 
+  
   //  std::vector<bioThreadArg*> theInput(nbrOfThreads) ;
   std::vector<pthread_t> theThreads(nbrOfThreads) ;
   for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
@@ -146,6 +146,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
   if (!std::isfinite(result)) {
     result = -std::numeric_limits<bioReal>::max() ;
   }
+
   if (g != NULL) {
     for (bioUInt i = 0 ; i < g->size() ; ++i) {
       if (!std::isfinite((*g)[i])) {
@@ -188,7 +189,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 }
 
 
- bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal> betas,
+bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal> betas,
  					     std::vector<bioReal> fixedBetas,
  					     std::vector<bioUInt> betaIds,
  					     bioReal* g,
@@ -196,10 +197,10 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
  					     bioReal* bh,
  					     bioBoolean hessian,
  					     bioBoolean bhhh) {
-
+  
   int n = betas.size() ;
   
-  ++nbrFctEvaluations ;
+   ++nbrFctEvaluations ;
   literalIds = betaIds ;
   if (forceDataPreparation || (theThreadMemory.dimension() != literalIds.size())) {
     prepareData() ;
@@ -333,8 +334,6 @@ void *computeFunctionForThread(void* fctPtr) {
 								      input->calcGradient,
 								      input->calcHessian) ;
       
-      
-
 	if (!input->theWeight.isDefined()) {
 	  input->result += fgh->f ;
 	  for (bioUInt i = 0 ; i < input->grad.size() ; ++i) {
@@ -382,7 +381,7 @@ void *computeFunctionForThread(void* fctPtr) {
 	input->theWeight.setIndividualIndex(&row) ;
 	input->theWeight.setRowIndex(&row) ;
       }
-      
+
       for (row = input->startData ;
 	   row < input->endData ;
 	   ++row) {
@@ -392,6 +391,7 @@ void *computeFunctionForThread(void* fctPtr) {
 	    w = input->theWeight.getExpression()->getValue() ;
 	  }
 
+	  
 	  const bioDerivatives* fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
 						  input->calcGradient,
 						  input->calcHessian) ;
@@ -531,6 +531,48 @@ void biogeme::simulateFormula(std::vector<bioString> formula,
   }
   return ;
 }
+
+bioReal biogeme::simulateSimpleFormula(std::vector<bioString> formula,
+				       std::vector<bioReal> beta,
+				       std::vector<bioReal> fixedBeta,
+				       bioBoolean gradient,
+				       bioBoolean hessian,
+				       bioReal* g,
+				       bioReal* h) {
+
+  bioFormula theFormula ;
+  theFormula.setExpression(formula) ;
+  theFormula.setParameters(&beta) ;
+  theFormula.setFixedParameters(&fixedBeta) ;
+  if (!theDraws.empty()) {
+    theFormula.setDraws(&theDraws) ;
+  }  
+
+  if (!gradient && !hessian) {
+    return theFormula.getExpression()->getValue() ;
+  }
+  int n = beta.size() ;
+  // The ids of th eliterals are from 0 to n-1, corresponding to the free parameters.
+  std::vector<bioUInt> literalIds(n) ;
+  for (int i = 0 ; i < n ; ++i) {
+    literalIds[i] = i ;
+  }
+  const bioDerivatives* results =
+    theFormula.getExpression()->getValueAndDerivatives(literalIds,
+						       gradient,
+						       hessian) ;
+
+  for (int i = 0 ; i < n ; ++i) {
+    g[i] = results->g[i] ;
+    if (hessian) {
+      for (int j = i ; j < n ; j++) {
+	h[i*n+j] = h[j*n+i] = results->h[i][j] ;
+      }
+    }
+  }
+  return results->f ;
+}
+
 
 void biogeme::simulateSeveralFormulas(std::vector<std::vector<bioString> > formulas,
 				      std::vector<bioReal> betas,

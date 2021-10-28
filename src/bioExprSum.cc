@@ -25,12 +25,12 @@ const bioDerivatives* bioExprSum::getValueAndDerivatives(std::vector<bioUInt> li
 						   bioBoolean gradient,
 						   bioBoolean hessian) {
 
-  bioString str = print(true) ;
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
 
   bioUInt n = literalIds.size() ;
+  theDerivatives.resize(n) ;
+
   theDerivatives.setToZero() ;
   for (std::vector< std::vector<bioReal> >::iterator rowIterator = data->begin() ;
        rowIterator != data->end() ;

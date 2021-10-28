@@ -27,16 +27,16 @@ const bioDerivatives* bioExprPower::getValueAndDerivatives(std::vector<bioUInt> 
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
-
-  
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
 
   bioUInt n = literalIds.size() ;
+  theDerivatives.resize(n) ;
+
   const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
+
   const bioDerivatives* rightResult = right->getValueAndDerivatives(literalIds,gradient,hessian) ;
-  
+
   if (rightResult->f == 0.0) {
     theDerivatives.f = 1.0 ;
   }

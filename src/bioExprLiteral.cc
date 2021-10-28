@@ -27,19 +27,14 @@ const bioDerivatives* bioExprLiteral::getValueAndDerivatives(std::vector<bioUInt
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+  
+  theDerivatives.resize(literalIds.size()) ;
 
   
-  
   if (gradient) {
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
+    theDerivatives.setDerivativesToZero() ;
     for (std::size_t i = 0 ; i < literalIds.size() ; ++i) {
       if (literalIds[i] == theLiteralId) {
 	theDerivatives.g[i] = 1.0 ;

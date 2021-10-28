@@ -22,26 +22,20 @@ bioExprMultSum::~bioExprMultSum() {
 }
 
 const bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						       bioBoolean gradient,
-						       bioBoolean hessian) {
+							     bioBoolean gradient,
+							     bioBoolean hessian) {
 
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+  
+  theDerivatives.resize(literalIds.size()) ;
 
   theDerivatives.f = 0.0 ;
-  if (gradient) {
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
-  }
+  theDerivatives.setDerivativesToZero() ;
   for (std::vector<bioExpression*>::iterator i = expressions.begin();
        i != expressions.end() ;
        ++i) {

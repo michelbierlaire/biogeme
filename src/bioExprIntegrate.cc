@@ -27,9 +27,10 @@ const bioDerivatives* bioExprIntegrate::getValueAndDerivatives(std::vector<bioUI
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   bioExprGaussHermite theGh(child,literalIds,rvId,gradient,hessian) ;   
   bioGaussHermite theGhAlgo(&theGh) ;
