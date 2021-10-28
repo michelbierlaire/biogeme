@@ -149,7 +149,7 @@ class bioBounds:
         each free parameter.
         """
 
-        self.n = len(b) #: number of optimization variables
+        self.n = len(b)  #: number of optimization variables
 
         self.lowerBounds = [noneToMinusInfinity(bb[0]) for bb in b]
         """ List of lower bounds """
@@ -582,8 +582,8 @@ def schnabelEskow(
         A[j, j] = np.sqrt(A[j, j])
         for i in range(j + 1, dim):
             A[j, i] = A[i, j] = A[i, j] / A[j, j]
-            A[i, j + 1 : i + 1] -= A[i, j] * A[j + 1 : i + 1, j]
-            A[j + 1 : i + 1, i] = A[i, j + 1 : i + 1]
+            A[i, j + 1: i + 1] -= A[i, j] * A[j + 1: i + 1, j]
+            A[j + 1: i + 1, i] = A[i, j + 1: i + 1]
 
     def permute(i, j):
         A[[i, j]] = A[[j, i]]
@@ -618,7 +618,7 @@ def schnabelEskow(
             permute(i, j)
         if j < dim - 1 and (
             (
-                A.diagonal()[j + 1 :] - A[j + 1 :, j] ** 2 / A.diagonal()[j]
+                A.diagonal()[j + 1:] - A[j + 1:, j] ** 2 / A.diagonal()[j]
             ).min()
             < -mu * gamma
         ):
@@ -644,8 +644,8 @@ def schnabelEskow(
             for i in range(k + 1, dim):
                 g[i] = (
                     A[i, i]
-                    - abs(A[i, k + 1 : i]).sum()
-                    - abs(A[i + 1 : dim, i]).sum()
+                    - abs(A[i, k + 1: i]).sum()
+                    - abs(A[i + 1: dim, i]).sum()
                 )
             # Modified Cholesky Decomposition
             for j in range(k + 1, dim - 2):
@@ -655,7 +655,7 @@ def schnabelEskow(
                     # Switch rows and columns of i and j of A
                     permute(i, j)
                 # Calculate E[j, j] and add to diagonal
-                norm_j = abs(A[j + 1 : dim, j]).sum()
+                norm_j = abs(A[j + 1: dim, j]).sum()
                 E[j] = delta = max(
                     0, -A[j, j] + max(norm_j, taubar * gamma), deltaPrev
                 )
@@ -665,7 +665,7 @@ def schnabelEskow(
                 # Update Gerschgorin bound estimates
                 if A[j, j] != norm_j:
                     temp = 1.0 - norm_j / A[j, j]
-                    g[j + 1 :] += abs(A[j + 1 :, j]) * temp
+                    g[j + 1:] += abs(A[j + 1:, j]) * temp
                 # perform jth iteration of factorization
                 pivot(j)
 
@@ -1866,6 +1866,7 @@ def simpleBoundsNewtonAlgorithm(
              matrix initBfgs do not match the length of x0.
 
     """
+
     if len(x0) != bounds.n:
         raise excep.biogemeError(
             f'Incompatible size:' f' {len(x0)} and {len(bounds)}'
