@@ -331,3 +331,7 @@ dist/biogeme-3.2.9a0-py3.9-macosx-10.9-x86_64.egg
 dist/biogeme-3.2.9a0.tar.gz
 examples/indicators/.ipynb_checkpoints/Untitled-checkpoint.ipynb
 examples/indicators/Untitled.ipynb
+examples/notebooks/test_dumped.dat
+examples/notebooks/test~01.dat
+examples/notebooks/test~02.dat
+examples/notebooks/Untitled.ipynb
