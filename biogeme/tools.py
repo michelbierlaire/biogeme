@@ -35,6 +35,7 @@ def findiff_g(theFunction, x):
     :rtype: numpy.array
 
     """
+    x = x.astype(float)
     tau = 0.0000001
     n = len(x)
     g = np.zeros(n)
@@ -129,6 +130,7 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
     :rtype: float, numpy.array,numpy.array,  numpy.array,numpy.array
 
     """
+    x = np.array(x, dtype=float)
     f, g, h = theFunction(x)
     g_num = findiff_g(theFunction, x)
     gdiff = g - g_num
@@ -170,7 +172,7 @@ def getPrimeNumbers(n):
         raise excep.biogemeError(
             f'Incorrect number: {n}'
         )
-        
+
     while total < n:
         upperBound *= 10
         primes = calculatePrimeNumbers(upperBound)
@@ -181,7 +183,6 @@ def getPrimeNumbers(n):
         raise excep.biogemeError(
             f'Incorrect number: {n}'
         ) from e
-        
 
 
 def calculatePrimeNumbers(upperBound):
@@ -193,22 +194,23 @@ def calculatePrimeNumbers(upperBound):
     :return: array with prime numbers
     :rtype: list(int)
 
-    :raise biogemeError: if the upperBound is incorrectly defined (negative number
-    
+    :raise biogemeError: if the upperBound is incorrectly defined
+        (negative number, e.g.)
+
     >>> tools.calculatePrimeNumbers(10)
     [2, 3, 5, 7]
 
     """
     try:
         mywork = list(range(0, upperBound + 1))
-    except TypeError as e: 
+    except TypeError as e:
         raise excep.biogemeError(
             f'Incorrect value: {upperBound}'
         ) from e
-    
+
     try:
         largest = int(np.ceil(np.sqrt(float(upperBound))))
-    except ValueError as e: 
+    except ValueError as e:
         raise excep.biogemeError(
             f'Incorrect value: {upperBound}'
         ) from e
