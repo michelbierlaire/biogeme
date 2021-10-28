@@ -431,7 +431,6 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
     :rtype: numpay.array, dict(str:object)
 
     """
-
     tol = np.finfo(np.float64).eps ** 0.3333
     steptol = 1.0e-5
     cgtol = np.finfo(np.float64).eps ** 0.3333
