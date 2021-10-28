@@ -25,7 +25,7 @@ import biogeme.algorithms as algo
 import biogeme.optimization as opt
 import biogeme.exceptions as excep
 from biogeme.expressions import Variable, Beta
-from testData import myData1
+from testData import getData
 
 
 class rosenbrock(algo.functionToMinimize):
@@ -97,7 +97,7 @@ class testOptimization(unittest.TestCase):
         V = {1: V1, 2: V2, 3: V3}
 
         likelihood = models.loglogit(V, av=None, i=Choice)
-        self.myBiogeme = bio.BIOGEME(myData1, likelihood)
+        self.myBiogeme = bio.BIOGEME(getData(1), likelihood)
         self.myBiogeme.modelName = 'simpleExample'
         self.theFunction = rosenbrock()
         self.myBiogeme.saveIterations = False
