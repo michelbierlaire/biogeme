@@ -697,7 +697,16 @@ class Expression:
         #    )
 
         def my_function(x):
-            self.freeBetaValues = np.array(x, dtype=float)
+            if type(x) == int or type(x) == float or type(x) == np.float64:
+                x = [float(x)]
+            if len(x) != len(self.freeBetaValues):
+                error_msg(
+                    f'Function is expecting an array lf length '
+                    f'{len(self.freeBetaValues)}, not {len(x)}'
+                )
+                excep.biogemeError(error_msg)
+            
+            self.freeBetaValues = x
             f, g, h, b = self.getValueAndDerivatives(
                 database=database,
                 numberOfDraws=numberOfDraws,
@@ -761,6 +770,11 @@ class Expression:
             bhhh=False,
             aggregation=aggregation,
         )
+        if database is None:
+            if len(f) != 1:
+                error_msg = ('Incorrect number of return values')
+                raise excep.biogemeError(error_msg)
+            return f[0]
         return f
 
     def getValueAndDerivatives(
@@ -873,7 +887,7 @@ class Expression:
                 betas[x] if x in betas else self.allFixedBetas[x].initValue for x in self.fixedBetaNames
             ]
 
-                
+
         self.cpp.setExpression(self.getSignature())
         self.cpp.setFreeBetas(self.freeBetaValues)
         self.cpp.setFixedBetas(self.fixedBetaValues)
@@ -3278,7 +3292,10 @@ class LogLogit(Expression):
         else:
             consistent = True
         listOfAlternatives = list(self.util)
-        choices = database.valuesFromDatabase(self.choice)
+        if database is None:
+            choices = np.array([self.choice.getValue_c()])
+        else:
+            choices = database.valuesFromDatabase(self.choice)
         correctChoices = np.isin(choices, listOfAlternatives)
         indexOfIncorrectChoices = np.argwhere(~correctChoices)
         if indexOfIncorrectChoices.any():
@@ -3298,25 +3315,34 @@ class LogLogit(Expression):
             listOfErrors.append(theError)
 
         if consistent:
-            choiceAvailability = database.checkAvailabilityOfChosenAlt(
-                self.av, self.choice
-            )
-            indexOfUnavailableChoices = np.where(~choiceAvailability)[0]
-            if indexOfUnavailableChoices.size > 0:
-                incorrectChoices = choices[indexOfUnavailableChoices]
-                content = '-'.join(
-                    '{}[{}]'.format(*t)
-                    for t in zip(indexOfUnavailableChoices, incorrectChoices)
+            if database is None:
+                value_choice = self.choice.getValue_c()
+                if not value_choice in self.av.keys():
+                    theError = (
+                        f'The chosen alternative [{value_choice}] '
+                        f'is not available'
+                    )                   
+                    listOfErrors.append(theError)
+            else:
+                choiceAvailability = database.checkAvailabilityOfChosenAlt(
+                    self.av, self.choice
                 )
-                truncate = 100
-                if len(content) > truncate:
-                    content = f'{content[:truncate]}...'
-                theError = (
-                    f'The chosen alternative [{self.choice}] '
-                    f'is not available for the following '
-                    f'observations (rownumber[choice]): '
-                ) + content
-                listOfWarnings.append(theError)
+                indexOfUnavailableChoices = np.where(~choiceAvailability)[0]
+                if indexOfUnavailableChoices.size > 0:
+                    incorrectChoices = choices[indexOfUnavailableChoices]
+                    content = '-'.join(
+                        '{}[{}]'.format(*t)
+                        for t in zip(indexOfUnavailableChoices, incorrectChoices)
+                    )
+                    truncate = 100
+                    if len(content) > truncate:
+                        content = f'{content[:truncate]}...'
+                    theError = (
+                        f'The chosen alternative [{self.choice}] '
+                        f'is not available for the following '
+                        f'observations (rownumber[choice]): '
+                    ) + content
+                    listOfWarnings.append(theError)
 
         return listOfErrors, listOfWarnings
 
@@ -3578,7 +3604,9 @@ class Elem(Expression):
         if key in self.dictOfExpressions:
             return self.dictOfExpressions[key].getValue()
 
-        return 0.0
+        error_msg = (f'Key {key} is not present in the dictionary. '
+                     f'Available keys: {self.dictOfExpressions.keys()}')
+        raise excep.biogemeError(error_msg)
 
     def __str__(self):
         s = '{{'
