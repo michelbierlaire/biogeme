@@ -346,3 +346,6 @@ reports/pandasIndicators39/pandasIndicators.log
 reports/pandasIndicators39/pandasIndicators.out
 reports/pandasIndicators39/Bier18a.pdf
 reports/pandasIndicators39/pandasIndicators.pdf
+src/cexpressions.cpp
+src/tmp.py
+tests/functions/errors.lis
