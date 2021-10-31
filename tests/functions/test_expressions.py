@@ -371,7 +371,7 @@ class test_expressions(unittest.TestCase):
             result = self.Variable1 > self
 
     def test_getValue_c(self):
-        result = self.Variable1.getValue_c(self.myData)
+        result = self.Variable1.getValue_c(database=self.myData)
         np.testing.assert_equal(result, [10, 20, 30, 40, 50])
 
     def test_DefineVariable(self):
@@ -478,7 +478,7 @@ class test_expressions(unittest.TestCase):
             + self.beta1 * (self.beta3 < self.beta4)
         )
         f_list, g_list, h_list, bhhh_list = expr1.getValueAndDerivatives(
-            self.myData, aggregation=False
+            database=self.myData, aggregation=False
         )
         f_ok = -1.27580012
         g_ok = [2.0, 5.8653004]
@@ -505,7 +505,7 @@ class test_expressions(unittest.TestCase):
             + self.beta1 * (self.beta3 < self.beta4)
         )
         f, g, h, b = expr1.getValueAndDerivatives(
-            self.myData, aggregation=True
+            database=self.myData, aggregation=True
         )
         f_ok = -6.37900057544549
         g_ok = [10.0, 29.32650201405922]
@@ -561,7 +561,7 @@ class test_expressions(unittest.TestCase):
             expr2.getValue()
         with self.assertRaises(excep.biogemeError):
             expr2.getValue_c()
-        res = list(expr2.getValue_c(self.myData))
+        res = list(expr2.getValue_c(database=self.myData))
         self.assertListEqual(res, [4.0, 8.0, 12.0, 16.0, 20.0])
 
     def test_dictOfBetas(self):
@@ -846,7 +846,7 @@ class test_expressions(unittest.TestCase):
         expr3 = ex.MonteCarlo(myDraws * myDraws)
         with self.assertRaises(excep.biogemeError):
             res = expr3.getValue_c(numberOfDraws=100000)
-        res = expr3.getValue_c(self.myData, numberOfDraws=100000)
+        res = expr3.getValue_c(database=self.myData, numberOfDraws=100000)
         for v in res:
             self.assertAlmostEqual(v, 1.0 / 3.0, 2)
 
@@ -858,7 +858,7 @@ class test_expressions(unittest.TestCase):
         dx = (b - a) * ex.exp(-omega) * (1 + ex.exp(-omega)) ** (-2)
         integrand = x * x
         expr4 = ex.Integrate(integrand * dx / (b - a), 'omega')
-        res = expr4.getValue_c(self.myData)
+        res = expr4.getValue_c(database=self.myData)
         for v in res:
             self.assertAlmostEqual(v, 1.0 / 3.0, 2)
 
@@ -870,7 +870,7 @@ class test_expressions(unittest.TestCase):
             -self.beta2 * self.Variable2
         ) / (self.beta3 * (self.beta2 >= self.beta1))
         expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
-        res = list(expr5.getValue_c(self.myData))
+        res = list(expr5.getValue_c(database=self.myData))
         res_ok = [
             -0.02703200460356393,
             -0.02703200460356393,
@@ -896,7 +896,7 @@ class test_expressions(unittest.TestCase):
         integrand = x * x
         expr4 = ex.Integrate(integrand * dx / (b - a), 'omega')
         expr6 = ex.bioMultSum([expr1, expr2, expr4])
-        res = list(expr6.getValue_c(self.myData))
+        res = list(expr6.getValue_c(database=self.myData))
         res_ok = [
             4.063012266030643,
             8.063012266030643,
@@ -914,7 +914,7 @@ class test_expressions(unittest.TestCase):
         r = expr7.getValue()
         self.assertAlmostEqual(r, -1.2362866960692134, 5)
         expr8 = models.loglogit(V, av, 1)
-        res = expr8.getValue_c(self.myData)
+        res = expr8.getValue_c(database=self.myData)
         for v in res:
             self.assertAlmostEqual(v, -1.2362866960692136, 5)
 
@@ -923,13 +923,13 @@ class test_expressions(unittest.TestCase):
         av = {0: 1, 1: 1, 2: 1}
         expr8 = models.loglogit(V, av, 1)
         expr9 = ex.Derive(expr8, 'beta2')
-        res = expr9.getValue_c(self.myData)
+        res = expr9.getValue_c(database=self.myData)
         for v in res:
             self.assertAlmostEqual(v, -0.7095392129298093, 5)
 
     def test_expr10(self):
         expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
-        res = expr10.getValue_c(self.myData)
+        res = expr10.getValue_c(database=self.myData)
         for i, j in zip(
             res,
             [
@@ -952,7 +952,7 @@ class test_expressions(unittest.TestCase):
         expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
         expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
         expr11 = ex.bioMin(expr5, expr10)
-        res = expr11.getValue_c(self.myData)
+        res = expr11.getValue_c(database=self.myData)
         res_ok = [-0.027032, -0.027032, -0.027032, 0.9986501, 0.99996833]
         for i, j in zip(
             res,
@@ -970,7 +970,7 @@ class test_expressions(unittest.TestCase):
         expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
         expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
         expr12 = ex.bioMax(expr5, expr10)
-        res = expr12.getValue_c(self.myData)
+        res = expr12.getValue_c(database=self.myData)
         for i, j in zip(
             res, [0.5, 0.8413447460685283, 0.9772498680518218, 1.6, 2.0]
         ):
@@ -986,7 +986,7 @@ class test_expressions(unittest.TestCase):
             (self.beta3, newvar),
         ]
         expr13 = ex.bioLinearUtility(terms)
-        res = expr13.getValue_c(self.myData)
+        res = expr13.getValue_c(database=self.myData)
         res_ok = [
             152,
             304,
@@ -1001,7 +1001,7 @@ class test_expressions(unittest.TestCase):
             + self.beta2 * ex.Variable('Variable2')
             + self.beta3 * newvar
         )
-        res = expr13bis.getValue_c(self.myData)
+        res = expr13bis.getValue_c(database=self.myData)
         res_ok = [
             152,
             304,
