@@ -169,9 +169,7 @@ def getPrimeNumbers(n):
     total = 0
     upperBound = 100
     if n <= 0:
-        raise excep.biogemeError(
-            f'Incorrect number: {n}'
-        )
+        raise excep.biogemeError(f'Incorrect number: {n}')
 
     while total < n:
         upperBound *= 10
@@ -180,9 +178,7 @@ def getPrimeNumbers(n):
     try:
         return primes[0:n]
     except TypeError as e:
-        raise excep.biogemeError(
-            f'Incorrect number: {n}'
-        ) from e
+        raise excep.biogemeError(f'Incorrect number: {n}') from e
 
 
 def calculatePrimeNumbers(upperBound):
@@ -204,16 +200,12 @@ def calculatePrimeNumbers(upperBound):
     try:
         mywork = list(range(0, upperBound + 1))
     except TypeError as e:
-        raise excep.biogemeError(
-            f'Incorrect value: {upperBound}'
-        ) from e
+        raise excep.biogemeError(f'Incorrect value: {upperBound}') from e
 
     try:
         largest = int(np.ceil(np.sqrt(float(upperBound))))
     except ValueError as e:
-        raise excep.biogemeError(
-            f'Incorrect value: {upperBound}'
-        ) from e
+        raise excep.biogemeError(f'Incorrect value: {upperBound}') from e
 
     # Remove all multiples
     for i in range(2, largest + 1):
