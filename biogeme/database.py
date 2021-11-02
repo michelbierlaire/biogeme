@@ -421,9 +421,9 @@ class Database:
                 database=self,
                 aggregation=False,
             )
-        avail_chosen = np.array([
-            calculated_avail[c][i] for i, c in enumerate(choice_array)
-        ])
+        avail_chosen = np.array(
+            [calculated_avail[c][i] for i, c in enumerate(choice_array)]
+        )
         return avail_chosen != 0
 
     def choiceAvailabilityStatistics(self, avail, choice):
@@ -474,7 +474,7 @@ class Database:
 
         :raise biogemeError: if called.
         """
-        error_msg = f'Obsolete: use expression.getValue_c(database) instead'
+        error_msg = 'Obsolete: use expression.getValue_c(database) instead'
         raise excep.biogemeError(error_msg)
 
     def scaleColumn(self, column, scale):
@@ -1028,11 +1028,11 @@ class Database:
         return self.data[self.data[columnName] == value].count()[columnName]
 
     def generateFlatPanelDataframe(self, saveOnFile=None):
+        raise ('Not yet implemented')
         if not self.isPanel():
             error_msg = 'This function can only be called for panel data'
             raise excep.biogemeError(error_msg)
-            
-        
+
     def __str__(self):
         """Allows to print the dabase"""
         result = f'biogeme database {self.name}:\n{self.data}'
