@@ -377,8 +377,9 @@ class paretoClass:
         if S_dominated:
             return False
         self.pareto[elem] = 1
-        self.pareto = {k: v for k, v in self.pareto.items()
-                       if k not in D_dominating}
+        self.pareto = {
+            k: v for k, v in self.pareto.items() if k not in D_dominating
+        }
         self.removed |= D_dominating
         return True
 
