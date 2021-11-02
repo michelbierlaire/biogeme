@@ -17,10 +17,9 @@ Implementation of class contaning and processing the estimation results.
 
 import pickle
 import datetime
+import urllib.request as urlr
 import pandas as pd
 import numpy as np
-import urllib.request as urlr
-import urllib.error as urle
 from scipy import linalg
 from scipy import stats
 import biogeme.version as bv
@@ -331,11 +330,9 @@ class bioResults:
                 with open(pickleFile, 'rb') as f:
                     self.data = pickle.load(f)
             except FileNotFoundError as e:
-                error_msg = (
-                    f'File {pickleFile} not found'
-                )
+                error_msg = f'File {pickleFile} not found'
                 raise excep.biogemeError(error_msg) from e
-                    
+
         else:
             raise excep.biogemeError('No data provided.')
 
