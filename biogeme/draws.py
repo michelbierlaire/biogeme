@@ -272,7 +272,7 @@ def getNormalWichuraDraws(
     tail area of p; z is accurate to about 1 part in :math:`10^{16}`.
 
     .. _`Wichura (1988)`:
-       http://www.jstor.org/stable/2347330 
+       http://www.jstor.org/stable/2347330
 
     :param sampleSize: number of observations for which draws must be
                        generated. If None, a one dimensional array
