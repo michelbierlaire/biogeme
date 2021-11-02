@@ -280,8 +280,7 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
 
     # First term
     betaValues = [
-        0 if initialBetas is None else initialBetas[i]
-        for i in range(eye - 1)
+        0 if initialBetas is None else initialBetas[i] for i in range(eye - 1)
     ]
     if thresholds[0] is None:
         beta = expr.Beta(
