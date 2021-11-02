@@ -644,7 +644,12 @@ class Expression:
         self.expression_prepared = True
 
     def createFunction(
-            self, database=None, numberOfDraws=1000, gradient=True, hessian=True, bhhh=False,
+        self,
+        database=None,
+        numberOfDraws=1000,
+        gradient=True,
+        hessian=True,
+        bhhh=False,
     ):
         """Create a function based on the expression. The function takes as
             argument an array for the free parameters, and return the
@@ -689,23 +694,23 @@ class Expression:
         if not self.expression_prepared:
             self._prepareFormulaForEvaluation(database)
 
-        #variables = self.setOfVariables()
-        #if variables:
+        # variables = self.setOfVariables()
+        # if variables:
         #    raise excep.biogemeError(
         #        'Functions can be generated only for simple expressions '
         #        'that do not involve any variable'
         #    )
 
         def my_function(x):
-            if type(x) == int or type(x) == float or type(x) == np.float64:
+            if isinstance(x, (float, int, np.float64)):
                 x = [float(x)]
             if len(x) != len(self.freeBetaValues):
-                error_msg(
+                error_msg = (
                     f'Function is expecting an array lf length '
                     f'{len(self.freeBetaValues)}, not {len(x)}'
                 )
                 excep.biogemeError(error_msg)
-            
+
             self.freeBetaValues = x
             f, g, h, b = self.getValueAndDerivatives(
                 database=database,
@@ -724,8 +729,7 @@ class Expression:
                 if bhhh:
                     results.append(b)
                 return tuple(results)
-            return f    
-
+            return f
 
         return my_function
 
@@ -738,6 +742,9 @@ class Expression:
     ):
 
         """Evaluation of the expression, without the derivatives
+
+        :param betas: values of the free parameters
+        :type betas: list(float)
 
         :param database: database. If no database is provided, the
             expression must not contain any variable.
@@ -759,6 +766,8 @@ class Expression:
 
         :rtype: np.array or float
 
+        :raise biogemeError: if no database is given, and the number
+            of returned values is different from one.
         """
 
         f, _, _, _ = self.getValueAndDerivatives(
@@ -772,7 +781,7 @@ class Expression:
         )
         if database is None:
             if len(f) != 1:
-                error_msg = ('Incorrect number of return values')
+                error_msg = 'Incorrect number of return values'
                 raise excep.biogemeError(error_msg)
             return f[0]
         return f
@@ -794,6 +803,9 @@ class Expression:
         C++ code to evaluate the value of the expression for a
         series of entries in a database. Note that this function
         will generate draws if needed.
+
+        :param betas: values of the free parameters
+        :type betas: list(float)
 
         :param database: database. If no database is provided, the
             expression must not contain any variable.
@@ -869,6 +881,7 @@ class Expression:
             self.cpp.setData(database.data)
             if self.embedExpression('PanelLikelihoodTrajectory'):
                 if database.isPanel():
+                    database.buildPanelMap()
                     self.cpp.setDataMap(database.individualMap)
                 else:
                     error_msg = (
@@ -880,13 +893,15 @@ class Expression:
 
         if betas is not None:
             self.freeBetaValues = [
-                betas[x] if x in betas else self.allFreeBetas[x].initValue for x in self.freeBetaNames
+                betas[x] if x in betas else self.allFreeBetas[x].initValue
+                for x in self.freeBetaNames
             ]
-            # List of values of the fixed beta parameters (those to be estimated)
+            # List of values of the fixed beta parameters (those to be
+            # estimated)
             self.fixedBetaValues = [
-                betas[x] if x in betas else self.allFixedBetas[x].initValue for x in self.fixedBetaNames
+                betas[x] if x in betas else self.allFixedBetas[x].initValue
+                for x in self.fixedBetaNames
             ]
-
 
         self.cpp.setExpression(self.getSignature())
         self.cpp.setFreeBetas(self.freeBetaValues)
@@ -3321,7 +3336,7 @@ class LogLogit(Expression):
                     theError = (
                         f'The chosen alternative [{value_choice}] '
                         f'is not available'
-                    )                   
+                    )
                     listOfErrors.append(theError)
             else:
                 choiceAvailability = database.checkAvailabilityOfChosenAlt(
@@ -3332,7 +3347,9 @@ class LogLogit(Expression):
                     incorrectChoices = choices[indexOfUnavailableChoices]
                     content = '-'.join(
                         '{}[{}]'.format(*t)
-                        for t in zip(indexOfUnavailableChoices, incorrectChoices)
+                        for t in zip(
+                            indexOfUnavailableChoices, incorrectChoices
+                        )
                     )
                     truncate = 100
                     if len(content) > truncate:
@@ -3599,13 +3616,18 @@ class Elem(Expression):
 
         :return: value of the expression
         :rtype: float
+
+        :raise biogemeError: if the calcuated key is not present in
+            the dictionary.
         """
         key = int(self.keyExpression.getValue())
         if key in self.dictOfExpressions:
             return self.dictOfExpressions[key].getValue()
 
-        error_msg = (f'Key {key} is not present in the dictionary. '
-                     f'Available keys: {self.dictOfExpressions.keys()}')
+        error_msg = (
+            f'Key {key} is not present in the dictionary. '
+            f'Available keys: {self.dictOfExpressions.keys()}'
+        )
         raise excep.biogemeError(error_msg)
 
     def __str__(self):
@@ -4030,4 +4052,3 @@ def defineNumberingOfElementaryExpressions(
         allDraws,
         drawNames,
     )
-
