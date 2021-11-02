@@ -41,7 +41,7 @@ def mixedloglikelihood(prob):
 
     :return: the simulated loglikelihood, given by
 
-        .. math:: \\ln\\left(\\sum_{r=1}^R 
+        .. math:: \\ln\\left(\\sum_{r=1}^R
             P(i|\\xi^r_1,\\ldots,\\xi^r_L) \\right)
 
         where :math:`R` is the number of draws, and :math:`\\xi_j^r`
