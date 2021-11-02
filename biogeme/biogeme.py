@@ -52,7 +52,6 @@ class BIOGEME:
         numberOfDraws=1000,
         seed=None,
         skipAudit=False,
-        displayUsedVariables=False,
         suggestScales=True,
         missingData=99999,
     ):
@@ -100,10 +99,6 @@ class BIOGEME:
             models and large data sets. Default: False.
         :type skipAudit: bool
 
-        :param displayUsedVariables: if True, displays all the
-            variables used in the formulas. Default: False.
-        :type displayUsedVariables: bool
-
         :param suggestScales: if True, Biogeme suggests the scaling of
             the variables in the database. Default: True.
             See also :func:`biogeme.database.Database.suggestScaling`
@@ -125,7 +120,6 @@ class BIOGEME:
         """Logger that controls the output of
         messages to the screen and log file.
         Type: class :class:`biogeme.messaging.bioMessage`."""
-
 
         self.logger.warning(
             'The possibility to remove unused variables has been '
@@ -187,7 +181,7 @@ class BIOGEME:
             calculating the weight of each observation in the
             sample.
             """
-            
+
             self.formulas = dict({self.loglikeName: formulas})
             """ Dictionary containing Biogeme formulas of type
             :class:`biogeme.expressions.Expression`.
@@ -208,12 +202,11 @@ class BIOGEME:
 
         for f in self.formulas.values():
             f.missingData = self.missingData
-            
+
         self.database = database  #: :class:`biogeme.database.Database` object
 
         self.userNotes = userNotes  #: User notes
 
-            
         self.lastSample = None
         """ keeps track of the sample of data used to calculate the
         stochastic gradient / hessian
@@ -344,7 +337,9 @@ class BIOGEME:
             listOfErrors += err
             listOfWarnings += war
         if self.weight is not None:
-            total = self.weight.getValue_c(database=self.database, aggregation=True)
+            total = self.weight.getValue_c(
+                database=self.database, aggregation=True
+            )
             s_size = self.database.getSampleSize()
             ratio = s_size / total
             if np.abs(ratio - 1) >= 0.01:
@@ -487,7 +482,7 @@ class BIOGEME:
 
         """
         expression = -eb.log(eb.bioMultSum(avail))
-    
+
         self.nullLogLike = expression.getValue_c(
             database=self.database,
             aggregation=True,
@@ -856,7 +851,7 @@ class BIOGEME:
         optimizationMessages['Optimization time'] = datetime.now() - start_time
         # Information provided by the optimization algorithm after completion.
         self.optimizationMessages = optimizationMessages
-        
+
         fgHb = self.calculateLikelihoodAndDerivatives(
             xstar, scaled=False, hessian=True, bhhh=True
         )
@@ -1081,7 +1076,7 @@ class BIOGEME:
         results = self.algorithm(
             theFunction, startingValues, self.bounds, self.algoParameters
         )
-        
+
         return results
 
     def simulate(self, theBetaValues=None):
@@ -1109,14 +1104,6 @@ class BIOGEME:
 
         """
 
-        if self.database.isPanel():
-            error_msg = (
-                'Simulation for panel data is not yet'
-                ' implemented. Remove the "panel" '
-                'statement to simulate each observation.'
-            )
-            raise excep.biogemeError(error_msg)
-
         if theBetaValues is None:
             betaValues = self.betaInitValues
         else:
@@ -1141,10 +1128,37 @@ class BIOGEME:
                     )
                     betaValues.append(self.betaInitValues[i])
 
+        if self.database.isPanel():
+            for f in self.formulas.values():
+                count = f.countPanelTrajectoryExpressions()
+                if count != 1:
+                    theError = (
+                        f'For panel data, the expression must '
+                        f'contain exactly one PanelLikelihoodTrajectory '
+                        f'operator. It contains {count}: {f}'
+                    )
+                    raise excep.biogemeError(theError)
+
         output = pd.DataFrame(index=self.database.data.index)
-        formulas = [v.getSignature() for v in self.formulas.values()]
+        formulas_signature = [v.getSignature() for v in self.formulas.values()]
+
+        if self.database.isPanel():
+            self.database.buildPanelMap()
+            self.theC.setDataMap(self.database.individualMap)
+
+        self.logger.setDebug()
+        self.logger.debug('Debugging on')
+        for v in self.formulas.values():
+            self.logger.debug(f'Audit {v}')
+            listOfWarnings, listOfErrors = v.audit(database=self.database)
+            if listOfWarnings:
+                self.logger.warning('\n'.join(listOfWarnings))
+            if listOfErrors:
+                self.logger.warning('\n'.join(listOfErrors))
+                raise excep.biogemeError('\n'.join(listOfErrors))
+
         result = self.theC.simulateSeveralFormulas(
-            formulas,
+            formulas_signature,
             betaValues,
             self.fixedBetaValues,
             self.database.data,
