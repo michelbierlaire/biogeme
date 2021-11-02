@@ -895,7 +895,7 @@ class specificationProblem(vns.problemClass):
         :param availabilities: dict describing the availability of the
             alternatives.
 
-        :type availabilities: 
+        :type availabilities:
             dict(int, :class:`biogeme.expressions.Expression`)
 
         :param choice: expression for the observed choice
@@ -1839,9 +1839,7 @@ class solution(vns.solutionClass):
                 'The attribute objectivesNames is not defined'
             )
         if self.objectives is None:
-            raise excep.biogemeError(
-                'The attribute objectives is not defined'
-            )
+            raise excep.biogemeError('The attribute objectives is not defined')
         for t, r in zip(self.objectivesNames, self.objectives):
             res += f'\n{t}: {r}'
         return res
