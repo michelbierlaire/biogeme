@@ -29,7 +29,7 @@ logger = msg.bioMessage()
 
 def scipy(fct, initBetas, bounds, parameters=None):
 
-    """Optimization interface for Biogeme, based on the scipy 
+    """Optimization interface for Biogeme, based on the scipy
     minimize function.
 
     :param fct: object to calculate the objective function and its derivatives.
