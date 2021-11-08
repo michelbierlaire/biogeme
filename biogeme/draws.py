@@ -198,22 +198,24 @@ def getHaltonDraws(
         raise excep.biogemeError(
             f'Invalid sample size: {sampleSize} when generating draws.'
         )
-    totalSize = numberOfDraws * sampleSize
+    length = numberOfDraws * sampleSize
+    req_length = length + skip + 1
+    numbers = np.empty(req_length)
+    numbers[0] = 0
+    numbers_idx = 1
+    t = 1
+    while numbers_idx < req_length:
+        d = 1/base**t
+        numbers_size = numbers_idx
+        i = 1
+        while i < base and numbers_idx < req_length:
+            max_numbers = min(req_length - numbers_idx, numbers_size)
+            numbers[numbers_idx: numbers_idx + max_numbers] = numbers[:max_numbers] + d * i
+            numbers_idx += max_numbers
+            i += 1
+        t += 1
+    numbers = numbers[skip + 1:length + skip + 1]
 
-    numbers = []
-    skipped = 0
-    for i in range(totalSize + 1 + skip):
-        n, denom = 0.0, 1.0
-        while i > 0:
-            i, remainder = divmod(i, base)
-            denom *= base
-            n += remainder / denom
-        if skipped < skip:
-            skipped += 1
-        else:
-            numbers.append(n)
-
-    numbers = np.array(numbers[1:])
     if shuffled:
         np.random.shuffle(numbers)
 
