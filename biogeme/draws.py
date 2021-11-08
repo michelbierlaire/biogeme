@@ -151,7 +151,8 @@ def getLatinHypercubeDraws(
 def getHaltonDraws(
     sampleSize, numberOfDraws, symmetric=False, base=2, skip=0, shuffled=False
 ):
-    """Generate Halton draws
+    """Generate Halton draws. 
+    Implementation by Cristian Arteaga, University of Nevada Las Vegas,
 
     :param sampleSize: number of observations for which draws must be
                        generated. If None, a one dimensional array
