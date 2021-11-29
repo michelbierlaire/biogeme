@@ -457,12 +457,23 @@ void *computeFunctionForThread(void* fctPtr) {
 void *simulFunctionForThread(void* fctPtr) {
   try {
     bioThreadArgSimul *input = (bioThreadArgSimul *) fctPtr;
-    
     bioSeveralExpressions* expressions = input->theFormulas.getExpressions() ;
     if (input->panel) {
-      std::stringstream str ;
-      str << "Simulation of panel data is not yet implemented" ;
-      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+      bioUInt individual ;
+      expressions->setIndividualIndex(&individual) ;
+      for (individual = input->startData ;
+	   individual < input->endData ;
+	   ++individual) {
+	try {
+	  std::vector<bioReal > res = expressions->getValues() ;
+	  input->results.push_back(res) ;
+	}
+	catch(bioExceptions& e) {
+	  std::stringstream str ;
+	  str << "Error in simulating panel data: " << e.what() ;
+	  throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+	}
+      }
     }
     else {
       bioUInt row ;
@@ -680,6 +691,7 @@ void biogeme::setData(std::vector< std::vector<bioReal> >& d) {
 void biogeme::setDataMap(std::vector< std::vector<bioUInt> >& dm) {
   theDataMap = dm ;
   forceDataPreparation = true ;
+  panel = true ;
 }
 
 void biogeme::setMissingData(bioReal md) {
