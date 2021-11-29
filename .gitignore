@@ -349,3 +349,4 @@ reports/pandasIndicators39/pandasIndicators.pdf
 src/cexpressions.cpp
 src/tmp.py
 tests/functions/errors.lis
+src/biogeme.cc
