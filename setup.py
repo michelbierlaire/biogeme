@@ -189,10 +189,17 @@ extensions = [biogeme_extension, expressions_extension]
 
 if USE_CYTHON:
 #    extensions = cythonize(extensions, language='c++', include_path=[numpy.get_include()])
+
+# WARNING: recently, problems with parallel compilation in cython have
+# been reported. Therefore, this feature is currently turned off.
+    
+#    extensions = cythonize(extensions,
+#                           compiler_directives={'language_level' : "3"},
+#                           include_path=[numpy.get_include()],
+#                           nthreads=8)
     extensions = cythonize(extensions,
                            compiler_directives={'language_level' : "3"},
-                           include_path=[numpy.get_include()],
-                           nthreads=8)
+                           include_path=[numpy.get_include()])
     cmdclass.update({'build_ext': build_ext})
 
 #exec(open('biogeme/version.py').read())
