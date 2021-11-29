@@ -1,3 +1,4 @@
+	
 """Instructions for the installation of Biogeme
 
 :author: Michel Bierlaire
@@ -11,7 +12,7 @@
 import os
 import sys
 import platform
-import distutils.ccompiler
+#import distutils.ccompiler
 import multiprocessing.pool
 import setuptools
 #from setuptools import setup, Extension
@@ -64,7 +65,7 @@ def parallelCCompile(self,
     list(multiprocessing.pool.ThreadPool(N).imap(_single_compile, objects))
     return objects
 
-distutils.ccompiler.CCompiler.compile = parallelCCompile
+#distutils.ccompiler.CCompiler.compile = parallelCCompile
 
 try:
     from Cython.Build import cythonize
@@ -81,11 +82,13 @@ ext = '.pyx' if USE_CYTHON else '.cpp'
 cmdclass = {}
 
 source = ['src/biogeme.cc',
+          'src/evaluateExpressions.cc',
           'src/bioMemoryManagement.cc',
           'src/bioNormalCdf.cc',
           'src/bioFormula.cc',
           'src/bioSeveralFormulas.cc',
           'src/bioThreadMemory.cc',
+          'src/bioThreadMemoryOneExpression.cc',
           'src/bioThreadMemorySimul.cc',
           'src/bioString.cc',
           'src/bioExprNormalCdf.cc',
@@ -128,6 +131,7 @@ source = ['src/biogeme.cc',
           'src/bioSeveralExpressions.cc',
           'src/bioExceptions.cc',
           'src/bioDerivatives.cc',
+          'src/bioVectorOfDerivatives.cc',
           'src/bioGaussHermite.cc',
           'src/bioGhFunction.cc']
 
@@ -152,14 +156,25 @@ if sys.platform == 'win32':
                             '-lstdc++',
                             '-lpthread'])
 
-extensions = [setuptools.Extension('biogeme.cbiogeme',
+biogeme_extension = setuptools.Extension('biogeme.cbiogeme',
                                    ['src/cbiogeme'+ext] + source,
                                    include_dirs=[numpy.get_include()],
                                    extra_compile_args=extra_compile_args,
                                    language='c++11',
                                    define_macros=[('NPY_NO_DEPRECATED_API',
                                                    'NPY_1_7_API_VERSION')],
-                                   extra_link_args=extra_link_args)]
+                                   extra_link_args=extra_link_args)
+
+expressions_extension = setuptools.Extension('biogeme.cexpressions',
+                                   ['src/cexpressions'+ext] + source,
+                                   include_dirs=[numpy.get_include()],
+                                   extra_compile_args=extra_compile_args,
+                                   language='c++11',
+                                   define_macros=[('NPY_NO_DEPRECATED_API',
+                                                   'NPY_1_7_API_VERSION')],
+                                   extra_link_args=extra_link_args)
+
+extensions = [biogeme_extension, expressions_extension]
 
 #extensions = [Extension('biogeme.cbiogeme',
 #                        ['src/cbiogeme'+ext]+source,
@@ -176,7 +191,8 @@ if USE_CYTHON:
 #    extensions = cythonize(extensions, language='c++', include_path=[numpy.get_include()])
     extensions = cythonize(extensions,
                            compiler_directives={'language_level' : "3"},
-                           include_path=[numpy.get_include()])
+                           include_path=[numpy.get_include()],
+                           nthreads=8)
     cmdclass.update({'build_ext': build_ext})
 
 #exec(open('biogeme/version.py').read())
