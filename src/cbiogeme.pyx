@@ -184,7 +184,7 @@ cdef class pyBiogeme:
 
 		cdef double_matrix_view r_view = r
 		self.theBiogeme.simulateSeveralFormulas(formulas,
-					        	      betas, 
+				        	      betas, 
    						      fixedBetas, 
  						      nThreads,
 						      d, 
