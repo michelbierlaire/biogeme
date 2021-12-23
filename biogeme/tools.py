@@ -10,6 +10,7 @@
 # pylint: disable=invalid-name, too-many-locals
 
 import numpy as np
+import pandas as pd
 from scipy.stats import chi2
 import biogeme.messaging as msg
 import biogeme.exceptions as excep
@@ -308,3 +309,134 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
     else:
         final_msg = f'H0 can be rejected at level {significance_level}'
     return final_msg, stat, threshold
+
+
+def flatten_database(df, merge_id, row_name=None, identical_columns=None):
+    """Combine several rows of a Pandas database into one. For instance,
+    consider the following database:
+
+       ID  Age  Cost   Name
+    0   1   23    34  Item3
+    1   1   23    45  Item4
+    2   1   23    12  Item7
+    3   2   45    65  Item3
+    4   2   45    34  Item7
+
+    If row_name is 'Name', the function generates the same data in the following format:
+
+        Age  Item3_Cost  Item4_Cost  Item7_Cost
+    ID
+    1    23          34        45.0          12
+    2    45          65         NaN          34
+
+    If row_name is None, the function generates the same data in the following format:
+
+        Age  1_Cost 1_Name  2_Cost 2_Name  3_Cost 3_Name
+    ID
+    1    23      34  Item3      45  Item4    12.0  Item7
+    2    45      65  Item3      34  Item7     NaN    NaN
+
+    :Param df: initial data frame
+    :type df: pandas.DataFrame
+
+    :param merge_id: name of the column that identifies rows that
+        should be merged. In the above example: 'ID'
+    :type merge_id: str
+
+    :param row_name: name of the columns that provides the name of the
+        rows in the new dataframe. In the example above: 'Name'. If
+        None, the rows are numbered sequentially.
+    :type row_name: str
+
+    :param identical_columns: name of the columns that contain
+        identical values across the rows of a group. In the example
+        above: ['Age']. If None, these columns are automatically
+        detected. On large database, there may be a performance issue.
+    :type identical_columns: list(str)
+
+    :return: reformatted database
+    :rtype: pandas.DataFrame
+    """
+    grouped = df.groupby(by=merge_id)
+    all_columns = set(df.columns)
+    if identical_columns is None:
+
+        def are_values_identical(col):
+            """This function checks if all the values in a column
+                are identical
+
+            :param col: the column
+            :type col: pandas.Series
+
+            :return: True if all values are identical. False otherwise.
+            :rtype: bool
+            """
+            return (col.iloc[0] == col).all(0)
+
+        def get_varying_cols(g):
+            """This functions returns the name of all columns
+                that have constant values within each group of data.
+
+            :param g: group of data
+            :type g: pandas.DataFrame
+
+            :return: name of all columns that have constant values
+                within each group of data.
+            :rtype: set(str)
+            """
+            return {
+                colname
+                for colname, col in g.iteritems()
+                if not are_values_identical(col)
+            }
+
+        all_varying_cols = grouped.apply(get_varying_cols)
+        varying_columns = set.intersection(*all_varying_cols)
+        identical_columns = list(all_columns - varying_columns)
+        varying_columns = list(varying_columns)
+    else:
+        varying_columns = list(all_columns - set(identical_columns))
+
+    # Take the first row for columns that are identical
+    common_data = df[identical_columns].drop_duplicates(merge_id, keep='first')
+    common_data.index = common_data[merge_id]
+    # Treat the other columns
+    grouped_varying = df[[merge_id] + list(varying_columns)].groupby(
+        by=merge_id
+    )
+
+    def treat(x):
+        """Treat a group of data.
+
+        :param x: group of data
+        :type x: pandas.DataFrame
+
+        :return: the same data organized in one row, with proper column names
+        :rtype: pandas.DataFrame
+        """
+        the_columns = set(x.columns) - {merge_id}
+        if row_name is not None:
+            the_columns -= {row_name}
+        first = True
+        i = 0
+        for _, row in x.iterrows():
+            i += 1
+            if first:
+                all_values = [row[merge_id]]
+                all_columns = [merge_id]
+                first = False
+            name = f'{i}' if row_name is None else row[row_name]
+            columns = [f'{name}_{c}' for c in list(the_columns)]
+            all_values.extend([row[c] for c in list(the_columns)])
+            all_columns.extend(columns)
+        df = pd.DataFrame([all_values], columns=all_columns)
+        return df
+
+    flat_data = grouped_varying.apply(treat)
+    flat_data.index = flat_data[merge_id]
+
+    # We remove the column 'merge_id' as it is stored as index.
+    return pd.concat(
+        [common_data, flat_data], axis='columns'
+    ).drop(columns=[merge_id]) 
+
