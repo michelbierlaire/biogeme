@@ -15,6 +15,7 @@
 class bioVectorOfDerivatives {
 
  public:
+  bioVectorOfDerivatives() ;
   void onlyOne(bioDerivatives d) ;
   void resizeAll(bioUInt n) ;
   void setEverythingToZero() ;
@@ -24,9 +25,9 @@ class bioVectorOfDerivatives {
   void set_with_h(bioBoolean yes);
   void set_with_bhhh(bioBoolean yes);
   bioUInt getSize() const ;
-  bioBoolean with_g() ;
-  bioBoolean with_h() ;
-  bioBoolean with_bhhh() ;
+  bioBoolean with_g() const ;
+  bioBoolean with_h() const ;
+  bioBoolean with_bhhh() const ;
   void aggregate(bioDerivatives d) ;
   void disaggregate(bioDerivatives d) ;
   void aggregate(bioVectorOfDerivatives d) ;

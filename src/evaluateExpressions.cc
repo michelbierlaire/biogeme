@@ -65,6 +65,9 @@ void evaluateOneExpression::calculate(bioBoolean gradient,
   with_g = gradient ;
   with_h = hessian ;
   with_bhhh = bhhh ;
+  results.set_with_g(with_g) ;
+  results.set_with_h(with_h) ;
+  results.set_with_bhhh(with_bhhh) ;
   aggregation = aggr ;
   if (with_data) {
     prepareData() ;

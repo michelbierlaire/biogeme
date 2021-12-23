@@ -9,7 +9,13 @@
 #include "bioDebug.h"
 #include "bioVectorOfDerivatives.h"
 
+bioVectorOfDerivatives::bioVectorOfDerivatives():
+  wg(false),
+  wh(false),
+  wbhhh(false) {
 
+}
+  
 void bioVectorOfDerivatives::onlyOne(bioDerivatives d) {
   theDerivatives.clear() ;
   theDerivatives.push_back(d) ;
@@ -93,15 +99,15 @@ void bioVectorOfDerivatives::set_with_bhhh(bioBoolean yes) {
   wbhhh = yes ;
 }
 
-bioBoolean bioVectorOfDerivatives::with_g() {
+bioBoolean bioVectorOfDerivatives::with_g() const {
   return wg ;
 }
 
-bioBoolean bioVectorOfDerivatives::with_h() {
+bioBoolean bioVectorOfDerivatives::with_h() const {
   return wh ;
 }
 
-bioBoolean bioVectorOfDerivatives::with_bhhh() {
+bioBoolean bioVectorOfDerivatives::with_bhhh() const {
   return wbhhh ;
 }
 
