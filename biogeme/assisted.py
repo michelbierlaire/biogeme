@@ -10,6 +10,7 @@ Assisted specification for choice models
 # pylint: disable=too-many-public-methods, too-many-branches
 # pylint: disable=too-many-statements
 
+from collections import namedtuple
 import random
 import copy
 import html
@@ -18,8 +19,13 @@ import biogeme.messaging as msg
 import biogeme.exceptions as excep
 from biogeme import vns
 from biogeme.expressions import Beta, bioMultSum
+# This tuple is imported here, so that it can be imported from here later on.
+from biogeme.segmentation import SegmentationTuple
 
 logger = msg.bioMessage()
+
+
+TermTuple = namedtuple('TermTuple', 'attribute segmentation bounds validity')
 
 
 class variable:
@@ -478,8 +484,7 @@ class term:
                     f'{p}'
                 )
 
-            ok = self.validity(val)
-            if not ok:
+            if not self.validity(val):
                 if status_msg is None:
                     status_msg = 'Invalid parameter(s):'
                 status_msg += f' {b} in alternative {altname}: {val}'
@@ -630,7 +635,7 @@ class socioEconomic:
 class segmentation:
     """Class representing the possible segmentations"""
 
-    def __init__(self, dictOfSocioEco):
+    def __init__(self, name, dictOfSocioEco):
         """
         Ctor
         """
@@ -644,6 +649,8 @@ class segmentation:
         self.listOfVariables = []  #: list of variables involved
 
         self.alwaysActive = False  #: True if it must always be active
+
+        self.name = name  #: name of the segmentation
 
         self.used = False  #: True if used.
 
@@ -1013,7 +1020,7 @@ class specificationProblem(vns.problemClass):
                 raise excep.biogemeError(error_msg)
 
         self.theSegmentations = {
-            k: segmentation(v) for k, v in theSegmentations.items()
+            k: segmentation(k, v) for k, v in theSegmentations.items()
         }
         """dict of segmentations, where the keys are the names, and the
         values are objects of class ``segmentation``
@@ -1077,42 +1084,47 @@ class specificationProblem(vns.problemClass):
 
         # Check the consistency of the input
         for k, u in self.utilities.items():
+            # First check that the tuples have the correct length
+            for t in u[1]:
+                if len(t) != 4:
+                    err_msg = f'tuple must contain 4 elements: {t}'
+                    raise excep.biogemeError(err_msg)
             # All segmentations must exist
             for t in u[1]:
-                # t[0] name of the variable
+                # t[0] name of the attribute
                 # t[1] name of the segmentation
                 # t[2] bounds
                 # t[3] function checking validity
                 if (
-                    t[1] is not None
-                    and self.theSegmentations.get(t[1]) is None
+                    t.segmentation is not None
+                    and self.theSegmentations.get(t.segmentation) is None
                 ):
                     raise excep.biogemeError(
-                        f'Segmentation {t[1]} ' f'does not exist'
+                        f'Segmentation {t.segmentation} ' f'does not exist'
                     )
-                if t[0] is not None and self.theVariables.get(t[0]) is None:
-                    raise excep.biogemeError(f'Variable {t[0]} does not exist')
+                if t.attribute is not None and self.theVariables.get(t.attribute) is None:
+                    raise excep.biogemeError(f'Attribute {t.attribute} does not exist')
                 self.theAlternatives[k] = utility(
                     k,
                     u[0],
                     [
                         term(
-                            self.theVariables.get(t[0]),
-                            self.theSegmentations.get(t[1]),
-                            t[2],
-                            t[3],
+                            self.theVariables.get(tt.attribute),
+                            self.theSegmentations.get(tt.segmentation),
+                            tt.bounds,
+                            tt.validity,
                         )
-                        for t in u[1]
+                        for tt in u[1]
                     ],
                 )
-                if t[1] is not None:
-                    self.theSegmentations[t[1]].listOfVariables.append(
-                        self.theVariables.get(t[0])
+                if t.segmentation is not None:
+                    self.theSegmentations[t.segmentation].listOfVariables.append(
+                        self.theVariables.get(t.attribute)
                     )
                 # If the segmentation is not associated with a
                 # variable, it must always be active
-                if t[2] is None:
-                    self.theSegmentations[t[1]].alwaysActive = True
+                if t.attribute is None:
+                    self.theSegmentations[t.segmentation].alwaysActive = True
 
         self.decisions = self.getDecisions()
         """
@@ -1131,7 +1143,8 @@ class specificationProblem(vns.problemClass):
                 unused.append(v.name)
         if unused:
             raise excep.biogemeError(
-                f'The following variables ' f'are not used: {unused}'
+                f'The following variables '
+                f'are not used: {unused}'
             )
         unused = list()
         for s in self.theSegmentations.values():
@@ -1139,7 +1152,8 @@ class specificationProblem(vns.problemClass):
                 unused.append(s.name)
         if unused:
             raise excep.biogemeError(
-                f'The following variables ' f'are not used: {unused}'
+                f'The following segmentations '
+                f'are not used: {unused}'
             )
 
     def getBiogemeModel(self):
@@ -1152,7 +1166,6 @@ class specificationProblem(vns.problemClass):
             self.database,
             logprob,
             suggestScales=False,
-            numberOfThreads=10,
             userNotes=self.describeHtml(),
         )
         b.generateHtml = False
