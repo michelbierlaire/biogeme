@@ -421,9 +421,19 @@ class Database:
                 database=self,
                 aggregation=False,
             )
-        avail_chosen = np.array(
-            [calculated_avail[c][i] for i, c in enumerate(choice_array)]
-        )
+        try:
+            avail_chosen = np.array(
+                [calculated_avail[c][i] for i, c in enumerate(choice_array)]
+            )
+        except KeyError as e:
+            for c in choice_array:
+                err_msg = ''
+                if c not in calculated_avail:
+                    err_msg = (
+                        f'Chosen alternative {c} does not appear in '
+                        f'availability dict: {calculated_avail.keys()}'
+                    )
+                    raise excep.biogemeError(err_msg)
         return avail_chosen != 0
 
     def choiceAvailabilityStatistics(self, avail, choice):
