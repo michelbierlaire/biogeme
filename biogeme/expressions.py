@@ -47,18 +47,18 @@ class Expression:
 
         self.parent = None  #: Parent expression
 
-        self.children = list()  #: List of children expressions
+        self.children = []  #: List of children expressions
 
         self.elementaryExpressionIndex = None
         """Indices of the elementary expressions (dict)"""
 
-        self.allFreeBetas = dict()  #: dict of free parameters
+        self.allFreeBetas = {}  #: dict of free parameters
 
-        self.freeBetaNames = list()  #: list of names of free parameters
+        self.freeBetaNames = []  #: list of names of free parameters
 
-        self.allFixedBetas = dict()  #: dict of fixed parameters
+        self.allFixedBetas = {}  #: dict of fixed parameters
 
-        self.fixedBetaNames = list()  #: list of names of fixed parameters
+        self.fixedBetaNames = []  #: list of names of fixed parameters
 
         self.allRandomVariables = None  #: dict of random variables
 
@@ -603,7 +603,7 @@ class Expression:
                     f'No database is provided and the expression '
                     f'contains variables: {variables}'
                 )
-            self.variableNames = list()
+            self.variableNames = []
 
         (
             self.elementaryExpressionIndex,
@@ -1591,7 +1591,38 @@ class Or(BinaryOperator):
         return 0.0
 
 
-class Equal(BinaryOperator):
+class ComparisonOperator(BinaryOperator):
+    """Base class for comparison expressions."""
+
+    def __init__(self, left, right):
+        """Constructor
+
+        :param left: first arithmetic expression
+        :type left: biogeme.expressions.Expression
+
+        :param right: second arithmetic expression
+        :type right: biogeme.expressions.Expression
+        """
+        BinaryOperator.__init__(self, left, right)
+
+    def audit(self, database=None):
+        """Performs varuious checks on the expression."""
+        listOfErrors = []
+        listOfWarnings = []
+        if isinstance(self.left, ComparisonOperator) or isinstance(
+            self.right, ComparisonOperator
+        ):
+            the_warning = (
+                'Chaining two comparisons expressions is not recommended'
+                ' as it may be ambiguous. Keep in mind that the '
+                'expression (a <= x <= b) is not equivalent to (a <= x) '
+                'and (x <= b)'
+            )
+            listOfWarnings.append(the_warning)
+        return listOfErrors, listOfWarnings
+        
+
+class Equal(ComparisonOperator):
     """
     Logical equal
     """
@@ -1605,7 +1636,7 @@ class Equal(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        ComparisonOperator.__init__(self, left, right)
 
     def __str__(self):
         return f'({self.left} == {self.right})'
@@ -1620,7 +1651,7 @@ class Equal(BinaryOperator):
         return r
 
 
-class NotEqual(BinaryOperator):
+class NotEqual(ComparisonOperator):
     """
     Logical not equal
     """
@@ -1634,7 +1665,7 @@ class NotEqual(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        ComparisonOperator.__init__(self, left, right)
 
     def __str__(self):
         return f'({self.left} != {self.right})'
@@ -1649,7 +1680,7 @@ class NotEqual(BinaryOperator):
         return r
 
 
-class LessOrEqual(BinaryOperator):
+class LessOrEqual(ComparisonOperator):
     """
     Logical less or equal
     """
@@ -1664,7 +1695,7 @@ class LessOrEqual(BinaryOperator):
         :type right: biogeme.expressions.Expression
 
         """
-        BinaryOperator.__init__(self, left, right)
+        ComparisonOperator.__init__(self, left, right)
 
     def __str__(self):
         return f'({self.left} <= {self.right})'
@@ -1679,7 +1710,7 @@ class LessOrEqual(BinaryOperator):
         return r
 
 
-class GreaterOrEqual(BinaryOperator):
+class GreaterOrEqual(ComparisonOperator):
     """
     Logical greater or equal
     """
@@ -1693,7 +1724,7 @@ class GreaterOrEqual(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        ComparisonOperator.__init__(self, left, right)
 
     def __str__(self):
         return f'({self.left} >= {self.right})'
@@ -1708,7 +1739,7 @@ class GreaterOrEqual(BinaryOperator):
         return r
 
 
-class Less(BinaryOperator):
+class Less(ComparisonOperator):
     """
     Logical less
     """
@@ -1722,7 +1753,7 @@ class Less(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        ComparisonOperator.__init__(self, left, right)
 
     def __str__(self):
         return f'({self.left} < {self.right})'
@@ -1737,7 +1768,7 @@ class Less(BinaryOperator):
         return r
 
 
-class Greater(BinaryOperator):
+class Greater(ComparisonOperator):
     """
     Logical greater
     """
@@ -1751,7 +1782,7 @@ class Greater(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        ComparisonOperator.__init__(self, left, right)
 
     def __str__(self):
         return f'({self.left} > {self.right})'
@@ -3095,7 +3126,7 @@ class Beta(Elementary):
         if free and self.status == 0:
             return {self.name: self}
 
-        return dict()
+        return {}
 
     def getValue(self):
         """Evaluates the value of the expression
@@ -3635,11 +3666,11 @@ class Elem(Expression):
         first = True
         for k, v in self.dictOfExpressions.items():
             if first:
-                s += '{}:{}'.format(k, v)
+                s += f'{k}:{v}'
                 first = False
             else:
-                s += ', {}:{}'.format(k, v)
-        s += '}}[{}]'.format(self.keyExpression)
+                s += f', {k}:{v}'
+        s += f'}}[{self.keyExpression}]'
         return s
 
     def getSignature(self):
@@ -3696,10 +3727,10 @@ class Elem(Expression):
         listOfSignatures += self.keyExpression.getSignature()
         for i, e in self.dictOfExpressions.items():
             listOfSignatures += e.getSignature()
-        signature = '<{}>'.format(self.getClassName())
-        signature += '{{{}}}'.format(id(self))
-        signature += '({})'.format(len(self.dictOfExpressions))
-        signature += ',{}'.format(id(self.keyExpression))
+        signature = f'<{self.getClassName()}>'
+        signature += f'{{{id(self)}}}'
+        signature += f'({len(self.dictOfExpressions)})'
+        signature += f',{id(self.keyExpression)}'
         for i, e in self.dictOfExpressions.items():
             signature += f',{i},{id(e)}'
         listOfSignatures += [signature.encode()]
@@ -3805,7 +3836,7 @@ class bioLinearUtility(Expression):
             return freenames
         if fixed:
             return fixednames
-        return dict()
+        return {}
 
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
@@ -3830,7 +3861,7 @@ class bioLinearUtility(Expression):
         :rtype: dict(string:biogeme.expressions.Expression)
 
         """
-        return dict()
+        return {}
 
     def dictOfDraws(self):
         """Recursively extract the random variables
@@ -3841,7 +3872,7 @@ class bioLinearUtility(Expression):
              the elements the type of draws. Here, returns an empty dict.
         :rtype: dict(string:string)
         """
-        return dict()
+        return {}
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -3902,7 +3933,7 @@ class bioLinearUtility(Expression):
             listOfSignatures += e.getSignature()
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
-        signature += '({})'.format(len(self.listOfTerms))
+        signature += f'({len(self.listOfTerms)})'
         for b, v in self.listOfTerms:
             signature += (
                 f',{id(b)},{b.uniqueId},{b.name},{id(v)},{v.uniqueId},{v.name}'
@@ -3960,7 +3991,7 @@ def defineNumberingOfElementaryExpressions(
         more than once.
     """
     # Free parameters (to be estimated), sorted by alphatical order.
-    allFreeBetas = dict()
+    allFreeBetas = {}
     freeBetaIndex = {}
     for f in collectionOfFormulas:
         d = f.dictOfBetas(free=True, fixed=False)
@@ -3971,7 +4002,7 @@ def defineNumberingOfElementaryExpressions(
         freeBetaIndex[v] = i
 
     # Fixed parameters (not to be estimated), sorted by alphatical order.
-    allFixedBetas = dict()
+    allFixedBetas = {}
     fixedBetaIndex = {}
     for f in collectionOfFormulas:
         d = f.dictOfBetas(free=False, fixed=True)
@@ -3982,7 +4013,7 @@ def defineNumberingOfElementaryExpressions(
         fixedBetaIndex[v] = i
 
     # Random variables for numerical integration
-    allRandomVariables = dict()
+    allRandomVariables = {}
     randomVariableIndex = {}
     for f in collectionOfFormulas:
         d = f.dictOfRandomVariables()
@@ -3993,7 +4024,7 @@ def defineNumberingOfElementaryExpressions(
         randomVariableIndex[v] = i
 
     # Draws
-    allDraws = dict()
+    allDraws = {}
     drawIndex = {}
     for f in collectionOfFormulas:
         d = f.dictOfDraws()
