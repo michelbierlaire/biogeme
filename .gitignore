@@ -30,6 +30,9 @@ archive/tools/prepareData/biosampledata
 #                                           #
 #############################################
 
+# tox
+.tox
+
 # All .lo files
 **/*.lo
 **/*.la
