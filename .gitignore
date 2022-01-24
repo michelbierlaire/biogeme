@@ -352,3 +352,4 @@ src/cexpressions.cpp
 src/tmp.py
 tests/functions/errors.lis
 biogeme/tmp.py
+examples/assisted/debug.py
