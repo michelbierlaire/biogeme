@@ -1146,8 +1146,6 @@ class BIOGEME:
             self.database.buildPanelMap()
             self.theC.setDataMap(self.database.individualMap)
 
-        self.logger.setDebug()
-        self.logger.debug('Debugging on')
         for v in self.formulas.values():
             self.logger.debug(f'Audit {v}')
             listOfWarnings, listOfErrors = v.audit(database=self.database)
