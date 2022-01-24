@@ -198,6 +198,8 @@ def calculatePrimeNumbers(upperBound):
     [2, 3, 5, 7]
 
     """
+    if upperBound < 0:
+        raise excep.biogemeError(f'Incorrect value: {upperBound}')
     try:
         mywork = list(range(0, upperBound + 1))
     except TypeError as e:
@@ -322,21 +324,24 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
     3   2   45    65  Item3
     4   2   45    34  Item7
 
-    If row_name is 'Name', the function generates the same data in the following format:
+    If row_name is 'Name', the function generates the same data in the
+    following format:
 
         Age  Item3_Cost  Item4_Cost  Item7_Cost
     ID
     1    23          34        45.0          12
     2    45          65         NaN          34
 
-    If row_name is None, the function generates the same data in the following format:
+    If row_name is None, the function generates the same data in the
+    following format:
+
 
         Age  1_Cost 1_Name  2_Cost 2_Name  3_Cost 3_Name
     ID
     1    23      34  Item3      45  Item4    12.0  Item7
     2    45      65  Item3      34  Item7     NaN    NaN
 
-    :Param df: initial data frame
+    :param df: initial data frame
     :type df: pandas.DataFrame
 
     :param merge_id: name of the column that identifies rows that
@@ -356,6 +361,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
     :return: reformatted database
     :rtype: pandas.DataFrame
+
     """
     grouped = df.groupby(by=merge_id)
     all_columns = set(df.columns)
@@ -371,6 +377,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
             :return: True if all values are identical. False otherwise.
             :rtype: bool
             """
+            
             return (col.iloc[0] == col).all(0)
 
         def get_varying_cols(g):
@@ -391,7 +398,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
             }
 
         all_varying_cols = grouped.apply(get_varying_cols)
-        varying_columns = set.intersection(*all_varying_cols)
+        varying_columns = set.union(*all_varying_cols)
         identical_columns = list(all_columns - varying_columns)
         varying_columns = list(varying_columns)
     else:
@@ -413,10 +420,28 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
         :return: the same data organized in one row, with proper column names
         :rtype: pandas.DataFrame
+
+        :raise: biogemeError if there are duplicates in the name of
+        the row. Indeed, in that case, they cannot be used to name the
+        new columns.
         """
+        if not are_values_identical(x[merge_id]):
+            err_msg = (
+                f'Group has different IDs: {x[merge_id]}. '
+                f'Rows id: {x.index}'
+            )
+            raise excep.biogemeError(err_msg)
+        if row_name is not None and not x[row_name].is_unique:
+            err_msg = (
+                f'Entries in column [{row_name}] are not unique. '
+                f'This column cannot be used to name the new columns:\n{x[[row_name, merge_id]]}. '
+            )
+            raise excep.biogemeError(err_msg)
+
         the_columns = set(x.columns) - {merge_id}
         if row_name is not None:
             the_columns -= {row_name}
+        sorted_list = sorted(list(the_columns))
         first = True
         i = 0
         for _, row in x.iterrows():
@@ -426,8 +451,8 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
                 all_columns = [merge_id]
                 first = False
             name = f'{i}' if row_name is None else row[row_name]
-            columns = [f'{name}_{c}' for c in list(the_columns)]
-            all_values.extend([row[c] for c in list(the_columns)])
+            columns = [f'{name}_{c}' for c in sorted_list]
+            all_values.extend([row[c] for c in sorted_list])
             all_columns.extend(columns)
         df = pd.DataFrame([all_values], columns=all_columns)
         return df
@@ -438,5 +463,4 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
     # We remove the column 'merge_id' as it is stored as index.
     return pd.concat(
         [common_data, flat_data], axis='columns'
-    ).drop(columns=[merge_id]) 
-
+    ).drop(columns=[merge_id])
