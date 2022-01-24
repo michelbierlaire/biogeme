@@ -8,8 +8,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
-    - run: pip install wheel
-    - run: pip install pipenv
+      with:
+        python-version: '3.9'
+        cache: 'pipenv'
+    - run: pip install -U wheel pipenv
     - run: pipenv install --dev --system
     - run: python setup.py install
     - run: pytest tests/simple_test.py
