@@ -13,14 +13,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
-    - run: pip install wheel
-    - run: pip install pipenv
+    - run: pip install -U wheel pipenv
     - run: pipenv lock
     - uses: actions/upload-artifact@v2
       with:
         name: "Pipfile lock"
         path: Pipfile.lock
-    - uses: peter-evans/create-pull-request@v2
+    - uses: peter-evans/create-pull-request@v3
       with:
         title: "Update Pipfile.lock (dependencies)"
         branch: update-pipfile
