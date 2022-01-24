@@ -11,10 +11,8 @@ Assisted specification for the airline cases tudy
 
 import pandas as pd
 import biogeme.database as db
-import biogeme.models as models
 import biogeme.messaging as msg
-import biogeme.vns as vns
-import biogeme.assisted as assisted
+from biogeme import models, vns, assisted
 from biogeme.expressions import (
     Beta,
     log,
@@ -23,7 +21,12 @@ from biogeme.expressions import (
     Numeric,
     Variable,
 )
+from biogeme.assisted import (
+    SegmentationTuple,
+    TermTuple,
+)
 
+## Step 1: data preparation. Identical to any Biogeme script.
 logger = msg.bioMessage()
 logger.setDebug()
 
@@ -51,12 +54,6 @@ DepartureTimeSensitive = DefineVariable(
 )
 ArrivalTimeSensitive = DefineVariable(
     'ArrivalTimeSensitive', q11_DepartureOrArrivalIsImportant == 2, database
-)
-Missing = DefineVariable(
-    'Missing',
-    (q11_DepartureOrArrivalIsImportant != 1)
-    * (q11_DepartureOrArrivalIsImportant != 2),
-    database,
 )
 
 DesiredDepartureTime = DefineVariable(
@@ -118,8 +115,51 @@ Opt3_SchedDelayLate = DefineVariable(
     database,
 )
 
+## Step 2: identify and name the relevant attributes of the alternatives
+# Define the attributes of the alternatives
 
-# Definition of potential nonlinear transforms of variables
+attributes = {
+    'Fare direct': Fare_1,
+    'Fare same': Fare_2,
+    'Fare multiple': Fare_3,
+    'Legroom direct': Legroom_1,
+    'Legroom same': Legroom_2,
+    'Legroom multiple': Legroom_3,
+    'Time direct': TripTimeHours_1,
+    'Time same': TripTimeHours_2,
+    'Time multiple': TripTimeHours_3,
+    'Early direct': Opt1_SchedDelayEarly,
+    'Early same': Opt2_SchedDelayEarly,
+    'Early multiple': Opt3_SchedDelayEarly,
+    'Late direct': Opt1_SchedDelayLate,
+    'Late same': Opt2_SchedDelayLate,
+    'Late multiple': Opt3_SchedDelayLate,
+}
+
+## Step 3: define the group of attributes
+
+# Group the attributes. All attributes in the same group will be
+# associated with the same transformation, and the same
+# segmentation. Attributes in the same group can be generic or
+# alternative specific, except if mentioned otherwise
+
+groupsOfAttributes = {
+    'Fare': ['Fare direct', 'Fare same', 'Fare multiple'],
+    'Legroom': ['Legroom direct', 'Legroom same', 'Legroom multiple'],
+    'Time': ['Time direct', 'Time same', 'Time multiple'],
+    'Early': ['Early direct', 'Early same', 'Early multiple'],
+    'Late': ['Late direct', 'Late same', 'Late multiple'],
+}
+
+## Step 4: force some groups of attributes to be alternative specific.
+# In this example, no variable must be alternative specific
+genericForbiden = None
+
+## Step 5: force some groups of attributes to be active.
+# In this example, all the variables must be in the model
+forceActive = list(groupsOfAttributes.keys())
+
+## Step 6: define potential transformations of the attributes
 def incomeInteraction(x):
     """Defines an interaction with income"""
     return 'inc. interaction', x / Variable('Cont_Income')
@@ -199,92 +239,10 @@ def boxcox_fare(x):
     return boxcox(x, 'fare')
 
 
-# Define all possible segmentations
-all_segmentations = {
-    'TripPurpose': (
-        q02_TripPurpose,
-        {
-            1: 'business',
-            2: 'leisure',
-            3: 'attending conf.',
-            4: 'business & leisure',
-            0: 'unknown',
-        },
-    ),
-    'Gender': (q17_Gender, {1: 'male', 2: 'female', -1: 'unknown'}),
-    'Education': (
-        q20_Education,
-        {
-            1: 'less than high school',
-            2: 'high school',
-            3: 'some college',
-            4: 'associate occ.',
-            5: 'associate acad.',
-            6: 'bachelor',
-            7: 'master',
-            8: 'professional',
-            9: 'doctorate',
-            -1: 'unkonown',
-        },
-    ),
-    'Importance': (
-        q11_DepartureOrArrivalIsImportant,
-        {1: 'departure', 2: 'arrival', 3: 'not important'},
-    ),
-    'Who pays': (
-        q03_WhoPays,
-        {1: 'traveler', 2: 'employer', 3: 'third party', 0: 'unknown'},
-    ),
-}
-
-# Define segmentations
-segmentations = {
-    'Seg. cte': all_segmentations,
-    'Seg. fare': all_segmentations,
-    'Seg. time': all_segmentations,
-    'Seg. delay': all_segmentations,
-    'Seg. legroom': all_segmentations,
-}
-
-# Define the attributes of the alternatives
-variables = {
-    'Fare direct': Fare_1,
-    'Fare same': Fare_2,
-    'Fare multiple': Fare_3,
-    'Legroom direct': Legroom_1,
-    'Legroom same': Legroom_2,
-    'Legroom multiple': Legroom_3,
-    'Time direct': TripTimeHours_1,
-    'Time same': TripTimeHours_2,
-    'Time multiple': TripTimeHours_3,
-    'Early direct': Opt1_SchedDelayEarly,
-    'Early same': Opt2_SchedDelayEarly,
-    'Early multiple': Opt3_SchedDelayEarly,
-    'Late direct': Opt1_SchedDelayLate,
-    'Late same': Opt2_SchedDelayLate,
-    'Late multiple': Opt3_SchedDelayLate,
-}
-
-
-# Group the attributes. All attributes in the same group will be
-# assoaited with the same nonlinear transform, and the same
-# segmentation. Attributes in the same group can be generic or
-# alternative specific, except if mentioned otherwise
-groupsOfVariables = {
-    'Fare': ['Fare direct', 'Fare same', 'Fare multiple'],
-    'Legroom': ['Legroom direct', 'Legroom same', 'Legroom multiple'],
-    'Time': ['Time direct', 'Time same', 'Time multiple'],
-    'Early': ['Early direct', 'Early same', 'Early multiple'],
-    'Late': ['Late direct', 'Late same', 'Late multiple'],
-}
-
-# In this example, no variable must be alternative specific
-genericForbiden = None
-
-# In this example, all the variables must be in the model
-forceActive = list(groupsOfVariables.keys())
-
-# Associate a list of potential nonlinearities with each group of variable
+## Step 7: Associate each group of attributes with possible
+## transformations. Define a dictionary where the keys are the names
+## of the groups of attributes, and the values are lists of functions
+## defined in the previous step.
 nonlinearSpecs = {
     'Time': [
         mylog,
@@ -309,34 +267,171 @@ nonlinearSpecs = {
     'Late': [mylog, sqrt, square],
 }
 
-# Specification of the utility function. For each term, it is possible
-# to define bounds on the coefficient, and to include a function that
-# verifies its validity a posteriori.
+
+## Step 7: define the potential segmentations
+all_segmentations = {
+    'TripPurpose': SegmentationTuple(
+        variable=q02_TripPurpose,
+        mapping={
+            1: 'business',
+            2: 'leisure',
+            3: 'attending conf.',
+            4: 'business & leisure',
+            0: 'unknown',
+        },
+    ),
+    'Gender': SegmentationTuple(
+        variable=q17_Gender,
+        mapping={1: 'male', 2: 'female', -1: 'unknown'},
+    ),
+    'Education': SegmentationTuple(
+        variable=q20_Education,
+        mapping={
+            1: 'less than high school',
+            2: 'high school',
+            3: 'some college',
+            4: 'associate occ.',
+            5: 'associate acad.',
+            6: 'bachelor',
+            7: 'master',
+            8: 'professional',
+            9: 'doctorate',
+            -1: 'unkonown',
+        },
+    ),
+    'Importance': SegmentationTuple(
+        variable=q11_DepartureOrArrivalIsImportant,
+        mapping={1: 'departure', 2: 'arrival', 3: 'not important'},
+    ),
+    'Who pays': SegmentationTuple(
+        variable=q03_WhoPays,
+        mapping={1: 'traveler', 2: 'employer', 3: 'third party', 0: 'unknown'},
+    ),
+}
+
+# Define segmentations
+segmentations = {
+    'Seg. cte': all_segmentations,
+    'Seg. fare': all_segmentations,
+    'Seg. time': all_segmentations,
+    'Seg. delay': all_segmentations,
+    'Seg. legroom': all_segmentations,
+}
+
+
+## Step 8: Specification of the utility function. For each term, it is possible
+## to define bounds on the coefficient, and to include a function that
+## verifies its validity a posteriori.
 
 utility_direct = [
-    ('Fare direct', 'Seg. fare', (None, 0), None),
-    ('Legroom direct', 'Seg. legroom', (0, None), None),
-    ('Early direct', 'Seg. delay', (None, 0), None),
-    ('Late direct', 'Seg. delay', (None, 0), None),
-    ('Time direct', 'Seg. time', (None, 0), None),
+    TermTuple(
+        attribute='Fare direct',
+        segmentation='Seg. fare',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Legroom direct',
+        segmentation='Seg. legroom',
+        bounds=(0, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Early direct',
+        segmentation='Seg. delay',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Late direct',
+        segmentation='Seg. delay',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Time direct',
+        segmentation='Seg. time',
+        bounds=(None, 0),
+        validity=None,
+    ),
 ]
 
 utility_same = [
-    (None, 'Seg. cte', (None, None), None),
-    ('Fare same', 'Seg. fare', (None, 0), None),
-    ('Legroom same', 'Seg. legroom', (0, None), None),
-    ('Early same', 'Seg. delay', (None, 0), None),
-    ('Late same', 'Seg. delay', (None, 0), None),
-    ('Time same', 'Seg. time', (None, 0), None),
+    TermTuple(
+        attribute=None,
+        segmentation='Seg. cte',
+        bounds=(None, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Fare same',
+        segmentation='Seg. fare',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Legroom same',
+        segmentation='Seg. legroom',
+        bounds=(0, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Early same',
+        segmentation='Seg. delay',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Late same',
+        segmentation='Seg. delay',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Time same',
+        segmentation='Seg. time',
+        bounds=(None, 0),
+        validity=None,
+    ),
 ]
 
 utility_multiple = [
-    (None, 'Seg. cte', (None, None), None),
-    ('Fare multiple', 'Seg. fare', (None, 0), None),
-    ('Legroom multiple', 'Seg. legroom', (0, None), None),
-    ('Early multiple', 'Seg. delay', (None, 0), None),
-    ('Late multiple', 'Seg. delay', (None, 0), None),
-    ('Time multiple', 'Seg. time', (None, 0), None),
+    TermTuple(
+        attribute=None,
+        segmentation='Seg. cte',
+        bounds=(None, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Fare multiple',
+        segmentation='Seg. fare',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Legroom multiple',
+        segmentation='Seg. legroom',
+        bounds=(0, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Early multiple',
+        segmentation='Seg. delay',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Late multiple',
+        segmentation='Seg. delay',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Time multiple',
+        segmentation='Seg. time',
+        bounds=(None, 0),
+        validity=None,
+    ),
 ]
 
 utilities = {
@@ -345,10 +440,11 @@ utilities = {
     3: ('Multiple airlines', utility_multiple),
 }
 
+## Step 9: availabilities
 availabilities = {1: 1, 2: 1, 3: 1}
 
 
-# We define potential candidates for the choice model.
+# Step 10: We define potential candidates for the choice model.
 def logit(V, av, choice):
     """logit model"""
     return models.loglogit(V, av, choice)
@@ -404,12 +500,13 @@ myModels = {
     'CNL alpha est.': cnl2,
 }
 
-# Definition of the specification problem, gathering all information defined above.
+## Step 11:  Definition of the specification problem, gathering all information
+# defined above.
 theProblem = assisted.specificationProblem(
     'Airline',
     database,
-    variables,
-    groupsOfVariables,
+    attributes,
+    groupsOfAttributes,
     genericForbiden,
     forceActive,
     nonlinearSpecs,
@@ -424,15 +521,7 @@ theProblem.maximumNumberOfParameters = 300
 
 # We propose several specifications to initialize the algorithm.
 # For each group of attributes, we decide if it is nonlinear, and generic.
-nl1 = {
-    'Time': (None, False),
-    'Fare': (None, False),
-    'Legroom': (None, False),
-    'Early': (None, False),
-    'Late': (None, False),
-}
-
-nl2 = {
+nl = {
     'Time': (5, False),
     'Fare': (0, False),
     'Legroom': (None, False),
@@ -440,26 +529,17 @@ nl2 = {
     'Late': (None, False),
 }
 
-nl3 = {
-    'Time': (5, False),
-    'Fare': (1, False),
-    'Legroom': (None, False),
-    'Early': (None, False),
-    'Late': (None, False),
-}
 
 # For each segmentation, we decided which dimensions are active.
-sg1 = {'Seg. cte': [], 'Seg. legroom': ['TripPurpose', 'Gender']}
-
-sg2 = {'Seg. cte': ['TripPurpose'], 'Seg. legroom': ['Gender']}
+sg = {'Seg. cte': ['TripPurpose'], 'Seg. legroom': ['Gender']}
 
 
 initSolutions = [
-    theProblem.generateSolution(nl2, sg2, 'Logit'),
-    theProblem.generateSolution(nl2, sg2, 'Nested one stop'),
-    theProblem.generateSolution(nl2, sg2, 'Nested same'),
-    theProblem.generateSolution(nl2, sg2, 'CNL alpha fixed'),
-    theProblem.generateSolution(nl2, sg2, 'CNL alpha est.'),
+    theProblem.generateSolution(nl, sg, 'Logit'),
+    theProblem.generateSolution(nl, sg, 'Nested one stop'),
+    theProblem.generateSolution(nl, sg, 'Nested same'),
+    theProblem.generateSolution(nl, sg, 'CNL alpha fixed'),
+    theProblem.generateSolution(nl, sg, 'CNL alpha est.'),
 ]
 
 # Optimization algorithm
