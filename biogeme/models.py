@@ -115,14 +115,15 @@ def boxcox(x, ell):
         + ell ** 2 * expr.log(x) ** 3 / 6.0
         + ell ** 3 * expr.log(x) ** 4 / 24.0
     )
-    return expr.Elem({0: regular, 1: mclaurin}, ell < expr.Numeric(1.0e-5))
+    smooth = expr.Elem({0: regular, 1: mclaurin}, ell < expr.Numeric(1.0e-5))
+    return expr.Elem({0: smooth, 1: expr.Numeric(0)}, x == 0)
 
 
 def piecewise(variable, thresholds):
     """Obsolete function. Present for compatibility only"""
     errorMsg = (
         'The function "piecewise" is obsolete and has been replaced '
-        'by "piecewiseexpr.Variables". Its use has changed. Please refer '
+        'by "piecewiseVariables". Its use has changed. Please refer '
         'to the documentation.'
     )
     raise excep.biogemeError(errorMsg)
@@ -210,7 +211,7 @@ def piecewiseVariables(variable, thresholds):
     return results
 
 
-def piecewiseFormula(variable, thresholds, initialBetas=None):
+def piecewiseFormula(variable, thresholds, betas=None):
     """Generate the formula for a piecewise linear specification.
 
     If there are K thresholds, K-1 variables are generated. The first
@@ -233,11 +234,13 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
     :param thresholds: list of thresholds
     :type thresholds: list(float)
 
-    :param initialBetas: list of values to initialize the beta
-                         parameters.  The number of entries should be
-                         the number of thresholds, plus one. If None,
-                         the value of zero is used. Default: none.
-    :type initialBetas: list(float)
+    :param betas: list of beta parameters to be used in the
+        specification.  The number of entries should be the number of
+        thresholds, minus one. If None, for each interval, the
+        parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
+        where vaer is the name of the variable. Default: none.
+    :type betas:
+        list(biogeme.expresssions.Beta)
 
     :return: expression of  the piecewise linear specification.
     :rtype: biogeme.expressions.expr.Expression
@@ -249,10 +252,9 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
     :raise biogemeError: if the length of list ``initialexpr.Betas`` is
         not equal to the length of ``thresholds`` minus one.
 
-    .. seealso:: :meth:`piecewiseexpr.Variables`
+    .. seealso:: :meth:`piecewiseVariables`
 
     """
-
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
@@ -266,71 +268,36 @@ def piecewiseFormula(variable, thresholds, initialBetas=None):
             'the last thresholds can be None'
         )
         raise excep.biogemeError(errorMsg)
-    if initialBetas is not None:
-        if len(initialBetas) != eye - 1:
+    if betas is not None:
+        if len(betas) != eye - 1:
             errorMsg = (
                 f'As there are {eye} thresholds, a total of {eye-1} '
-                f'values are needed to initialize the parameters. '
-                f'But {len(initialBetas)} are provided'
+                f'Beta parameters are needed, and not {len(betas)}.'
             )
             raise excep.biogemeError(errorMsg)
 
     theVars = piecewiseVariables(expr.Variable(f'{variable}'), thresholds)
-    terms = []
+    if betas is None:
+        betas = []
+        for i, a_threshold in enumerate(thresholds[:-1]):
+            next_threshold = thresholds[i+1]
+            a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
+            next_name = (
+                'inf' if next_threshold is None
+                else f'{next_threshold}'
+            )
+            betas.append(
+                expr.Beta(
+                    f'beta_{variable}_{a_name}_{next_name}',
+                    0,
+                    None,
+                    None,
+                    0
+                )
+            )
 
-    # First term
-    betaValues = [
-        0 if initialBetas is None else initialBetas[i] for i in range(eye - 1)
-    ]
-    if thresholds[0] is None:
-        beta = expr.Beta(
-            f'beta_{variable}_lessthan_{thresholds[1]}',
-            betaValues[0],
-            None,
-            None,
-            0,
-        )
-    else:
-        beta = expr.Beta(
-            f'beta_{variable}_{thresholds[0]}_{thresholds[1]}',
-            betaValues[0],
-            None,
-            None,
-            0,
-        )
+    terms = [beta * theVars[i] for i, beta in enumerate(betas)]
 
-    terms = [beta * theVars[0]]
-
-    # All terms, except the last
-    for i in range(1, eye - 2):
-        beta = expr.Beta(
-            f'beta_{variable}_{thresholds[i]}_{thresholds[i+1]}',
-            betaValues[i],
-            None,
-            None,
-            0,
-        )
-
-        terms += [beta * theVars[i]]
-
-    # Last term
-    if thresholds[-1] is None:
-        beta = expr.Beta(
-            f'beta_{variable}_{thresholds[-2]}_more',
-            betaValues[-2],
-            None,
-            None,
-            0,
-        )
-    else:
-        beta = expr.Beta(
-            f'beta_{variable}_{thresholds[-2]}_{thresholds[-1]}',
-            betaValues[-2],
-            None,
-            None,
-            0,
-        )
-    terms += [beta * theVars[-1]]
     return expr.bioMultSum(terms)
 
 
@@ -1247,7 +1214,7 @@ def getMevForCrossNested(V, availability, nests):
     Gi_terms = {}
     logGi = {}
     for i in V:
-        Gi_terms[i] = list()
+        Gi_terms[i] = []
     biosum = {}
     for m in nests:
         if availability is None:
@@ -1452,7 +1419,7 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
     Gi_terms = {}
     logGi = {}
     for i in V:
-        Gi_terms[i] = list()
+        Gi_terms[i] = []
     biosum = {}
     for m in nests:
         if availability is None:
@@ -1661,7 +1628,7 @@ def checkValidityCNL(V, nests):
     ok = True
     message = ''
 
-    alt = {i: list() for i in V}
+    alt = {i: [] for i in V}
     number = 0
     for mu, alpha in nests:
         for i, a in alpha.items():
