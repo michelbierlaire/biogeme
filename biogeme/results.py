@@ -679,8 +679,11 @@ class bioResults:
         h += bv.getLaTeX()
         return h
 
-    def getLaTeX(self):
+    def getLaTeX(self, onlyRobust=True):
         """Get the results coded in LaTeX
+
+        :param onlyRobust: if True, only the robust statistics are included
+        :type onlyRobust: bool
 
         :return: LaTeX code
         :rtype: string
@@ -716,8 +719,9 @@ class bioResults:
 
         h += '\n%%Parameter estimates\n'
         h += '\\section{Parameter estimates}\n'
-        table = self.getEstimatedParameters()
+        table = self.getEstimatedParameters(onlyRobust)
 
+        
         def formatting(x):
             """Defines the formatting for the to_latex function of pandas"""
             res = f'{x:.3g}'
@@ -827,9 +831,12 @@ class bioResults:
         """
         return sum([not b.isBoundActive() for b in self.data.betas])
 
-    def getEstimatedParameters(self):
+    def getEstimatedParameters(self, onlyRobust=True):
         """Gather the estimated parameters and the corresponding statistics in
         a Pandas dataframe.
+
+        :param onlyRobust: if True, only the robust statistics are included
+        :type onlyRobust: bool
 
         :return: Pandas dataframe with the results
         :rtype: pandas.DataFrame
@@ -841,27 +848,44 @@ class bioResults:
             if b.isBoundActive():
                 anyActiveBound = True
         if anyActiveBound:
-            columns = [
-                'Value',
-                'Active bound',
-                'Std err',
-                't-test',
-                'p-value',
-                'Rob. Std err',
-                'Rob. t-test',
-                'Rob. p-value',
-            ]
+            if onlyRobust:
+                columns = [
+                    'Value',
+                    'Active bound',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
+            else:
+                columns = [
+                    'Value',
+                    'Active bound',
+                    'Std err',
+                    't-test',
+                    'p-value',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
         else:
-            columns = [
-                'Value',
-                'Std err',
-                't-test',
-                'p-value',
-                'Rob. Std err',
-                'Rob. t-test',
-                'Rob. p-value',
-            ]
-        if self.data.bootstrap is not None:
+            if onlyRobust:
+                columns = [
+                    'Value',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
+            else:
+                columns = [
+                    'Value',
+                    'Std err',
+                    't-test',
+                    'p-value',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
+        if self.data.bootstrap is not None and not onlyRobust:
             columns += [
                 f'Bootstrap[{len(self.data.bootstrap)}] Std err',
                 'Bootstrap t-test',
@@ -870,27 +894,44 @@ class bioResults:
         table = pd.DataFrame(columns=columns)
         for b in self.data.betas:
             if anyActiveBound:
-                arow = {
-                    'Value': b.value,
-                    'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
-                    'Std err': b.stdErr,
-                    't-test': b.tTest,
-                    'p-value': b.pValue,
-                    'Rob. Std err': b.robust_stdErr,
-                    'Rob. t-test': b.robust_tTest,
-                    'Rob. p-value': b.robust_pValue,
-                }
+                if onlyRobust:
+                    arow = {
+                        'Value': b.value,
+                        'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
+                else:
+                    arow = {
+                        'Value': b.value,
+                        'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
+                        'Std err': b.stdErr,
+                        't-test': b.tTest,
+                        'p-value': b.pValue,
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
             else:
-                arow = {
-                    'Value': b.value,
-                    'Std err': b.stdErr,
-                    't-test': b.tTest,
-                    'p-value': b.pValue,
-                    'Rob. Std err': b.robust_stdErr,
-                    'Rob. t-test': b.robust_tTest,
-                    'Rob. p-value': b.robust_pValue,
-                }
-            if self.data.bootstrap is not None:
+                if onlyRobust:
+                    arow = {
+                        'Value': b.value,
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
+                else:
+                    arow = {
+                        'Value': b.value,
+                        'Std err': b.stdErr,
+                        't-test': b.tTest,
+                        'p-value': b.pValue,
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
+            if self.data.bootstrap is not None and not onlyRobust:
                 arow[
                     f'Bootstrap[{len(self.data.bootstrap)}] Std err'
                 ] = b.bootstrap_stdErr
