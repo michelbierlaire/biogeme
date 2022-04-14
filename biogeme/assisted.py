@@ -20,12 +20,16 @@ import biogeme.exceptions as excep
 from biogeme import vns
 from biogeme.expressions import Beta, bioMultSum
 # This tuple is imported here, so that it can be imported from here later on.
-from biogeme.segmentation import SegmentationTuple
+from biogeme.segmentation import DiscreteSegmentationTuple, segment_parameter
 
 logger = msg.bioMessage()
 
 
 TermTuple = namedtuple('TermTuple', 'attribute segmentation bounds validity')
+SegmentedParameterTuple = namedtuple(
+    'SegmentedParameterTuple',
+    'dict combinatorial'
+)
 
 
 class variable:
@@ -635,7 +639,7 @@ class socioEconomic:
 class segmentation:
     """Class representing the possible segmentations"""
 
-    def __init__(self, name, dictOfSocioEco):
+    def __init__(self, name, dictOfSocioEco, combinatorial):
         """
         Ctor
         """
@@ -645,6 +649,9 @@ class segmentation:
         """dict of object of class socioEconomic characterizing the
         segmentation.
         """
+
+        self.combinatorial = combinatorial
+        """True if all combinations are considered"""
 
         self.listOfVariables = []  #: list of variables involved
 
@@ -703,6 +710,10 @@ class segmentation:
 
     def getBetaNames(self, coef_name):
         """Get the name of the parameters for all combinations."""
+
+        expr = self.getExpression(coef_name, (None, None))
+        betas = expr.setOfBetas()
+        return [b.name for b in betas]
         combinations = None
         for v in self.dictOfSocioEco.values():
             if v.active:
@@ -731,27 +742,42 @@ class segmentation:
         :return: biogeme  expression for the segmentation
         :rtype: :class:`biogeme.expressions.bioMultSum`
         """
-        combinations = None
-        for v in self.dictOfSocioEco.values():
-            if v.active:
-                combinations = v.combine(combinations)
 
-        if combinations is None:
-            return Beta(coef_name, 0, bounds[0], bounds[1], 0)
 
-        listOfTerms = []
-        for triplet in combinations:
-            theCoefName = coef_name
-            listOfConditions = []
-            for var, value, name in zip(triplet[0], triplet[1], triplet[2]):
-                theCoefName = f'{theCoefName}_{name}'
-                listOfConditions.append(var == value)
-            aTerm = Beta(theCoefName, 0, bounds[0], bounds[1], 0)
-            for t in listOfConditions:
-                aTerm = aTerm * t
-            listOfTerms.append(aTerm)
-        return bioMultSum(listOfTerms)
+#        combinations = None
+#        for v in self.dictOfSocioEco.values():
+#            if v.active:
+#                combinations = v.combine(combinations)
+#
+#        if combinations is None:
+#            return Beta(coef_name, 0, bounds[0], bounds[1], 0)
+#
+#        listOfTerms = []
+#        for triplet in combinations:
+#            theCoefName = coef_name
+#            listOfConditions = []
+#            for var, value, name in zip(triplet[0], triplet[1], triplet[2]):
+#                theCoefName = f'{theCoefName}_{name}'
+#                listOfConditions.append(var == value)
+#            aTerm = Beta(theCoefName, 0, bounds[0], bounds[1], 0)
+#            for t in listOfConditions:
+#                aTerm = aTerm * t
+#            listOfTerms.append(aTerm)
+#        before =  bioMultSum(listOfTerms)
 
+        the_coef = Beta(coef_name, 0, bounds[0], bounds[1], 0)
+        list_of_segmentations = [
+            DiscreteSegmentationTuple(variable=v.expression, mapping=v.values)
+            for v in self.dictOfSocioEco.values()
+            if v.active
+        ]
+        return segment_parameter(
+            the_coef,
+            list_of_segmentations,
+            self.combinatorial
+        )
+
+        
     def describe(self):
         """Description of the segmentation
 
@@ -1020,7 +1046,7 @@ class specificationProblem(vns.problemClass):
                 raise excep.biogemeError(error_msg)
 
         self.theSegmentations = {
-            k: segmentation(k, v) for k, v in theSegmentations.items()
+            k: segmentation(k, v.dict, v.combinatorial) for k, v in theSegmentations.items()
         }
         """dict of segmentations, where the keys are the names, and the
         values are objects of class ``segmentation``
@@ -1137,7 +1163,7 @@ class specificationProblem(vns.problemClass):
         Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)
         """
 
-        unused = list()
+        unused = []
         for v in self.theVariables.values():
             if not v.used:
                 unused.append(v.name)
@@ -1146,7 +1172,7 @@ class specificationProblem(vns.problemClass):
                 f'The following variables '
                 f'are not used: {unused}'
             )
-        unused = list()
+        unused = []
         for s in self.theSegmentations.values():
             if not s.used:
                 unused.append(s.name)
@@ -1785,7 +1811,7 @@ class specificationProblem(vns.problemClass):
         """
         Select randomly another model from the list
 
-        :param size: not used here. Muxt be there for compliance with the
+        :param size: not used here. Must be there for compliance with the
             call of operators.
         :type size: int
 
