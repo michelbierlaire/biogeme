@@ -1037,12 +1037,38 @@ class Database:
         """
         return self.data[self.data[columnName] == value].count()[columnName]
 
-    def generateFlatPanelDataframe(self, saveOnFile=None):
-        raise ('Not yet implemented')
+    def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=[]):
+        """Generate a flat version of the panel data 
+        
+        :param saveOnFile: if True, the flat database is saved on file.
+        :type saveOnFile: bool
+
+        :param identical_columns: list of columns that contain the
+            same values for all observations of the same individual. If
+            None, these columns are automatically detected. Default: empty
+            list.
+        :type identical_columns: list(str)
+
+        :return: the flatten database, in Pandas format
+        :rtype: pandas.DataFrame
+
+        :raise biogemeError: if the database in not panel
+
+        """
         if not self.isPanel():
             error_msg = 'This function can only be called for panel data'
             raise excep.biogemeError(error_msg)
-
+        flat_data = tools.flatten_database(
+            self.data,
+            self.panelColumn,
+            identical_columns=identical_columns
+        )
+        if saveOnFile:
+            file_name = f'{self.name}_flatten.csv'
+            flat_data.to_csv(file_name)
+            self.logger.general(f'File {file_name} has been created.')
+        return flat_data
+        
     def __str__(self):
         """Allows to print the dabase"""
         result = f'biogeme database {self.name}:\n{self.data}'
