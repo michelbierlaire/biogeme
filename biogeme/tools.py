@@ -248,7 +248,9 @@ def countNumberOfGroups(df, column):
 
     """
     df['_biogroups'] = (df[column] != df[column].shift(1)).cumsum()
-    return len(df['_biogroups'].unique())
+    result = len(df['_biogroups'].unique())
+    df.drop(columns=['_biogroups'], inplace=True)
+    return result
 
 
 def likelihood_ratio_test(model1, model2, significance_level=0.95):
@@ -365,48 +367,52 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
     """
     grouped = df.groupby(by=merge_id)
     all_columns = set(df.columns)
+
+    def are_values_identical(col):
+        """This function checks if all the values in a column
+            are identical
+
+        :param col: the column
+        :type col: pandas.Series
+
+        :return: True if all values are identical. False otherwise.
+        :rtype: bool
+        """
+
+        return (col.iloc[0] == col).all(0)
+
+    def get_varying_cols(g):
+        """This functions returns the name of all columns
+            that have constant values within each group of data.
+
+        :param g: group of data
+        :type g: pandas.DataFrame
+
+        :return: name of all columns that have constant values
+            within each group of data.
+        :rtype: set(str)
+        """
+        return {
+            colname
+            for colname, col in g.iteritems()
+            if not are_values_identical(col)
+        }
+
     if identical_columns is None:
-
-        def are_values_identical(col):
-            """This function checks if all the values in a column
-                are identical
-
-            :param col: the column
-            :type col: pandas.Series
-
-            :return: True if all values are identical. False otherwise.
-            :rtype: bool
-            """
-            
-            return (col.iloc[0] == col).all(0)
-
-        def get_varying_cols(g):
-            """This functions returns the name of all columns
-                that have constant values within each group of data.
-
-            :param g: group of data
-            :type g: pandas.DataFrame
-
-            :return: name of all columns that have constant values
-                within each group of data.
-            :rtype: set(str)
-            """
-            return {
-                colname
-                for colname, col in g.iteritems()
-                if not are_values_identical(col)
-            }
-
         all_varying_cols = grouped.apply(get_varying_cols)
         varying_columns = set.union(*all_varying_cols)
         identical_columns = list(all_columns - varying_columns)
         varying_columns = list(varying_columns)
     else:
-        varying_columns = list(all_columns - set(identical_columns))
+        identical_columns = set(identical_columns)
+        identical_columns.add(merge_id)
+        varying_columns = list(all_columns - identical_columns)
 
+        
     # Take the first row for columns that are identical
-    common_data = df[identical_columns].drop_duplicates(merge_id, keep='first')
-    common_data.index = common_data[merge_id]
+    if identical_columns:
+        common_data = df[identical_columns].drop_duplicates(merge_id, keep='first')
+        common_data.index = common_data[merge_id]
     # Treat the other columns
     grouped_varying = df[[merge_id] + list(varying_columns)].groupby(
         by=merge_id
@@ -461,6 +467,8 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
     flat_data.index = flat_data[merge_id]
 
     # We remove the column 'merge_id' as it is stored as index.
-    return pd.concat(
-        [common_data, flat_data], axis='columns'
-    ).drop(columns=[merge_id])
+    if identical_columns:
+        return pd.concat(
+            [common_data, flat_data], axis='columns'
+        ).drop(columns=[merge_id])
+    return flat_data.drop(columns=[merge_id])
