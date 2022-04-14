@@ -78,11 +78,12 @@ logprob = models.loglogit(V, av, CHOICE)
 
 # Definition of the weight
 weight = 8.890991e-01 * (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
+#weight =  (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
 
 # Define level of verbosity
-logger = msg.bioMessage()
-logger.setSilent()
-# logger.setWarning()
+#logger = msg.bioMessage()
+#logger.setSilent()
+#logger.setWarning()
 # logger.setGeneral()
 # logger.setDetailed()
 

@@ -16,6 +16,7 @@ import biogeme.database as db
 from biogeme import models
 import biogeme.optimization as opt
 import biogeme.messaging as msg
+import biogeme.segmentation as seg
 from biogeme.expressions import Beta, DefineVariable, bioLinearUtility
 
 # Read the data
@@ -43,7 +44,6 @@ database.remove(exclude)
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 
 # We use starting values estimated from a previous run
 B_TIME = Beta('B_TIME', -1.28, None, None, 0)
@@ -66,15 +66,32 @@ SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
 CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
 CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
 
+# Define segmentations
+gender_segmentation = seg.DiscreteSegmentationTuple(
+    variable=MALE, mapping={0: 'female', 1: 'male'}
+)
+
+GA_segmentation = seg.DiscreteSegmentationTuple(
+    variable=GA, mapping={0: 'without_ga', 1: 'with_ga'}
+)
+
+segmentations_for_asc = [
+    gender_segmentation,
+    GA_segmentation,
+]
+
+segmented_ASC_TRAIN = seg.segment_parameter(ASC_TRAIN, segmentations_for_asc)
+segmented_ASC_CAR = seg.segment_parameter(ASC_CAR, segmentations_for_asc)
+
 # Definition of the utility functions
 terms1 = [(B_TIME, TRAIN_TT_SCALED), (B_COST, TRAIN_COST_SCALED)]
-V1 = ASC_TRAIN + bioLinearUtility(terms1)
+V1 = segmented_ASC_TRAIN + bioLinearUtility(terms1)
 
 terms2 = [(B_TIME, SM_TT_SCALED), (B_COST, SM_COST_SCALED)]
-V2 = ASC_SM + bioLinearUtility(terms2)
+V2 = bioLinearUtility(terms2)
 
 terms3 = [(B_TIME, CAR_TT_SCALED), (B_COST, CAR_CO_SCALED)]
-V3 = ASC_CAR + bioLinearUtility(terms3)
+V3 = segmented_ASC_CAR + bioLinearUtility(terms3)
 
 # Associate utility functions with the numbering of alternatives
 V = {1: V1, 2: V2, 3: V3}
@@ -95,15 +112,16 @@ logger.setGeneral()
 
 
 # These notes will be included as such in the report file.
-userNotes = (
+user_notes = (
     'Example of a logit model with three alternatives: Train, Car and'
-    ' Swissmetro. Same as 01logit, using bioLinearUtility, and '
-    'introducing some options and features.'
+    ' Swissmetro. Same as 01logit and '
+    'introducing some options and features. In particular, bioLinearUtility,'
+    ' and automatic segmentation of parameters.'
 )
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(
-    database, logprob, numberOfThreads=2, userNotes=userNotes
+    database, logprob, numberOfThreads=2, userNotes=user_notes
 )
 
 # As we have used starting values different from 0, the initial model
@@ -145,3 +163,6 @@ for description, message in results.data.optimizationMessages.items():
 # Generate the file in Alogit format
 results.writeF12(robustStdErr=True)
 results.writeF12(robustStdErr=False)
+
+# Generate LaTeX code with the results
+print(results.getLaTeX())

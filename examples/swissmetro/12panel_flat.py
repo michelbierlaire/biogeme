@@ -1,10 +1,10 @@
-"""File 12panel.py
+"""File 12panel_flat.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 18:55:38 2019
+:date: Mon Feb 14 13:10:32 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
- The datafile is organized as panel data.
+ The datafile is organized as panel data, but a flat version is generated.
  Three alternatives: Train, Car and Swissmetro
  SP data
 """
@@ -17,21 +17,57 @@ from biogeme import models
 import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
+    Variable,
     DefineVariable,
     bioDraws,
-    PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
+    exp,
+    bioMultSum,
 )
 
 np.random.seed(seed=90267)
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
+orig_database = db.Database('swissmetro', df)
+exclude = (
+    (Variable('PURPOSE') != 1) * (Variable('PURPOSE') != 3)
+    + (Variable('CHOICE') == 0)
+) > 0
+orig_database.remove(exclude)
+
+globals().update(orig_database.variables)
+
+# Definition of new variables
+SM_COST = SM_CO * (GA == 0)
+TRAIN_COST = TRAIN_CO * (GA == 0)
+
+# Definition of new variables: adding columns to the orig_database
+CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), orig_database)
+TRAIN_AV_SP = DefineVariable(
+    'TRAIN_AV_SP', TRAIN_AV * (SP != 0), orig_database
+)
+_ = DefineVariable(
+    'TRAIN_TT_SCALED', TRAIN_TT / 100.0, orig_database
+)
+_ = DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100, orig_database
+)
+_ = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, orig_database)
+_ = DefineVariable('SM_COST_SCALED', SM_COST / 100, orig_database)
+_ = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, orig_database)
+_ = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, orig_database)
+
 
 # They are organized as panel data. The variable ID identifies each individual.
-database.panel("ID")
+orig_database.panel("ID")
+
+# We flatten the database, so that each row corresponds to one individual
+flat_df = orig_database.generateFlatPanelDataframe(identical_columns=None)
+for i in flat_df.columns:
+    print(i)
+database = db.Database('swissmetro_flat', flat_df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database
@@ -40,16 +76,6 @@ database.panel("ID")
 # The following statement allows you to use the names of the variable
 # as Python variable.
 globals().update(database.variables)
-
-# Removing some observations can be done directly using pandas.
-# remove = (((database.data.PURPOSE != 1) &
-#           (database.data.PURPOSE != 3)) |
-#          (database.data.CHOICE == 0))
-# database.data.drop(database.data[remove].index,inplace=True)
-
-# Here we use the "biogeme" way for backward compatibility
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
-database.remove(exclude)
 
 
 # Parameters to be estimated
@@ -78,41 +104,44 @@ ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
 ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'NORMAL_ANTI')
 
-# Definition of new variables
-SM_COST = SM_CO * (GA == 0)
-TRAIN_COST = TRAIN_CO * (GA == 0)
-
-# Definition of new variables: adding columns to the database
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
-TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
-)
-SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
-SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
-CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
-CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
 
 # Definition of the utility functions
-V1 = ASC_TRAIN_RND + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM_RND + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR_RND + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+V1 = [
+    ASC_TRAIN_RND
+    + B_TIME_RND * Variable(f'{t}_TRAIN_TT_SCALED')
+    + B_COST * Variable(f'{t}_TRAIN_COST_SCALED')
+    for t in range(1, 10)
+]
+
+V2 = [
+    ASC_SM_RND
+    + B_TIME_RND * Variable(f'{t}_SM_TT_SCALED')
+    + B_COST * Variable(f'{t}_SM_COST_SCALED')
+    for t in range(1, 10)
+]
+
+V3 = [
+    ASC_CAR_RND
+    + B_TIME_RND * Variable(f'{t}_CAR_TT_SCALED')
+    + B_COST * Variable(f'{t}_CAR_CO_SCALED')
+    for t in range(1, 10)
+]
 
 # Associate utility functions with the numbering of alternatives
-V = {1: V1, 2: V2, 3: V3}
+V = [{1: V1[t], 2: V2[t], 3: V3[t]} for t in range(9)]
 
 # Associate the availability conditions with the alternatives
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Conditional to the random parameters, the likelihood of one observation is
 # given by the logit model (called the kernel)
-obsprob = models.logit(V, av, CHOICE)
-
+obsprob = [
+    models.loglogit(V[t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)
+]
+condprobIndiv = exp(bioMultSum(obsprob))
 # Conditional to the random parameters, the likelihood of all observations for
 # one individual (the trajectory) is the product of the likelihood of
 # each observation.
-condprobIndiv = PanelLikelihoodTrajectory(obsprob)
 
 # We integrate over the random parameters using Monte-Carlo
 logprob = log(MonteCarlo(condprobIndiv))
@@ -126,8 +155,8 @@ logger.setDetailed()
 # logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
-biogeme.modelName = '12panel'
+biogeme = bio.BIOGEME(database, logprob, numberOfDraws=10)
+biogeme.modelName = '12panel_flat'
 
 # Estimate the parameters.
 results = biogeme.estimate()
