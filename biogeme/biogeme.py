@@ -121,10 +121,6 @@ class BIOGEME:
         messages to the screen and log file.
         Type: class :class:`biogeme.messaging.bioMessage`."""
 
-        self.logger.warning(
-            'The possibility to remove unused variables has been '
-            'temporarily turned off'
-        )
         if not skipAudit:
             database.data = database.data.replace({True: 1, False: 0})
             listOfErrors, listOfWarnings = database._audit()
@@ -163,6 +159,8 @@ class BIOGEME:
 
         self.missingData = missingData  #: code for missing data
 
+        self.database = database  #: :class:`biogeme.database.Database` object
+        
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -176,6 +174,23 @@ class BIOGEME:
             calculating the formula for the loglikelihood
             """
 
+            if self.database.isPanel():
+                dict_of_variables = formulas.dictOfVariablesOutsidePanelTrajectory()
+                if dict_of_variables:
+                    err_msg = (
+                        f'Error in the loglikelihood function. '
+                        f'Some variables are not inside PanelLikelihoodTrajectory: '
+                        f'{dict_of_variables.keys()} .'
+                        f'If the database is organized as panel data, '
+                        f'all variables must be used inside a '
+                        f'PanelLikelihoodTrajectory. '
+                        f'If it is not consistent with your model, generate a flat '
+                        f'version of the data using the function '
+                        f'`generateFlatPanelDataframe`.'
+                    )
+                    raise excep.biogemeError(err_msg)   
+                
+                
             self.weight = None
             """ Object of type :class:`biogeme.expressions.Expression`
             calculating the weight of each observation in the
@@ -202,8 +217,6 @@ class BIOGEME:
 
         for f in self.formulas.values():
             f.missingData = self.missingData
-
-        self.database = database  #: :class:`biogeme.database.Database` object
 
         self.userNotes = userNotes  #: User notes
 
@@ -1148,7 +1161,7 @@ class BIOGEME:
 
         for v in self.formulas.values():
             self.logger.debug(f'Audit {v}')
-            listOfWarnings, listOfErrors = v.audit(database=self.database)
+            listOfErrors, listOfWarnings = v.audit(database=self.database)
             if listOfWarnings:
                 self.logger.warning('\n'.join(listOfWarnings))
             if listOfErrors:
