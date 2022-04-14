@@ -995,6 +995,21 @@ class Expression:
             s = dict(s, **d)
         return s
 
+    def dictOfVariablesOutsidePanelTrajectory(self):
+        """Recursively extract the variables appearing in the expression, that are not inside the PanelTrajecvory, and store them in a dictionary.
+
+        :return: returns a dict with the variables appearing in the
+                 expression the keys being their names.
+        :rtype: dict(string:biogeme.expressions.Expression)
+
+        """
+        s = {}
+        for e in self.children:
+            d = e.dictOfVariablesOutsidePanelTrajectory()
+            s = dict(s, **d)
+        return s
+
+    
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
         store them in a dictionary.
@@ -1278,6 +1293,15 @@ class Expression:
         for e in self.children:
             e.changeInitValues(betas)
 
+    def getGlobalExpression(self):
+        """Obtain the global expression that contains the current expression.
+
+        :return: the global expression
+        :rtype: biogeme.expressions.Expression
+        """
+        if self.parent is None:
+            return self
+        return self.parent.getGlobalExpression()
 
 class BinaryOperator(Expression):
     """
@@ -1612,15 +1636,19 @@ class ComparisonOperator(BinaryOperator):
         if isinstance(self.left, ComparisonOperator) or isinstance(
             self.right, ComparisonOperator
         ):
+            print(f'Current expression: {self}')
+            print(f'Left expression: {self.left} [{isinstance(self.left, ComparisonOperator)}]')
+            print(f'Right expression: {self.right} [{isinstance(self.right, ComparisonOperator)}]')
+            print(f'Type left expression: {type(self.left)}')
             the_warning = (
-                'Chaining two comparisons expressions is not recommended'
-                ' as it may be ambiguous. Keep in mind that the '
-                'expression (a <= x <= b) is not equivalent to (a <= x) '
-                'and (x <= b)'
+                f'Chaining two comparisons expressions is not recommended'
+                f' as it may be ambiguous. Keep in mind that, for Biogeme, the '
+                f'expression (a <= x <= b) is not equivalent to (a <= x) '
+                f'and (x <= b) [{self}]'
             )
             listOfWarnings.append(the_warning)
         return listOfErrors, listOfWarnings
-        
+
 
 class Equal(ComparisonOperator):
     """
@@ -2667,6 +2695,30 @@ class Variable(Elementary):
         """
         return {self.name: self}
 
+    def dictOfVariablesOutsidePanelTrajectory(self):
+        """Recursively extract the variables appearing in the expression, and
+        store them in a dictionary.
+
+        Overload the generic function.
+
+        :return: returns a dict with the variables appearing in the
+               expression the keys being their names.
+               Here, it contains only one element.
+        :rtype: dict(string:biogeme.expressions.Expression)
+
+        """
+        if not self.isContainedIn('PanelLikelihoodTrajectory'):
+            return {self.name: self}
+        return {}
+
+
+    
+    def checkAllVariablesInsidePanelTrajectory(self):
+        return self.isContainedIn(
+            'PanelLikelihoodTrajectory'
+        )
+
+        
     def audit(self, database=None):
         """Performs various checks on the expressions.
 
@@ -2687,6 +2739,7 @@ class Variable(Elementary):
             raise excep.biogemeError(
                 'The database must be provided to audit the variable.'
             )
+
         if self.name not in database.data.columns:
             theError = f'Variable {self.name} not found in the database.'
             listOfErrors.append(theError)
@@ -3368,7 +3421,7 @@ class LogLogit(Expression):
                         f'The chosen alternative [{value_choice}] '
                         f'is not available'
                     )
-                    listOfErrors.append(theError)
+                    listOfWarnings.append(theError)
             else:
                 choiceAvailability = database.checkAvailabilityOfChosenAlt(
                     self.av, self.choice
