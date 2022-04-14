@@ -8,8 +8,7 @@
 from collections import namedtuple, deque
 from biogeme.expressions import Beta, bioMultSum
 
-SegmentationTuple = namedtuple('SegmentationTuple', 'variable mapping')
-
+DiscreteSegmentationTuple = namedtuple('DiscreteSegmentationTuple', 'variable mapping')
 
 def combine_segmented_expressions(variable, mapping_of_expressions):
     """Create an expressions that combines all the segments
@@ -95,51 +94,78 @@ def create_segmented_parameter(parameter, mapping):
     return segmented_parameters
 
 
-def segment_parameter(parameter, list_of_segmentations):
+def segment_parameter(
+        parameter,
+        list_of_discrete_segmentations,
+        combinatorial=False
+):
     """Segment a parameter expression along several dimensions of segmentation
 
     :param parameter: parameter to segment
     :type parameter: biogeme.expressions.Beta
 
-    :param list_of_segmentations: each element of the list is a tuple
+    :param list_of_discrete_segmentations: each element of the list is a tuple
         with the variable characterizing the segmentation, and a
         dictionary mapping the values with the names of the segments.
-    :type list_of_segmentations:
-        tuple(SegmentationTuple(biogeme.expressions.Variable, dict(int:str)))
+    :type list_of_discrete_segmentations:
+        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))
+
+    :param combinatorial: if True, a parameter is associated with each
+        combination of values for the discrete segmentations. If
+        :math:`N_s` is the number of values for segmentation s, the
+        total numper of parameters is :math:`\\prod_s N_s`.  If False,
+        for each segmentation in the list, a parameter is associated
+        with each value of this segmentation.  If `:math:`N_s` is the
+        number of values for segmentation s, the total number of
+        parameters is :math:`\\sum_s N_s`.  :type combinatorial: bool
 
     :return: expression involving all the segments
     :rtype: biogeme.expressions.Expression
 
     """
-    stack_of_segmentations = deque(list_of_segmentations)
-    if not stack_of_segmentations:
-        return parameter
+    if combinatorial:
+        # Recursive call to the function, based on a stack
+        stack_of_segmentations = deque(list_of_discrete_segmentations)
+        if not stack_of_segmentations:
+            return parameter
 
-    next_segment = stack_of_segmentations.pop()
-    segmented_parameters = create_segmented_parameter(
-        parameter, next_segment.mapping
-    )
-    map_of_expressions = {
-        key: segment_parameter(value, stack_of_segmentations)
-        for key, value in segmented_parameters.items()
-    }
-    return combine_segmented_expressions(
-        next_segment.variable, map_of_expressions
-    )
+        next_segment = stack_of_segmentations.pop()
+        segmented_parameters = create_segmented_parameter(
+            parameter, next_segment.mapping
+        )
+        map_of_expressions = {
+            key: segment_parameter(
+                value,
+                stack_of_segmentations,
+                combinatorial=True
+            )
+            for key, value in segmented_parameters.items()
+        }
+        return combine_segmented_expressions(
+            next_segment.variable, map_of_expressions
+        )
 
+    # If not combinatorial, just a list of terms.
+    all_segments = [
+        expr * (s.variable == value)
+        for s in list_of_discrete_segmentations
+        for value, expr in create_segmented_parameter(parameter, s.mapping).items()
+    ]
+    
+    return bioMultSum(all_segments)
 
-def code_to_segment_parameter(parameter, list_of_segmentations, prefix=''):
+def code_to_segment_parameter(parameter, list_of_discrete_segmentations, prefix=''):
     """Generate the Python code to segment a parameter along several
         dimensions of segmentation
 
     :param parameter: parameter to segment
     :type parameter: biogeme.expressions.Beta
 
-    :param list_of_segmentations: each element of the list is a tuple
+    :param list_of_discrete_segmentations: each element of the list is a tuple
         with the variable characterizing the segmentation, and a
         dictionary mapping the values with the names of the segments.
-    :type list_of_segmentations:
-        tuple(SegmentationTuple(biogeme.expressions.Variable, dict(int:str)))
+    :type list_of_discrete_segmentations:
+        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))
 
     :param prefix: name of the current expression, used as prefix
     :type prefix: str
@@ -148,7 +174,7 @@ def code_to_segment_parameter(parameter, list_of_segmentations, prefix=''):
     :rtype: str
 
     """
-    stack_of_segmentations = deque(list_of_segmentations)
+    stack_of_segmentations = deque(list_of_discrete_segmentations)
     next_segment = stack_of_segmentations.pop()
 
     if prefix == '':
@@ -162,7 +188,7 @@ def code_to_segment_parameter(parameter, list_of_segmentations, prefix=''):
             )
             result += '\n'
     else:
-        for key, value in next_segment.mapping.items():
+        for value in next_segment.mapping.values():
             param_name = f'{prefix}_{value}'
             result += f"{param_name} = Beta('{param_name}', 0, None, None)\n"
     terms = ', '.join(
