@@ -282,7 +282,7 @@ bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal> betas,
 void biogeme::setExpressions(std::vector<bioString> ll,
 			     std::vector<bioString> w,
 			     bioUInt t) {
-  
+
   theLoglikeString.erase(theLoglikeString.begin(),theLoglikeString.end()) ;
   for (bioUInt i = 0 ; i < ll.size() ; ++i) {
     if (std::find(theLoglikeString.begin(),theLoglikeString.end(),ll[i]) == theLoglikeString.end()) {
@@ -513,6 +513,7 @@ void biogeme::prepareMemoryForThreads(bioBoolean force) {
   if (!theWeightString.empty()) {
     theThreadMemory.setWeight(theWeightString) ;
   }
+  
 }
 
 void biogeme::simulateFormula(std::vector<bioString> formula,
@@ -706,6 +707,7 @@ void biogeme::setDraws(std::vector< std::vector< std::vector<bioReal> > >& draws
 
 void biogeme::prepareData() {
 
+  
   // Here, we prepare the data that do not vary from one call of the
   // functions to the next.
 
@@ -778,6 +780,7 @@ void biogeme::prepareData() {
       theInput[thread]->theWeight.setMissingData(theInput[thread]->missingData) ;
     }
   }
+
 }
 
 void biogeme::prepareDataSimul() {
