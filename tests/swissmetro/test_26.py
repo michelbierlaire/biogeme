@@ -1,3 +1,4 @@
+import os
 import unittest
 import numpy as np
 import pandas as pd
@@ -13,10 +14,11 @@ from biogeme.expressions import (
     log,
 )
 
-pandas = pd.read_csv("swissmetro.dat", sep='\t')
-database = db.Database("swissmetro", pandas)
+myPath = os.path.dirname(os.path.abspath(__file__))
+pandas = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
+database = db.Database('swissmetro', pandas)
 
-database.panel("ID")
+database.panel('ID')
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database
@@ -24,7 +26,7 @@ database.panel("ID")
 
 globals().update(database.variables)
 
-# Here we use the "biogeme" way for backward compatibility
+# Here we use the 'biogeme' way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
 

@@ -16,10 +16,11 @@ Test the expressions module
 
 import unittest
 import numpy as np
+import pandas as pd
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
 from biogeme import models
-from testData import getData
+from test_data import getData
 
 
 class test_expressions(unittest.TestCase):
@@ -41,6 +42,13 @@ class test_expressions(unittest.TestCase):
         self.xi1 = ex.bioDraws('xi1', 'NORMAL')
         self.xi2 = ex.bioDraws('xi2', 'UNIF')
         self.xi3 = ex.bioDraws('xi3', 'WRONGTYPE')
+        self.addTypeEqualityFunc(pd.DataFrame, self.assertDataframeEqual)
+
+    def assertDataframeEqual(self, a, b, msg):
+        try:
+            pd.testing.assert_frame_equal(a, b)
+        except AssertionError as e:
+            raise self.failureException(msg) from e
 
     def test_isNumeric(self):
         result = ex.isNumeric(1)
@@ -376,11 +384,17 @@ class test_expressions(unittest.TestCase):
 
     def test_DefineVariable(self):
         _ = ex.DefineVariable(
-            'newvar', self.Variable1 + self.Variable2, self.myData
+            'newvar_b', self.Variable1 + self.Variable2, self.myData
         )
         cols = self.myData.data.columns
-        added = 'newvar' in cols
+        added = 'newvar_b' in cols
         self.assertTrue(added)
+        self.myData.data['newvar_p'] = (
+            self.myData.data['Variable1'] + self.myData.data['Variable2']
+        )
+        pd.testing.assert_series_equal(
+            self.myData.data['newvar_b'], self.myData.data['newvar_p'], check_dtype=False, check_names=False
+        )
 
     def test_expr1(self):
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
@@ -788,8 +802,20 @@ class test_expressions(unittest.TestCase):
             ex.PanelLikelihoodTrajectory(self.beta1)
         )
         c3 = expr3.countPanelTrajectoryExpressions()
-        self.assertEqual(c3, 2)
-
+        expr4 = self.Variable1 + ex.PanelLikelihoodTrajectory(
+            ex.PanelLikelihoodTrajectory(self.beta1)
+        )
+        c4 = expr4.countPanelTrajectoryExpressions()
+        self.assertEqual(c4, 2)
+        d1 = expr1.dictOfVariablesOutsidePanelTrajectory()
+        self.assertDictEqual(d1, {})
+        d2 = expr2.dictOfVariablesOutsidePanelTrajectory()
+        self.assertDictEqual(d2, {})
+        d3 = expr3.dictOfVariablesOutsidePanelTrajectory()
+        self.assertDictEqual(d3, {})
+        d4 = expr4.dictOfVariablesOutsidePanelTrajectory()
+        self.assertListEqual(list(d4.keys()), ['Variable1'])
+        
     def test_ids_multiple_formulas(self):
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)

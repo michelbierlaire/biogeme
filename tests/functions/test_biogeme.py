@@ -2,7 +2,7 @@
 Test the biogeme module
 
 :author: Michel Bierlaire
-:data: Wed Apr 29 18:32:42 2020
+:date: Wed Apr 29 18:32:42 2020
 
 """
 # Bug in pylint
@@ -20,7 +20,7 @@ import random as rnd
 import numpy as np
 import biogeme.biogeme as bio
 from biogeme.expressions import Variable, Beta, exp, bioDraws
-from testData import getData
+from test_data import getData
 
 
 class test_biogeme(unittest.TestCase):

@@ -1,3 +1,4 @@
+import os
 import unittest
 import pandas as pd
 import biogeme.database as db
@@ -14,8 +15,9 @@ from biogeme.expressions import (
 )
 
 
-pandas = pd.read_csv("swissmetro.dat", sep='\t')
-database = db.Database("swissmetro", pandas)
+myPath = os.path.dirname(os.path.abspath(__file__))
+df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
+database = db.Database('swissmetro', df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database

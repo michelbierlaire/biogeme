@@ -1,13 +1,14 @@
-import sys
+import os
+import unittest
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.models as models
-import unittest
+from biogeme import models
 from biogeme.expressions import Beta, DefineVariable, Elem, Derive
 
-pandas = pd.read_csv("swissmetro.dat", sep='\t')
-database = db.Database("swissmetro", pandas)
+myPath = os.path.dirname(os.path.abspath(__file__))
+df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
+database = db.Database('swissmetro', df)
 
 # The Pandas data structure is available as database.data. Use all the
 # Pandas functions to invesigate the database
@@ -15,11 +16,7 @@ database = db.Database("swissmetro", pandas)
 
 globals().update(database.variables)
 
-# Removing some observations can be done directly using pandas.
-# remove = (((database.data.PURPOSE != 1) & (database.data.PURPOSE != 3)) | (database.data.CHOICE == 0))
-# database.data.drop(database.data[remove].index,inplace=True)
-
-# Here we use the "biogeme" way for backward compatibility
+# Here we use the 'biogeme' way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
 
@@ -84,7 +81,7 @@ class test_01simul(unittest.TestCase):
         biogeme.saveIterations = False
         biogeme.generateHtml = False
         biogeme.generatePickle = False
-        biogeme.modelName = "01logit_simul"
+        biogeme.modelName = '01logit_simul'
         results = biogeme.simulate()
         self.assertAlmostEqual(sum(results['P1']), 907.9992101964821, 2)
         self.assertAlmostEqual(

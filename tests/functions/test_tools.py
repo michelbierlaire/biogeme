@@ -15,9 +15,16 @@ Test the tools module
 
 import unittest
 import numpy as np
+from copy import deepcopy
 import pandas as pd
 from biogeme import tools
 import biogeme.exceptions as excep
+from test_data import (
+    input_flatten,
+    output_flatten_1,
+    output_flatten_2,
+    output_flatten_3,
+)
 
 
 def myFunction(x):
@@ -143,6 +150,18 @@ class TestTools(unittest.TestCase):
             model1 = (-1340.8, 7)
             model2 = (-1338.49, 5)
             tools.likelihood_ratio_test(model1, model2)
+
+    def test_flatten_database(self):
+        df = deepcopy(input_flatten)
+        result_1 = tools.flatten_database(df, 'ID', row_name='Name')
+        output_flatten_1.index.name = 'ID'
+        pd.testing.assert_frame_equal(result_1, output_flatten_1)
+        result_2 = tools.flatten_database(input_flatten, 'ID')
+        output_flatten_2.index.name = 'ID'
+        pd.testing.assert_frame_equal(result_2, output_flatten_2)
+        result_3 = tools.flatten_database(df, 'ID', identical_columns=[])
+        output_flatten_3.index.name = 'ID'
+        pd.testing.assert_frame_equal(result_3, output_flatten_3)
 
 
 if __name__ == '__main__':
