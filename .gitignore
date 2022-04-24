@@ -354,3 +354,4 @@ tests/functions/errors.lis
 biogeme/tmp.py
 examples/assisted/debug.py
 *.pickle
+*.pickle
