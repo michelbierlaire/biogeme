@@ -1,4 +1,4 @@
-	
+
 """Instructions for the installation of Biogeme
 
 :author: Michel Bierlaire
@@ -13,7 +13,6 @@ import os
 import sys
 import platform
 #import distutils.ccompiler
-import multiprocessing.pool
 import setuptools
 #from setuptools import setup, Extension
 #import setuptools.command.test
@@ -29,43 +28,6 @@ if platform.system() == 'Darwin':
 else:
     os.environ["CC"] = 'gcc'
     os.environ["CXX"] = 'g++'
-
-
-
-
-# monkey-patch for parallel compilation
-def parallelCCompile(self,
-                     sources,
-                     output_dir=None,
-                     macros=None,
-                     include_dirs=None,
-                     debug=0,
-                     extra_preargs=None,
-                     extra_postargs=None,
-                     depends=None):
-    """ those lines are copied from distutils.ccompiler.CCompiler directly"""
-    macros, objects, extra_postargs, pp_opts, build = \
-        self._setup_compile(output_dir,
-                            macros,
-                            include_dirs,
-                            sources,
-                            depends,
-                            extra_postargs)
-    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
-
-    # parallel code
-    N = 8 # number of parallel compilations
-    def _single_compile(obj):
-        try:
-            src, extension = build[obj]
-        except KeyError:
-            return
-        self._compile(obj, src, extension, cc_args, extra_postargs, pp_opts)
-    # convert to list, imap is evaluated on-demand
-    list(multiprocessing.pool.ThreadPool(N).imap(_single_compile, objects))
-    return objects
-
-#distutils.ccompiler.CCompiler.compile = parallelCCompile
 
 try:
     from Cython.Build import cythonize
@@ -146,8 +108,9 @@ if platform.system() == 'Darwin':
 if sys.platform == 'win32':
     # mismatch between library names
     extra_compile_args.append('-D_hypot=hypot')
-    # as one cannot assume that libstdc++, libgcc and pthreads exists on windows,
-    # static link them so they are included in the compiled python extension.
+    # as one cannot assume that libstdc++, libgcc and pthreads exists
+    # on windows, static link them so they are included in the
+    # compiled python extension.
     extra_link_args.extend(['-mwindows',
                             '-mms-bitfields',
                             '-static-libstdc++',
@@ -188,16 +151,18 @@ extensions = [biogeme_extension, expressions_extension]
 #extra_link_args=['-fsanitize=address','-O1','-fno-omit-frame-pointer','-g']
 
 if USE_CYTHON:
-#    extensions = cythonize(extensions, language='c++', include_path=[numpy.get_include()])
+#    extensions = cythonize(extensions, language='c++',
+#    include_path=[numpy.get_include()])
 
 # WARNING: recently, problems with parallel compilation in cython have
 # been reported. Therefore, this feature is currently turned off.
-    
+
 #    extensions = cythonize(extensions,
 #                           compiler_directives={'language_level' : "3"},
 #                           include_path=[numpy.get_include()],
 #                           nthreads=8)
     extensions = cythonize(extensions,
+                           nthreads=8,
                            compiler_directives={'language_level' : "3"},
                            include_path=[numpy.get_include()])
     cmdclass.update({'build_ext': build_ext})
@@ -211,14 +176,23 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(name='biogeme',
                  version=__version__,
-                 description='Estimation and application of discrete choice models',
+                 description=(
+                     'Estimation and application of discrete choice models'
+                 ),
                  url='http://biogeme.epfl.ch',
                  author='Michel Bierlaire',
                  keywords='discrete choice maximum likelihood estimation',
                  author_email='michel.bierlaire@epfl.ch',
                  long_description=long_description,
                  long_description_content_type='text/markdown',
-                 install_requires=['numpy', 'cython', 'unidecode', 'scipy', 'pandas', 'tqdm'],
+                 install_requires=[
+                     'numpy',
+                     'cython',
+                     'unidecode',
+                     'scipy',
+                     'pandas',
+                     'tqdm'
+                 ],
                  packages=setuptools.find_packages(),
                  include_package_data=True,
                  package_data={'biogeme': ['_biogeme.pyd']},
