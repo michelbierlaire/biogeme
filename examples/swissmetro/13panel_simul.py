@@ -55,8 +55,6 @@ database.remove(exclude)
 database.panel("ID")
 
 
-
-
 # Parameters to be estimated
 B_COST = Beta('B_COST', 0, None, None, 0)
 
@@ -157,8 +155,10 @@ simulate = {
     'Denominator': denominator,
 }
 
-biosim = bio.BIOGEME(database, simulate, numberOfDraws=100, suggestScales=False)
-#biosim = bio.BIOGEME(database, simulate, numberOfDraws=100000, suggestScales=False)
+biosim = bio.BIOGEME(
+    database, simulate, numberOfDraws=100, suggestScales=False
+)
+# biosim = bio.BIOGEME(database, simulate, numberOfDraws=100000, suggestScales=False)
 sim = biosim.simulate()
 
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
