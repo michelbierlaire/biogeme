@@ -48,12 +48,8 @@ CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), orig_database)
 TRAIN_AV_SP = DefineVariable(
     'TRAIN_AV_SP', TRAIN_AV * (SP != 0), orig_database
 )
-_ = DefineVariable(
-    'TRAIN_TT_SCALED', TRAIN_TT / 100.0, orig_database
-)
-_ = DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100, orig_database
-)
+_ = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, orig_database)
+_ = DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100, orig_database)
 _ = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, orig_database)
 _ = DefineVariable('SM_COST_SCALED', SM_COST / 100, orig_database)
 _ = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, orig_database)
