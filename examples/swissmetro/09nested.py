@@ -13,6 +13,7 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
+from biogeme.tools import calculate_correlation
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, DefineVariable
 
@@ -103,3 +104,8 @@ biogeme.calculateNullLoglikelihood(av)
 results = biogeme.estimate()
 pandasResults = results.getEstimatedParameters()
 print(pandasResults)
+
+corr = calculate_correlation(
+    nests, results, alternative_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'}
+)
+print(corr)
