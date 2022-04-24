@@ -357,3 +357,9 @@ examples/assisted/debug.py
 *.pickle
 *.F12
 *.log
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
