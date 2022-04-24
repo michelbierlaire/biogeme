@@ -14,8 +14,10 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
+from biogeme.tools import calculate_correlation
 import biogeme.results as res
 from biogeme.expressions import Beta, Derive
+import biogeme.exceptions as excep
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
@@ -94,7 +96,7 @@ nests = nest_existing, nest_public
 # results from the pickle file.
 try:
     results = res.bioResults(pickleFile='11cnl.pickle')
-except FileNotFoundError:
+except excep.biogemeError:
     print(
         'Run first the script 11cnl.py in order to generate the file '
         '11cnl.pickle.'
@@ -102,6 +104,15 @@ except FileNotFoundError:
     sys.exit()
 
 print('Estimation results: ', results.getEstimatedParameters())
+
+print(
+    'Calculating correlation matrix. '
+    'It may generate numerical warnings from scipy.'
+)
+corr = calculate_correlation(
+    nests, results, alternative_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'}
+)
+print(corr)
 
 # The choice model is a cross-nested logit, with availability conditions
 prob1 = models.cnl_avail(V, av, nests, 1)
