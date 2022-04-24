@@ -22,7 +22,7 @@ from biogeme.expressions import (
     Variable,
 )
 from biogeme.assisted import (
-    SegmentationTuple,
+    DiscreteSegmentationTuple,
     TermTuple,
 )
 
@@ -270,7 +270,7 @@ nonlinearSpecs = {
 
 ## Step 7: define the potential segmentations
 all_segmentations = {
-    'TripPurpose': SegmentationTuple(
+    'TripPurpose': DiscreteSegmentationTuple(
         variable=q02_TripPurpose,
         mapping={
             1: 'business',
@@ -280,11 +280,11 @@ all_segmentations = {
             0: 'unknown',
         },
     ),
-    'Gender': SegmentationTuple(
+    'Gender': DiscreteSegmentationTuple(
         variable=q17_Gender,
         mapping={1: 'male', 2: 'female', -1: 'unknown'},
     ),
-    'Education': SegmentationTuple(
+    'Education': DiscreteSegmentationTuple(
         variable=q20_Education,
         mapping={
             1: 'less than high school',
@@ -299,11 +299,11 @@ all_segmentations = {
             -1: 'unkonown',
         },
     ),
-    'Importance': SegmentationTuple(
+    'Importance': DiscreteSegmentationTuple(
         variable=q11_DepartureOrArrivalIsImportant,
         mapping={1: 'departure', 2: 'arrival', 3: 'not important'},
     ),
-    'Who pays': SegmentationTuple(
+    'Who pays': DiscreteSegmentationTuple(
         variable=q03_WhoPays,
         mapping={1: 'traveler', 2: 'employer', 3: 'third party', 0: 'unknown'},
     ),
