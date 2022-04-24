@@ -355,3 +355,5 @@ biogeme/tmp.py
 examples/assisted/debug.py
 *.pickle
 *.pickle
+*.F12
+*.log
