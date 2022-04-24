@@ -1,7 +1,7 @@
 """File 16panelDiscreteSocioEco.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 19:30:31 2019
+:date: Mon Feb 14 14:47:54 2022
 
  Example of a discrete mixture of logit models, also called latent class model.
  The class membership model includes socio-economic variables.
@@ -17,11 +17,13 @@ from biogeme import models
 import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
+    Variable,
     DefineVariable,
     bioDraws,
-    PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
+    exp,
+    bioMultSum,
 )
 
 # Read the data
@@ -48,6 +50,23 @@ globals().update(database.variables)
 # Here we use the "biogeme" way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
+
+# Definition of new variables
+SM_COST = SM_CO * (GA == 0)
+TRAIN_COST = TRAIN_CO * (GA == 0)
+
+# Definition of new variables: adding columns to the database
+CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
+TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
+_ = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
+_ = DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100, database)
+_ = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
+_ = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
+_ = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
+_ = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
+
+flat_df = database.generateFlatPanelDataframe(identical_columns=None)
+flat_database = db.Database('swissmetro_flat', flat_df)
 
 # Parameters to be estimated. One version for each latent class.
 numberOfClasses = 2
@@ -115,41 +134,42 @@ ASC_SM_RND = [
 CLASS_CTE = Beta('CLASS_CTE', 0, None, None, 0)
 CLASS_INC = Beta('CLASS_INC', 0, None, None, 0)
 
-# Definition of new variables
-SM_COST = SM_CO * (GA == 0)
-TRAIN_COST = TRAIN_CO * (GA == 0)
-
-# Definition of new variables: adding columns to the database
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
-TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
-)
-SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
-SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
-CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
-CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
 
 # In class 0, it is assumed that the time coefficient is zero
 B_TIME_RND[0] = 0
 
 # Utility functions
 V1 = [
-    ASC_TRAIN_RND[i]
-    + B_TIME_RND[i] * TRAIN_TT_SCALED
-    + B_COST[i] * TRAIN_COST_SCALED
+    [
+        ASC_TRAIN_RND[i]
+        + B_TIME_RND[i] * Variable(f'{t}_TRAIN_TT_SCALED')
+        + B_COST[i] * Variable(f'{t}_TRAIN_COST_SCALED')
+        for t in range(1, 10)
+    ]
     for i in range(numberOfClasses)
 ]
 V2 = [
-    ASC_SM_RND[i] + B_TIME_RND[i] * SM_TT_SCALED + B_COST[i] * SM_COST_SCALED
+    [
+        ASC_SM_RND[i]
+        + B_TIME_RND[i] * Variable(f'{t}_SM_TT_SCALED')
+        + B_COST[i] * Variable(f'{t}_SM_COST_SCALED')
+        for t in range(1, 10)
+    ]
     for i in range(numberOfClasses)
 ]
 V3 = [
-    ASC_CAR_RND[i] + B_TIME_RND[i] * CAR_TT_SCALED + B_COST[i] * CAR_CO_SCALED
+    [
+        ASC_CAR_RND[i]
+        + B_TIME_RND[i] * Variable(f'{t}_CAR_TT_SCALED')
+        + B_COST[i] * Variable(f'{t}_CAR_CO_SCALED')
+        for t in range(1, 10)
+    ]
     for i in range(numberOfClasses)
 ]
-V = [{1: V1[i], 2: V2[i], 3: V3[i]} for i in range(numberOfClasses)]
+V = [
+    [{1: V1[i][t], 2: V2[i][t], 3: V3[i][t]} for t in range(9)]
+    for i in range(numberOfClasses)
+]
 
 # Associate the availability conditions with the alternatives
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
@@ -157,7 +177,14 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # The choice model is a discrete mixture of logit, with availability conditions
 # We calculate the conditional probability for each class
 prob = [
-    PanelLikelihoodTrajectory(models.logit(V[i], av, CHOICE))
+    exp(
+        bioMultSum(
+            [
+                models.loglogit(V[i][t], av, Variable(f'{t+1}_CHOICE'))
+                for t in range(9)
+            ]
+        )
+    )
     for i in range(numberOfClasses)
 ]
 
@@ -180,7 +207,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(flat_database, logprob, numberOfDraws=100000)
 biogeme.modelName = '16panelDiscreteSocioEco'
 
 # Estimate the parameters.
