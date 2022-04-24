@@ -1073,7 +1073,7 @@ def cnl(V, availability, nests, choice):
           representing the nest parameter,
         - a dictionary mapping the alternative ids with the cross-nested
           parameters for the corresponding nest. If an alternative is
-          missing in the dictionaray, the corresponding alpha is set to zero.
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 
@@ -1264,7 +1264,7 @@ def logcnl(V, availability, nests, choice):
           representing the nest parameter,
         - a dictionary mapping the alternative ids with the cross-nested
           parameters for the corresponding nest. If an alternative is
-          missing in the dictionaray, the corresponding alpha is set to zero.
+          missing in the dictionary, the corresponding alpha is set to zero.
 
         Example::
 

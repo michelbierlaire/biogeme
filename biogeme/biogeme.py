@@ -160,7 +160,7 @@ class BIOGEME:
         self.missingData = missingData  #: code for missing data
 
         self.database = database  #: :class:`biogeme.database.Database` object
-        
+
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -188,9 +188,9 @@ class BIOGEME:
                         f'version of the data using the function '
                         f'`generateFlatPanelDataframe`.'
                     )
-                    raise excep.biogemeError(err_msg)   
-                
-                
+                    raise excep.biogemeError(err_msg)
+
+
             self.weight = None
             """ Object of type :class:`biogeme.expressions.Expression`
             calculating the weight of each observation in the
@@ -299,6 +299,7 @@ class BIOGEME:
                 self.theC.setExpressions(
                     self.loglikeSignatures, self.numberOfThreads
                 )
+
             else:
                 self.weightSignatures = self.weight.getSignature()
                 """ Internal signature of the formula for the weight."""
@@ -363,9 +364,6 @@ class BIOGEME:
                 )
                 listOfWarnings.append(theWarning)
         if listOfWarnings:
-            if self.logger.screenLevel < 1:
-                self.logger.setWarning()
-                self.logger.warning('Logger status has been set to "warning"')
             self.logger.warning('\n'.join(listOfWarnings))
         if listOfErrors:
             self.logger.warning('\n'.join(listOfErrors))

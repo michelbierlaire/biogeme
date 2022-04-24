@@ -851,9 +851,6 @@ class Expression:
 
         errors, warnings = self.audit(database)
         if warnings:
-            if self.logger.screenLevel < 1:
-                self.logger.setWarning()
-                self.logger.warning('Logger status has been set to "warning"')
             self.logger.warning('\n'.join(warnings))
         if errors:
             error_msg = '\n'.join(errors)
@@ -1274,6 +1271,9 @@ class Expression:
         listOfWarnings = []
 
         for e in self.children:
+            if not isinstance(e, Expression):
+                theError = f'Invalid expression: {e}'
+                listOfErrors.append(theError)
             err, war = e.audit(database)
             listOfErrors += err
             listOfWarnings += war
@@ -2587,7 +2587,7 @@ class Numeric(Expression):
         :type value: float
         """
         Expression.__init__(self)
-        self.value = value  #: numeric value
+        self.value = float(value)  #: numeric value
 
     def __str__(self):
         return '`' + str(self.value) + '`'

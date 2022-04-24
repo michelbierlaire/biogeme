@@ -11,9 +11,12 @@
 
 import numpy as np
 import pandas as pd
+import itertools
 from scipy.stats import chi2
+from scipy.integrate import dblquad
 import biogeme.messaging as msg
 import biogeme.exceptions as excep
+from biogeme.expressions import Expression
 
 logger = msg.bioMessage()
 
@@ -408,10 +411,11 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         identical_columns.add(merge_id)
         varying_columns = list(all_columns - identical_columns)
 
-        
     # Take the first row for columns that are identical
     if identical_columns:
-        common_data = df[identical_columns].drop_duplicates(merge_id, keep='first')
+        common_data = df[identical_columns].drop_duplicates(
+            merge_id, keep='first'
+        )
         common_data.index = common_data[merge_id]
     # Treat the other columns
     grouped_varying = df[[merge_id] + list(varying_columns)].groupby(
@@ -427,7 +431,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         :return: the same data organized in one row, with proper column names
         :rtype: pandas.DataFrame
 
-        :raise: biogemeError if there are duplicates in the name of
+        :raise biogemeError:  if there are duplicates in the name of
         the row. Indeed, in that case, they cannot be used to name the
         new columns.
         """
@@ -440,7 +444,8 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         if row_name is not None and not x[row_name].is_unique:
             err_msg = (
                 f'Entries in column [{row_name}] are not unique. '
-                f'This column cannot be used to name the new columns:\n{x[[row_name, merge_id]]}. '
+                f'This column cannot be used to name the new '
+                f'columns:\n{x[[row_name, merge_id]]}. '
             )
             raise excep.biogemeError(err_msg)
 
@@ -468,7 +473,335 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
     # We remove the column 'merge_id' as it is stored as index.
     if identical_columns:
-        return pd.concat(
-            [common_data, flat_data], axis='columns'
-        ).drop(columns=[merge_id])
+        return pd.concat([common_data, flat_data], axis='columns').drop(
+            columns=[merge_id]
+        )
     return flat_data.drop(columns=[merge_id])
+
+
+def covariance_cross_nested(i, j, nests):
+    """Calculate the covariance between the error terms of two
+        alternatives of a cross-nested logit model. It is assumed that
+        the homogeneity parameter mu of the model has been normalized
+        to one.
+
+    :param i: first alternative
+    :type i: int
+
+    :param j: first alternative
+    :type j: int
+
+    :param nests: a tuple containing as many items as nests.
+        Each item is also a tuple containing two items:
+
+        - an object of type biogeme.expressions. expr.Expression
+          representing the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
+
+        Example::
+
+            alphaA = {1: alpha1a,
+                      2: alpha2a,
+                      3: alpha3a,
+                      4: alpha4a,
+                      5: alpha5a,
+                      6: alpha6a}
+            alphaB = {1: alpha1b,
+                      2: alpha2b,
+                      3: alpha3b,
+                      4: alpha4b,
+                      5: alpha5b,
+                      6: alpha6b}
+            nesta = MUA, alphaA
+            nestb = MUB, alphaB
+            nests = nesta, nestb
+
+    :type nests: tuple
+
+    :return: value of the correlation
+    :rtype: float
+
+    :raise biogemeError: if the requested number is non positive or a float
+
+    """
+    set_of_alternatives = {alt for m in nests for alt in m[1]}
+
+    if i not in set_of_alternatives:
+        raise excep.biogemeError(f'Unknown alternative: {i}')
+    if j not in set_of_alternatives:
+        raise excep.biogemeError(f'Unknown alternative: {j}')
+
+    if i == j:
+        return np.pi * np.pi / 6.0
+
+    def integrand(z_i, z_j):
+        """Function to be integrated to calculate the correlation between
+            alternative i and alternative j.
+
+        :param z_i: argument corresponding to alternative i
+        :type z_i: float
+
+        :param z_j: argument corresponding to alternative j
+        :type z_j: float
+        """
+        y_i = -np.log(z_i)
+        y_j = -np.log(z_j)
+        xi_i = -np.log(y_i)
+        xi_j = -np.log(y_j)
+        dy_i = -1 / z_i
+        dy_j = -1 / z_j
+        dxi_i = -dy_i / y_i
+        dxi_j = -dy_j / y_j
+
+        G_sum = 0.0
+        Gi_sum = 0.0
+        Gj_sum = 0.0
+        Gij_sum = 0.0
+        for m in nests:
+            mu_m = m[0]
+            alphas = m[1]
+            alpha_i = alphas.get(i, 0)
+            if alpha_i != 0:
+                term_i = (alpha_i * y_i) ** mu_m
+            else:
+                term_i = 0
+            alpha_j = alphas.get(j, 0)
+            if alpha_j != 0:
+                term_j = (alpha_j * y_j) ** mu_m
+            else:
+                term_j = 0
+            the_sum = term_i + term_j
+            p1 = (1.0 / mu_m) - 1
+            p2 = (1.0 / mu_m) - 2
+            G_sum += the_sum ** (1.0 / mu_m)
+            if alpha_i != 0:
+                Gi_sum += alpha_i ** mu_m * y_i ** (mu_m - 1) * the_sum ** p1
+            if alpha_j != 0:
+                Gj_sum += alpha_j ** mu_m * y_j ** (mu_m - 1) * the_sum ** p1
+            if mu_m != 1.0 and alpha_i != 0 and alpha_j != 0:
+                Gij_sum += (
+                    (1 - mu_m)
+                    * the_sum ** p2
+                    * (alpha_i * alpha_j) ** mu_m
+                    * (y_i * y_j) ** (mu_m - 1)
+                )
+
+        F = np.exp(-G_sum)
+        F_second = F * y_i * y_j * (Gi_sum * Gj_sum - Gij_sum)
+
+        return xi_i * xi_j * F_second * dxi_i * dxi_j
+
+    integral, _ = dblquad(integrand, 0, 1, lambda x: 0, lambda x: 1)
+    return integral - np.euler_gamma * np.euler_gamma
+
+
+def correlation_nested(nests):
+    """Calculate the correlation matrix of the error terms of all
+        alternatives of a nested logit model. It is assumed that
+        the homogeneity parameter mu of the model has been normalized
+        to one.
+
+    :param nests: A tuple containing as many items as nests.
+        Each item is also a tuple containing two items:
+
+        - an object of type biogeme.expressions.expr.Expression representing
+          the nest parameter,
+        - a list containing the list of identifiers of the alternatives
+          belonging to the nest.
+
+        Example::
+
+            nesta = MUA ,[1, 2, 3]
+            nestb = MUB ,[4, 5, 6]
+            nests = nesta, nestb
+
+    :type nests: tuple
+
+    :return: correlation matrix
+    :rtype: pd.DataFrame
+
+    """
+    set_of_alternatives = {alt for m in nests for alt in m[1]}
+    list_of_alternatives = sorted(set_of_alternatives)
+    index = {alt: i for i, alt in enumerate(list_of_alternatives)}
+    J = len(list_of_alternatives)
+    correlation = np.identity(J)
+    for m in nests:
+        mu_m = m[0]
+        alt_m = m[1]
+        for i, j in itertools.combinations(alt_m, 2):
+            correlation[index[i]][index[j]] = correlation[index[j]][
+                index[i]
+            ] = 1.0 - 1.0 / (mu_m * mu_m)
+
+    return pd.DataFrame(
+        correlation, index=list_of_alternatives, columns=list_of_alternatives
+    )
+
+
+def correlation_cross_nested(nests):
+    """Calculate the correlation matrix of the error terms of all
+        alternatives of a cross-nested logit model. It is assumed that
+        the homogeneity parameter mu of the model has been normalized
+        to one.
+
+    :param nests: a tuple containing as many items as nests.
+        Each item is also a tuple containing two items:
+
+        - an object of type biogeme.expressions. expr.Expression
+          representing the nest parameter,
+        - a dictionary mapping the alternative ids with the cross-nested
+          parameters for the corresponding nest. If an alternative is
+          missing in the dictionary, the corresponding alpha is set to zero.
+
+        Example::
+
+            alphaA = {1: alpha1a,
+                      2: alpha2a,
+                      3: alpha3a,
+                      4: alpha4a,
+                      5: alpha5a,
+                      6: alpha6a}
+            alphaB = {1: alpha1b,
+                      2: alpha2b,
+                      3: alpha3b,
+                      4: alpha4b,
+                      5: alpha5b,
+                      6: alpha6b}
+            nesta = MUA, alphaA
+            nestb = MUB, alphaB
+            nests = nesta, nestb
+
+    :type nests: tuple
+
+    :return: value of the correlation
+    :rtype: float
+
+    :raise biogemeError: if the requested number is non positive or a float
+
+    :return: correlation matrix
+    :rtype: pd.DataFrame
+
+    """
+    set_of_alternatives = {alt for m in nests for alt in m[1]}
+    list_of_alternatives = sorted(set_of_alternatives)
+    J = len(list_of_alternatives)
+
+    covar = np.empty((J, J))
+    for i, alt_i in enumerate(list_of_alternatives):
+        for j, alt_j in enumerate(list_of_alternatives):
+            covar[i][j] = covariance_cross_nested(alt_i, alt_j, nests)
+            if i != j:
+                covar[j][i] = covar[i][j]
+
+    v = np.sqrt(np.diag(covar))
+    outer_v = np.outer(v, v)
+    correlation = covar / outer_v
+    correlation[covar == 0] = 0
+    return pd.DataFrame(
+        correlation, index=list_of_alternatives, columns=list_of_alternatives
+    )
+
+
+def calculate_correlation(nests, results, alternative_names=None):
+    """Calculate the correlation matrix of a nested or cross-nested logit
+        model, using the estimation results.
+
+    :param nests:  A tuple containing as many items as nests.
+
+        Each item is also a tuple containing two items:
+
+        - an object of type biogeme.expressions. expr.Expression
+          representing the nest parameter,
+
+        - for the nested logit model, a list containing the list of
+          identifiers of the alternatives belonging to the nest.
+
+        - for the cross-nested logit model, a dictionary mapping the
+          alternative ids with the cross-nested parameters for the
+          corresponding nest. If an alternative is missing in the
+          dictionary, the corresponding alpha is set to zero.
+
+
+        Example for the nested logit::
+            nesta = MUA ,[1, 2, 3]
+            nestb = MUB ,[4, 5, 6]
+            nests = nesta, nestb
+
+        Example for the cross-nested logit::
+
+            alphaA = {1: alpha1a,
+                      2: alpha2a,
+                      3: alpha3a,
+                      4: alpha4a,
+                      5: alpha5a,
+                      6: alpha6a}
+            alphaB = {1: alpha1b,
+                      2: alpha2b,
+                      3: alpha3b,
+                      4: alpha4b,
+                      5: alpha5b,
+                      6: alpha6b}
+            nesta = MUA, alphaA
+            nestb = MUB, alphaB
+            nests = nesta, nestb
+
+    :type nests: tuple(tuple(biogeme.expressions.Expression, list(int))), or
+                 tuple(tuple(biogeme.Expression, dict(int:biogeme.expressions.Expression)))
+
+    :param results: estimation results
+    :type results: biogeme.results.bioResults
+
+    :param alternative_names: a dictionary mapping the alternative IDs
+        with their name. If None, the IDs are used as names.
+    :type alternative_names: dict(int: str)
+    """
+
+    betas = results.getBetaValues()
+
+    cnl = isinstance(nests[0][1], dict)
+    print(f'{cnl=}')
+
+    def get_estimated_expression(expr):
+        """Returns the estimated value of the nest parameter.
+
+        :param expr: expression to calculate
+        :type expr: biogeme.expressions.Expression or float.
+
+        :return: calculated value
+        :rtype: float
+
+        :raise biogemeError: if the input value is not an expression or a float.
+        """
+
+        if isinstance(expr, Expression):
+            expr.changeInitValues(betas)
+            return expr.getValue_c()
+        if isinstance(expr, float):
+            return expr
+        raise excep.biogemeError(f'Invalid type: {type(expr)}')
+
+    def numerical_tuple(the_tuple):
+        mu_m = get_estimated_expression(the_tuple[0])
+        alpha_m = the_tuple[1]
+        if isinstance(alpha_m, dict):
+            # Cross-nested logit
+            estimated_alpha_m = {
+                alt
+                if alternative_names is None
+                else alternative_names[alt]: get_estimated_expression(e)
+                for alt, e in alpha_m.items()
+            }
+            return mu_m, estimated_alpha_m
+        return mu_m, [
+            alt
+            if alternative_names is None
+            else alternative_names[alt] for alt in alpha_m]
+
+    estimated_nests = tuple(numerical_tuple(m) for m in nests)
+
+    if cnl:
+        return correlation_cross_nested(estimated_nests)
+    return correlation_nested(estimated_nests)

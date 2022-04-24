@@ -17,7 +17,7 @@ from biogeme.singleton import Singleton
 class bioMessage(metaclass=Singleton):
     """Manages the Biogeme messages"""
 
-    def __init__(self, screenLevel=0):
+    def __init__(self, screenLevel=1):
         """Constructor
 
         :param screenLevel: level of message that must be displayed on the
