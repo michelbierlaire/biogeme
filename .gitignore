@@ -363,3 +363,4 @@ examples/assisted/debug.py
 *.dvi
 *.fdb_latexmk
 *.fls
+biogeme/cbiogeme.cpython-310-darwin.so
