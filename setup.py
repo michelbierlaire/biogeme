@@ -6,21 +6,14 @@
 
 """
 
-# Too constraining
-# pylint: disable=invalid-name, protected-access, too-many-arguments
 
 import os
 import sys
 import platform
-#import distutils.ccompiler
-import setuptools
-#from setuptools import setup, Extension
-#import setuptools.command.test
+from setuptools import setup, Extension, find_packages
 
 
 import numpy
-
-from biogeme.version import __version__
 
 if platform.system() == 'Darwin':
     os.environ["CC"] = 'clang'
@@ -31,7 +24,6 @@ else:
 
 try:
     from Cython.Build import cythonize
-    from Cython.Distutils import build_ext
 except ImportError:
     USE_CYTHON = False
     print('Not using Cython')
@@ -40,6 +32,22 @@ else:
     print('Using Cython')
 
 ext = '.pyx' if USE_CYTHON else '.cpp'
+
+def no_cythonize(extensions, **_ignore):
+    for extension in extensions:
+        sources = []
+        for sfile in extension.sources:
+            path, ext = os.path.splitext(sfile)
+            if ext in (".pyx", ".py"):
+                if extension.language == "c++":
+                    ext = ".cpp"
+                else:
+                    ext = ".c"
+                sfile = path + ext
+            sources.append(sfile)
+        extension.sources[:] = sources
+    return extensions
+
 
 cmdclass = {}
 
@@ -119,87 +127,44 @@ if sys.platform == 'win32':
                             '-lstdc++',
                             '-lpthread'])
 
-biogeme_extension = setuptools.Extension('biogeme.cbiogeme',
-                                   ['src/cbiogeme'+ext] + source,
-                                   include_dirs=[numpy.get_include()],
-                                   extra_compile_args=extra_compile_args,
-                                   language='c++11',
-                                   define_macros=[('NPY_NO_DEPRECATED_API',
-                                                   'NPY_1_7_API_VERSION')],
-                                   extra_link_args=extra_link_args)
+biogeme_extension = Extension('biogeme.cbiogeme',
+                              ['src/cbiogeme'+ext] + source,
+                              include_dirs=[numpy.get_include()],
+                              extra_compile_args=extra_compile_args,
+                              language='c++11',
+                              define_macros=[('NPY_NO_DEPRECATED_API',
+                                              'NPY_1_7_API_VERSION')],
+                              extra_link_args=extra_link_args)
 
-expressions_extension = setuptools.Extension('biogeme.cexpressions',
-                                   ['src/cexpressions'+ext] + source,
-                                   include_dirs=[numpy.get_include()],
-                                   extra_compile_args=extra_compile_args,
-                                   language='c++11',
-                                   define_macros=[('NPY_NO_DEPRECATED_API',
-                                                   'NPY_1_7_API_VERSION')],
-                                   extra_link_args=extra_link_args)
+expressions_extension = Extension('biogeme.cexpressions',
+                                  ['src/cexpressions'+ext] + source,
+                                  include_dirs=[numpy.get_include()],
+                                  extra_compile_args=extra_compile_args,
+                                  language='c++11',
+                                  define_macros=[('NPY_NO_DEPRECATED_API',
+                                                  'NPY_1_7_API_VERSION')],
+                                  extra_link_args=extra_link_args)
 
 extensions = [biogeme_extension, expressions_extension]
 
-#extensions = [Extension('biogeme.cbiogeme',
-#                        ['src/cbiogeme'+ext]+source,
-#                        include_dirs=[numpy.get_include()],
-#                        extra_compile_args=extra_compile_args,
-#                        language='c++11',
-#                        extra_link_args = ['-lprofiler'])]
-
-
-#extra_compile_args=['-O0'],
-#extra_link_args=['-fsanitize=address','-O1','-fno-omit-frame-pointer','-g']
-
 if USE_CYTHON:
-#    extensions = cythonize(extensions, language='c++',
-#    include_path=[numpy.get_include()])
-
-# WARNING: recently, problems with parallel compilation in cython have
-# been reported. Therefore, this feature is currently turned off.
-
-#    extensions = cythonize(extensions,
-#                           compiler_directives={'language_level' : "3"},
-#                           include_path=[numpy.get_include()],
-#                           nthreads=8)
     extensions = cythonize(extensions,
                            nthreads=8,
-                           compiler_directives={'language_level' : "3"},
+                           compiler_directives={
+                               'language_level' : "3",
+                               'embedsignature': True},
                            include_path=[numpy.get_include()])
-    cmdclass.update({'build_ext': build_ext})
+else:
+    no_cythonize(extensions)
 
-#exec(open('biogeme/version.py').read())
-# now we have a `__version__` variable
-# later on we use: __version__
+with open("requirements.txt") as fp:
+    install_requires = fp.read().strip().split("\n")
 
-with open('README.md', 'r') as fh:
-    long_description = fh.read()
 
-setuptools.setup(name='biogeme',
-                 version=__version__,
-                 description=(
-                     'Estimation and application of discrete choice models'
-                 ),
-                 url='http://biogeme.epfl.ch',
-                 author='Michel Bierlaire',
-                 keywords='discrete choice maximum likelihood estimation',
-                 author_email='michel.bierlaire@epfl.ch',
-                 long_description=long_description,
-                 long_description_content_type='text/markdown',
-                 install_requires=[
-                     'numpy',
-                     'cython',
-                     'unidecode',
-                     'scipy',
-                     'pandas',
-                     'tqdm'
-                 ],
-                 packages=setuptools.find_packages(),
-                 include_package_data=True,
-                 package_data={'biogeme': ['_biogeme.pyd']},
-                 package_dir={'biogeme.cbiogeme': 'src'},
-                 cmdclass=cmdclass,
-                 classifiers=[
-                     'Programming Language :: Python :: 3',
-                     'Operating System :: OS Independent',
-                 ],
-                 ext_modules=extensions)
+setup(
+    include_package_data=True,
+    package_data={'biogeme': ['_biogeme.pyd']},
+    install_requires=install_requires,
+    package_dir={'biogeme.cbiogeme': 'src'},
+    cmdclass=cmdclass,
+    ext_modules=extensions)
