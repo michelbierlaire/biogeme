@@ -27,6 +27,9 @@ import biogeme.filenames as bf
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
 
+logger = msg.bioMessage()
+
+
 
 def calcPValue(t):
     """Calculates the p value of a parameter from its t-statistic.
@@ -227,7 +230,7 @@ class rawResults:
         """Value of the likelihood function with equal probability model
         """
 
-        self.betas = list()  #: List of objects of type results.beta
+        self.betas = []  #: List of objects of type results.beta
 
         for b, n in zip(betaValues, self.betaNames):
             bounds = theModel.getBoundsOnBeta(n)
@@ -313,8 +316,6 @@ class bioResults:
         :raise biogeme.exceptions.biogemeError: if no data is provided.
         """
 
-        self.logger = msg.bioMessage()
-
         if theRawResults is not None:
             self.data = theRawResults
             """Object of type :class:`biogeme.results.rawResults` contaning the
@@ -350,7 +351,7 @@ class bioResults:
         with open(self.data.pickleFileName, 'wb') as f:
             pickle.dump(self.data, f)
 
-        self.logger.general(
+        logger.general(
             f'Results saved in file {self.data.pickleFileName}'
         )
         return self.data.pickleFileName
@@ -531,7 +532,7 @@ class bioResults:
                         self.data.bootstrap_varCovar, np.finfo(float).max
                     )
 
-            self.data.secondOrderTable = dict()
+            self.data.secondOrderTable = {}
             for i in range(self.data.nparam):
                 for j in range(i):
                     t = self._calculateTest(i, j, self.data.varCovar)
@@ -721,7 +722,7 @@ class bioResults:
         h += '\\section{Parameter estimates}\n'
         table = self.getEstimatedParameters(onlyRobust)
 
-        
+
         def formatting(x):
             """Defines the formatting for the to_latex function of pandas"""
             res = f'{x:.3g}'
@@ -958,7 +959,7 @@ class bioResults:
                 if p not in self.data.betaNames:
                     unknown.append(p)
             if unknown:
-                self.logger.warning(
+                logger.warning(
                     f'Unknown parameters are ignored: {unknown}'
                 )
         columns = [
@@ -1139,7 +1140,7 @@ class bioResults:
         :raise biogeme.exceptions.biogemeError: if some requested parameters
             are not available.
         """
-        values = dict()
+        values = {}
         if myBetas is None:
             myBetas = self.data.betaNames
         for b in myBetas:
@@ -1208,14 +1209,14 @@ class bioResults:
         self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
         with open(self.data.htmlFileName, 'w') as f:
             f.write(self.getHtml())
-        self.logger.general(f'Results saved in file {self.data.htmlFileName}')
+        logger.general(f'Results saved in file {self.data.htmlFileName}')
 
     def writeLaTeX(self):
         """Write the results in a LaTeX file."""
         self.data.latexFileName = bf.getNewFileName(self.data.modelName, 'tex')
         with open(self.data.latexFileName, 'w') as f:
             f.write(self.getLaTeX())
-        self.logger.general(f'Results saved in file {self.data.latexFileName}')
+        logger.general(f'Results saved in file {self.data.latexFileName}')
 
     def _getHtmlHeader(self):
         """Prepare the header for the HTML file, containing comments and the
@@ -1464,4 +1465,56 @@ class bioResults:
         self.data.F12FileName = bf.getNewFileName(self.data.modelName, 'F12')
         with open(self.data.F12FileName, 'w') as f:
             f.write(self.getF12(robustStdErr))
-        self.logger.general(f'Results saved in file {self.data.F12FileName}')
+        logger.general(f'Results saved in file {self.data.F12FileName}')
+
+
+def compileEstimationResults(
+        dict_of_results,
+        statistics=(
+            'Number of estimated parameters',
+            'Sample size',
+            'Final log likelihood',
+            'Akaike Information Criterion',
+            'Bayesian Information Criterion',
+        ),
+        include_parameter_estimates=True,
+):
+    """Compile estimation results into a common table
+
+    :param dict_of_results: dictionary where the keys are the names of
+        the models, and the values are either the estimation results,
+        or the name of the pickle file where to find them.
+    :type dict_of_results: dict(str:bioResults) or dict(str:str)
+
+    :param statistics: list of statistics to include in the summary
+        table
+    :type statistics: tuple(str)
+
+    :param include_parameter_estimates: if True, the parameter
+        estimates are included.
+    :type include_parameter_estimates: bool
+
+    :return: pandas dataframe with the requested results.
+    :rtype: pandas.DataFrame
+
+    """
+    df = pd.DataFrame(columns=dict_of_results.keys())
+
+    for col, res in dict_of_results.items():
+        if not isinstance(res, bioResults):
+            try:
+                res = bioResults(pickleFile=res)
+            except excep.biogemeError:
+                warning = f'Impossible to access result file {res}'
+                logger.warning(warning)
+                res = None
+        if res is not None:
+            stats_results = res.getGeneralStatistics()
+            for s in statistics:
+                df.loc[s, col] = stats_results[s][0]
+            if include_parameter_estimates:
+                betas = res.getBetaValues()
+                for name, value in betas.items():
+                    df.loc[name, col] = value
+
+    return df
