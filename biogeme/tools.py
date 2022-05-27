@@ -762,7 +762,6 @@ def calculate_correlation(nests, results, alternative_names=None):
     betas = results.getBetaValues()
 
     cnl = isinstance(nests[0][1], dict)
-    print(f'{cnl=}')
 
     def get_estimated_expression(expr):
         """Returns the estimated value of the nest parameter.
@@ -779,7 +778,7 @@ def calculate_correlation(nests, results, alternative_names=None):
         if isinstance(expr, Expression):
             expr.changeInitValues(betas)
             return expr.getValue_c()
-        if isinstance(expr, float):
+        if isinstance(expr, (int, float)):
             return expr
         raise excep.biogemeError(f'Invalid type: {type(expr)}')
 
@@ -805,3 +804,4 @@ def calculate_correlation(nests, results, alternative_names=None):
     if cnl:
         return correlation_cross_nested(estimated_nests)
     return correlation_nested(estimated_nests)
+
