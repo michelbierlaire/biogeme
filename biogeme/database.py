@@ -759,8 +759,9 @@ class Database:
 
         :param rng: a dictionary of generators. The keys of the dictionary
            characterize the name of the generators, and must be
-           different from the pre-defined generators in Biogeme:
-           NORMAL, UNIFORM and UNIFORMSYM. The elements of the
+           different from the pre-defined generators in Biogeme 
+           (see :func:`~biogeme.database.Database.generateDraws` for the list). 
+           The elements of the
            dictionary are functions that take two arguments: the
            number of series to generate (typically, the size of the
            database), and the number of draws per series.
@@ -803,7 +804,52 @@ class Database:
         :param types: A dict indexed by the names of the variables,
                       describing the types of draws. Each of them can
                       be a native type or any type defined by the
-                      function database.setRandomNumberGenerators
+                      function :func:`~biogeme.database.Database.setRandomNumberGenerators`.
+
+                      Native types:
+
+                      - ``'UNIFORM'``: Uniform U[0, 1],
+                      - ``'UNIFORM_ANTI``: Antithetic uniform U[0, 1]',
+                      - ``'UNIFORM_HALTON2'``: Halton draws with base 2,
+                        skipping the first 10,
+                      - ``'UNIFORM_HALTON3'``: Halton draws with base 3,
+                        skipping the first 10,
+                      - ``'UNIFORM_HALTON5'``: Halton draws with base 5,
+                        skipping  the first 10,
+                      - ``'UNIFORM_MLHS'``: Modified Latin Hypercube
+                        Sampling on [0, 1],
+                      - ``'UNIFORM_MLHS_ANTI'``: Antithetic Modified
+                        Latin Hypercube Sampling on [0, 1],
+                      - ``'UNIFORMSYM'``: Uniform U[-1, 1],
+                      - ``'UNIFORMSYM_ANTI'``: Antithetic uniform U[-1, 1],
+                      - ``'UNIFORMSYM_HALTON2'``: Halton draws on [-1, 1]
+                        with base 2, skipping the first 10,
+                      - ``'UNIFORMSYM_HALTON3'``: Halton draws on [-1, 1]
+                        with base 3, skipping the first 10,
+                      - ``'UNIFORMSYM_HALTON5'``: Halton draws on [-1, 1]
+                        with base 5, skipping the first 10,
+                      - ``'UNIFORMSYM_MLHS'``: Modified Latin Hypercube
+                        Sampling on [-1, 1],
+                      - ``'UNIFORMSYM_MLHS_ANTI'``: Antithetic Modified
+                        Latin Hypercube Sampling on [-1, 1],
+                      - ``'NORMAL'``: Normal N(0, 1) draws,
+                      - ``'NORMAL_ANTI'``: Antithetic normal draws,
+                      - ``'NORMAL_HALTON2'``: Normal draws from Halton
+                        base 2 sequence,
+                      - ``'NORMAL_HALTON3'``: Normal draws from Halton
+                        base 3 sequence,
+                      - ``'NORMAL_HALTON5'``: Normal draws from Halton
+                        base 5 sequence,
+                      - ``'NORMAL_MLHS'``: Normal draws from Modified
+                        Latin Hypercube Sampling,
+                      - ``'NORMAL_MLHS_ANTI'``: Antithetic normal draws
+                        from Modified Latin Hypercube Sampling]
+
+                      For an updated description of the native types, call the function
+                      :func:`~biogeme.database.Database.descriptionOfNativeDraws`.
+
+
+
         :type types: dict
 
         :param names: the list of names of the variables that require draws
@@ -830,7 +876,7 @@ class Database:
                   ['randomDraws1', 'randomDraws2', 'randomDraws3'], 10)
 
 
-        :raise biogemeError: if a type of sdraw is unknown.
+        :raise biogemeError: if a type of draw is unknown.
 
         :raise biogemeError: if the output of the draw generator does not
             have the requested dimensions.
@@ -1038,8 +1084,8 @@ class Database:
         return self.data[self.data[columnName] == value].count()[columnName]
 
     def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=[]):
-        """Generate a flat version of the panel data 
-        
+        """Generate a flat version of the panel data
+
         :param saveOnFile: if True, the flat database is saved on file.
         :type saveOnFile: bool
 
@@ -1068,7 +1114,7 @@ class Database:
             flat_data.to_csv(file_name)
             self.logger.general(f'File {file_name} has been created.')
         return flat_data
-        
+
     def __str__(self):
         """Allows to print the dabase"""
         result = f'biogeme database {self.name}:\n{self.data}'
