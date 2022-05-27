@@ -148,12 +148,20 @@ expressions_extension = Extension('biogeme.cexpressions',
 extensions = [biogeme_extension, expressions_extension]
 
 if USE_CYTHON:
-    extensions = cythonize(extensions,
-                           nthreads=8,
-                           compiler_directives={
-                               'language_level' : "3",
-                               'embedsignature': True},
-                           include_path=[numpy.get_include()])
+    if sys.platform == 'win32':
+    
+        extensions = cythonize(extensions,
+                               compiler_directives={
+                                   'language_level' : "3",
+                                   'embedsignature': True},
+                               include_path=[numpy.get_include()])
+    else:
+        extensions = cythonize(extensions,
+                               nthreads=8,
+                               compiler_directives={
+                                   'language_level' : "3",
+                                   'embedsignature': True},
+                               include_path=[numpy.get_include()])
 else:
     no_cythonize(extensions)
 
