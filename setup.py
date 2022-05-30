@@ -1,5 +1,6 @@
-from cysetuptools import setup
+import os
 import platform
+from cysetuptools import setup
 
 if platform.system() == 'Darwin':
     os.environ["CC"] = 'clang++'
@@ -10,5 +11,3 @@ else:
 
 
 setup()
-
-
