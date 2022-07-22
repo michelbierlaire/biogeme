@@ -17,6 +17,7 @@ Implementation of class contaning and processing the estimation results.
 
 import pickle
 import datetime
+from collections import namedtuple
 import urllib.request as urlr
 import pandas as pd
 import numpy as np
@@ -26,9 +27,11 @@ import biogeme.version as bv
 import biogeme.filenames as bf
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
+from biogeme import tools
 
 logger = msg.bioMessage()
 
+GeneralStatistic = namedtuple('GeneralStatistic', 'value format')
 
 
 def calcPValue(t):
@@ -351,9 +354,7 @@ class bioResults:
         with open(self.data.pickleFileName, 'wb') as f:
             pickle.dump(self.data, f)
 
-        logger.general(
-            f'Results saved in file {self.data.pickleFileName}'
-        )
+        logger.general(f'Results saved in file {self.data.pickleFileName}')
         return self.data.pickleFileName
 
     def _calculateTest(self, i, j, matrix):
@@ -722,7 +723,6 @@ class bioResults:
         h += '\\section{Parameter estimates}\n'
         table = self.getEstimatedParameters(onlyRobust)
 
-
         def formatting(x):
             """Defines the formatting for the to_latex function of pandas"""
             res = f'{x:.3g}'
@@ -743,57 +743,94 @@ class bioResults:
         """Format the results in a dict
 
         :return: dict with the results. The keys describe each
-                 content. Each element is a tuple, with the value and its
-                 preferred formatting.
+                 content. Each element is a GeneralStatistic tuple,
+                 with the value and its preferred formatting.
 
         Example::
 
                      'Init log likelihood': (-115.30029248549191, '.7g')
 
         :rtype: dict(string:float,string)
+
         """
         d = {}
-        d['Number of estimated parameters'] = self.data.nparam, ''
+        d['Number of estimated parameters'] = GeneralStatistic(
+            value=self.data.nparam, format=''
+        )
         nf = self.numberOfFreeParameters()
         if nf != self.data.nparam:
-            d['Number of free parameters'] = nf, ''
-        d['Sample size'] = self.data.sampleSize, ''
-        if self.data.sampleSize != self.data.numberOfObservations:
-            d['Observations'] = self.data.numberOfObservations, ''
-        d['Excluded observations'] = self.data.excludedData, ''
-        if self.data.nullLogLike is not None:
-            d['Null log likelihood'] = self.data.nullLogLike, '.7g'
-        d['Init log likelihood'] = self.data.initLogLike, '.7g'
-        d['Final log likelihood'] = self.data.logLike, '.7g'
-        if self.data.nullLogLike is not None:
-            d['Likelihood ratio test for the null model'] = (
-                self.data.likelihoodRatioTestNull,
-                '.7g',
+            d['Number of free parameters'] = GeneralStatistic(
+                value=nf, format=''
             )
-            d['Rho-square for the null model'] = self.data.rhoSquareNull, '.3g'
-            d['Rho-square-bar for the null model'] = (
-                self.data.rhoBarSquareNull,
-                '.3g',
-            )
-        d['Likelihood ratio test for the init. model'] = (
-            self.data.likelihoodRatioTest,
-            '.7g',
+        d['Sample size'] = GeneralStatistic(
+            value=self.data.sampleSize, format=''
         )
-        d['Rho-square for the init. model'] = self.data.rhoSquare, '.3g'
-        d['Rho-square-bar for the init. model'] = self.data.rhoBarSquare, '.3g'
-        d['Akaike Information Criterion'] = self.data.akaike, '.7g'
-        d['Bayesian Information Criterion'] = self.data.bayesian, '.7g'
-        d['Final gradient norm'] = self.data.gradientNorm, '.4E'
+        if self.data.sampleSize != self.data.numberOfObservations:
+            d['Observations'] = GeneralStatistic(
+                value=self.data.numberOfObservations, format=''
+            )
+        d['Excluded observations'] = GeneralStatistic(
+            value=self.data.excludedData, format=''
+        )
+        if self.data.nullLogLike is not None:
+            d['Null log likelihood'] = GeneralStatistic(
+                value=self.data.nullLogLike, format='.7g'
+            )
+        d['Init log likelihood'] = GeneralStatistic(
+            value=self.data.initLogLike, format='.7g'
+        )
+        d['Final log likelihood'] = GeneralStatistic(
+            value=self.data.logLike, format='.7g'
+        )
+        if self.data.nullLogLike is not None:
+            d['Likelihood ratio test for the null model'] = GeneralStatistic(
+                value=self.data.likelihoodRatioTestNull,
+                format='.7g',
+            )
+            d['Rho-square for the null model'] = GeneralStatistic(
+                value=self.data.rhoSquareNull, format='.3g'
+            )
+            d['Rho-square-bar for the null model'] = GeneralStatistic(
+                value=self.data.rhoBarSquareNull,
+                format='.3g',
+            )
+        d['Likelihood ratio test for the init. model'] = GeneralStatistic(
+            value=self.data.likelihoodRatioTest,
+            format='.7g',
+        )
+        d['Rho-square for the init. model'] = GeneralStatistic(
+            value=self.data.rhoSquare, format='.3g'
+        )
+        d['Rho-square-bar for the init. model'] = GeneralStatistic(
+            value=self.data.rhoBarSquare, format='.3g'
+        )
+        d['Akaike Information Criterion'] = GeneralStatistic(
+            value=self.data.akaike, format='.7g'
+        )
+        d['Bayesian Information Criterion'] = GeneralStatistic(
+            value=self.data.bayesian, format='.7g'
+        )
+        d['Final gradient norm'] = GeneralStatistic(
+            value=self.data.gradientNorm, format='.4E'
+        )
         if self.data.monteCarlo:
-            d['Number of draws'] = self.data.numberOfDraws, ''
-            d['Draws generation time'] = self.data.drawsProcessingTime, ''
-            d['Types of draws'] = (
-                [f'{i}: {k}' for i, k in self.data.typesOfDraws.items()],
-                '',
+            d['Number of draws'] = GeneralStatistic(
+                value=self.data.numberOfDraws, format=''
+            )
+            d['Draws generation time'] = GeneralStatistic(
+                value=self.data.drawsProcessingTime, format=''
+            )
+            d['Types of draws'] = GeneralStatistic(
+                value=[f'{i}: {k}' for i, k in self.data.typesOfDraws.items()],
+                format='',
             )
         if self.data.bootstrap is not None:
-            d['Bootstrapping time'] = self.data.bootstrap_time, ''
-        d['Nbr of threads'] = self.data.numberOfThreads, ''
+            d['Bootstrapping time'] = GeneralStatistic(
+                value=self.data.bootstrap_time, format=''
+            )
+        d['Nbr of threads'] = GeneralStatistic(
+            value=self.data.numberOfThreads, format=''
+        )
         return d
 
     def printGeneralStatistics(self):
@@ -898,7 +935,9 @@ class bioResults:
                 if onlyRobust:
                     arow = {
                         'Value': b.value,
-                        'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
+                        'Active bound': {True: 1.0, False: 0.0}[
+                            b.isBoundActive()
+                        ],
                         'Rob. Std err': b.robust_stdErr,
                         'Rob. t-test': b.robust_tTest,
                         'Rob. p-value': b.robust_pValue,
@@ -906,7 +945,9 @@ class bioResults:
                 else:
                     arow = {
                         'Value': b.value,
-                        'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
+                        'Active bound': {True: 1.0, False: 0.0}[
+                            b.isBoundActive()
+                        ],
                         'Std err': b.stdErr,
                         't-test': b.tTest,
                         'p-value': b.pValue,
@@ -959,9 +1000,7 @@ class bioResults:
                 if p not in self.data.betaNames:
                     unknown.append(p)
             if unknown:
-                logger.warning(
-                    f'Unknown parameters are ignored: {unknown}'
-                )
+                logger.warning(f'Unknown parameters are ignored: {unknown}')
         columns = [
             'Covariance',
             'Correlation',
@@ -1098,15 +1137,15 @@ class bioResults:
             h += '</tr>\n'
         h += '</table>\n'
 
-        h += '<p>Smallest eigenvalue: {:.6g}</p>\n'.format(
-            self.data.smallestEigenValue
+        h += (
+            f'<p>Smallest eigenvalue: '
+            f'{self.data.smallestEigenValue:.6g}</p>\n'
         )
-        h += '<p>Largest eigenvalue: {:.6g}</p>\n'.format(
-            self.data.largestEigenValue
+        h += (
+            f'<p>Largest eigenvalue: '
+            f'{self.data.largestEigenValue:.6g}</p>\n'
         )
-        h += '<p>Condition number: {:.6g}</p>\n'.format(
-            self.data.conditionNumber
-        )
+        h += f'<p>Condition number: ' f'{self.data.conditionNumber:.6g}</p>\n'
         if np.abs(self.data.smallestEigenValue) <= 1.0e-5:
             h += (
                 '<p>The second derivatives matrix is close to singularity. '
@@ -1467,18 +1506,48 @@ class bioResults:
             f.write(self.getF12(robustStdErr))
         logger.general(f'Results saved in file {self.data.F12FileName}')
 
+    def likelihood_ratio_test(self, other_model, significance_level=0.05):
+        """This function performs a likelihood ratio test between a restricted
+        and an unrestricted model. The "self" model can be either the
+        restricted or the unrestricted.
+
+        :param other_model: other model to perform the test.
+        :type other_model: biogeme.results.bioResults
+
+        :param significance_level: level of significance of the test. Default: 0.05
+        :type significance_level: float
+
+        :return: a tuple containing:
+
+                  - a message with the outcome of the test
+                  - the statistic, that is minus two times the difference
+                    between the loglikelihood  of the two models
+                  - the threshold of the chi square distribution.
+
+        :rtype: LRTuple(str, float, float)
+
+        """
+        LR = self.data.logLike
+        LU = other_model.data.logLike
+        KR = self.data.nparam
+        KU = other_model.data.nparam
+        return tools.likelihood_ratio_test(
+            (LU, KU), (LR, KR), significance_level
+        )
+
 
 def compileEstimationResults(
-        dict_of_results,
-        statistics=(
-            'Number of estimated parameters',
-            'Sample size',
-            'Final log likelihood',
-            'Akaike Information Criterion',
-            'Bayesian Information Criterion',
-        ),
-        include_parameter_estimates=True,
+    dict_of_results,
+    statistics=(
+        'Number of estimated parameters',
+        'Sample size',
+        'Final log likelihood',
+        'Akaike Information Criterion',
+        'Bayesian Information Criterion',
+    ),
+    include_parameter_estimates=True,
 ):
+
     """Compile estimation results into a common table
 
     :param dict_of_results: dictionary where the keys are the names of
@@ -1517,4 +1586,4 @@ def compileEstimationResults(
                 for name, value in betas.items():
                     df.loc[name, col] = value
 
-    return df
+    return df.fillna('')

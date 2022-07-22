@@ -16,7 +16,7 @@
 import numpy as np
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
-import biogeme.cexpressions as ee
+import biogeme.cythonbiogeme as ee
 
 
 def isNumeric(obj):
@@ -1006,7 +1006,7 @@ class Expression:
             s = dict(s, **d)
         return s
 
-    
+
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
         store them in a dictionary.
@@ -1090,6 +1090,42 @@ class Expression:
         """
         for e in self.children:
             e.setUniqueId(idsOfElementaryExpressions)
+
+    def rename_elementary(self, names, prefix=None, suffix=None):
+        """ Rename elementary expressions by adding a prefix and/or a suffix
+
+        :param names: names of expressions to rename
+        :type names: list(str)
+
+        :param prefix: if not None, the expression is renamed, with a
+            prefix defined by this argument.
+        :type prefix: str
+
+        :param suffix: if not None, the expression is renamed, with a
+            suffix defined by this argument.
+        :type suffix: str
+        """
+        for e in self.children:
+            e.rename_elementary(names, prefix=prefix, suffix=suffix)
+            
+    def fix_betas(self, beta_values, prefix=None, suffix=None):
+        """Fix all the values of the beta parameters appearing in the dictionary
+
+        :param beta_values: dictionary containing the betas to be
+            fixed (as key) and their value.
+        :type beta_values: dict(str: float)
+
+        :param prefix: if not None, the parameter is renamed, with a
+            prefix defined by this argument.
+        :type prefix: str
+
+        :param suffix: if not None, the parameter is renamed, with a
+            suffix defined by this argument.
+        :type suffix: str
+
+        """
+        for e in self.children:
+            e.fix_betas(beta_values, prefix=prefix, suffix=suffix)
 
     def setSpecificIndices(
         self,
@@ -2362,6 +2398,26 @@ class Elementary(Expression):
 
         return None
 
+    def rename_elementary(self, names, prefix=None, suffix=None):
+        """ Rename elementary expressions by adding a prefix and/or a suffix
+
+        :param names: names of expressions to rename
+        :type names: list(str)
+
+        :param prefix: if not None, the expression is renamed, with a
+            prefix defined by this argument.
+        :type prefix: str
+
+        :param suffix: if not None, the expression is renamed, with a
+            suffix defined by this argument.
+        :type suffix: str
+        """
+        if self.name in names:
+            if prefix is not None:
+                self.name = f'{prefix}{self.name}'
+            if suffix is not None:
+                self.name = f'{self.name}{suffix}'
+                
     def setUniqueId(self, idsOfElementaryExpressions):
         """
         Provides a unique id to the elementary expressions. Overloads the
@@ -2712,13 +2768,13 @@ class Variable(Elementary):
         return {}
 
 
-    
+
     def checkAllVariablesInsidePanelTrajectory(self):
         return self.isContainedIn(
             'PanelLikelihoodTrajectory'
         )
 
-        
+
     def audit(self, database=None):
         """Performs various checks on the expressions.
 
@@ -3070,7 +3126,33 @@ class Beta(Elementary):
         self.betaId = None
 
     def __str__(self):
-        return f'{self.name}({self.initValue})'
+        if self.status == 0:
+            return f'{self.name}(init={self.initValue})'
+        return f'{self.name}(fixed={self.initValue})'
+
+    def fix_betas(self, beta_values, prefix=None, suffix=None):
+        """Fix all the values of the beta parameters appearing in the dictionary
+
+        :param beta_values: dictionary containing the betas to be
+            fixed (as key) and their value.
+        :type beta_values: dict(str: float)
+
+        :param prefix: if not None, the parameter is renamed, with a
+            prefix defined by this argument.
+        :type prefix: str
+
+        :param suffix: if not None, the parameter is renamed, with a
+            suffix defined by this argument.
+        :type suffix: str
+
+        """
+        if self.name in beta_values:
+            self.initValue = beta_values[self.name]
+            self.status = 1
+            if prefix is not None:
+                self.name = f'{prefix}{self.name}'
+            if suffix is not None:
+                self.name = f'{self.name}{suffix}'
 
     def setOfBetas(self, free=True, fixed=False):
         """Extract the set of parameters from the expression. Overload the

@@ -19,6 +19,7 @@ for specific services to Biogeme
 
 import numpy as np
 import pandas as pd
+from collections import namedtuple
 
 import biogeme.exceptions as excep
 import biogeme.filenames as bf
@@ -28,6 +29,7 @@ from biogeme import draws
 
 from biogeme.expressions import Variable, isNumeric, Numeric
 
+EstimationValidation = namedtuple('EstimationValidation', 'estimation validation')
 
 class Database:
     """Class that contains and prepare the database."""
@@ -1012,7 +1014,10 @@ class Database:
                 pd.concat(theSlices[:i] + theSlices[i + 1 :])
             )
             validationSets.append(v)
-        return zip(estimationSets, validationSets)
+        return [
+            EstimationValidation(estimation=e, validation=v)
+            for e, v in zip(estimationSets, validationSets)
+        ]
 
     def isPanel(self):
         """Tells if the data is panel or not.

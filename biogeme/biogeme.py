@@ -22,7 +22,7 @@ import pandas as pd
 import tqdm
 
 import biogeme.database as db
-import biogeme.cbiogeme as cb
+import biogeme.cythonbiogeme as cb
 import biogeme.expressions as eb
 import biogeme.results as res
 import biogeme.exceptions as excep
@@ -461,7 +461,7 @@ class BIOGEME:
 
         # List of tuples (ell, u) containing the lower and upper bounds
         # for each free parameter
-        self.bounds = list()
+        self.bounds = []
         for x in self.freeBetaNames:
             self.bounds.append(
                 (self.allFreeBetas[x].lb, self.allFreeBetas[x].ub)
@@ -1027,12 +1027,13 @@ class BIOGEME:
         allSimulationResults = []
         for v in validationData:
             # v[0] is the estimation data set
-            self.database = db.Database('Estimation data', v[0])
+            database = db.Database('Estimation data', v.estimation)
             self.loglike.changeInitValues(estimationResults.getBetaValues())
-            results = self.estimate()
+            estBiogeme = BIOGEME(database, self.loglike)
+            results = estBiogeme.estimate()
             simulate = {'Loglikelihood': self.loglike}
             simBiogeme = BIOGEME(
-                db.Database('Validation data', v[1]), simulate
+                db.Database('Validation data', v.validation), simulate
             )
             simResult = simBiogeme.simulate(results.getBetaValues())
             allSimulationResults.append(simResult)
@@ -1129,7 +1130,7 @@ class BIOGEME:
                     self.logger.warning(
                         f'Parameter {x} not present in the model'
                     )
-            betaValues = list()
+            betaValues = []
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])

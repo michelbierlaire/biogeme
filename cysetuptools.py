@@ -141,6 +141,7 @@ def setup(cythonize=True, **kwargs):
     """
     this_dir = op.dirname(__file__)
     setup_cfg_file = op.join(this_dir, 'setup.cfg')
+    print(f'********  Read setup file {setup_cfg_file}')
     cythonize = _str_to_bool(os.environ.get('CYTHONIZE', cythonize))
     profile_cython = _str_to_bool(os.environ.get('PROFILE_CYTHON', False))
     debug = _str_to_bool(os.environ.get('DEBUG', False))

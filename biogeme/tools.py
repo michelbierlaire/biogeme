@@ -9,9 +9,10 @@
 # Too constraining
 # pylint: disable=invalid-name, too-many-locals
 
+import itertools
+from collections import namedtuple
 import numpy as np
 import pandas as pd
-import itertools
 from scipy.stats import chi2
 from scipy.integrate import dblquad
 import biogeme.messaging as msg
@@ -20,9 +21,9 @@ from biogeme.expressions import Expression
 
 logger = msg.bioMessage()
 
-
+LRTuple = namedtuple('LRTuple', 'message statistic threshold')
 def findiff_g(theFunction, x):
-    """Calculates the gradient of a function :math`f` using finite differences
+    """Calculates the gradient of a function :math:`f` using finite differences
 
     :param theFunction: A function object that takes a vector as an
                         argument, and returns a tuple. The first
@@ -256,7 +257,7 @@ def countNumberOfGroups(df, column):
     return result
 
 
-def likelihood_ratio_test(model1, model2, significance_level=0.95):
+def likelihood_ratio_test(model1, model2, significance_level=0.05):
     """This function performs a likelihood ratio test between a
     restricted and an unrestricted model.
 
@@ -268,7 +269,7 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
                    the number of estimated parameters.
     :type model2: tuple(float, int)
 
-    :param significance_level: level of significance of the test. Default: 0.95
+    :param significance_level: level of significance of the test. Default: 0.05
     :type significance_level: float
 
     :return: a tuple containing:
@@ -278,7 +279,7 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
                     between the loglikelihood  of the two models
                   - the threshold of the chi square distribution.
 
-    :rtype: (str, float, float)
+    :rtype: LRTuple(str, float, float)
 
     :raise biogemeError: if the unrestricted model has a lower log
         likelihood than the restricted model.
@@ -310,41 +311,47 @@ def likelihood_ratio_test(model1, model2, significance_level=0.95):
 
     stat = -2 * (loglike_r - loglike_ur)
     chi_df = df_ur - df_r
-    threshold = chi2.ppf(significance_level, chi_df)
+    threshold = chi2.ppf(1-significance_level, chi_df)
     if stat <= threshold:
-        final_msg = f'H0 cannot be rejected at level {significance_level}'
+        final_msg = f'H0 cannot be rejected at level {100*significance_level:.1f}%'
     else:
-        final_msg = f'H0 can be rejected at level {significance_level}'
-    return final_msg, stat, threshold
+        final_msg = f'H0 can be rejected at level {100*significance_level:.1f}%'
+    return LRTuple(
+        message=final_msg,
+        statistic=stat,
+        threshold=threshold
+    )
 
 
 def flatten_database(df, merge_id, row_name=None, identical_columns=None):
-    """Combine several rows of a Pandas database into one. For instance,
-    consider the following database:
+    """Combine several rows of a Pandas database into one.
+    For instance, consider the following database::
 
-       ID  Age  Cost   Name
-    0   1   23    34  Item3
-    1   1   23    45  Item4
-    2   1   23    12  Item7
-    3   2   45    65  Item3
-    4   2   45    34  Item7
+           ID  Age  Cost   Name
+        0   1   23    34  Item3
+        1   1   23    45  Item4
+        2   1   23    12  Item7
+        3   2   45    65  Item3
+        4   2   45    34  Item7
+
+
 
     If row_name is 'Name', the function generates the same data in the
-    following format:
+    following format::
 
-        Age  Item3_Cost  Item4_Cost  Item7_Cost
-    ID
-    1    23          34        45.0          12
-    2    45          65         NaN          34
+            Age  Item3_Cost  Item4_Cost  Item7_Cost
+        ID
+        1    23          34        45.0          12
+        2    45          65         NaN          34
+
 
     If row_name is None, the function generates the same data in the
-    following format:
+    following format::
 
-
-        Age  1_Cost 1_Name  2_Cost 2_Name  3_Cost 3_Name
-    ID
-    1    23      34  Item3      45  Item4    12.0  Item7
-    2    45      65  Item3      34  Item7     NaN    NaN
+            Age  1_Cost 1_Name  2_Cost 2_Name  3_Cost 3_Name
+        ID
+        1    23      34  Item3      45  Item4    12.0  Item7
+        2    45      65  Item3      34  Item7     NaN    NaN
 
     :param df: initial data frame
     :type df: pandas.DataFrame
@@ -577,13 +584,13 @@ def covariance_cross_nested(i, j, nests):
             p2 = (1.0 / mu_m) - 2
             G_sum += the_sum ** (1.0 / mu_m)
             if alpha_i != 0:
-                Gi_sum += alpha_i ** mu_m * y_i ** (mu_m - 1) * the_sum ** p1
+                Gi_sum += alpha_i**mu_m * y_i ** (mu_m - 1) * the_sum**p1
             if alpha_j != 0:
-                Gj_sum += alpha_j ** mu_m * y_j ** (mu_m - 1) * the_sum ** p1
+                Gj_sum += alpha_j**mu_m * y_j ** (mu_m - 1) * the_sum**p1
             if mu_m != 1.0 and alpha_i != 0 and alpha_j != 0:
                 Gij_sum += (
                     (1 - mu_m)
-                    * the_sum ** p2
+                    * the_sum**p2
                     * (alpha_i * alpha_j) ** mu_m
                     * (y_i * y_j) ** (mu_m - 1)
                 )
@@ -772,7 +779,9 @@ def calculate_correlation(nests, results, alternative_names=None):
         :return: calculated value
         :rtype: float
 
-        :raise biogemeError: if the input value is not an expression or a float.
+        :raise biogemeError: if the input value is not an expression
+            or a float.
+
         """
 
         if isinstance(expr, Expression):
@@ -795,13 +804,12 @@ def calculate_correlation(nests, results, alternative_names=None):
             }
             return mu_m, estimated_alpha_m
         return mu_m, [
-            alt
-            if alternative_names is None
-            else alternative_names[alt] for alt in alpha_m]
+            alt if alternative_names is None else alternative_names[alt]
+            for alt in alpha_m
+        ]
 
     estimated_nests = tuple(numerical_tuple(m) for m in nests)
 
     if cnl:
         return correlation_cross_nested(estimated_nests)
     return correlation_nested(estimated_nests)
-

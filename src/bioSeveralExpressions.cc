@@ -56,7 +56,15 @@ std::vector<bioReal > bioSeveralExpressions::getValues() {
   for (std::vector<bioExpression*>::iterator i = theExpressions.begin() ;
        i != theExpressions.end() ;
        ++i) {
-    results.push_back((*i)->getValue()) ;
+    bioReal res ;
+    try {
+      res = (*i)->getValue() ;
+    }
+    //    catch(bioExceptions& e) {
+    catch(...) {
+      res = std::numeric_limits<bioReal>::quiet_NaN() ;
+    }
+    results.push_back(res) ;
   }
   return results ;
 }

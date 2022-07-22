@@ -592,7 +592,6 @@ void biogeme::simulateSeveralFormulas(std::vector<std::vector<bioString> > formu
 				      bioUInt t,
 				      std::vector< std::vector<bioReal> > data,
 				      bioReal* results) {
-
   nbrOfThreads = t ;
   theThreadMemorySimul.resize(nbrOfThreads) ;
   theThreadMemorySimul.setFormulas(formulas) ;
