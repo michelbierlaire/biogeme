@@ -238,7 +238,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
         specification.  The number of entries should be the number of
         thresholds, minus one. If None, for each interval, the
         parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
-        where vaer is the name of the variable. Default: none.
+        where var is the name of the variable. Default: none.
     :type betas:
         list(biogeme.expresssions.Beta)
 
@@ -255,6 +255,12 @@ def piecewiseFormula(variable, thresholds, betas=None):
     .. seealso:: :meth:`piecewiseVariables`
 
     """
+    if not isinstance(variable, str):
+        errorMsg = (
+            'The first argument of piecewiseFormula must be the name of a variable.'
+        )
+        raise excep.biogemeError(errorMsg)
+    
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
