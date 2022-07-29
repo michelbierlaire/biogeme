@@ -13,7 +13,7 @@ and the model specification.
 # pylint: disable=too-many-instance-attributes, too-many-lines,
 # pylint: disable=too-many-function-args, invalid-unary-operand-type
 
-
+import glob
 import multiprocessing as mp
 from datetime import datetime
 import pickle
@@ -31,6 +31,12 @@ import biogeme.messaging as msg
 import biogeme.optimization as opt
 from biogeme import tools
 from biogeme.algorithms import functionToMinimize
+
+
+logger = msg.bioMessage()
+"""Logger that controls the output of
+        messages to the screen and log file.
+        Type: class :class:`biogeme.messaging.bioMessage`."""
 
 
 # import yep
@@ -116,18 +122,13 @@ class BIOGEME:
 
         """
 
-        self.logger = msg.bioMessage()
-        """Logger that controls the output of
-        messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`."""
-
         if not skipAudit:
             database.data = database.data.replace({True: 1, False: 0})
             listOfErrors, listOfWarnings = database._audit()
             if listOfWarnings:
-                self.logger.warning('\n'.join(listOfWarnings))
+                logger.warning('\n'.join(listOfWarnings))
             if listOfErrors:
-                self.logger.warning('\n'.join(listOfErrors))
+                logger.warning('\n'.join(listOfErrors))
                 raise excep.biogemeError('\n'.join(listOfErrors))
 
         self.loglikeName = 'loglike'
@@ -175,21 +176,24 @@ class BIOGEME:
             """
 
             if self.database.isPanel():
-                dict_of_variables = formulas.dictOfVariablesOutsidePanelTrajectory()
+                dict_of_variables = (
+                    formulas.dictOfVariablesOutsidePanelTrajectory()
+                )
                 if dict_of_variables:
                     err_msg = (
                         f'Error in the loglikelihood function. '
-                        f'Some variables are not inside PanelLikelihoodTrajectory: '
+                        f'Some variables are not inside '
+                        f'PanelLikelihoodTrajectory: '
                         f'{dict_of_variables.keys()} .'
                         f'If the database is organized as panel data, '
                         f'all variables must be used inside a '
                         f'PanelLikelihoodTrajectory. '
-                        f'If it is not consistent with your model, generate a flat '
+                        f'If it is not consistent with your model, '
+                        f'generate a flat '
                         f'version of the data using the function '
                         f'`generateFlatPanelDataframe`.'
                     )
                     raise excep.biogemeError(err_msg)
-
 
             self.weight = None
             """ Object of type :class:`biogeme.expressions.Expression`
@@ -232,7 +236,7 @@ class BIOGEME:
         if suggestScales:
             suggestedScales = self.database.suggestScaling()
             if not suggestedScales.empty:
-                self.logger.detailed(
+                logger.detailed(
                     'It is suggested to scale the following variables.'
                 )
                 for _, row in suggestedScales.iterrows():
@@ -241,19 +245,19 @@ class BIOGEME:
                         'because the largest (abs) value is\t'
                         f'{row["Largest"]}'
                     )
-                    self.logger.detailed(error_msg)
+                    logger.detailed(error_msg)
                 error_msg = (
                     'To remove this feature, set the parameter '
                     'suggestScales to False when creating the '
                     'BIOGEME object.'
                 )
-                self.logger.detailed(error_msg)
-
-        if not skipAudit:
-            self._audit()
+                logger.detailed(error_msg)
 
         self._prepareDatabaseForFormula()
         self._prepareLiterals()
+        if not skipAudit:
+            self._audit()
+
         self.theC = cb.pyBiogeme(len(self.freeBetaNames))
         if self.database.isPanel():
             self.theC.setPanel(True)
@@ -364,9 +368,9 @@ class BIOGEME:
                 )
                 listOfWarnings.append(theWarning)
         if listOfWarnings:
-            self.logger.warning('\n'.join(listOfWarnings))
+            logger.warning('\n'.join(listOfWarnings))
         if listOfErrors:
-            self.logger.warning('\n'.join(listOfErrors))
+            logger.warning('\n'.join(listOfErrors))
             raise excep.biogemeError('\n'.join(listOfErrors))
 
     def _generateDraws(self, numberOfDraws):
@@ -407,7 +411,7 @@ class BIOGEME:
             if sample == 1.0:
                 self.database.useFullSample()
             else:
-                self.logger.detailed(f'Use {100*sample}% of the data.')
+                logger.detailed(f'Use {100*sample}% of the data.')
                 if self.database.isPanel():
                     self.database.sampleIndividualMapWithoutReplacement(
                         sample, self.columnForBatchSamplingWeights
@@ -551,7 +555,7 @@ class BIOGEME:
         self._prepareDatabaseForFormula(batch)
         f = self.theC.calculateLikelihood(x, self.fixedBetaValues)
 
-        self.logger.detailed(
+        logger.detailed(
             f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
         )
 
@@ -625,7 +629,7 @@ class BIOGEME:
         if bhhh:
             bhhhmsg = f'BHHH norm:  {np.linalg.norm(bh):10.1g}'
         gradnorm = np.linalg.norm(g)
-        self.logger.general(
+        logger.general(
             f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
             f' Gradient norm: {gradnorm:10.1g}'
             f' {hmsg} {bhhhmsg}'
@@ -743,9 +747,9 @@ class BIOGEME:
                     ell = line.split('=')
                     betas[ell[0].strip()] = float(ell[1])
             self.changeInitValues(betas)
-            self.logger.detailed(f'Parameter values restored from {filename}')
+            logger.detailed(f'Parameter values restored from {filename}')
         except IOError:
-            self.logger.warning(
+            logger.warning(
                 f'Cannot read file {filename}. Statement is ignored.'
             )
 
@@ -790,12 +794,17 @@ class BIOGEME:
 
     def estimate(
         self,
+        recycle=False,
         bootstrap=0,
         algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
         algoParameters=None,
     ):
 
         """Estimate the parameters of the model.
+
+        :param recycle: if True, the estimation results are read from
+            the pickle file.
+        :type recycle: bool
 
         :param bootstrap: number of bootstrap resampling used to
                calculate the variance-covariance matrix using
@@ -828,7 +837,30 @@ class BIOGEME:
 
         :raises biogemeError: if no expression has been provided for the
             likelihood
+
         """
+        if recycle:
+            pickle_files = self.files_of_type('pickle')
+            pickle_files.sort()
+            if pickle_files:
+                pickle_to_read = pickle_files[-1]
+                if len(pickle_files) > 1:
+                    warning_msg = (
+                        f'Several pickle files are available for '
+                        f'this model: {pickle_files}. '
+                        f'The file {pickle_to_read} '
+                        f'is used to load the results.'
+                    )
+                    logger.warning(warning_msg)
+                results = res.bioResults(pickleFile=pickle_to_read)
+                logger.general(
+                    f'Estimation results read from {pickle_to_read}'
+                )
+                return results
+            warning_msg = (
+                'Recycling was requested, but no pickle file was found'
+            )
+            logger.warning(warning_msg)
         if self.loglike is None:
             raise excep.biogemeError(
                 'No log likelihood function has been specified'
@@ -840,7 +872,7 @@ class BIOGEME:
             )
 
         if self.saveIterations:
-            self.logger.general(
+            logger.general(
                 f'*** Initial values of the parameters are '
                 f'obtained from the file {self._saveIterationsFileName()}'
             )
@@ -872,10 +904,10 @@ class BIOGEME:
                 'the analytical hessian. Finite differences'
                 ' is tried instead.'
             )
-            self.logger.warning(warning_msg)
+            logger.warning(warning_msg)
             finDiffHessian = self.likelihoodFiniteDifferenceHessian(xstar)
             if not np.isfinite(fgHb[2]).all():
-                self.logger.warning(
+                logger.warning(
                     'Numerical problems with finite '
                     'difference hessian as well.'
                 )
@@ -891,12 +923,12 @@ class BIOGEME:
 
             start_time = datetime.now()
 
-            self.logger.general(
+            logger.general(
                 f'Re-estimate the model {bootstrap} times for bootstrapping'
             )
             self.bootstrap_results = np.empty(shape=[bootstrap, len(xstar)])
-            hideProgress = self.logger.screenLevel == 0
-            self.logger.temporarySilence()
+            hideProgress = logger.screenLevel == 0
+            logger.temporarySilence()
             for b in tqdm.tqdm(range(bootstrap), disable=hideProgress):
                 if self.database.isPanel():
                     sample = self.database.sampleIndividualMapWithReplacement()
@@ -909,7 +941,7 @@ class BIOGEME:
 
             # Time needed to generate the bootstrap results
             self.bootstrap_time = datetime.now() - start_time
-            self.logger.resume()
+            logger.resume()
         rawResults = res.rawResults(
             self, xstar, fgHb, bootstrap=self.bootstrap_results
         )
@@ -1044,7 +1076,7 @@ class BIOGEME:
             pickleFileName = bf.getNewFileName(fname, 'pickle')
             with open(pickleFileName, 'wb') as f:
                 pickle.dump(allSimulationResults, f)
-            self.logger.general(
+            logger.general(
                 f'Simulation results saved in file {pickleFileName}'
             )
 
@@ -1127,15 +1159,13 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    self.logger.warning(
-                        f'Parameter {x} not present in the model'
-                    )
+                    logger.warning(f'Parameter {x} not present in the model')
             betaValues = []
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])
                 else:
-                    self.logger.warning(
+                    logger.warning(
                         f'Simulation: initial value of {x} not provided.'
                     )
                     betaValues.append(self.betaInitValues[i])
@@ -1159,12 +1189,12 @@ class BIOGEME:
             self.theC.setDataMap(self.database.individualMap)
 
         for v in self.formulas.values():
-            self.logger.debug(f'Audit {v}')
+            logger.debug(f'Audit {v}')
             listOfErrors, listOfWarnings = v.audit(database=self.database)
             if listOfWarnings:
-                self.logger.warning('\n'.join(listOfWarnings))
+                logger.warning('\n'.join(listOfWarnings))
             if listOfErrors:
-                self.logger.warning('\n'.join(listOfErrors))
+                logger.warning('\n'.join(listOfErrors))
                 raise excep.biogemeError('\n'.join(listOfErrors))
 
         result = self.theC.simulateSeveralFormulas(
@@ -1216,22 +1246,20 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    self.logger.warning(
-                        f'Parameter {x} not present in the model'
-                    )
-            betaValues = list()
+                    logger.warning(f'Parameter {x} not present in the model')
+            betaValues = []
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])
                 else:
-                    self.logger.warning(
+                    logger.warning(
                         f'Simulation: initial value of {x} not provided.'
                     )
                     betaValues.append(self.betaInitValues[i])
 
         output = pd.DataFrame(index=self.database.data.index)
         for k, v in self.formulas.items():
-            self.logger.detailed(f'Simulate {k}')
+            logger.detailed(f'Simulate {k}')
             signature = v.getSignature()
             result = self.theC.simulateFormula(
                 signature, betaValues, self.fixedBetaValues, self.database.data
@@ -1309,13 +1337,39 @@ class BIOGEME:
         :type verbosity: int
 
         """
-        self.logger.createLog(fileLevel=verbosity, fileName=self.modelName)
+        logger.createLog(fileLevel=verbosity, fileName=self.modelName)
 
     def __str__(self):
         r = f'{self.modelName}: database [{self.database.name}]'
         r += str(self.formulas)
         print(r)
         return r
+
+    def files_of_type(self, extension, all_files=False):
+        """Identify the list of files with a given extension in the
+            local directory
+
+        :param extension: extension of the requested files (without
+            the dot): 'pickle', or 'html'
+        :type extension: str
+
+        :param all_files: if all_files is False, only files containing
+            the name of the model are identified. If all_files is
+            True, all files with the requested extension are
+            identified.
+        :type all_files: bool
+
+        :return: list of files with the requested extension.
+        :rtype: list(str)
+
+        """
+        if all_files:
+            pattern = f'*.{extension}'
+            return glob.glob(pattern)
+        pattern1 = f'{self.modelName}.{extension}'
+        pattern2 = f'{self.modelName}~*.{extension}'
+        files = glob.glob(pattern1) + glob.glob(pattern2)
+        return files
 
 
 class negLikelihood(functionToMinimize):
@@ -1408,7 +1462,6 @@ class negLikelihood(functionToMinimize):
         return -self.fv, -self.gv
 
     def f_g_h(self, batch=None):
-        logger = msg.bioMessage()
         if self.x is None:
             raise excep.biogemeError('The variables must be set first.')
 
