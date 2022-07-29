@@ -22,6 +22,8 @@ from biogeme.expressions import Expression
 logger = msg.bioMessage()
 
 LRTuple = namedtuple('LRTuple', 'message statistic threshold')
+
+
 def findiff_g(theFunction, x):
     """Calculates the gradient of a function :math:`f` using finite differences
 
@@ -261,11 +263,11 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
     """This function performs a likelihood ratio test between a
     restricted and an unrestricted model.
 
-    :param model1: the final loglikelood of one model, and the number of
+    :param model1: the final loglikelihood of one model, and the number of
                    estimated parameters.
     :type model1: tuple(float, int)
 
-    :param model2: the final loglikelood of the other model, and
+    :param model2: the final loglikelihood of the other model, and
                    the number of estimated parameters.
     :type model2: tuple(float, int)
 
@@ -311,16 +313,16 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
 
     stat = -2 * (loglike_r - loglike_ur)
     chi_df = df_ur - df_r
-    threshold = chi2.ppf(1-significance_level, chi_df)
+    threshold = chi2.ppf(1 - significance_level, chi_df)
     if stat <= threshold:
-        final_msg = f'H0 cannot be rejected at level {100*significance_level:.1f}%'
+        final_msg = (
+            f'H0 cannot be rejected at level {100*significance_level:.1f}%'
+        )
     else:
-        final_msg = f'H0 can be rejected at level {100*significance_level:.1f}%'
-    return LRTuple(
-        message=final_msg,
-        statistic=stat,
-        threshold=threshold
-    )
+        final_msg = (
+            f'H0 can be rejected at level {100*significance_level:.1f}%'
+        )
+    return LRTuple(message=final_msg, statistic=stat, threshold=threshold)
 
 
 def flatten_database(df, merge_id, row_name=None, identical_columns=None):
