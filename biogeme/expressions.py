@@ -13,10 +13,15 @@
 # pylint: disable=invalid-name, too-many-locals, too-many-arguments
 # pylint: disable=too-many-instance-attributes, too-many-lines
 
+import copy
 import numpy as np
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
 import biogeme.cythonbiogeme as ee
+from biogeme.idmanager import IdManager
+from deepdiff import DeepDiff
+
+logger = msg.bioMessage()
 
 
 def isNumeric(obj):
@@ -39,36 +44,11 @@ class Expression:
     def __init__(self):
         """Constructor"""
 
-        self.logger = msg.bioMessage()
-        """Logger that controls the output of
-        messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`.
-        """
-
         self.parent = None  #: Parent expression
 
         self.children = []  #: List of children expressions
 
-        self.elementaryExpressionIndex = None
-        """Indices of the elementary expressions (dict)"""
-
-        self.allFreeBetas = {}  #: dict of free parameters
-
-        self.freeBetaNames = []  #: list of names of free parameters
-
-        self.allFixedBetas = {}  #: dict of fixed parameters
-
-        self.fixedBetaNames = []  #: list of names of fixed parameters
-
-        self.allRandomVariables = None  #: dict of random variables
-
-        self.variableNames = None  #: list of variables names
-
-        self.randomVariableNames = None  #: list of random variables names
-
-        self.allDraws = None  #: dict of draws
-
-        self.drawNames = None  #: list of draw types
+        self.id_manager = None
 
         self.numberOfDraws = None
         """number of draws for Monte Carlo integration
@@ -78,22 +58,6 @@ class Expression:
         """Row of the database where the values of the variables are found
         """
 
-        self.betaIds = None
-        """List of ids of the free beta parameters (those to be estimated)
-        """
-
-        self.freeBetaValues = None
-        """List of values of the free beta parameters (those to be estimated)
-        """
-
-        self.fixedBetaValues = None
-        """ List of values of the fixed beta parameters (those to be estimated)
-        """
-
-        self.expression_prepared = False
-        """ If True, the expression is prepared to be used.
-        """
-
         self.cpp = ee.pyEvaluateOneExpression()
         """ Interface to the C++ implementation
         """
@@ -101,6 +65,52 @@ class Expression:
         self.missingData = 99999
         """ Value interpreted as missing data
         """
+
+
+    def getStatusIdManager(self):
+        """Check the elementary expressions that are associated with an ID manager.
+
+        :return: two sets of elementary expressions, those with and without an ID manager.
+        :rtype: tuple(set(str), set(str))
+        """
+        with_id = set()
+        without_id = set()
+        for e in self.children:
+            yes, no = e.getStatusIdManager()
+            with_id.update(yes)
+            without_id.update(no)
+        return with_id, without_id
+
+    def prepare(self, database, numberOfDraws=1000):
+        """Prepare the expression to be evaluated
+        
+        :param database: Biogeme database
+        :type database: biogeme.database.Database
+
+        :param numberOfDraws: number of draws for Monte-Carlo integration
+        :type number: int
+        """
+        # First, we reset the IDs, if any
+        self.setIdManager(None)
+        # Second, we calculate a new set of IDs.
+        id_manager = IdManager([self], database, numberOfDraws)
+        self.setIdManager(id_manager)
+        
+        
+    def setIdManager(self, id_manager):
+        """The ID manager contains the IDs of the elementary expressions.
+
+        It is externally created, as it may nee to coordinate the
+        numbering of several expressions. It is stored only in the
+        expressions of type Elementary.
+
+        :param id_manager: ID manager to be propagated to the
+            elementary expressions. If None, all the IDs are set to None.
+        :type if_manager: class IdManager
+        """
+        self.id_manager = id_manager
+        for e in self.children:
+            e.setIdManager(id_manager)
 
     def __repr__(self):
         """built-in function used to compute the 'official' string reputation
@@ -579,70 +589,6 @@ class Expression:
             )
         return Greater(self, other)
 
-    def _prepareFormulaForEvaluation(self, database):
-        """Extract from the formula the elementary expressions (parameters,
-        variables, random parameters) and decide a numbering convention.
-
-        :raise biogemeError: if no database is given and the
-            expressions involves variables.
-
-        :raise biogemeError: if the expression involves MonteCarlo integration,
-           and no database is provided.
-
-        """
-
-        if self.expression_prepared:
-            return
-
-        if database is not None:
-            self.variableNames = list(database.data.columns.values)
-        else:
-            variables = self.setOfVariables()
-            if variables:
-                raise excep.biogemeError(
-                    f'No database is provided and the expression '
-                    f'contains variables: {variables}'
-                )
-            self.variableNames = []
-
-        (
-            self.elementaryExpressionIndex,
-            self.allFreeBetas,
-            self.freeBetaNames,
-            self.allFixedBetas,
-            self.fixedBetaNames,
-            self.allRandomVariables,
-            self.randomVariableNames,
-            self.allDraws,
-            self.drawNames,
-        ) = defineNumberingOfElementaryExpressions([self], self.variableNames)
-
-        # List of ids of the free beta parameters (those to be estimated)
-        self.betaIds = list(range(len(self.freeBetaNames)))
-
-        # List of values of the free beta parameters (those to be estimated)
-        self.freeBetaValues = [
-            self.allFreeBetas[x].initValue for x in self.freeBetaNames
-        ]
-        # List of values of the fixed beta parameters (those to be estimated)
-        self.fixedBetaValues = [
-            self.allFixedBetas[x].initValue for x in self.fixedBetaNames
-        ]
-
-        # Draws
-        if self.requiresDraws():
-            if database is None:
-                error_msg = (
-                    'An expression involving MonteCarlo integration '
-                    'must be associated with a database.'
-                )
-                raise excep.biogemeError(error_msg)
-            database.generateDraws(
-                self.allDraws, self.drawNames, self.numberOfDraws
-            )
-
-        self.expression_prepared = True
-
     def createFunction(
         self,
         database=None,
@@ -691,27 +637,27 @@ class Expression:
                 'The provided parameters are inconsistent.'
             )
 
-        if not self.expression_prepared:
-            self._prepareFormulaForEvaluation(database)
-
-        # variables = self.setOfVariables()
-        # if variables:
-        #    raise excep.biogemeError(
-        #        'Functions can be generated only for simple expressions '
-        #        'that do not involve any variable'
-        #    )
+        with_id, without_id = self.getStatusIdManager()
+        if len(without_id) > 0:
+            if len(with_id) > 0:
+                error_msg = (
+                    f'IDs are defined for some expressions '
+                    f'[{with_id}] but not for some [{without_id}]'
+                )
+                raise excep.biogemeError(error_msg)
+            self.setIdManager(IdManager([self], database, numberOfDraws))
 
         def my_function(x):
             if isinstance(x, (float, int, np.float64)):
                 x = [float(x)]
-            if len(x) != len(self.freeBetaValues):
+            if len(x) != len(self.id_manager.free_betas_values):
                 error_msg = (
-                    f'Function is expecting an array lf length '
-                    f'{len(self.freeBetaValues)}, not {len(x)}'
+                    f'Function is expecting an array of length '
+                    f'{len(self.id_manager.free_betas_values)}, not {len(x)}'
                 )
                 excep.biogemeError(error_msg)
 
-            self.freeBetaValues = x
+            self.id_manager.free_betas_values = x
             f, g, h, b = self.getValueAndDerivatives(
                 database=database,
                 numberOfDraws=numberOfDraws,
@@ -719,6 +665,7 @@ class Expression:
                 hessian=hessian,
                 bhhh=bhhh,
                 aggregation=True,
+                prepareIds=False,
             )
 
             results = [f]
@@ -735,10 +682,11 @@ class Expression:
 
     def getValue_c(
         self,
-        betas=None,
         database=None,
+        betas=None,
         numberOfDraws=1000,
         aggregation=False,
+        prepareIds=False,
     ):
 
         """Evaluation of the expression, without the derivatives
@@ -769,6 +717,12 @@ class Expression:
         :raise biogemeError: if no database is given, and the number
             of returned values is different from one.
         """
+        if self.requiresDraws() and database is None:
+            error_msg = (
+                'An expression involving MonteCarlo integration '
+                'must be associated with a database.'
+            )
+            raise excep.biogemeError(error_msg)
 
         f, _, _, _ = self.getValueAndDerivatives(
             betas=betas,
@@ -778,6 +732,8 @@ class Expression:
             hessian=False,
             bhhh=False,
             aggregation=aggregation,
+            prepareIds=prepareIds,
+
         )
         if database is None:
             if len(f) != 1:
@@ -787,14 +743,15 @@ class Expression:
         return f
 
     def getValueAndDerivatives(
-        self,
-        betas=None,
-        database=None,
-        numberOfDraws=1000,
-        gradient=True,
-        hessian=True,
-        bhhh=True,
-        aggregation=True,
+            self,
+            betas=None,
+            database=None,
+            numberOfDraws=1000,
+            gradient=True,
+            hessian=True,
+            bhhh=True,
+            aggregation=True,
+            prepareIds=False,
     ):
         """Evaluation of the expression
 
@@ -848,13 +805,19 @@ class Expression:
         :raise biogemeError: if the expression involves MonteCarlo integration,
            and no database is provided.
         """
+        if prepareIds:
+            self.keep_id_manager = self.id_manager
+            self.prepare(database, numberOfDraws)
+        elif self.id_manager is None:
+            error_msg = f'Expression evaluated out of context. Set prepareIds to True.'
+            raise excep.biogemeError(error_msg)
 
         errors, warnings = self.audit(database)
         if warnings:
-            self.logger.warning('\n'.join(warnings))
+            logger.warning('\n'.join(warnings))
         if errors:
             error_msg = '\n'.join(errors)
-            self.logger.warning(error_msg)
+            logger.warning(error_msg)
             raise excep.biogemeError(error_msg)
 
         if (hessian or bhhh) and not gradient:
@@ -872,8 +835,6 @@ class Expression:
 
         self.numberOfDraws = numberOfDraws
 
-        if not self.expression_prepared:
-            self._prepareFormulaForEvaluation(database)
         if database is not None:
             self.cpp.setData(database.data)
             if self.embedExpression('PanelLikelihoodTrajectory'):
@@ -889,20 +850,23 @@ class Expression:
                     raise excep.biogemeError(error_msg)
 
         if betas is not None:
-            self.freeBetaValues = [
-                betas[x] if x in betas else self.allFreeBetas[x].initValue
-                for x in self.freeBetaNames
+            self.id_manager.free_betas_values = [
+                betas[x]
+                if x in betas
+                else self.id_manager.free_betas.expressions[x].initValue
+                for x in self.id_manager.free_betas.names
             ]
-            # List of values of the fixed beta parameters (those to be
-            # estimated)
+            # List of values of the fixed beta parameters (those not estimated)
             self.fixedBetaValues = [
-                betas[x] if x in betas else self.allFixedBetas[x].initValue
-                for x in self.fixedBetaNames
+                betas[x]
+                if x in betas
+                else self.id_manager.fixed_betas.expressions[x].initValue
+                for x in self.id_manager.fixed_betas.names
             ]
 
         self.cpp.setExpression(self.getSignature())
-        self.cpp.setFreeBetas(self.freeBetaValues)
-        self.cpp.setFixedBetas(self.fixedBetaValues)
+        self.cpp.setFreeBetas(self.id_manager.free_betas_values)
+        self.cpp.setFixedBetas(self.id_manager.fixed_betas_values)
         self.cpp.setMissingData(self.missingData)
 
         if self.requiresDraws():
@@ -928,13 +892,20 @@ class Expression:
         bhhhres = b if bhhh else None
 
         if aggregation:
-            return (
+            results = (
                 f[0],
                 None if gres is None else g[0],
                 None if hres is None else h[0],
                 None if bhhhres is None else b[0],
             )
-        return f, gres, hres, bhhhres
+        else:
+            results = (f, gres, hres, bhhhres)
+
+        # Now, if we had to set the IDS, we reset them as they cannot be used in another context.
+        if prepareIds:
+            # We restore the previous Id manager
+            self.setIdManager(self.keep_id_manager)
+        return results
 
     def requiresDraws(self):
         """Checks if the expression requires draws
@@ -972,6 +943,7 @@ class Expression:
         return set(self.dictOfVariables().keys())
 
     def dictOfBetas(self, free=True, fixed=False):
+
         """
         Extract the set of parameters from the expression.
 
@@ -993,7 +965,9 @@ class Expression:
         return s
 
     def dictOfVariablesOutsidePanelTrajectory(self):
-        """Recursively extract the variables appearing in the expression, that are not inside the PanelTrajecvory, and store them in a dictionary.
+        """Recursively extract the variables appearing in the
+        expression, that are not inside the PanelTrajecvory, and store
+        them in a dictionary.
 
         :return: returns a dict with the variables appearing in the
                  expression the keys being their names.
@@ -1005,7 +979,6 @@ class Expression:
             d = e.dictOfVariablesOutsidePanelTrajectory()
             s = dict(s, **d)
         return s
-
 
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
@@ -1080,19 +1053,8 @@ class Expression:
                 draws = dict(draws, **d)
         return draws
 
-    def setUniqueId(self, idsOfElementaryExpressions):
-        """Provides a unique id to the elementary expressions.
-
-        :param idsOfElementaryExpressions: dictionary mapping the name
-              of the elementary expression with their id.
-        :type idsOfElementaryExpressions: dict(string:int)
-
-        """
-        for e in self.children:
-            e.setUniqueId(idsOfElementaryExpressions)
-
     def rename_elementary(self, names, prefix=None, suffix=None):
-        """ Rename elementary expressions by adding a prefix and/or a suffix
+        """Rename elementary expressions by adding a prefix and/or a suffix
 
         :param names: names of expressions to rename
         :type names: list(str)
@@ -1107,9 +1069,10 @@ class Expression:
         """
         for e in self.children:
             e.rename_elementary(names, prefix=prefix, suffix=suffix)
-            
+
     def fix_betas(self, beta_values, prefix=None, suffix=None):
-        """Fix all the values of the beta parameters appearing in the dictionary
+        """Fix all the values of the beta parameters appearing in the
+        dictionary
 
         :param beta_values: dictionary containing the betas to be
             fixed (as key) and their value.
@@ -1126,6 +1089,12 @@ class Expression:
         """
         for e in self.children:
             e.fix_betas(beta_values, prefix=prefix, suffix=suffix)
+
+    def resetSpecificIndices(self):
+        """Reset the indices of all elementary expressions,"""
+        raise excep.biogemeError('Obsolete function. Should not be called.')
+        for e in self.children:
+            e.resetSpecificIndices()
 
     def setSpecificIndices(
         self,
@@ -1153,6 +1122,7 @@ class Expression:
         :type indicesOfDraws: dict(string:int)
 
         """
+        raise excep.biogemeError('Obsolete function. Should not be called.')
         for e in self.children:
             e.setSpecificIndices(
                 indicesOfFreeBetas,
@@ -1170,6 +1140,7 @@ class Expression:
         :type indicesOfVariables: dict(string:int)
 
         """
+        raise excep.biogemeError('Obsolete function. Should not be called.')
         for e in self.children:
             e.setVariableIndices(indicesOfVariables)
 
@@ -1338,6 +1309,7 @@ class Expression:
         if self.parent is None:
             return self
         return self.parent.getGlobalExpression()
+
 
 class BinaryOperator(Expression):
     """
@@ -1673,12 +1645,19 @@ class ComparisonOperator(BinaryOperator):
             self.right, ComparisonOperator
         ):
             print(f'Current expression: {self}')
-            print(f'Left expression: {self.left} [{isinstance(self.left, ComparisonOperator)}]')
-            print(f'Right expression: {self.right} [{isinstance(self.right, ComparisonOperator)}]')
+            print(
+                f'Left expression: {self.left} '
+                f'[{isinstance(self.left, ComparisonOperator)}]'
+            )
+            print(
+                f'Right expression: {self.right} '
+                f'[{isinstance(self.right, ComparisonOperator)}]'
+            )
             print(f'Type left expression: {type(self.left)}')
             the_warning = (
                 f'Chaining two comparisons expressions is not recommended'
-                f' as it may be ambiguous. Keep in mind that, for Biogeme, the '
+                f' as it may be ambiguous. '
+                f'Keep in mind that, for Biogeme, the '
                 f'expression (a <= x <= b) is not equivalent to (a <= x) '
                 f'and (x <= b) [{self}]'
             )
@@ -2103,30 +2082,6 @@ class Derive(UnaryOperator):
         UnaryOperator.__init__(self, child)
         # Name of the elementary expression by which the derivative is taken
         self.elementaryName = name
-        # Unique ID of the expression
-        self.elementaryIndex = None
-
-    def setUniqueId(self, idsOfElementaryExpressions):
-        """
-        Provides a unique id to the elementary expressions.
-
-        :param idsOfElementaryExpressions: dictionary mapping the name
-                of the elementary expression with their id.
-        :type idsOfElementaryExpressions: dict(string:int)
-
-        :raise biogemeError: if no index is available for an expression.
-        """
-        if self.elementaryName in idsOfElementaryExpressions:
-            self.elementaryIndex = idsOfElementaryExpressions[
-                self.elementaryName
-            ]
-        else:
-            error_msg = (
-                f'No index is available for elementary '
-                f'expression {self.elementaryName}.'
-            )
-            raise excep.biogemeError(error_msg)
-        self.child.setUniqueId(idsOfElementaryExpressions)
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2174,12 +2129,15 @@ class Derive(UnaryOperator):
         :return: list of the signatures of an expression and its children.
         :rtype: list(string)
         """
+        elementaryIndex = self.id_manager.elementary_expressions.indices[
+            self.elementaryName
+        ]
         listOfSignatures = []
         listOfSignatures += self.child.getSignature()
         mysignature = f'<{self.getClassName()}>'
         mysignature += f'{{{id(self)}}}'
         mysignature += f',{id(self.child)}'
-        mysignature += f',{self.elementaryIndex}'
+        mysignature += f',{elementaryIndex}'
         listOfSignatures += [mysignature.encode()]
         return listOfSignatures
 
@@ -2202,7 +2160,6 @@ class Integrate(UnaryOperator):
         """
         UnaryOperator.__init__(self, child)
         self.randomVariableName = name
-        self.randomVariableIndex = None
 
     def audit(self, database=None):
         """Performs various checks on the expressions.
@@ -2223,27 +2180,10 @@ class Integrate(UnaryOperator):
             listOfErrors.append(theError)
         return listOfErrors, listOfWarnings
 
-    def setUniqueId(self, idsOfElementaryExpressions):
-        """Provides a unique id to the elementary expressions. Overloads the
-        generic function
-
-        :param idsOfElementaryExpressions: dictionary mapping the name of
-                the elementary expression with their id.
-        :type idsOfElementaryExpressions: dict(string:int)
-
-        :raise biogemeError: if no index is available for a random variable.
-        """
-        if self.randomVariableName in idsOfElementaryExpressions:
-            self.randomVariableIndex = idsOfElementaryExpressions[
-                self.randomVariableName
-            ]
-        else:
-            error_msg = (
-                f'No index is available for random variable '
-                f'{self.randomVariableName}.'
-            )
-            raise excep.biogemeError(error_msg)
-        self.child.setUniqueId(idsOfElementaryExpressions)
+    def resetSpecificIndices(self):
+        """Reset the indices of all elementary expressions,"""
+        raise excep.biogemeError('Obsolete function. Should not be called.')
+        self.child.resetSpecificIndices()
 
     def setSpecificIndices(
         self,
@@ -2274,6 +2214,7 @@ class Integrate(UnaryOperator):
         :raise biogemeError: if no index is available for a random variable.
 
         """
+        raise excep.biogemeError('Obsolete function. Should not be called.')
         if self.randomVariableName in indicesOfRandomVariables:
             self.randomVariableIndex = indicesOfRandomVariables[
                 self.randomVariableName
@@ -2340,12 +2281,13 @@ class Integrate(UnaryOperator):
         :return: list of the signatures of an expression and its children.
         :rtype: list(string)
         """
+        randomVariableIndex = self.id_manager.random_variables.indices[self.randomVariableName]
         listOfSignatures = []
         listOfSignatures += self.child.getSignature()
         mysignature = f'<{self.getClassName()}>'
         mysignature += f'{{{id(self)}}}'
         mysignature += f',{id(self.child)}'
-        mysignature += f',{self.randomVariableIndex}'
+        mysignature += f',{randomVariableIndex}'
         listOfSignatures += [mysignature.encode()]
         return listOfSignatures
 
@@ -2373,7 +2315,7 @@ class Elementary(Expression):
         Expression.__init__(self)
         self.name = name  #: name of the elementary expressiom
 
-        self.uniqueId = None
+        self.elementaryIndex = None
         """The id should be unique for all elementary expressions
         appearing in a given set of formulas.
         """
@@ -2384,7 +2326,17 @@ class Elementary(Expression):
         :return: name of the expression
         :rtype: str
         """
-        return self.name
+        return f'{self.name}'
+
+    def getStatusIdManager(self):
+        """Check the elementary expressions that are associated with an ID manager.
+
+        :return: two lists of elementary expressions, those with and without an ID manager.
+        :rtype: tuple(list(str), list(str))
+        """
+        if self.id_manager is None:
+            return [], [self.name]
+        return [self.name], []
 
     def getElementaryExpression(self, name):
         """
@@ -2399,7 +2351,7 @@ class Elementary(Expression):
         return None
 
     def rename_elementary(self, names, prefix=None, suffix=None):
-        """ Rename elementary expressions by adding a prefix and/or a suffix
+        """Rename elementary expressions by adding a prefix and/or a suffix
 
         :param names: names of expressions to rename
         :type names: list(str)
@@ -2417,35 +2369,7 @@ class Elementary(Expression):
                 self.name = f'{prefix}{self.name}'
             if suffix is not None:
                 self.name = f'{self.name}{suffix}'
-                
-    def setUniqueId(self, idsOfElementaryExpressions):
-        """
-        Provides a unique id to the elementary expressions. Overloads the
-        generic function
 
-        :param idsOfElementaryExpressions: dictionary mapping the name
-              of the elementary expression with their id.
-        :type idsOfElementaryExpressions: dict(string:int)
-
-        :raise biogemeError: if no index is available for an expression.
-        """
-        if self.name in idsOfElementaryExpressions:
-            self.uniqueId = idsOfElementaryExpressions[self.name]
-            if not isinstance(self.uniqueId, int):
-                error_msg = (
-                    f'An integer is required as an ID for [{self.name}]. '
-                    f'The value [{self.uniqueId}] is of type '
-                    f'{type(self.uniqueId)}'
-                )
-                raise excep.biogemeError(error_msg)
-
-        else:
-            error_msg = (
-                f'No index is available for expression {self.name}.'
-                f' List of available indices: '
-                f'{[n for n, i in idsOfElementaryExpressions.items() ]}'
-            )
-            raise excep.biogemeError(error_msg)
 
 
 class bioDraws(Elementary):
@@ -2468,49 +2392,26 @@ class bioDraws(Elementary):
     def __str__(self):
         return f'bioDraws("{self.name}", "{self.drawType}")'
 
-    def setSpecificIndices(
-        self,
-        indicesOfFreeBetas,
-        indicesOfFixedBetas,
-        indicesOfRandomVariables,
-        indicesOfDraws,
-    ):
+    def setIdManager(self, id_manager=None):
+        """The ID manager contains the IDs of the elementary expressions.
+
+        It is externally created, as it may nee to coordinate the
+        numbering of several expressions. It is stored only in the
+        expressions of type Elementary.
+
+        :param id_manager: ID manager to be propagated to the
+            elementary expressions. If None, all the IDs are set to None.
+        :type if_manager: class IdManager
         """
-        Provide an index to all elementary expressions, specific to their type
-        Overloads the generic function.
-
-        :param indicesOfFreeBetas: dictionary mapping the name of the
-                               free betas with their index
-        :type indicesOfFreeBetas: dict(string:int)
-
-        :param indicesOfFixedBetas: dictionary mapping the name of the
-                                fixed betas with their index
-        :type indicesOfFixedBetas: dict(string:int)
-
-        :param indicesOfRandomVariables: dictionary mapping the name of the
-                                random variables with their index
-        :type indicesOfRandomVariables: dict(string:int)
-        :param indicesOfDraws: dictionary mapping the name of the draws with
-                            their index
-        :type indicesOfDraws: dict(string:int)
-
-        :raise biogemeError: if no index is available for one draw type.
-        """
-        if indicesOfDraws is None:
-            error_msg = (
-                f'No index is available for draw {self.drawType}.'
-                f' Actually, no draws have been identified.'
-            )
-            raise excep.biogemeError(error_msg)
-
-        if self.name in indicesOfDraws:
-            self.drawId = indicesOfDraws[self.name]
-        else:
-            error_msg = (
-                f'No index is available for draw {self.drawType}.'
-                f' Known types of draws: {indicesOfDraws.keys()}'
-            )
-            raise excep.biogemeError(error_msg)
+        self.id_manager = id_manager
+        if id_manager is None:
+            self.elementaryIndex = None
+            self.drawId = None
+            return
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
+            self.name
+        ]
+        self.drawId = self.id_manager.draws.indices[self.name]
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2564,7 +2465,7 @@ class bioDraws(Elementary):
         :raise biogeme.exceptions.biogemeError: if no id has been defined for
             draw
         """
-        if self.uniqueId is None:
+        if self.elementaryIndex is None:
             error_msg = (
                 f'No id has been defined for elementary '
                 f'expression {self.name}.'
@@ -2575,7 +2476,7 @@ class bioDraws(Elementary):
             raise excep.biogemeError(error_msg)
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
-        signature += f'"{self.name}",{self.uniqueId},{self.drawId}'
+        signature += f'"{self.name}",{self.elementaryIndex},{self.drawId}'
         return [signature.encode()]
 
     def dictOfDraws(self):
@@ -2588,27 +2489,6 @@ class bioDraws(Elementary):
         :rtype: dict(string:string)
         """
         return {self.name: self.drawType}
-
-    def setDrawIndex(self, idsOfDraws):
-        """
-        Provide an index to a series of draw for a random variable. Overload
-        the generic function.
-
-        :param idsOfDraws: dictionary mapping the name of the draws with
-            their id.
-        :type idsOfDraws: dict(string:int)
-
-        :raise biogemeError: if no id is available for a draw.
-        """
-        if self.name in idsOfDraws:
-            self.drawId = idsOfDraws[self.name]
-        else:
-            error_msg = (
-                f'No id is available for draw {self.name}. '
-                f'List of available indices: '
-                f'{[n for n, i in idsOfDraws.items()]}'
-            )
-            raise excep.biogemeError(error_msg)
 
     def audit(self, database=None):
         """Performs various checks on the expressions.
@@ -2737,6 +2617,28 @@ class Variable(Elementary):
         )
         raise excep.biogemeError(error_msg)
 
+    def setIdManager(self, id_manager=None):
+        """The ID manager contains the IDs of the elementary expressions.
+
+        It is externally created, as it may need to coordinate the
+        numbering of several expressions. It is stored only in the
+        expressions of type Elementary.
+
+        :param id_manager: ID manager to be propagated to the
+            elementary expressions. If None, all the IDs are set to None.
+        :type if_manager: class IdManager
+        """
+        
+        self.id_manager = id_manager
+        if id_manager is None:
+            self.elementaryIndex = None
+            self.variableId = None
+            return
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
+            self.name
+        ]
+        self.variableId = self.id_manager.variables.indices[self.name]
+
     def dictOfVariables(self):
         """Recursively extract the variables appearing in the expression, and
         store them in a dictionary.
@@ -2767,13 +2669,10 @@ class Variable(Elementary):
             return {self.name: self}
         return {}
 
-
-
-    def checkAllVariablesInsidePanelTrajectory(self):
-        return self.isContainedIn(
-            'PanelLikelihoodTrajectory'
-        )
-
+    #    def checkAllVariablesInsidePanelTrajectory(self):
+    #        """
+    #        """
+    #        return self.isContainedIn('PanelLikelihoodTrajectory')
 
     def audit(self, database=None):
         """Performs various checks on the expressions.
@@ -2800,22 +2699,6 @@ class Variable(Elementary):
             theError = f'Variable {self.name} not found in the database.'
             listOfErrors.append(theError)
         return listOfErrors, listOfWarnings
-
-    def setVariableIndices(self, indicesOfVariables):
-        """
-        Provide an index to all variables
-
-        :param indicesOfVariables: dictionary mapping the name of the
-                                variables with their index
-        :type indicesOfVariables: dict(string:int)
-
-        :raise biogemeError: if no index is provided for the variable
-        """
-        try:
-            self.variableId = indicesOfVariables[self.name]
-        except KeyError as e:
-            error_msg = f'No ID has been provided for variable {self.name}'
-            raise excep.biogemeError(error_msg) from e
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2869,7 +2752,7 @@ class Variable(Elementary):
         :raise biogeme.exceptions.biogemeError: if no id has been defined for
             variable
         """
-        if self.uniqueId is None:
+        if self.elementaryIndex is None:
             error_msg = (
                 f'No id has been defined for elementary expression '
                 f'{self.name}.'
@@ -2880,7 +2763,7 @@ class Variable(Elementary):
             raise excep.biogemeError(error_msg)
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
-        signature += f'"{self.name}",{self.uniqueId},{self.variableId}'
+        signature += f'"{self.name}",{self.elementaryIndex},{self.variableId}'
         return [signature.encode()]
 
 
@@ -2906,16 +2789,12 @@ class DefineVariable(Variable):
             neither a numeric value or a
             biogeme.expressions.Expression object.
         """
-        Variable.__init__(self, name)
-        if isNumeric(expression):
-            database.addColumn(Numeric(expression), name)
-        else:
-            if not isinstance(expression, Expression):
-                raise excep.biogemeError(
-                    f'This is not a valid expression: {expression}'
-                )
-            database.addColumn(expression, name)
-
+        raise excep.biogemeError(
+            'This expression is obsolete. Use the same function in the '
+            'database object. Replace "new_var = DefineVariable(\'NEW_VAR\','
+            ' expression, database)" by  "new_var = database.DefineVariable'
+            '(\'NEW_VAR\', expression)"'
+        )
 
 class RandomVariable(Elementary):
     """
@@ -2931,6 +2810,27 @@ class RandomVariable(Elementary):
         Elementary.__init__(self, name)
         # Index of the random variable
         self.rvId = None
+
+    def setIdManager(self, id_manager=None):
+        """The ID manager contains the IDs of the elementary expressions.
+
+        It is externally created, as it may nee to coordinate the
+        numbering of several expressions. It is stored only in the
+        expressions of type Elementary.
+
+        :param id_manager: ID manager to be propagated to the
+            elementary expressions. If None, all the IDs are set to None.
+        :type if_manager: class IdManager
+        """
+        self.id_manager = id_manager
+        if id_manager is None:
+            self.elementaryIndex = None
+            self.rvId = None
+            return
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
+            self.name
+        ]
+        self.rvId = self.id_manager.random_variables.indices[self.name]
 
     def audit(self, database=None):
         """Performs various checks on the expressions.
@@ -2964,50 +2864,6 @@ class RandomVariable(Elementary):
         :rtype: dict(string:biogeme.expressions.Expression)
         """
         return {self.name: self}
-
-    def setSpecificIndices(
-        self,
-        indicesOfFreeBetas,
-        indicesOfFixedBetas,
-        indicesOfRandomVariables,
-        indicesOfDraws,
-    ):
-        """
-        Provide an index to all elementary expressions, specific to their type
-        Overloads the generic function.
-
-        :param indicesOfFreeBetas: dictionary mapping the name of the
-                               free betas with their index
-        :type indicesOfFreeBetas: dict(string:int)
-
-        :param indicesOfFixedBetas: dictionary mapping the name of the
-                                fixed betas with their index
-        :type indicesOfFixedBetas: dict(string:int)
-
-        :param indicesOfRandomVariables: dictionary mapping the name of the
-                                random variables with their index
-        :type indicesOfRandomVariables: dict(string:int)
-        :param indicesOfDraws: dictionary mapping the name of the draws with
-                            their index
-        :type indicesOfDraws: dict(string:int)
-
-        :raise biogemeError: if no index is available for a random variable.
-        """
-        if indicesOfRandomVariables is None:
-            error_msg = (
-                f'No index is available for random variable {self.name}.'
-                f' Actually, no random variable has been identified.'
-            )
-            raise excep.biogemeError(error_msg)
-        if self.name in indicesOfRandomVariables:
-            self.rvId = indicesOfRandomVariables[self.name]
-        else:
-            error_msg = (
-                f'No index is available for random variable '
-                f'{self.name}. Known random variables: '
-                f'{indicesOfRandomVariables.keys()}'
-            )
-            raise excep.biogemeError(error_msg)
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -3061,7 +2917,7 @@ class RandomVariable(Elementary):
         :raise biogeme.exceptions.biogemeError: if no id has been defined for
             random variable
         """
-        if self.uniqueId is None:
+        if self.elementaryIndex is None:
             error_msg = (
                 f'No id has been defined for elementary '
                 f'expression {self.name}.'
@@ -3075,7 +2931,7 @@ class RandomVariable(Elementary):
 
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
-        signature += f'"{self.name}",{self.uniqueId},{self.rvId}'
+        signature += f'"{self.name}",{self.elementaryIndex},{self.rvId}'
         return [signature.encode()]
 
 
@@ -3125,13 +2981,38 @@ class Beta(Elementary):
         self.status = status
         self.betaId = None
 
+    def setIdManager(self, id_manager=None):
+        """The ID manager contains the IDs of the elementary expressions.
+
+        It is externally created, as it may nee to coordinate the
+        numbering of several expressions. It is stored only in the
+        expressions of type Elementary.
+
+        :param id_manager: ID manager to be propagated to the
+            elementary expressions. If None, all the IDs are set to None.
+        :type if_manager: class IdManager
+        """
+        self.id_manager = id_manager
+        if id_manager is None:
+            self.elementaryIndex = None
+            self.betaId = None
+            return
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
+            self.name
+        ]
+        if self.status != 0:
+            self.betaId = self.id_manager.fixed_betas.indices[self.name]
+        else:
+            self.betaId = self.id_manager.free_betas.indices[self.name]
+
     def __str__(self):
         if self.status == 0:
             return f'{self.name}(init={self.initValue})'
         return f'{self.name}(fixed={self.initValue})'
 
     def fix_betas(self, beta_values, prefix=None, suffix=None):
-        """Fix all the values of the beta parameters appearing in the dictionary
+        """Fix all the values of the beta parameters appearing in the
+        dictionary
 
         :param beta_values: dictionary containing the betas to be
             fixed (as key) and their value.
@@ -3176,70 +3057,6 @@ class Beta(Elementary):
 
         return set()
 
-    def setSpecificIndices(
-        self,
-        indicesOfFreeBetas,
-        indicesOfFixedBetas,
-        indicesOfRandomVariables,
-        indicesOfDraws,
-    ):
-        """
-        Provide an index to all elementary expressions, specific to their type
-
-        :param indicesOfFreeBetas: dictionary mapping the name of the
-                               free betas with their index
-        :type indicesOfFreeBetas: dict(string:int)
-
-        :param indicesOfFixedBetas: dictionary mapping the name of the
-                                fixed betas with their index
-        :type indicesOfFixedBetas: dict(string:int)
-
-        :param indicesOfRandomVariables: dictionary mapping the name of the
-                                random variables with their index
-        :type indicesOfRandomVariables: dict(string:int)
-        :param indicesOfDraws: dictionary mapping the name of the draws with
-                            their index
-        :type indicesOfDraws: dict(string:int)
-
-        :raise biogemeError: if no index is available for one of the parameters
-
-        """
-
-        if self.status != 0:
-            if indicesOfFixedBetas is None:
-                error_msg = (
-                    f'No index is available for fixed parameter '
-                    f'{self.name}. Actually, no fixed parameter '
-                    f'has been identified.'
-                )
-                raise excep.biogemeError(error_msg)
-            if self.name in indicesOfFixedBetas:
-                self.betaId = indicesOfFixedBetas[self.name]
-            else:
-                error_msg = (
-                    f'No index is available for fixed parameter '
-                    f'{self.name}. Known fixed parameters: '
-                    '{indicesOfFixedBetas.keys()}'
-                )
-                raise excep.biogemeError(error_msg)
-        else:
-            if indicesOfFreeBetas is None:
-                error_msg = (
-                    f'No index is available for free parameter '
-                    f'{self.name}. Actually, no free parameter '
-                    f'has been identified.'
-                )
-                raise excep.biogemeError(error_msg)
-
-            if self.name in indicesOfFreeBetas:
-                self.betaId = indicesOfFreeBetas[self.name]
-            else:
-                error_msg = (
-                    f'No index is available for free parameter '
-                    f'{self.name}. Known free parameters: '
-                    f'{indicesOfFreeBetas.keys()}'
-                )
-                raise excep.biogemeError(error_msg)
 
     def dictOfBetas(self, free=True, fixed=False):
         """Extract the set of parameters from the expression. Overload the
@@ -3339,7 +3156,7 @@ class Beta(Elementary):
         :raise biogeme.exceptions.biogemeError: if no id has been defined for
             parameter
         """
-        if self.uniqueId is None:
+        if self.elementaryIndex is None:
             error_msg = (
                 f'No id has been defined for elementary '
                 f'expression {self.name}.'
@@ -3353,7 +3170,7 @@ class Beta(Elementary):
         signature = f'<{self.getClassName()}>'
         signature += f'{{{id(self)}}}'
         signature += (
-            f'"{self.name}"[{self.status}],{self.uniqueId},{self.betaId}'
+            f'"{self.name}"[{self.status}],{self.elementaryIndex},{self.betaId}'
         )
         return [signature.encode()]
 
@@ -3434,7 +3251,7 @@ class LogLogit(Expression):
         for i, e in self.av.items():
             e.parent = self
             self.children.append(e)
-
+        
     def audit(self, database=None):
         """Performs various checks on the expressions.
 
@@ -3545,13 +3362,13 @@ class LogLogit(Expression):
         choice = int(self.choice.getValue())
         if choice not in self.util:
             error_msg = (
-                f'Alternative {choice} for not appear in the list '
+                f'Alternative {choice} does not appear in the list '
                 f'of utility functions: {self.util.keys()}'
             )
             raise excep.biogemeError(error_msg)
         if choice not in self.av:
             error_msg = (
-                f'Alternative {choice} for not appear in the list '
+                f'Alternative {choice} does not appear in the list '
                 f'of availabilities: {self.av.keys()}'
             )
             raise excep.biogemeError(error_msg)
@@ -3566,9 +3383,19 @@ class LogLogit(Expression):
 
     def __str__(self):
         s = self.getClassName()
-        s += '('
+        s += f'[choice={self.choice}]'
+        s += 'U=('
         first = True
         for i, e in self.util.items():
+            if first:
+                s += f'{int(i)}:{e}'
+                first = False
+            else:
+                s += f', {int(i)}:{e}'
+        s += ')'
+        s += 'av=('
+        first = True
+        for i, e in self.av.items():
             if first:
                 s += f'{int(i)}:{e}'
                 first = False
@@ -3651,7 +3478,32 @@ class _bioLogLogit(LogLogit):
     for the availabilities and a dict of formulas for the utilities It
     uses only the C++ implementation.
     """
+    def __init__(self, util, av, choice):
+        """Constructor
 
+        :param util: dictionary where the keys are the identifiers of
+                     the alternatives, and the elements are objects
+                     defining the utility functions.
+
+        :type util: dict(int:biogeme.expressions.Expression)
+
+        :param av: dictionary where the keys are the identifiers of
+                   the alternatives, and the elements are object of
+                   type biogeme.expressions.Expression defining the
+                   availability conditions. If av is None, all the
+                   alternatives are assumed to be always available
+
+        :type av: dict(int:biogeme.expressions.Expression)
+
+        :param choice: formula to obtain the alternative for which the
+                       logit probability must be calculated.
+        :type choice: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+        """
+        super().__init__(util, av, choice)
 
 class _bioLogLogitFullChoiceSet(LogLogit):
     """This expression captures the logarithm of the logit formula, where
@@ -3661,6 +3513,32 @@ class _bioLogLogitFullChoiceSet(LogLogit):
        formulas for the utilities. It uses only the C++ implementation.
 
     """
+    def __init__(self, util, av, choice):
+        """Constructor
+
+        :param util: dictionary where the keys are the identifiers of
+                     the alternatives, and the elements are objects
+                     defining the utility functions.
+
+        :type util: dict(int:biogeme.expressions.Expression)
+
+        :param av: dictionary where the keys are the identifiers of
+                   the alternatives, and the elements are object of
+                   type biogeme.expressions.Expression defining the
+                   availability conditions. If av is None, all the
+                   alternatives are assumed to be always available
+
+        :type av: dict(int:biogeme.expressions.Expression)
+
+        :param choice: formula to obtain the alternative for which the
+                       logit probability must be calculated.
+        :type choice: biogeme.expressions.Expression
+
+        :raise biogemeError: if one of the expressions is invalid, that is
+            neither a numeric value or a
+            biogeme.expressions.Expression object.
+        """
+        super().__init__(util, av, choice)
 
 
 class bioMultSum(Expression):
@@ -4071,150 +3949,7 @@ class bioLinearUtility(Expression):
         signature += f'({len(self.listOfTerms)})'
         for b, v in self.listOfTerms:
             signature += (
-                f',{id(b)},{b.uniqueId},{b.name},{id(v)},{v.uniqueId},{v.name}'
+                f',{id(b)},{b.elementaryIndex},{b.name},{id(v)},{v.elementaryIndex},{v.name}'
             )
         listOfSignatures += [signature.encode()]
         return listOfSignatures
-
-
-def defineNumberingOfElementaryExpressions(
-    collectionOfFormulas, variableNames
-):
-    """Provides indices for elementary expressions
-
-    The numbering is done in the following order:
-
-        (i) free betas,
-        (ii) fixed betas,
-        (iii) random variables for numrerical integration,
-        (iv) random variables for Monte-Carlo integration,
-        (v) variables
-
-    The numbering convention will be performed for all expressions
-    together, so that the same elementary expressions in several
-    expressions will have the same index.
-
-    :param collectionOfFormulas: collection of Biogeme expressions.
-    :type collectionOfFormulas: list(biogeme.expressions.Expression)
-    :param variableNames: list of the names of the variables
-    :type variableNames: list(string)
-    :return: dict, free, freeNames, fixed, fixedNames, rv, rvNames, draws,
-        drawsNames where
-
-         - dict is a dictionary mapping the names of the elementary
-           expressions with their index,
-         - free is a dict with the free betas,
-         - freeNames is a list of the names of the free betas,
-         - fixed is a dict with the fixed betas,
-         - fixedNames is the list of the names of the fixed betas,
-         - rv is a dict with the random variables for numerical integration,
-         - rvNames is a list with their names,
-         - draws is a dict of the draws, and
-         - drawsNames is a list with their names.
-
-    :rtype: tuple(dict(str: class Expression),
-                  dict(str: class Beta),
-                  list(str),
-                  dict(str: class Beta),
-                  list(str),
-                  dict(str: class RandomVariable),
-                  list(str),
-                  dict(str: class bioDraws),
-                  list(str))
-
-    :raise biogemeError: if some elementary expressions are defined
-        more than once.
-    """
-    # Free parameters (to be estimated), sorted by alphatical order.
-    allFreeBetas = {}
-    freeBetaIndex = {}
-    for f in collectionOfFormulas:
-        d = f.dictOfBetas(free=True, fixed=False)
-        allFreeBetas = dict(allFreeBetas, **d)
-    freeBetaNames = sorted(allFreeBetas)
-    #    for i in range(len(freeBetaNames)):
-    for i, v in enumerate(freeBetaNames):
-        freeBetaIndex[v] = i
-
-    # Fixed parameters (not to be estimated), sorted by alphatical order.
-    allFixedBetas = {}
-    fixedBetaIndex = {}
-    for f in collectionOfFormulas:
-        d = f.dictOfBetas(free=False, fixed=True)
-        allFixedBetas = dict(allFixedBetas, **d)
-    fixedBetaNames = sorted(allFixedBetas)
-    #    for i in range(len(fixedBetaNames)):
-    for i, v in enumerate(fixedBetaNames):
-        fixedBetaIndex[v] = i
-
-    # Random variables for numerical integration
-    allRandomVariables = {}
-    randomVariableIndex = {}
-    for f in collectionOfFormulas:
-        d = f.dictOfRandomVariables()
-        allRandomVariables = dict(allRandomVariables, **d)
-    randomVariableNames = sorted(allRandomVariables)
-    #    for i in range(len(randomVariableNames)):
-    for i, v in enumerate(randomVariableNames):
-        randomVariableIndex[v] = i
-
-    # Draws
-    allDraws = {}
-    drawIndex = {}
-    for f in collectionOfFormulas:
-        d = f.dictOfDraws()
-        allDraws = dict(allDraws, **d)
-    drawNames = sorted(allDraws)
-    #    for i in range(len(drawNames)):
-    for i, v in enumerate(drawNames):
-        drawIndex[v] = i
-
-    # Variables
-    variableIndex = {}
-    #    for i in range(len(variableNames)):
-    for i, v in enumerate(variableNames):
-        variableIndex[v] = i
-
-    # Merge all the names
-    allElementaryExpressions = (
-        freeBetaNames
-        + fixedBetaNames
-        + randomVariableNames
-        + drawNames
-        + variableNames
-    )
-
-    if len(allElementaryExpressions) != len(set(allElementaryExpressions)):
-        duplicates = {
-            x
-            for x in allElementaryExpressions
-            if allElementaryExpressions.count(x) > 1
-        }
-        error_msg = (
-            f'The following elementary expressions are defined '
-            f'more than once: {duplicates}.'
-        )
-        raise excep.biogemeError(error_msg)
-
-    elementaryExpressionIndex = {}
-    for i, v in enumerate(allElementaryExpressions):
-        elementaryExpressionIndex[v] = i
-
-    for f in collectionOfFormulas:
-        f.setUniqueId(elementaryExpressionIndex)
-        f.setSpecificIndices(
-            freeBetaIndex, fixedBetaIndex, randomVariableIndex, drawIndex
-        )
-        f.setVariableIndices(variableIndex)
-
-    return (
-        elementaryExpressionIndex,
-        allFreeBetas,
-        freeBetaNames,
-        allFixedBetas,
-        fixedBetaNames,
-        allRandomVariables,
-        randomVariableNames,
-        allDraws,
-        drawNames,
-    )
