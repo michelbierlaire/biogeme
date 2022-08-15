@@ -123,7 +123,7 @@ class TestTools(unittest.TestCase):
         self.assertSequenceEqual(
             r,
             (
-                'H0 cannot be rejected at level 0.95',
+                'H0 cannot be rejected at level 5.0%',
                 4.619999999999891,
                 5.991464547107979,
             ),
@@ -132,16 +132,16 @@ class TestTools(unittest.TestCase):
         self.assertSequenceEqual(
             r,
             (
-                'H0 cannot be rejected at level 0.95',
+                'H0 cannot be rejected at level 5.0%',
                 4.619999999999891,
                 5.991464547107979,
             ),
         )
-        r = tools.likelihood_ratio_test(model1, model2, significance_level=0.9)
+        r = tools.likelihood_ratio_test(model1, model2, significance_level=0.1)
         self.assertSequenceEqual(
             r,
             (
-                'H0 can be rejected at level 0.9',
+                'H0 can be rejected at level 10.0%',
                 4.619999999999891,
                 4.605170185988092,
             ),

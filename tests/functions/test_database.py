@@ -57,7 +57,9 @@ class testDatabase(unittest.TestCase):
 
     def test_sumFromDatabase(self):
         expression = self.Variable2 / self.Variable1
-        result = expression.getValue_c(database=self.myData1, aggregation=True)
+        result = expression.getValue_c(
+            database=self.myData1, aggregation=True, prepareIds=True
+        )
         self.assertEqual(result, 50)
 
     def test_addColumn(self):
@@ -160,31 +162,30 @@ class testDatabase(unittest.TestCase):
         result1 = self.myPanelData.generateFlatPanelDataframe()
         result1 = result1.reindex(sorted(result1.columns), axis='columns')
         compared1 = output_flatten_database_1.reindex(
-            sorted(output_flatten_database_1.columns),
-            axis='columns'
+            sorted(output_flatten_database_1.columns), axis='columns'
         )
         compared1.index.name = 'Person'
         pd.testing.assert_frame_equal(result1, compared1)
         # Test with automatic detection of identical columns
-        result2 = self.myPanelData.generateFlatPanelDataframe(identical_columns=None)
+        result2 = self.myPanelData.generateFlatPanelDataframe(
+            identical_columns=None
+        )
         result2 = result2.reindex(sorted(result2.columns), axis='columns')
         compared2 = output_flatten_database_2.reindex(
-            sorted(output_flatten_database_2.columns),
-            axis='columns'
+            sorted(output_flatten_database_2.columns), axis='columns'
         )
         compared2.index.name = 'Person'
         pd.testing.assert_frame_equal(result2, compared2)
         # Test with explicit list of identical columns
-        result3 = self.myPanelData.generateFlatPanelDataframe(identical_columns=['Age'])
+        result3 = self.myPanelData.generateFlatPanelDataframe(
+            identical_columns=['Age']
+        )
         result3 = result3.reindex(sorted(result3.columns), axis='columns')
         compared3 = output_flatten_database_3.reindex(
-            sorted(output_flatten_database_3.columns),
-            axis='columns'
+            sorted(output_flatten_database_3.columns), axis='columns'
         )
         compared3.index.name = 'Person'
         pd.testing.assert_frame_equal(result3, compared3)
-
-        
 
     def test_getNumberOfObservations(self):
         self.myPanelData.panel('Person')
@@ -236,7 +237,7 @@ class testDatabase(unittest.TestCase):
         df = pd.DataFrame(data)
         database = db.Database('test', df)
         sp = database.split(5)
-        estimation, validation = next(sp)
+        estimation, validation = sp[0]
         # Verify that the intersection is empty
         intersection = set(estimation['obsID']) & set(validation['obsID'])
         self.assertSetEqual(intersection, set())
@@ -245,7 +246,7 @@ class testDatabase(unittest.TestCase):
         self.assertSetEqual(union, set(range(25)))
 
         sp = database.split(5, groups='userID')
-        estimation, validation = next(sp)
+        estimation, validation = sp[0]
         # Verify that the intersection is empty
         intersection = set(estimation['userID']) & set(validation['userID'])
         self.assertSetEqual(intersection, set())

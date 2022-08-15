@@ -25,7 +25,7 @@ import biogeme.algorithms as algo
 import biogeme.optimization as opt
 import biogeme.exceptions as excep
 from biogeme.expressions import Variable, Beta
-from testData import getData
+from test_data import getData
 
 
 class rosenbrock(algo.functionToMinimize):
@@ -82,7 +82,7 @@ class rosenbrock(algo.functionToMinimize):
         raise excep.biogemeError('This function is not data driven.')
 
 
-class testOptimization(unittest.TestCase):
+class test_optimization(unittest.TestCase):
     def setUp(self):
         np.random.seed(90267)
         rnd.seed(90267)

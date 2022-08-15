@@ -18,7 +18,7 @@ import biogeme.draws as dr
 import numpy as np
 
 
-class testDraws(unittest.TestCase):
+class test_draws(unittest.TestCase):
     def setUp(self):
         np.random.seed(90267)
 

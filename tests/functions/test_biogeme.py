@@ -84,13 +84,13 @@ class test_biogeme(unittest.TestCase):
         self.assertAlmostEqual(res, -115.30029248549191, 5)
 
     def test_calculateLikelihood(self):
-        x = self.myBiogeme.betaInitValues
+        x = self.myBiogeme.id_manager.free_betas_values
         xplus = [v + 1 for v in x]
         res = self.myBiogeme.calculateLikelihood(xplus, scaled=False)
         self.assertEqual(res, -555)
 
     def test_calculateLikelihoodAndDerivatives(self):
-        x = self.myBiogeme.betaInitValues
+        x = self.myBiogeme.id_manager.free_betas_values
         xplus = [v + 1 for v in x]
         f, g, h, bhhh = self.myBiogeme.calculateLikelihoodAndDerivatives(
             xplus, scaled=False, hessian=True, bhhh=True
@@ -105,7 +105,7 @@ class test_biogeme(unittest.TestCase):
         self.assertListEqual(bhhh_true, bhhh.tolist())
 
     def test_likelihoodFiniteDifferenceHessian(self):
-        x = self.myBiogeme.betaInitValues
+        x = self.myBiogeme.id_manager.free_betas_values
         xplus = [v + 1 for v in x]
         h = self.myBiogeme.likelihoodFiniteDifferenceHessian(xplus)
         h_true = [[-1380.00020229, -150.0], [-150.0000451, -540.00005396]]
@@ -140,12 +140,12 @@ class test_biogeme(unittest.TestCase):
 
     def test_changeInitValues(self):
         self.myBiogeme.changeInitValues({'beta2': -100, 'beta1': 3.14156})
-        self.assertListEqual(self.myBiogeme.betaInitValues, [3.14156, -100])
+        self.assertListEqual(self.myBiogeme.id_manager.free_betas_values, [3.14156, -100])
 
     def test_confidenceIntervals(self):
         results = self.myBiogeme.estimate(bootstrap=10)
         drawsFromBetas = results.getBetasForSensitivityAnalysis(
-            self.myBiogeme.freeBetaNames
+            self.myBiogeme.id_manager.free_betas.names
         )
         s = self.myBiogeme.simulate(results.getBetaValues())
         left, right = self.myBiogeme.confidenceIntervals(drawsFromBetas)
