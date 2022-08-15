@@ -4,7 +4,7 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
-from biogeme.expressions import Beta, DefineVariable, log, Elem
+from biogeme.expressions import Beta, log, Elem
 
 
 myPath = os.path.dirname(os.path.abspath(__file__))
@@ -32,9 +32,9 @@ tau2 = tau1 + delta2
 
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
-TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
+TRAIN_COST_SCALED = database.DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100
 )
 
 #  Utility

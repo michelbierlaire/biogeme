@@ -4,7 +4,7 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta, DefineVariable, Elem, Derive
+from biogeme.expressions import Beta, Elem, Derive
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
@@ -45,8 +45,8 @@ V = {1: V1, 2: V2, 3: V3}
 
 
 # Associate the availability conditions with the alternatives
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
+CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
+TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
 
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
