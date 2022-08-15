@@ -422,7 +422,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
     # Take the first row for columns that are identical
     if identical_columns:
-        common_data = df[identical_columns].drop_duplicates(
+        common_data = df[list(identical_columns)].drop_duplicates(
             merge_id, keep='first'
         )
         common_data.index = common_data[merge_id]
