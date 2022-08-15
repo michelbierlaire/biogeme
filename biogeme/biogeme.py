@@ -13,6 +13,7 @@ and the model specification.
 # pylint: disable=too-many-instance-attributes, too-many-lines,
 # pylint: disable=too-many-function-args, invalid-unary-operand-type
 
+
 import glob
 import multiprocessing as mp
 from datetime import datetime
@@ -31,15 +32,14 @@ import biogeme.messaging as msg
 import biogeme.optimization as opt
 from biogeme import tools
 from biogeme.algorithms import functionToMinimize
+from biogeme.idmanager import IdManager
 
+# import yep
 
 logger = msg.bioMessage()
 """Logger that controls the output of
         messages to the screen and log file.
         Type: class :class:`biogeme.messaging.bioMessage`."""
-
-
-# import yep
 
 
 class BIOGEME:
@@ -162,6 +162,17 @@ class BIOGEME:
 
         self.database = database  #: :class:`biogeme.database.Database` object
 
+        self.numberOfThreads = (
+            mp.cpu_count() if numberOfThreads is None else numberOfThreads
+        )
+        """ Number of threads used for parallel computing. Default: the number
+        of available CPU.
+        """
+
+        self.numberOfDraws = numberOfDraws
+        """ Number of draws for Monte-Carlo integration."""
+
+
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -182,14 +193,12 @@ class BIOGEME:
                 if dict_of_variables:
                     err_msg = (
                         f'Error in the loglikelihood function. '
-                        f'Some variables are not inside '
-                        f'PanelLikelihoodTrajectory: '
+                        f'Some variables are not inside PanelLikelihoodTrajectory: '
                         f'{dict_of_variables.keys()} .'
                         f'If the database is organized as panel data, '
                         f'all variables must be used inside a '
                         f'PanelLikelihoodTrajectory. '
-                        f'If it is not consistent with your model, '
-                        f'generate a flat '
+                        f'If it is not consistent with your model, generate a flat '
                         f'version of the data using the function '
                         f'`generateFlatPanelDataframe`.'
                     )
@@ -207,6 +216,7 @@ class BIOGEME:
             The keys are the names of the formulas.
             """
         else:
+            self.formulas = formulas
             # Verify the validity of the formulas
             for k, f in formulas.items():
                 if not isinstance(f, eb.Expression):
@@ -217,7 +227,6 @@ class BIOGEME:
                     )
             self.loglike = formulas.get(self.loglikeName)
             self.weight = formulas.get(self.weightName)
-            self.formulas = formulas
 
         for f in self.formulas.values():
             f.missingData = self.missingData
@@ -254,11 +263,13 @@ class BIOGEME:
                 logger.detailed(error_msg)
 
         self._prepareDatabaseForFormula()
-        self._prepareLiterals()
+
         if not skipAudit:
             self._audit()
 
-        self.theC = cb.pyBiogeme(len(self.freeBetaNames))
+        self.reset_id_manager()
+
+        self.theC = cb.pyBiogeme(self.id_manager.number_of_free_betas)
         if self.database.isPanel():
             self.theC.setPanel(True)
             self.theC.setDataMap(self.database.individualMap)
@@ -281,13 +292,6 @@ class BIOGEME:
         stochastic optimization.
         """
 
-        self.numberOfThreads = (
-            mp.cpu_count() if numberOfThreads is None else numberOfThreads
-        )
-        """ Number of threads used for parallel computing. Default: the number
-        of available CPU.
-        """
-
         start_time = datetime.now()
         self._generateDraws(numberOfDraws)
         if self.monteCarlo:
@@ -295,15 +299,14 @@ class BIOGEME:
         self.drawsProcessingTime = datetime.now() - start_time
         """ Time needed to generate the draws. """
 
+        self.reset_id_manager()
         if self.loglike is not None:
-
             self.loglikeSignatures = self.loglike.getSignature()
             """ Internal signature of the formula for the loglikelihood."""
             if self.weight is None:
                 self.theC.setExpressions(
                     self.loglikeSignatures, self.numberOfThreads
                 )
-
             else:
                 self.weightSignatures = self.weight.getSignature()
                 """ Internal signature of the formula for the weight."""
@@ -331,6 +334,21 @@ class BIOGEME:
 
         self.bestIteration = None  #: Store the best iteration found so far.
 
+    def reset_id_manager(self):
+        """Reset all the ids of the elementary expression in the formulas"""
+        # First, we reset the IDs
+        for f in self.formulas.values():
+            f.setIdManager(id_manager=None)
+        # Second, we calculate a new set of IDs.
+        self.id_manager = IdManager(
+            self.formulas.values(),
+            self.database,
+            self.numberOfDraws,
+            force_new_ids=True,
+        )
+        for f in self.formulas.values():
+            f.setIdManager(id_manager=self.id_manager)
+
     def _saveIterationsFileName(self):
         """
         :return: The name of the file where the iterations are saved.
@@ -356,7 +374,7 @@ class BIOGEME:
             listOfWarnings += war
         if self.weight is not None:
             total = self.weight.getValue_c(
-                database=self.database, aggregation=True
+                database=self.database, aggregation=True, prepareIds=True
             )
             s_size = self.database.getSampleSize()
             ratio = s_size / total
@@ -381,13 +399,13 @@ class BIOGEME:
             numberOfDraws: self explanatory (int)
         """
 
-        # Number of draws for Monte-Carlo integration.
-        self.numberOfDraws = numberOfDraws
         # Draws
-        self.monteCarlo = len(self.allDraws) > 0
+        self.monteCarlo = self.id_manager.requires_draws
         if self.monteCarlo:
             self.database.generateDraws(
-                self.allDraws, self.drawNames, numberOfDraws
+                self.id_manager.draws.expressions,
+                self.id_manager.draws.names,
+                numberOfDraws,
             )
 
     def _prepareDatabaseForFormula(self, sample=None):
@@ -426,6 +444,14 @@ class BIOGEME:
         if self.database.isPanel():
             self.database.buildPanelMap()
 
+    def freeBetaNames(self):
+        """Returns the names of the parameters that must be estimated
+
+        :return: list of names of the parameters
+        :rtype: list(str)
+        """
+        return self.id_manager.free_betas.names
+
     def getBoundsOnBeta(self, betaName):
         """Returns the bounds on the parameter as defined by the user.
 
@@ -435,53 +461,10 @@ class BIOGEME:
         :rtype: tuple
         :raises biogemeError: if the name of the parameter is not found.
         """
-
-        if betaName not in self.freeBetaNames:
+        index = self.id_manager.free_betas.indices.get(betaName)
+        if index is None:
             raise excep.biogemeError(f'Unknown parameter {betaName}')
-        index = self.freeBetaNames.index(betaName)
-        return self.bounds[index]
-
-    def _prepareLiterals(self):
-        """Extract from the formulas the literals (parameters,
-        variables, random variables) and decide a numbering convention.
-        """
-
-        collectionOfFormulas = [f for k, f in self.formulas.items()]
-        variableNames = list(self.database.data.columns.values)
-
-        (
-            self.elementaryExpressionIndex,
-            self.allFreeBetas,
-            self.freeBetaNames,
-            self.allFixedBetas,
-            self.fixedBetaNames,
-            self.allRandomVariables,
-            self.randomVariableNames,
-            self.allDraws,
-            self.drawNames,
-        ) = eb.defineNumberingOfElementaryExpressions(
-            collectionOfFormulas, variableNames
-        )
-
-        # List of tuples (ell, u) containing the lower and upper bounds
-        # for each free parameter
-        self.bounds = []
-        for x in self.freeBetaNames:
-            self.bounds.append(
-                (self.allFreeBetas[x].lb, self.allFreeBetas[x].ub)
-            )
-        # List of ids of the free beta parameters (those to be estimated)
-        self.betaIds = list(range(len(self.freeBetaNames)))
-
-        # List of initial values of the free beta parameters (those to be
-        # estimated)
-        self.betaInitValues = [
-            float(self.allFreeBetas[x].initValue) for x in self.freeBetaNames
-        ]
-        # Values of the fixed parameters (not estimated).
-        self.fixedBetaValues = [
-            float(self.allFixedBetas[x].initValue) for x in self.fixedBetaNames
-        ]
+        return self.id_manager.bounds[index]
 
     def calculateNullLoglikelihood(self, avail):
         """Calculate the log likelihood of the null model that predicts equal
@@ -501,6 +484,7 @@ class BIOGEME:
         self.nullLogLike = expression.getValue_c(
             database=self.database,
             aggregation=True,
+            prepareIds=True,
         )
         return self.nullLogLike
 
@@ -514,7 +498,7 @@ class BIOGEME:
         """
         # Value of the loglikelihood for the default values of the parameters.
         self.initLogLike = self.calculateLikelihood(
-            self.betaInitValues, scaled=False
+            self.id_manager.free_betas_values, scaled=False
         )
         return self.initLogLike
 
@@ -543,17 +527,18 @@ class BIOGEME:
         :raises ValueError: if the length of the list x is incorrect.
 
         """
-
-        if len(x) != len(self.betaInitValues):
+        if len(x) != len(self.id_manager.free_betas_values):
             error_msg = (
                 f'Input vector must be of length '
-                f'{len(self.betaInitValues)} and '
+                f'{len(self.id_manager.free_betas_values)} and '
                 f'not {len(x)}'
             )
             raise ValueError(error_msg)
 
         self._prepareDatabaseForFormula(batch)
-        f = self.theC.calculateLikelihood(x, self.fixedBetaValues)
+        f = self.theC.calculateLikelihood(
+            x, self.id_manager.fixed_betas_values
+        )
 
         logger.detailed(
             f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
@@ -606,10 +591,10 @@ class BIOGEME:
             error is raised.
         """
         n = len(x)
-        if n != len(self.betaInitValues):
+        if n != self.id_manager.number_of_free_betas:
             error_msg = (
                 f'Input vector must be of length '
-                f'{len(self.betaInitValues)} and not {len(x)}'
+                f'{self.id_manager.number_of_free_betas} and not {len(x)}'
             )
             raise ValueError(error_msg)
         self._prepareDatabaseForFormula(batch)
@@ -617,9 +602,15 @@ class BIOGEME:
         g = np.empty(n)
         h = np.empty([n, n])
         bh = np.empty([n, n])
-
         f, g, h, bh = self.theC.calculateLikelihoodAndDerivatives(
-            x, self.fixedBetaValues, self.betaIds, g, h, bh, hessian, bhhh
+            x,
+            self.id_manager.fixed_betas_values,
+            self.id_manager.free_betas.indices.values(),
+            g,
+            h,
+            bh,
+            hessian,
+            bhhh,
         )
 
         hmsg = ''
@@ -645,7 +636,10 @@ class BIOGEME:
             if f >= self.bestIteration:
                 with open(self._saveIterationsFileName(), 'w') as pf:
                     for i, v in enumerate(x):
-                        print(f'{self.freeBetaNames[i]} = {v}', file=pf)
+                        print(
+                            f'{self.id_manager.free_betas.names[i]} = {v}',
+                            file=pf,
+                        )
 
         if scaled:
             N = float(self.database.getSampleSize())
@@ -716,8 +710,8 @@ class BIOGEME:
 
         return tools.checkDerivatives(
             theFunction,
-            np.asarray(self.betaInitValues),
-            self.freeBetaNames,
+            np.asarray(self.id_manager.free_betas_values),
+            self.id_manager.free_betas.names,
             verbose,
         )
 
@@ -769,7 +763,7 @@ class BIOGEME:
                 low=-defaultBound if beta.lb is None else beta.lb,
                 high=defaultBound if beta.ub is None else beta.ub,
             )
-            for name, beta in self.allFreeBetas.items()
+            for name, beta in self.id_manager.free_betas.expressions.items()
         }
         self.changeInitValues(randomBetas)
 
@@ -787,10 +781,10 @@ class BIOGEME:
             self.weight.changeInitValues(betas)
         for _, f in self.formulas.items():
             f.changeInitValues(betas)
-        for i, name in enumerate(self.freeBetaNames):
+        for i, name in enumerate(self.id_manager.free_betas.names):
             value = betas.get(name)
             if value is not None:
-                self.betaInitValues[i] = value
+                self.id_manager.free_betas_values[i] = value
 
     def estimate(
         self,
@@ -802,8 +796,8 @@ class BIOGEME:
 
         """Estimate the parameters of the model.
 
-        :param recycle: if True, the estimation results are read from
-            the pickle file.
+        :param recycle: if True, the results are read from the pickle
+            file, if it exists. If False, the estimation is performed.
         :type recycle: bool
 
         :param bootstrap: number of bootstrap resampling used to
@@ -839,6 +833,13 @@ class BIOGEME:
             likelihood
 
         """
+        if self.modelName == 'biogemeModelDefaultName':
+            logger.warning(
+                f'You have not defined a name for the model. '
+                f'The output files are named from the model name. '
+                f'The default is [biogemeModelDefaultName]'
+            )
+
         if recycle:
             pickle_files = self.files_of_type('pickle')
             pickle_files.sort()
@@ -853,8 +854,10 @@ class BIOGEME:
                     )
                     logger.warning(warning_msg)
                 results = res.bioResults(pickleFile=pickle_to_read)
-                logger.general(
-                    f'Estimation results read from {pickle_to_read}'
+                logger.warning(
+                    f'Estimation results read from {pickle_to_read}. '
+                    f'There is no guarantee that they correspond '
+                    f'to the specified model.'
                 )
                 return results
             warning_msg = (
@@ -865,7 +868,7 @@ class BIOGEME:
             raise excep.biogemeError(
                 'No log likelihood function has been specified'
             )
-        if len(self.freeBetaNames) == 0:
+        if len(self.id_manager.free_betas.names) == 0:
             raise excep.biogemeError(
                 f'There is no parameter to estimate'
                 f' in the formula: {self.loglike}.'
@@ -888,7 +891,7 @@ class BIOGEME:
 
         #        yep.stop()
 
-        output = self.optimize(self.betaInitValues)
+        output = self.optimize(self.id_manager.free_betas_values)
         xstar, optimizationMessages = output
         # Running time of the optimization algorithm
         optimizationMessages['Optimization time'] = datetime.now() - start_time
@@ -989,12 +992,11 @@ class BIOGEME:
             likelihood
 
         """
-
         if self.loglike is None:
             raise excep.biogemeError(
                 'No log likelihood function has been specificed'
             )
-        if len(self.freeBetaNames) == 0:
+        if len(self.id_manager.free_betas.names) == 0:
             raise excep.biogemeError(
                 f'There is no parameter to estimate'
                 f' in the formula: {self.loglike}.'
@@ -1008,7 +1010,7 @@ class BIOGEME:
 
         #        yep.stop()
 
-        output = self.optimize(self.betaInitValues)
+        output = self.optimize(self.id_manager.free_betas_values)
         xstar, optimizationMessages = output
         # Running time of the optimization algorithm
         optimizationMessages['Optimization time'] = datetime.now() - start_time
@@ -1100,7 +1102,6 @@ class BIOGEME:
 
         :raises biogemeError: an error is raised if no algorithm is specified.
         """
-
         theFunction = negLikelihood(
             like=self.calculateLikelihood,
             like_deriv=self.calculateLikelihoodAndDerivatives,
@@ -1108,7 +1109,7 @@ class BIOGEME:
         )
 
         if startingValues is None:
-            startingValues = self.betaInitValues
+            startingValues = self.id_manager.free_betas_values
 
         if self.algorithm is None:
             err = (
@@ -1118,7 +1119,10 @@ class BIOGEME:
             raise excep.biogemeError(err)
 
         results = self.algorithm(
-            theFunction, startingValues, self.bounds, self.algoParameters
+            theFunction,
+            startingValues,
+            self.id_manager.bounds,
+            self.algoParameters,
         )
 
         return results
@@ -1149,7 +1153,7 @@ class BIOGEME:
         """
 
         if theBetaValues is None:
-            betaValues = self.betaInitValues
+            betaValues = self.id_manager.free_betas_values
         else:
             if not isinstance(theBetaValues, dict):
                 err = (
@@ -1158,17 +1162,17 @@ class BIOGEME:
                 )
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
-                if x not in self.freeBetaNames:
+                if x not in self.id_manager.free_betas.names:
                     logger.warning(f'Parameter {x} not present in the model')
             betaValues = []
-            for i, x in enumerate(self.freeBetaNames):
+            for i, x in enumerate(self.id_manager.free_betas.names):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])
                 else:
                     logger.warning(
                         f'Simulation: initial value of {x} not provided.'
                     )
-                    betaValues.append(self.betaInitValues[i])
+                    betaValues.append(self.id_manager.free_betas_values[i])
 
         if self.database.isPanel():
             for f in self.formulas.values():
@@ -1189,7 +1193,6 @@ class BIOGEME:
             self.theC.setDataMap(self.database.individualMap)
 
         for v in self.formulas.values():
-            logger.debug(f'Audit {v}')
             listOfErrors, listOfWarnings = v.audit(database=self.database)
             if listOfWarnings:
                 logger.warning('\n'.join(listOfWarnings))
@@ -1200,7 +1203,7 @@ class BIOGEME:
         result = self.theC.simulateSeveralFormulas(
             formulas_signature,
             betaValues,
-            self.fixedBetaValues,
+            self.id_manager.fixed_betas_values,
             self.database.data,
             self.numberOfThreads,
         )
@@ -1236,7 +1239,7 @@ class BIOGEME:
             raise excep.biogemeError(error_msg)
 
         if theBetaValues is None:
-            betaValues = self.betaInitValues
+            betaValues = self.id_manager.free_betas_values
         else:
             if not isinstance(theBetaValues, dict):
                 err = (
@@ -1245,24 +1248,27 @@ class BIOGEME:
                 )
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
-                if x not in self.freeBetaNames:
+                if x not in self.id_manager.free_betas.names:
                     logger.warning(f'Parameter {x} not present in the model')
             betaValues = []
-            for i, x in enumerate(self.freeBetaNames):
+            for i, x in enumerate(self.id_manager.free_betas.names):
                 if x in theBetaValues:
                     betaValues.append(theBetaValues[x])
                 else:
                     logger.warning(
                         f'Simulation: initial value of {x} not provided.'
                     )
-                    betaValues.append(self.betaInitValues[i])
+                    betaValues.append(self.id_manager.free_betas_values[i])
 
         output = pd.DataFrame(index=self.database.data.index)
         for k, v in self.formulas.items():
             logger.detailed(f'Simulate {k}')
             signature = v.getSignature()
             result = self.theC.simulateFormula(
-                signature, betaValues, self.fixedBetaValues, self.database.data
+                signature,
+                betaValues,
+                self.id_manager.fixed_betas_values,
+                self.database.data,
             )
             output[k] = result
         return output
@@ -1348,20 +1354,16 @@ class BIOGEME:
     def files_of_type(self, extension, all_files=False):
         """Identify the list of files with a given extension in the
             local directory
-
         :param extension: extension of the requested files (without
             the dot): 'pickle', or 'html'
         :type extension: str
-
         :param all_files: if all_files is False, only files containing
             the name of the model are identified. If all_files is
             True, all files with the requested extension are
             identified.
         :type all_files: bool
-
         :return: list of files with the requested extension.
         :rtype: list(str)
-
         """
         if all_files:
             pattern = f'*.{extension}'
@@ -1473,6 +1475,7 @@ class negLikelihood(functionToMinimize):
             self.recalculate = True
 
         if self.recalculate:
+
             self.fv, self.gv, self.hv, _ = self.like_deriv(
                 self.x, self.scaled, hessian=True, bhhh=False, batch=batch
             )
