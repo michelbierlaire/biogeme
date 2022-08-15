@@ -255,9 +255,16 @@ def piecewiseFormula(variable, thresholds, betas=None):
     .. seealso:: :meth:`piecewiseVariables`
 
     """
-    if not isinstance(variable, str):
+    if isinstance(variable, expr.Variable):
+        the_variable = variable
+        the_name = variable.name
+    elif isinstance(variable, str):
+        the_name = variable
+        the_valiable = expr.Variable(f'{variable}')
+    else:
         errorMsg = (
-            'The first argument of piecewiseFormula must be the name of a variable.'
+            'The first argument of piecewiseFormula must be the '
+            'name of a variable, or the variable itself..'
         )
         raise excep.biogemeError(errorMsg)
     
