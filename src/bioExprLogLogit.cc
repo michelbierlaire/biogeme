@@ -39,7 +39,9 @@ const bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUIn
 							bioBoolean hessian) {
 
   if (!gradient && hessian) {
-    throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
+    throw bioExceptions(__FILE__,
+			__LINE__,
+			"If the hessian is needed, the gradient must be computed") ;
   }
   
   theDerivatives.with_g = gradient ;

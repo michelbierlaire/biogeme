@@ -706,7 +706,6 @@ void biogeme::setDraws(std::vector< std::vector< std::vector<bioReal> > >& draws
 
 void biogeme::prepareData() {
 
-  
   // Here, we prepare the data that do not vary from one call of the
   // functions to the next.
 

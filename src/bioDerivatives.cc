@@ -22,7 +22,7 @@ static std::exception_ptr theExceptionPtr = nullptr ;
 */
 
 
-bioDerivatives::bioDerivatives(): with_g(true), with_h(true), with_bhhh(true) {
+bioDerivatives::bioDerivatives(): with_g(true), with_h(true), with_bhhh(true), bhhh_weight(1.0) {
 
 }
 
@@ -270,7 +270,12 @@ void bioDerivatives::computeBhhh() {
     }
     for (bioUInt i = 0 ; i < n ; ++i) {
       for (bioUInt j = i ; j < n ; ++j) {
-	bhhh[i][j] = g[i] * g[j] ;
+	if (bhhh_weight == 1.0) {
+	  bhhh[i][j] = g[i] * g[j] ;
+	}
+	else {
+	  bhhh[i][j] = bhhh_weight * g[i] * g[j] ;
+	}
       }
     }
   }

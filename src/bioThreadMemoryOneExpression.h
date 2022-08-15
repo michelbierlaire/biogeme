@@ -53,6 +53,7 @@ class bioThreadMemoryOneExpression {
   void setMissingData(bioReal md) ;
   void setDataMap(std::vector< std::vector<bioUInt> >* dm) ;
   void setDraws(std::vector< std::vector< std::vector<bioReal> > >* d) ;
+  void clear() ;
   
  private:
   std::vector<bioThreadArgOneExpression> inputStructures ;

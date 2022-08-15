@@ -140,6 +140,7 @@ void evaluateOneExpression::setDraws(std::vector< std::vector< std::vector<bioRe
 }
 
 void evaluateOneExpression::prepareData() {
+  theThreadMemory.clear() ;
   if (aggregation) {
     theThreadMemory.resize(nbrOfThreads, getDimension(), 1) ;
   }

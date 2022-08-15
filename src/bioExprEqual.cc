@@ -25,8 +25,8 @@ bioExprEqual::~bioExprEqual() {
 
 
 const bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						     bioBoolean gradient,
-						     bioBoolean hessian) {
+							   bioBoolean gradient,
+							   bioBoolean hessian) {
 
   theDerivatives.with_g = gradient ;
   theDerivatives.with_h = hessian ;
@@ -37,6 +37,7 @@ const bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> 
     if (containsLiterals(literalIds)) {
       std::stringstream str ;
       str << "Expression Equal is not differentiable" << std::endl ;
+      str << "[" << print() << "]" << std::endl ;
       throw(bioExceptions(__FILE__,__LINE__,str.str())) ;
     }
     theDerivatives.setDerivativesToZero() ;

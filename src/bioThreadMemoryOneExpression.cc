@@ -116,3 +116,8 @@ void bioThreadMemoryOneExpression::setDraws(std::vector< std::vector< std::vecto
     i->setDraws(d) ;
   }
 }
+
+void bioThreadMemoryOneExpression::clear() {
+  inputStructures.clear() ;
+  formulasPerThread.clear() ;
+}

@@ -29,6 +29,7 @@ public:
   bioBoolean with_g ;
   bioBoolean with_h ;
   bioBoolean with_bhhh ;
+  bioReal bhhh_weight ;
   bioReal f ;
   std::vector<bioReal> g ;
   std::vector<std::vector<bioReal> > h ;
