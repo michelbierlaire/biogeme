@@ -222,7 +222,7 @@ class rawResults:
 
         self.betaValues = betaValues  #: Values of the parameters
 
-        self.betaNames = theModel.freeBetaNames  #: Names of the parameters
+        self.betaNames = theModel.id_manager.free_betas.names  #: Names of the parameters
 
         self.initLogLike = theModel.initLogLike
         """Value of the likelihood function with the initial value of the
@@ -1416,7 +1416,7 @@ class bioResults:
         #  characters 39-58, standard error      20 chars
 
         mystats = self.getGeneralStatistics()
-        table = self.getEstimatedParameters()
+        table = self.getEstimatedParameters(onlyRobust=False)
         coefNames = list(table.index.values)
         for name in coefNames:
             values = table.loc[name]
