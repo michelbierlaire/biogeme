@@ -29,7 +29,16 @@ from biogeme import draws
 
 from biogeme.expressions import Variable, isNumeric, Numeric
 
-EstimationValidation = namedtuple('EstimationValidation', 'estimation validation')
+EstimationValidation = namedtuple(
+    'EstimationValidation', 'estimation validation'
+)
+
+logger = msg.bioMessage()
+"""Logger that controls the output of
+        messages to the screen and log file.
+        Type: class :class:`biogeme.messaging.bioMessage`.
+        """
+
 
 class Database:
     """Class that contains and prepare the database."""
@@ -44,11 +53,6 @@ class Database:
         :type pandasDatabase: pandas.DataFrame
 
         :raise biogemeError: if the audit function detects errors.
-        """
-        self.logger = msg.bioMessage()
-        """Logger that controls the output of
-        messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`.
         """
 
         self.name = name
@@ -125,9 +129,9 @@ class Database:
 
         listOfErrors, listOfWarnings = self._audit()
         if listOfWarnings:
-            self.logger.warning('\n'.join(listOfWarnings))
+            logger.warning('\n'.join(listOfWarnings))
         if listOfErrors:
-            self.logger.warning('\n'.join(listOfErrors))
+            logger.warning('\n'.join(listOfErrors))
             raise excep.biogemeError('\n'.join(listOfErrors))
 
     def _initNativeRandomNumberGenerators(self):
@@ -392,7 +396,8 @@ class Database:
         :rtype: numpy.Series
 
         """
-        return expression.getValue_c(database=self)
+        
+        return expression.getValue_c(database=self, prepareIds=True)
 
     def checkAvailabilityOfChosenAlt(self, avail, choice):
         """Check if the chosen alternative is available for each entry
@@ -409,6 +414,8 @@ class Database:
                  available, False otherwise.
         :rtype: numpy.Series
 
+        :raise biogemeError: if the chosen alternative does not appear
+            in the availability dict
         """
         self._avail = avail
         self._choice = choice
@@ -416,12 +423,14 @@ class Database:
         choice_array = choice.getValue_c(
             database=self,
             aggregation=False,
+            prepareIds=True
         )
         calculated_avail = {}
         for key, expression in avail.items():
             calculated_avail[key] = expression.getValue_c(
                 database=self,
                 aggregation=False,
+                prepareIds=True
             )
         try:
             avail_chosen = np.array(
@@ -458,6 +467,7 @@ class Database:
         choice_array = choice.getValue_c(
             database=self,
             aggregation=False,
+            prepareIds=True,
         )
         unique = np.unique(choice_array, return_counts=True)
         choice_stat = {alt: unique[1][i] for i, alt in enumerate(unique[0])}
@@ -466,6 +476,7 @@ class Database:
             calculated_avail[key] = expression.getValue_c(
                 database=self,
                 aggregation=False,
+                prepareIds=True,
             )
         avail_stat = {k: sum(a) for k, a in calculated_avail.items()}
         theResults = {
@@ -481,6 +492,7 @@ class Database:
 
         :param expression: expression to evaluate
         :type expression: biogeme.expressions.Expression
+
         :return: sum of the expressions over the database.
         :rtype: float
 
@@ -645,11 +657,6 @@ class Database:
             self.individualMap = self.fullIndividualMap.sample(
                 frac=samplingRate, weights=columnWithSamplingWeights
             )
-            theMsg = (
-                f'Full data: {self.fullIndividualMap.shape} '
-                f'Sampled data: {self.individualMap.shape}'
-            )
-            self.logger.debug(theMsg)
 
         else:
             # Cross sectional data
@@ -677,10 +684,6 @@ class Database:
 
             self.data = self.fullData.sample(
                 frac=samplingRate, weights=columnWithSamplingWeights
-            )
-            self.logger.debug(
-                f'Full data: {self.fullData.shape} '
-                f'Sampled data: {self.data.shape}'
             )
 
     def useFullSample(self):
@@ -717,13 +720,19 @@ class Database:
             )
 
         self._expression = expression
-        new_column = expression.getValue_c(
+        new_column = self._expression.getValue_c(
             database=self,
             aggregation=False,
+            prepareIds=True
         )
         self.data[column] = new_column
         self.variables[column] = Variable(column)
         return self.data[column]
+
+    def DefineVariable(self, name, expression):
+        """Insert a new column in the database and define it as a variable."""
+        self.addColumn(expression, name)
+        return Variable(name)
 
     def remove(self, expression):
         """Removes from the database all entries such that the value
@@ -753,7 +762,7 @@ class Database:
         theName = f'{self.name}_dumped'
         dataFileName = bf.getNewFileName(theName, 'dat')
         self.data.to_csv(dataFileName, sep='\t', index_label='__rowId')
-        self.logger.general(f'File {dataFileName} has been created')
+        logger.general(f'File {dataFileName} has been created')
         return dataFileName
 
     def setRandomNumberGenerators(self, rng):
@@ -761,8 +770,8 @@ class Database:
 
         :param rng: a dictionary of generators. The keys of the dictionary
            characterize the name of the generators, and must be
-           different from the pre-defined generators in Biogeme 
-           (see :func:`~biogeme.database.Database.generateDraws` for the list). 
+           different from the pre-defined generators in Biogeme
+           (see :func:`~biogeme.database.Database.generateDraws` for the list).
            The elements of the
            dictionary are functions that take two arguments: the
            number of series to generate (typically, the size of the
@@ -883,7 +892,6 @@ class Database:
         :raise biogemeError: if the output of the draw generator does not
             have the requested dimensions.
         """
-
         self.numberOfDraws = numberOfDraws
         # Dimensions of the draw table:
         # 1. number of variables
@@ -1088,7 +1096,9 @@ class Database:
         """
         return self.data[self.data[columnName] == value].count()[columnName]
 
-    def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=[]):
+    def generateFlatPanelDataframe(
+        self, saveOnFile=None, identical_columns=[]
+    ):
         """Generate a flat version of the panel data
 
         :param saveOnFile: if True, the flat database is saved on file.
@@ -1110,14 +1120,12 @@ class Database:
             error_msg = 'This function can only be called for panel data'
             raise excep.biogemeError(error_msg)
         flat_data = tools.flatten_database(
-            self.data,
-            self.panelColumn,
-            identical_columns=identical_columns
+            self.data, self.panelColumn, identical_columns=identical_columns
         )
         if saveOnFile:
             file_name = f'{self.name}_flatten.csv'
             flat_data.to_csv(file_name)
-            self.logger.general(f'File {file_name} has been created.')
+            logger.general(f'File {file_name} has been created.')
         return flat_data
 
     def __str__(self):
