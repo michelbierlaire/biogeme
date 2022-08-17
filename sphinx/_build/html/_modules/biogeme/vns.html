@@ -1,68 +1,31 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>biogeme.vns &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -70,19 +33,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
@@ -98,75 +50,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>biogeme.vns</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for biogeme.vns</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;File vns.py</span>
 
@@ -198,7 +112,7 @@
         <span class="sd">&quot;&quot;&quot;Evaluate  the validity of the solution.</span>
 
 <span class="sd">        :param aSolution: solution to be checked</span>
-<span class="sd">        :type aSolution: solutionClass</span>
+<span class="sd">        :type aSolution: :class:`biogeme.vns.solutionClass`</span>
 
 <span class="sd">        :return: valid, why where valid is True if the solution is</span>
 <span class="sd">            valid, and False otherwise. why contains an explanation why it</span>
@@ -212,7 +126,7 @@
 <span class="sd">        the solution object.</span>
 
 <span class="sd">        :param aSolution: solution to be evaluated</span>
-<span class="sd">        :type aSolution: solutionClass</span>
+<span class="sd">        :type aSolution: :class:`biogeme.vns.solutionClass`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
@@ -221,7 +135,7 @@
         <span class="sd">&quot;&quot;&quot;Short description of the solution. Used for reporting.</span>
 
 <span class="sd">        :param aSolution: solution to be described</span>
-<span class="sd">        :type aSolution: solutionClass</span>
+<span class="sd">        :type aSolution: :class:`biogeme.vns.solutionClass`</span>
 
 <span class="sd">        :return: short description of the solution.</span>
 <span class="sd">        :rtype: str</span>
@@ -233,14 +147,14 @@
 <span class="sd">        Generates a neighbor of the solution.</span>
 
 <span class="sd">        :param aSolution: solution to be modified</span>
-<span class="sd">        :type aSolution: solutionClass</span>
+<span class="sd">        :type aSolution: :class:`biogeme.vns.solutionClass`</span>
 
 <span class="sd">        :param neighborhoodSize: size of the neighborhood to be applied</span>
 <span class="sd">        :type neighborhoodSize: int</span>
 
 <span class="sd">        :return: a neighbor solution, and the number of changes that have been</span>
 <span class="sd">                 actually applied.</span>
-<span class="sd">        :rtype: tuple(solutionClass, int)</span>
+<span class="sd">        :rtype: tuple(:class:`biogeme.vns.solutionClass`, int)</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="problemClass.neighborRejected"><a class="viewcode-back" href="../../vns.html#biogeme.vns.problemClass.neighborRejected">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
@@ -249,10 +163,10 @@
 <span class="sd">        algorithm. Used to update the statistics on the operators.</span>
 
 <span class="sd">        :param aSolution: solution  modified</span>
-<span class="sd">        :type aSolution: solutionClass</span>
+<span class="sd">        :type aSolution: :class:`biogeme.vns.solutionClass`</span>
 
 <span class="sd">        :param aNeighbor: neighbor</span>
-<span class="sd">        :type aNeighbor: solutionClass</span>
+<span class="sd">        :type aNeighbor: :class:`biogeme.vns.solutionClass`</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="problemClass.neighborAccepted"><a class="viewcode-back" href="../../vns.html#biogeme.vns.problemClass.neighborAccepted">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
@@ -261,10 +175,10 @@
 <span class="sd">        algorithm. Used to update the statistics on the operators.</span>
 
 <span class="sd">        :param aSolution: solution modified</span>
-<span class="sd">        :type aSolution: solutionClass</span>
+<span class="sd">        :type aSolution: :class:`biogeme.vns.solutionClass`</span>
 
 <span class="sd">        :param aNeighbor: neighbor</span>
-<span class="sd">        :type aNeighbor: solutionClass</span>
+<span class="sd">        :type aNeighbor: :class:`biogeme.vns.solutionClass`</span>
 <span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
@@ -348,8 +262,13 @@
 <span class="sd">        :type operators: list(str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scores</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">operatorNames</span><span class="p">}</span>
+        <span class="sd">&quot;&quot;&quot; dict of scores obtained by the operators&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">available</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">operatorNames</span><span class="p">}</span></div>
+        <span class="sd">&quot;&quot;&quot; Names of the operators &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">available</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">operatorNames</span><span class="p">}</span>
+        <span class="sd">&quot;&quot;&quot; dict of availability of the operators &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="operatorsManagement.increaseScore"><a class="viewcode-back" href="../../vns.html#biogeme.vns.operatorsManagement.increaseScore">[docs]</a>    <span class="k">def</span> <span class="nf">increaseScore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Increase the score of an operator.</span>
@@ -448,10 +367,27 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">maxNeighborhood</span> <span class="o">=</span> <span class="n">maxNeighborhood</span>
+        <span class="sd">&quot;&quot;&quot;the maximum size of the neighborhood that must be considered</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">archiveInputFile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">pareto</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;dict containing the pareto set. The keys are the solutions</span>
+<span class="sd">            (class :class:`biogeme.vns.solutionClass`), and the values are</span>
+<span class="sd">            the size of the neighborhood that must be applied the next</span>
+<span class="sd">            time tat the solution is selected by the algorithm.</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">removed</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;set of solutions that have been in the Pareto set ar some point,</span>
+<span class="sd">            but have been removed because dominated by another</span>
+<span class="sd">            solution.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">considered</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="sd">&quot;&quot;&quot;set of solutions that have been considered at some point by the</span>
+<span class="sd">            algorithm</span>
+<span class="sd">            &quot;&quot;&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">restore</span><span class="p">(</span><span class="n">archiveInputFile</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
@@ -525,8 +461,9 @@
         <span class="k">if</span> <span class="n">S_dominated</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pareto</span><span class="p">[</span><span class="n">elem</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">D_dominating</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">pareto</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pareto</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pareto</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">D_dominating</span>
+        <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">removed</span> <span class="o">|=</span> <span class="n">D_dominating</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -622,7 +559,7 @@
 <span class="sd">    :return: the pareto set, the set of models that have been in the</span>
 <span class="sd">             pareto set and then removed, and the set of all models</span>
 <span class="sd">             considered by the algorithm.</span>
-<span class="sd">    :rtype: class pareto</span>
+<span class="sd">    :rtype: class :class:`biogeme.vns.paretoClass`</span>
 
 <span class="sd">    :raise biogemeError: if the first Pareto set is empty.</span>
 
@@ -658,11 +595,11 @@
         <span class="n">continueWithSolution</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="n">continueWithSolution</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;**** Size of pareto set: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">thePareto</span><span class="o">.</span><span class="n">pareto</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;----&gt; Neighbor </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1"> of size </span><span class="si">{</span><span class="n">neighborhoodSize</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
             <span class="n">aNeighbor</span><span class="p">,</span> <span class="n">numberOfChanges</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">generateNeighbor</span><span class="p">(</span>
                 <span class="n">solutionToImprove</span><span class="p">,</span> <span class="n">neighborhoodSize</span>
             <span class="p">)</span>
+
             <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">numberOfNeighbors</span><span class="p">:</span>
                 <span class="n">thePareto</span><span class="o">.</span><span class="n">changeNeighborhood</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">)</span>
@@ -673,6 +610,7 @@
                     <span class="sa">f</span><span class="s1">&#39;Neighbor of size </span><span class="si">{</span><span class="n">neighborhoodSize</span><span class="si">}</span><span class="s1">: &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;generation failed&#39;</span>
                 <span class="p">)</span>
+                <span class="n">thePareto</span><span class="o">.</span><span class="n">changeNeighborhood</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">)</span>
                 <span class="n">continueWithSolution</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">elif</span> <span class="n">aNeighbor</span> <span class="ow">in</span> <span class="n">thePareto</span><span class="o">.</span><span class="n">considered</span><span class="p">:</span>
                 <span class="n">problem</span><span class="o">.</span><span class="n">neighborRejected</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">,</span> <span class="n">aNeighbor</span><span class="p">)</span>
@@ -680,11 +618,11 @@
                     <span class="sa">f</span><span class="s1">&#39;*** Neighbor of size </span><span class="si">{</span><span class="n">neighborhoodSize</span><span class="si">}</span><span class="s1">:&#39;</span>
                     <span class="sa">f</span><span class="s1">&#39; already considered***&#39;</span>
                 <span class="p">)</span>
+                <span class="n">thePareto</span><span class="o">.</span><span class="n">changeNeighborhood</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">problem</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">aNeighbor</span><span class="p">)</span>
                 <span class="n">valid</span><span class="p">,</span> <span class="n">why</span> <span class="o">=</span> <span class="n">problem</span><span class="o">.</span><span class="n">isValid</span><span class="p">(</span><span class="n">aNeighbor</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">valid</span><span class="p">:</span>
-
                     <span class="k">if</span> <span class="n">thePareto</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">aNeighbor</span><span class="p">):</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="s1">&#39;*** New pareto solution: &#39;</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="n">problem</span><span class="o">.</span><span class="n">describe</span><span class="p">(</span><span class="n">aNeighbor</span><span class="p">))</span>
@@ -698,12 +636,14 @@
                             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">neighborhoodSize</span><span class="si">}</span><span class="s1">: dominated***&#39;</span>
                         <span class="p">)</span>
                         <span class="n">problem</span><span class="o">.</span><span class="n">neighborRejected</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">,</span> <span class="n">aNeighbor</span><span class="p">)</span>
+                        <span class="n">thePareto</span><span class="o">.</span><span class="n">changeNeighborhood</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s1">&#39;*** Neighbor of size </span><span class="si">{</span><span class="n">neighborhoodSize</span><span class="si">}</span><span class="s1">&#39;</span>
                         <span class="sa">f</span><span class="s1">&#39; invalid: </span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="s1">***&#39;</span>
                     <span class="p">)</span>
                     <span class="n">problem</span><span class="o">.</span><span class="n">neighborRejected</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">,</span> <span class="n">aNeighbor</span><span class="p">)</span>
+                    <span class="n">thePareto</span><span class="o">.</span><span class="n">changeNeighborhood</span><span class="p">(</span><span class="n">solutionToImprove</span><span class="p">)</span>
 
         <span class="n">solutionToImprove</span><span class="p">,</span> <span class="n">neighborhoodSize</span> <span class="o">=</span> <span class="n">thePareto</span><span class="o">.</span><span class="n">select</span><span class="p">()</span>
 
@@ -711,46 +651,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

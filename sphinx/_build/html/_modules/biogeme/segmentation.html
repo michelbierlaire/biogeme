@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>biogeme.segmentation &mdash; Biogeme 3.2.7 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> Biogeme
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../distributions.html">Distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../segmentation.html">Segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Biogeme</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>biogeme.segmentation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for biogeme.segmentation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Class that provides some automatic specification for segmented parameters</span>
+
+<span class="sd">:author: Michel Bierlaire</span>
+<span class="sd">:date: Fri Dec 31 10:41:33 2021</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span><span class="p">,</span> <span class="n">deque</span>
+<span class="kn">from</span> <span class="nn">biogeme.expressions</span> <span class="kn">import</span> <span class="n">Beta</span><span class="p">,</span> <span class="n">bioMultSum</span>
+
+<span class="n">DiscreteSegmentationTuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s1">&#39;DiscreteSegmentationTuple&#39;</span><span class="p">,</span> <span class="s1">&#39;variable mapping&#39;</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="combine_segmented_expressions"><a class="viewcode-back" href="../../segmentation.html#biogeme.segmentation.combine_segmented_expressions">[docs]</a><span class="k">def</span> <span class="nf">combine_segmented_expressions</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">mapping_of_expressions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create an expressions that combines all the segments</span>
+
+<span class="sd">    :param variable: variable that characterizes the segmentation</span>
+<span class="sd">    :type variable: biogeme.expressions.Variable</span>
+
+<span class="sd">    :param mapping_of_expressions: dictionary that maps each value of</span>
+<span class="sd">        the variable with the expression for the corresponding</span>
+<span class="sd">        segment.</span>
+<span class="sd">    :type mapping_of_expressions: dict(int: biogeme.expressions.Expression)</span>
+
+<span class="sd">    :return: combined expression</span>
+<span class="sd">    :rtype: biogeme.expressions.bioMultSum</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">expr</span> <span class="o">*</span> <span class="p">(</span><span class="n">variable</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">mapping_of_expressions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="code_to_combine_segmented_expressions"><a class="viewcode-back" href="../../segmentation.html#biogeme.segmentation.code_to_combine_segmented_expressions">[docs]</a><span class="k">def</span> <span class="nf">code_to_combine_segmented_expressions</span><span class="p">(</span>
+    <span class="n">variable</span><span class="p">,</span> <span class="n">mapping_of_expressions</span><span class="p">,</span> <span class="n">prefix</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create the Python code for an expressions that combines all the segments</span>
+
+<span class="sd">    :param variable: variable that characterizes the segmentation</span>
+<span class="sd">    :type variable: biogeme.expressions.Variable</span>
+
+<span class="sd">    :param mapping_of_expressions: dictionary that maps each value of</span>
+<span class="sd">        the variable with the Python code of the expression for the</span>
+<span class="sd">        corresponding segment.</span>
+<span class="sd">    :type mapping_of_expressions: dict(int: biogeme.expressions.Expression)</span>
+
+<span class="sd">    :param prefix: name of the current expression, used as prefix</span>
+<span class="sd">    :type prefix: str</span>
+
+<span class="sd">    :return: code for the combined expression</span>
+<span class="sd">    :rtype: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">mapping_of_expressions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> = &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1"> * (</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1"> == </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">mapping_of_expressions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1"> = bioMultSum([</span><span class="si">{</span><span class="n">terms</span><span class="si">}</span><span class="s1">])</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="create_segmented_parameter"><a class="viewcode-back" href="../../segmentation.html#biogeme.segmentation.create_segmented_parameter">[docs]</a><span class="k">def</span> <span class="nf">create_segmented_parameter</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">mapping</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a version of the parameter for each segment</span>
+
+<span class="sd">    :param parameter: parameter</span>
+<span class="sd">    :type parameter: biogeme.expressions.Beta</span>
+
+<span class="sd">    :param mapping: dictionary that maps each segment id with the name</span>
+<span class="sd">        of the segment.</span>
+<span class="sd">    :type mapping: dict(int: str)</span>
+
+<span class="sd">    :return: a dictionary that maps each segment id with the created parameters</span>
+<span class="sd">    :rtype: dict(int: biogeme.expressions.Beta)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">segmented_parameters</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">value</span><span class="p">:</span> <span class="n">Beta</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">initValue</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">lb</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">ub</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">segmented_parameters</span></div>
+
+
+<div class="viewcode-block" id="segment_parameter"><a class="viewcode-back" href="../../segmentation.html#biogeme.segmentation.segment_parameter">[docs]</a><span class="k">def</span> <span class="nf">segment_parameter</span><span class="p">(</span>
+    <span class="n">parameter</span><span class="p">,</span> <span class="n">list_of_discrete_segmentations</span><span class="p">,</span> <span class="n">combinatorial</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Segment a parameter expression along several dimensions of segmentation</span>
+
+<span class="sd">    :param parameter: parameter to segment</span>
+<span class="sd">    :type parameter: biogeme.expressions.Beta</span>
+
+<span class="sd">    :param list_of_discrete_segmentations: each element of the list is a tuple</span>
+<span class="sd">        with the variable characterizing the segmentation, and a</span>
+<span class="sd">        dictionary mapping the values with the names of the segments.</span>
+<span class="sd">    :type list_of_discrete_segmentations:</span>
+<span class="sd">        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))</span>
+
+<span class="sd">    :param combinatorial: if True, a parameter is associated with each</span>
+<span class="sd">        combination of values for the discrete segmentations. If</span>
+<span class="sd">        :math:`N_s` is the number of values for segmentation s, the</span>
+<span class="sd">        total numper of parameters is :math:`\\prod_s N_s`.  If False,</span>
+<span class="sd">        for each segmentation in the list, a parameter is associated</span>
+<span class="sd">        with each value of this segmentation.  If `:math:`N_s` is the</span>
+<span class="sd">        number of values for segmentation s, the total number of</span>
+<span class="sd">        parameters is :math:`\\sum_s N_s`.  :type combinatorial: bool</span>
+
+<span class="sd">    :return: expression involving all the segments</span>
+<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">combinatorial</span><span class="p">:</span>
+        <span class="c1"># Recursive call to the function, based on a stack</span>
+        <span class="n">stack_of_segmentations</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">list_of_discrete_segmentations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stack_of_segmentations</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parameter</span>
+
+        <span class="n">next_segment</span> <span class="o">=</span> <span class="n">stack_of_segmentations</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">segmented_parameters</span> <span class="o">=</span> <span class="n">create_segmented_parameter</span><span class="p">(</span>
+            <span class="n">parameter</span><span class="p">,</span> <span class="n">next_segment</span><span class="o">.</span><span class="n">mapping</span>
+        <span class="p">)</span>
+        <span class="n">map_of_expressions</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">segment_parameter</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">,</span> <span class="n">stack_of_segmentations</span><span class="p">,</span> <span class="n">combinatorial</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">segmented_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">combine_segmented_expressions</span><span class="p">(</span>
+            <span class="n">next_segment</span><span class="o">.</span><span class="n">variable</span><span class="p">,</span> <span class="n">map_of_expressions</span>
+        <span class="p">)</span>
+
+    <span class="c1"># If not combinatorial, just a list of terms.</span>
+    <span class="n">all_segments</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">expr</span> <span class="o">*</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">variable</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">list_of_discrete_segmentations</span>
+        <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">create_segmented_parameter</span><span class="p">(</span>
+            <span class="n">parameter</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">mapping</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">all_segments</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="code_to_segment_parameter"><a class="viewcode-back" href="../../segmentation.html#biogeme.segmentation.code_to_segment_parameter">[docs]</a><span class="k">def</span> <span class="nf">code_to_segment_parameter</span><span class="p">(</span>
+    <span class="n">parameter</span><span class="p">,</span> <span class="n">list_of_discrete_segmentations</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate the Python code to segment a parameter along several</span>
+<span class="sd">        dimensions of segmentation</span>
+
+<span class="sd">    :param parameter: parameter to segment</span>
+<span class="sd">    :type parameter: biogeme.expressions.Beta</span>
+
+<span class="sd">    :param list_of_discrete_segmentations: each element of the list is a tuple</span>
+<span class="sd">        with the variable characterizing the segmentation, and a</span>
+<span class="sd">        dictionary mapping the values with the names of the segments.</span>
+<span class="sd">    :type list_of_discrete_segmentations:</span>
+<span class="sd">        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))</span>
+
+<span class="sd">    :param prefix: name of the current expression, used as prefix</span>
+<span class="sd">    :type prefix: str</span>
+
+<span class="sd">    :return: code for the segmentation</span>
+<span class="sd">    :rtype: str</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stack_of_segmentations</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">list_of_discrete_segmentations</span><span class="p">)</span>
+    <span class="n">next_segment</span> <span class="o">=</span> <span class="n">stack_of_segmentations</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">prefix</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span>
+    <span class="c1"># prefix = &#39;beta_var_1&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">stack_of_segmentations</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">next_segment</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="n">code_to_segment_parameter</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">,</span> <span class="n">stack_of_segmentations</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">next_segment</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">param_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2"> = Beta(&#39;</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">&#39;, 0, None, None)</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> * (</span><span class="si">{</span><span class="n">next_segment</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> == </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">))&#39;</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">next_segment</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s1"> = bioMultSum([</span><span class="si">{</span><span class="n">terms</span><span class="si">}</span><span class="s1">])&#39;</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

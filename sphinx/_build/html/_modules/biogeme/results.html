@@ -1,68 +1,32 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>biogeme.results &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -70,19 +34,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
@@ -98,75 +51,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>biogeme.results</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for biogeme.results</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Implementation of class contaning and processing the estimation results.</span>
@@ -187,6 +102,8 @@
 
 <span class="kn">import</span> <span class="nn">pickle</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">urllib.request</span> <span class="k">as</span> <span class="nn">urlr</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">linalg</span>
@@ -195,6 +112,11 @@
 <span class="kn">import</span> <span class="nn">biogeme.filenames</span> <span class="k">as</span> <span class="nn">bf</span>
 <span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
 <span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
+<span class="kn">from</span> <span class="nn">biogeme</span> <span class="kn">import</span> <span class="n">tools</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+
+<span class="n">GeneralStatistic</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;GeneralStatistic&#39;</span><span class="p">,</span> <span class="s1">&#39;value format&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="calcPValue"><a class="viewcode-back" href="../../results.html#biogeme.results.calcPValue">[docs]</a><span class="k">def</span> <span class="nf">calcPValue</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
@@ -233,31 +155,31 @@
 <span class="sd">        :type bounds: float,float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1">#: Name of the parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: Name of the parameter</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="c1">#: Current value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1">#: Current value</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#: Lower bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lb</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1">#: Lower bound</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#: Upper bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ub</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1">#: Upper bound</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">stdErr</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Standard error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdErr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Standard error</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">tTest</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: t-test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tTest</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: t-test</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">pValue</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: p-value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pValue</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: p-value</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">robust_stdErr</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Robust standard error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robust_stdErr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Robust standard error</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">robust_tTest</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Robust t-test</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robust_tTest</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Robust t-test</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">robust_pValue</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Robust p-value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">robust_pValue</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Robust p-value</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_stdErr</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Std error calculated from bootstrap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_stdErr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Std error calculated from bootstrap</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_tTest</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: t-test calculated from bootstrap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_tTest</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: t-test calculated from bootstrap</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_pValue</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: p-value calculated from bootstrap</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_pValue</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: p-value calculated from bootstrap</span></div>
 
 <div class="viewcode-block" id="beta.isBoundActive"><a class="viewcode-back" href="../../results.html#biogeme.results.beta.isBoundActive">[docs]</a>    <span class="k">def</span> <span class="nf">isBoundActive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0e-6</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if one of the two bound is &#39;numerically&#39; active. Being</span>
@@ -377,16 +299,17 @@
 <span class="sd">        :type bootstrap: numpy.array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelName</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">modelName</span>  <span class="c1">#: Name of the model</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">modelName</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">modelName</span> <span class="c1">#: Name of the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">userNotes</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">userNotes</span>  <span class="c1">#: User notes</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">userNotes</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">userNotes</span> <span class="c1">#: User notes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nparam</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">betaValues</span><span class="p">)</span>  <span class="c1">#: Number of parameters</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">nparam</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">betaValues</span><span class="p">)</span> <span class="c1">#: Number of parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">betaValues</span> <span class="o">=</span> <span class="n">betaValues</span>  <span class="c1">#: Values of the parameters</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">betaValues</span> <span class="o">=</span> <span class="n">betaValues</span> <span class="c1">#: Values of the parameters</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">betaNames</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">freeBetaNames</span> <span class="c1">#: Names of the parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">betaNames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">theModel</span><span class="o">.</span><span class="n">id_manager</span><span class="o">.</span><span class="n">free_betas</span><span class="o">.</span><span class="n">names</span>
+        <span class="p">)</span>  <span class="c1">#: Names of the parameters</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">initLogLike</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">initLogLike</span>
         <span class="sd">&quot;&quot;&quot;Value of the likelihood function with the initial value of the</span>
@@ -397,22 +320,22 @@
         <span class="sd">&quot;&quot;&quot;Value of the likelihood function with equal probability model</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">betas</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> <span class="c1">#: List of objects of type results.beta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">betas</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#: List of objects of type results.beta</span>
 
         <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">betaValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">betaNames</span><span class="p">):</span>
             <span class="n">bounds</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">getBoundsOnBeta</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">betas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beta</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">bounds</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logLike</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#: Value of the loglikelihood function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logLike</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1">#: Value of the loglikelihood function</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#: Value of the gradient of the loglikelihood function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1">#: Value of the gradient of the loglik. function</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1">#: Value of the hessian of the loglikelihood function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1">#: Value of the hessian of the loglik. function</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bhhh</span> <span class="o">=</span> <span class="n">fgHb</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
         <span class="sd">&quot;&quot;&quot;Value of the BHHH matrix of the loglikelihood function&quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">name</span> <span class="c1">#: Name of the database</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataname</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">name</span>  <span class="c1">#: Name of the database</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sampleSize</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">getSampleSize</span><span class="p">()</span>
         <span class="sd">&quot;&quot;&quot;Sample size (number of individuals if panel data)&quot;&quot;&quot;</span>
@@ -444,13 +367,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">numberOfThreads</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">numberOfThreads</span>
         <span class="sd">&quot;&quot;&quot;Number of threads used for parallel computing&quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">htmlFileName</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Name of the HTML output file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">htmlFileName</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Name of the HTML output file</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">F12FileName</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Name of the F12 output file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">F12FileName</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Name of the F12 output file</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">latexFileName</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Name of the LaTeX output file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latexFileName</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Name of the LaTeX output file</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">pickleFileName</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Name of the pickle outpt file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pickleFileName</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Name of the pickle outpt file</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap</span> <span class="o">=</span> <span class="n">bootstrap</span>
         <span class="sd">&quot;&quot;&quot;output of the bootstrapping. numpy array, of size B x K,</span>
@@ -464,8 +387,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_time</span> <span class="o">=</span> <span class="n">theModel</span><span class="o">.</span><span class="n">bootstrap_time</span>
             <span class="sd">&quot;&quot;&quot; Time needed to perform the bootstrap&quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">secondOrderTable</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Second order statistics</span></div></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">secondOrderTable</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Second order statistics</span></div></div>
 
 
 <div class="viewcode-block" id="bioResults"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults">[docs]</a><span class="k">class</span> <span class="nc">bioResults</span><span class="p">:</span>
@@ -478,13 +400,11 @@
 <span class="sd">            Default: None.</span>
 <span class="sd">        :type theRawResults: biogeme.results.rawResults</span>
 <span class="sd">        :param pickleFile: name of the file containing the raw results in</span>
-<span class="sd">            pickle format. Default: None.</span>
+<span class="sd">            pickle format. It can be a URL. Default: None.</span>
 <span class="sd">        :type pickleFile: string</span>
 
 <span class="sd">        :raise biogeme.exceptions.biogemeError: if no data is provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">theRawResults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">theRawResults</span>
@@ -492,8 +412,18 @@
 <span class="sd">            raw estimation results.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
         <span class="k">elif</span> <span class="n">pickleFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickleFile</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">urlr</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">pickleFile</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickleFile</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">pickleFile</span><span class="si">}</span><span class="s1"> not found&#39;</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;No data provided.&#39;</span><span class="p">)</span>
 
@@ -511,9 +441,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pickleFileName</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pickleFileName</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pickleFileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pickleFileName</span></div>
 
     <span class="k">def</span> <span class="nf">_calculateTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
@@ -692,7 +620,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap_varCovar</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
                     <span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">secondOrderTable</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">secondOrderTable</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nparam</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
                     <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculateTest</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">varCovar</span><span class="p">)</span>
@@ -840,8 +768,11 @@
         <span class="n">h</span> <span class="o">+=</span> <span class="n">bv</span><span class="o">.</span><span class="n">getLaTeX</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">h</span>
 
-<div class="viewcode-block" id="bioResults.getLaTeX"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.getLaTeX">[docs]</a>    <span class="k">def</span> <span class="nf">getLaTeX</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="bioResults.getLaTeX"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.getLaTeX">[docs]</a>    <span class="k">def</span> <span class="nf">getLaTeX</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">onlyRobust</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the results coded in LaTeX</span>
+
+<span class="sd">        :param onlyRobust: if True, only the robust statistics are included</span>
+<span class="sd">        :type onlyRobust: bool</span>
 
 <span class="sd">        :return: LaTeX code</span>
 <span class="sd">        :rtype: string</span>
@@ -877,7 +808,7 @@
 
         <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%%</span><span class="s1">Parameter estimates</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">section{Parameter estimates}</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEstimatedParameters</span><span class="p">()</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEstimatedParameters</span><span class="p">(</span><span class="n">onlyRobust</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">formatting</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
             <span class="sd">&quot;&quot;&quot;Defines the formatting for the to_latex function of pandas&quot;&quot;&quot;</span>
@@ -887,69 +818,115 @@
 
             <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">.0&#39;</span>
 
-        <span class="n">h</span> <span class="o">+=</span> <span class="n">table</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">float_format</span><span class="o">=</span><span class="n">formatting</span><span class="p">)</span>
+        <span class="c1">## Need to check for old versions of Pandas.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">+=</span> <span class="n">table</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatting</span><span class="p">)</span><span class="o">.</span><span class="n">to_latex</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">+=</span> <span class="n">table</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">float_format</span><span class="o">=</span><span class="n">formatting</span><span class="p">)</span>
 
         <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%%</span><span class="s1">Correlation</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">section</span><span class="si">{Correlation}</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCorrelationResults</span><span class="p">()</span>
-        <span class="n">h</span> <span class="o">+=</span> <span class="n">table</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">float_format</span><span class="o">=</span><span class="n">formatting</span><span class="p">)</span>
+        <span class="c1">## Need to check for old versions of Pandas.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">+=</span> <span class="n">table</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatting</span><span class="p">)</span><span class="o">.</span><span class="n">to_latex</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">+=</span> <span class="n">table</span><span class="o">.</span><span class="n">to_latex</span><span class="p">(</span><span class="n">float_format</span><span class="o">=</span><span class="n">formatting</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">h</span></div>
 
 <div class="viewcode-block" id="bioResults.getGeneralStatistics"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.getGeneralStatistics">[docs]</a>    <span class="k">def</span> <span class="nf">getGeneralStatistics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Format the results in a dict</span>
 
 <span class="sd">        :return: dict with the results. The keys describe each</span>
-<span class="sd">                 content. Each element is a tuple, with the value and its</span>
-<span class="sd">                 preferred formatting.</span>
+<span class="sd">                 content. Each element is a GeneralStatistic tuple,</span>
+<span class="sd">                 with the value and its preferred formatting.</span>
 
 <span class="sd">        Example::</span>
 
 <span class="sd">                     &#39;Init log likelihood&#39;: (-115.30029248549191, &#39;.7g&#39;)</span>
 
 <span class="sd">        :rtype: dict(string:float,string)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Number of estimated parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nparam</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Number of estimated parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nparam</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+        <span class="p">)</span>
         <span class="n">nf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberOfFreeParameters</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">nf</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nparam</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Number of free parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nf</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Sample size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sampleSize</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sampleSize</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfObservations</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfObservations</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Excluded observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">excludedData</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nullLogLike</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Null log likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nullLogLike</span><span class="p">,</span> <span class="s1">&#39;.7g&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Init log likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">initLogLike</span><span class="p">,</span> <span class="s1">&#39;.7g&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Final log likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">logLike</span><span class="p">,</span> <span class="s1">&#39;.7g&#39;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nullLogLike</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Likelihood ratio test for the null model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">likelihoodRatioTestNull</span><span class="p">,</span>
-                <span class="s1">&#39;.7g&#39;</span><span class="p">,</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Number of free parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">nf</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
             <span class="p">)</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square for the null model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoSquareNull</span><span class="p">,</span> <span class="s1">&#39;.3g&#39;</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square-bar for the null model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoBarSquareNull</span><span class="p">,</span>
-                <span class="s1">&#39;.3g&#39;</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Likelihood ratio test for the init. model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">likelihoodRatioTest</span><span class="p">,</span>
-            <span class="s1">&#39;.7g&#39;</span><span class="p">,</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Sample size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sampleSize</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
         <span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square for the init. model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoSquare</span><span class="p">,</span> <span class="s1">&#39;.3g&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square-bar for the init. model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoBarSquare</span><span class="p">,</span> <span class="s1">&#39;.3g&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Akaike Information Criterion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">akaike</span><span class="p">,</span> <span class="s1">&#39;.7g&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Bayesian Information Criterion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bayesian</span><span class="p">,</span> <span class="s1">&#39;.7g&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Final gradient norm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">gradientNorm</span><span class="p">,</span> <span class="s1">&#39;.4E&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sampleSize</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfObservations</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfObservations</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+            <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Excluded observations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">excludedData</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nullLogLike</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Null log likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nullLogLike</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span>
+            <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Init log likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">initLogLike</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span>
+        <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Final log likelihood&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">logLike</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nullLogLike</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Likelihood ratio test for the null model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">likelihoodRatioTestNull</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square for the null model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoSquareNull</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.3g&#39;</span>
+            <span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square-bar for the null model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoBarSquareNull</span><span class="p">,</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.3g&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Likelihood ratio test for the init. model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">likelihoodRatioTest</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square for the init. model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoSquare</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.3g&#39;</span>
+        <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Rho-square-bar for the init. model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">rhoBarSquare</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.3g&#39;</span>
+        <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Akaike Information Criterion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">akaike</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span>
+        <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Bayesian Information Criterion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bayesian</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.7g&#39;</span>
+        <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Final gradient norm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">gradientNorm</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;.4E&#39;</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">monteCarlo</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Number of draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfDraws</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Draws generation time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drawsProcessingTime</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Types of draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">typesOfDraws</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
-                <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Number of draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfDraws</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+            <span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Draws generation time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">drawsProcessingTime</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+            <span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Types of draws&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">typesOfDraws</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Bootstrapping time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap_time</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Nbr of threads&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfThreads</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Bootstrapping time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap_time</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+            <span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;Nbr of threads&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GeneralStatistic</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">numberOfThreads</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
 <div class="viewcode-block" id="bioResults.printGeneralStatistics"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.printGeneralStatistics">[docs]</a>    <span class="k">def</span> <span class="nf">printGeneralStatistics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -988,9 +965,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="ow">not</span> <span class="n">b</span><span class="o">.</span><span class="n">isBoundActive</span><span class="p">()</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">betas</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="bioResults.getEstimatedParameters"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.getEstimatedParameters">[docs]</a>    <span class="k">def</span> <span class="nf">getEstimatedParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="bioResults.getEstimatedParameters"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.getEstimatedParameters">[docs]</a>    <span class="k">def</span> <span class="nf">getEstimatedParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">onlyRobust</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Gather the estimated parameters and the corresponding statistics in</span>
 <span class="sd">        a Pandas dataframe.</span>
+
+<span class="sd">        :param onlyRobust: if True, only the robust statistics are included</span>
+<span class="sd">        :type onlyRobust: bool</span>
 
 <span class="sd">        :return: Pandas dataframe with the results</span>
 <span class="sd">        :rtype: pandas.DataFrame</span>
@@ -1002,27 +982,44 @@
             <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">isBoundActive</span><span class="p">():</span>
                 <span class="n">anyActiveBound</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">anyActiveBound</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="s1">&#39;Value&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Active bound&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Std err&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;t-test&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;p-value&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">,</span>
-            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">onlyRobust</span><span class="p">:</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s1">&#39;Value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Active bound&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s1">&#39;Value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Active bound&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Std err&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;t-test&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;p-value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">,</span>
+                <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="s1">&#39;Value&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Std err&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;t-test&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;p-value&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">onlyRobust</span><span class="p">:</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s1">&#39;Value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s1">&#39;Value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Std err&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;t-test&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;p-value&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">,</span>
+                <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">onlyRobust</span><span class="p">:</span>
             <span class="n">columns</span> <span class="o">+=</span> <span class="p">[</span>
                 <span class="sa">f</span><span class="s1">&#39;Bootstrap[</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">)</span><span class="si">}</span><span class="s1">] Std err&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;Bootstrap t-test&#39;</span><span class="p">,</span>
@@ -1031,27 +1028,48 @@
         <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">betas</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">anyActiveBound</span><span class="p">:</span>
-                <span class="n">arow</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                    <span class="s1">&#39;Active bound&#39;</span><span class="p">:</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}[</span><span class="n">b</span><span class="o">.</span><span class="n">isBoundActive</span><span class="p">()],</span>
-                    <span class="s1">&#39;Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">stdErr</span><span class="p">,</span>
-                    <span class="s1">&#39;t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">tTest</span><span class="p">,</span>
-                    <span class="s1">&#39;p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">pValue</span><span class="p">,</span>
-                    <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_stdErr</span><span class="p">,</span>
-                    <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_tTest</span><span class="p">,</span>
-                    <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_pValue</span><span class="p">,</span>
-                <span class="p">}</span>
+                <span class="k">if</span> <span class="n">onlyRobust</span><span class="p">:</span>
+                    <span class="n">arow</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s1">&#39;Active bound&#39;</span><span class="p">:</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}[</span>
+                            <span class="n">b</span><span class="o">.</span><span class="n">isBoundActive</span><span class="p">()</span>
+                        <span class="p">],</span>
+                        <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_stdErr</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_tTest</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_pValue</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">arow</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s1">&#39;Active bound&#39;</span><span class="p">:</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">}[</span>
+                            <span class="n">b</span><span class="o">.</span><span class="n">isBoundActive</span><span class="p">()</span>
+                        <span class="p">],</span>
+                        <span class="s1">&#39;Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">stdErr</span><span class="p">,</span>
+                        <span class="s1">&#39;t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">tTest</span><span class="p">,</span>
+                        <span class="s1">&#39;p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">pValue</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_stdErr</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_tTest</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_pValue</span><span class="p">,</span>
+                    <span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">arow</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-                    <span class="s1">&#39;Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">stdErr</span><span class="p">,</span>
-                    <span class="s1">&#39;t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">tTest</span><span class="p">,</span>
-                    <span class="s1">&#39;p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">pValue</span><span class="p">,</span>
-                    <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_stdErr</span><span class="p">,</span>
-                    <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_tTest</span><span class="p">,</span>
-                    <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_pValue</span><span class="p">,</span>
-                <span class="p">}</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">onlyRobust</span><span class="p">:</span>
+                    <span class="n">arow</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_stdErr</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_tTest</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_pValue</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">arow</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                        <span class="s1">&#39;Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">stdErr</span><span class="p">,</span>
+                        <span class="s1">&#39;t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">tTest</span><span class="p">,</span>
+                        <span class="s1">&#39;p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">pValue</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. Std err&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_stdErr</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. t-test&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_tTest</span><span class="p">,</span>
+                        <span class="s1">&#39;Rob. p-value&#39;</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">robust_pValue</span><span class="p">,</span>
+                    <span class="p">}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">onlyRobust</span><span class="p">:</span>
                 <span class="n">arow</span><span class="p">[</span>
                     <span class="sa">f</span><span class="s1">&#39;Bootstrap[</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">bootstrap</span><span class="p">)</span><span class="si">}</span><span class="s1">] Std err&#39;</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">bootstrap_stdErr</span>
@@ -1078,9 +1096,7 @@
                 <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">betaNames</span><span class="p">:</span>
                     <span class="n">unknown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;Unknown parameters are ignored: </span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown parameters are ignored: </span><span class="si">{</span><span class="n">unknown</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s1">&#39;Covariance&#39;</span><span class="p">,</span>
             <span class="s1">&#39;Correlation&#39;</span><span class="p">,</span>
@@ -1217,15 +1233,15 @@
             <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/tr&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/table&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
 
-        <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;&lt;p&gt;Smallest eigenvalue: </span><span class="si">{:.6g}</span><span class="s1">&lt;/p&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">smallestEigenValue</span>
+        <span class="n">h</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;&lt;p&gt;Smallest eigenvalue: &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">smallestEigenValue</span><span class="si">:</span><span class="s1">.6g</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="p">)</span>
-        <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;&lt;p&gt;Largest eigenvalue: </span><span class="si">{:.6g}</span><span class="s1">&lt;/p&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">largestEigenValue</span>
+        <span class="n">h</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;&lt;p&gt;Largest eigenvalue: &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">largestEigenValue</span><span class="si">:</span><span class="s1">.6g</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="p">)</span>
-        <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;&lt;p&gt;Condition number: </span><span class="si">{:.6g}</span><span class="s1">&lt;/p&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">conditionNumber</span>
-        <span class="p">)</span>
+        <span class="n">h</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;&lt;p&gt;Condition number: &#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">conditionNumber</span><span class="si">:</span><span class="s1">.6g</span><span class="si">}</span><span class="s1">&lt;/p&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">smallestEigenValue</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.0e-5</span><span class="p">:</span>
             <span class="n">h</span> <span class="o">+=</span> <span class="p">(</span>
                 <span class="s1">&#39;&lt;p&gt;The second derivatives matrix is close to singularity. &#39;</span>
@@ -1259,7 +1275,7 @@
 <span class="sd">        :raise biogeme.exceptions.biogemeError: if some requested parameters</span>
 <span class="sd">            are not available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">myBetas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">myBetas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">betaNames</span>
         <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">myBetas</span><span class="p">:</span>
@@ -1328,14 +1344,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">htmlFileName</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">getNewFileName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">modelName</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">htmlFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getHtml</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">htmlFileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">htmlFileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="bioResults.writeLaTeX"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.writeLaTeX">[docs]</a>    <span class="k">def</span> <span class="nf">writeLaTeX</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write the results in a LaTeX file.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">latexFileName</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">getNewFileName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">modelName</span><span class="p">,</span> <span class="s1">&#39;tex&#39;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">latexFileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLaTeX</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">latexFileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">latexFileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_getHtmlHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Prepare the header for the HTML file, containing comments and the</span>
@@ -1496,7 +1512,7 @@
         <span class="c1">#  characters 39-58, standard error      20 chars</span>
 
         <span class="n">mystats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getGeneralStatistics</span><span class="p">()</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEstimatedParameters</span><span class="p">()</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEstimatedParameters</span><span class="p">(</span><span class="n">onlyRobust</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">coefNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">coefNames</span><span class="p">:</span>
             <span class="n">values</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -1584,50 +1600,116 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">F12FileName</span> <span class="o">=</span> <span class="n">bf</span><span class="o">.</span><span class="n">getNewFileName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">modelName</span><span class="p">,</span> <span class="s1">&#39;F12&#39;</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">F12FileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getF12</span><span class="p">(</span><span class="n">robustStdErr</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">F12FileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Results saved in file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">F12FileName</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bioResults.likelihood_ratio_test"><a class="viewcode-back" href="../../results.html#biogeme.results.bioResults.likelihood_ratio_test">[docs]</a>    <span class="k">def</span> <span class="nf">likelihood_ratio_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other_model</span><span class="p">,</span> <span class="n">significance_level</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This function performs a likelihood ratio test between a restricted</span>
+<span class="sd">        and an unrestricted model. The &quot;self&quot; model can be either the</span>
+<span class="sd">        restricted or the unrestricted.</span>
+
+<span class="sd">        :param other_model: other model to perform the test.</span>
+<span class="sd">        :type other_model: biogeme.results.bioResults</span>
+
+<span class="sd">        :param significance_level: level of significance of the test. Default: 0.05</span>
+<span class="sd">        :type significance_level: float</span>
+
+<span class="sd">        :return: a tuple containing:</span>
+
+<span class="sd">                  - a message with the outcome of the test</span>
+<span class="sd">                  - the statistic, that is minus two times the difference</span>
+<span class="sd">                    between the loglikelihood  of the two models</span>
+<span class="sd">                  - the threshold of the chi square distribution.</span>
+
+<span class="sd">        :rtype: LRTuple(str, float, float)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LR</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">logLike</span>
+        <span class="n">LU</span> <span class="o">=</span> <span class="n">other_model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">logLike</span>
+        <span class="n">KR</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nparam</span>
+        <span class="n">KU</span> <span class="o">=</span> <span class="n">other_model</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nparam</span>
+        <span class="k">return</span> <span class="n">tools</span><span class="o">.</span><span class="n">likelihood_ratio_test</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">LU</span><span class="p">,</span> <span class="n">KU</span><span class="p">),</span> <span class="p">(</span><span class="n">LR</span><span class="p">,</span> <span class="n">KR</span><span class="p">),</span> <span class="n">significance_level</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="compileEstimationResults"><a class="viewcode-back" href="../../results.html#biogeme.results.compileEstimationResults">[docs]</a><span class="k">def</span> <span class="nf">compileEstimationResults</span><span class="p">(</span>
+    <span class="n">dict_of_results</span><span class="p">,</span>
+    <span class="n">statistics</span><span class="o">=</span><span class="p">(</span>
+        <span class="s1">&#39;Number of estimated parameters&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Sample size&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Final log likelihood&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Akaike Information Criterion&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;Bayesian Information Criterion&#39;</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">include_parameter_estimates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Compile estimation results into a common table</span>
+
+<span class="sd">    :param dict_of_results: dictionary where the keys are the names of</span>
+<span class="sd">        the models, and the values are either the estimation results,</span>
+<span class="sd">        or the name of the pickle file where to find them.</span>
+<span class="sd">    :type dict_of_results: dict(str:bioResults) or dict(str:str)</span>
+
+<span class="sd">    :param statistics: list of statistics to include in the summary</span>
+<span class="sd">        table</span>
+<span class="sd">    :type statistics: tuple(str)</span>
+
+<span class="sd">    :param include_parameter_estimates: if True, the parameter</span>
+<span class="sd">        estimates are included.</span>
+<span class="sd">    :type include_parameter_estimates: bool</span>
+
+<span class="sd">    :return: pandas dataframe with the requested results.</span>
+<span class="sd">    :rtype: pandas.DataFrame</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">dict_of_results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">dict_of_results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">bioResults</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">bioResults</span><span class="p">(</span><span class="n">pickleFile</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">:</span>
+                <span class="n">warning</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Impossible to access result file </span><span class="si">{</span><span class="n">res</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stats_results</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">getGeneralStatistics</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">statistics</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats_results</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">include_parameter_estimates</span><span class="p">:</span>
+                <span class="n">betas</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">getBetaValues</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">betas</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

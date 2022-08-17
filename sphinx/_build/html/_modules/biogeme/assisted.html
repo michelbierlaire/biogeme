@@ -1,68 +1,32 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>biogeme.assisted &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -70,19 +34,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
@@ -98,75 +51,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>biogeme.assisted</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for biogeme.assisted</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;File assisted.py</span>
 <span class="sd">:author: Michel Bierlaire, EPFL</span>
@@ -180,6 +95,7 @@
 <span class="c1"># pylint: disable=too-many-public-methods, too-many-branches</span>
 <span class="c1"># pylint: disable=too-many-statements</span>
 
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">html</span>
@@ -189,7 +105,16 @@
 <span class="kn">from</span> <span class="nn">biogeme</span> <span class="kn">import</span> <span class="n">vns</span>
 <span class="kn">from</span> <span class="nn">biogeme.expressions</span> <span class="kn">import</span> <span class="n">Beta</span><span class="p">,</span> <span class="n">bioMultSum</span>
 
+<span class="c1"># This tuple is imported here, so that it can be imported from here later on.</span>
+<span class="kn">from</span> <span class="nn">biogeme.segmentation</span> <span class="kn">import</span> <span class="n">DiscreteSegmentationTuple</span><span class="p">,</span> <span class="n">segment_parameter</span>
+
 <span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+
+
+<span class="n">TermTuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;TermTuple&#39;</span><span class="p">,</span> <span class="s1">&#39;attribute segmentation bounds validity&#39;</span><span class="p">)</span>
+<span class="n">SegmentedParameterTuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
+    <span class="s1">&#39;SegmentedParameterTuple&#39;</span><span class="p">,</span> <span class="s1">&#39;dict combinatorial&#39;</span>
+<span class="p">)</span>
 
 
 <div class="viewcode-block" id="variable"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.variable">[docs]</a><span class="k">class</span> <span class="nc">variable</span><span class="p">:</span>
@@ -206,21 +131,21 @@
 <span class="sd">        :type expression: :class:`biogeme.expressions.Expression`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1">#: name of the variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: name of the variable</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span> <span class="c1">#: Biogeme expression for the variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span>  <span class="c1">#: Biogeme expression for the variable</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if variable is active</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if variable is active</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">generic</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if the variable is generic.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generic</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if the variable is generic.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">genericName</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Name of the generic variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">genericName</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Name of the generic variable</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nonlinearSpec</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="sd">&quot;&quot;&quot; Function with the nonlinear specifications.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">used</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if variable used in the model.</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if variable used in the model.</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -295,9 +220,9 @@
 <span class="sd">        :param nonlinearSpecs: list of possible nonlinear specifications</span>
 <span class="sd">        :type nonlinearSpecs: list(function)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1">#: name of the group of variables.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: name of the group of variables.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">variables</span> <span class="c1">#: list of variables in the group.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">variables</span>  <span class="c1">#: list of variables in the group.</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">genericForbiden</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span>
         <span class="sd">&quot;&quot;&quot; True of the group cannot be made generic</span>
@@ -311,7 +236,7 @@
         <span class="sd">&quot;&quot;&quot; True if the group is always active.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if the group is active.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if the group is active.</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">nonlinearSpecs</span> <span class="o">=</span> <span class="n">nonlinearSpecs</span>
         <span class="sd">&quot;&quot;&quot; list of possible nonlinear specifications</span>
@@ -321,7 +246,7 @@
         <span class="sd">&quot;&quot;&quot;Index of the selected non linear specification.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1">#: True if linear specification.</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1">#: True if linear specification.</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">v</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">]</span>
@@ -547,7 +472,7 @@
 <span class="sd">        :type validity: bool f(float)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="n">var</span> <span class="c1">#: variable of the term</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="n">var</span>  <span class="c1">#: variable of the term</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">segmentation</span> <span class="o">=</span> <span class="n">aSegmentation</span>
         <span class="sd">&quot;&quot;&quot; discrete segmentation of the parameter</span>
@@ -562,7 +487,7 @@
         <span class="sd">&quot;&quot;&quot; function checking the validity of the coefficient.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span> <span class="c1">#: bounds on the coefficient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>  <span class="c1">#: bounds on the coefficient</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="o">.</span><span class="n">used</span> <span class="o">=</span> <span class="kc">True</span>
@@ -648,8 +573,7 @@
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
 
-            <span class="n">ok</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validity</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">validity</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">status_msg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">status_msg</span> <span class="o">=</span> <span class="s1">&#39;Invalid parameter(s):&#39;</span>
                 <span class="n">status_msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s1"> in alternative </span><span class="si">{</span><span class="n">altname</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -726,11 +650,11 @@
 <span class="sd">        :type terms: list(term)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1">#: name of the alternative</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: name of the alternative</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">alternativeId</span> <span class="c1">#: id of the alternative</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">alternativeId</span>  <span class="c1">#: id of the alternative</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">terms</span> <span class="o">=</span> <span class="n">terms</span> <span class="c1">#: list of terms in the utility function</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">terms</span> <span class="o">=</span> <span class="n">terms</span>  <span class="c1">#: list of terms in the utility function</span></div>
 
 <div class="viewcode-block" id="utility.getExpression"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.utility.getExpression">[docs]</a>    <span class="k">def</span> <span class="nf">getExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -764,16 +688,16 @@
 <span class="sd">        :type values: dict(int: str)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1">#: name of the segmentation variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: name of the segmentation variable</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span> <span class="c1">#: Biogeme expression of the variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span>  <span class="c1">#: Biogeme expression of the variable</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
         <span class="sd">&quot;&quot;&quot;dict with values that it can take as keys, and a name</span>
 <span class="sd">        describing them as values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if the segmentation variable is active.</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if the segmentation variable is active.</span></div>
 
 <div class="viewcode-block" id="socioEconomic.combine"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.socioEconomic.combine">[docs]</a>    <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">existingValues</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Generates the possible combinations of values,</span>
@@ -800,7 +724,7 @@
 <div class="viewcode-block" id="segmentation"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.segmentation">[docs]</a><span class="k">class</span> <span class="nc">segmentation</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Class representing the possible segmentations&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="segmentation.__init__"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.segmentation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictOfSocioEco</span><span class="p">):</span>
+<div class="viewcode-block" id="segmentation.__init__"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.segmentation.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dictOfSocioEco</span><span class="p">,</span> <span class="n">combinatorial</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ctor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -811,11 +735,16 @@
 <span class="sd">        segmentation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">listOfVariables</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1">#: list of variables involved</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">combinatorial</span> <span class="o">=</span> <span class="n">combinatorial</span>
+        <span class="sd">&quot;&quot;&quot;True if all combinations are considered&quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">alwaysActive</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if it must always be active</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">listOfVariables</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1">#: list of variables involved</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">used</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#: True if used.</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alwaysActive</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if it must always be active</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: name of the segmentation</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">used</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1">#: True if used.</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dictOfSocioEco</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -866,6 +795,10 @@
 
 <div class="viewcode-block" id="segmentation.getBetaNames"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.segmentation.getBetaNames">[docs]</a>    <span class="k">def</span> <span class="nf">getBetaNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coef_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the name of the parameters for all combinations.&quot;&quot;&quot;</span>
+
+        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getExpression</span><span class="p">(</span><span class="n">coef_name</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">betas</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">setOfBetas</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">betas</span><span class="p">]</span>
         <span class="n">combinations</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dictOfSocioEco</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
@@ -894,26 +827,37 @@
 <span class="sd">        :return: biogeme  expression for the segmentation</span>
 <span class="sd">        :rtype: :class:`biogeme.expressions.bioMultSum`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">combinations</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dictOfSocioEco</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
-                <span class="n">combinations</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">combinations</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">combinations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Beta</span><span class="p">(</span><span class="n">coef_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1">#        combinations = None</span>
+        <span class="c1">#        for v in self.dictOfSocioEco.values():</span>
+        <span class="c1">#            if v.active:</span>
+        <span class="c1">#                combinations = v.combine(combinations)</span>
+        <span class="c1">#</span>
+        <span class="c1">#        if combinations is None:</span>
+        <span class="c1">#            return Beta(coef_name, 0, bounds[0], bounds[1], 0)</span>
+        <span class="c1">#</span>
+        <span class="c1">#        listOfTerms = []</span>
+        <span class="c1">#        for triplet in combinations:</span>
+        <span class="c1">#            theCoefName = coef_name</span>
+        <span class="c1">#            listOfConditions = []</span>
+        <span class="c1">#            for var, value, name in zip(triplet[0], triplet[1], triplet[2]):</span>
+        <span class="c1">#                theCoefName = f&#39;{theCoefName}_{name}&#39;</span>
+        <span class="c1">#                listOfConditions.append(var == value)</span>
+        <span class="c1">#            aTerm = Beta(theCoefName, 0, bounds[0], bounds[1], 0)</span>
+        <span class="c1">#            for t in listOfConditions:</span>
+        <span class="c1">#                aTerm = aTerm * t</span>
+        <span class="c1">#            listOfTerms.append(aTerm)</span>
+        <span class="c1">#        before =  bioMultSum(listOfTerms)</span>
 
-        <span class="n">listOfTerms</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">:</span>
-            <span class="n">theCoefName</span> <span class="o">=</span> <span class="n">coef_name</span>
-            <span class="n">listOfConditions</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">triplet</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">triplet</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">triplet</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
-                <span class="n">theCoefName</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">theCoefName</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="n">listOfConditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span>
-            <span class="n">aTerm</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">theCoefName</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">listOfConditions</span><span class="p">:</span>
-                <span class="n">aTerm</span> <span class="o">=</span> <span class="n">aTerm</span> <span class="o">*</span> <span class="n">t</span>
-            <span class="n">listOfTerms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aTerm</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">listOfTerms</span><span class="p">)</span></div>
+        <span class="n">the_coef</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="n">coef_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">list_of_segmentations</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">DiscreteSegmentationTuple</span><span class="p">(</span><span class="n">variable</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">v</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dictOfSocioEco</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">active</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">segment_parameter</span><span class="p">(</span>
+            <span class="n">the_coef</span><span class="p">,</span> <span class="n">list_of_segmentations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">combinatorial</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="segmentation.describe"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.segmentation.describe">[docs]</a>    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Description of the segmentation</span>
@@ -1065,7 +1009,8 @@
 <span class="sd">        :param availabilities: dict describing the availability of the</span>
 <span class="sd">            alternatives.</span>
 
-<span class="sd">        :type availabilities: dict(int, :class:`biogeme.expressions.Expression`)</span>
+<span class="sd">        :type availabilities:</span>
+<span class="sd">            dict(int, :class:`biogeme.expressions.Expression`)</span>
 
 <span class="sd">        :param choice: expression for the observed choice</span>
 <span class="sd">        :type choice: :class:`biogeme.expressions.Expression`</span>
@@ -1104,7 +1049,7 @@
 <span class="sd">        :class:`biogeme.results.bioResults`).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="c1">#: name of the problem.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>  <span class="c1">#: name of the problem.</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
         <span class="sd">&quot;&quot;&quot;object of type :class:`biogeme.database.Database`, containing the</span>
@@ -1182,7 +1127,8 @@
                 <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">k</span><span class="p">:</span> <span class="n">segmentation</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">theSegmentations</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">segmentation</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">combinatorial</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">theSegmentations</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="sd">&quot;&quot;&quot;dict of segmentations, where the keys are the names, and the</span>
 <span class="sd">        values are objects of class ``segmentation``</span>
@@ -1193,7 +1139,7 @@
 <span class="sd">        :class:`biogeme.assisted.specificationProblem.__init__`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">choice</span> <span class="o">=</span> <span class="n">choice</span> <span class="c1">#: expression for the observed choice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choice</span> <span class="o">=</span> <span class="n">choice</span>  <span class="c1">#: expression for the observed choice</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">availability</span> <span class="o">=</span> <span class="n">availabilities</span>
         <span class="sd">&quot;&quot;&quot;dict describing the availability of the alternatives.</span>
@@ -1214,7 +1160,7 @@
 <span class="sd">        the loglikelihood expression.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">selectedModel</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#: index of the selected model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectedModel</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1">#: index of the selected model</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">maximumNumberOfParameters</span> <span class="o">=</span> <span class="mi">200</span>
         <span class="sd">&quot;&quot;&quot;maximum number of parameters allowed in a specification. If the</span>
@@ -1222,7 +1168,7 @@
 <span class="sd">        rejected by the algorithm.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">lastOperator</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: Last operator used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastOperator</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: Last operator used</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">operators</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s1">&#39;Change segmentation&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">changeSegmentation</span><span class="p">,</span>
@@ -1246,42 +1192,54 @@
 
         <span class="c1"># Check the consistency of the input</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">utilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># First check that the tuples have the correct length</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;tuple must contain 4 elements: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
             <span class="c1"># All segmentations must exist</span>
             <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                <span class="c1"># t[0] name of the variable</span>
+                <span class="c1"># t[0] name of the attribute</span>
                 <span class="c1"># t[1] name of the segmentation</span>
                 <span class="c1"># t[2] bounds</span>
                 <span class="c1"># t[3] function checking validity</span>
                 <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">segmentation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">segmentation</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
                 <span class="p">):</span>
                     <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s1">&#39;Segmentation </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="sa">f</span><span class="s1">&#39;does not exist&#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;Segmentation </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">segmentation</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="sa">f</span><span class="s1">&#39;does not exist&#39;</span>
                     <span class="p">)</span>
-                <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Variable </span><span class="si">{</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> does not exist&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">t</span><span class="o">.</span><span class="n">attribute</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">attribute</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Attribute </span><span class="si">{</span><span class="n">t</span><span class="o">.</span><span class="n">attribute</span><span class="si">}</span><span class="s1"> does not exist&#39;</span>
+                    <span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">theAlternatives</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">utility</span><span class="p">(</span>
                     <span class="n">k</span><span class="p">,</span>
                     <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                     <span class="p">[</span>
                         <span class="n">term</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                            <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
-                            <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tt</span><span class="o">.</span><span class="n">attribute</span><span class="p">),</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tt</span><span class="o">.</span><span class="n">segmentation</span><span class="p">),</span>
+                            <span class="n">tt</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span>
+                            <span class="n">tt</span><span class="o">.</span><span class="n">validity</span><span class="p">,</span>
                         <span class="p">)</span>
-                        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="p">],</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">listOfVariables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">segmentation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="p">[</span>
+                        <span class="n">t</span><span class="o">.</span><span class="n">segmentation</span>
+                    <span class="p">]</span><span class="o">.</span><span class="n">listOfVariables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">attribute</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="c1"># If the segmentation is not associated with a</span>
                 <span class="c1"># variable, it must always be active</span>
-                <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">alwaysActive</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">attribute</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">segmentation</span><span class="p">]</span><span class="o">.</span><span class="n">alwaysActive</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">decisions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDecisions</span><span class="p">()</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1294,7 +1252,7 @@
 <span class="sd">        Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">unused</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">unused</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">theVariables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">v</span><span class="o">.</span><span class="n">used</span><span class="p">:</span>
                 <span class="n">unused</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -1302,13 +1260,13 @@
             <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;The following variables &#39;</span> <span class="sa">f</span><span class="s1">&#39;are not used: </span><span class="si">{</span><span class="n">unused</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
-        <span class="n">unused</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">unused</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">theSegmentations</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">used</span><span class="p">:</span>
                 <span class="n">unused</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">unused</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;The following variables &#39;</span> <span class="sa">f</span><span class="s1">&#39;are not used: </span><span class="si">{</span><span class="n">unused</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;The following segmentations &#39;</span> <span class="sa">f</span><span class="s1">&#39;are not used: </span><span class="si">{</span><span class="n">unused</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span></div>
 
 <div class="viewcode-block" id="specificationProblem.getBiogemeModel"><a class="viewcode-back" href="../../assisted.html#biogeme.assisted.specificationProblem.getBiogemeModel">[docs]</a>    <span class="k">def</span> <span class="nf">getBiogemeModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1321,7 +1279,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span>
             <span class="n">logprob</span><span class="p">,</span>
             <span class="n">suggestScales</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">numberOfThreads</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
             <span class="n">userNotes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">describeHtml</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">b</span><span class="o">.</span><span class="n">generateHtml</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1941,7 +1898,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Select randomly another model from the list</span>
 
-<span class="sd">        :param size: not used here. Muxt be there for compliance with the</span>
+<span class="sd">        :param size: not used here. Must be there for compliance with the</span>
 <span class="sd">            call of operators.</span>
 <span class="sd">        :type size: int</span>
 
@@ -1973,9 +1930,9 @@
         <span class="sd">&quot;&quot;&quot; Names of the objective functions</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: values of the objectives</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: values of the objectives</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: True if the solution is valid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: True if the solution is valid</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">causeInvalidity</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="sd">&quot;&quot;&quot;If the solution is invalid, contains the cause of the invalidity</span>
@@ -1992,7 +1949,7 @@
 <span class="sd">        Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#: description of the solution</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1">#: description of the solution</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decisions</span><span class="p">)</span>
@@ -2003,52 +1960,42 @@
                 <span class="s1">&#39;Description of the solution not available&#39;</span>
             <span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectivesNames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="s1">&#39;The attribute objectivesNames is not defined&#39;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The attribute objectives is not defined&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objectivesNames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectives</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">r</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

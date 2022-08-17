@@ -1,68 +1,32 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>biogeme.models &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
-    
+    <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../../index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -70,19 +34,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../assisted.html">Assisted specification</a></li>
@@ -98,75 +51,37 @@
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-        
       <li>biogeme.models</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for biogeme.models</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot; Implements various models.</span>
 
@@ -181,20 +96,7 @@
 <span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
 <span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
 
-<span class="kn">from</span> <span class="nn">biogeme.expressions</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">_bioLogLogit</span><span class="p">,</span>
-    <span class="n">_bioLogLogitFullChoiceSet</span><span class="p">,</span>
-    <span class="n">exp</span><span class="p">,</span>
-    <span class="n">log</span><span class="p">,</span>
-    <span class="n">Elem</span><span class="p">,</span>
-    <span class="n">bioMin</span><span class="p">,</span>
-    <span class="n">bioMax</span><span class="p">,</span>
-    <span class="n">Numeric</span><span class="p">,</span>
-    <span class="n">Beta</span><span class="p">,</span>
-    <span class="n">bioMultSum</span><span class="p">,</span>
-    <span class="n">Variable</span><span class="p">,</span>
-    <span class="n">Expression</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">biogeme.expressions</span> <span class="k">as</span> <span class="nn">expr</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
 
@@ -209,7 +111,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param av: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -217,20 +119,20 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type av: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type av: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param i: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
 <span class="sd">    :type i: int</span>
 
 <span class="sd">    :return: choice probability of alternative number i.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">av</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_bioLogLogitFullChoiceSet</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choice</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogitFullChoiceSet</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choice</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="logit"><a class="viewcode-back" href="../../models.html#biogeme.models.logit">[docs]</a><span class="k">def</span> <span class="nf">logit</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
@@ -243,7 +145,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param av: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -251,20 +153,20 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type av: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type av: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param i: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
 <span class="sd">    :type i: int</span>
 
 <span class="sd">    :return: choice probability of alternative number i.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">av</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">_bioLogLogitFullChoiceSet</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choice</span><span class="o">=</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogitFullChoiceSet</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choice</span><span class="o">=</span><span class="n">i</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="boxcox"><a class="viewcode-back" href="../../models.html#biogeme.models.boxcox">[docs]</a><span class="k">def</span> <span class="nf">boxcox</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ell</span><span class="p">):</span>
@@ -283,22 +185,23 @@
 <span class="sd">              + \\frac{1}{24} \\ell^3 \\log(x)^4.</span>
 
 <span class="sd">    :param x: a variable to transform.</span>
-<span class="sd">    :type x: biogeme.expressions.Expression</span>
+<span class="sd">    :type x: biogeme.expressions.expr.Expression</span>
 <span class="sd">    :param ell: parameter of the transformation.</span>
-<span class="sd">    :type ell: biogeme.expressions.Expression</span>
+<span class="sd">    :type ell: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: the Box-Cox transform</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">regular</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="n">ell</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">ell</span>
+    <span class="n">regular</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="n">ell</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">/</span> <span class="n">ell</span>
     <span class="n">mclaurin</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="o">+</span> <span class="n">ell</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-        <span class="o">+</span> <span class="n">ell</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">6.0</span>
-        <span class="o">+</span> <span class="n">ell</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="mf">24.0</span>
+        <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">ell</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">ell</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">/</span> <span class="mf">6.0</span>
+        <span class="o">+</span> <span class="n">ell</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">/</span> <span class="mf">24.0</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="n">Elem</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="n">regular</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">mclaurin</span><span class="p">},</span> <span class="n">ell</span> <span class="o">&lt;</span> <span class="n">Numeric</span><span class="p">(</span><span class="mf">1.0e-5</span><span class="p">))</span></div>
+    <span class="n">smooth</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">Elem</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="n">regular</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">mclaurin</span><span class="p">},</span> <span class="n">ell</span> <span class="o">&lt;</span> <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mf">1.0e-5</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">Elem</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="n">smooth</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">)},</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="piecewise"><a class="viewcode-back" href="../../models.html#biogeme.models.piecewise">[docs]</a><span class="k">def</span> <span class="nf">piecewise</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">):</span>
@@ -328,13 +231,13 @@
 <span class="sd">    :param variable: variable for which we need the piecewise linear</span>
 <span class="sd">       transform. The expression itself or the name of the variable</span>
 <span class="sd">       can be given.</span>
-<span class="sd">    :type variable: biogeme.expressions.Expression or str</span>
+<span class="sd">    :type variable: biogeme.expressions.expr.Expression or str</span>
 
 <span class="sd">    :param thresholds: list of thresholds</span>
 <span class="sd">    :type thresholds: list(float)</span>
 
 <span class="sd">    :return: list of variables to for the piecewise linear specification.</span>
-<span class="sd">    :rtype: list(biogeme.expressions.Expression)</span>
+<span class="sd">    :rtype: list(biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :raise biogemeError: if the thresholds are not defined properly,</span>
 <span class="sd">        as only the first and the last thresholds can be set</span>
@@ -359,29 +262,41 @@
 
     <span class="c1"># If the name of the variable is given, we transform it into an expression.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">variable</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
+        <span class="n">variable</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
 
     <span class="c1"># First variable</span>
     <span class="k">if</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">bioMax</span><span class="p">(</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">))]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">expr</span><span class="o">.</span><span class="n">bioMax</span><span class="p">(</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">eye</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bioMax</span><span class="p">(</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">b</span><span class="p">))]</span>
+        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="n">expr</span><span class="o">.</span><span class="n">bioMax</span><span class="p">(</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
 
     <span class="c1"># Last variable</span>
     <span class="k">if</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bioMax</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])]</span>
+        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">bioMax</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bioMax</span><span class="p">(</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">b</span><span class="p">))]</span>
+        <span class="n">results</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="n">expr</span><span class="o">.</span><span class="n">bioMax</span><span class="p">(</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMin</span><span class="p">(</span><span class="n">variable</span> <span class="o">-</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">b</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
     <span class="k">return</span> <span class="n">results</span></div>
 
 
-<div class="viewcode-block" id="piecewiseFormula"><a class="viewcode-back" href="../../models.html#biogeme.models.piecewiseFormula">[docs]</a><span class="k">def</span> <span class="nf">piecewiseFormula</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">initialBetas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="piecewiseFormula"><a class="viewcode-back" href="../../models.html#biogeme.models.piecewiseFormula">[docs]</a><span class="k">def</span> <span class="nf">piecewiseFormula</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">betas</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate the formula for a piecewise linear specification.</span>
 
 <span class="sd">    If there are K thresholds, K-1 variables are generated. The first</span>
@@ -404,25 +319,39 @@
 <span class="sd">    :param thresholds: list of thresholds</span>
 <span class="sd">    :type thresholds: list(float)</span>
 
-<span class="sd">    :param initialBetas: list of values to initialize the beta</span>
-<span class="sd">                         parameters.  The number of entries should be</span>
-<span class="sd">                         the number of thresholds, plus one. If None,</span>
-<span class="sd">                         the value of zero is used. Default: none.</span>
-<span class="sd">    :type initialBetas: list(float)</span>
+<span class="sd">    :param betas: list of beta parameters to be used in the</span>
+<span class="sd">        specification.  The number of entries should be the number of</span>
+<span class="sd">        thresholds, minus one. If None, for each interval, the</span>
+<span class="sd">        parameter Beta(&#39;beta_VAR_interval&#39;,0, None, None, 0) is used,</span>
+<span class="sd">        where var is the name of the variable. Default: none.</span>
+<span class="sd">    :type betas:</span>
+<span class="sd">        list(biogeme.expresssions.Beta)</span>
 
 <span class="sd">    :return: expression of  the piecewise linear specification.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :raise biogemeError: if the thresholds are not defined properly,</span>
 <span class="sd">        which means that only the first and the last threshold can be set</span>
 <span class="sd">        to None.</span>
 
-<span class="sd">    :raise biogemeError: if the length of list ``initialBetas`` is not equal to</span>
-<span class="sd">        the length of ``thresholds`` minus one.</span>
+<span class="sd">    :raise biogemeError: if the length of list ``initialexpr.Betas`` is</span>
+<span class="sd">        not equal to the length of ``thresholds`` minus one.</span>
 
 <span class="sd">    .. seealso:: :meth:`piecewiseVariables`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="n">expr</span><span class="o">.</span><span class="n">Variable</span><span class="p">):</span>
+        <span class="n">the_variable</span> <span class="o">=</span> <span class="n">variable</span>
+        <span class="n">the_name</span> <span class="o">=</span> <span class="n">variable</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">the_name</span> <span class="o">=</span> <span class="n">variable</span>
+        <span class="n">the_valiable</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;The first argument of piecewiseFormula must be the &#39;</span>
+            <span class="s1">&#39;name of a variable, or the variable itself..&#39;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">eye</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">thresholds</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">thresholds</span><span class="p">):</span>
@@ -437,72 +366,32 @@
             <span class="s1">&#39;the last thresholds can be None&#39;</span>
         <span class="p">)</span>
         <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">initialBetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initialBetas</span><span class="p">)</span> <span class="o">!=</span> <span class="n">eye</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">betas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span> <span class="o">!=</span> <span class="n">eye</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;As there are </span><span class="si">{</span><span class="n">eye</span><span class="si">}</span><span class="s1"> thresholds, a total of </span><span class="si">{</span><span class="n">eye</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s1"> &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;values are needed to initialize the parameters. &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;But </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">initialBetas</span><span class="p">)</span><span class="si">}</span><span class="s1"> are provided&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Beta parameters are needed, and not </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
-    <span class="n">theVars</span> <span class="o">=</span> <span class="n">piecewiseVariables</span><span class="p">(</span><span class="n">Variable</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">thresholds</span><span class="p">)</span>
-    <span class="n">terms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">theVars</span> <span class="o">=</span> <span class="n">piecewiseVariables</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span> <span class="n">thresholds</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">betas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">betas</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a_threshold</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thresholds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">next_threshold</span> <span class="o">=</span> <span class="n">thresholds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">a_name</span> <span class="o">=</span> <span class="s1">&#39;minus_inf&#39;</span> <span class="k">if</span> <span class="n">a_threshold</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a_threshold</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">next_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;inf&#39;</span> <span class="k">if</span> <span class="n">next_threshold</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">next_threshold</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="n">betas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Beta</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;beta_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">a_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">next_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
-    <span class="c1"># First term</span>
-    <span class="n">betaValues</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="mi">0</span> <span class="k">if</span> <span class="n">initialBetas</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">initialBetas</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">eye</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="k">if</span> <span class="n">thresholds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;beta_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_lessthan_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">betaValues</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;beta_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">betaValues</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">beta</span> <span class="o">*</span> <span class="n">theVars</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">beta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">betas</span><span class="p">)]</span>
 
-    <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">beta</span> <span class="o">*</span> <span class="n">theVars</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-
-    <span class="c1"># All terms, except the last</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">eye</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;beta_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">betaValues</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="n">terms</span> <span class="o">+=</span> <span class="p">[</span><span class="n">beta</span> <span class="o">*</span> <span class="n">theVars</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
-
-    <span class="c1"># Last term</span>
-    <span class="k">if</span> <span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;beta_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">_more&#39;</span><span class="p">,</span>
-            <span class="n">betaValues</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">beta</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;beta_</span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">thresholds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="n">betaValues</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="kc">None</span><span class="p">,</span>
-            <span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="n">terms</span> <span class="o">+=</span> <span class="p">[</span><span class="n">beta</span> <span class="o">*</span> <span class="n">theVars</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-    <span class="k">return</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="piecewiseFunction"><a class="viewcode-back" href="../../models.html#biogeme.models.piecewiseFunction">[docs]</a><span class="k">def</span> <span class="nf">piecewiseFunction</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">betas</span><span class="p">):</span>
@@ -587,7 +476,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param logGi: a dictionary mapping each alternative id with the function</span>
 
@@ -597,7 +486,7 @@
 <span class="sd">        where :math:`G` is the MEV generating function. If an alternative</span>
 <span class="sd">        :math:`i` is not available, then :math:`G_i = 0`.</span>
 
-<span class="sd">    :type logGi: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type logGi: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param av: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -605,14 +494,14 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type av: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type av: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of the choice probability of the MEV model, given by</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    .. math:: V_i + \\ln G_i(e^{V_1},\\ldots,e^{V_J}) -</span>
 <span class="sd">              \\ln\\left(\\sum_j e^{V_j + \\ln G_j(e^{V_1},</span>
@@ -621,9 +510,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">H</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">v</span> <span class="o">+</span> <span class="n">logGi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">V</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
     <span class="k">if</span> <span class="n">av</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">logP</span> <span class="o">=</span> <span class="n">_bioLogLogitFullChoiceSet</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">av</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choice</span><span class="o">=</span><span class="n">choice</span><span class="p">)</span>
+        <span class="n">logP</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogitFullChoiceSet</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">av</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choice</span><span class="o">=</span><span class="n">choice</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">logP</span> <span class="o">=</span> <span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span>
+        <span class="n">logP</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">logP</span></div>
 
 
@@ -633,7 +522,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 
 <span class="sd">    :param logGi: a dictionary mapping each alternative id with the function</span>
@@ -644,7 +533,7 @@
 <span class="sd">        where :math:`G` is the MEV generating function. If an alternative</span>
 <span class="sd">        :math:`i` is not available, then :math:`G_i = 0`.</span>
 
-<span class="sd">    :type logGi: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type logGi: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param av: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -652,11 +541,11 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type av: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type av: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: Choice probability of the MEV model, given by</span>
 
@@ -664,9 +553,9 @@
 <span class="sd">              \\ldots,e^{V_J})}}{\\sum_j e^{V_j +</span>
 <span class="sd">              \\ln G_j(e^{V_1},\\ldots,e^{V_J})}}</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">logmev</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">logGi</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">choice</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logmev</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">logGi</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">choice</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="logmev_endogenousSampling"><a class="viewcode-back" href="../../models.html#biogeme.models.logmev_endogenousSampling">[docs]</a><span class="k">def</span> <span class="nf">logmev_endogenousSampling</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">logGi</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">correction</span><span class="p">,</span> <span class="n">choice</span><span class="p">):</span>
@@ -681,7 +570,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param logGi: a dictionary mapping each alternative id with the function</span>
 
@@ -691,7 +580,7 @@
 <span class="sd">        where :math:`G` is the MEV generating function. If an alternative</span>
 <span class="sd">        :math:`i` is not available, then :math:`G_i = 0`.</span>
 
-<span class="sd">    :type logGi: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type logGi: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param av: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -699,16 +588,16 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type av: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type av: dict(int:biogeme.expressions.expr.Expression)</span>
 
 
 <span class="sd">    :param correction: a dict of expressions for the correstion terms</span>
 <span class="sd">                       of each alternative.</span>
-<span class="sd">    :type correction: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type correction: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of the choice probability of the MEV model, given by</span>
 
@@ -718,11 +607,11 @@
 
 <span class="sd">    where :math:`\\omega_i` is the correction term for alternative :math:`i`.</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">H</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">v</span> <span class="o">+</span> <span class="n">logGi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">correction</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">V</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-    <span class="n">logP</span> <span class="o">=</span> <span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span>
+    <span class="n">logP</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">_bioLogLogit</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">logP</span></div>
 
 
@@ -737,7 +626,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param logGi: a dictionary mapping each alternative id with the function</span>
 
@@ -747,7 +636,7 @@
 <span class="sd">        where :math:`G` is the MEV generating function. If an alternative</span>
 <span class="sd">        :math:`i` is not available, then :math:`G_i = 0`.</span>
 
-<span class="sd">    :type logGi: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type logGi: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param av: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -755,16 +644,16 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type av: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type av: dict(int:biogeme.expressions.expr.Expression)</span>
 
 
 <span class="sd">    :param correction: a dict of expressions for the correstion terms</span>
 <span class="sd">                       of each alternative.</span>
-<span class="sd">    :type correction: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type correction: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of the choice probability of the MEV model, given by</span>
 
@@ -774,10 +663,12 @@
 
 <span class="sd">    where :math:`\\omega_i` is the correction term for alternative :math:`i`.</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">logmev_endogenousSampling</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">logGi</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">correction</span><span class="p">,</span> <span class="n">choice</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span>
+        <span class="n">logmev_endogenousSampling</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">logGi</span><span class="p">,</span> <span class="n">av</span><span class="p">,</span> <span class="n">correction</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="getMevGeneratingForNested"><a class="viewcode-back" href="../../models.html#biogeme.models.getMevGeneratingForNested">[docs]</a><span class="k">def</span> <span class="nf">getMevGeneratingForNested</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">):</span>
@@ -785,7 +676,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -793,12 +684,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions.Expression representing</span>
+<span class="sd">        - an object of type biogeme.expressions.expr.Expression representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
@@ -819,25 +710,25 @@
 
 <span class="sd">    where :math:`G` is the MEV generating function.</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">termsForNests</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">availability</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">Elem</span><span class="p">(</span>
-                    <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])},</span>
-                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Elem</span><span class="p">(</span>
+                    <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])},</span>
+                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="p">]</span>
-        <span class="n">theSum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">sumdict</span><span class="p">)</span>
-        <span class="n">termsForNests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theSum</span> <span class="o">**</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">termsForNests</span><span class="p">)</span></div>
+        <span class="n">theSum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">sumdict</span><span class="p">)</span>
+        <span class="n">termsForNests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theSum</span><span class="o">**</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">termsForNests</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="getMevForNested"><a class="viewcode-back" href="../../models.html#biogeme.models.getMevForNested">[docs]</a><span class="k">def</span> <span class="nf">getMevForNested</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">):</span>
@@ -846,7 +737,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">        each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -854,12 +745,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions.Expression representing</span>
+<span class="sd">        - an object of type biogeme.expressions.expr.Expression representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
@@ -882,25 +773,27 @@
 <span class="sd">        where :math:`m` is the (only) nest containing alternative :math:`i`,</span>
 <span class="sd">        and :math:`G` is the MEV generating function.</span>
 
-<span class="sd">    :rtype: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :rtype: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logGi</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">availability</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">Elem</span><span class="p">(</span>
-                    <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])},</span>
-                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Elem</span><span class="p">(</span>
+                    <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])},</span>
+                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">expr</span><span class="o">.</span><span class="n">Numeric</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="p">]</span>
-        <span class="n">theSum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">sumdict</span><span class="p">)</span>
+        <span class="n">theSum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">sumdict</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">logGi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">theSum</span><span class="p">)</span>
+            <span class="n">logGi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="n">theSum</span>
+            <span class="p">)</span>
     <span class="k">return</span> <span class="n">logGi</span></div>
 
 
@@ -911,7 +804,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">        each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability</span>
 <span class="sd">        of each alternative, indexed</span>
@@ -919,12 +812,12 @@
 <span class="sd">        None. In this case, all alternatives are supposed to be</span>
 <span class="sd">        always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
 <span class="sd">          representing the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
@@ -938,7 +831,7 @@
 <span class="sd">    :type nests: tuple</span>
 
 <span class="sd">    :param mu: scale parameter</span>
-<span class="sd">    :type mu: biogeme.expressions.Expression</span>
+<span class="sd">    :type mu: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: a dictionary mapping each alternative id with the function</span>
 
@@ -949,23 +842,27 @@
 <span class="sd">        where :math:`m` is the (only) nest containing alternative :math:`i`,</span>
 <span class="sd">        and :math:`G` is the MEV generating function.</span>
 
-<span class="sd">    :rtype: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :rtype: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">logGi</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">availability</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span><span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sumdict</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="n">Elem</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])},</span> <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">Elem</span><span class="p">(</span>
+                    <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">])},</span> <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span>
+                <span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="p">]</span>
-        <span class="n">theSum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">sumdict</span><span class="p">)</span>
+        <span class="n">theSum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">sumdict</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
             <span class="n">logGi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">log</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">mu</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="n">theSum</span><span class="p">)</span>
+                <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+                <span class="o">+</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="o">+</span> <span class="p">(</span><span class="n">mu</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">theSum</span><span class="p">)</span>
             <span class="p">)</span>
     <span class="k">return</span> <span class="n">logGi</span></div>
 
@@ -975,7 +872,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability</span>
 <span class="sd">                         of each alternative, indexed by numerical</span>
@@ -983,12 +880,12 @@
 <span class="sd">                         this case, all alternatives are supposed to</span>
 <span class="sd">                         be always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests. Each item is also</span>
 <span class="sd">        a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
 <span class="sd">          representing the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the</span>
 <span class="sd">          alternatives belonging to the nest.</span>
@@ -1003,13 +900,13 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: choice probability for the nested logit model,</span>
 <span class="sd">             based on the derivatives of the MEV generating function produced</span>
 <span class="sd">             by the function getMevForNested</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :raise biogemeError: if the definition of the nests is invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1029,7 +926,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">        each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">        alternative (:math:`a_i` in the above formula), indexed</span>
@@ -1037,12 +934,12 @@
 <span class="sd">        None. In this case, all alternatives are supposed to be</span>
 <span class="sd">        always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression representing</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
@@ -1057,13 +954,13 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of choice probability for the nested logit model,</span>
 <span class="sd">             based on the derivatives of the MEV generating function produced</span>
 <span class="sd">             by the function getMevForNested</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :raise biogemeError: if the definition of the nests is invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1083,7 +980,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -1091,12 +988,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions.Expression  representing</span>
+<span class="sd">        - an object of type biogeme.expressions.expr.Expression  representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
@@ -1111,10 +1008,10 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :param mu: expression producing the value of the top-level scale parameter.</span>
-<span class="sd">    :type mu:  biogeme.expressions.Expression</span>
+<span class="sd">    :type mu:  biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: the nested logit choice probability based on the following</span>
 <span class="sd">             derivatives of the MEV generating function:</span>
@@ -1126,10 +1023,10 @@
 <span class="sd">    Where :math:`m` is the (only) nest containing alternative :math:`i`, and</span>
 <span class="sd">    :math:`G` is the MEV generating function.</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">lognestedMevMu</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">lognestedMevMu</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="lognestedMevMu"><a class="viewcode-back" href="../../models.html#biogeme.models.lognestedMevMu">[docs]</a><span class="k">def</span> <span class="nf">lognestedMevMu</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">,</span> <span class="n">mu</span><span class="p">):</span>
@@ -1141,7 +1038,7 @@
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">        each alternative, indexed by numerical ids.</span>
 
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative (:math:`a_i` in the above formula), indexed</span>
@@ -1149,12 +1046,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions.Expression  representing</span>
+<span class="sd">        - an object of type biogeme.expressions.expr.Expression  representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
@@ -1169,10 +1066,10 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :param mu: expression producing the value of the top-level scale parameter.</span>
-<span class="sd">    :type mu:  biogeme.expressions.Expression</span>
+<span class="sd">    :type mu:  biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: the log of the nested logit choice probability based on the</span>
 <span class="sd">        following derivatives of the MEV generating function:</span>
@@ -1184,7 +1081,7 @@
 <span class="sd">        where :math:`m` is the (only) nest containing alternative :math:`i`,</span>
 <span class="sd">        and :math:`G` is the MEV generating function.</span>
 
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -1198,7 +1095,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -1206,12 +1103,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests. Each item is</span>
 <span class="sd">        also a tuple containing two items</span>
 
-<span class="sd">        - an object of type biogeme.expressions.Expression  representing</span>
+<span class="sd">        - an object of type biogeme.expressions.expr.Expression  representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1239,10 +1136,10 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">cnl</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span></div>
 
@@ -1252,7 +1149,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -1260,68 +1157,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression</span>
-<span class="sd">          representing the nest parameter,</span>
-<span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
-<span class="sd">          parameters for the corresponding nest. If an alternative is</span>
-<span class="sd">          missing in the dictionaray, the corresponding alpha is set to zero.</span>
-
-<span class="sd">        Example::</span>
-
-<span class="sd">            alphaA = {1: alpha1a,</span>
-<span class="sd">                      2: alpha2a,</span>
-<span class="sd">                      3: alpha3a,</span>
-<span class="sd">                      4: alpha4a,</span>
-<span class="sd">                      5: alpha5a,</span>
-<span class="sd">                      6: alpha6a}</span>
-<span class="sd">            alphaB = {1: alpha1b,</span>
-<span class="sd">                      2: alpha2b,</span>
-<span class="sd">                      3: alpha3b,</span>
-<span class="sd">                      4: alpha4b,</span>
-<span class="sd">                      5: alpha5b,</span>
-<span class="sd">                      6: alpha6b}</span>
-<span class="sd">            nesta = MUA, alphaA</span>
-<span class="sd">            nestb = MUB, alphaB</span>
-<span class="sd">            nests = nesta, nestb</span>
-
-<span class="sd">    :type nests: tuple</span>
-
-<span class="sd">    :param choice: id of the alternative for which the probability must be</span>
-<span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
-
-<span class="sd">    :return: choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
-
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">logcnl</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="logcnl_avail"><a class="viewcode-back" href="../../models.html#biogeme.models.logcnl_avail">[docs]</a><span class="k">def</span> <span class="nf">logcnl_avail</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Same as logcnl. Maintained for backward compatibility</span>
-
-<span class="sd">    :param V: dict of objects representing the utility functions of</span>
-<span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
-
-<span class="sd">    :param availability: dict of objects representing the availability of each</span>
-<span class="sd">               alternative, indexed</span>
-<span class="sd">               by numerical ids. Must be consistent with V, or</span>
-<span class="sd">               None. In this case, all alternatives are supposed to be</span>
-<span class="sd">               always available.</span>
-
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
-
-<span class="sd">    :param nests: a tuple containing as many items as nests.</span>
-<span class="sd">        Each item is also a tuple containing two items:</span>
-
-<span class="sd">        - an object of type biogeme.expressions. Expression</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
 <span class="sd">          representing the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1349,10 +1190,66 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
+
+<span class="sd">    :return: choice probability for the cross-nested logit model.</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logcnl</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="logcnl_avail"><a class="viewcode-back" href="../../models.html#biogeme.models.logcnl_avail">[docs]</a><span class="k">def</span> <span class="nf">logcnl_avail</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Same as logcnl. Maintained for backward compatibility</span>
+
+<span class="sd">    :param V: dict of objects representing the utility functions of</span>
+<span class="sd">              each alternative, indexed by numerical ids.</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
+
+<span class="sd">    :param availability: dict of objects representing the availability of each</span>
+<span class="sd">               alternative, indexed</span>
+<span class="sd">               by numerical ids. Must be consistent with V, or</span>
+<span class="sd">               None. In this case, all alternatives are supposed to be</span>
+<span class="sd">               always available.</span>
+
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
+
+<span class="sd">    :param nests: a tuple containing as many items as nests.</span>
+<span class="sd">        Each item is also a tuple containing two items:</span>
+
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
+<span class="sd">          representing the nest parameter,</span>
+<span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
+<span class="sd">          parameters for the corresponding nest. If an alternative is</span>
+<span class="sd">          missing in the dictionary, the corresponding alpha is set to zero.</span>
+
+<span class="sd">        Example::</span>
+
+<span class="sd">            alphaA = {1: alpha1a,</span>
+<span class="sd">                      2: alpha2a,</span>
+<span class="sd">                      3: alpha3a,</span>
+<span class="sd">                      4: alpha4a,</span>
+<span class="sd">                      5: alpha5a,</span>
+<span class="sd">                      6: alpha6a}</span>
+<span class="sd">            alphaB = {1: alpha1b,</span>
+<span class="sd">                      2: alpha2b,</span>
+<span class="sd">                      3: alpha3b,</span>
+<span class="sd">                      4: alpha4b,</span>
+<span class="sd">                      5: alpha5b,</span>
+<span class="sd">                      6: alpha6b}</span>
+<span class="sd">            nesta = MUA, alphaA</span>
+<span class="sd">            nestb = MUB, alphaB</span>
+<span class="sd">            nests = nesta, nestb</span>
+
+<span class="sd">    :type nests: tuple</span>
+
+<span class="sd">    :param choice: id of the alternative for which the probability must be</span>
+<span class="sd">              calculated.</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">logcnl</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">)</span></div>
 
@@ -1363,7 +1260,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int: biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int: biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">        alternative, indexed</span>
@@ -1371,12 +1268,12 @@
 <span class="sd">        None. In this case, all alternatives are supposed to be</span>
 <span class="sd">        always available.</span>
 
-<span class="sd">    :type availability: dict(int: biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int: biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
 <span class="sd">          representing the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1403,35 +1300,38 @@
 <span class="sd">    :type nests: tuple</span>
 
 <span class="sd">    :return: log of the choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">Gi_terms</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">logGi</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">V</span><span class="p">:</span>
-        <span class="n">Gi_terms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">Gi_terms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">biosum</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">availability</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">biosum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+            <span class="n">biosum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">biosum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span>
+            <span class="n">biosum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">]</span>
             <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">Gi_terms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span>
                 <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="o">*</span> <span class="n">exp</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                 <span class="o">*</span> <span class="n">biosum</span> <span class="o">**</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="p">]</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">V</span><span class="p">:</span>
-        <span class="n">logGi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">Gi_terms</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+        <span class="n">logGi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">Gi_terms</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
     <span class="k">return</span> <span class="n">logGi</span></div>
 
 
@@ -1440,7 +1340,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -1448,16 +1348,16 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
 <span class="sd">          representing the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
-<span class="sd">          missing in the dictionaray, the corresponding alpha is set to zero.</span>
+<span class="sd">          missing in the dictionary, the corresponding alpha is set to zero.</span>
 
 <span class="sd">        Example::</span>
 
@@ -1481,10 +1381,10 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of the choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :raise biogemeError: if the definition of the nests is invalid.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1504,7 +1404,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -1512,12 +1412,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests. Each</span>
 <span class="sd">        item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression representing</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1545,15 +1445,15 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :param mu: Homogeneity parameter :math:`\\mu`.</span>
-<span class="sd">    :type mu: biogeme.expressions.Expression</span>
+<span class="sd">    :type mu: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">exp</span><span class="p">(</span><span class="n">logcnlmu</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logcnlmu</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">choice</span><span class="p">,</span> <span class="n">mu</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="getMevForCrossNestedMu"><a class="viewcode-back" href="../../models.html#biogeme.models.getMevForCrossNestedMu">[docs]</a><span class="k">def</span> <span class="nf">getMevForCrossNestedMu</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">availability</span><span class="p">,</span> <span class="n">nests</span><span class="p">,</span> <span class="n">mu</span><span class="p">):</span>
@@ -1563,7 +1463,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -1571,12 +1471,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression representing</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1603,40 +1503,42 @@
 <span class="sd">    :type nests: tuple</span>
 
 <span class="sd">    :param mu: Homogeneity parameter :math:`\\mu`.</span>
-<span class="sd">    :type mu: biogeme.expressions.Expression</span>
+<span class="sd">    :type mu: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of the choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Gi_terms</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">logGi</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">V</span><span class="p">:</span>
-        <span class="n">Gi_terms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">Gi_terms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">biosum</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">availability</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">biosum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span>
+            <span class="n">biosum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mu</span><span class="p">)</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mu</span><span class="p">)</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">biosum</span> <span class="o">=</span> <span class="n">bioMultSum</span><span class="p">(</span>
+            <span class="n">biosum</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span>
                 <span class="p">[</span>
-                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mu</span><span class="p">)</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                    <span class="n">availability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="o">*</span> <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mu</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">]</span>
             <span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">Gi_terms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span>
                 <span class="n">a</span> <span class="o">**</span> <span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">mu</span><span class="p">)</span>
-                <span class="o">*</span> <span class="n">exp</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">V</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
                 <span class="o">*</span> <span class="n">biosum</span> <span class="o">**</span> <span class="p">((</span><span class="n">mu</span> <span class="o">/</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
             <span class="p">]</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">V</span><span class="p">:</span>
-        <span class="n">logGi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">bioMultSum</span><span class="p">(</span><span class="n">Gi_terms</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+        <span class="n">logGi</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mu</span> <span class="o">*</span> <span class="n">expr</span><span class="o">.</span><span class="n">bioMultSum</span><span class="p">(</span><span class="n">Gi_terms</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
     <span class="k">return</span> <span class="n">logGi</span></div>
 
 
@@ -1647,7 +1549,7 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param availability: dict of objects representing the availability of each</span>
 <span class="sd">               alternative, indexed</span>
@@ -1655,12 +1557,12 @@
 <span class="sd">               None. In this case, all alternatives are supposed to be</span>
 <span class="sd">               always available.</span>
 
-<span class="sd">    :type availability: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type availability: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests. Each item is</span>
 <span class="sd">        also a tuple containing two items</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression representing</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1688,13 +1590,13 @@
 
 <span class="sd">    :param choice: id of the alternative for which the probability must be</span>
 <span class="sd">              calculated.</span>
-<span class="sd">    :type choice: biogeme.expressions.Expression</span>
+<span class="sd">    :type choice: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :param mu: Homogeneity parameter :math:`\\mu`.</span>
-<span class="sd">    :type mu: biogeme.expressions.Expression</span>
+<span class="sd">    :type mu: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :return: log of the choice probability for the cross-nested logit model.</span>
-<span class="sd">    :rtype: biogeme.expressions.Expression</span>
+<span class="sd">    :rtype: biogeme.expressions.expr.Expression</span>
 
 <span class="sd">    :raise biogemeError: if the definition of the nests is invalid.</span>
 
@@ -1713,12 +1615,12 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 <span class="sd">    :param nests: A tuple containing as many items as nests. Each item is also</span>
 <span class="sd">        a tuple containing two items:</span>
 
-<span class="sd">        - an object of type biogeme.expressions. Expression representing the</span>
-<span class="sd">          nest parameter,</span>
+<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
+<span class="sd">          representing the nest parameter,</span>
 <span class="sd">        - a list containing the list of identifiers of the alternatives</span>
 <span class="sd">          belonging to the nest.</span>
 
@@ -1734,6 +1636,7 @@
 <span class="sd">    :return: a tuple ok, message, where the message explains the</span>
 <span class="sd">             problem is the nested structure is not OK.</span>
 <span class="sd">    :rtype: tuple(bool, str)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1779,12 +1682,12 @@
 
 <span class="sd">    :param V: dict of objects representing the utility functions of</span>
 <span class="sd">              each alternative, indexed by numerical ids.</span>
-<span class="sd">    :type V: dict(int:biogeme.expressions.Expression)</span>
+<span class="sd">    :type V: dict(int:biogeme.expressions.expr.Expression)</span>
 
 <span class="sd">    :param nests: a tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items</span>
 
-<span class="sd">        - an object of type biogeme.expressions.Expression  representing</span>
+<span class="sd">        - an object of type biogeme.expressions.expr.Expression  representing</span>
 <span class="sd">          the nest parameter,</span>
 <span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
 <span class="sd">          parameters for the corresponding nest. If an alternative is</span>
@@ -1818,7 +1721,7 @@
     <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
-    <span class="n">alt</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">V</span><span class="p">}</span>
+    <span class="n">alt</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">V</span><span class="p">}</span>
     <span class="n">number</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">mu</span><span class="p">,</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">alpha</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1832,7 +1735,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ell</span><span class="p">:</span>
             <span class="n">problems_zero</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ell</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ell</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Expression</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ell</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ell</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">expr</span><span class="o">.</span><span class="n">Expression</span><span class="p">):</span>
             <span class="n">problems_one</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">problems_zero</span><span class="p">:</span>
@@ -1849,46 +1752,30 @@
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

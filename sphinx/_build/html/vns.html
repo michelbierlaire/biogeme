@@ -1,69 +1,34 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Variable Neighborhood Search &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Version" href="version.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -71,19 +36,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
@@ -99,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
@@ -108,76 +63,35 @@
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Variable Neighborhood Search</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/vns.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="variable-neighborhood-search">
-<h1>Variable Neighborhood Search<a class="headerlink" href="#variable-neighborhood-search" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="variable-neighborhood-search">
+<h1>Variable Neighborhood Search<a class="headerlink" href="#variable-neighborhood-search" title="Permalink to this heading"></a></h1>
 <p>Implementation of the VNS algorithm</p>
-<div class="section" id="module-biogeme.vns">
-<span id="biogeme-vns-module"></span><h2>biogeme.vns module<a class="headerlink" href="#module-biogeme.vns" title="Permalink to this headline">¶</a></h2>
+<section id="module-biogeme.vns">
+<span id="biogeme-vns-module"></span><h2>biogeme.vns module<a class="headerlink" href="#module-biogeme.vns" title="Permalink to this heading"></a></h2>
 <p>File vns.py</p>
 <dl class="field-list simple">
 <dt class="field-odd">author</dt>
@@ -189,13 +103,13 @@
 </dl>
 <p>Multi-objective variable neighborhood search algorithm</p>
 <dl class="py class">
-<dt id="biogeme.vns.operatorsManagement">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></code><code class="sig-name descname"><span class="pre">operatorsManagement</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operatorNames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></span><span class="sig-name descname"><span class="pre">operatorsManagement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operatorNames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class managing the selection and performance analysis of the operators</p>
 <dl class="py method">
-<dt id="biogeme.vns.operatorsManagement.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operatorNames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operatorNames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>operatorNames</strong> – names of operators</p>
@@ -203,9 +117,15 @@
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.available">
+<span class="sig-name descname"><span class="pre">available</span></span><a class="headerlink" href="#biogeme.vns.operatorsManagement.available" title="Permalink to this definition"></a></dt>
+<dd><p>dict of availability of the operators</p>
+</dd></dl>
+
 <dl class="py method">
-<dt id="biogeme.vns.operatorsManagement.decreaseScore">
-<code class="sig-name descname"><span class="pre">decreaseScore</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.decreaseScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.decreaseScore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.decreaseScore">
+<span class="sig-name descname"><span class="pre">decreaseScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.decreaseScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.decreaseScore" title="Permalink to this definition"></a></dt>
 <dd><p>Decrease the score of an operator. If it has already the minimum
 score, it increases the others.</p>
 <dl class="field-list simple">
@@ -219,8 +139,8 @@ score, it increases the others.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.operatorsManagement.increaseScore">
-<code class="sig-name descname"><span class="pre">increaseScore</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.increaseScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.increaseScore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.increaseScore">
+<span class="sig-name descname"><span class="pre">increaseScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.increaseScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.increaseScore" title="Permalink to this definition"></a></dt>
 <dd><p>Increase the score of an operator.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -232,9 +152,21 @@ score, it increases the others.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.names">
+<span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#biogeme.vns.operatorsManagement.names" title="Permalink to this definition"></a></dt>
+<dd><p>Names of the operators</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.scores">
+<span class="sig-name descname"><span class="pre">scores</span></span><a class="headerlink" href="#biogeme.vns.operatorsManagement.scores" title="Permalink to this definition"></a></dt>
+<dd><p>dict of scores obtained by the operators</p>
+</dd></dl>
+
 <dl class="py method">
-<dt id="biogeme.vns.operatorsManagement.selectOperator">
-<code class="sig-name descname"><span class="pre">selectOperator</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minProbability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.selectOperator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.selectOperator" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.operatorsManagement.selectOperator">
+<span class="sig-name descname"><span class="pre">selectOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minProbability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#operatorsManagement.selectOperator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.operatorsManagement.selectOperator" title="Permalink to this definition"></a></dt>
 <dd><p>Select an operator based on the scores</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,13 +195,13 @@ N, where N is the number of operators.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="biogeme.vns.paretoClass">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></code><code class="sig-name descname"><span class="pre">paretoClass</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxNeighborhood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archiveInputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></span><span class="sig-name descname"><span class="pre">paretoClass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxNeighborhood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archiveInputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class managing the solutions</p>
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxNeighborhood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archiveInputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxNeighborhood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archiveInputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -283,8 +215,8 @@ from previous runs</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.add">
-<code class="sig-name descname"><span class="pre">add</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.add" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elem</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.add" title="Permalink to this definition"></a></dt>
 <dd><ul class="simple">
 <li><p>We define the set D as the set of members of the current
 Pareto set that are dominated by the element elem.</p></li>
@@ -307,8 +239,8 @@ elements in D.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.changeNeighborhood">
-<code class="sig-name descname"><span class="pre">changeNeighborhood</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.changeNeighborhood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.changeNeighborhood" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.changeNeighborhood">
+<span class="sig-name descname"><span class="pre">changeNeighborhood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.changeNeighborhood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.changeNeighborhood" title="Permalink to this definition"></a></dt>
 <dd><p>Change the size of the neighborhood for a solution in the Pareto set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -317,9 +249,16 @@ elements in D.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.considered">
+<span class="sig-name descname"><span class="pre">considered</span></span><a class="headerlink" href="#biogeme.vns.paretoClass.considered" title="Permalink to this definition"></a></dt>
+<dd><p>set of solutions that have been considered at some point by the
+algorithm</p>
+</dd></dl>
+
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.dump">
-<code class="sig-name descname"><span class="pre">dump</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.dump" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.dump" title="Permalink to this definition"></a></dt>
 <dd><p>Dump the three sets on a file using pickle</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -332,14 +271,37 @@ elements in D.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.length">
-<code class="sig-name descname"><span class="pre">length</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.length" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.length" title="Permalink to this definition"></a></dt>
 <dd><p>Obtain the length of the parato set.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.maxNeighborhood">
+<span class="sig-name descname"><span class="pre">maxNeighborhood</span></span><a class="headerlink" href="#biogeme.vns.paretoClass.maxNeighborhood" title="Permalink to this definition"></a></dt>
+<dd><p>the maximum size of the neighborhood that must be considered</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.pareto">
+<span class="sig-name descname"><span class="pre">pareto</span></span><a class="headerlink" href="#biogeme.vns.paretoClass.pareto" title="Permalink to this definition"></a></dt>
+<dd><p>dict containing the pareto set. The keys are the solutions
+(class <a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>), and the values are
+the size of the neighborhood that must be applied the next
+time tat the solution is selected by the algorithm.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.removed">
+<span class="sig-name descname"><span class="pre">removed</span></span><a class="headerlink" href="#biogeme.vns.paretoClass.removed" title="Permalink to this definition"></a></dt>
+<dd><p>set of solutions that have been in the Pareto set ar some point,
+but have been removed because dominated by another
+solution.</p>
+</dd></dl>
+
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.resetNeighborhood">
-<code class="sig-name descname"><span class="pre">resetNeighborhood</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.resetNeighborhood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.resetNeighborhood" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.resetNeighborhood">
+<span class="sig-name descname"><span class="pre">resetNeighborhood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.resetNeighborhood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.resetNeighborhood" title="Permalink to this definition"></a></dt>
 <dd><p>Reset the size of the neighborhood to 1 for a solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -349,14 +311,14 @@ elements in D.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.restore">
-<code class="sig-name descname"><span class="pre">restore</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.restore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.restore" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.restore">
+<span class="sig-name descname"><span class="pre">restore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fileName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.restore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.restore" title="Permalink to this definition"></a></dt>
 <dd><p>Restore the Pareto from a file</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.paretoClass.select">
-<code class="sig-name descname"><span class="pre">select</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.paretoClass.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#paretoClass.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.paretoClass.select" title="Permalink to this definition"></a></dt>
 <dd><p>Select a candidate to be modified during the next iteration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -371,17 +333,17 @@ elements in D.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="biogeme.vns.problemClass">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></code><code class="sig-name descname"><span class="pre">problemClass</span></code><a class="reference internal" href="_modules/biogeme/vns.html#problemClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></span><span class="sig-name descname"><span class="pre">problemClass</span></span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Abstract class defining a problem</p>
 <dl class="py method">
-<dt id="biogeme.vns.problemClass.describe">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">describe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.describe" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass.describe">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.describe" title="Permalink to this definition"></a></dt>
 <dd><p>Short description of the solution. Used for reporting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution to be described</p>
+<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – solution to be described</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>short description of the solution.</p>
@@ -393,25 +355,25 @@ elements in D.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.problemClass.evaluate">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">evaluate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.evaluate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass.evaluate">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.evaluate" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate the objectives functions of the solution and store them in
 the solution object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution to be evaluated</p>
+<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – solution to be evaluated</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.problemClass.generateNeighbor">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">generateNeighbor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighborhoodSize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.generateNeighbor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.generateNeighbor" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass.generateNeighbor">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generateNeighbor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighborhoodSize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.generateNeighbor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.generateNeighbor" title="Permalink to this definition"></a></dt>
 <dd><p>Generates a neighbor of the solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution to be modified</p></li>
+<li><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – solution to be modified</p></li>
 <li><p><strong>neighborhoodSize</strong> (<em>int</em>) – size of the neighborhood to be applied</p></li>
 </ul>
 </dd>
@@ -420,18 +382,18 @@ the solution object.</p>
 actually applied.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple(<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass">solutionClass</a>, int)</p>
+<dd class="field-odd"><p>tuple(<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>, int)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.problemClass.isValid">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">isValid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.isValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.isValid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass.isValid">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isValid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.isValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.isValid" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluate  the validity of the solution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution to be checked</p>
+<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – solution to be checked</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>valid, why where valid is True if the solution is
@@ -445,30 +407,30 @@ is invalid.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.problemClass.neighborAccepted">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">neighborAccepted</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aNeighbor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.neighborAccepted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.neighborAccepted" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass.neighborAccepted">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighborAccepted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aNeighbor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.neighborAccepted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.neighborAccepted" title="Permalink to this definition"></a></dt>
 <dd><p>Notify that a neighbor has been accepted by the
 algorithm. Used to update the statistics on the operators.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution modified</p></li>
-<li><p><strong>aNeighbor</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – neighbor</p></li>
+<li><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – solution modified</p></li>
+<li><p><strong>aNeighbor</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – neighbor</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.problemClass.neighborRejected">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">neighborRejected</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aNeighbor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.neighborRejected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.neighborRejected" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.problemClass.neighborRejected">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">neighborRejected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aNeighbor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#problemClass.neighborRejected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.problemClass.neighborRejected" title="Permalink to this definition"></a></dt>
 <dd><p>Notify that a neighbor has been rejected by the
 algorithm. Used to update the statistics on the operators.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution  modified</p></li>
-<li><p><strong>aNeighbor</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – neighbor</p></li>
+<li><p><strong>aSolution</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – solution  modified</p></li>
+<li><p><strong>aNeighbor</strong> (<a class="reference internal" href="#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) – neighbor</p></li>
 </ul>
 </dd>
 </dl>
@@ -477,25 +439,24 @@ algorithm. Used to update the statistics on the operators.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="biogeme.vns.solutionClass">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></code><code class="sig-name descname"><span class="pre">solutionClass</span></code><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.solutionClass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></span><span class="sig-name descname"><span class="pre">solutionClass</span></span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This is an abstract class defining a solution.</p>
 <dl class="py method">
-<dt id="biogeme.vns.solutionClass.__eq__">
-<code class="sig-name descname"><span class="pre">__eq__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass.__eq__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.solutionClass.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass.__eq__" title="Permalink to this definition"></a></dt>
 <dd><p>Return self==value.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.solutionClass.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="biogeme.vns.solutionClass.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.vns.solutionClass.dominates">
-<code class="sig-name descname"><span class="pre">dominates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anotherSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass.dominates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass.dominates" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.solutionClass.dominates">
+<span class="sig-name descname"><span class="pre">dominates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">anotherSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#solutionClass.dominates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.solutionClass.dominates" title="Permalink to this definition"></a></dt>
 <dd><p>Checks if the current solution dominates another one. It is
 assumed that all objectives are minimized.</p>
 <dl class="field-list simple">
@@ -524,8 +485,8 @@ incompatible.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.vns.vns">
-<code class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></code><code class="sig-name descname"><span class="pre">vns</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firstSolutions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxNeighborhood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfNeighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archiveInputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickleOutputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#vns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.vns" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.vns.vns">
+<span class="sig-prename descclassname"><span class="pre">biogeme.vns.</span></span><span class="sig-name descname"><span class="pre">vns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">problem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firstSolutions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxNeighborhood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfNeighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">archiveInputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickleOutputFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/vns.html#vns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.vns.vns" title="Permalink to this definition"></a></dt>
 <dd><p>Multi objective Variable Neighborhood Search</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -549,7 +510,7 @@ pareto set and then removed, and the set of all models
 considered by the algorithm.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>class pareto</p>
+<dd class="field-odd"><p>class <a class="reference internal" href="#biogeme.vns.paretoClass" title="biogeme.vns.paretoClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.paretoClass</span></code></a></p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the first Pareto set is empty.</p>
@@ -557,54 +518,37 @@ considered by the algorithm.</p>
 </dl>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="version.html" class="btn btn-neutral float-left" title="Version" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

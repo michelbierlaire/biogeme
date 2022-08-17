@@ -24,6 +24,7 @@ Welcome to Biogeme's documentation!
   models.rst
   optimization.rst
   results.rst
+  segmentation.rst
   singleton.rst
   tools.rst
   version.rst
