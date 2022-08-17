@@ -27,12 +27,8 @@ V, _, _, _ = scenario()
 V_PT = V[0]
 V_CAR = V[1]
 
-WTP_PT_TIME = Derive(V_PT, 'TimePT') / Derive(
-    V_PT, 'MarginalCostPT'
-)
-WTP_CAR_TIME = Derive(V_CAR, 'TimeCar') / Derive(
-    V_CAR, 'CostCarCHF'
-)
+WTP_PT_TIME = Derive(V_PT, 'TimePT') / Derive(V_PT, 'MarginalCostPT')
+WTP_CAR_TIME = Derive(V_CAR, 'TimeCar') / Derive(V_CAR, 'CostCarCHF')
 
 simulate = {
     'weight': normalizedWeight,
@@ -56,22 +52,18 @@ except excep.biogemeError:
 simulated_values = biogeme.simulate(results.getBetaValues())
 
 wtpcar = (
-    60
-    * simulated_values['WTP CAR time']
-    * simulated_values['weight']
+    60 * simulated_values['WTP CAR time'] * simulated_values['weight']
 ).mean()
 
 # Calculate confidence intervals
-b = results.getBetasForSensitivityAnalysis(biogeme.freeBetaNames)
+b = results.getBetasForSensitivityAnalysis(biogeme.freeBetaNames())
 
 # Returns data frame containing, for each simulated value, the left
 # and right bounds of the confidence interval calculated by simulation.
 left, right = biogeme.confidenceIntervals(b, 0.9)
 
 wtpcar_left = (60 * left['WTP CAR time'] * left['weight']).mean()
-wtpcar_right = (
-    60 * right['WTP CAR time'] * right['weight']
-).mean()
+wtpcar_right = (60 * right['WTP CAR time'] * right['weight']).mean()
 print(
     f'Average WTP for car: {wtpcar:.3g} '
     f'CI:[{wtpcar_left:.3g}, {wtpcar_right:.3g}]'
@@ -82,10 +74,7 @@ print(
 # population: for workers and non workers
 print(
     'Unique values:      ',
-    [
-        f'{i:.3g}'
-        for i in 60 * simulated_values['WTP CAR time'].unique()
-    ],
+    [f'{i:.3g}' for i in 60 * simulated_values['WTP CAR time'].unique()],
 )
 
 
@@ -105,12 +94,8 @@ def wtpForSubgroup(theFilter):
     totalWeight = sim['weight'].sum()
     weight = sim['weight'] * size / totalWeight
     _wtpcar = (60 * sim['WTP CAR time'] * weight).mean()
-    _wtpcar_left = (
-        60 * left[theFilter]['WTP CAR time'] * weight
-    ).mean()
-    _wtpcar_right = (
-        60 * right[theFilter]['WTP CAR time'] * weight
-    ).mean()
+    _wtpcar_left = (60 * left[theFilter]['WTP CAR time'] * weight).mean()
+    _wtpcar_right = (60 * right[theFilter]['WTP CAR time'] * weight).mean()
     return _wtpcar, _wtpcar_left, _wtpcar_right
 
 

@@ -38,25 +38,17 @@ prob_SM = models.nested(V, None, nests, 2)
 # Calculation of the direct elasticities.
 # We use the 'Derive' operator to calculate the derivatives.
 
-direct_elas_pt_time = (
-    Derive(prob_PT, 'TimePT') * TimePT / prob_PT
-)
+direct_elas_pt_time = Derive(prob_PT, 'TimePT') * TimePT / prob_PT
 
 direct_elas_pt_cost = (
     Derive(prob_PT, 'MarginalCostPT') * MarginalCostPT / prob_PT
 )
 
-direct_elas_car_time = (
-    Derive(prob_CAR, 'TimeCar') * TimeCar / prob_CAR
-)
+direct_elas_car_time = Derive(prob_CAR, 'TimeCar') * TimeCar / prob_CAR
 
-direct_elas_car_cost = (
-    Derive(prob_CAR, 'CostCarCHF') * CostCarCHF / prob_CAR
-)
+direct_elas_car_cost = Derive(prob_CAR, 'CostCarCHF') * CostCarCHF / prob_CAR
 
-direct_elas_sm_dist = (
-    Derive(prob_SM, 'distance_km') * distance_km / prob_SM
-)
+direct_elas_sm_dist = Derive(prob_SM, 'distance_km') * distance_km / prob_SM
 
 # Simulate the formulas
 simulate = {
@@ -97,8 +89,7 @@ simulated_values['Weighted prob. PT'] = (
     * simulated_values['Prob. public transportation']
 )
 simulated_values['Weighted prob. SM'] = (
-    simulated_values['weight']
-    * simulated_values['Prob. slow modes']
+    simulated_values['weight'] * simulated_values['Prob. slow modes']
 )
 
 # Then the denominator of the aggregate elasticity expression.

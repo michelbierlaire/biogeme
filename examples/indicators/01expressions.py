@@ -12,15 +12,17 @@ from biogeme.expressions import Beta, exp
 b = Beta('b', 1, None, None, 0)
 expression = exp(-b * b + 1)
 
-# We can calculate its value.
-z = expression.getValue_c()
+# We can calculate its value. Note that, as the expression is
+# calculated out of Biogeme, the IDs must be prepared. So the
+# parameter 'prepareIds' is set to True
+z = expression.getValue_c(prepareIds=True)
 print(f'exp(-b * b + 1) = {z}')
 
 # We can also calculate the value, the first derivative, the second
 # derivative, and the BHHH, which in this case is the square of the
 # first derivatives
 
-f, g, h, bhhh = expression.getValueAndDerivatives()
+f, g, h, bhhh = expression.getValueAndDerivatives(prepareIds=True)
 print(f'f = {f}')
 print(f'g = {g}')
 print(f'h = {h}')

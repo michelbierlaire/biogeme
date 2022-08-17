@@ -44,7 +44,7 @@ simulated_values = biogeme.simulate(results.getBetaValues())
 
 # We also calculate confidence intervals for the calculated quantities
 
-betas = biogeme.freeBetaNames
+betas = biogeme.freeBetaNames()
 b = results.getBetasForSensitivityAnalysis(betas)
 left, right = biogeme.confidenceIntervals(b, 0.9)
 
@@ -57,9 +57,7 @@ simulated_values['Weighted prob. car'] = (
     simulated_values['weight'] * simulated_values['Prob. car']
 )
 left['Weighted prob. car'] = left['weight'] * left['Prob. car']
-right['Weighted prob. car'] = (
-    right['weight'] * right['Prob. car']
-)
+right['Weighted prob. car'] = right['weight'] * right['Prob. car']
 
 marketShare_car = simulated_values['Weighted prob. car'].mean()
 marketShare_car_left = left['Weighted prob. car'].mean()

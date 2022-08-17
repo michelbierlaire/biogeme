@@ -47,9 +47,7 @@ BETA_TIME_FULLTIME = Beta('BETA_TIME_FULLTIME', 0, None, None, 0)
 BETA_TIME_OTHER = Beta('BETA_TIME_OTHER', 0, None, None, 0)
 BETA_DIST_MALE = Beta('BETA_DIST_MALE', 0, None, None, 0)
 BETA_DIST_FEMALE = Beta('BETA_DIST_FEMALE', 0, None, None, 0)
-BETA_DIST_UNREPORTED = Beta(
-    'BETA_DIST_UNREPORTED', 0, None, None, 0
-)
+BETA_DIST_UNREPORTED = Beta('BETA_DIST_UNREPORTED', 0, None, None, 0)
 BETA_COST = Beta('BETA_COST', 0, None, None, 0)
 
 # Definition of variables:
@@ -100,9 +98,7 @@ def scenario(factor=1.0):
         ASC_SM
         + BETA_DIST_MALE * distance_km_scaled * male
         + BETA_DIST_FEMALE * distance_km_scaled * female
-        + BETA_DIST_UNREPORTED
-        * distance_km_scaled
-        * unreportedGender
+        + BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
     )
 
     # Associate utility functions with the numbering of alternatives

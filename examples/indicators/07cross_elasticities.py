@@ -41,19 +41,11 @@ prob_SM = models.nested(V, None, nests, 2)
 
 # Calculation of the cross elasticities.
 # We use the 'Derive' operator to calculate the derivatives.
-cross_elas_pt_time = (
-    Derive(prob_PT, 'TimeCar') * TimeCar / prob_PT
-)
-cross_elas_pt_cost = (
-    Derive(prob_PT, 'CostCarCHF') * CostCarCHF / prob_PT
-)
-cross_elas_car_time = (
-    Derive(prob_CAR, 'TimePT') * TimePT / prob_CAR
-)
+cross_elas_pt_time = Derive(prob_PT, 'TimeCar') * TimeCar / prob_PT
+cross_elas_pt_cost = Derive(prob_PT, 'CostCarCHF') * CostCarCHF / prob_PT
+cross_elas_car_time = Derive(prob_CAR, 'TimePT') * TimePT / prob_CAR
 cross_elas_car_cost = (
-    Derive(prob_CAR, 'MarginalCostPT')
-    * MarginalCostPT
-    / prob_CAR
+    Derive(prob_CAR, 'MarginalCostPT') * MarginalCostPT / prob_CAR
 )
 
 simulate = {

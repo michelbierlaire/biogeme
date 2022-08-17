@@ -43,25 +43,25 @@ except excep.biogemeError:
 start_time = time.time()
 simulate_formulas = {
     'weight': normalizedWeight.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
     'Utility PT': V_PT.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
     'Utility car': V_CAR.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
     'Utility SM': V_SM.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
     'Prob. PT': prob_PT.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
     'Prob. car': prob_CAR.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
     'Prob. SM': prob_SM.getValue_c(
-        betas=results.getBetaValues(), database=database
+        betas=results.getBetaValues(), database=database, prepareIds=True
     ),
 }
 

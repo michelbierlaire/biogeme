@@ -50,8 +50,7 @@ def revenues(factor):
 
     simulate = {
         'weight': normalizedWeight,
-        'Revenue public transportation': prob_PT
-        * MarginalCostScenario,
+        'Revenue public transportation': prob_PT * MarginalCostScenario,
     }
 
     biogeme = bio.BIOGEME(database, simulate)
@@ -59,7 +58,7 @@ def revenues(factor):
 
     # We also calculate confidence intervals for the calculated quantities
 
-    betas = biogeme.freeBetaNames
+    betas = biogeme.freeBetaNames()
     b = results.getBetasForSensitivityAnalysis(betas)
     left, right = biogeme.confidenceIntervals(b, 0.9)
 
