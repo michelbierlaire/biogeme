@@ -14,10 +14,10 @@
 # pylint: disable=too-many-branches, too-many-instance-attributes, too-many-lines,
 # pylint: disable=too-many-public-methods
 
-from biogeme.expressions import log, exp
+from biogeme.expressions import log, exp, Numeric
 
 
-def normalpdf(x, mu=0.0, s=1.0):
+def normalpdf(x, mu=Numeric(0.0), s=Numeric(1.0)):
     """
     Normal pdf
 
@@ -152,7 +152,7 @@ def triangularpdf(x, a=-1.0, b=1.0, c=0.0):
     return result
 
 
-def logisticcdf(x, mu=0.0, s=1.0):
+def logisticcdf(x, mu=Numeric(0.0), s=Numeric(1.0)):
     """
     Logistic CDF
 

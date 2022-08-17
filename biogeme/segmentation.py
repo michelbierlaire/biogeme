@@ -8,10 +8,14 @@
 from collections import namedtuple, deque
 from biogeme.expressions import Beta, bioMultSum
 
-DiscreteSegmentationTuple = namedtuple('DiscreteSegmentationTuple', 'variable mapping')
+DiscreteSegmentationTuple = namedtuple(
+    'DiscreteSegmentationTuple', 'variable mapping'
+)
+
 
 def combine_segmented_expressions(variable, mapping_of_expressions):
     """Create an expressions that combines all the segments
+
     :param variable: variable that characterizes the segmentation
     :type variable: biogeme.expressions.Variable
 
@@ -95,9 +99,7 @@ def create_segmented_parameter(parameter, mapping):
 
 
 def segment_parameter(
-        parameter,
-        list_of_discrete_segmentations,
-        combinatorial=False
+    parameter, list_of_discrete_segmentations, combinatorial=False
 ):
     """Segment a parameter expression along several dimensions of segmentation
 
@@ -135,9 +137,7 @@ def segment_parameter(
         )
         map_of_expressions = {
             key: segment_parameter(
-                value,
-                stack_of_segmentations,
-                combinatorial=True
+                value, stack_of_segmentations, combinatorial=True
             )
             for key, value in segmented_parameters.items()
         }
@@ -149,12 +149,17 @@ def segment_parameter(
     all_segments = [
         expr * (s.variable == value)
         for s in list_of_discrete_segmentations
-        for value, expr in create_segmented_parameter(parameter, s.mapping).items()
+        for value, expr in create_segmented_parameter(
+            parameter, s.mapping
+        ).items()
     ]
-    
+
     return bioMultSum(all_segments)
 
-def code_to_segment_parameter(parameter, list_of_discrete_segmentations, prefix=''):
+
+def code_to_segment_parameter(
+    parameter, list_of_discrete_segmentations, prefix=''
+):
     """Generate the Python code to segment a parameter along several
         dimensions of segmentation
 

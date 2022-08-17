@@ -12,6 +12,7 @@ ElementsTuple = namedtuple('ElementsTuple', 'expressions indices names')
 
 logger = msg.bioMessage()
 
+
 class IdManager:
     """Class combining managing the ids of an arithmetic expression."""
 
@@ -60,21 +61,22 @@ class IdManager:
                     f'No database is provided and an expression '
                     f'contains variables: {the_variables}'
                 )
-            if f.embedExpression('MonteCarlo') or f.embedExpression('bioDraws'):
+            if f.embedExpression('MonteCarlo') or f.embedExpression(
+                'bioDraws'
+            ):
                 self.requires_draws = True
 
         self.prepare()
 
     def __str__(self):
         return str(self.elementary_expressions.indices)
-    
+
     def __repr__(self):
         return str(self.elementary_expressions.indices)
 
-
     def __eq__(self, other):
         return self.elementary_expressions == other.elementary_expressions
-    
+
     def audit(self):
         """Performs various checks on the expressions.
 
@@ -103,25 +105,24 @@ class IdManager:
                 )
                 listOfErrors.append(err_msg)
         return listOfErrors, listOfWarnings
-        
+
     def changeInitValues(self, betas):
-        """Modifies the values of the pameters 
+        """Modifies the values of the pameters
 
         :param betas: dictionary where the keys are the names of the
                       parameters, and the values are the new value for
                       the parameters.
         :type betas: dict(string:float)
         """
+
         def get_value(name):
             v = betas.get(name)
             if v is None:
                 return self.free_betas.expressions[name].initValue
             return v
-        self.free_betas_values = [
-            get_value(x)
-            for x in self.free_betas.names
-        ]
-        
+
+        self.free_betas_values = [get_value(x) for x in self.free_betas.names]
+
     def expressions_names_indices(self, dict_of_elements):
         indices = {}
         names = {}
@@ -160,9 +161,11 @@ class IdManager:
 
         self.free_betas = self.expressions_names_indices(expr)
 
-
         self.bounds = [
-            (self.free_betas.expressions[b].lb, self.free_betas.expressions[b].ub)
+            (
+                self.free_betas.expressions[b].lb,
+                self.free_betas.expressions[b].ub,
+            )
             for b in self.free_betas.names
         ]
         self.number_of_free_betas = len(self.free_betas.names)

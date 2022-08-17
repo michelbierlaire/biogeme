@@ -151,7 +151,7 @@ def getLatinHypercubeDraws(
 def getHaltonDraws(
     sampleSize, numberOfDraws, symmetric=False, base=2, skip=0, shuffled=False
 ):
-    """Generate Halton draws. 
+    """Generate Halton draws.
     Implementation by Cristian Arteaga, University of Nevada Las Vegas,
 
     :param sampleSize: number of observations for which draws must be
@@ -206,16 +206,18 @@ def getHaltonDraws(
     numbers_idx = 1
     t = 1
     while numbers_idx < req_length:
-        d = 1/base**t
+        d = 1 / base**t
         numbers_size = numbers_idx
         i = 1
         while i < base and numbers_idx < req_length:
             max_numbers = min(req_length - numbers_idx, numbers_size)
-            numbers[numbers_idx: numbers_idx + max_numbers] = numbers[:max_numbers] + d * i
+            numbers[numbers_idx : numbers_idx + max_numbers] = (
+                numbers[:max_numbers] + d * i
+            )
             numbers_idx += max_numbers
             i += 1
         t += 1
-    numbers = numbers[skip + 1:length + skip + 1]
+    numbers = numbers[skip + 1 : length + skip + 1]
 
     if shuffled:
         np.random.shuffle(numbers)

@@ -172,7 +172,6 @@ class BIOGEME:
         self.numberOfDraws = numberOfDraws
         """ Number of draws for Monte-Carlo integration."""
 
-
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -187,14 +186,13 @@ class BIOGEME:
             """
 
             if self.database.isPanel():
-                dict_of_variables = (
-                    formulas.dictOfVariablesOutsidePanelTrajectory()
-                )
-                if dict_of_variables:
+                check_variables = self.loglike.check_panel_trajectory()
+
+                if check_variables:
                     err_msg = (
                         f'Error in the loglikelihood function. '
                         f'Some variables are not inside PanelLikelihoodTrajectory: '
-                        f'{dict_of_variables.keys()} .'
+                        f'{check_variables} .'
                         f'If the database is organized as panel data, '
                         f'all variables must be used inside a '
                         f'PanelLikelihoodTrajectory. '
@@ -369,6 +367,20 @@ class BIOGEME:
         listOfErrors = []
         listOfWarnings = []
         for v in self.formulas.values():
+            check_draws = v.check_draws()
+            if check_draws:
+                err_msg = (
+                    f'The following draws are defined outside the '
+                    f'MonteCarlo operator: {check_draws}'
+                )
+                listOfErrors.append(err_msg)
+            check_rv = v.check_rv()
+            if check_rv:
+                err_msg = (
+                    f'The following random variables are defined '
+                    f'outside the Integrate operator: {check_draws}'
+                )
+                listOfErrors.append(err_msg)
             err, war = v.audit(self.database)
             listOfErrors += err
             listOfWarnings += war
@@ -714,18 +726,6 @@ class BIOGEME:
             self.id_manager.free_betas.names,
             verbose,
         )
-
-    def loadSavedIteration(self, filename='__savedIterations.txt'):
-        """
-        Obsolete function
-        """
-        message = (
-            'The function loadSavedIterations is obsolete. It is '
-            'sufficient to set the parameter saveIterations to True '
-            'or False to control the process. Therefore, there '
-            'is no need to call the function loadSavedIteration anymore.'
-        )
-        raise excep.biogemeError(message)
 
     def _loadSavedIteration(self):
         """Reads the values of the parameters from a text file where each line
@@ -1211,68 +1211,6 @@ class BIOGEME:
             output[key] = r
         return output
 
-    def oldsimulate(self, theBetaValues=None):
-        """Applies the formulas to each row of the database. This is the old
-        implementation. To be removed in future versions.
-
-        :param theBetaValues: values of the parameters to be used in
-                the calculations. If None, the default values are
-                used. Default: None.
-        :type theBetaValues: dict(str, float)
-
-        :return: a pandas data frame with the simulated value. Each
-              row corresponds to a row in the database, and each
-              column to a formula.
-
-        :rtype: Pandas data frame
-
-        :raises biogemeError: if the number of parameters is incorrect
-
-        """
-
-        if self.database.isPanel():
-            error_msg = (
-                'Simulation for panel data is not yet'
-                ' implemented. Remove the "panel" '
-                'statement to simulate each observation.'
-            )
-            raise excep.biogemeError(error_msg)
-
-        if theBetaValues is None:
-            betaValues = self.id_manager.free_betas_values
-        else:
-            if not isinstance(theBetaValues, dict):
-                err = (
-                    'Deprecated. A dictionary must be provided. '
-                    'It can be obtained from results.getBetaValues()'
-                )
-                raise excep.biogemeError(err)
-            for x in theBetaValues.keys():
-                if x not in self.id_manager.free_betas.names:
-                    logger.warning(f'Parameter {x} not present in the model')
-            betaValues = []
-            for i, x in enumerate(self.id_manager.free_betas.names):
-                if x in theBetaValues:
-                    betaValues.append(theBetaValues[x])
-                else:
-                    logger.warning(
-                        f'Simulation: initial value of {x} not provided.'
-                    )
-                    betaValues.append(self.id_manager.free_betas_values[i])
-
-        output = pd.DataFrame(index=self.database.data.index)
-        for k, v in self.formulas.items():
-            logger.detailed(f'Simulate {k}')
-            signature = v.getSignature()
-            result = self.theC.simulateFormula(
-                signature,
-                betaValues,
-                self.id_manager.fixed_betas_values,
-                self.database.data,
-            )
-            output[k] = result
-        return output
-
     def confidenceIntervals(self, betaValues, intervalSize=0.9):
         """Calculate confidence intervals on the simulated quantities
 
@@ -1352,8 +1290,8 @@ class BIOGEME:
         return r
 
     def files_of_type(self, extension, all_files=False):
-        """Identify the list of files with a given extension in the
-            local directory
+        """Identify the list of files with a given extension in the  local directory
+
         :param extension: extension of the requested files (without
             the dot): 'pickle', or 'html'
         :type extension: str
@@ -1362,6 +1300,7 @@ class BIOGEME:
             True, all files with the requested extension are
             identified.
         :type all_files: bool
+
         :return: list of files with the requested extension.
         :rtype: list(str)
         """

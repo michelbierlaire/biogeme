@@ -490,9 +490,9 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
 def covariance_cross_nested(i, j, nests):
     """Calculate the covariance between the error terms of two
-        alternatives of a cross-nested logit model. It is assumed that
-        the homogeneity parameter mu of the model has been normalized
-        to one.
+    alternatives of a cross-nested logit model. It is assumed that
+    the homogeneity parameter mu of the model has been normalized
+    to one.
 
     :param i: first alternative
     :type i: int
@@ -652,9 +652,10 @@ def correlation_nested(nests):
 
 def correlation_cross_nested(nests):
     """Calculate the correlation matrix of the error terms of all
-        alternatives of a cross-nested logit model. It is assumed that
-        the homogeneity parameter mu of the model has been normalized
-        to one.
+    alternatives of a cross-nested logit model. It is assumed that
+    the homogeneity parameter mu of the model has been normalized
+    to one.
+
 
     :param nests: a tuple containing as many items as nests.
         Each item is also a tuple containing two items:
@@ -715,8 +716,7 @@ def correlation_cross_nested(nests):
 
 
 def calculate_correlation(nests, results, alternative_names=None):
-    """Calculate the correlation matrix of a nested or cross-nested logit
-        model, using the estimation results.
+    """Calculate the correlation matrix of a nested or cross-nested logit model.
 
     :param nests:  A tuple containing as many items as nests.
 
@@ -788,7 +788,7 @@ def calculate_correlation(nests, results, alternative_names=None):
 
         if isinstance(expr, Expression):
             expr.changeInitValues(betas)
-            return expr.getValue_c()
+            return expr.getValue_c(prepareIds=True)
         if isinstance(expr, (int, float)):
             return expr
         raise excep.biogemeError(f'Invalid type: {type(expr)}')

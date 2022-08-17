@@ -108,12 +108,12 @@ def boxcox(x, ell):
     :rtype: biogeme.expressions.expr.Expression
     """
 
-    regular = (x ** ell - 1.0) / ell
+    regular = (x**ell - 1.0) / ell
     mclaurin = (
         expr.log(x)
         + ell * expr.log(x) ** 2
-        + ell ** 2 * expr.log(x) ** 3 / 6.0
-        + ell ** 3 * expr.log(x) ** 4 / 24.0
+        + ell**2 * expr.log(x) ** 3 / 6.0
+        + ell**3 * expr.log(x) ** 4 / 24.0
     )
     smooth = expr.Elem({0: regular, 1: mclaurin}, ell < expr.Numeric(1.0e-5))
     return expr.Elem({0: smooth, 1: expr.Numeric(0)}, x == 0)
@@ -267,7 +267,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
             'name of a variable, or the variable itself..'
         )
         raise excep.biogemeError(errorMsg)
-    
+
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
@@ -293,19 +293,14 @@ def piecewiseFormula(variable, thresholds, betas=None):
     if betas is None:
         betas = []
         for i, a_threshold in enumerate(thresholds[:-1]):
-            next_threshold = thresholds[i+1]
+            next_threshold = thresholds[i + 1]
             a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
             next_name = (
-                'inf' if next_threshold is None
-                else f'{next_threshold}'
+                'inf' if next_threshold is None else f'{next_threshold}'
             )
             betas.append(
                 expr.Beta(
-                    f'beta_{variable}_{a_name}_{next_name}',
-                    0,
-                    None,
-                    None,
-                    0
+                    f'beta_{variable}_{a_name}_{next_name}', 0, None, None, 0
                 )
             )
 
@@ -647,7 +642,7 @@ def getMevGeneratingForNested(V, availability, nests):
                 for i in m[1]
             ]
         theSum = expr.bioMultSum(sumdict)
-        termsForNests.append(theSum ** 1.0 / m[0])
+        termsForNests.append(theSum**1.0 / m[0])
     return expr.bioMultSum(termsForNests)
 
 

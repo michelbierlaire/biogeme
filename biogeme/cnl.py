@@ -85,19 +85,19 @@ def cnl_G(alternatives, nests):
                 alpha_i = alphas.get(alternatives[i], 0)
                 if alpha_i != 0 and y[i] != 0:
                     Gi[i] += (
-                        alpha_i ** mu_m
+                        alpha_i**mu_m
                         * y[i] ** (mu_m - 1)
-                        * nest_specific_sum ** p1
+                        * nest_specific_sum**p1
                     )
                     Gij[i][i] += (
                         1 - mu_m
-                    ) * nest_specific_sum ** p2 * alpha_i ** (2 * mu_m) * y[
+                    ) * nest_specific_sum**p2 * alpha_i ** (2 * mu_m) * y[
                         i
                     ] ** (
                         2 * mu_m - 2.0
                     ) + (
                         mu_m - 1
-                    ) * nest_specific_sum ** p1 * alpha_i ** mu_m * y[
+                    ) * nest_specific_sum**p1 * alpha_i**mu_m * y[
                         i
                     ] ** (
                         mu_m - 2
@@ -107,7 +107,7 @@ def cnl_G(alternatives, nests):
                         if alpha_j != 0 and y[j] != 0:
                             Gij[i][j] += (
                                 (1 - mu_m)
-                                * nest_specific_sum ** p2
+                                * nest_specific_sum**p2
                                 * (alpha_i * alpha_j) ** mu_m
                                 * (y[i] * y[j]) ** (mu_m - 1.0)
                             )

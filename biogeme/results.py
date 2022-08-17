@@ -222,7 +222,9 @@ class rawResults:
 
         self.betaValues = betaValues  #: Values of the parameters
 
-        self.betaNames = theModel.id_manager.free_betas.names  #: Names of the parameters
+        self.betaNames = (
+            theModel.id_manager.free_betas.names
+        )  #: Names of the parameters
 
         self.initLogLike = theModel.initLogLike
         """Value of the likelihood function with the initial value of the
@@ -731,12 +733,21 @@ class bioResults:
 
             return f'{res}.0'
 
-        h += table.to_latex(float_format=formatting)
+        ## Need to check for old versions of Pandas.
+        try:
+            h += table.style.format(formatting).to_latex()
+        except AttributeError:
+            h += table.to_latex(float_format=formatting)
 
         h += '\n%%Correlation\n'
         h += '\\section{Correlation}\n'
         table = self.getCorrelationResults()
-        h += table.to_latex(float_format=formatting)
+        ## Need to check for old versions of Pandas.
+        try:
+            h += table.style.format(formatting).to_latex()
+        except AttributeError:
+            h += table.to_latex(float_format=formatting)
+
         return h
 
     def getGeneralStatistics(self):

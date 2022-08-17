@@ -396,7 +396,7 @@ class Database:
         :rtype: numpy.Series
 
         """
-        
+
         return expression.getValue_c(database=self, prepareIds=True)
 
     def checkAvailabilityOfChosenAlt(self, avail, choice):
@@ -421,16 +421,12 @@ class Database:
         self._choice = choice
 
         choice_array = choice.getValue_c(
-            database=self,
-            aggregation=False,
-            prepareIds=True
+            database=self, aggregation=False, prepareIds=True
         )
         calculated_avail = {}
         for key, expression in avail.items():
             calculated_avail[key] = expression.getValue_c(
-                database=self,
-                aggregation=False,
-                prepareIds=True
+                database=self, aggregation=False, prepareIds=True
             )
         try:
             avail_chosen = np.array(
@@ -721,9 +717,7 @@ class Database:
 
         self._expression = expression
         new_column = self._expression.getValue_c(
-            database=self,
-            aggregation=False,
-            prepareIds=True
+            database=self, aggregation=False, prepareIds=True
         )
         self.data[column] = new_column
         self.variables[column] = Variable(column)

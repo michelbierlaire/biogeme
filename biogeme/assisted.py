@@ -19,6 +19,7 @@ import biogeme.messaging as msg
 import biogeme.exceptions as excep
 from biogeme import vns
 from biogeme.expressions import Beta, bioMultSum
+
 # This tuple is imported here, so that it can be imported from here later on.
 from biogeme.segmentation import DiscreteSegmentationTuple, segment_parameter
 
@@ -27,8 +28,7 @@ logger = msg.bioMessage()
 
 TermTuple = namedtuple('TermTuple', 'attribute segmentation bounds validity')
 SegmentedParameterTuple = namedtuple(
-    'SegmentedParameterTuple',
-    'dict combinatorial'
+    'SegmentedParameterTuple', 'dict combinatorial'
 )
 
 
@@ -743,27 +743,26 @@ class segmentation:
         :rtype: :class:`biogeme.expressions.bioMultSum`
         """
 
-
-#        combinations = None
-#        for v in self.dictOfSocioEco.values():
-#            if v.active:
-#                combinations = v.combine(combinations)
-#
-#        if combinations is None:
-#            return Beta(coef_name, 0, bounds[0], bounds[1], 0)
-#
-#        listOfTerms = []
-#        for triplet in combinations:
-#            theCoefName = coef_name
-#            listOfConditions = []
-#            for var, value, name in zip(triplet[0], triplet[1], triplet[2]):
-#                theCoefName = f'{theCoefName}_{name}'
-#                listOfConditions.append(var == value)
-#            aTerm = Beta(theCoefName, 0, bounds[0], bounds[1], 0)
-#            for t in listOfConditions:
-#                aTerm = aTerm * t
-#            listOfTerms.append(aTerm)
-#        before =  bioMultSum(listOfTerms)
+        #        combinations = None
+        #        for v in self.dictOfSocioEco.values():
+        #            if v.active:
+        #                combinations = v.combine(combinations)
+        #
+        #        if combinations is None:
+        #            return Beta(coef_name, 0, bounds[0], bounds[1], 0)
+        #
+        #        listOfTerms = []
+        #        for triplet in combinations:
+        #            theCoefName = coef_name
+        #            listOfConditions = []
+        #            for var, value, name in zip(triplet[0], triplet[1], triplet[2]):
+        #                theCoefName = f'{theCoefName}_{name}'
+        #                listOfConditions.append(var == value)
+        #            aTerm = Beta(theCoefName, 0, bounds[0], bounds[1], 0)
+        #            for t in listOfConditions:
+        #                aTerm = aTerm * t
+        #            listOfTerms.append(aTerm)
+        #        before =  bioMultSum(listOfTerms)
 
         the_coef = Beta(coef_name, 0, bounds[0], bounds[1], 0)
         list_of_segmentations = [
@@ -772,12 +771,9 @@ class segmentation:
             if v.active
         ]
         return segment_parameter(
-            the_coef,
-            list_of_segmentations,
-            self.combinatorial
+            the_coef, list_of_segmentations, self.combinatorial
         )
 
-        
     def describe(self):
         """Description of the segmentation
 
@@ -1046,7 +1042,8 @@ class specificationProblem(vns.problemClass):
                 raise excep.biogemeError(error_msg)
 
         self.theSegmentations = {
-            k: segmentation(k, v.dict, v.combinatorial) for k, v in theSegmentations.items()
+            k: segmentation(k, v.dict, v.combinatorial)
+            for k, v in theSegmentations.items()
         }
         """dict of segmentations, where the keys are the names, and the
         values are objects of class ``segmentation``
@@ -1128,8 +1125,13 @@ class specificationProblem(vns.problemClass):
                     raise excep.biogemeError(
                         f'Segmentation {t.segmentation} ' f'does not exist'
                     )
-                if t.attribute is not None and self.theVariables.get(t.attribute) is None:
-                    raise excep.biogemeError(f'Attribute {t.attribute} does not exist')
+                if (
+                    t.attribute is not None
+                    and self.theVariables.get(t.attribute) is None
+                ):
+                    raise excep.biogemeError(
+                        f'Attribute {t.attribute} does not exist'
+                    )
                 self.theAlternatives[k] = utility(
                     k,
                     u[0],
@@ -1144,7 +1146,9 @@ class specificationProblem(vns.problemClass):
                     ],
                 )
                 if t.segmentation is not None:
-                    self.theSegmentations[t.segmentation].listOfVariables.append(
+                    self.theSegmentations[
+                        t.segmentation
+                    ].listOfVariables.append(
                         self.theVariables.get(t.attribute)
                     )
                 # If the segmentation is not associated with a
@@ -1169,8 +1173,7 @@ class specificationProblem(vns.problemClass):
                 unused.append(v.name)
         if unused:
             raise excep.biogemeError(
-                f'The following variables '
-                f'are not used: {unused}'
+                f'The following variables ' f'are not used: {unused}'
             )
         unused = []
         for s in self.theSegmentations.values():
@@ -1178,8 +1181,7 @@ class specificationProblem(vns.problemClass):
                 unused.append(s.name)
         if unused:
             raise excep.biogemeError(
-                f'The following segmentations '
-                f'are not used: {unused}'
+                f'The following segmentations ' f'are not used: {unused}'
             )
 
     def getBiogemeModel(self):

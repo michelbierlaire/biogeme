@@ -933,7 +933,7 @@ def trustRegionIntersection(dc, d, delta):
     """
     a = np.inner(d, d)
     b = 2 * np.inner(dc, d)
-    c = np.inner(dc, dc) - delta ** 2
+    c = np.inner(dc, dc) - delta**2
     discriminant = b * b - 4.0 * a * c
     return (-b + np.sqrt(discriminant)) / (2 * a)
 
@@ -1957,16 +1957,23 @@ def simpleBoundsNewtonAlgorithm(
             delta = delta / 2.0
             status = '-'
         else:
-            fct.setVariables(xc)
-            fc = fct.f()
-            nfev += 1
+            failed = False
+            try:
+                fct.setVariables(xc)
+                fc = fct.f()
+                nfev += 1
 
-            num = f - fc
-            step = xc - xk
-            denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
-            rho = num / denom
+                num = f - fc
+                step = xc - xk
+                denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
+                rho = num / denom
+                failed = rho < eta1
+            except RuntimeError as e:
+                raise e
+                logger.debug(xc)
+                failed = True
 
-            if rho < eta1:
+            if failed:
                 # Failure: reduce the trust region
                 delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
                 status = '-'
