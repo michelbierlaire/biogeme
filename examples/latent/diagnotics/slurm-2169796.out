@@ -1,0 +1,24 @@
+STARTING AT Wed Aug 17 15:15:31 CEST 2022
+02oneLatentOrdered.py
+[15:15:32] < General >   *** Initial values of the parameters are obtained from the file __02oneLatentOrdered.iter
+[15:15:32] < Warning >   Cannot read file __02oneLatentOrdered.iter. Statement is ignored.
+[15:15:32] < General >   Log likelihood (N = 1906):  -26510.27 Gradient norm:      4e+04 Hessian norm:       3e+05 
+[15:15:32] < General >   Log likelihood (N = 1906):   -22918.8 Gradient norm:      3e+04 Hessian norm:       2e+05 
+[15:15:32] < General >   Log likelihood (N = 1906):  -20336.98 Gradient norm:      3e+04 Hessian norm:       4e+05 
+[15:15:32] < General >   Log likelihood (N = 1906):  -18365.51 Gradient norm:      6e+03 Hessian norm:       3e+05 
+[15:15:33] < General >   Log likelihood (N = 1906):  -18014.06 Gradient norm:      2e+03 Hessian norm:       1e+05 
+[15:15:33] < General >   Log likelihood (N = 1906):  -17900.74 Gradient norm:      5e+02 Hessian norm:       9e+04 
+[15:15:33] < General >   Log likelihood (N = 1906):  -17878.69 Gradient norm:      2e+02 Hessian norm:       7e+04 
+[15:15:33] < General >   Log likelihood (N = 1906):   -17861.1 Gradient norm:      7e+01 Hessian norm:       7e+04 
+[15:15:33] < General >   Log likelihood (N = 1906):  -17858.76 Gradient norm:      1e+01 Hessian norm:       7e+04 
+[15:15:33] < General >   Log likelihood (N = 1906):  -17858.65 Gradient norm:        0.7 Hessian norm:       7e+04 
+[15:15:33] < General >   Log likelihood (N = 1906):  -17858.65 Gradient norm:       0.01 Hessian norm:       7e+04 
+[15:15:33] < General >   Log likelihood (N = 1906):  -17858.65 Gradient norm:       0.01 Hessian norm:       7e+04 BHHH norm:       1e+05
+[15:15:34] < General >   Results saved in file 02oneLatentOrdered.html
+[15:15:34] < General >   Results saved in file 02oneLatentOrdered.pickle
+Estimated betas: 29
+final log likelihood: -17858.653
+Output file: 02oneLatentOrdered.html
+[15:15:35] < General >   Results saved in file 02oneLatentOrdered.tex
+LaTeX file: 02oneLatentOrdered.tex
+FINISHED AT Wed Aug 17 15:15:35 CEST 2022

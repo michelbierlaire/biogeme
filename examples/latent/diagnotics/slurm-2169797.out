@@ -1,0 +1,9 @@
+STARTING AT Wed Aug 17 15:15:31 CEST 2022
+03choiceOnly.py
+  File "03choiceOnly.py", line 76
+    omega = RandomVariable('omega'.Define a random parameter, normally distributed)
+                                          ^
+SyntaxError: invalid syntax
+srun: error: h013: task 0: Exited with exit code 1
+srun: launch/slurm: _step_signal: Terminating StepId=2169797.0
+FINISHED AT Wed Aug 17 15:15:31 CEST 2022

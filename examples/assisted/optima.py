@@ -18,7 +18,6 @@ from biogeme import assisted
 from biogeme.expressions import (
     Beta,
     log,
-    DefineVariable,
     Elem,
     Numeric,
     Variable,
@@ -61,18 +60,14 @@ database.remove(exclude)
 # Definition of new variables
 
 
-otherSubscription = DefineVariable(
+otherSubscription = database.DefineVariable(
     'otherSubscription',
     ((HalfFareST == 1) + (LineRelST == 1) + (AreaRelST == 1) + (OtherST) == 1)
-    > 0,
-    database,
-)
+    > 0)
 
-subscription = DefineVariable(
+subscription = database.DefineVariable(
     'subscription',
-    (GenAbST == 1) * 1 + (GenAbST != 1) * otherSubscription * 2,
-    database,
-)
+    (GenAbST == 1) * 1 + (GenAbST != 1) * otherSubscription * 2)
 
 TimePT_scaled = TimePT / 200
 TimeCar_scaled = TimeCar / 200

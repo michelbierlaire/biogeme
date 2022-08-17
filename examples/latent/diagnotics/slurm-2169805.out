@@ -1,0 +1,19 @@
+STARTING AT Wed Aug 17 15:15:31 CEST 2022
+07problem_simul.py
+We identify the entries for which the likelihood is zero, so that the log likelihood cannot be computed
+     P_Envir01 P_Envir02 P_Envir03 P_Mobil11 P_Mobil14 P_Mobil16 P_Mobil17
+0                    0.0                                                  
+2                                                                         
+3                                                                         
+4                                                                         
+5                    0.0                                                  
+...        ...       ...       ...       ...       ...       ...       ...
+2259                 0.0                                                  
+2261                                                                      
+2262                                                                      
+2263                                                                      
+2264                                                                      
+
+[1906 rows x 7 columns]
+The problematic model is Envir02
+FINISHED AT Wed Aug 17 15:15:33 CEST 2022

@@ -18,7 +18,6 @@ import biogeme.optimization as opt
 import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
-    DefineVariable,
     RandomVariable,
     Integrate,
     exp,
@@ -40,9 +39,8 @@ database.remove(Choice == -1.0)
 ### Variables
 
 # Piecewise linear definition of income
-ScaledIncome = DefineVariable(
-    'ScaledIncome', CalculatedIncome / 1000, database
-)
+ScaledIncome = database.DefineVariable(
+    'ScaledIncome', CalculatedIncome / 1000)
 
 thresholds = [None, 4, 6, 8, 10, None]
 formulaIncome = models.piecewiseFormula(
@@ -50,16 +48,15 @@ formulaIncome = models.piecewiseFormula(
 )
 
 # Definition of other variables
-age_65_more = DefineVariable('age_65_more', age >= 65, database)
-moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
-moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
-individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
-male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
-)
-haveGA = DefineVariable('haveGA', GenAbST == 1, database)
-highEducation = DefineVariable('highEducation', Education >= 6, database)
+age_65_more = database.DefineVariable('age_65_more', age >= 65)
+moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
+moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
+individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
+male = database.DefineVariable('male', Gender == 1)
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0)
+haveGA = database.DefineVariable('haveGA', GenAbST == 1)
+highEducation = database.DefineVariable('highEducation', Education >= 6)
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 1)
@@ -74,7 +71,8 @@ coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
 ### Latent variable: structural equation
 
-# Define a random parameter, normally distributed, designed to be used
+# Define a random parameter, normally distributed)
+# designed to be used
 # for numerical integration
 omega = RandomVariable('omega')
 density = dist.normalpdf(omega)
@@ -108,19 +106,16 @@ BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', 0.0, None, 0, 0)
 BETA_TIME_PT_CL = Beta('BETA_TIME_PT_CL', -1.0, None, None, 0)
 BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', 0.0, None, None, 0)
 
-TimePT_scaled = DefineVariable('TimePT_scaled', TimePT / 200, database)
-TimeCar_scaled = DefineVariable('TimeCar_scaled', TimeCar / 200, database)
-MarginalCostPT_scaled = DefineVariable(
-    'MarginalCostPT_scaled', MarginalCostPT / 10, database
-)
-CostCarCHF_scaled = DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10, database
-)
-distance_km_scaled = DefineVariable(
-    'distance_km_scaled', distance_km / 5, database
-)
-PurpHWH = DefineVariable('PurpHWH', TripPurpose == 1, database)
-PurpOther = DefineVariable('PurpOther', TripPurpose != 1, database)
+TimePT_scaled = database.DefineVariable('TimePT_scaled', TimePT / 200)
+TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
+MarginalCostPT_scaled = database.DefineVariable(
+    'MarginalCostPT_scaled', MarginalCostPT / 10)
+CostCarCHF_scaled = database.DefineVariable(
+    'CostCarCHF_scaled', CostCarCHF / 10)
+distance_km_scaled = database.DefineVariable(
+    'distance_km_scaled', distance_km / 5)
+PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
+PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 
 ### Definition of utility functions:
 

@@ -16,7 +16,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.tools import calculate_correlation
 import biogeme.results as res
-from biogeme.expressions import Beta, Derive
+from biogeme.expressions import Beta, Variable, Derive
 import biogeme.exceptions as excep
 
 # Read the data
@@ -27,9 +27,19 @@ database = db.Database('swissmetro', df)
 # Pandas functions to invesigate the database
 # print(database.data.describe())
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
+PURPOSE = Variable('PURPOSE')
+CHOICE = Variable('CHOICE')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+TRAIN_TT = Variable('TRAIN_TT')
+SM_TT = Variable('SM_TT')
+CAR_TT = Variable('CAR_TT')
+CAR_CO = Variable('CAR_CO')
+SM_CO = Variable('SM_CO')
+SM_AV = Variable('SM_AV')
 
 # Removing some observations can be done directly using pandas.
 # remove = (((database.data.PURPOSE != 1) &

@@ -1,2 +1,6 @@
 cython
-numpy
+pandas
+scipy
+deepdiff
+tqdm
+

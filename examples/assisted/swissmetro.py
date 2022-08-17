@@ -18,7 +18,6 @@ from biogeme import assisted
 from biogeme.expressions import (
     Beta,
     log,
-    DefineVariable,
     Elem,
     Numeric,
 )
@@ -53,11 +52,11 @@ database.remove(exclude)
 
 # Definition of new variables
 
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
-TRAIN_COST = DefineVariable('TRAIN_COST', TRAIN_CO * (GA == 0) / 100, database)
-SM_COST = DefineVariable('SM_COST', SM_CO * (GA == 0) / 100, database)
-CAR_COST = DefineVariable('CAR_COST', CAR_CO / 100, database)
+CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
+TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
+TRAIN_COST = database.DefineVariable('TRAIN_COST', TRAIN_CO * (GA == 0) / 100)
+SM_COST = database.DefineVariable('SM_COST', SM_CO * (GA == 0) / 100)
+CAR_COST = database.DefineVariable('CAR_COST', CAR_CO / 100)
 
 
 ## Step 2: identify and name the relevant attributes of the alternatives

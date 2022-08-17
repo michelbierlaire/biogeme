@@ -12,15 +12,25 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta, DefineVariable, bioDraws, MonteCarlo
+from biogeme.expressions import Beta, Variable, bioDraws, MonteCarlo
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
+PURPOSE = Variable('PURPOSE')
+CHOICE = Variable('CHOICE')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+TRAIN_TT = Variable('TRAIN_TT')
+SM_TT = Variable('SM_TT')
+CAR_TT = Variable('CAR_TT')
+CAR_CO = Variable('CAR_CO')
+SM_CO = Variable('SM_CO')
+SM_AV = Variable('SM_AV')
 
 # Here we use the "biogeme" way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -45,16 +55,16 @@ SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
 # Definition of new variables: adding columns to the database
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
-TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
+TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
+TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
+TRAIN_COST_SCALED = database.DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100
 )
-SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
-SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
-CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
-CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
+SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
+SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
+CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
+CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 
 # Definition of the utility functions
 V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -79,18 +89,18 @@ simulate = {
     'Choice': CHOICE,
 }
 
-pickleFile = '19individualLevelParameters.pickle'
-if os.path.isfile(pickleFile):
-    with open(pickleFile, 'rb') as f:
+pickle_file = '19individualLevelParameters.pickle'
+if os.path.isfile(pickle_file):
+    with open(pickle_file, 'rb') as f:
         sim = pickle.load(f)
 else:
     biosim = bio.BIOGEME(database, simulate, numberOfDraws=100000)
     sim = biosim.simulate()
     sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
-    with open(pickleFile, 'wb') as f:
+    with open(pickle_file, 'wb') as f:
         pickle.dump(sim, f)
 
-htmlFile = '19individualLevelParameters.html'
-with open(htmlFile, 'w') as h:
+html_file = '19individualLevelParameters.html'
+with open(html_file, 'w') as h:
     print(sim.to_html(), file=h)
-print(f'Simulated values available in {htmlFile}')
+print(f'Simulated values available in {html_file}')

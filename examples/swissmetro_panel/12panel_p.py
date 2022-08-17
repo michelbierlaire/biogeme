@@ -23,7 +23,6 @@ from biogeme.expressions import (
     Beta,
     Variable,
     bioMultSum,
-    DefineVariable,
     bioDraws,
     MonteCarlo,
     log,
@@ -69,15 +68,15 @@ TRAIN_COST = [
 
 # Definition of new variables: adding columns to the database
 CAR_AV_SP = [
-    DefineVariable(
-        f'CAR_AV_SP_{q}', Variable(f'CAR_AV_{q}') * (SP != 0), database
+    database.DefineVariable(
+        f'CAR_AV_SP_{q}', Variable(f'CAR_AV_{q}') * (SP != 0)
     )
     for q in range(nbrQuestions)
 ]
 
 TRAIN_AV_SP = [
-    DefineVariable(
-        f'TRAIN_AV_SP_{q}', Variable(f'TRAIN_AV_{q}') * (SP != 0), database
+    database.DefineVariable(
+        f'TRAIN_AV_SP_{q}', Variable(f'TRAIN_AV_{q}') * (SP != 0)
     )
     for q in range(nbrQuestions)
 ]
@@ -85,39 +84,39 @@ TRAIN_AV_SP = [
 SM_AV = [Variable(f'SM_AV_{q}') for q in range(nbrQuestions)]
 
 TRAIN_TT_SCALED = [
-    DefineVariable(
-        f'TRAIN_TT_SCALED_{q}', Variable(f'TRAIN_TT_{q}') / 100.0, database
+    database.DefineVariable(
+        f'TRAIN_TT_SCALED_{q}', Variable(f'TRAIN_TT_{q}') / 100.0
     )
     for q in range(nbrQuestions)
 ]
 
 TRAIN_COST_SCALED = [
-    DefineVariable(f'TRAIN_COST_SCALED_{q}', TRAIN_COST[q] / 100, database)
+    database.DefineVariable(f'TRAIN_COST_SCALED_{q}', TRAIN_COST[q] / 100)
     for q in range(nbrQuestions)
 ]
 
 SM_TT_SCALED = [
-    DefineVariable(
-        f'SM_TT_SCALED_{q}', Variable(f'SM_TT_{q}') / 100.0, database
+    database.DefineVariable(
+        f'SM_TT_SCALED_{q}', Variable(f'SM_TT_{q}') / 100.0
     )
     for q in range(nbrQuestions)
 ]
 
 SM_COST_SCALED = [
-    DefineVariable(f'SM_COST_SCALED_{q}', SM_COST[q] / 100, database)
+    database.DefineVariable(f'SM_COST_SCALED_{q}', SM_COST[q] / 100)
     for q in range(nbrQuestions)
 ]
 
 CAR_TT_SCALED = [
-    DefineVariable(
-        f'CAR_TT_SCALED_{q}', Variable(f'CAR_TT_{q}') / 100, database
+    database.DefineVariable(
+        f'CAR_TT_SCALED_{q}', Variable(f'CAR_TT_{q}') / 100
     )
     for q in range(nbrQuestions)
 ]
 
 CAR_CO_SCALED = [
-    DefineVariable(
-        f'CAR_CO_SCALED_{q}', Variable(f'CAR_CO_{q}') / 100, database
+    database.DefineVariable(
+        f'CAR_CO_SCALED_{q}', Variable(f'CAR_CO_{q}') / 100
     )
     for q in range(nbrQuestions)
 ]

@@ -16,7 +16,6 @@ from biogeme import models, vns, assisted
 from biogeme.expressions import (
     Beta,
     log,
-    DefineVariable,
     Elem,
     Numeric,
     Variable,
@@ -49,70 +48,55 @@ chosenAlternative = (
     (BestAlternative_1 * 1) + (BestAlternative_2 * 2) + (BestAlternative_3 * 3)
 )
 
-DepartureTimeSensitive = DefineVariable(
-    'DepartureTimeSensitive', q11_DepartureOrArrivalIsImportant == 1, database
+DepartureTimeSensitive = database.DefineVariable(
+    'DepartureTimeSensitive', q11_DepartureOrArrivalIsImportant == 1
 )
-ArrivalTimeSensitive = DefineVariable(
-    'ArrivalTimeSensitive', q11_DepartureOrArrivalIsImportant == 2, database
+ArrivalTimeSensitive = database.DefineVariable(
+    'ArrivalTimeSensitive', q11_DepartureOrArrivalIsImportant == 2
 )
 
-DesiredDepartureTime = DefineVariable(
-    'DesiredDepartureTime', q12_IdealDepTime, database
+DesiredDepartureTime = database.DefineVariable(
+    'DesiredDepartureTime', q12_IdealDepTime
 )
-DesiredArrivalTime = DefineVariable(
-    'DesiredArrivalTime', q13_IdealArrTime, database
+DesiredArrivalTime = database.DefineVariable(
+    'DesiredArrivalTime', q13_IdealArrTime
 )
-ScheduledDelay_1 = DefineVariable(
+ScheduledDelay_1 = database.DefineVariable(
     'ScheduledDelay_1',
     (DepartureTimeSensitive * (DepartureTimeMins_1 - DesiredDepartureTime))
     + (ArrivalTimeSensitive * (ArrivalTimeMins_1 - DesiredArrivalTime)),
-    database,
 )
 
-ScheduledDelay_2 = DefineVariable(
+ScheduledDelay_2 = database.DefineVariable(
     'ScheduledDelay_2',
     (DepartureTimeSensitive * (DepartureTimeMins_2 - DesiredDepartureTime))
     + (ArrivalTimeSensitive * (ArrivalTimeMins_2 - DesiredArrivalTime)),
-    database,
 )
 
-ScheduledDelay_3 = DefineVariable(
+ScheduledDelay_3 = database.DefineVariable(
     'ScheduledDelay_3',
     (DepartureTimeSensitive * (DepartureTimeMins_3 - DesiredDepartureTime))
     + (ArrivalTimeSensitive * (ArrivalTimeMins_3 - DesiredArrivalTime)),
-    database,
 )
 
-Opt1_SchedDelayEarly = DefineVariable(
-    'Opt1_SchedDelayEarly',
-    (-(ScheduledDelay_1) * (ScheduledDelay_1 < 0)) / 60,
-    database,
+Opt1_SchedDelayEarly = database.DefineVariable(
+    'Opt1_SchedDelayEarly', (-(ScheduledDelay_1) * (ScheduledDelay_1 < 0)) / 60
 )
-Opt2_SchedDelayEarly = DefineVariable(
-    'Opt2_SchedDelayEarly',
-    (-(ScheduledDelay_2) * (ScheduledDelay_2 < 0)) / 60,
-    database,
+Opt2_SchedDelayEarly = database.DefineVariable(
+    'Opt2_SchedDelayEarly', (-(ScheduledDelay_2) * (ScheduledDelay_2 < 0)) / 60
 )
-Opt3_SchedDelayEarly = DefineVariable(
-    'Opt3_SchedDelayEarly',
-    (-(ScheduledDelay_3) * (ScheduledDelay_3 < 0)) / 60,
-    database,
+Opt3_SchedDelayEarly = database.DefineVariable(
+    'Opt3_SchedDelayEarly', (-(ScheduledDelay_3) * (ScheduledDelay_3 < 0)) / 60
 )
 
-Opt1_SchedDelayLate = DefineVariable(
-    'Opt1_SchedDelayLate',
-    (ScheduledDelay_1 * (ScheduledDelay_1 > 0)) / 60,
-    database,
+Opt1_SchedDelayLate = database.DefineVariable(
+    'Opt1_SchedDelayLate', (ScheduledDelay_1 * (ScheduledDelay_1 > 0)) / 60
 )
-Opt2_SchedDelayLate = DefineVariable(
-    'Opt2_SchedDelayLate',
-    (ScheduledDelay_2 * (ScheduledDelay_2 > 0)) / 60,
-    database,
+Opt2_SchedDelayLate = database.DefineVariable(
+    'Opt2_SchedDelayLate', (ScheduledDelay_2 * (ScheduledDelay_2 > 0)) / 60
 )
-Opt3_SchedDelayLate = DefineVariable(
-    'Opt3_SchedDelayLate',
-    (ScheduledDelay_3 * (ScheduledDelay_3 > 0)) / 60,
-    database,
+Opt3_SchedDelayLate = database.DefineVariable(
+    'Opt3_SchedDelayLate', (ScheduledDelay_3 * (ScheduledDelay_3 > 0)) / 60
 )
 
 ## Step 2: identify and name the relevant attributes of the alternatives
@@ -177,7 +161,7 @@ def logincomeInteraction(x):
 
 def sqrtincomeInteraction(x):
     """Defines an interaction with between the sqrt and income"""
-    return 'inc. interaction', x ** 0.5 / Variable('Cont_Income')
+    return 'inc. interaction', x**0.5 / Variable('Cont_Income')
 
 
 def mylog(x):
@@ -187,12 +171,12 @@ def mylog(x):
 
 def sqrt(x):
     """Sqrt of the variable"""
-    return 'sqrt', x ** 0.5
+    return 'sqrt', x**0.5
 
 
 def square(x):
     """Square of the variable"""
-    return 'square', x ** 2
+    return 'square', x**2
 
 
 def piecewise(x, thresholds, name):

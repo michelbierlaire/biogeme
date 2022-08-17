@@ -21,7 +21,6 @@ import biogeme.optimization as opt
 from biogeme import models
 from biogeme.expressions import (
     Beta,
-    DefineVariable,
     Variable,
     RandomVariable,
     exp,
@@ -69,20 +68,20 @@ structBetas = structResults.getBetaValues()
 ### Variables
 
 # Definition of other variables
-male = DefineVariable('male', Gender == 1, database)
+male = database.DefineVariable('male', Gender == 1)
 
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
 
-highEducation = DefineVariable('highEducation', Education >= 6, database)
+highEducation = database.DefineVariable('highEducation', Education >= 6)
 
-childCenter = DefineVariable(
-    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0, database
+childCenter = database.DefineVariable(
+    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
 )
 
-childSuburb = DefineVariable(
-    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0, database
+childSuburb = database.DefineVariable(
+    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
 )
 
 

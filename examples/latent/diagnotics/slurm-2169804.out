@@ -1,0 +1,31 @@
+STARTING AT Wed Aug 17 15:15:31 CEST 2022
+07problem.py
+[15:15:32] < General >   *** Initial values of the parameters are obtained from the file __07problem.iter
+[15:15:32] < Warning >   Cannot read file __07problem.iter. Statement is ignored.
+[15:15:33] < General >   Log likelihood (N = 1906): -1.797693e+308 Gradient norm:        inf Hessian norm:         inf 
+Traceback (most recent call last):
+  File "07problem.py", line 268, in <module>
+    results = biogeme.estimate()
+  File "/home/bierlair/biogeme-3.2.9/biogeme/biogeme.py", line 907, in estimate
+    output = self.optimize(self.id_manager.free_betas_values)
+  File "/home/bierlair/biogeme-3.2.9/biogeme/biogeme.py", line 1138, in optimize
+    self.algoParameters,
+  File "/home/bierlair/biogeme-3.2.9/biogeme/optimization.py", line 497, in simpleBoundsNewtonAlgorithmForBiogeme
+    enlargingFactor=enlargingFactor,
+  File "/home/bierlair/biogeme-3.2.9/biogeme/algorithms.py", line 1901, in simpleBoundsNewtonAlgorithm
+    f, g, H = fct.f_g_h()
+  File "/home/bierlair/biogeme-3.2.9/biogeme/biogeme.py", line 1432, in f_g_h
+    self.x, self.scaled, hessian=True, bhhh=False, batch=batch
+  File "/home/bierlair/biogeme-3.2.9/biogeme/biogeme.py", line 644, in calculateLikelihoodAndDerivatives
+    raise excep.biogemeError(error_msg)
+biogeme.exceptions.biogemeError: The norm of the gradient is inf: g=[-1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308 -1.79769313e+308 -1.79769313e+308
+ -1.79769313e+308 -1.79769313e+308]
+srun: error: h013: task 0: Exited with exit code 1
+srun: launch/slurm: _step_signal: Terminating StepId=2169804.0
+FINISHED AT Wed Aug 17 15:15:33 CEST 2022

@@ -14,7 +14,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.loglikelihood as ll
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable, Elem, bioMultSum
+from biogeme.expressions import Beta, Elem, bioMultSum
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
@@ -28,9 +28,8 @@ globals().update(database.variables)
 database.remove(Choice == -1.0)
 
 # Piecewise linear definition of income
-ScaledIncome = DefineVariable(
-    'ScaledIncome', CalculatedIncome / 1000, database
-)
+ScaledIncome = database.DefineVariable(
+    'ScaledIncome', CalculatedIncome / 1000)
 
 thresholds = [None, 4, 6, 8, 10, None]
 formulaIncome = models.piecewiseFormula(
@@ -38,16 +37,15 @@ formulaIncome = models.piecewiseFormula(
 )
 
 # Definition of other variables
-age_65_more = DefineVariable('age_65_more', age >= 65, database)
-moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
-moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
-individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
-male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
-)
-haveGA = DefineVariable('haveGA', GenAbST == 1, database)
-highEducation = DefineVariable('highEducation', Education >= 6, database)
+age_65_more = database.DefineVariable('age_65_more', age >= 65)
+moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
+moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
+individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
+male = database.DefineVariable('male', Gender == 1)
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0)
+haveGA = database.DefineVariable('haveGA', GenAbST == 1)
+highEducation = database.DefineVariable('highEducation', Education >= 6)
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
@@ -101,13 +99,13 @@ MODEL_Mobil14 = INTER_Mobil14 + B_Mobil14_F1 * CARLOVERS
 MODEL_Mobil16 = INTER_Mobil16 + B_Mobil16_F1 * CARLOVERS
 MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
-SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, 0, None, 0)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, 0, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, 0, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, 0, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, 0, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, 0, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, 0, None, 0)
+SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, None, None, 0)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, None, None, 0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, None, None, 0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, None, None, 0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, None, None, 0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, None, None, 0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, None, None, 0)
 
 # We build a dict with each contribution to the loglikelihood if
 # (var > 0) and (var < 6). If not, 0 is returned.

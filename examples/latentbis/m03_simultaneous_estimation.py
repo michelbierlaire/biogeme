@@ -20,7 +20,6 @@ import biogeme.messaging as msg
 from biogeme import models
 from biogeme.expressions import (
     Beta,
-    DefineVariable,
     Variable,
     log,
     RandomVariable,
@@ -73,16 +72,16 @@ structBetas = structResults.getBetaValues()
 
 
 # Definition of other variables
-male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+male = database.DefineVariable('male', Gender == 1)
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
-highEducation = DefineVariable('highEducation', Education >= 6, database)
-childCenter = DefineVariable(
-    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0, database
+highEducation = database.DefineVariable('highEducation', Education >= 6)
+childCenter = database.DefineVariable(
+    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
 )
-childSuburb = DefineVariable(
-    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0, database
+childSuburb = database.DefineVariable(
+    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
 )
 
 ### Coefficients
