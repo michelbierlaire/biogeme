@@ -32,6 +32,7 @@ archive/tools/prepareData/biosampledata
 
 # tox
 .tox
+.eggs
 
 # All .lo files
 **/*.lo
