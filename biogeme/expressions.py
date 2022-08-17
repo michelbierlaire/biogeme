@@ -108,9 +108,8 @@ class Expression:
         an ID manager.
 
         :return: two sets of elementary expressions, those with and
-        without an ID manager.
+            without an ID manager.
         :rtype: tuple(set(str), set(str))
-
         """
         with_id = set()
         without_id = set()
@@ -2254,9 +2253,8 @@ class Elementary(Expression):
         an ID manager.
 
         :return: two lists of elementary expressions, those with and
-        without an ID manager.
+            without an ID manager.
         :rtype: tuple(list(str), list(str))
-
         """
         if self.id_manager is None:
             return [], [self.name]
