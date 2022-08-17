@@ -368,3 +368,4 @@ examples/assisted/debug.py
 *.fls
 biogeme/cbiogeme.cpython-310-darwin.so
 *.so
+examples/assisted/.ipynb_checkpoints/runknapsack-checkpoint.ipynb
