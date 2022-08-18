@@ -475,10 +475,10 @@ class term:
         if not self.var.active:
             return True, None
         estimatedValues = estimationResults.getBetaValues()
-        betaName = self.getBeta(altname)
         status_msg = None
-        for b in self.segmentation.getBetaNames(betaName):
-            val = estimatedValues.get(b)
+        for the_beta in self.coef_names:
+            print(f'Check validity of {the_beta=}')
+            val = estimatedValues.get(the_beta)
             if val is None:
                 p = list(estimatedValues.keys())
                 raise excep.biogemeError(
@@ -491,7 +491,7 @@ class term:
             if not self.validity(val):
                 if status_msg is None:
                     status_msg = 'Invalid parameter(s):'
-                status_msg += f' {b} in alternative {altname}: {val}'
+                status_msg += f' {the_beta} in alternative {altname}: {val}'
 
         return status_msg is None, status_msg
 
@@ -704,7 +704,7 @@ class segmentation:
         if self.alwaysActive:
             return True
         activeVariables = sum(
-            [v.active if v is not None else True for v in self.listOfVariables]
+            v.active if v is not None else True for v in self.listOfVariables
         )
         return activeVariables > 0
 
@@ -713,7 +713,7 @@ class segmentation:
 
         expr = self.getExpression(coef_name, (None, None))
         betas = expr.setOfBetas()
-        return [b.name for b in betas]
+        return [betas]
         combinations = None
         for v in self.dictOfSocioEco.values():
             if v.active:
@@ -837,7 +837,7 @@ class specificationProblem(vns.problemClass):
             - the name of the nonlinear transform
             - the expression of the transform.
 
-            Examples of such a function::
+             Examples of such a function::
 
                 def sqrt(x):
                     return 'sqrt', x**0.5
@@ -1543,22 +1543,22 @@ class specificationProblem(vns.problemClass):
 
         b = self.getBiogemeModel()
         logger.detailed(
-            f'Evaluate model with ' f'{len(b.freeBetaNames)} parameters.'
+            f'Evaluate model with ' f'{len(b.id_manager.free_betas.names)} parameters.'
         )
-        if len(b.freeBetaNames) == 0:
+        if len(b.id_manager.free_betas.names) == 0:
             estimationResults = None
             self.archive[aSolution] = estimationResults
             aSolution.valid = False
             aSolution.causeInvalidity = 'Model with 0 parameters'
             return estimationResults
 
-        if len(b.freeBetaNames) > self.maximumNumberOfParameters:
+        if len(b.id_manager.free_betas.names) > self.maximumNumberOfParameters:
             estimationResults = None
             self.archive[aSolution] = estimationResults
             aSolution.valid = False
             aSolution.causeInvalidity = (
                 f'More than {self.maximumNumberOfParameters}'
-                f' parameters: {len(b.freeBetaNames)}'
+                f' parameters: {len(b.id_manager.free_betas.names)}'
             )
             return estimationResults
 

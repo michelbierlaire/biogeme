@@ -1586,7 +1586,7 @@ class ComparisonOperator(BinaryOperator):
         BinaryOperator.__init__(self, left, right)
 
     def audit(self, database=None):
-        """Performs varuious checks on the expression."""
+        """Performs various checks on the expression."""
         listOfErrors = []
         listOfWarnings = []
         if isinstance(self.left, ComparisonOperator) or isinstance(
