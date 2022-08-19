@@ -752,7 +752,7 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
 
     alpha = alpha0
     alphal = 0
-    alphar = np.finfo(np.float128).max
+    alphar = np.finfo(float).max
     finished = False
     while not finished:
         xnew = x + alpha * d
@@ -767,7 +767,7 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
             finished = False
         elif np.inner(gnew, d) < beta2 * deriv:
             alphal = alpha
-            if alphar == np.finfo(np.float128).max:
+            if alphar == np.finfo(float).max:
                 alpha = lbd * alpha
             else:
                 alpha = (alphal + alphar) / 2.0
