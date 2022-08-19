@@ -32,7 +32,7 @@ ScaledIncome = database.DefineVariable(
 
 thresholds = [None, 4, 6, 8, 10, None]
 formulaIncome = models.piecewiseFormula(
-    ScaledIncome, thresholds, [0.0, 0.0, 0.0, 0.0, 0.0]
+    ScaledIncome, thresholds
 )
 
 # Definition of other variables

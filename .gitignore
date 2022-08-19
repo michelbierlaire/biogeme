@@ -73,6 +73,7 @@ examples/notebooks/.ipynb_checkpoints/*
 examples/workingNotToDistribute
 examples/sampling
 examples/latent/diagnostics
+examples/latent/*.tex
 src/cbiogeme.cpp
 src/cythonbiogeme.cpp
 biogeme.egg-info
