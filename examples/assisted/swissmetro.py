@@ -25,6 +25,7 @@ from biogeme.expressions import (
 from biogeme.assisted import (
     DiscreteSegmentationTuple,
     TermTuple,
+    SegmentedParameterTuple,
 )
 
 
@@ -381,10 +382,18 @@ segmentations_headway = {
 
 
 segmentations = {
-    'Seg. cte': segmentations_cte,
-    'Seg. cost': segmentations_cost,
-    'Seg. time': segmentations_time,
-    'Seg. headway': segmentations_headway,
+    'Seg. cte': SegmentedParameterTuple(
+        dict=segmentations_cte, combinatorial=False
+    ),
+    'Seg. cost': SegmentedParameterTuple(
+        dict=segmentations_cost, combinatorial=False
+    ),
+    'Seg. time': SegmentedParameterTuple(
+        dict=segmentations_time, combinatorial=False
+    ),
+    'Seg. headway': SegmentedParameterTuple(
+        dict=segmentations_headway, combinatorial=False
+    )
 }
 
 

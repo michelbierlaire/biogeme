@@ -1,8 +1,0 @@
-STARTING AT Wed Aug 17 15:15:31 CEST 2022
-03choiceOnly_mc.py
-[15:17:39] < General >   *** Initial values of the parameters are obtained from the file __03choiceOnly_mc.iter
-[15:17:39] < Warning >   Cannot read file __03choiceOnly_mc.iter. Statement is ignored.
-[15:20:15] < General >   Log likelihood (N = 1906):  -2093.955 Gradient norm:      6e+03 Hessian norm:       3e+05 
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 2169798 ON h014 CANCELLED AT 2022-08-17T15:22:24 ***
-slurmstepd: error: *** STEP 2169798.0 ON h014 CANCELLED AT 2022-08-17T15:22:24 ***

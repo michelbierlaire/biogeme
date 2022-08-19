@@ -192,22 +192,22 @@ all_discrete_segmentations = {
 # Define segmentations
 segmentations = {
     'Seg. cte': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
+        dict=all_discrete_segmentations, combinatorial=False
     ),
     'Seg. cost': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
+        dict=all_discrete_segmentations, combinatorial=False
     ),
     'Seg. wait': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
+        dict=all_discrete_segmentations, combinatorial=False
     ),
     'Seg. time': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
+        dict=all_discrete_segmentations, combinatorial=False
     ),
     'Seg. transfers': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
+        dict=all_discrete_segmentations, combinatorial=False
     ),
     'Seg. dist': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
+        dict=all_discrete_segmentations, combinatorial=False
     ),
 }
 

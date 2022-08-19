@@ -23,6 +23,7 @@ from biogeme.expressions import (
 from biogeme.assisted import (
     DiscreteSegmentationTuple,
     TermTuple,
+    SegmentedParameterTuple,
 )
 
 ## Step 1: data preparation. Identical to any Biogeme script.
@@ -295,11 +296,26 @@ all_segmentations = {
 
 # Define segmentations
 segmentations = {
-    'Seg. cte': all_segmentations,
-    'Seg. fare': all_segmentations,
-    'Seg. time': all_segmentations,
-    'Seg. delay': all_segmentations,
-    'Seg. legroom': all_segmentations,
+    'Seg. cte': SegmentedParameterTuple(
+        dict=all_segmentations,
+        combinatorial=False
+    ),
+    'Seg. fare': SegmentedParameterTuple(
+        dict=all_segmentations,
+        combinatorial=False
+    ),
+    'Seg. time': SegmentedParameterTuple(
+        dict=all_segmentations,
+        combinatorial=False
+    ),
+    'Seg. delay': SegmentedParameterTuple(
+        dict=all_segmentations,
+        combinatorial=False
+    ),
+    'Seg. legroom': SegmentedParameterTuple(
+        dict=all_segmentations,
+        combinatorial=False
+    ),
 }
 
 
