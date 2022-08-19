@@ -1,6 +1,0 @@
-STARTING AT Wed Aug 17 15:42:40 CEST 2022
-13panel_simul.py
-Run first the script 12panel.py in order to generate the file 12panel.pickle.
-srun: error: h161: task 0: Exited with exit code 1
-srun: launch/slurm: _step_signal: Terminating StepId=2169833.0
-FINISHED AT Wed Aug 17 15:42:42 CEST 2022
