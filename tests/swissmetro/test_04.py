@@ -44,16 +44,16 @@ CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 # is 0, the log of 1 computed instead.
 LOG_CAR_COST = database.DefineVariable(
     'LOG_CAR_COST',
-    (CAR_CO_SCALED != 0) * log(CAR_CO_SCALED + 1 * (CAR_CO_SCALED == 0))
+    (CAR_CO_SCALED != 0) * log(CAR_CO_SCALED + 1 * (CAR_CO_SCALED == 0)),
 )
 LOG_TRAIN_COST = database.DefineVariable(
     'LOG_TRAIN_COST',
     (TRAIN_COST_SCALED != 0)
-    * log(TRAIN_COST_SCALED + 1 * (TRAIN_COST_SCALED == 0))
+    * log(TRAIN_COST_SCALED + 1 * (TRAIN_COST_SCALED == 0)),
 )
 LOG_SM_COST = database.DefineVariable(
     'LOG_SM_COST',
-    (SM_COST_SCALED != 0) * log(SM_COST_SCALED + 1 * (SM_COST_SCALED == 0))
+    (SM_COST_SCALED != 0) * log(SM_COST_SCALED + 1 * (SM_COST_SCALED == 0)),
 )
 
 V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * LOG_TRAIN_COST

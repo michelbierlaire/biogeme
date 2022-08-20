@@ -33,9 +33,9 @@ class test_biogeme(unittest.TestCase):
         beta1 = Beta('beta1', -1.0, -3, 3, 0)
         beta2 = Beta('beta2', 2.0, -3, 10, 0)
         self.likelihood = (
-            -(beta1 ** 2) * Variable1
+            -(beta1**2) * Variable1
             - exp(beta2 * beta1) * Variable2
-            - beta2 ** 4
+            - beta2**4
         )
         simul = beta1 / Variable1 + beta2 / Variable2
         dictOfExpressions = {
@@ -140,7 +140,9 @@ class test_biogeme(unittest.TestCase):
 
     def test_changeInitValues(self):
         self.myBiogeme.changeInitValues({'beta2': -100, 'beta1': 3.14156})
-        self.assertListEqual(self.myBiogeme.id_manager.free_betas_values, [3.14156, -100])
+        self.assertListEqual(
+            self.myBiogeme.id_manager.free_betas_values, [3.14156, -100]
+        )
 
     def test_confidenceIntervals(self):
         results = self.myBiogeme.estimate(bootstrap=10)

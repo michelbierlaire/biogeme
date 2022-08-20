@@ -591,7 +591,9 @@ class test_expressions(unittest.TestCase):
         expr_ok = ex.PanelLikelihoodTrajectory(self.Variable1)
         check_ok = expr_ok.check_panel_trajectory()
         self.assertEqual(len(check_ok), 0)
-        expr_not_ok = self.Variable2 + ex.PanelLikelihoodTrajectory(self.Variable1)
+        expr_not_ok = self.Variable2 + ex.PanelLikelihoodTrajectory(
+            self.Variable1
+        )
         check_not_ok = expr_not_ok.check_panel_trajectory()
         self.assertSetEqual(check_not_ok, {'Variable2'})
 
@@ -614,7 +616,6 @@ class test_expressions(unittest.TestCase):
         expr_not_ok = d1 + ex.Integrate(1, d2)
         check_not_ok = expr_not_ok.check_rv()
         self.assertSetEqual(check_not_ok, {'d1'})
-        
 
     def test_countPanelTrajectoryExpressions(self):
         expr1 = self.beta1
@@ -675,7 +676,6 @@ class test_expressions(unittest.TestCase):
         self.assertFalse(formulas.random_variables.expressions)
         self.assertFalse(formulas.draws.expressions)
 
-    @unittest.skip('Takes too long for debugging')        
     def test_expr3(self):
         myDraws = ex.bioDraws('myDraws', 'UNIFORM')
         expr3 = ex.MonteCarlo(myDraws * myDraws)
@@ -856,7 +856,6 @@ class test_expressions(unittest.TestCase):
         ss = self.myData.getSampleSize()
         self.assertEqual(ss, 2)
 
-    @unittest.skip('Takes too long for debugging')        
     def test_expr14(self):
         c1 = ex.bioDraws('draws1', 'NORMAL_HALTON2')
         c2 = ex.bioDraws('draws2', 'NORMAL_HALTON2')

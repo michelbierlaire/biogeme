@@ -61,7 +61,6 @@ df3 = pd.DataFrame(
 )
 
 
-
 def getData(myid):
     data_frames = {
         1: deepcopy(df1),
