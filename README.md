@@ -7,9 +7,9 @@ Biogeme requires Python 3.6, 3.7, 3.8 or 3.9 and can be installed [from PyPI](ht
 
 `pip install biogeme`
 
-Installing Biogeme from source can be done after cloning the repository with:
+Installing Biogeme from source can be done after cloning the repository with the following command executed in the directody where the file `setup.py`is located:
 
-`python setup.py install`
+`pip install -ve .`
 
 ## Documentation
 Further documentation is available on https://biogeme.epfl.ch/
