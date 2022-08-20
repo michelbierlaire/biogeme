@@ -388,7 +388,7 @@ We assume that the reader is already familiar with discrete choice
 models, and has successfully installed \PDBIOGEME.\@  \PDBIOGEME\ is
 a Python package written in Python and C++, that relies on the
 Pandas library for the management of the data.  This document has
-been written using \PDBIOGEME\ 3.9.
+been written using \PDBIOGEME\ 3.2.9.
 
 \clearpage
 
@@ -410,7 +410,7 @@ specification of a discrete choice model.
   are used to segment the population into mutually exclusive segments.
 \item[Attribute] An attribute is a variable that does vary across
   alternatives.
-\item[Group of attributes] A group captures the same atrribute in
+\item[Group of attributes] A group captures the same attribute in
   different utility functions. All attributes in the same group play
   similar roles in the specification of the model. A group of
   attributes is said to be \emph{active} if it is involved in the
@@ -555,15 +555,15 @@ Then, associate each group of attributes with possible
   of the segmentations, and the values are the tuples described above.
   \begin{lstlisting}
 segmentations_cost = {
-    'GA': SegmentationTuple(
+    'GA': DiscreteSegmentationTuple(
         variable=GA,
         mapping={1: 'GA', 0: 'noGA'}
     ),
-    'gender': SegmentationTuple(
+    'gender': DiscreteSegmentationTuple(
         variable=MALE,
         mapping={0: 'female', 1: 'male'}
     ),
-    'income': SegmentationTuple(
+    'income': DiscreteSegmentationTuple(
         variable=INCOME,
         mapping={
             1: 'inc-under50',
@@ -572,11 +572,11 @@ segmentations_cost = {
             4: 'inc-unknown',
         },
     ),
-    'class': SegmentationTuple(
+    'class': DiscreteSegmentationTuple(
         variable=FIRST,
         mapping={0: 'secondClass', 1: 'firstClass'}
     ),
-    'who': SegmentationTuple(
+    'who': DiscreteSegmentationTuple(
         variable=WHO,
         mapping={1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'},
     ),
@@ -584,14 +584,26 @@ segmentations_cost = {
   \end{lstlisting}
 
   Each of these potential segmentations is then associated with a name,
-  using a dictionary.
+  using a dictionary. It also clarifies if the segmentation should be
+  done for each characteristic separately, or if all combinations of
+  all possible values of the characteristics should be used for the
+  segmentation. In the latter case, \lstinline@combinatorial@ must be
+  set to True.
   \begin{lstlisting}
-    segmentations = {
-      'Seg. cte': segmentations_cte,
-      'Seg. cost': segmentations_cost,
-      'Seg. time': segmentations_time,
-      'Seg. headway': segmentations_headway,
-    }
+segmentations = {
+    'Seg. cte': SegmentedParameterTuple(
+        dict=segmentations_cte, combinatorial=False
+    ),
+    'Seg. cost': SegmentedParameterTuple(
+        dict=segmentations_cost, combinatorial=False
+    ),
+    'Seg. time': SegmentedParameterTuple(
+        dict=segmentations_time, combinatorial=False
+    ),
+    'Seg. headway': SegmentedParameterTuple(
+        dict=segmentations_headway, combinatorial=False
+    ),
+}
   \end{lstlisting}
 Note that this feature allows the algorithm to investigate interactions between
 attributes and discrete characteristics. In order to model
