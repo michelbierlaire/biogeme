@@ -128,7 +128,7 @@ def sqrt(x):
     :rtype: tuple(str, biogeme.expressions.Expression)
 
     """
-    return 'sqrt', x ** 0.5
+    return 'sqrt', x**0.5
 
 
 def square(x):
@@ -141,7 +141,7 @@ def square(x):
     :rtype: tuple(str, biogeme.expressions.Expression)
 
     """
-    return 'square', x ** 2
+    return 'square', x**2
 
 
 def piecewise(x, thresholds, name):
@@ -324,13 +324,9 @@ segmentations_cte = {
 }
 
 segmentations_cost = {
-    'GA': DiscreteSegmentationTuple(
-        variable=GA,
-        mapping={1: 'GA', 0: 'noGA'}
-    ),
+    'GA': DiscreteSegmentationTuple(variable=GA, mapping={1: 'GA', 0: 'noGA'}),
     'gender': DiscreteSegmentationTuple(
-        variable=MALE,
-        mapping={0: 'female', 1: 'male'}
+        variable=MALE, mapping={0: 'female', 1: 'male'}
     ),
     'income': DiscreteSegmentationTuple(
         variable=INCOME,
@@ -393,7 +389,7 @@ segmentations = {
     ),
     'Seg. headway': SegmentedParameterTuple(
         dict=segmentations_headway, combinatorial=False
-    )
+    ),
 }
 
 

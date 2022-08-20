@@ -12,7 +12,7 @@ No measurement equation for the indicators.
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-from  biogeme import models
+from biogeme import models
 import biogeme.optimization as opt
 import biogeme.messaging as msg
 from biogeme.expressions import (
@@ -38,8 +38,7 @@ database.remove(Choice == -1.0)
 ### Variables
 
 # Piecewise linear definition of income
-ScaledIncome = database.DefineVariable(
-    'ScaledIncome', CalculatedIncome / 1000)
+ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 
 thresholds = [None, 4, 6, 8, 10, None]
 formulaIncome = models.piecewiseFormula(
@@ -53,7 +52,8 @@ moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
 individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
 male = database.DefineVariable('male', Gender == 1)
 haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0)
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
+)
 haveGA = database.DefineVariable('haveGA', GenAbST == 1)
 highEducation = database.DefineVariable('highEducation', Education >= 6)
 
@@ -103,11 +103,14 @@ BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', 0.0, None, None, 0)
 TimePT_scaled = database.DefineVariable('TimePT_scaled', TimePT / 200)
 TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
 MarginalCostPT_scaled = database.DefineVariable(
-    'MarginalCostPT_scaled', MarginalCostPT / 10)
+    'MarginalCostPT_scaled', MarginalCostPT / 10
+)
 CostCarCHF_scaled = database.DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10)
+    'CostCarCHF_scaled', CostCarCHF / 10
+)
 distance_km_scaled = database.DefineVariable(
-    'distance_km_scaled', distance_km / 5)
+    'distance_km_scaled', distance_km / 5
+)
 PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
 PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 

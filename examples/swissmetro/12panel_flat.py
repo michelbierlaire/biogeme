@@ -57,9 +57,7 @@ TRAIN_COST = TRAIN_CO * (GA == 0)
 
 # Definition of new variables: adding columns to the orig_database
 CAR_AV_SP = orig_database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = orig_database.DefineVariable(
-    'TRAIN_AV_SP', TRAIN_AV * (SP != 0)
-)
+TRAIN_AV_SP = orig_database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
 _ = orig_database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
 _ = orig_database.DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100)
 _ = orig_database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)

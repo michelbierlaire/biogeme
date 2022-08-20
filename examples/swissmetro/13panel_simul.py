@@ -166,7 +166,9 @@ simulate = {
     'Denominator': denominator,
 }
 
-biosim = bio.BIOGEME(database, simulate, numberOfDraws=100000, suggestScales=False)
+biosim = bio.BIOGEME(
+    database, simulate, numberOfDraws=100000, suggestScales=False
+)
 sim = biosim.simulate()
 
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']

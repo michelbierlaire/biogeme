@@ -14,16 +14,18 @@ import biogeme.exceptions as excep
 import biogeme.messaging as msg
 
 logger = msg.bioMessage()
-#logger.setDetailed()
+# logger.setDetailed()
 logger.setDebug()
 
 # pylint: disable=invalid-name
+
 
 class oneSack(vns.solutionClass):
     """Implements the virtual class. A solution here is a sack
     configuration.
 
     """
+
     def __init__(self, solution):
         super().__init__()
         self.x = solution
@@ -49,6 +51,7 @@ class oneSack(vns.solutionClass):
     def __str__(self):
         return str(self.x)
 
+
 def addItems(aSolution, size=1):
     """Add ``size`` items in the sack
 
@@ -67,6 +70,7 @@ def addItems(aSolution, size=1):
     xplus = aSolution.x.copy()
     xplus[absent[:n]] = 1
     return oneSack(xplus), n
+
 
 def removeItems(aSolution, size=1):
     """Remove ``size`` items from the sack
@@ -87,6 +91,7 @@ def removeItems(aSolution, size=1):
     xplus[present[:n]] = 0
     return oneSack(xplus), n
 
+
 def changeDecisions(aSolution, size=1):
     """Change the status of ``size`` items in the sack.
 
@@ -106,7 +111,6 @@ def changeDecisions(aSolution, size=1):
     for i in range(min(n, size)):
         xplus[order[i]] = 1 - xplus[order[i]]
     return oneSack(xplus), n
-
 
 
 class knapsack(vns.problemClass):
@@ -155,7 +159,7 @@ class knapsack(vns.problemClass):
         return aSolution.objectives[0] <= self.capacity, 'Infeasible sack'
 
     def evaluate(self, aSolution):
-        """ Calculates the total weight and the total utility of a sack.
+        """Calculates the total weight and the total utility of a sack.
 
         :param aSolution: sack to evaluate
         :type aSolution: class oneSack
@@ -163,7 +167,7 @@ class knapsack(vns.problemClass):
         """
         aSolution.objectives = [
             np.inner(aSolution.x, self.weight),
-            -np.inner(aSolution.x, self.utility)
+            -np.inner(aSolution.x, self.utility),
         ]
 
     def describe(self, aSolution):

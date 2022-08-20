@@ -18,8 +18,10 @@ from biogeme import models
 import biogeme.results as res
 from biogeme.exceptions import biogemeError
 from biogeme.expressions import Beta, Variable, bioDraws, MonteCarlo
-try: 
+
+try:
     import matplotlib.pyplot as plt
+
     plot = True
 except ModuleNotFoundError:
     plot = False
@@ -179,6 +181,6 @@ def normalpdf(v, mu=0.0, s=1.0):
 
 betas = results.getBetaValues(['B_TIME', 'B_TIME_S'])
 x = np.arange(simresults['beta'].min(), simresults['beta'].max(), 0.01)
-if plot: 
+if plot:
     plt.plot(x, normalpdf(x, betas['B_TIME'], betas['B_TIME_S']), '-')
     plt.show()

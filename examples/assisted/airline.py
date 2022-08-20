@@ -297,24 +297,19 @@ all_segmentations = {
 # Define segmentations
 segmentations = {
     'Seg. cte': SegmentedParameterTuple(
-        dict=all_segmentations,
-        combinatorial=False
+        dict=all_segmentations, combinatorial=False
     ),
     'Seg. fare': SegmentedParameterTuple(
-        dict=all_segmentations,
-        combinatorial=False
+        dict=all_segmentations, combinatorial=False
     ),
     'Seg. time': SegmentedParameterTuple(
-        dict=all_segmentations,
-        combinatorial=False
+        dict=all_segmentations, combinatorial=False
     ),
     'Seg. delay': SegmentedParameterTuple(
-        dict=all_segmentations,
-        combinatorial=False
+        dict=all_segmentations, combinatorial=False
     ),
     'Seg. legroom': SegmentedParameterTuple(
-        dict=all_segmentations,
-        combinatorial=False
+        dict=all_segmentations, combinatorial=False
     ),
 }
 

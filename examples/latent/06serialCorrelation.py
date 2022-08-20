@@ -56,8 +56,7 @@ betas = results.getBetaValues()
 ### Variables
 
 # Piecewise linear definition of income
-ScaledIncome = database.DefineVariable(
-    'ScaledIncome', CalculatedIncome / 1000)
+ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 thresholds = [None, 4, 6, 8, 10, None]
 formulaIncome = models.piecewiseFormula(
     ScaledIncome,
@@ -78,7 +77,8 @@ moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
 individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
 male = database.DefineVariable('male', Gender == 1)
 haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0)
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
+)
 haveGA = database.DefineVariable('haveGA', GenAbST == 1)
 highEducation = database.DefineVariable('highEducation', Education >= 6)
 

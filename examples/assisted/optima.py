@@ -63,11 +63,12 @@ database.remove(exclude)
 otherSubscription = database.DefineVariable(
     'otherSubscription',
     ((HalfFareST == 1) + (LineRelST == 1) + (AreaRelST == 1) + (OtherST) == 1)
-    > 0)
+    > 0,
+)
 
 subscription = database.DefineVariable(
-    'subscription',
-    (GenAbST == 1) * 1 + (GenAbST != 1) * otherSubscription * 2)
+    'subscription', (GenAbST == 1) * 1 + (GenAbST != 1) * otherSubscription * 2
+)
 
 TimePT_scaled = TimePT / 200
 TimeCar_scaled = TimeCar / 200
@@ -114,12 +115,12 @@ def mylog(x):
 
 def sqrt(x):
     """Sqrt of the attribute"""
-    return 'sqrt', x ** 0.5
+    return 'sqrt', x**0.5
 
 
 def square(x):
     """Square of the attribute"""
-    return 'square', x ** 2
+    return 'square', x**2
 
 
 def boxcox(x, name):

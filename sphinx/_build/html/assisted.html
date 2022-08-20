@@ -631,7 +631,8 @@ one argument (the variable), and return a tuple with</p>
 <li><p>the name of the nonlinear transform</p></li>
 <li><p>the expression of the transform.</p></li>
 </ul>
-<p>Examples of such a function:</p>
+<blockquote>
+<div><p>Examples of such a function:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">**</span><span class="mf">0.5</span>
 
@@ -640,6 +641,7 @@ one argument (the variable), and return a tuple with</p>
     <span class="k">return</span> <span class="s1">&#39;Box-Cox&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">boxcox</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ell</span><span class="p">)</span>
 </pre></div>
 </div>
+</div></blockquote>
 </p></li>
 <li><p><strong>theSegmentations</strong> (<em>dict</em><em>(</em><em>str</em><em>, </em><em>tuple</em><em>(</em><em>biogeme.expression.Expression</em><em>,
 </em><em>dict</em><em>(</em><em>int</em><em>, </em><em>str</em><em>)</em><em>)</em><em>)</em>) – <p>a dictionary, with keys being names

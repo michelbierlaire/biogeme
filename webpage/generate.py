@@ -113,15 +113,15 @@ imageFiles = [
 ]
 
 for f in imageFiles:
-    copyFile(f, '/Users/michelbierlaire/GoogleDrive/webpages/images')
+    copyFile(f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/images')
 
 cssFiles = ['biomenu.css', 'biopanel.css', 'biobacktotop.css']
 for f in cssFiles:
-    copyFile(f, '/Users/michelbierlaire/GoogleDrive/webpages/css')
+    copyFile(f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/css')
 
 jsFiles = ['backtotop.js', 'os.js', 'menu.js']
 for f in jsFiles:
-    copyFile(f, '/Users/michelbierlaire/GoogleDrive/webpages/js')
+    copyFile(f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/js')
 
 
 def cleanDoc(doc):
@@ -334,6 +334,7 @@ def generateExamples():
         ('Calculating indicators', 'indicators'),
         ('Monte-Carlo integration', 'montecarlo'),
         ('Choice models with latent variables', 'latent'),
+        ('Assisted specification', 'assisted'),
     ]
 
     result = tableOfContents(allExamples)
