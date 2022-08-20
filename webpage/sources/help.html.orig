@@ -67,10 +67,27 @@
 	  <p>In order to comply better with good programming practice in
 	    Python, the syntax to import the variable names from the data
 	    file has been modified since version 3.2.5. The file
-	    <code>headers.py</code> is not generated anymore. The statement
+	    <code>headers.py</code> is not generated anymore.
+	    The best practice is to declare every variable explicity:
+	  </p>
+	  <p>
+	    <pre>
+PURPOSE = Variable('PURPOSE')
+CHOICE = Variable('CHOICE')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+TRAIN_TT = Variable('TRAIN_TT')
+	    </pre>
+	  </p>
+	  <p>
+	    If, for any reason, this explicit declaration is not
+	    desired, it is possible to replace the statement
 	  </p>
 	  <p><code>from headers import *</code></p>
-	  <p>must be replaced by</p>
+	  <p>by</p>
 	  <p><code>
 	      globals().update(database.variables)
 	    </code>
@@ -82,7 +99,7 @@
 	      df = pd.read_csv("swissmetro.dat",'\t')<br>
 	      database = db.Database("swissmetro",df)
 	  </code></p>
-	  <p>Moreover, in order to avoid any ambiguity, the operators used by
+	  <p>Also, in order to avoid any ambiguity, the operators used by
 	    Biogeme must be explicitly imported. For instance:</p>
 	  <p>
 	    <code>
@@ -96,7 +113,6 @@
 	      from biogeme.expressions import *
 	  </code></p>
 	  <p>  although this is not a good Python programming practice. </p>
-	  
 	</div>
       </div>
 
