@@ -287,7 +287,7 @@ class paretoClass:
         """
 
         if archiveInputFile is None:
-            self.pareto = dict()
+            self.pareto = {}
             """dict containing the pareto set. The keys are the solutions
             (class :class:`biogeme.vns.solutionClass`), and the values are
             the size of the neighborhood that must be applied the next
@@ -315,7 +315,7 @@ class paretoClass:
                     f'Unable to read file {archiveInputFile}. '
                     f'Pareto set empty.'
                 )
-                self.pareto = dict()
+                self.pareto = {}
                 self.removed = set()
                 self.considered = set()
 
@@ -499,7 +499,7 @@ def vns(
 
     if thePareto.length() == 0:
         raise excep.biogemeError(
-            'Cannot start the algorithm ' 'with an empty Pareto set.'
+            'Cannot start the algorithm with an empty Pareto set.'
         )
 
     logger.general(f'Initial pareto: {thePareto.length()}')

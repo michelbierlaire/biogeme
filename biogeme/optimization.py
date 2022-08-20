@@ -469,11 +469,11 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
 
     if proportionTrueHessian == 1.0:
         logger.detailed(
-            '** Optimization: Newton with trust region for simple ' 'bounds'
+            '** Optimization: Newton with trust region for simple bounds'
         )
     elif proportionTrueHessian == 0.0:
         logger.detailed(
-            '** Optimization: BFGS with trust region for simple ' 'bounds'
+            '** Optimization: BFGS with trust region for simple bounds'
         )
     else:
         logger.detailed(

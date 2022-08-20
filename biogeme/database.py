@@ -17,9 +17,9 @@ for specific services to Biogeme
 # pylint: disable=too-many-instance-attributes, too-many-lines,
 # pylint: disable=too-many-public-methods
 
+from collections import namedtuple
 import numpy as np
 import pandas as pd
-from collections import namedtuple
 
 import biogeme.exceptions as excep
 import biogeme.filenames as bf
@@ -101,7 +101,7 @@ class Database:
         # generators with a series of native generators.
         self._initNativeRandomNumberGenerators()
 
-        self.userRandomNumberGenerators = dict()
+        self.userRandomNumberGenerators = {}
         """Dictionary containing user defined random number
         generators. Defined by the function
         Database.setRandomNumberGenerators that checks that reserved
@@ -1068,7 +1068,7 @@ class Database:
             self.data = self.data.sort_values(by=self.panelColumn)
             # It is necessary to renumber the row to reflect the new ordering
             self.data.index = range(len(self.data.index))
-            local_map = dict()
+            local_map = {}
             individuals = self.data[self.panelColumn].unique()
             for i in individuals:
                 indices = self.data.loc[self.data[self.panelColumn] == i].index

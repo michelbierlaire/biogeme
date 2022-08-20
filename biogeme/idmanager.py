@@ -124,6 +124,16 @@ class IdManager:
         self.free_betas_values = [get_value(x) for x in self.free_betas.names]
 
     def expressions_names_indices(self, dict_of_elements):
+        """Assigns consecutive indices to expressions
+
+        :param dict_of_elements: dictionary of expressions. The keys
+            are the names.
+        :type dict_of_elements: dict(str: biogeme.expressions.Expression)
+
+        :return: a tuple with the original dictionary, the indices,
+            and the sorted names.
+        :rtype: ElementsTuple
+        """
         indices = {}
         names = {}
         names = sorted(dict_of_elements)
@@ -258,7 +268,8 @@ class IdManager:
     def setDataMap(self, sample):
         """Specify the map of the panel data in the expressions
 
-        :param sample: map of the panel data (see :func:`biogeme.database.Database.buildPanelMap`)
+        :param sample: map of the panel data (see
+            :func:`biogeme.database.Database.buildPanelMap`)
         :type sample: pandas.DataFrame
         """
         for f in self.expressions:
@@ -267,8 +278,10 @@ class IdManager:
     def setData(self, sample):
         """Specify the sample
 
-        :param sample: map of the panel data (see :func:`biogeme.database.Database.buildPanelMap`)
+        :param sample: map of the panel data (see
+            :func:`biogeme.database.Database.buildPanelMap`)
         :type sample: pandas.DataFrame
+
         """
         for f in self.expressions:
             f.cpp.setData(sample)

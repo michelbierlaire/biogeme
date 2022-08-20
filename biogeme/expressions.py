@@ -3388,6 +3388,7 @@ class _bioLogLogit(LogLogit):
         """
         super().__init__(util, av, choice)
 
+
 class _bioLogLogitFullChoiceSet(LogLogit):
     """This expression captures the logarithm of the logit formula, where
     all alternatives are supposed to be always available.

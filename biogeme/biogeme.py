@@ -835,9 +835,9 @@ class BIOGEME:
         """
         if self.modelName == 'biogemeModelDefaultName':
             logger.warning(
-                f'You have not defined a name for the model. '
-                f'The output files are named from the model name. '
-                f'The default is [biogemeModelDefaultName]'
+                'You have not defined a name for the model. '
+                'The output files are named from the model name. '
+                'The default is [biogemeModelDefaultName]'
             )
 
         if recycle:
@@ -1290,7 +1290,8 @@ class BIOGEME:
         return r
 
     def files_of_type(self, extension, all_files=False):
-        """Identify the list of files with a given extension in the  local directory
+        """Identify the list of files with a given extension in the
+        local directory
 
         :param extension: extension of the requested files (without
             the dot): 'pickle', or 'html'

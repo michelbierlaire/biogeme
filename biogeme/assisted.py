@@ -1543,7 +1543,8 @@ class specificationProblem(vns.problemClass):
 
         b = self.getBiogemeModel()
         logger.detailed(
-            f'Evaluate model with ' f'{len(b.id_manager.free_betas.names)} parameters.'
+            f'Evaluate model with '
+            f'{len(b.id_manager.free_betas.names)} parameters.'
         )
         if len(b.id_manager.free_betas.names) == 0:
             estimationResults = None

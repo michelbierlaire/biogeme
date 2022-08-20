@@ -110,7 +110,8 @@ def segment_parameter(
         with the variable characterizing the segmentation, and a
         dictionary mapping the values with the names of the segments.
     :type list_of_discrete_segmentations:
-        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))
+        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable,
+                                        dict(int:str)))
 
     :param combinatorial: if True, a parameter is associated with each
         combination of values for the discrete segmentations. If
@@ -161,7 +162,7 @@ def code_to_segment_parameter(
     parameter, list_of_discrete_segmentations, prefix=''
 ):
     """Generate the Python code to segment a parameter along several
-        dimensions of segmentation
+    dimensions of segmentation
 
     :param parameter: parameter to segment
     :type parameter: biogeme.expressions.Beta
@@ -170,7 +171,8 @@ def code_to_segment_parameter(
         with the variable characterizing the segmentation, and a
         dictionary mapping the values with the names of the segments.
     :type list_of_discrete_segmentations:
-        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))
+        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable,
+                                        dict(int:str)))
 
     :param prefix: name of the current expression, used as prefix
     :type prefix: str

@@ -382,7 +382,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
     def are_values_identical(col):
         """This function checks if all the values in a column
-            are identical
+        are identical
 
         :param col: the column
         :type col: pandas.Series
@@ -395,7 +395,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
     def get_varying_cols(g):
         """This functions returns the name of all columns
-            that have constant values within each group of data.
+        that have constant values within each group of data.
 
         :param g: group of data
         :type g: pandas.DataFrame
@@ -547,7 +547,7 @@ def covariance_cross_nested(i, j, nests):
 
     def integrand(z_i, z_j):
         """Function to be integrated to calculate the correlation between
-            alternative i and alternative j.
+        alternative i and alternative j.
 
         :param z_i: argument corresponding to alternative i
         :type z_i: float
@@ -608,9 +608,8 @@ def covariance_cross_nested(i, j, nests):
 
 def correlation_nested(nests):
     """Calculate the correlation matrix of the error terms of all
-        alternatives of a nested logit model. It is assumed that
-        the homogeneity parameter mu of the model has been normalized
-        to one.
+    alternatives of a nested logit model. It is assumed that the
+    homogeneity parameter mu of the model has been normalized to one.
 
     :param nests: A tuple containing as many items as nests.
         Each item is also a tuple containing two items:
@@ -716,7 +715,8 @@ def correlation_cross_nested(nests):
 
 
 def calculate_correlation(nests, results, alternative_names=None):
-    """Calculate the correlation matrix of a nested or cross-nested logit model.
+    """Calculate the correlation matrix of a nested or cross-nested
+    logit model.
 
     :param nests:  A tuple containing as many items as nests.
 

@@ -1525,7 +1525,8 @@ class bioResults:
         :param other_model: other model to perform the test.
         :type other_model: biogeme.results.bioResults
 
-        :param significance_level: level of significance of the test. Default: 0.05
+        :param significance_level: level of significance of the
+            test. Default: 0.05
         :type significance_level: float
 
         :return: a tuple containing:
