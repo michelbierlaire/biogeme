@@ -3,7 +3,7 @@
 :author: Michel Bierlaire, EPFL
 :date: Sun Oct 31 10:14:43 2021
 
-We use an estimated model to perform various simulations
+We use an estimated model to calcualte market shares.
 """
 import sys
 from biogeme import models

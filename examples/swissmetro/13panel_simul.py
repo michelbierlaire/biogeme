@@ -176,7 +176,7 @@ pickleFile = '13panel_individual_parameters.pickle'
 with open(pickleFile, 'wb') as f:
     pickle.dump(sim, f)
 
-htmlFile = '13panel_individual_parameters.html'
+htmlFile = '13panel_simul.html'
 with open(htmlFile, 'w') as h:
     print(sim.to_html(), file=h)
 print(f'Simulated values available in {htmlFile}')

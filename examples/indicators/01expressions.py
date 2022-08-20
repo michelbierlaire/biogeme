@@ -2,6 +2,9 @@
 
 :author: Michel Bierlaire, EPFL
 :date: Sun Oct 31 09:02:49 2021
+
+Example of manipulating mathematical expressions and calculation of
+derivatives.
 """
 import numpy as np
 import matplotlib.pyplot as plt

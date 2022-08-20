@@ -334,6 +334,7 @@ def generateExamples():
         ('Calculating indicators', 'indicators'),
         ('Monte-Carlo integration', 'montecarlo'),
         ('Choice models with latent variables', 'latent'),
+        ('Choice models with latent variables: another example', 'latentbis'),
         ('Assisted specification', 'assisted'),
     ]
 

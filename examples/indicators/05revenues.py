@@ -3,7 +3,7 @@
 :author: Michel Bierlaire, EPFL
 :date: Sun Oct 31 11:26:34 2021
 
-We use an estimated model to calcuate revenues
+We use an estimated model to calculate revenues
 """
 import sys
 import numpy as np
