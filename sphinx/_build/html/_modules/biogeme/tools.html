@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.tools &mdash; Biogeme 3.2.7 documentation</title>
+  <title>biogeme.tools &mdash; Biogeme 3.2.9 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
@@ -467,7 +468,7 @@
 
     <span class="k">def</span> <span class="nf">are_values_identical</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This function checks if all the values in a column</span>
-<span class="sd">            are identical</span>
+<span class="sd">        are identical</span>
 
 <span class="sd">        :param col: the column</span>
 <span class="sd">        :type col: pandas.Series</span>
@@ -480,7 +481,7 @@
 
     <span class="k">def</span> <span class="nf">get_varying_cols</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This functions returns the name of all columns</span>
-<span class="sd">            that have constant values within each group of data.</span>
+<span class="sd">        that have constant values within each group of data.</span>
 
 <span class="sd">        :param g: group of data</span>
 <span class="sd">        :type g: pandas.DataFrame</span>
@@ -632,7 +633,7 @@
 
     <span class="k">def</span> <span class="nf">integrand</span><span class="p">(</span><span class="n">z_i</span><span class="p">,</span> <span class="n">z_j</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to be integrated to calculate the correlation between</span>
-<span class="sd">            alternative i and alternative j.</span>
+<span class="sd">        alternative i and alternative j.</span>
 
 <span class="sd">        :param z_i: argument corresponding to alternative i</span>
 <span class="sd">        :type z_i: float</span>
@@ -693,9 +694,8 @@
 
 <div class="viewcode-block" id="correlation_nested"><a class="viewcode-back" href="../../tools.html#biogeme.tools.correlation_nested">[docs]</a><span class="k">def</span> <span class="nf">correlation_nested</span><span class="p">(</span><span class="n">nests</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the correlation matrix of the error terms of all</span>
-<span class="sd">        alternatives of a nested logit model. It is assumed that</span>
-<span class="sd">        the homogeneity parameter mu of the model has been normalized</span>
-<span class="sd">        to one.</span>
+<span class="sd">    alternatives of a nested logit model. It is assumed that the</span>
+<span class="sd">    homogeneity parameter mu of the model has been normalized to one.</span>
 
 <span class="sd">    :param nests: A tuple containing as many items as nests.</span>
 <span class="sd">        Each item is also a tuple containing two items:</span>
@@ -801,7 +801,8 @@
 
 
 <div class="viewcode-block" id="calculate_correlation"><a class="viewcode-back" href="../../tools.html#biogeme.tools.calculate_correlation">[docs]</a><span class="k">def</span> <span class="nf">calculate_correlation</span><span class="p">(</span><span class="n">nests</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">alternative_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the correlation matrix of a nested or cross-nested logit model.</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the correlation matrix of a nested or cross-nested</span>
+<span class="sd">    logit model.</span>
 
 <span class="sd">    :param nests:  A tuple containing as many items as nests.</span>
 
@@ -909,7 +910,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

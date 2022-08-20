@@ -19,6 +19,7 @@ Welcome to Biogeme's documentation!
   exceptions.rst
   expressions.rst
   filenames.rst
+  idmanager.rst
   loglikelihood.rst
   messaging.rst
   models.rst

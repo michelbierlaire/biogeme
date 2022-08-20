@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Biogeme 3.2.7 documentation</title>
+  <title>Index &mdash; Biogeme 3.2.9 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
@@ -123,6 +124,8 @@
       <li><a href="expressions.html#biogeme.expressions.Expression.__eq__">__eq__() (biogeme.expressions.Expression method)</a>
 
       <ul>
+        <li><a href="idmanager.html#biogeme.idmanager.IdManager.__eq__">(biogeme.idmanager.IdManager method)</a>
+</li>
         <li><a href="vns.html#biogeme.vns.solutionClass.__eq__">(biogeme.vns.solutionClass method)</a>
 </li>
       </ul></li>
@@ -231,6 +234,8 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.Variable.__init__">(biogeme.expressions.Variable method)</a>
 </li>
+        <li><a href="idmanager.html#biogeme.idmanager.IdManager.__init__">(biogeme.idmanager.IdManager method)</a>
+</li>
         <li><a href="messaging.html#biogeme.messaging.bioMessage.__init__">(biogeme.messaging.bioMessage method)</a>
 </li>
         <li><a href="results.html#biogeme.results.beta.__init__">(biogeme.results.beta method)</a>
@@ -314,10 +319,10 @@
         <li><a href="assisted.html#biogeme.assisted.segmentation.alwaysActive">(biogeme.assisted.segmentation attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="expressions.html#biogeme.expressions.And">And (class in biogeme.expressions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="assisted.html#biogeme.assisted.specificationProblem.applyOperator">applyOperator() (biogeme.assisted.specificationProblem method)</a>
 </li>
       <li><a href="assisted.html#biogeme.assisted.specificationProblem.archive">archive (biogeme.assisted.specificationProblem attribute)</a>
@@ -338,6 +343,8 @@
         <li><a href="expressions.html#biogeme.expressions.PanelLikelihoodTrajectory.audit">(biogeme.expressions.PanelLikelihoodTrajectory method)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.Variable.audit">(biogeme.expressions.Variable method)</a>
+</li>
+        <li><a href="idmanager.html#biogeme.idmanager.IdManager.audit">(biogeme.idmanager.IdManager method)</a>
 </li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.LogLogit.av">av (biogeme.expressions.LogLogit attribute)</a>
@@ -455,6 +462,13 @@
 
       <ul>
         <li><a href="filenames.html#module-biogeme.filenames">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.idmanager
+
+      <ul>
+        <li><a href="idmanager.html#module-biogeme.idmanager">module</a>
 </li>
       </ul></li>
       <li>
@@ -609,6 +623,8 @@
         <li><a href="expressions.html#biogeme.expressions.Beta.changeInitValues">(biogeme.expressions.Beta method)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.Expression.changeInitValues">(biogeme.expressions.Expression method)</a>
+</li>
+        <li><a href="idmanager.html#biogeme.idmanager.IdManager.changeInitValues">(biogeme.idmanager.IdManager method)</a>
 </li>
       </ul></li>
       <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeLinearity">changeLinearity() (biogeme.assisted.specificationProblem method)</a>
@@ -865,6 +881,8 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.Elementary.elementaryIndex">elementaryIndex (biogeme.expressions.Elementary attribute)</a>
 </li>
+      <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple">ElementsTuple (class in biogeme.idmanager)</a>
+</li>
       <li><a href="expressions.html#biogeme.expressions.Expression.embedExpression">embedExpression() (biogeme.expressions.Expression method)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Equal">Equal (class in biogeme.expressions)</a>
@@ -898,6 +916,10 @@
 </li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Expression">Expression (class in biogeme.expressions)</a>
+</li>
+      <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple.expressions">expressions (biogeme.idmanager.ElementsTuple attribute)</a>
+</li>
+      <li><a href="idmanager.html#biogeme.idmanager.IdManager.expressions_names_indices">expressions_names_indices() (biogeme.idmanager.IdManager method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1229,9 +1251,13 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.id_manager">id_manager (biogeme.expressions.Expression attribute)</a>
 </li>
+      <li><a href="idmanager.html#biogeme.idmanager.IdManager">IdManager (class in biogeme.idmanager)</a>
+</li>
       <li><a href="vns.html#biogeme.vns.operatorsManagement.increaseScore">increaseScore() (biogeme.vns.operatorsManagement method)</a>
 </li>
       <li><a href="assisted.html#biogeme.assisted.specificationProblem.increaseSegmentation">increaseSegmentation() (biogeme.assisted.specificationProblem method)</a>
+</li>
+      <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple.indices">indices (biogeme.idmanager.ElementsTuple attribute)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.individualMap">individualMap (biogeme.database.Database attribute)</a>
 </li>
@@ -1243,10 +1269,10 @@
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Integrate">Integrate (class in biogeme.expressions)</a>
 </li>
-      <li><a href="algorithms.html#biogeme.algorithms.bioBounds.intersect">intersect() (biogeme.algorithms.bioBounds method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="algorithms.html#biogeme.algorithms.bioBounds.intersect">intersect() (biogeme.algorithms.bioBounds method)</a>
+</li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.intersectionWithTrustRegion">intersectionWithTrustRegion() (biogeme.algorithms.bioBounds method)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.inverseBfgs">inverseBfgs() (in module biogeme.algorithms)</a>
@@ -1441,6 +1467,8 @@
 </li>
         <li><a href="filenames.html#module-biogeme.filenames">biogeme.filenames</a>
 </li>
+        <li><a href="idmanager.html#module-biogeme.idmanager">biogeme.idmanager</a>
+</li>
         <li><a href="loglikelihood.html#module-biogeme.loglikelihood">biogeme.loglikelihood</a>
 </li>
         <li><a href="messaging.html#module-biogeme.messaging">biogeme.messaging</a>
@@ -1500,8 +1528,12 @@
         <li><a href="results.html#biogeme.results.beta.name">(biogeme.results.beta attribute)</a>
 </li>
       </ul></li>
-      <li><a href="vns.html#biogeme.vns.operatorsManagement.names">names (biogeme.vns.operatorsManagement attribute)</a>
+      <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple.names">names (biogeme.idmanager.ElementsTuple attribute)</a>
+
+      <ul>
+        <li><a href="vns.html#biogeme.vns.operatorsManagement.names">(biogeme.vns.operatorsManagement attribute)</a>
 </li>
+      </ul></li>
       <li><a href="biogeme.html#biogeme.biogeme.negLikelihood">negLikelihood (class in biogeme.biogeme)</a>
 </li>
       <li><a href="assisted.html#biogeme.assisted.specificationProblem.neighborAccepted">neighborAccepted() (biogeme.assisted.specificationProblem method)</a>
@@ -1520,10 +1552,10 @@
 </li>
       <li><a href="models.html#biogeme.models.nestedMevMu">nestedMevMu() (in module biogeme.models)</a>
 </li>
-      <li><a href="algorithms.html#biogeme.algorithms.newtonLineSearch">newtonLineSearch() (in module biogeme.algorithms)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="algorithms.html#biogeme.algorithms.newtonLineSearch">newtonLineSearch() (in module biogeme.algorithms)</a>
+</li>
       <li><a href="optimization.html#biogeme.optimization.newtonLineSearchForBiogeme">newtonLineSearchForBiogeme() (in module biogeme.optimization)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.newtonTrustRegion">newtonTrustRegion() (in module biogeme.algorithms)</a>
@@ -1620,10 +1652,10 @@
 </li>
       <li><a href="models.html#biogeme.models.piecewiseFormula">piecewiseFormula() (in module biogeme.models)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#biogeme.models.piecewiseFunction">piecewiseFunction() (in module biogeme.models)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="models.html#biogeme.models.piecewiseVariables">piecewiseVariables() (in module biogeme.models)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Plus">Plus (class in biogeme.expressions)</a>
@@ -1631,7 +1663,11 @@
       <li><a href="expressions.html#biogeme.expressions.Power">Power (class in biogeme.expressions)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.prepare">prepare() (biogeme.expressions.Expression method)</a>
+
+      <ul>
+        <li><a href="idmanager.html#biogeme.idmanager.IdManager.prepare">(biogeme.idmanager.IdManager method)</a>
 </li>
+      </ul></li>
       <li><a href="results.html#biogeme.results.bioResults.printGeneralStatistics">printGeneralStatistics() (biogeme.results.bioResults method)</a>
 </li>
       <li><a href="vns.html#biogeme.vns.problemClass">problemClass (class in biogeme.vns)</a>
@@ -1749,6 +1785,10 @@
       <li><a href="vns.html#biogeme.vns.operatorsManagement.selectOperator">selectOperator() (biogeme.vns.operatorsManagement method)</a>
 </li>
       <li><a href="results.html#biogeme.results.beta.setBootstrapStdErr">setBootstrapStdErr() (biogeme.results.beta method)</a>
+</li>
+      <li><a href="idmanager.html#biogeme.idmanager.IdManager.setData">setData() (biogeme.idmanager.IdManager method)</a>
+</li>
+      <li><a href="idmanager.html#biogeme.idmanager.IdManager.setDataMap">setDataMap() (biogeme.idmanager.IdManager method)</a>
 </li>
       <li><a href="messaging.html#biogeme.messaging.bioMessage.setDebug">setDebug() (biogeme.messaging.bioMessage method)</a>
 </li>
@@ -2038,7 +2078,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

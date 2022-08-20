@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.segmentation &mdash; Biogeme 3.2.7 documentation</title>
+  <title>biogeme.segmentation &mdash; Biogeme 3.2.9 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -46,6 +46,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../models.html">Models</a></li>
@@ -195,7 +196,8 @@
 <span class="sd">        with the variable characterizing the segmentation, and a</span>
 <span class="sd">        dictionary mapping the values with the names of the segments.</span>
 <span class="sd">    :type list_of_discrete_segmentations:</span>
-<span class="sd">        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))</span>
+<span class="sd">        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable,</span>
+<span class="sd">                                        dict(int:str)))</span>
 
 <span class="sd">    :param combinatorial: if True, a parameter is associated with each</span>
 <span class="sd">        combination of values for the discrete segmentations. If</span>
@@ -246,7 +248,7 @@
     <span class="n">parameter</span><span class="p">,</span> <span class="n">list_of_discrete_segmentations</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate the Python code to segment a parameter along several</span>
-<span class="sd">        dimensions of segmentation</span>
+<span class="sd">    dimensions of segmentation</span>
 
 <span class="sd">    :param parameter: parameter to segment</span>
 <span class="sd">    :type parameter: biogeme.expressions.Beta</span>
@@ -255,7 +257,8 @@
 <span class="sd">        with the variable characterizing the segmentation, and a</span>
 <span class="sd">        dictionary mapping the values with the names of the segments.</span>
 <span class="sd">    :type list_of_discrete_segmentations:</span>
-<span class="sd">        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable, dict(int:str)))</span>
+<span class="sd">        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable,</span>
+<span class="sd">                                        dict(int:str)))</span>
 
 <span class="sd">    :param prefix: name of the current expression, used as prefix</span>
 <span class="sd">    :type prefix: str</span>
@@ -298,7 +301,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

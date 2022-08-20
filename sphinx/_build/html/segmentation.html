@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Segmentation &mdash; Biogeme 3.2.7 documentation</title>
+  <title>Segmentation &mdash; Biogeme 3.2.9 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
@@ -147,15 +148,13 @@ corresponding segment.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="biogeme.segmentation.code_to_segment_parameter">
 <span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">code_to_segment_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_discrete_segmentations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#code_to_segment_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.code_to_segment_parameter" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Generate the Python code to segment a parameter along several</dt><dd><p>dimensions of segmentation</p>
-</dd>
-</dl>
+<dd><p>Generate the Python code to segment a parameter along several
+dimensions of segmentation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameter</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter to segment</p></li>
-<li><p><strong>list_of_discrete_segmentations</strong> (<em>tuple</em><em>(</em><a class="reference internal" href="#biogeme.segmentation.DiscreteSegmentationTuple" title="biogeme.segmentation.DiscreteSegmentationTuple"><em>DiscreteSegmentationTuple</em></a><em>(</em><a class="reference internal" href="expressions.html#biogeme.expressions.Variable" title="biogeme.expressions.Variable"><em>biogeme.expressions.Variable</em></a><em>, </em><em>dict</em><em>(</em><em>int:str</em><em>)</em><em>)</em><em>)</em>) – each element of the list is a tuple
+<li><p><strong>list_of_discrete_segmentations</strong> – each element of the list is a tuple
 with the variable characterizing the segmentation, and a
 dictionary mapping the values with the names of the segments.</p></li>
 <li><p><strong>prefix</strong> (<em>str</em>) – name of the current expression, used as prefix</p></li>
@@ -221,7 +220,7 @@ of the segment.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parameter</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter to segment</p></li>
-<li><p><strong>list_of_discrete_segmentations</strong> (<em>tuple</em><em>(</em><a class="reference internal" href="#biogeme.segmentation.DiscreteSegmentationTuple" title="biogeme.segmentation.DiscreteSegmentationTuple"><em>DiscreteSegmentationTuple</em></a><em>(</em><a class="reference internal" href="expressions.html#biogeme.expressions.Variable" title="biogeme.expressions.Variable"><em>biogeme.expressions.Variable</em></a><em>, </em><em>dict</em><em>(</em><em>int:str</em><em>)</em><em>)</em><em>)</em>) – each element of the list is a tuple
+<li><p><strong>list_of_discrete_segmentations</strong> – each element of the list is a tuple
 with the variable characterizing the segmentation, and a
 dictionary mapping the values with the names of the segments.</p></li>
 <li><p><strong>combinatorial</strong> – if True, a parameter is associated with each
@@ -257,7 +256,7 @@ parameters is <span class="math notranslate nohighlight">\(\sum_s N_s\)</span>. 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

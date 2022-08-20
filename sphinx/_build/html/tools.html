@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tools &mdash; Biogeme 3.2.7 documentation</title>
+  <title>Tools &mdash; Biogeme 3.2.9 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
@@ -155,7 +156,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="biogeme.tools.calculate_correlation">
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">calculate_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#calculate_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.calculate_correlation" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the correlation matrix of a nested or cross-nested logit model.</p>
+<dd><p>Calculate the correlation matrix of a nested or cross-nested
+logit model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -305,12 +307,9 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="biogeme.tools.correlation_nested">
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">correlation_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#correlation_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.correlation_nested" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Calculate the correlation matrix of the error terms of all</dt><dd><p>alternatives of a nested logit model. It is assumed that
-the homogeneity parameter mu of the model has been normalized
-to one.</p>
-</dd>
-</dl>
+<dd><p>Calculate the correlation matrix of the error terms of all
+alternatives of a nested logit model. It is assumed that the
+homogeneity parameter mu of the model has been normalized to one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
@@ -589,7 +588,7 @@ likelihood than the restricted model.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
