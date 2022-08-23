@@ -54,15 +54,20 @@ structBetas = structResults.getBetaValues()
 # Piecewise linear definition of income
 ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 thresholds = [None, 4, 6, 8, 10, None]
+beta_names = [
+        'beta_ScaledIncome_minus_inf_4',
+        'beta_ScaledIncome_4_6',
+        'beta_ScaledIncome_6_8',
+        'beta_ScaledIncome_8_10',
+        'beta_ScaledIncome_10_inf',
+]
+
 formulaIncome = models.piecewiseFormula(
     ScaledIncome,
     thresholds,
     [
-        structBetas['beta_ScaledIncome_minus_inf_4'],
-        structBetas['beta_ScaledIncome_4_6'],
-        structBetas['beta_ScaledIncome_6_8'],
-        structBetas['beta_ScaledIncome_8_10'],
-        structBetas['beta_ScaledIncome_10_inf'],
+        Beta(name, structBetas[name], None, None, 0)
+        for name in beta_names
     ],
 )
 

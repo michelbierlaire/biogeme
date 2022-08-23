@@ -52,21 +52,24 @@ except FileNotFoundError:
     sys.exit()
 
 betas = results.getBetaValues()
-
 ### Variables
 
 # Piecewise linear definition of income
 ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 thresholds = [None, 4, 6, 8, 10, None]
+beta_names = [
+        'beta_ScaledIncome_minus_inf_4',
+        'beta_ScaledIncome_4_6',
+        'beta_ScaledIncome_6_8',
+        'beta_ScaledIncome_8_10',
+        'beta_ScaledIncome_10_inf',
+]
 formulaIncome = models.piecewiseFormula(
     ScaledIncome,
     thresholds,
     [
-        betas['beta_ScaledIncome_minus_inf_4'],
-        betas['beta_ScaledIncome_4_6'],
-        betas['beta_ScaledIncome_6_8'],
-        betas['beta_ScaledIncome_8_10'],
-        betas['beta_ScaledIncome_10_inf'],
+        Beta(name, betas[name], None, None, 0)
+        for name in beta_names
     ],
 )
 
