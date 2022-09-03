@@ -1,71 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Algorithms &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Algorithms &mdash; Biogeme 3.2.9 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Assisted specification" href="assisted.html" />
     <link rel="prev" title="Welcome to Biogeme’s documentation!" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,19 +38,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Algorithms</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-biogeme.algorithms">biogeme.algorithms module</a></li>
@@ -99,87 +53,48 @@
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Algorithms</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/algorithms.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="algorithms">
-<h1>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="algorithms">
+<h1>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this heading"></a></h1>
 <p>Generic optimization algorithms.</p>
-<div class="section" id="module-biogeme.algorithms">
-<span id="biogeme-algorithms-module"></span><h2>biogeme.algorithms module<a class="headerlink" href="#module-biogeme.algorithms" title="Permalink to this headline">¶</a></h2>
+<section id="module-biogeme.algorithms">
+<span id="biogeme-algorithms-module"></span><h2>biogeme.algorithms module<a class="headerlink" href="#module-biogeme.algorithms" title="Permalink to this heading"></a></h2>
 <p>Optimization algorithms.</p>
 <dl class="field-list simple">
 <dt class="field-odd">author</dt>
@@ -190,8 +105,8 @@
 </dd>
 </dl>
 <dl class="py function">
-<dt id="biogeme.algorithms.bfgs">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">bfgs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bfgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bfgs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bfgs">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">bfgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bfgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bfgs" title="Permalink to this definition"></a></dt>
 <dd><p>Update the BFGS matrix. Formula (13.12) of <a class="reference external" href="http://optimizationprinciplesalgorithms.com/">Bierlaire (2015)</a>
 where the method proposed by <a class="reference external" href="https://link.springer.com/content/pdf/10.1007/BFb0067703.pdf">Powell (1977)</a> is applied</p>
 <dl class="field-list simple">
@@ -212,8 +127,8 @@ where the method proposed by <a class="reference external" href="https://link.sp
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.bfgsLineSearch">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">bfgsLineSearch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBfgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bfgsLineSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bfgsLineSearch" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bfgsLineSearch">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">bfgsLineSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBfgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bfgsLineSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bfgsLineSearch" title="Permalink to this definition"></a></dt>
 <dd><p>BFGS method with inexact line search (Wolfe conditions)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -248,8 +163,8 @@ matrix initBfgs do not match the length of x0.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.bfgsTrustRegion">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">bfgsTrustRegion</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBfgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bfgsTrustRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bfgsTrustRegion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bfgsTrustRegion">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">bfgsTrustRegion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initBfgs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bfgsTrustRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bfgsTrustRegion" title="Permalink to this definition"></a></dt>
 <dd><p>BFGS method with trust region</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -290,13 +205,13 @@ matrix initBfgs do not match the length of x0.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="biogeme.algorithms.bioBounds">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">bioBounds</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">bioBounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class is designed for the management of simple bound constraints</p>
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>b</strong> (<em>list</em><em>(</em><em>tuple</em><em>)</em>) – list of tuples (ell,u) containing the lower and
@@ -309,8 +224,8 @@ upper bounds for each free parameter.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.activity">
-<code class="sig-name descname"><span class="pre">activity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.220446049250313e-16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.activity" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.activity">
+<span class="sig-name descname"><span class="pre">activity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.220446049250313e-16</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.activity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.activity" title="Permalink to this definition"></a></dt>
 <dd><p>Determines the activity status of each variable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -345,15 +260,15 @@ of x and bounds do not match.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="biogeme.algorithms.bioBounds.bounds">
-<code class="sig-name descname"><span class="pre">bounds</span></code><a class="headerlink" href="#biogeme.algorithms.bioBounds.bounds" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.bounds">
+<span class="sig-name descname"><span class="pre">bounds</span></span><a class="headerlink" href="#biogeme.algorithms.bioBounds.bounds" title="Permalink to this definition"></a></dt>
 <dd><p>list of tuples (ell,u) containing the lower and upper bounds for
 each free parameter.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.breakpoints">
-<code class="sig-name descname"><span class="pre">breakpoints</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.breakpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.breakpoints" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.breakpoints">
+<span class="sig-name descname"><span class="pre">breakpoints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.breakpoints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.breakpoints" title="Permalink to this definition"></a></dt>
 <dd><p>Projects the direction d, starting from x,
 on the intersection of the bound constraints</p>
 <dl class="field-list simple">
@@ -382,8 +297,8 @@ are inconsistent</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.feasible">
-<code class="sig-name descname"><span class="pre">feasible</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.feasible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.feasible" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.feasible">
+<span class="sig-name descname"><span class="pre">feasible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.feasible"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.feasible" title="Permalink to this definition"></a></dt>
 <dd><p>Check if point verifies the bound constraints</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -403,8 +318,8 @@ are inconsistent</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.generalizedCauchyPoint">
-<code class="sig-name descname"><span class="pre">generalizedCauchyPoint</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.generalizedCauchyPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.generalizedCauchyPoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.generalizedCauchyPoint">
+<span class="sig-name descname"><span class="pre">generalizedCauchyPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.generalizedCauchyPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.generalizedCauchyPoint" title="Permalink to this definition"></a></dt>
 <dd><p>Implementation of Step 2 of the Specific Algorithm by
 <a class="reference external" href="https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf">Conn et al. (1988)</a>.</p>
 <p>The quadratic model is defined as</p>
@@ -437,8 +352,8 @@ inconsistent</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.intersect">
-<code class="sig-name descname"><span class="pre">intersect</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherBounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.intersect" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.intersect">
+<span class="sig-name descname"><span class="pre">intersect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">otherBounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.intersect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.intersect" title="Permalink to this definition"></a></dt>
 <dd><p>Create a bounds object representing the intersection of two regions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -458,8 +373,8 @@ are inconsistent</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.intersectionWithTrustRegion">
-<code class="sig-name descname"><span class="pre">intersectionWithTrustRegion</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.intersectionWithTrustRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.intersectionWithTrustRegion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.intersectionWithTrustRegion">
+<span class="sig-name descname"><span class="pre">intersectionWithTrustRegion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.intersectionWithTrustRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.intersectionWithTrustRegion" title="Permalink to this definition"></a></dt>
 <dd><p>Create a bioBounds object representing the intersection
 between the feasible domain and the trust region.</p>
 <dl class="field-list simple">
@@ -483,14 +398,14 @@ are inconsistent</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="biogeme.algorithms.bioBounds.lowerBounds">
-<code class="sig-name descname"><span class="pre">lowerBounds</span></code><a class="headerlink" href="#biogeme.algorithms.bioBounds.lowerBounds" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.lowerBounds">
+<span class="sig-name descname"><span class="pre">lowerBounds</span></span><a class="headerlink" href="#biogeme.algorithms.bioBounds.lowerBounds" title="Permalink to this definition"></a></dt>
 <dd><p>List of lower bounds</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.maximumStep">
-<code class="sig-name descname"><span class="pre">maximumStep</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.maximumStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.maximumStep" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.maximumStep">
+<span class="sig-name descname"><span class="pre">maximumStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.maximumStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.maximumStep" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the maximum step that can be performed
 along a direction while staying feasible.</p>
 <dl class="field-list simple">
@@ -514,14 +429,14 @@ and the list of indices achieving this value.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="biogeme.algorithms.bioBounds.n">
-<code class="sig-name descname"><span class="pre">n</span></code><a class="headerlink" href="#biogeme.algorithms.bioBounds.n" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.n">
+<span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#biogeme.algorithms.bioBounds.n" title="Permalink to this definition"></a></dt>
 <dd><p>number of optimization variables</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.project">
-<code class="sig-name descname"><span class="pre">project</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.project" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.project">
+<span class="sig-name descname"><span class="pre">project</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.project"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.project" title="Permalink to this definition"></a></dt>
 <dd><p>Project a point onto the feasible domain defined by the bounds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -541,8 +456,8 @@ are inconsistent</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.bioBounds.subspace">
-<code class="sig-name descname"><span class="pre">subspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selectedVariables</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.subspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.subspace" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.subspace">
+<span class="sig-name descname"><span class="pre">subspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selectedVariables</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#bioBounds.subspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.bioBounds.subspace" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a bioBounds object for selected variables</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -563,16 +478,16 @@ are inconsistent</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="biogeme.algorithms.bioBounds.upperBounds">
-<code class="sig-name descname"><span class="pre">upperBounds</span></code><a class="headerlink" href="#biogeme.algorithms.bioBounds.upperBounds" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.bioBounds.upperBounds">
+<span class="sig-name descname"><span class="pre">upperBounds</span></span><a class="headerlink" href="#biogeme.algorithms.bioBounds.upperBounds" title="Permalink to this definition"></a></dt>
 <dd><p>List of upper bounds</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.cauchyNewtonDogleg">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">cauchyNewtonDogleg</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#cauchyNewtonDogleg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.cauchyNewtonDogleg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.cauchyNewtonDogleg">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">cauchyNewtonDogleg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#cauchyNewtonDogleg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.cauchyNewtonDogleg" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the Cauchy, the Newton and the dogleg points.</p>
 <p>The Cauchy point is defined as</p>
 <div class="math notranslate nohighlight">
@@ -613,8 +528,8 @@ not convex.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.dogleg">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">dogleg</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#dogleg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.dogleg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.dogleg">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">dogleg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#dogleg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.dogleg" title="Permalink to this definition"></a></dt>
 <dd><p>Find an approximation of the trust region subproblem using
 the dogleg method</p>
 <dl class="field-list simple">
@@ -652,14 +567,14 @@ the dogleg method</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="biogeme.algorithms.functionToMinimize">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">functionToMinimize</span></code><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.functionToMinimize">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">functionToMinimize</span></span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This is an abstract class. The actual function to minimize
 must be implemented in a concrete class deriving from this one.</p>
 <dl class="py method">
-<dt id="biogeme.algorithms.functionToMinimize.f">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">f</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.functionToMinimize.f">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the value of the function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -682,8 +597,8 @@ used. Default: None pass</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.functionToMinimize.f_g">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">f_g</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f_g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f_g" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.functionToMinimize.f_g">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f_g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f_g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f_g" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the value of the function and the gradient</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -706,8 +621,8 @@ used. Default: None pass</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.functionToMinimize.f_g_bhhh">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">f_g_bhhh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f_g_bhhh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f_g_bhhh" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.functionToMinimize.f_g_bhhh">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f_g_bhhh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f_g_bhhh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f_g_bhhh" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the value of the function, the gradient and
 the BHHH matrix</p>
 <dl class="field-list simple">
@@ -731,8 +646,8 @@ used. Default: None pass</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.functionToMinimize.f_g_h">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">f_g_h</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f_g_h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f_g_h" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.functionToMinimize.f_g_h">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">f_g_h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.f_g_h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.f_g_h" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate the value of the function, the gradient and the Hessian</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -755,8 +670,8 @@ used. Default: None pass</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="biogeme.algorithms.functionToMinimize.setVariables">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">setVariables</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.setVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.setVariables" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.functionToMinimize.setVariables">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setVariables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#functionToMinimize.setVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.functionToMinimize.setVariables" title="Permalink to this definition"></a></dt>
 <dd><p>Set the values of the variables for which the function
 has to be calculated.</p>
 <dl class="field-list simple">
@@ -769,8 +684,8 @@ has to be calculated.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.inverseBfgs">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">inverseBfgs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Hinv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#inverseBfgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.inverseBfgs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.inverseBfgs">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">inverseBfgs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Hinv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#inverseBfgs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.inverseBfgs" title="Permalink to this definition"></a></dt>
 <dd><p>Update the inverse BFGS matrix. Formula (13.13) of <a class="reference external" href="http://optimizationprinciplesalgorithms.com/">Bierlaire (2015)</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -790,8 +705,8 @@ has to be calculated.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.lineSearch">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">lineSearch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lbd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#lineSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.lineSearch" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.lineSearch">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">lineSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lbd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#lineSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.lineSearch" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate a step along a direction that satisfies both Wolfe conditions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -826,8 +741,8 @@ direction</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.newtonLineSearch">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">newtonLineSearch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#newtonLineSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.newtonLineSearch" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.newtonLineSearch">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">newtonLineSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#newtonLineSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.newtonLineSearch" title="Permalink to this definition"></a></dt>
 <dd><p>Newton method with inexact line search (Wolfe conditions)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -855,8 +770,8 @@ is reached. Defaut: 100</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.newtonTrustRegion">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">newtonTrustRegion</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#newtonTrustRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.newtonTrustRegion" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.newtonTrustRegion">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">newtonTrustRegion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#newtonTrustRegion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.newtonTrustRegion" title="Permalink to this definition"></a></dt>
 <dd><p>Newton method with trust region</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -891,8 +806,8 @@ related to the run of the algorithm.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.relativeChange">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">relativeChange</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xpred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#relativeChange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.relativeChange" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.relativeChange">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">relativeChange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xpred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#relativeChange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.relativeChange" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the relative change.</p>
 <p>It is typically used as stopping criterion.</p>
 <dl class="field-list simple">
@@ -918,8 +833,8 @@ related to the run of the algorithm.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.relativeGradient">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">relativeGradient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#relativeGradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.relativeGradient" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.relativeGradient">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">relativeGradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">typf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#relativeGradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.relativeGradient" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the relative gradients.</p>
 <p>It is typically used as stopping criterion.</p>
 <dl class="field-list simple">
@@ -948,8 +863,8 @@ related to the run of the algorithm.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.schnabelEskow">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">schnabelEskow</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taubar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.6756745753887175e-11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#schnabelEskow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.schnabelEskow" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.schnabelEskow">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">schnabelEskow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">taubar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.6756745753887175e-11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#schnabelEskow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.schnabelEskow" title="Permalink to this definition"></a></dt>
 <dd><p>Modified Cholesky factorization by <a class="reference external" href="https://doi.org/10.1137/s105262349833266x">Schnabel and Eskow (1999)</a>.</p>
 <p>If the matrix is ‘safely’ positive definite, the output is the
 classical Cholesky factor. If not, the diagonal elements are
@@ -988,8 +903,8 @@ where <span class="math notranslate nohighlight">\(A + E = PLL^TP^T\)</span>.</p
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.simpleBoundsNewtonAlgorithm">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">simpleBoundsNewtonAlgorithm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proportionTrueHessian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infeasibleConjugateGradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steptol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cgtol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enlargingFactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#simpleBoundsNewtonAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.simpleBoundsNewtonAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.simpleBoundsNewtonAlgorithm">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">simpleBoundsNewtonAlgorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proportionTrueHessian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infeasibleConjugateGradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steptol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cgtol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enlargingFactor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#simpleBoundsNewtonAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.simpleBoundsNewtonAlgorithm" title="Permalink to this definition"></a></dt>
 <dd><p>Trust region algorithm for problems with simple bounds</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1048,8 +963,8 @@ matrix initBfgs do not match the length of x0.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.truncatedConjugateGradient">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">truncatedConjugateGradient</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#truncatedConjugateGradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.truncatedConjugateGradient" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.truncatedConjugateGradient">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">truncatedConjugateGradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#truncatedConjugateGradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.truncatedConjugateGradient" title="Permalink to this definition"></a></dt>
 <dd><p>Find an approximation of the trust region subproblem using the
 truncated conjugate gradient method</p>
 <dl class="field-list simple">
@@ -1082,8 +997,8 @@ truncated conjugate gradient method</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.truncatedConjugateGradientSubspace">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">truncatedConjugateGradientSubspace</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infeasibleIterate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#truncatedConjugateGradientSubspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.truncatedConjugateGradientSubspace" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.truncatedConjugateGradientSubspace">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">truncatedConjugateGradientSubspace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infeasibleIterate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.06273418136464e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#truncatedConjugateGradientSubspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.truncatedConjugateGradientSubspace" title="Permalink to this definition"></a></dt>
 <dd><p>Find an approximation of the solution of the trust region
 subproblem using the truncated conjugate gradient method within
 the subspace of free variables. Free variables are those
@@ -1131,8 +1046,8 @@ Default: False.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.algorithms.trustRegionIntersection">
-<code class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></code><code class="sig-name descname"><span class="pre">trustRegionIntersection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#trustRegionIntersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.trustRegionIntersection" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.algorithms.trustRegionIntersection">
+<span class="sig-prename descclassname"><span class="pre">biogeme.algorithms.</span></span><span class="sig-name descname"><span class="pre">trustRegionIntersection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/algorithms.html#trustRegionIntersection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.algorithms.trustRegionIntersection" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the intersection with the boundary of the trust region.</p>
 <p>Consider a trust region of radius <span class="math notranslate nohighlight">\(\delta\)</span>, centered at
 <span class="math notranslate nohighlight">\(\hat{x}\)</span>. Let <span class="math notranslate nohighlight">\(x_c\)</span> be in the trust region, and
@@ -1160,55 +1075,38 @@ Default: False.</p></li>
 </dl>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="assisted.html" class="btn btn-neutral float-right" title="Assisted specification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Biogeme’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="assisted.html" class="btn btn-neutral float-right" title="Assisted specification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

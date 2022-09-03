@@ -28,12 +28,12 @@ const bioDerivatives* bioExprTimes::getValueAndDerivatives(std::vector<bioUInt> 
 						     bioBoolean hessian) {
 
 
-  //  DEBUG_MESSAGE("Derivatives of " << print());
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
 
   bioUInt n = literalIds.size() ;
+  theDerivatives.resize(n) ;
+
   const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;
   const bioDerivatives* rightResult = NULL ;
   bioReal rightValue ;

@@ -47,6 +47,15 @@ cdef extern from "biogeme.h":
 				     double_matrix& data,
 				     double* results) except +
 
+		double simulateSimpleFormula(vector[string] loglikeSignatures,
+                                              double_vector betas, 
+                                              double_vector fixedBetas,
+                                              bool_t gradient,
+                                              bool_t hessian,
+                                              double* g,
+                                              double* h) except +
+
+
 		void simulateSeveralFormulas(vector[string_vector] loglikeSignatures,
 				     double_vector betas, 
 				     double_vector fixedBetas,
@@ -121,6 +130,33 @@ cdef class pyBiogeme:
 		r = self.theBiogeme.calculateLikelihood(betas, fixedBetas)
 		return r
 
+	def simulateSimpleFormula(self, 
+                                  formula, 
+                                  betas, 
+                                  fixedBetas,
+                                  gradient,
+                                  hessian,
+                                  gmem,
+                                  hmem):
+		if not gmem.flags['C_CONTIGUOUS']:
+			print('gmem not contiguous')
+			gmem = np.ascontiguousarray(gmem)
+		if not hmem.flags['C_CONTIGUOUS']:
+			print('hmem not contiguous')
+			hmem = np.ascontiguousarray(hmem)
+
+		cdef double_vector_view gmem_view = gmem
+		cdef double_matrix_view hmem_view = hmem
+
+		r = self.theBiogeme.simulateSimpleFormula(formula,
+					                 betas, 
+   						        fixedBetas,
+                                                           gradient,
+                                                           hessian,
+                                                           &gmem_view[0],
+                                                           &hmem_view[0,0])
+		return r, gmem, hmem
+
 	def simulateFormula(self, formula, betas, fixedBetas, d):
 		n = d.shape[0]	
 		r = np.empty(n)
@@ -131,10 +167,10 @@ cdef class pyBiogeme:
 
 		cdef double_vector_view r_view = r
 		self.theBiogeme.simulateFormula(formula,
-					        betas, 
-   						fixedBetas, 
-						d, 
-						&r_view[0])
+					       betas, 
+   					       fixedBetas, 
+					       d, 
+					       &r_view[0])
 		return r
 	
 	def simulateSeveralFormulas(self, formulas, betas, fixedBetas, d, nThreads):
@@ -148,7 +184,7 @@ cdef class pyBiogeme:
 
 		cdef double_matrix_view r_view = r
 		self.theBiogeme.simulateSeveralFormulas(formulas,
-					        	      betas, 
+				        	      betas, 
    						      fixedBetas, 
  						      nThreads,
 						      d, 

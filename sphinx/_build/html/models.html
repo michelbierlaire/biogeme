@@ -1,71 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Models &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Models &mdash; Biogeme 3.2.9 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Optimization" href="optimization.html" />
     <link rel="prev" title="Messaging" href="messaging.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,19 +38,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
@@ -96,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Models</a><ul>
@@ -104,82 +59,42 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Models</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/models.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="models">
-<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="models">
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this heading"></a></h1>
 <p>Functions for model specification.</p>
-<div class="section" id="module-biogeme.models">
-<span id="biogeme-models-module"></span><h2>biogeme.models module<a class="headerlink" href="#module-biogeme.models" title="Permalink to this headline">¶</a></h2>
+<section id="module-biogeme.models">
+<span id="biogeme-models-module"></span><h2>biogeme.models module<a class="headerlink" href="#module-biogeme.models" title="Permalink to this heading"></a></h2>
 <p>Implements various models.</p>
 <dl class="field-list simple">
 <dt class="field-odd">author</dt>
@@ -190,8 +105,8 @@
 </dd>
 </dl>
 <dl class="py function">
-<dt id="biogeme.models.boxcox">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">boxcox</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#boxcox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.boxcox" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.boxcox">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">boxcox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ell</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#boxcox"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.boxcox" title="Permalink to this definition"></a></dt>
 <dd><p>Box-Cox transform</p>
 <div class="math notranslate nohighlight">
 \[B(x, \ell) = \frac{x^{\ell}-1}{\ell}.\]</div>
@@ -206,32 +121,32 @@ the McLaurin approximation is used:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – a variable to transform.</p></li>
-<li><p><strong>ell</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – parameter of the transformation.</p></li>
+<li><p><strong>x</strong> (<em>biogeme.expressions.expr.Expression</em>) – a variable to transform.</p></li>
+<li><p><strong>ell</strong> (<em>biogeme.expressions.expr.Expression</em>) – parameter of the transformation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>the Box-Cox transform</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.checkValidityCNL">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">checkValidityCNL</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#checkValidityCNL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.checkValidityCNL" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.checkValidityCNL">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">checkValidityCNL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#checkValidityCNL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.checkValidityCNL" title="Permalink to this definition"></a></dt>
 <dd><p>Verifies if the cross-nested logit specifciation is valid</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
 Each item is also a tuple containing two items</p>
 <ul>
-<li><p>an object of type biogeme.expressions.Expression  representing
+<li><p>an object of type biogeme.expressions.expr.Expression  representing
 the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -269,20 +184,20 @@ problem is the nested structure is not OK.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.checkValidityNestedLogit">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">checkValidityNestedLogit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#checkValidityNestedLogit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.checkValidityNestedLogit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.checkValidityNestedLogit">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">checkValidityNestedLogit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#checkValidityNestedLogit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.checkValidityNestedLogit" title="Permalink to this definition"></a></dt>
 <dd><p>Verifies if the nested logit model is indeed based on a partition
 of the choice set.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests. Each item is also
 a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression representing the
-nest parameter,</p></li>
+<li><p>an object of type biogeme.expressions. expr.Expression
+representing the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
 </ul>
@@ -306,15 +221,15 @@ problem is the nested structure is not OK.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.cnl">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">cnl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#cnl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.cnl" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.cnl">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">cnl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#cnl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.cnl" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the cross-nested logit model as a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -322,11 +237,11 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression
+<li><p>an object of type biogeme.expressions. expr.Expression
 representing the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
-missing in the dictionaray, the corresponding alpha is set to zero.</p></li>
+missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </ul>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alphaA</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1a</span><span class="p">,</span>
@@ -347,7 +262,7 @@ missing in the dictionaray, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -355,21 +270,21 @@ calculated.</p></li>
 <dd class="field-even"><p>choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.cnl_avail">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">cnl_avail</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#cnl_avail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.cnl_avail" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.cnl_avail">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">cnl_avail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#cnl_avail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.cnl_avail" title="Permalink to this definition"></a></dt>
 <dd><p>Same as cnl. Maintained for backward compatibility</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -377,7 +292,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests. Each item is
 also a tuple containing two items</p>
 <ul>
-<li><p>an object of type biogeme.expressions.Expression  representing
+<li><p>an object of type biogeme.expressions.expr.Expression  representing
 the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -402,7 +317,7 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -410,22 +325,22 @@ calculated.</p></li>
 <dd class="field-even"><p>choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.cnlmu">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">cnlmu</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#cnlmu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.cnlmu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.cnlmu">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">cnlmu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#cnlmu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.cnlmu" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the cross-nested logit model as a MEV model with
 the homogeneity parameters is explicitly involved</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -433,7 +348,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests. Each
 item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression representing
+<li><p>an object of type biogeme.expressions. expr.Expression representing
 the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -458,31 +373,31 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
-<li><p><strong>mu</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – Homogeneity parameter <span class="math notranslate nohighlight">\(\mu\)</span>.</p></li>
+<li><p><strong>mu</strong> (<em>biogeme.expressions.expr.Expression</em>) – Homogeneity parameter <span class="math notranslate nohighlight">\(\mu\)</span>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.getMevForCrossNested">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">getMevForCrossNested</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForCrossNested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForCrossNested" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.getMevForCrossNested">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">getMevForCrossNested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForCrossNested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForCrossNested" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the MEV generating function for the cross nested logit
 model as a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int: biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int: biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int: biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int: biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -490,7 +405,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression
+<li><p>an object of type biogeme.expressions. expr.Expression
 representing the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -521,23 +436,23 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 <dd class="field-even"><p>log of the choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.getMevForCrossNestedMu">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">getMevForCrossNestedMu</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForCrossNestedMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForCrossNestedMu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.getMevForCrossNestedMu">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">getMevForCrossNestedMu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForCrossNestedMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForCrossNestedMu" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the MEV generating function for the cross-nested logit
 model as a MEV model with the homogeneity parameters is explicitly
 involved.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -545,7 +460,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression representing
+<li><p>an object of type biogeme.expressions. expr.Expression representing
 the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -570,29 +485,29 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>mu</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – Homogeneity parameter <span class="math notranslate nohighlight">\(\mu\)</span>.</p></li>
+<li><p><strong>mu</strong> (<em>biogeme.expressions.expr.Expression</em>) – Homogeneity parameter <span class="math notranslate nohighlight">\(\mu\)</span>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>log of the choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.getMevForNested">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">getMevForNested</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForNested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForNested" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.getMevForNested">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">getMevForNested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForNested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForNested" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the derivatives of MEV generating function for the
 nested logit model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -600,7 +515,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions.Expression representing
+<li><p>an object of type biogeme.expressions.expr.Expression representing
 the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
@@ -626,22 +541,22 @@ and <span class="math notranslate nohighlight">\(G\)</span> is the MEV generatin
 </p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict(int:biogeme.expressions.Expression)</p>
+<dd class="field-odd"><p>dict(int:biogeme.expressions.expr.Expression)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.getMevForNestedMu">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">getMevForNestedMu</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForNestedMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForNestedMu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.getMevForNestedMu">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">getMevForNestedMu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevForNestedMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevForNestedMu" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the MEV generating function for the nested logit model,
 including the scale parameter</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability
 of each alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -649,7 +564,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression
+<li><p>an object of type biogeme.expressions. expr.Expression
 representing the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
@@ -661,7 +576,7 @@ belonging to the nest.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>mu</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – scale parameter</p></li>
+<li><p><strong>mu</strong> (<em>biogeme.expressions.expr.Expression</em>) – scale parameter</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -675,21 +590,21 @@ and <span class="math notranslate nohighlight">\(G\)</span> is the MEV generatin
 </p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict(int:biogeme.expressions.Expression)</p>
+<dd class="field-odd"><p>dict(int:biogeme.expressions.expr.Expression)</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.getMevGeneratingForNested">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">getMevGeneratingForNested</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevGeneratingForNested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevGeneratingForNested" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.getMevGeneratingForNested">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">getMevGeneratingForNested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#getMevGeneratingForNested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.getMevGeneratingForNested" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the  MEV generating function for the nested logit model</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -697,7 +612,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions.Expression representing
+<li><p>an object of type biogeme.expressions.expr.Expression representing
 the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
@@ -722,21 +637,21 @@ y_\ell^{\mu_m}\right)^{\frac{\mu}{\mu_m}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(G\)</span> is the MEV generating function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.logcnl">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">logcnl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logcnl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logcnl" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.logcnl">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">logcnl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logcnl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logcnl" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the log of the cross-nested logit model as a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -744,11 +659,11 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression
+<li><p>an object of type biogeme.expressions. expr.Expression
 representing the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
-missing in the dictionaray, the corresponding alpha is set to zero.</p></li>
+missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </ul>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alphaA</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1a</span><span class="p">,</span>
@@ -769,7 +684,7 @@ missing in the dictionaray, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -777,7 +692,7 @@ calculated.</p></li>
 <dd class="field-even"><p>log of the choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the definition of the nests is invalid.</p>
@@ -786,15 +701,15 @@ calculated.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.logcnl_avail">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">logcnl_avail</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logcnl_avail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logcnl_avail" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.logcnl_avail">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">logcnl_avail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logcnl_avail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logcnl_avail" title="Permalink to this definition"></a></dt>
 <dd><p>Same as logcnl. Maintained for backward compatibility</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -802,7 +717,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression
+<li><p>an object of type biogeme.expressions. expr.Expression
 representing the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -827,7 +742,7 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -835,22 +750,22 @@ calculated.</p></li>
 <dd class="field-even"><p>log of choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.logcnlmu">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">logcnlmu</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logcnlmu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logcnlmu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.logcnlmu">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">logcnlmu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logcnlmu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logcnlmu" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the log of the cross-nested logit model as a MEV model
 with the homogeneity parameters is explicitly involved.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative, indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -858,7 +773,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests. Each item is
 also a tuple containing two items</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression representing
+<li><p>an object of type biogeme.expressions. expr.Expression representing
 the nest parameter,</p></li>
 <li><p>a dictionary mapping the alternative ids with the cross-nested
 parameters for the corresponding nest. If an alternative is
@@ -883,16 +798,16 @@ missing in the dictionary, the corresponding alpha is set to zero.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
-<li><p><strong>mu</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – Homogeneity parameter <span class="math notranslate nohighlight">\(\mu\)</span>.</p></li>
+<li><p><strong>mu</strong> (<em>biogeme.expressions.expr.Expression</em>) – Homogeneity parameter <span class="math notranslate nohighlight">\(\mu\)</span>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>log of the choice probability for the cross-nested logit model.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the definition of the nests is invalid.</p>
@@ -901,8 +816,8 @@ calculated.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.logit">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">logit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.logit">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">logit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logit" title="Permalink to this definition"></a></dt>
 <dd><p>The logit model</p>
 <p>The model is defined as</p>
 <div class="math notranslate nohighlight">
@@ -910,9 +825,9 @@ calculated.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -925,14 +840,14 @@ calculated.</p></li>
 <dd class="field-even"><p>choice probability of alternative number i.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.loglogit">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">loglogit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#loglogit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.loglogit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.loglogit">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">loglogit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#loglogit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.loglogit" title="Permalink to this definition"></a></dt>
 <dd><p>The logarithm of the logit model</p>
 <p>The model is defined as</p>
 <div class="math notranslate nohighlight">
@@ -940,9 +855,9 @@ calculated.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -955,33 +870,33 @@ calculated.</p></li>
 <dd class="field-even"><p>choice probability of alternative number i.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.logmev">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">logmev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logmev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logmev" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.logmev">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">logmev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logmev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logmev" title="Permalink to this definition"></a></dt>
 <dd><p>Log of the choice probability for a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
+<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
 <div class="math notranslate nohighlight">
 \[\ln \frac{\partial G}{\partial y_i}
 (e^{V_1},\ldots,e^{V_J})\]</div>
 <p>where <span class="math notranslate nohighlight">\(G\)</span> is the MEV generating function. If an alternative
 <span class="math notranslate nohighlight">\(i\)</span> is not available, then <span class="math notranslate nohighlight">\(G_i = 0\)</span>.</p>
 </p></li>
-<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
 always available.</p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -989,7 +904,7 @@ calculated.</p></li>
 <dd class="field-even"><p>log of the choice probability of the MEV model, given by</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 <div class="math notranslate nohighlight">
@@ -999,31 +914,31 @@ calculated.</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.logmev_endogenousSampling">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">logmev_endogenousSampling</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logmev_endogenousSampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logmev_endogenousSampling" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.logmev_endogenousSampling">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">logmev_endogenousSampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#logmev_endogenousSampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.logmev_endogenousSampling" title="Permalink to this definition"></a></dt>
 <dd><p>Log of choice probability for a MEV model, including the
 correction for endogenous sampling as proposed by <a class="reference external" href="http://dx.doi.org/10.1016/j.trb.2007.09.003">Bierlaire, Bolduc
 and McFadden (2008)</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
+<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
 <div class="math notranslate nohighlight">
 \[\ln \frac{\partial G}{\partial y_i}
 (e^{V_1}, \ldots, e^{V_J})\]</div>
 <p>where <span class="math notranslate nohighlight">\(G\)</span> is the MEV generating function. If an alternative
 <span class="math notranslate nohighlight">\(i\)</span> is not available, then <span class="math notranslate nohighlight">\(G_i = 0\)</span>.</p>
 </p></li>
-<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
 always available.</p></li>
-<li><p><strong>correction</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – a dict of expressions for the correstion terms
+<li><p><strong>correction</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – a dict of expressions for the correstion terms
 of each alternative.</p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -1038,21 +953,21 @@ calculated.</p></li>
 <p>where <span class="math notranslate nohighlight">\(\omega_i\)</span> is the correction term for alternative <span class="math notranslate nohighlight">\(i\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.lognested">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">lognested</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#lognested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.lognested" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.lognested">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">lognested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#lognested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.lognested" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the log of a nested logit model as a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -1060,7 +975,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression representing
+<li><p>an object of type biogeme.expressions. expr.Expression representing
 the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
@@ -1072,7 +987,7 @@ belonging to the nest.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -1082,7 +997,7 @@ based on the derivatives of the MEV generating function produced
 by the function getMevForNested</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the definition of the nests is invalid.</p>
@@ -1091,17 +1006,17 @@ by the function getMevForNested</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.lognestedMevMu">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">lognestedMevMu</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#lognestedMevMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.lognestedMevMu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.lognestedMevMu">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">lognestedMevMu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#lognestedMevMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.lognestedMevMu" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the log of the nested logit model as a MEV model, where
 mu is also a parameter, if the user wants to test different
 normalization schemes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -1109,7 +1024,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions.Expression  representing
+<li><p>an object of type biogeme.expressions.expr.Expression  representing
 the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
@@ -1121,9 +1036,9 @@ belonging to the nest.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
-<li><p><strong>mu</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression producing the value of the top-level scale parameter.</p></li>
+<li><p><strong>mu</strong> (<em>biogeme.expressions.expr.Expression</em>) – expression producing the value of the top-level scale parameter.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1138,33 +1053,33 @@ and <span class="math notranslate nohighlight">\(G\)</span> is the MEV generatin
 </p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.mev">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">mev</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#mev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.mev" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.mev">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">mev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#mev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.mev" title="Permalink to this definition"></a></dt>
 <dd><p>Choice probability for a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
+<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
 <div class="math notranslate nohighlight">
 \[\ln \frac{\partial G}{\partial y_i}
 (e^{V_1}, \ldots, e^{V_J})\]</div>
 <p>where <span class="math notranslate nohighlight">\(G\)</span> is the MEV generating function. If an alternative
 <span class="math notranslate nohighlight">\(i\)</span> is not available, then <span class="math notranslate nohighlight">\(G_i = 0\)</span>.</p>
 </p></li>
-<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
 always available.</p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -1178,37 +1093,37 @@ calculated.</p></li>
 \ln G_j(e^{V_1},\ldots,e^{V_J})}}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.mev_endogenousSampling">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">mev_endogenousSampling</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#mev_endogenousSampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.mev_endogenousSampling" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.mev_endogenousSampling">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">mev_endogenousSampling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logGi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">av</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#mev_endogenousSampling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.mev_endogenousSampling" title="Permalink to this definition"></a></dt>
 <dd><p>Choice probability for a MEV model, including the correction
 for endogenous sampling as proposed by
 <a class="reference external" href="http://dx.doi.org/10.1016/j.trb.2007.09.003">Bierlaire, Bolduc and McFadden (2008)</a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
+<li><p><strong>logGi</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – <p>a dictionary mapping each alternative id with the function</p>
 <div class="math notranslate nohighlight">
 \[\ln \frac{\partial G}{\partial y_i}
 (e^{V_1}, \ldots, e^{V_J})\]</div>
 <p>where <span class="math notranslate nohighlight">\(G\)</span> is the MEV generating function. If an alternative
 <span class="math notranslate nohighlight">\(i\)</span> is not available, then <span class="math notranslate nohighlight">\(G_i = 0\)</span>.</p>
 </p></li>
-<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>av</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
 always available.</p></li>
-<li><p><strong>correction</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – a dict of expressions for the correstion terms
+<li><p><strong>correction</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – a dict of expressions for the correstion terms
 of each alternative.</p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -1223,21 +1138,21 @@ calculated.</p></li>
 <p>where <span class="math notranslate nohighlight">\(\omega_i\)</span> is the correction term for alternative <span class="math notranslate nohighlight">\(i\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.nested">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">nested</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.nested" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.nested">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.nested" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the nested logit model as a MEV model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability
 of each alternative, indexed by numerical
 ids. Must be consistent with V, or None. In
 this case, all alternatives are supposed to
@@ -1245,7 +1160,7 @@ be always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests. Each item is also
 a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions. Expression
+<li><p>an object of type biogeme.expressions. expr.Expression
 representing the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the
 alternatives belonging to the nest.</p></li>
@@ -1257,7 +1172,7 @@ alternatives belonging to the nest.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
 </ul>
 </dd>
@@ -1267,7 +1182,7 @@ based on the derivatives of the MEV generating function produced
 by the function getMevForNested</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the definition of the nests is invalid.</p>
@@ -1276,17 +1191,17 @@ by the function getMevForNested</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.nestedMevMu">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">nestedMevMu</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#nestedMevMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.nestedMevMu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.nestedMevMu">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">nestedMevMu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#nestedMevMu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.nestedMevMu" title="Permalink to this definition"></a></dt>
 <dd><p>Implements the nested logit model as a MEV model, where mu is also
 a parameter, if the user wants to test different normalization
 schemes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the utility functions of
+<li><p><strong>V</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the utility functions of
 each alternative, indexed by numerical ids.</p></li>
-<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em>) – dict of objects representing the availability of each
+<li><p><strong>availability</strong> (<em>dict</em><em>(</em><em>int:biogeme.expressions.expr.Expression</em><em>)</em>) – dict of objects representing the availability of each
 alternative (<span class="math notranslate nohighlight">\(a_i\)</span> in the above formula), indexed
 by numerical ids. Must be consistent with V, or
 None. In this case, all alternatives are supposed to be
@@ -1294,7 +1209,7 @@ always available.</p></li>
 <li><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
 Each item is also a tuple containing two items:</p>
 <ul>
-<li><p>an object of type biogeme.expressions.Expression  representing
+<li><p>an object of type biogeme.expressions.expr.Expression  representing
 the nest parameter,</p></li>
 <li><p>a list containing the list of identifiers of the alternatives
 belonging to the nest.</p></li>
@@ -1306,9 +1221,9 @@ belonging to the nest.</p></li>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – id of the alternative for which the probability must be
+<li><p><strong>choice</strong> (<em>biogeme.expressions.expr.Expression</em>) – id of the alternative for which the probability must be
 calculated.</p></li>
-<li><p><strong>mu</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression producing the value of the top-level scale parameter.</p></li>
+<li><p><strong>mu</strong> (<em>biogeme.expressions.expr.Expression</em>) – expression producing the value of the top-level scale parameter.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1324,20 +1239,20 @@ e^{\mu_m V_i}\right)^{\frac{\mu}{\mu_m}-1}\]</div>
 <span class="math notranslate nohighlight">\(G\)</span> is the MEV generating function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.piecewise">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">piecewise</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewise" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.piecewise">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">piecewise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewise" title="Permalink to this definition"></a></dt>
 <dd><p>Obsolete function. Present for compatibility only</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.piecewiseFormula">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">piecewiseFormula</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initialBetas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewiseFormula"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewiseFormula" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.piecewiseFormula">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">piecewiseFormula</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewiseFormula"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewiseFormula" title="Permalink to this definition"></a></dt>
 <dd><p>Generate the formula for a piecewise linear specification.</p>
 <p>If there are K thresholds, K-1 variables are generated. The first
 and last thresholds can be defined as None, corresponding to
@@ -1356,25 +1271,26 @@ t &lt; a \\ t-a &amp; \text{if } a \leq t &lt; a+b \\ b  &amp;
 <li><p><strong>variable</strong> (<em>string</em>) – name of the variable for which we need the
 piecewise linear transform.</p></li>
 <li><p><strong>thresholds</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – list of thresholds</p></li>
-<li><p><strong>initialBetas</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – list of values to initialize the beta
-parameters.  The number of entries should be
-the number of thresholds, plus one. If None,
-the value of zero is used. Default: none.</p></li>
+<li><p><strong>betas</strong> (<em>list</em><em>(</em><em>biogeme.expresssions.Beta</em><em>)</em>) – list of beta parameters to be used in the
+specification.  The number of entries should be the number of
+thresholds, minus one. If None, for each interval, the
+parameter Beta(‘beta_VAR_interval’,0, None, None, 0) is used,
+where var is the name of the variable. Default: none.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>expression of  the piecewise linear specification.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
+<dd class="field-odd"><p>biogeme.expressions.expr.Expression</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the thresholds are not defined properly,
 which means that only the first and the last threshold can be set
 to None.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the length of list <code class="docutils literal notranslate"><span class="pre">initialBetas</span></code> is not equal to
-the length of <code class="docutils literal notranslate"><span class="pre">thresholds</span></code> minus one.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the length of list <code class="docutils literal notranslate"><span class="pre">initialexpr.Betas</span></code> is
+not equal to the length of <code class="docutils literal notranslate"><span class="pre">thresholds</span></code> minus one.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1385,8 +1301,8 @@ the length of <code class="docutils literal notranslate"><span class="pre">thres
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.piecewiseFunction">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">piecewiseFunction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewiseFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewiseFunction" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.piecewiseFunction">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">piecewiseFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">betas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewiseFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewiseFunction" title="Permalink to this definition"></a></dt>
 <dd><p>Plot a piecewise linear specification.</p>
 <p>If there are K thresholds, K-1 variables are generated. The first
 and last thresholds can be defined as None, corresponding to
@@ -1423,8 +1339,8 @@ to None.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.models.piecewiseVariables">
-<code class="sig-prename descclassname"><span class="pre">biogeme.models.</span></code><code class="sig-name descname"><span class="pre">piecewiseVariables</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewiseVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewiseVariables" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.models.piecewiseVariables">
+<span class="sig-prename descclassname"><span class="pre">biogeme.models.</span></span><span class="sig-name descname"><span class="pre">piecewiseVariables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/models.html#piecewiseVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.models.piecewiseVariables" title="Permalink to this definition"></a></dt>
 <dd><p>Generate the variables to include in a piecewise linear specification.</p>
 <p>If there are K thresholds, K-1 variables are generated. The first
 and last thresholds can be defined as None, corresponding to
@@ -1439,7 +1355,7 @@ t &lt; a \\ t-a &amp; \text{if } a \leq t &lt; a+b \\ b  &amp;
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>variable</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a><em> or </em><em>str</em>) – variable for which we need the piecewise linear
+<li><p><strong>variable</strong> (<em>biogeme.expressions.expr.Expression</em><em> or </em><em>str</em>) – variable for which we need the piecewise linear
 transform. The expression itself or the name of the variable
 can be given.</p></li>
 <li><p><strong>thresholds</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – list of thresholds</p></li>
@@ -1449,7 +1365,7 @@ can be given.</p></li>
 <dd class="field-even"><p>list of variables to for the piecewise linear specification.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>list(<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a>)</p>
+<dd class="field-odd"><p>list(biogeme.expressions.expr.Expression)</p>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the thresholds are not defined properly,
@@ -1463,55 +1379,38 @@ to None.</p>
 </div>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="optimization.html" class="btn btn-neutral float-right" title="Optimization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="messaging.html" class="btn btn-neutral float-left" title="Messaging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="optimization.html" class="btn btn-neutral float-right" title="Optimization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

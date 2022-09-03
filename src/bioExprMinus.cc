@@ -27,9 +27,9 @@ const bioDerivatives* bioExprMinus::getValueAndDerivatives(std::vector<bioUInt> 
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+  theDerivatives.resize(literalIds.size()) ;
 
   bioUInt n = literalIds.size() ;
   const bioDerivatives* leftResult = left->getValueAndDerivatives(literalIds,gradient,hessian) ;

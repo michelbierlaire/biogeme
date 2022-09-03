@@ -19,7 +19,6 @@ import biogeme.results as res
 import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
-    DefineVariable,
     log,
     bioDraws,
     MonteCarlo,
@@ -53,33 +52,36 @@ structBetas = structResults.getBetaValues()
 ### Variables
 
 # Piecewise linear definition of income
-ScaledIncome = DefineVariable(
-    'ScaledIncome', CalculatedIncome / 1000, database
-)
+ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 thresholds = [None, 4, 6, 8, 10, None]
+beta_names = [
+        'beta_ScaledIncome_minus_inf_4',
+        'beta_ScaledIncome_4_6',
+        'beta_ScaledIncome_6_8',
+        'beta_ScaledIncome_8_10',
+        'beta_ScaledIncome_10_inf',
+]
+
 formulaIncome = models.piecewiseFormula(
     ScaledIncome,
     thresholds,
     [
-        structBetas['beta_ScaledIncome_lessthan_4'],
-        structBetas['beta_ScaledIncome_4_6'],
-        structBetas['beta_ScaledIncome_6_8'],
-        structBetas['beta_ScaledIncome_8_10'],
-        structBetas['beta_ScaledIncome_10_more'],
+        Beta(name, structBetas[name], None, None, 0)
+        for name in beta_names
     ],
 )
 
 # Definition of other variables
-age_65_more = DefineVariable('age_65_more', age >= 65, database)
-moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
-moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
-individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
-male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+age_65_more = database.DefineVariable('age_65_more', age >= 65)
+moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
+moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
+individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
+male = database.DefineVariable('male', Gender == 1)
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
-haveGA = DefineVariable('haveGA', GenAbST == 1, database)
-highEducation = DefineVariable('highEducation', Education >= 6, database)
+haveGA = database.DefineVariable('haveGA', GenAbST == 1)
+highEducation = database.DefineVariable('highEducation', Education >= 6)
 
 
 ### Coefficients
@@ -331,19 +333,19 @@ BETA_WAITING_TIME = Beta(
     'BETA_WAITING_TIME', choiceBetas['BETA_WAITING_TIME'], None, None, 0
 )
 
-TimePT_scaled = DefineVariable('TimePT_scaled', TimePT / 200, database)
-TimeCar_scaled = DefineVariable('TimeCar_scaled', TimeCar / 200, database)
-MarginalCostPT_scaled = DefineVariable(
-    'MarginalCostPT_scaled', MarginalCostPT / 10, database
+TimePT_scaled = database.DefineVariable('TimePT_scaled', TimePT / 200)
+TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
+MarginalCostPT_scaled = database.DefineVariable(
+    'MarginalCostPT_scaled', MarginalCostPT / 10
 )
-CostCarCHF_scaled = DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10, database
+CostCarCHF_scaled = database.DefineVariable(
+    'CostCarCHF_scaled', CostCarCHF / 10
 )
-distance_km_scaled = DefineVariable(
-    'distance_km_scaled', distance_km / 5, database
+distance_km_scaled = database.DefineVariable(
+    'distance_km_scaled', distance_km / 5
 )
-PurpHWH = DefineVariable('PurpHWH', TripPurpose == 1, database)
-PurpOther = DefineVariable('PurpOther', TripPurpose != 1, database)
+PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
+PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 
 ### Definition of utility functions:
 
@@ -399,7 +401,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=10000)
+biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
 biogeme.modelName = '05latentChoiceFull_mc'
 
 # Estimate the parameters

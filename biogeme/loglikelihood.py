@@ -41,7 +41,7 @@ def mixedloglikelihood(prob):
 
     :return: the simulated loglikelihood, given by
 
-        .. math:: \\ln\\left(\\sum_{r=1}^R 
+        .. math:: \\ln\\left(\\sum_{r=1}^R
             P(i|\\xi^r_1,\\ldots,\\xi^r_L) \\right)
 
         where :math:`R` is the number of draws, and :math:`\\xi_j^r`
@@ -97,10 +97,10 @@ def loglikelihoodregression(meas, model, sigma):
         that is
 
     .. math:: -\\left( \\frac{(y-m)^2}{2\\sigma^2} \\right) -
-              \\log(\\sigma) - \\frac{1}{2}\\log(2\\pi)
+              \\frac{1}{2}\\log(\\sigma^2) - \\frac{1}{2}\\log(2\\pi)
 
     :rtype: biogeme.expressions.Expression
     """
     t = (meas - model) / sigma
-    f = -(t ** 2) / 2 - log(sigma) - 0.9189385332
+    f = -(t**2) / 2 - log(sigma**2) / 2 - 0.9189385332
     return f

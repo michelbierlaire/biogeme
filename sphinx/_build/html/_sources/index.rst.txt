@@ -19,11 +19,13 @@ Welcome to Biogeme's documentation!
   exceptions.rst
   expressions.rst
   filenames.rst
+  idmanager.rst
   loglikelihood.rst
   messaging.rst
   models.rst
   optimization.rst
   results.rst
+  segmentation.rst
   singleton.rst
   tools.rst
   version.rst

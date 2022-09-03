@@ -28,9 +28,10 @@ const bioDerivatives* bioExprMax::getValueAndDerivatives(std::vector<bioUInt> li
 						     bioBoolean gradient,
 						     bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {

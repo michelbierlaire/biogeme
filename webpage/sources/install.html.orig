@@ -96,13 +96,22 @@
 	    <a href="https://youtu.be/HkdAHXoRtos"
 	       target="_blank">this one</a>.
 	  </p>
-	  <p>The command to install Biogeme from source is
-	      <p><code>python setup.py install</code></p>
+	  <p>The command to install Biogeme from source is</p>
+	  <p><code>pip install -ve .</code></p>
+	  <p>that must be executed in the directory containing the
+	  file <code>setup.py</code>.</p>
 	    <p>Note that it requires a proper 
             environment to compile C++ code. In general, it is readily available on Linux, and
             MacOSX (if <a href="https://developer.apple.com/xcode/"
-			  target="_blank">Xcode</a> has been installed). It may be more
-            complicated on Windows. 
+			  target="_blank">Xcode</a> has been
+              installed).</p>
+	  <p>On Windows,
+	    <ol>
+	      <li>Install <a href="https://www.msys2.org">MSYS2</a>.</li>
+	      <li>Add c:\msys64\mingw64\bin in the Windows PATH.</li>
+	      <li>Install using the following command:
+		<p><code>pip install --global-option build_ext --global-option --compiler=mingw32</code>.</p></li>
+	      </p>
 	</div>
 	<div class="panel-footer">
           <a href="https://github.com/michelbierlaire/biogeme" target="_blank">github.com/michelbierlaire/biogeme</a>
@@ -196,21 +205,20 @@ If it does not work... I don't know :-(
   <p>
     <a href="https://pypi.org/project/biogeme/">pypi.org/project/biogeme/</a>
   </p>
-  If you select the "Download files", you will see the list of files
-  available. What you need to look at are the "Wheel" files. For
-  instance, the following files are available for version 3.2.8:
-  <ul>
-<li>Python 3.6  for MacOSX  : <code>biogeme-3.2.8-cp36-cp36m-macosx_10_9_x86_64.whl</code></li>
-<li>Python 3.6  for Windows  : <code>biogeme-3.2.8-cp36-cp36m-win_amd64.whl</code></li>
-<li>Python 3.7  for MacOSX  : <code>biogeme-3.2.8-cp37-cp37m-macosx_10_9_x86_64.whl</code></li>
-<li>Python 3.7  for Windows  : <code>biogeme-3.2.8-cp37-cp37m-win_amd64.whl</code></li>
-<li>Python 3.8  for MacOSX  : <code>biogeme-3.2.8-cp38-cp38-macosx_10_9_x86_64.whl</code></li>
-<li>Python 3.8  for Windows  : <code>biogeme-3.2.8-cp38-cp38-win_amd64.whl</code></li>
-<li>Python 3.9  for MacOSX  : <code>biogeme-3.2.8-cp39-cp39-macosx_10_9_x86_64.whl</code></li>
-<li>Python 3.9  for Windows  : <code>biogeme-3.2.8-cp39-cp39-win_amd64.whl</code></li>
-<li>Source: <code>biogeme-3.2.8.tar.gz</code></li>
+  <p>For instance, the following files are available for version 3.2.9:
+  <li>Source code: <code>biogeme-3.2.9.tar.gz</code></li>
+<li>Python 3.10 for MacOSX: <code>biogeme-3.2.9-cp310-cp310-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.9 for Windows: <code>biogeme-3.2.9-cp39-cp39-win_amd64.whl</code></li>
+<li>Python 3.9 for MacOSX: <code>biogeme-3.2.9-cp39-cp39-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.8 for Windows: <code>biogeme-3.2.9-cp38-cp38-win_amd64.whl</code></li>
+<li>Python 3.8 for MacOSX: <code>biogeme-3.2.9-cp38-cp38-macosx_10_9_x86_64.whl</code></li>
+<li>Python 3.7 for Windows: <code>biogeme-3.2.9-cp37-cp37m-win_amd64.whl</code></li>
+<li>Python 3.7 for MacOSX: <code>biogeme-3.2.9-cp37-cp37m-macosx_10_9_x86_64.whl</code></li>
+    <li>Source: <code>biogeme-3.2.1.tar.gz</code></li>
   </ul>
-  It means that you must use Python 3.6, 3.7, 3.8 or 3.9.
+  It means that you can use Python 3.7, 3.8 and 3.9 on both platforms,
+while the version for Python 3.10 is only available on MacOSX.
+</p>
 </dd>
 </dl>
 </div>
@@ -233,17 +241,15 @@ If it does not work... I don't know :-(
     </ul>
     The result should look like the following:
     <pre>
-      Python 3.9.5 (default, May 18 2021, 12:31:01)
-      [Clang 10.0.0 ] :: Anaconda, Inc. on darwin
-      Type "help", "copyright", "credits" or "license" for more information.
-      >>> import biogeme.version as ver
-      >>> print(ver.getText())
-      biogeme 3.2.8 [2021-08-05]
-      Version entirely written in Python
-      Home page: http://biogeme.epfl.ch
-      Submit questions to https://groups.google.com/d/forum/biogeme
-      Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
-      
+Python 3.10.4 (main, Mar 31 2022, 03:38:35) [Clang 12.0.0 ] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import biogeme.version as ver
+>>> print(ver.getText())
+biogeme 3.2.9 [2022-08-19]
+Version entirely written in Python
+Home page: http://biogeme.epfl.ch
+Submit questions to https://groups.google.com/d/forum/biogeme
+Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
     </pre>
 
   </div>

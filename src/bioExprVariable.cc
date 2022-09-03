@@ -57,7 +57,15 @@ bioReal bioExprVariable::getLiteralValue() const {
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
     if (theVariableId >= (*data)[*rowIndex].size()) {
-      throw bioExceptOutOfRange<bioUInt>(__FILE__,__LINE__,theVariableId,0,(*data)[*rowIndex].size() - 1) ;
+      std::stringstream str ;
+      str << theName
+	  << ": "
+	  << "Value "
+	  << theVariableId
+	  << " out of range [0,"
+	  << (*data)[*rowIndex].size() - 1
+	  <<"]" ;
+      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
     value = (*data)[*rowIndex][theVariableId] ;
   }

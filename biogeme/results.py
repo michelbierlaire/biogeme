@@ -17,6 +17,8 @@ Implementation of class contaning and processing the estimation results.
 
 import pickle
 import datetime
+from collections import namedtuple
+import urllib.request as urlr
 import pandas as pd
 import numpy as np
 from scipy import linalg
@@ -25,6 +27,11 @@ import biogeme.version as bv
 import biogeme.filenames as bf
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
+from biogeme import tools
+
+logger = msg.bioMessage()
+
+GeneralStatistic = namedtuple('GeneralStatistic', 'value format')
 
 
 def calcPValue(t):
@@ -63,31 +70,31 @@ class beta:
         :type bounds: float,float
         """
 
-        self.name = name #: Name of the parameter
+        self.name = name  #: Name of the parameter
 
-        self.value = value #: Current value
+        self.value = value  #: Current value
 
-        self.lb = bounds[0] #: Lower bound
+        self.lb = bounds[0]  #: Lower bound
 
-        self.ub = bounds[1] #: Upper bound
+        self.ub = bounds[1]  #: Upper bound
 
-        self.stdErr = None #: Standard error
+        self.stdErr = None  #: Standard error
 
-        self.tTest = None #: t-test
+        self.tTest = None  #: t-test
 
-        self.pValue = None #: p-value
+        self.pValue = None  #: p-value
 
-        self.robust_stdErr = None #: Robust standard error
+        self.robust_stdErr = None  #: Robust standard error
 
-        self.robust_tTest = None #: Robust t-test
+        self.robust_tTest = None  #: Robust t-test
 
-        self.robust_pValue = None #: Robust p-value
+        self.robust_pValue = None  #: Robust p-value
 
-        self.bootstrap_stdErr = None #: Std error calculated from bootstrap
+        self.bootstrap_stdErr = None  #: Std error calculated from bootstrap
 
-        self.bootstrap_tTest = None #: t-test calculated from bootstrap
+        self.bootstrap_tTest = None  #: t-test calculated from bootstrap
 
-        self.bootstrap_pValue = None #: p-value calculated from bootstrap
+        self.bootstrap_pValue = None  #: p-value calculated from bootstrap
 
     def isBoundActive(self, threshold=1.0e-6):
         """Check if one of the two bound is 'numerically' active. Being
@@ -207,16 +214,17 @@ class rawResults:
         :type bootstrap: numpy.array
         """
 
+        self.modelName = theModel.modelName  #: Name of the model
 
-        self.modelName = theModel.modelName #: Name of the model
+        self.userNotes = theModel.userNotes  #: User notes
 
-        self.userNotes = theModel.userNotes #: User notes
+        self.nparam = len(betaValues)  #: Number of parameters
 
-        self.nparam = len(betaValues) #: Number of parameters
+        self.betaValues = betaValues  #: Values of the parameters
 
-        self.betaValues = betaValues #: Values of the parameters
-
-        self.betaNames = theModel.freeBetaNames #: Names of the parameters
+        self.betaNames = (
+            theModel.id_manager.free_betas.names
+        )  #: Names of the parameters
 
         self.initLogLike = theModel.initLogLike
         """Value of the likelihood function with the initial value of the
@@ -227,22 +235,22 @@ class rawResults:
         """Value of the likelihood function with equal probability model
         """
 
-        self.betas = list() #: List of objects of type results.beta
+        self.betas = []  #: List of objects of type results.beta
 
         for b, n in zip(betaValues, self.betaNames):
             bounds = theModel.getBoundsOnBeta(n)
             self.betas.append(beta(n, b, bounds))
 
-        self.logLike = fgHb[0] #: Value of the loglikelihood function
+        self.logLike = fgHb[0]  #: Value of the loglikelihood function
 
-        self.g = fgHb[1] #: Value of the gradient of the loglikelihood function
+        self.g = fgHb[1]  #: Value of the gradient of the loglik. function
 
-        self.H = fgHb[2] #: Value of the hessian of the loglikelihood function
+        self.H = fgHb[2]  #: Value of the hessian of the loglik. function
 
         self.bhhh = fgHb[3]
         """Value of the BHHH matrix of the loglikelihood function"""
 
-        self.dataname = theModel.database.name #: Name of the database
+        self.dataname = theModel.database.name  #: Name of the database
 
         self.sampleSize = theModel.database.getSampleSize()
         """Sample size (number of individuals if panel data)"""
@@ -274,13 +282,13 @@ class rawResults:
         self.numberOfThreads = theModel.numberOfThreads
         """Number of threads used for parallel computing"""
 
-        self.htmlFileName = None #: Name of the HTML output file
+        self.htmlFileName = None  #: Name of the HTML output file
 
-        self.F12FileName = None #: Name of the F12 output file
+        self.F12FileName = None  #: Name of the F12 output file
 
-        self.latexFileName = None #: Name of the LaTeX output file
+        self.latexFileName = None  #: Name of the LaTeX output file
 
-        self.pickleFileName = None #: Name of the pickle outpt file
+        self.pickleFileName = None  #: Name of the pickle outpt file
 
         self.bootstrap = bootstrap
         """output of the bootstrapping. numpy array, of size B x K,
@@ -294,8 +302,7 @@ class rawResults:
             self.bootstrap_time = theModel.bootstrap_time
             """ Time needed to perform the bootstrap"""
 
-        self.secondOrderTable = None #: Second order statistics
-
+        self.secondOrderTable = None  #: Second order statistics
 
 
 class bioResults:
@@ -308,13 +315,11 @@ class bioResults:
             Default: None.
         :type theRawResults: biogeme.results.rawResults
         :param pickleFile: name of the file containing the raw results in
-            pickle format. Default: None.
+            pickle format. It can be a URL. Default: None.
         :type pickleFile: string
 
         :raise biogeme.exceptions.biogemeError: if no data is provided.
         """
-
-        self.logger = msg.bioMessage()
 
         if theRawResults is not None:
             self.data = theRawResults
@@ -322,8 +327,18 @@ class bioResults:
             raw estimation results.
             """
         elif pickleFile is not None:
-            with open(pickleFile, 'rb') as f:
-                self.data = pickle.load(f)
+            try:
+                with urlr.urlopen(pickleFile) as p:
+                    self.data = pickle.load(p)
+            except Exception:
+                pass
+            try:
+                with open(pickleFile, 'rb') as f:
+                    self.data = pickle.load(f)
+            except FileNotFoundError as e:
+                error_msg = f'File {pickleFile} not found'
+                raise excep.biogemeError(error_msg) from e
+
         else:
             raise excep.biogemeError('No data provided.')
 
@@ -341,9 +356,7 @@ class bioResults:
         with open(self.data.pickleFileName, 'wb') as f:
             pickle.dump(self.data, f)
 
-        self.logger.general(
-            f'Results saved in file {self.data.pickleFileName}'
-        )
+        logger.general(f'Results saved in file {self.data.pickleFileName}')
         return self.data.pickleFileName
 
     def _calculateTest(self, i, j, matrix):
@@ -522,7 +535,7 @@ class bioResults:
                         self.data.bootstrap_varCovar, np.finfo(float).max
                     )
 
-            self.data.secondOrderTable = dict()
+            self.data.secondOrderTable = {}
             for i in range(self.data.nparam):
                 for j in range(i):
                     t = self._calculateTest(i, j, self.data.varCovar)
@@ -670,8 +683,11 @@ class bioResults:
         h += bv.getLaTeX()
         return h
 
-    def getLaTeX(self):
+    def getLaTeX(self, onlyRobust=True):
         """Get the results coded in LaTeX
+
+        :param onlyRobust: if True, only the robust statistics are included
+        :type onlyRobust: bool
 
         :return: LaTeX code
         :rtype: string
@@ -707,7 +723,7 @@ class bioResults:
 
         h += '\n%%Parameter estimates\n'
         h += '\\section{Parameter estimates}\n'
-        table = self.getEstimatedParameters()
+        table = self.getEstimatedParameters(onlyRobust)
 
         def formatting(x):
             """Defines the formatting for the to_latex function of pandas"""
@@ -717,69 +733,115 @@ class bioResults:
 
             return f'{res}.0'
 
-        h += table.to_latex(float_format=formatting)
+        ## Need to check for old versions of Pandas.
+        try:
+            h += table.style.format(formatting).to_latex()
+        except AttributeError:
+            h += table.to_latex(float_format=formatting)
 
         h += '\n%%Correlation\n'
         h += '\\section{Correlation}\n'
         table = self.getCorrelationResults()
-        h += table.to_latex(float_format=formatting)
+        ## Need to check for old versions of Pandas.
+        try:
+            h += table.style.format(formatting).to_latex()
+        except AttributeError:
+            h += table.to_latex(float_format=formatting)
+
         return h
 
     def getGeneralStatistics(self):
         """Format the results in a dict
 
         :return: dict with the results. The keys describe each
-                 content. Each element is a tuple, with the value and its
-                 preferred formatting.
+                 content. Each element is a GeneralStatistic tuple,
+                 with the value and its preferred formatting.
 
         Example::
 
                      'Init log likelihood': (-115.30029248549191, '.7g')
 
         :rtype: dict(string:float,string)
+
         """
         d = {}
-        d['Number of estimated parameters'] = self.data.nparam, ''
+        d['Number of estimated parameters'] = GeneralStatistic(
+            value=self.data.nparam, format=''
+        )
         nf = self.numberOfFreeParameters()
         if nf != self.data.nparam:
-            d['Number of free parameters'] = nf, ''
-        d['Sample size'] = self.data.sampleSize, ''
-        if self.data.sampleSize != self.data.numberOfObservations:
-            d['Observations'] = self.data.numberOfObservations, ''
-        d['Excluded observations'] = self.data.excludedData, ''
-        if self.data.nullLogLike is not None:
-            d['Null log likelihood'] = self.data.nullLogLike, '.7g'
-        d['Init log likelihood'] = self.data.initLogLike, '.7g'
-        d['Final log likelihood'] = self.data.logLike, '.7g'
-        if self.data.nullLogLike is not None:
-            d['Likelihood ratio test for the null model'] = (
-                self.data.likelihoodRatioTestNull,
-                '.7g',
+            d['Number of free parameters'] = GeneralStatistic(
+                value=nf, format=''
             )
-            d['Rho-square for the null model'] = self.data.rhoSquareNull, '.3g'
-            d['Rho-square-bar for the null model'] = (
-                self.data.rhoBarSquareNull,
-                '.3g',
-            )
-        d['Likelihood ratio test for the init. model'] = (
-            self.data.likelihoodRatioTest,
-            '.7g',
+        d['Sample size'] = GeneralStatistic(
+            value=self.data.sampleSize, format=''
         )
-        d['Rho-square for the init. model'] = self.data.rhoSquare, '.3g'
-        d['Rho-square-bar for the init. model'] = self.data.rhoBarSquare, '.3g'
-        d['Akaike Information Criterion'] = self.data.akaike, '.7g'
-        d['Bayesian Information Criterion'] = self.data.bayesian, '.7g'
-        d['Final gradient norm'] = self.data.gradientNorm, '.4E'
+        if self.data.sampleSize != self.data.numberOfObservations:
+            d['Observations'] = GeneralStatistic(
+                value=self.data.numberOfObservations, format=''
+            )
+        d['Excluded observations'] = GeneralStatistic(
+            value=self.data.excludedData, format=''
+        )
+        if self.data.nullLogLike is not None:
+            d['Null log likelihood'] = GeneralStatistic(
+                value=self.data.nullLogLike, format='.7g'
+            )
+        d['Init log likelihood'] = GeneralStatistic(
+            value=self.data.initLogLike, format='.7g'
+        )
+        d['Final log likelihood'] = GeneralStatistic(
+            value=self.data.logLike, format='.7g'
+        )
+        if self.data.nullLogLike is not None:
+            d['Likelihood ratio test for the null model'] = GeneralStatistic(
+                value=self.data.likelihoodRatioTestNull,
+                format='.7g',
+            )
+            d['Rho-square for the null model'] = GeneralStatistic(
+                value=self.data.rhoSquareNull, format='.3g'
+            )
+            d['Rho-square-bar for the null model'] = GeneralStatistic(
+                value=self.data.rhoBarSquareNull,
+                format='.3g',
+            )
+        d['Likelihood ratio test for the init. model'] = GeneralStatistic(
+            value=self.data.likelihoodRatioTest,
+            format='.7g',
+        )
+        d['Rho-square for the init. model'] = GeneralStatistic(
+            value=self.data.rhoSquare, format='.3g'
+        )
+        d['Rho-square-bar for the init. model'] = GeneralStatistic(
+            value=self.data.rhoBarSquare, format='.3g'
+        )
+        d['Akaike Information Criterion'] = GeneralStatistic(
+            value=self.data.akaike, format='.7g'
+        )
+        d['Bayesian Information Criterion'] = GeneralStatistic(
+            value=self.data.bayesian, format='.7g'
+        )
+        d['Final gradient norm'] = GeneralStatistic(
+            value=self.data.gradientNorm, format='.4E'
+        )
         if self.data.monteCarlo:
-            d['Number of draws'] = self.data.numberOfDraws, ''
-            d['Draws generation time'] = self.data.drawsProcessingTime, ''
-            d['Types of draws'] = (
-                [f'{i}: {k}' for i, k in self.data.typesOfDraws.items()],
-                '',
+            d['Number of draws'] = GeneralStatistic(
+                value=self.data.numberOfDraws, format=''
+            )
+            d['Draws generation time'] = GeneralStatistic(
+                value=self.data.drawsProcessingTime, format=''
+            )
+            d['Types of draws'] = GeneralStatistic(
+                value=[f'{i}: {k}' for i, k in self.data.typesOfDraws.items()],
+                format='',
             )
         if self.data.bootstrap is not None:
-            d['Bootstrapping time'] = self.data.bootstrap_time, ''
-        d['Nbr of threads'] = self.data.numberOfThreads, ''
+            d['Bootstrapping time'] = GeneralStatistic(
+                value=self.data.bootstrap_time, format=''
+            )
+        d['Nbr of threads'] = GeneralStatistic(
+            value=self.data.numberOfThreads, format=''
+        )
         return d
 
     def printGeneralStatistics(self):
@@ -818,9 +880,12 @@ class bioResults:
         """
         return sum([not b.isBoundActive() for b in self.data.betas])
 
-    def getEstimatedParameters(self):
+    def getEstimatedParameters(self, onlyRobust=True):
         """Gather the estimated parameters and the corresponding statistics in
         a Pandas dataframe.
+
+        :param onlyRobust: if True, only the robust statistics are included
+        :type onlyRobust: bool
 
         :return: Pandas dataframe with the results
         :rtype: pandas.DataFrame
@@ -832,27 +897,44 @@ class bioResults:
             if b.isBoundActive():
                 anyActiveBound = True
         if anyActiveBound:
-            columns = [
-                'Value',
-                'Active bound',
-                'Std err',
-                't-test',
-                'p-value',
-                'Rob. Std err',
-                'Rob. t-test',
-                'Rob. p-value',
-            ]
+            if onlyRobust:
+                columns = [
+                    'Value',
+                    'Active bound',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
+            else:
+                columns = [
+                    'Value',
+                    'Active bound',
+                    'Std err',
+                    't-test',
+                    'p-value',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
         else:
-            columns = [
-                'Value',
-                'Std err',
-                't-test',
-                'p-value',
-                'Rob. Std err',
-                'Rob. t-test',
-                'Rob. p-value',
-            ]
-        if self.data.bootstrap is not None:
+            if onlyRobust:
+                columns = [
+                    'Value',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
+            else:
+                columns = [
+                    'Value',
+                    'Std err',
+                    't-test',
+                    'p-value',
+                    'Rob. Std err',
+                    'Rob. t-test',
+                    'Rob. p-value',
+                ]
+        if self.data.bootstrap is not None and not onlyRobust:
             columns += [
                 f'Bootstrap[{len(self.data.bootstrap)}] Std err',
                 'Bootstrap t-test',
@@ -861,27 +943,48 @@ class bioResults:
         table = pd.DataFrame(columns=columns)
         for b in self.data.betas:
             if anyActiveBound:
-                arow = {
-                    'Value': b.value,
-                    'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
-                    'Std err': b.stdErr,
-                    't-test': b.tTest,
-                    'p-value': b.pValue,
-                    'Rob. Std err': b.robust_stdErr,
-                    'Rob. t-test': b.robust_tTest,
-                    'Rob. p-value': b.robust_pValue,
-                }
+                if onlyRobust:
+                    arow = {
+                        'Value': b.value,
+                        'Active bound': {True: 1.0, False: 0.0}[
+                            b.isBoundActive()
+                        ],
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
+                else:
+                    arow = {
+                        'Value': b.value,
+                        'Active bound': {True: 1.0, False: 0.0}[
+                            b.isBoundActive()
+                        ],
+                        'Std err': b.stdErr,
+                        't-test': b.tTest,
+                        'p-value': b.pValue,
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
             else:
-                arow = {
-                    'Value': b.value,
-                    'Std err': b.stdErr,
-                    't-test': b.tTest,
-                    'p-value': b.pValue,
-                    'Rob. Std err': b.robust_stdErr,
-                    'Rob. t-test': b.robust_tTest,
-                    'Rob. p-value': b.robust_pValue,
-                }
-            if self.data.bootstrap is not None:
+                if onlyRobust:
+                    arow = {
+                        'Value': b.value,
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
+                else:
+                    arow = {
+                        'Value': b.value,
+                        'Std err': b.stdErr,
+                        't-test': b.tTest,
+                        'p-value': b.pValue,
+                        'Rob. Std err': b.robust_stdErr,
+                        'Rob. t-test': b.robust_tTest,
+                        'Rob. p-value': b.robust_pValue,
+                    }
+            if self.data.bootstrap is not None and not onlyRobust:
                 arow[
                     f'Bootstrap[{len(self.data.bootstrap)}] Std err'
                 ] = b.bootstrap_stdErr
@@ -908,9 +1011,7 @@ class bioResults:
                 if p not in self.data.betaNames:
                     unknown.append(p)
             if unknown:
-                self.logger.warning(
-                    f'Unknown parameters are ignored: {unknown}'
-                )
+                logger.warning(f'Unknown parameters are ignored: {unknown}')
         columns = [
             'Covariance',
             'Correlation',
@@ -1047,15 +1148,15 @@ class bioResults:
             h += '</tr>\n'
         h += '</table>\n'
 
-        h += '<p>Smallest eigenvalue: {:.6g}</p>\n'.format(
-            self.data.smallestEigenValue
+        h += (
+            f'<p>Smallest eigenvalue: '
+            f'{self.data.smallestEigenValue:.6g}</p>\n'
         )
-        h += '<p>Largest eigenvalue: {:.6g}</p>\n'.format(
-            self.data.largestEigenValue
+        h += (
+            f'<p>Largest eigenvalue: '
+            f'{self.data.largestEigenValue:.6g}</p>\n'
         )
-        h += '<p>Condition number: {:.6g}</p>\n'.format(
-            self.data.conditionNumber
-        )
+        h += f'<p>Condition number: ' f'{self.data.conditionNumber:.6g}</p>\n'
         if np.abs(self.data.smallestEigenValue) <= 1.0e-5:
             h += (
                 '<p>The second derivatives matrix is close to singularity. '
@@ -1089,7 +1190,7 @@ class bioResults:
         :raise biogeme.exceptions.biogemeError: if some requested parameters
             are not available.
         """
-        values = dict()
+        values = {}
         if myBetas is None:
             myBetas = self.data.betaNames
         for b in myBetas:
@@ -1158,14 +1259,14 @@ class bioResults:
         self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
         with open(self.data.htmlFileName, 'w') as f:
             f.write(self.getHtml())
-        self.logger.general(f'Results saved in file {self.data.htmlFileName}')
+        logger.general(f'Results saved in file {self.data.htmlFileName}')
 
     def writeLaTeX(self):
         """Write the results in a LaTeX file."""
         self.data.latexFileName = bf.getNewFileName(self.data.modelName, 'tex')
         with open(self.data.latexFileName, 'w') as f:
             f.write(self.getLaTeX())
-        self.logger.general(f'Results saved in file {self.data.latexFileName}')
+        logger.general(f'Results saved in file {self.data.latexFileName}')
 
     def _getHtmlHeader(self):
         """Prepare the header for the HTML file, containing comments and the
@@ -1326,7 +1427,7 @@ class bioResults:
         #  characters 39-58, standard error      20 chars
 
         mystats = self.getGeneralStatistics()
-        table = self.getEstimatedParameters()
+        table = self.getEstimatedParameters(onlyRobust=False)
         coefNames = list(table.index.values)
         for name in coefNames:
             values = table.loc[name]
@@ -1414,4 +1515,87 @@ class bioResults:
         self.data.F12FileName = bf.getNewFileName(self.data.modelName, 'F12')
         with open(self.data.F12FileName, 'w') as f:
             f.write(self.getF12(robustStdErr))
-        self.logger.general(f'Results saved in file {self.data.F12FileName}')
+        logger.general(f'Results saved in file {self.data.F12FileName}')
+
+    def likelihood_ratio_test(self, other_model, significance_level=0.05):
+        """This function performs a likelihood ratio test between a restricted
+        and an unrestricted model. The "self" model can be either the
+        restricted or the unrestricted.
+
+        :param other_model: other model to perform the test.
+        :type other_model: biogeme.results.bioResults
+
+        :param significance_level: level of significance of the
+            test. Default: 0.05
+        :type significance_level: float
+
+        :return: a tuple containing:
+
+                  - a message with the outcome of the test
+                  - the statistic, that is minus two times the difference
+                    between the loglikelihood  of the two models
+                  - the threshold of the chi square distribution.
+
+        :rtype: LRTuple(str, float, float)
+
+        """
+        LR = self.data.logLike
+        LU = other_model.data.logLike
+        KR = self.data.nparam
+        KU = other_model.data.nparam
+        return tools.likelihood_ratio_test(
+            (LU, KU), (LR, KR), significance_level
+        )
+
+
+def compileEstimationResults(
+    dict_of_results,
+    statistics=(
+        'Number of estimated parameters',
+        'Sample size',
+        'Final log likelihood',
+        'Akaike Information Criterion',
+        'Bayesian Information Criterion',
+    ),
+    include_parameter_estimates=True,
+):
+
+    """Compile estimation results into a common table
+
+    :param dict_of_results: dictionary where the keys are the names of
+        the models, and the values are either the estimation results,
+        or the name of the pickle file where to find them.
+    :type dict_of_results: dict(str:bioResults) or dict(str:str)
+
+    :param statistics: list of statistics to include in the summary
+        table
+    :type statistics: tuple(str)
+
+    :param include_parameter_estimates: if True, the parameter
+        estimates are included.
+    :type include_parameter_estimates: bool
+
+    :return: pandas dataframe with the requested results.
+    :rtype: pandas.DataFrame
+
+    """
+    df = pd.DataFrame(columns=dict_of_results.keys())
+
+    for col, res in dict_of_results.items():
+        if not isinstance(res, bioResults):
+            try:
+                res = bioResults(pickleFile=res)
+            except excep.biogemeError:
+                warning = f'Impossible to access result file {res}'
+                logger.warning(warning)
+                res = None
+        if res is not None:
+            stats_results = res.getGeneralStatistics()
+            for s in statistics:
+                df.loc[s, col] = stats_results[s][0]
+            if include_parameter_estimates:
+                betas = res.getBetaValues()
+                for name, value in betas.items():
+                    df.loc[name, col] = value
+
+    return df.fillna('')

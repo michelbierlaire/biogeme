@@ -1,71 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Distributions &mdash; Biogeme 3.2.7 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Distributions &mdash; Biogeme 3.2.9 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Draws" href="draws.html" />
     <link rel="prev" title="Database" href="database.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="index.html" class="icon icon-home"> Biogeme
-          
-
-          
           </a>
-
-          
-            
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -73,19 +38,8 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
@@ -99,87 +53,48 @@
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
+<li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">Biogeme</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
       <li>Distributions</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/distributions.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="distributions">
-<h1>Distributions<a class="headerlink" href="#distributions" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="distributions">
+<h1>Distributions<a class="headerlink" href="#distributions" title="Permalink to this heading"></a></h1>
 <p>Functions for probability distributions and draws.</p>
-<div class="section" id="module-biogeme.distributions">
-<span id="biogeme-distributions-module"></span><h2>biogeme.distributions module<a class="headerlink" href="#module-biogeme.distributions" title="Permalink to this headline">¶</a></h2>
+<section id="module-biogeme.distributions">
+<span id="biogeme-distributions-module"></span><h2>biogeme.distributions module<a class="headerlink" href="#module-biogeme.distributions" title="Permalink to this heading"></a></h2>
 <p>Implementation of the pdf and CDF of common distributions</p>
 <dl class="field-list simple">
 <dt class="field-odd">author</dt>
@@ -190,8 +105,8 @@
 </dd>
 </dl>
 <dl class="py function">
-<dt id="biogeme.distributions.logisticcdf">
-<code class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></code><code class="sig-name descname"><span class="pre">logisticcdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#logisticcdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.logisticcdf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.distributions.logisticcdf">
+<span class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></span><span class="sig-name descname"><span class="pre">logisticcdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu=`0.0`</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s=`1.0`</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#logisticcdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.logisticcdf" title="Permalink to this definition"></a></dt>
 <dd><p>Logistic CDF</p>
 <p>Cumulative distribution function of a logistic distribution</p>
 <div class="math notranslate nohighlight">
@@ -221,8 +136,8 @@ not verified by the code.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.distributions.lognormalpdf">
-<code class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></code><code class="sig-name descname"><span class="pre">lognormalpdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#lognormalpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.lognormalpdf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.distributions.lognormalpdf">
+<span class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></span><span class="sig-name descname"><span class="pre">lognormalpdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#lognormalpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.lognormalpdf" title="Permalink to this definition"></a></dt>
 <dd><p>Log normal pdf</p>
 <p>Probability density function of a log normal distribution</p>
 <div class="math notranslate nohighlight">
@@ -253,8 +168,8 @@ verified by the code.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.distributions.normalpdf">
-<code class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></code><code class="sig-name descname"><span class="pre">normalpdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#normalpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.normalpdf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.distributions.normalpdf">
+<span class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></span><span class="sig-name descname"><span class="pre">normalpdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu=`0.0`</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s=`1.0`</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#normalpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.normalpdf" title="Permalink to this definition"></a></dt>
 <dd><p>Normal pdf</p>
 <p>Probability density function of a normal distribution</p>
 <div class="math notranslate nohighlight">
@@ -284,8 +199,8 @@ verified by the code.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.distributions.triangularpdf">
-<code class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></code><code class="sig-name descname"><span class="pre">triangularpdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#triangularpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.triangularpdf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.distributions.triangularpdf">
+<span class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></span><span class="sig-name descname"><span class="pre">triangularpdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#triangularpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.triangularpdf" title="Permalink to this definition"></a></dt>
 <dd><p>Triangular pdf</p>
 <p>Probability density function of a triangular distribution</p>
 <div class="math notranslate nohighlight">
@@ -317,8 +232,8 @@ not verified by the code.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="biogeme.distributions.uniformpdf">
-<code class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></code><code class="sig-name descname"><span class="pre">uniformpdf</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#uniformpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.uniformpdf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="biogeme.distributions.uniformpdf">
+<span class="sig-prename descclassname"><span class="pre">biogeme.distributions.</span></span><span class="sig-name descname"><span class="pre">uniformpdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/distributions.html#uniformpdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.distributions.uniformpdf" title="Permalink to this definition"></a></dt>
 <dd><p>Uniform pdf</p>
 <p>Probability density function of a uniform distribution.</p>
 <div class="math notranslate nohighlight">
@@ -346,55 +261,38 @@ not verified by the code.</p>
 </dl>
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="draws.html" class="btn btn-neutral float-right" title="Draws" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="database.html" class="btn btn-neutral float-left" title="Database" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="draws.html" class="btn btn-neutral float-right" title="Draws" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Michel Bierlaire.
-
-    </p>
+    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

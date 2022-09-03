@@ -29,7 +29,7 @@ logger = msg.bioMessage()
 
 def scipy(fct, initBetas, bounds, parameters=None):
 
-    """Optimization interface for Biogeme, based on the scipy 
+    """Optimization interface for Biogeme, based on the scipy
     minimize function.
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -431,7 +431,6 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
     :rtype: numpay.array, dict(str:object)
 
     """
-
     tol = np.finfo(np.float64).eps ** 0.3333
     steptol = 1.0e-5
     cgtol = np.finfo(np.float64).eps ** 0.3333
@@ -470,11 +469,11 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
 
     if proportionTrueHessian == 1.0:
         logger.detailed(
-            '** Optimization: Newton with trust region for simple ' 'bounds'
+            '** Optimization: Newton with trust region for simple bounds'
         )
     elif proportionTrueHessian == 0.0:
         logger.detailed(
-            '** Optimization: BFGS with trust region for simple ' 'bounds'
+            '** Optimization: BFGS with trust region for simple bounds'
         )
     else:
         logger.detailed(

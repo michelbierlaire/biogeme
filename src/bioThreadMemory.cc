@@ -16,6 +16,7 @@ bioThreadMemory::bioThreadMemory() {
 }
 
 void bioThreadMemory::resize(bioUInt nThreads, bioUInt dim) {
+  inputStructures.clear() ;
   inputStructures.resize(nThreads) ;
   for (bioUInt i = 0 ; i < numberOfThreads() ; ++i) {
     inputStructures[i].grad.resize(dim) ;

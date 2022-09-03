@@ -149,7 +149,7 @@ class bioBounds:
         each free parameter.
         """
 
-        self.n = len(b) #: number of optimization variables
+        self.n = len(b)  #: number of optimization variables
 
         self.lowerBounds = [noneToMinusInfinity(bb[0]) for bb in b]
         """ List of lower bounds """
@@ -752,7 +752,7 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
 
     alpha = alpha0
     alphal = 0
-    alphar = np.finfo(np.float128).max
+    alphar = np.finfo(float).max
     finished = False
     while not finished:
         xnew = x + alpha * d
@@ -767,7 +767,7 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
             finished = False
         elif np.inner(gnew, d) < beta2 * deriv:
             alphal = alpha
-            if alphar == np.finfo(np.float128).max:
+            if alphar == np.finfo(float).max:
                 alpha = lbd * alpha
             else:
                 alpha = (alphal + alphar) / 2.0
@@ -933,7 +933,7 @@ def trustRegionIntersection(dc, d, delta):
     """
     a = np.inner(d, d)
     b = 2 * np.inner(dc, d)
-    c = np.inner(dc, dc) - delta ** 2
+    c = np.inner(dc, dc) - delta**2
     discriminant = b * b - 4.0 * a * c
     return (-b + np.sqrt(discriminant)) / (2 * a)
 
@@ -1866,6 +1866,7 @@ def simpleBoundsNewtonAlgorithm(
              matrix initBfgs do not match the length of x0.
 
     """
+
     if len(x0) != bounds.n:
         raise excep.biogemeError(
             f'Incompatible size:' f' {len(x0)} and {len(bounds)}'
@@ -1956,16 +1957,23 @@ def simpleBoundsNewtonAlgorithm(
             delta = delta / 2.0
             status = '-'
         else:
-            fct.setVariables(xc)
-            fc = fct.f()
-            nfev += 1
+            failed = False
+            try:
+                fct.setVariables(xc)
+                fc = fct.f()
+                nfev += 1
 
-            num = f - fc
-            step = xc - xk
-            denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
-            rho = num / denom
+                num = f - fc
+                step = xc - xk
+                denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
+                rho = num / denom
+                failed = rho < eta1
+            except RuntimeError as e:
+                raise e
+                logger.debug(xc)
+                failed = True
 
-            if rho < eta1:
+            if failed:
                 # Failure: reduce the trust region
                 delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
                 status = '-'

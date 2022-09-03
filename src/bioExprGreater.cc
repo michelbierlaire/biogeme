@@ -27,9 +27,10 @@ const bioDerivatives* bioExprGreater::getValueAndDerivatives(std::vector<bioUInt
 							     bioBoolean gradient,
 							     bioBoolean hessian) {
   
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   if (gradient || hessian) {
     if (containsLiterals(literalIds)) {
@@ -39,12 +40,7 @@ const bioDerivatives* bioExprGreater::getValueAndDerivatives(std::vector<bioUInt
     }
   }
   if (gradient) {
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
+    theDerivatives.setDerivativesToZero() ;
   }
 
   

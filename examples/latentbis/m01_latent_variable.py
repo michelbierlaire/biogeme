@@ -13,7 +13,7 @@ import biogeme.biogeme as bio
 
 from biogeme.expressions import (
     Beta,
-    DefineVariable,
+    Variable,
     log,
     Elem,
     bioNormalCdf,
@@ -39,20 +39,20 @@ age = Variable('age')
 database.remove(Choice == -1.0)
 
 # Definition of other variables
-male = DefineVariable('male', Gender == 1, database)
+male = database.DefineVariable('male', Gender == 1)
 
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
 
-highEducation = DefineVariable('highEducation', Education >= 6, database)
+highEducation = database.DefineVariable('highEducation', Education >= 6)
 
-childCenter = DefineVariable(
-    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0, database
+childCenter = database.DefineVariable(
+    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
 )
 
-childSuburb = DefineVariable(
-    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0, database
+childSuburb = database.DefineVariable(
+    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
 )
 
 # Parameters for the structural equation

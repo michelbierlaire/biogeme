@@ -17,7 +17,7 @@ from biogeme.singleton import Singleton
 class bioMessage(metaclass=Singleton):
     """Manages the Biogeme messages"""
 
-    def __init__(self, screenLevel=0):
+    def __init__(self, screenLevel=1):
         """Constructor
 
         :param screenLevel: level of message that must be displayed on the
@@ -32,18 +32,18 @@ class bioMessage(metaclass=Singleton):
 
         :type screenLevel: int
         """
-        self.screenLevel = screenLevel #: screen verbosity level
+        self.screenLevel = screenLevel  #: screen verbosity level
         self.types = {
             0: 'Silent',
             1: 'Warning',
             2: 'General',
             3: 'Detailed',
             4: 'Debug',
-        } #: names of verbosity levels
+        }  #: names of verbosity levels
 
         self.resetMessages()
 
-        self.lastLevel = None #: last level used
+        self.lastLevel = None  #: last level used
 
     def resetMessages(self):
         """Erase all messages"""

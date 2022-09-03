@@ -70,6 +70,14 @@ class biogeme {
   void setFixedBetas(std::vector<bioReal>& fixedBeta,
 		     std::vector<bioUInt>& betaIds) ;
 
+  bioReal simulateSimpleFormula(std::vector<bioString> formula,
+				std::vector<bioReal> beta,
+				std::vector<bioReal> fixedBeta,
+				bioBoolean gradient,
+				bioBoolean hessian,
+				bioReal* g,
+				bioReal* h) ;
+
   void simulateFormula(std::vector<bioString> formula,
 		       std::vector<bioReal> beta,
 		       std::vector<bioReal> fixedBeta,

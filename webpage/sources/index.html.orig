@@ -66,84 +66,78 @@
       </div>
       
       <div class="panel panel-default">
-	<div class="panel-heading">What's new in Biogeme 3.2.8</div>
+	<div class="panel-heading">What's new in Biogeme 3.2.10?</div>
 	<div class="panel-body">
-	  <p>Note that versions 3.2.7 and 3.2.8 are almost
-	  identical. The description below compares to version 3.2.6.
+	  <p><strong>Note</strong>: versions 3.2.9 and 3.2.10 are
+	  identical. Therefore, version 3.2.9 has been removed from
+	  the official distribution platform. </p>
 	  <dl>
-	    <dt>Assisted specification</dt>
-	    <dd>The asssisted specification algorithm
-	    by <a href="https://dx.doi.org/10.1016/j.jocm.2021.100285">Ortelli
-	      et al. (2021)</a> is now available. The multi-objective
-	    Variable Neighborhood Search algorithm is available
-	    separately, and can be used in any context.</dd>
-	    <dt>Optimization</dt>
-	    <dd>The optimization algorithms have been organized into
-	      two modules. The
-	      module <a href="sphinx/algorithms.html"><code>algorithms.py</code></a>
-	      contains generic optimization algorithms. The
-	      module <a href="sphinx/optimization.html"><code>optimization.py</code></a>
-	      contains the functions that can be called directly by
-	      Biogeme [<a href="sphinx/biogeme.html?highlight=estimate#biogeme.biogeme.BIOGEME.estimate">Click here for the documentation of
-	      the <code>estimate</code>
-	      function</a>]. [<a href="examples/swissmetro/01logit_allAlgos.py">Click
-	      here for an example.</a>]</dd>
-	    <dt>CFSQP</dt>
-	    <dd>The CFSQP algorithm has been removed from the
-	    distribution. </dd>
-	    <dt>Null log likelihood</dt>
-	    <dd>The log likelihood is calculated. The null model
-	      predicts equal probability for each alternative.</dd>
-	    <dt>Saved iterations</dt>
-	    <dd>Iterations are saved in a file with
-	      extension <code>.iter</code>. If the file exists, Biogeme
-	      will initialize the parameters from this files, and
-	      ignore the starting values provided. To turn this feature
-	      off, set <code>biogeme.saveIterations=False</code></dd>
-	    <dt>Random starting values</dt>
-	    <dd>It is possible to modify the initial values of the parameters in all formulas,
-              using randomly generated values. The value is drawn from a
-              uniform distribution on the interval defined by the
-              bounds (by default [-100, 100].)
-              [<a href="sphinx/biogeme.html?highlight=setrandominitvalue#biogeme.biogeme.BIOGEME.setRandomInitValues">Click
-              here for the documentation</a>].
-	      <dt>Sensitivity analysis</dt>
-	    <dd>The betas for sensitivity analysis are now generated
-	      by bootstrapping.
-	      [<a href="sphinx/results.html?highlight=sensitivityanalysis#biogeme.results.bioResults.getBetasForSensitivityAnalysis">Click
-	      here for the documentation</a>].</dd>
-	    <dt>Box-Cox</dt>
-	    <dd>The implementation of
-	      the <a href="sphinx/models.html?highlight=boxcox#biogeme.models.boxcox">Box-Cox
-		transform</a> was  incorrect and has been corrected.
-	      <dt>Validation</dt>
-	    <dd>The out-of-sample validation has been
-	      improved. [<a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">Click
-	      here for the documentation</a>]. It
-	      has to be compined with the <a href="sphinx/database.html?highlight=split#biogeme.database.Database.split"><code>split</code></a> function
-	      of the database
-	      object. [<a href="examples/swissmetro/04validation.py">Click here for an example</a>]
-	      <dt>Statistics about chosen alternatives</dt>
-	    <dd>It is now possible to calculate the number of time
-	      each alternative is chosen and available in the
-	      sample. [<a href="sphinx/database.html?highlight=choiceavailability#biogeme.database.Database.choiceAvailabilityStatistics">Click
-	      here for the documentation</a>].</dd>
-	    <dt>Validity check for the nests</dt>
-	    <dd> The validity of the specification of the nests
-	      for nested and cross nested logit models is now
-	      checked.</dd>
-	    <dt>ALOGIT file</dt>
-	    <dd>Output files in F12 format compatible with ALOGIT can
-	      now be
-	      produced. [<a href="sphinx/results.html?highlight=f12#biogeme.results.bioResults.writeF12">Click
-	      here for the documentation</a>]. </dd>
+	    <dt>New syntax for <code>DefineVariable</code></dt>
+	    <dd>
+	      <p><code>DefineVariable</code> actually defines a new column in the
+		database. The old syntax was:</p>
+	      <p><code>myvar = DefineVariable('myvar', x * y + 2,
+		  database)</code></p>
+	      <p>The new syntax is:</p>
+	      <p><code>myvar = database.DefineVariable('myvar', x * y +
+		  2)</code></p>
+	    </dd>
 	    <dt>Likelihood ratio test</dt>
-	    <dd>A function to perform the likelihood ratio test has
-	      been
-	      implemented. [<a href="sphinx/tools.html?highlight=likelihood_ratio#biogeme.tools.likelihood_ratio_test">Click
-	      here for the documentation</a>].</dd>
+	    <dd>It is now possible to perform a likelihood ratio test
+	    directly from the estimation results. <a href="sphinx/results.html#biogeme.results.bioResults.likelihood_ratio_test">See
+		documentation here. </a> It relies on a function that can
+	    be used in more general context. <a href="sphinx/tools.html#biogeme.tools.likelihood_ratio_test"> See
+	    documentation here.<a></dd>
+	    <dt>Comparing several models</dt>
+	    <dd>It is now possible to compile the estimation results
+	    from several models into a single data frame. <a href="sphinx/results.html#biogeme.results.compileEstimationResults">See
+		documentation here. </a> </dd>
+	    <dt>Automatic segmentation</dt>
+	    <dd>It is now possible to define a parameter such that it
+	    has a different value for each segment in the
+	    population. See the example <a href="examples/swissmetro/01logitBis.py"><code>01logitBis.py</code></a>.</dd>
+	    <dt>Simulation of panel data</dt>
+	    <dd>It is now possible to use Biogeme in simulation mode
+	    for panel data. See the following
+	      example: <a href="examples/swissmetro/13panel_simul.py"><code>13panel_simul.py</code></a>.</dd>
+	    <dt>Flattening panel data</dt>
+	    <dd>This new feature transforms a database organized in
+	    panel mode (that is, one row per observation) into a
+	    database organized in normal mode (that is, one row per
+	    individual, and the observations of each individual
+	    across columns). See documentation
+	    <a href="sphinx/database.html#biogeme.database.Database.generateFlatPanelDataframe">here</a> and <a href="sphinx/tools.html#biogeme.tools.flatten_database">here</a></dd>
+	    <dt>Covariance and correlation matrix of the nested and
+	      the cross-nested logit
+	      models</dt>
+	    <dd>These new functions calculate the covariance and the correlation matrix
+	    of the error terms of a cross-nested logit model from the
+	    estimated parameters. See
+	    documentation <a href="sphinx/tools.html#biogeme.tools.calculate_correlation">here</a>,
+	    <a href="sphinx/tools.html#biogeme.tools.correlation_nested">here</a>, <a href="sphinx/tools.html#biogeme.tools.covariance_cross_nested">here</a> and <a href="sphinx/tools.html#biogeme.tools.correlation_cross_nested">here</a>.</dd>
+	    <dt>Recycling estimation results</dt>
+	    <dd>It is now possible to skip estimation and read the
+	    estimation results from the pickle file by setting the
+	    parameter <code>recycle=True</code>. See the online
+	    documentation [<a href="sphinx/biogeme.html#biogeme.biogeme.BIOGEME.estimate">here</a>].</dd>
+	    <dt>The feature removing unused variables has been
+	      canceled.</dt>
+	    <dd>The parameters <code>removeUnusedVariables</code>
+	    and <code>displayUsedVariables</code> in the BIOGEME
+	      constructor have been removed.</dd>
+	    <dt>More functionalities for the mathematical expressions.</dt>
+	    <dd>The expressions have now been designed to also be
+	    available outside of the BIOGEME class. A detailed
+	    illustration of the functionalities is available
+	    [<a href="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.expressions.ipynb">Click
+		here</a>].</dd>
+	    <dt>New syntax for the assisted specification algorithm</dt>
+	    <dd>The new syntax involves <code>NamedTuple</code> to make the code
+	      more readable. Refer to the examples, such as
+	      <a href="examples/assisted/optima.py"
+		 target="_blank"><code>optima.py</code></a>.</dd>
+	    
 	  </dl>
-
 	</div>
       </div>
 
@@ -228,7 +222,8 @@
 	  <p>I would like to thank the following persons who played various roles in the development of Biogeme along the years. The list is certainly not complete, and I apologize for those who are omitted: 
 	    Alexandre Alahi, 
 	    Nicolas Antille, 
-	    Gianluca Antonini, 
+	    Gianluca Antonini,
+	    Cristian Arteaga,
 	    Kay Axhausen,
 	    John Bates, 
 	    Denis Bolduc,
@@ -249,6 +244,7 @@
 	    Gael Lederrey,
 	    Virginie Lurkin,
 	    Nicholas Molyneaux,
+	    Nicola Ortelli,
 	    Carolina Osorio,
 	    Meritxell Pacheco Paneque,
 	    Thomas Robin,

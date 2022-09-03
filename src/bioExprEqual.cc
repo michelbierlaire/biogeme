@@ -23,36 +23,33 @@ bioExprEqual::~bioExprEqual() {
 
 }
 
-  
-const bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						     bioBoolean gradient,
-						     bioBoolean hessian) {
 
-    if (gradient && theDerivatives.getSize() != literalIds.size()) {
-      theDerivatives.resize(literalIds.size()) ;
-    }
+const bioDerivatives* bioExprEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
+							   bioBoolean gradient,
+							   bioBoolean hessian) {
+
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {
       std::stringstream str ;
-      str << "Expression Equal is not differentiable" << std::endl ; 
+      str << "Expression Equal is not differentiable" << std::endl ;
+      str << "[" << print() << "]" << std::endl ;
       throw(bioExceptions(__FILE__,__LINE__,str.str())) ;
     }
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
+    theDerivatives.setDerivativesToZero() ;
   }
-  
+
   if (left == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"left") ;
   }
   if (right == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"right") ;
   }
-  
+
   const bioDerivatives* l = left->getValueAndDerivatives(literalIds,false,false) ;
   const bioDerivatives* r = right->getValueAndDerivatives(literalIds,false,false) ;
   if (l->f == r->f) {

@@ -16,8 +16,15 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.results as res
-from biogeme.expressions import Beta, DefineVariable, bioDraws, MonteCarlo
-import matplotlib.pyplot as plt
+from biogeme.exceptions import biogemeError
+from biogeme.expressions import Beta, Variable, bioDraws, MonteCarlo
+
+try:
+    import matplotlib.pyplot as plt
+
+    plot = True
+except ModuleNotFoundError:
+    plot = False
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
@@ -27,9 +34,19 @@ database = db.Database('swissmetro', df)
 # Pandas functions to investigate the database. For example:
 # print(database.data.describe())
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
+PURPOSE = Variable('PURPOSE')
+CHOICE = Variable('CHOICE')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+TRAIN_TT = Variable('TRAIN_TT')
+SM_TT = Variable('SM_TT')
+CAR_TT = Variable('CAR_TT')
+CAR_CO = Variable('CAR_CO')
+SM_CO = Variable('SM_CO')
+SM_AV = Variable('SM_AV')
 
 # Removing some observations can be done directly using pandas.
 # remove = (((database.data.PURPOSE != 1) &
@@ -60,16 +77,16 @@ SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
 # Definition of new variables: adding columns to the database
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
-TRAIN_TT_SCALED = DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0, database)
-TRAIN_COST_SCALED = DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100, database
+CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
+TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
+TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
+TRAIN_COST_SCALED = database.DefineVariable(
+    'TRAIN_COST_SCALED', TRAIN_COST / 100
 )
-SM_TT_SCALED = DefineVariable('SM_TT_SCALED', SM_TT / 100.0, database)
-SM_COST_SCALED = DefineVariable('SM_COST_SCALED', SM_COST / 100, database)
-CAR_TT_SCALED = DefineVariable('CAR_TT_SCALED', CAR_TT / 100, database)
-CAR_CO_SCALED = DefineVariable('CAR_CO_SCALED', CAR_CO / 100, database)
+SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
+SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
+CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
+CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 
 # Definition of the utility functions
 V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -85,7 +102,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # The estimation results are read from the pickle file
 try:
     results = res.bioResults(pickleFile='05normalMixture.pickle')
-except FileNotFoundError:
+except biogemeError:
     print(
         'Run first the script 05normalMixture.py in order to generate the '
         'file 05normalMixture.pickle.'
@@ -144,7 +161,8 @@ print(
 simresults['beta'] = simresults['Numerator'] / simresults['Denominator']
 
 # Plot the histogram of individual parameters
-simresults['beta'].plot(kind='hist', density=True, bins=20)
+if plot:
+    simresults['beta'].plot(kind='hist', density=True, bins=20)
 
 # Plot the general distribution of beta
 def normalpdf(v, mu=0.0, s=1.0):
@@ -163,5 +181,6 @@ def normalpdf(v, mu=0.0, s=1.0):
 
 betas = results.getBetaValues(['B_TIME', 'B_TIME_S'])
 x = np.arange(simresults['beta'].min(), simresults['beta'].max(), 0.01)
-plt.plot(x, normalpdf(x, betas['B_TIME'], betas['B_TIME_S']), '-')
-plt.show()
+if plot:
+    plt.plot(x, normalpdf(x, betas['B_TIME'], betas['B_TIME_S']), '-')
+    plt.show()

@@ -28,6 +28,10 @@ const bioDerivatives* bioExprDerive::getValueAndDerivatives(std::vector<bioUInt>
   if (gradient || hessian) {
     throw bioExceptions(__FILE__,__LINE__,"No derivatives are available for this expression, yet.") ;
   }
+
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+  theDerivatives.resize(literalIds.size()) ;
   
   std::vector<bioUInt> theIds ;
   theIds.push_back(literalId) ;

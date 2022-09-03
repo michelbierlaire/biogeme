@@ -1,6 +1,7 @@
 import numpy as np
 from biogeme import vns
 from knapsack import knapsack, oneSack
+
 ### Run one instance
 
 utility = np.array([80, 31, 48, 17, 27, 84, 34, 39, 46, 58, 23, 67])
@@ -25,4 +26,3 @@ print(f'Pareto solutions: {thePareto.pareto}')
 for p in thePareto.pareto.keys():
     obj = [f'{t}: {r} ' for t, r in zip(p.objectivesNames, p.objectives)]
     print(f'{p} {obj}')
-    

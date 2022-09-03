@@ -12,15 +12,25 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta
+from biogeme.expressions import Beta, Variable
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
-# The following statement allows you to use the names of the
-# variable as Python variable.
-globals().update(database.variables)
+PURPOSE = Variable('PURPOSE')
+CHOICE = Variable('CHOICE')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+TRAIN_TT = Variable('TRAIN_TT')
+SM_TT = Variable('SM_TT')
+CAR_TT = Variable('CAR_TT')
+CAR_CO = Variable('CAR_CO')
+SM_CO = Variable('SM_CO')
+SM_AV = Variable('SM_AV')
 
 # Removing some observations
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0

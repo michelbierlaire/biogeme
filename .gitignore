@@ -30,6 +30,10 @@ archive/tools/prepareData/biosampledata
 #                                           #
 #############################################
 
+# tox
+.tox
+.eggs
+
 # All .lo files
 **/*.lo
 **/*.la
@@ -67,7 +71,11 @@ archive/pybiogeme/pybiogeme
 .idea
 examples/notebooks/.ipynb_checkpoints/*
 examples/workingNotToDistribute
+examples/sampling
+examples/latent/diagnostics
+examples/latent/*.tex
 src/cbiogeme.cpp
+src/cythonbiogeme.cpp
 biogeme.egg-info
 build
 tests/functions/simpleExample.html
@@ -324,3 +332,42 @@ examples/swissmetro_panel/12panel_p.run
 examples/swissmetro/19individualLevelParameters.pickle
 examples/indicators/01nestedEstimation.pickle
 examples/assisted/.ipynb_checkpoints/paretoSwissmetro-checkpoint.ipynb
+biogeme/flycheck_biogeme (1).py
+dist/biogeme-3.2.9a0-py3.10-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.9a0-py3.8-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.9a0-py3.9-macosx-10.9-x86_64.egg
+dist/biogeme-3.2.9a0.tar.gz
+examples/indicators/.ipynb_checkpoints/Untitled-checkpoint.ipynb
+examples/indicators/Untitled.ipynb
+examples/notebooks/test_dumped.dat
+examples/notebooks/test~01.dat
+examples/notebooks/test~02.dat
+examples/notebooks/Untitled.ipynb
+reports/pandasIndicators39/pandasIndicators.aux
+reports/pandasIndicators39/pandasIndicators.bbl
+reports/pandasIndicators39/pandasIndicators.blg
+reports/pandasIndicators39/pandasIndicators.dvi
+reports/pandasIndicators39/pandasIndicators.fdb_latexmk
+reports/pandasIndicators39/pandasIndicators.fls
+reports/pandasIndicators39/pandasIndicators.log
+reports/pandasIndicators39/pandasIndicators.out
+reports/pandasIndicators39/Bier18a.pdf
+reports/pandasIndicators39/pandasIndicators.pdf
+src/cexpressions.cpp
+src/tmp.py
+tests/functions/errors.lis
+biogeme/tmp.py
+examples/assisted/debug.py
+*.pickle
+*.pickle
+*.F12
+*.log
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+biogeme/cbiogeme.cpython-310-darwin.so
+*.so
+examples/assisted/.ipynb_checkpoints/runknapsack-checkpoint.ipynb

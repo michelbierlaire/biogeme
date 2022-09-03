@@ -65,7 +65,6 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 				   std::vector< std::vector<bioReal> >* h,
 				   std::vector< std::vector<bioReal> >* bh) {
 
-
   if ( g != NULL) {
     if (g->size() != theThreadMemory.dimension()) {
       std::stringstream str ;
@@ -88,6 +87,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
     }
   }
 
+  
   //  std::vector<bioThreadArg*> theInput(nbrOfThreads) ;
   std::vector<pthread_t> theThreads(nbrOfThreads) ;
   for (bioUInt thread = 0 ; thread < nbrOfThreads ; ++thread) {
@@ -146,6 +146,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
   if (!std::isfinite(result)) {
     result = -std::numeric_limits<bioReal>::max() ;
   }
+
   if (g != NULL) {
     for (bioUInt i = 0 ; i < g->size() ; ++i) {
       if (!std::isfinite((*g)[i])) {
@@ -188,7 +189,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 }
 
 
- bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal> betas,
+bioReal biogeme::calculateLikeAndDerivatives(std::vector<bioReal> betas,
  					     std::vector<bioReal> fixedBetas,
  					     std::vector<bioUInt> betaIds,
  					     bioReal* g,
@@ -196,10 +197,10 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
  					     bioReal* bh,
  					     bioBoolean hessian,
  					     bioBoolean bhhh) {
-
+  
   int n = betas.size() ;
   
-  ++nbrFctEvaluations ;
+   ++nbrFctEvaluations ;
   literalIds = betaIds ;
   if (forceDataPreparation || (theThreadMemory.dimension() != literalIds.size())) {
     prepareData() ;
@@ -281,7 +282,7 @@ bioReal biogeme::applyTheFormula(  std::vector<bioReal>* g,
 void biogeme::setExpressions(std::vector<bioString> ll,
 			     std::vector<bioString> w,
 			     bioUInt t) {
-  
+
   theLoglikeString.erase(theLoglikeString.begin(),theLoglikeString.end()) ;
   for (bioUInt i = 0 ; i < ll.size() ; ++i) {
     if (std::find(theLoglikeString.begin(),theLoglikeString.end(),ll[i]) == theLoglikeString.end()) {
@@ -333,8 +334,6 @@ void *computeFunctionForThread(void* fctPtr) {
 								      input->calcGradient,
 								      input->calcHessian) ;
       
-      
-
 	if (!input->theWeight.isDefined()) {
 	  input->result += fgh->f ;
 	  for (bioUInt i = 0 ; i < input->grad.size() ; ++i) {
@@ -382,7 +381,7 @@ void *computeFunctionForThread(void* fctPtr) {
 	input->theWeight.setIndividualIndex(&row) ;
 	input->theWeight.setRowIndex(&row) ;
       }
-      
+
       for (row = input->startData ;
 	   row < input->endData ;
 	   ++row) {
@@ -392,6 +391,7 @@ void *computeFunctionForThread(void* fctPtr) {
 	    w = input->theWeight.getExpression()->getValue() ;
 	  }
 
+	  
 	  const bioDerivatives* fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
 						  input->calcGradient,
 						  input->calcHessian) ;
@@ -457,12 +457,23 @@ void *computeFunctionForThread(void* fctPtr) {
 void *simulFunctionForThread(void* fctPtr) {
   try {
     bioThreadArgSimul *input = (bioThreadArgSimul *) fctPtr;
-    
     bioSeveralExpressions* expressions = input->theFormulas.getExpressions() ;
     if (input->panel) {
-      std::stringstream str ;
-      str << "Simulation of panel data is not yet implemented" ;
-      throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+      bioUInt individual ;
+      expressions->setIndividualIndex(&individual) ;
+      for (individual = input->startData ;
+	   individual < input->endData ;
+	   ++individual) {
+	try {
+	  std::vector<bioReal > res = expressions->getValues() ;
+	  input->results.push_back(res) ;
+	}
+	catch(bioExceptions& e) {
+	  std::stringstream str ;
+	  str << "Error in simulating panel data: " << e.what() ;
+	  throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+	}
+      }
     }
     else {
       bioUInt row ;
@@ -502,6 +513,7 @@ void biogeme::prepareMemoryForThreads(bioBoolean force) {
   if (!theWeightString.empty()) {
     theThreadMemory.setWeight(theWeightString) ;
   }
+  
 }
 
 void biogeme::simulateFormula(std::vector<bioString> formula,
@@ -532,13 +544,54 @@ void biogeme::simulateFormula(std::vector<bioString> formula,
   return ;
 }
 
+bioReal biogeme::simulateSimpleFormula(std::vector<bioString> formula,
+				       std::vector<bioReal> beta,
+				       std::vector<bioReal> fixedBeta,
+				       bioBoolean gradient,
+				       bioBoolean hessian,
+				       bioReal* g,
+				       bioReal* h) {
+
+  bioFormula theFormula ;
+  theFormula.setExpression(formula) ;
+  theFormula.setParameters(&beta) ;
+  theFormula.setFixedParameters(&fixedBeta) ;
+  if (!theDraws.empty()) {
+    theFormula.setDraws(&theDraws) ;
+  }  
+
+  if (!gradient && !hessian) {
+    return theFormula.getExpression()->getValue() ;
+  }
+  int n = beta.size() ;
+  // The ids of th eliterals are from 0 to n-1, corresponding to the free parameters.
+  std::vector<bioUInt> literalIds(n) ;
+  for (int i = 0 ; i < n ; ++i) {
+    literalIds[i] = i ;
+  }
+  const bioDerivatives* results =
+    theFormula.getExpression()->getValueAndDerivatives(literalIds,
+						       gradient,
+						       hessian) ;
+
+  for (int i = 0 ; i < n ; ++i) {
+    g[i] = results->g[i] ;
+    if (hessian) {
+      for (int j = i ; j < n ; j++) {
+	h[i*n+j] = h[j*n+i] = results->h[i][j] ;
+      }
+    }
+  }
+  return results->f ;
+}
+
+
 void biogeme::simulateSeveralFormulas(std::vector<std::vector<bioString> > formulas,
 				      std::vector<bioReal> betas,
 				      std::vector<bioReal> fixedBetas,
 				      bioUInt t,
 				      std::vector< std::vector<bioReal> > data,
 				      bioReal* results) {
-
   nbrOfThreads = t ;
   theThreadMemorySimul.resize(nbrOfThreads) ;
   theThreadMemorySimul.setFormulas(formulas) ;
@@ -638,6 +691,7 @@ void biogeme::setData(std::vector< std::vector<bioReal> >& d) {
 void biogeme::setDataMap(std::vector< std::vector<bioUInt> >& dm) {
   theDataMap = dm ;
   forceDataPreparation = true ;
+  panel = true ;
 }
 
 void biogeme::setMissingData(bioReal md) {
@@ -724,6 +778,7 @@ void biogeme::prepareData() {
       theInput[thread]->theWeight.setMissingData(theInput[thread]->missingData) ;
     }
   }
+
 }
 
 void biogeme::prepareDataSimul() {

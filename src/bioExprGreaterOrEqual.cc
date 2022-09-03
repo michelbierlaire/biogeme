@@ -24,12 +24,13 @@ bioExprGreaterOrEqual::~bioExprGreaterOrEqual() {
 }
 
 const bioDerivatives* bioExprGreaterOrEqual::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-							      bioBoolean gradient,
-							      bioBoolean hessian) {
+								    bioBoolean gradient,
+								    bioBoolean hessian) {
 
-  if (gradient && theDerivatives.getSize() != literalIds.size()) {
-    theDerivatives.resize(literalIds.size()) ;
-  }
+  theDerivatives.with_g = gradient ;
+  theDerivatives.with_h = hessian ;
+
+  theDerivatives.resize(literalIds.size()) ;
 
   if (gradient) {
     if (containsLiterals(literalIds)) {
@@ -37,12 +38,7 @@ const bioDerivatives* bioExprGreaterOrEqual::getValueAndDerivatives(std::vector<
       str << "Expression GreaterOrEqual is not differentiable" << std::endl ; 
       throw bioExceptions(__FILE__,__LINE__,str.str()) ;
     }
-    if (hessian) {
-      theDerivatives.setDerivativesToZero() ;
-    }
-    else {
-      theDerivatives.setGradientToZero() ;
-    }
+    theDerivatives.setDerivativesToZero() ;
   }
   
 

@@ -38,6 +38,10 @@ bioDerivatives* bioExprLiteral::getValueAndDerivatives(std::vector<bioUInt> lite
     }
   }
 
+  theDerivatives->with_g = gradient ;
+  theDerivatives->with_h = hessian ;
+
+
   theDerivatives->f = getLiteralValue() ;
   if (gradient) {
     for (std::size_t i = 0 ; i < literalIds.size() ; ++i) {

@@ -13,7 +13,7 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta, DefineVariable, Elem, bioNormalCdf
+from biogeme.expressions import Beta, Elem, bioNormalCdf
 
 # Read the data
 df = pd.read_csv('optima.dat', sep='\t')
@@ -27,9 +27,7 @@ globals().update(database.variables)
 database.remove(Choice == -1.0)
 
 # Piecewise linear definition of income
-ScaledIncome = DefineVariable(
-    'ScaledIncome', CalculatedIncome / 1000, database
-)
+ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 
 thresholds = [None, 4, 6, 8, 10, None]
 formulaIncome = models.piecewiseFormula(
@@ -37,16 +35,16 @@ formulaIncome = models.piecewiseFormula(
 )
 
 # Definition of other variables
-age_65_more = DefineVariable('age_65_more', age >= 65, database)
-moreThanOneCar = DefineVariable('moreThanOneCar', NbCar > 1, database)
-moreThanOneBike = DefineVariable('moreThanOneBike', NbBicy > 1, database)
-individualHouse = DefineVariable('individualHouse', HouseType == 1, database)
-male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+age_65_more = database.DefineVariable('age_65_more', age >= 65)
+moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
+moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
+individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
+male = database.DefineVariable('male', Gender == 1)
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
-haveGA = DefineVariable('haveGA', GenAbST == 1, database)
-highEducation = DefineVariable('highEducation', Education >= 6, database)
+haveGA = database.DefineVariable('haveGA', GenAbST == 1)
+highEducation = database.DefineVariable('highEducation', Education >= 6)
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)

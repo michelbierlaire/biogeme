@@ -20,7 +20,6 @@ import biogeme.messaging as msg
 from biogeme import models
 from biogeme.expressions import (
     Beta,
-    DefineVariable,
     Variable,
     log,
     RandomVariable,
@@ -73,16 +72,16 @@ structBetas = structResults.getBetaValues()
 
 
 # Definition of other variables
-male = DefineVariable('male', Gender == 1, database)
-haveChildren = DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0, database
+male = database.DefineVariable('male', Gender == 1)
+haveChildren = database.DefineVariable(
+    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
-highEducation = DefineVariable('highEducation', Education >= 6, database)
-childCenter = DefineVariable(
-    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0, database
+highEducation = database.DefineVariable('highEducation', Education >= 6)
+childCenter = database.DefineVariable(
+    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
 )
-childSuburb = DefineVariable(
-    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0, database
+childSuburb = database.DefineVariable(
+    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
 )
 
 ### Coefficients
@@ -247,19 +246,19 @@ BETA_WAITING_TIME = Beta(
     'BETA_WAITING_TIME', choiceBetas['BETA_WAITING_TIME'], None, None, 0
 )
 
-TimePT_scaled = DefineVariable('TimePT_scaled', TimePT / 200, database)
-TimeCar_scaled = DefineVariable('TimeCar_scaled', TimeCar / 200, database)
-MarginalCostPT_scaled = DefineVariable(
-    'MarginalCostPT_scaled', MarginalCostPT / 10, database
+TimePT_scaled = database.DefineVariable('TimePT_scaled', TimePT / 200)
+TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
+MarginalCostPT_scaled = database.DefineVariable(
+    'MarginalCostPT_scaled', MarginalCostPT / 10
 )
-CostCarCHF_scaled = DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10, database
+CostCarCHF_scaled = database.DefineVariable(
+    'CostCarCHF_scaled', CostCarCHF / 10
 )
-distance_km_scaled = DefineVariable(
-    'distance_km_scaled', distance_km / 5, database
+distance_km_scaled = database.DefineVariable(
+    'distance_km_scaled', distance_km / 5
 )
-PurpHWH = DefineVariable('PurpHWH', TripPurpose == 1, database)
-PurpOther = DefineVariable('PurpOther', TripPurpose != 1, database)
+PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
+PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 
 ### Definition of utility functions:
 

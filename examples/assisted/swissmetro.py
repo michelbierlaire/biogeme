@@ -18,13 +18,20 @@ from biogeme import assisted
 from biogeme.expressions import (
     Beta,
     log,
-    DefineVariable,
     Elem,
     Numeric,
 )
 
+from biogeme.assisted import (
+    DiscreteSegmentationTuple,
+    TermTuple,
+    SegmentedParameterTuple,
+)
+
+
+## Step 1: data preparation. Identical to any Biogeme script.
 logger = msg.bioMessage()
-logger.setDebug()
+logger.setDetailed()
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
@@ -46,136 +53,15 @@ database.remove(exclude)
 
 # Definition of new variables
 
-CAR_AV_SP = DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0), database)
-TRAIN_AV_SP = DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0), database)
-TRAIN_COST = DefineVariable('TRAIN_COST', TRAIN_CO * (GA == 0) / 100, database)
-SM_COST = DefineVariable('SM_COST', SM_CO * (GA == 0) / 100, database)
-CAR_COST = DefineVariable('CAR_COST', CAR_CO / 100, database)
+CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
+TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
+TRAIN_COST = database.DefineVariable('TRAIN_COST', TRAIN_CO * (GA == 0) / 100)
+SM_COST = database.DefineVariable('SM_COST', SM_CO * (GA == 0) / 100)
+CAR_COST = database.DefineVariable('CAR_COST', CAR_CO / 100)
 
 
-# Definition of potential nonlinear transforms of variables
-def mylog(x):
-    """Log of the variable, or 0 if the variable is zero"""
-    return 'log', Elem({0: log(x), 1: Numeric(0)}, x == 0)
-
-
-def sqrt(x):
-    """Sqrt of the variable"""
-    return 'sqrt', x ** 0.5
-
-
-def square(x):
-    """Square of the variable"""
-    return 'square', x ** 2
-
-
-def piecewise(x, thresholds, name):
-    """Piecewise linear specification"""
-    piecewiseVariables = models.piecewiseVariables(x, thresholds)
-    formula = piecewiseVariables[0]
-    for k in range(1, len(thresholds) - 1):
-        formula += (
-            Beta(
-                f'pw_{name}_{thresholds[k-1]}_{thresholds[k]}',
-                0,
-                None,
-                None,
-                0,
-            )
-            * piecewiseVariables[k]
-        )
-    return (f'piecewise_{thresholds}', formula)
-
-
-def piecewise_time_1(x):
-    """Piecewise linear for time :math:`0, 0.1, +\\infty`"""
-    return piecewise(x, [0, 0.1, None], 'time')
-
-
-def piecewise_time_2(x):
-    """Piecewise linear for time :math:`0, 0.25, +\\infty`"""
-    return piecewise(x, [0, 0.25, None], 'time')
-
-
-def piecewise_cost_1(x):
-    """Piecewise linear for cost :math:`0, 0.1, +\\infty`"""
-    return piecewise(x, [0, 0.1, None], 'cost')
-
-
-def piecewise_cost_2(x):
-    """Piecewise linear for cost :math:`0, 0.25, +\\infty`"""
-    return piecewise(x, [0, 0.25, None], 'cost')
-
-
-def boxcox(x, name):
-    """Box-Cox transform of the variable"""
-    ell = Beta(f'lambda_{name}', 1, 0.0001, 3.0, 0)
-    return f'Box-Cox_{name}', models.boxcox(x, ell)
-
-
-def boxcox_time(x):
-    """Box-Cox transform of the variable time"""
-    return boxcox(x, 'time')
-
-
-def boxcox_cost(x):
-    """Box-Cox transform of the variable cost"""
-    return boxcox(x, 'cost')
-
-
-def boxcox_headway(x):
-    """Box-Cox transform of the variable headway"""
-    return boxcox(x, 'headway')
-
-
-# Define all possible segmentations
-segmentations_cte = {
-    'GA': (GA, {1: 'GA', 0: 'noGA'}),
-    'gender': (MALE, {0: 'female', 1: 'male'}),
-    'class': (FIRST, {0: 'secondClass', 1: 'firstClass'}),
-    'luggage': (LUGGAGE, {0: 'noLugg', 1: 'oneLugg', 3: 'severalLugg'}),
-    'income': (
-        INCOME,
-        {1: 'inc-under50', 2: 'inc-50-100', 3: 'inc-100+', 4: 'inc-unknown'},
-    ),
-}
-
-segmentations_cost = {
-    'GA': (GA, {1: 'GA', 0: 'noGA'}),
-    'gender': (MALE, {0: 'female', 1: 'male'}),
-    'income': (
-        INCOME,
-        {1: 'inc-under50', 2: 'inc-50-100', 3: 'inc-100+', 4: 'inc-unknown'},
-    ),
-    'class': (FIRST, {0: 'secondClass', 1: 'firstClass'}),
-    'who': (WHO, {1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'}),
-}
-
-segmentations_time = {
-    'GA': (GA, {1: 'GA', 0: 'noGA'}),
-    'gender': (MALE, {0: 'female', 1: 'male'}),
-    'who': (WHO, {1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'}),
-    'class': (FIRST, {0: 'secondClass', 1: 'firstClass'}),
-    'luggage': (LUGGAGE, {0: 'noLugg', 1: 'oneLugg', 3: 'severalLugg'}),
-}
-
-segmentations_headway = {
-    'class': (FIRST, {0: 'secondClass', 1: 'firstClass'}),
-    'luggage': (LUGGAGE, {0: 'noLugg', 1: 'oneLugg', 3: 'severalLugg'}),
-    'who': (WHO, {1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'}),
-}
-
-
-segmentations = {
-    'Seg. cte': segmentations_cte,
-    'Seg. cost': segmentations_cost,
-    'Seg. time': segmentations_time,
-    'Seg. headway': segmentations_headway,
-}
-
-
-# Define the attributes of the alternatives
-variables = {
+## Step 2: identify and name the relevant attributes of the alternatives
+attributes = {
     'Train travel time': TRAIN_TT_SCALED,
     'Swissmetro travel time': SM_TT_SCALED,
     'Car travel time': CAR_TT_SCALED,
@@ -186,12 +72,13 @@ variables = {
     'Swissmetro headway': SM_HE,
 }
 
+## Step 3: define the group of attributes
 
 # Group the attributes. All attributes in the same group will be
-# assoaited with the same nonlinear transform, and the same
+# associated with the same transformation, and the same
 # segmentation. Attributes in the same group can be generic or
 # alternative specific, except if mentioned otherwise
-groupsOfVariables = {
+groupsOfAttributes = {
     'Travel time': [
         'Train travel time',
         'Swissmetro travel time',
@@ -205,15 +92,194 @@ groupsOfVariables = {
     'Headway': ['Train headway', 'Swissmetro headway'],
 }
 
+## Step 4: force some groups of attributes to be alternative specific.
 
-# In this example, all the variables could be generic
+# In this example, all the attributes can potentially be generic
 genericForbiden = None
 
-# In this example, we impose time and cost ot be in the model
+## Step 5: force some groups of attributes to be active.
+
+# In this example, we impose time and cost to be in the model
 forceActive = ['Travel time', 'Travel cost']
 
-# Associate a list of potential nonlinearities with each group of variable
-nonlinearSpecs = {
+
+## Step 6: define potential transformations of the attributes
+
+
+def mylog(x):
+    """Log of the attribute, or 0 if it is zero
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    return 'log', Elem({0: log(x), 1: Numeric(0)}, x == 0)
+
+
+def sqrt(x):
+    """Sqrt of the attribute
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+
+    """
+    return 'sqrt', x**0.5
+
+
+def square(x):
+    """Square of the attribute
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+
+    """
+    return 'square', x**2
+
+
+def piecewise(x, thresholds, name):
+    """Piecewise linear transformation of a variable
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :param thresholds: list of thresholds
+    :type thresholds: list(float)
+
+    :param name: name of the variable
+    :type name: str
+    """
+    piecewiseVariables = models.piecewiseVariables(x, thresholds)
+    formula = piecewiseVariables[0]
+    for k in range(1, len(thresholds) - 1):
+        formula += (
+            Beta(
+                f'pw_{name}_{thresholds[k-1]}_{thresholds[k]}',
+                0,
+                None,
+                None,
+                0,
+            )
+            * piecewiseVariables[k]
+        )
+    return (f'piecewise_{name}_{thresholds}', formula)
+
+
+def piecewise_time_1(x):
+    """Piecewise linear for time :math:`0, 0.1, +\\infty`
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+
+    """
+    return piecewise(x, [0, 0.1, None], 'time')
+
+
+def piecewise_time_2(x):
+    """Piecewise linear for time :math:`0, 0.25, +\\infty`
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    return piecewise(x, [0, 0.25, None], 'time')
+
+
+def piecewise_cost_1(x):
+    """Piecewise linear for cost :math:`0, 0.1, +\\infty`
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+
+    """
+    return piecewise(x, [0, 0.1, None], 'cost')
+
+
+def piecewise_cost_2(x):
+    """Piecewise linear for cost :math:`0, 0.25, +\\infty`
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    return piecewise(x, [0, 0.25, None], 'cost')
+
+
+def boxcox(x, name):
+    """Box-Cox transform of the attribute. This is not a valid
+        transformation, as it has two arguments. It is defined to be
+        called by another function.
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :param name: name of the variable to be transformed
+    :type name: str
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    ell = Beta(f'lambda_{name}', 1, None, None, 0)
+    return f'Box-Cox_{name}', models.boxcox(x, ell)
+
+
+def boxcox_time(x):
+    """Box-Cox transform of the attribute time. This is a valid transformation.
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    return boxcox(x, 'time')
+
+
+def boxcox_cost(x):
+    """Box-Cox transform of the attribute cost
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    return boxcox(x, 'cost')
+
+
+def boxcox_headway(x):
+    """Box-Cox transform of the attribute headway
+
+    :param x: attribute
+    :type x: biogeme.expressions.Variable
+
+    :return: name of the transformation, and expression to calculate it.
+    :rtype: tuple(str, biogeme.expressions.Expression)
+    """
+    return boxcox(x, 'headway')
+
+
+# Associate each group of attributes with possible
+# transformations. Define a dictionary where the keys are the names of
+# the groups of attributes, and the values are lists of functions
+# defined in the previous step.
+
+transformations = {
     'Travel time': [
         mylog,
         sqrt,
@@ -233,29 +299,172 @@ nonlinearSpecs = {
     'Headway': [mylog, sqrt, square, boxcox_headway],
 }
 
-# Specification of the utility function. For each term, it is possible
-# to define bounds on the coefficient, and to include a function that
-# verifies its validity a posteriori.
+## Step 7: define the potential segmentations
+
+segmentations_cte = {
+    'GA': DiscreteSegmentationTuple(variable=GA, mapping={1: 'GA', 0: 'noGA'}),
+    'gender': DiscreteSegmentationTuple(
+        variable=MALE, mapping={0: 'female', 1: 'male'}
+    ),
+    'class': DiscreteSegmentationTuple(
+        variable=FIRST, mapping={0: 'secondClass', 1: 'firstClass'}
+    ),
+    'luggage': DiscreteSegmentationTuple(
+        variable=LUGGAGE, mapping={0: 'noLugg', 1: 'oneLugg', 3: 'severalLugg'}
+    ),
+    'income': DiscreteSegmentationTuple(
+        variable=INCOME,
+        mapping={
+            1: 'inc-under50',
+            2: 'inc-50-100',
+            3: 'inc-100+',
+            4: 'inc-unknown',
+        },
+    ),
+}
+
+segmentations_cost = {
+    'GA': DiscreteSegmentationTuple(variable=GA, mapping={1: 'GA', 0: 'noGA'}),
+    'gender': DiscreteSegmentationTuple(
+        variable=MALE, mapping={0: 'female', 1: 'male'}
+    ),
+    'income': DiscreteSegmentationTuple(
+        variable=INCOME,
+        mapping={
+            1: 'inc-under50',
+            2: 'inc-50-100',
+            3: 'inc-100+',
+            4: 'inc-unknown',
+        },
+    ),
+    'class': DiscreteSegmentationTuple(
+        variable=FIRST, mapping={0: 'secondClass', 1: 'firstClass'}
+    ),
+    'who': DiscreteSegmentationTuple(
+        variable=WHO,
+        mapping={1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'},
+    ),
+}
+
+segmentations_time = {
+    'GA': DiscreteSegmentationTuple(variable=GA, mapping={1: 'GA', 0: 'noGA'}),
+    'gender': DiscreteSegmentationTuple(
+        variable=MALE, mapping={0: 'female', 1: 'male'}
+    ),
+    'class': DiscreteSegmentationTuple(
+        variable=FIRST, mapping={0: 'secondClass', 1: 'firstClass'}
+    ),
+    'luggage': DiscreteSegmentationTuple(
+        variable=LUGGAGE, mapping={0: 'noLugg', 1: 'oneLugg', 3: 'severalLugg'}
+    ),
+    'who': DiscreteSegmentationTuple(
+        variable=WHO,
+        mapping={1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'},
+    ),
+}
+
+segmentations_headway = {
+    'class': DiscreteSegmentationTuple(
+        variable=FIRST, mapping={0: 'secondClass', 1: 'firstClass'}
+    ),
+    'luggage': DiscreteSegmentationTuple(
+        variable=LUGGAGE, mapping={0: 'noLugg', 1: 'oneLugg', 3: 'severalLugg'}
+    ),
+    'who': DiscreteSegmentationTuple(
+        variable=WHO,
+        mapping={1: 'egoPays', 2: 'employerPays', 3: 'fiftyFifty'},
+    ),
+}
+
+
+segmentations = {
+    'Seg. cte': SegmentedParameterTuple(
+        dict=segmentations_cte, combinatorial=False
+    ),
+    'Seg. cost': SegmentedParameterTuple(
+        dict=segmentations_cost, combinatorial=False
+    ),
+    'Seg. time': SegmentedParameterTuple(
+        dict=segmentations_time, combinatorial=False
+    ),
+    'Seg. headway': SegmentedParameterTuple(
+        dict=segmentations_headway, combinatorial=False
+    ),
+}
+
+
+## Step 8: Specification of the utility function. For each term, it is possible
+## to define bounds on the coefficient, and to include a function that
+## verifies its validity a posteriori.
 
 utility_train = [
-    (None, 'Seg. cte', (None, None), None),
-    ('Train travel time', 'Seg. time', (None, 0), None),
-    ('Train travel cost', 'Seg. cost', (None, 0), None),
-    ('Train headway', 'Seg. headway', (None, 0), None),
+    TermTuple(
+        attribute=None,
+        segmentation='Seg. cte',
+        bounds=(None, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Train travel time',
+        segmentation='Seg. time',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Train travel cost',
+        segmentation='Seg. cost',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Train headway',
+        segmentation='Seg. headway',
+        bounds=(None, 0),
+        validity=None,
+    ),
 ]
 
 utility_sm = [
-    (None, 'Seg. cte', (None, None), None),
-    ('Swissmetro travel time', 'Seg. time', (None, 0), None),
-    ('Swissmetro travel cost', 'Seg. cost', (None, 0), None),
-    ('Swissmetro headway', 'Seg. headway', (None, 0), None),
+    TermTuple(
+        attribute=None,
+        segmentation='Seg. cte',
+        bounds=(None, None),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Swissmetro travel time',
+        segmentation='Seg. time',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Swissmetro travel cost',
+        segmentation='Seg. cost',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Swissmetro headway',
+        segmentation='Seg. headway',
+        bounds=(None, 0),
+        validity=None,
+    ),
 ]
 
 utility_car = [
-    ('Car travel time', 'Seg. time', (None, 0), None),
-    ('Car travel cost', 'Seg. cost', (None, 0), None),
+    TermTuple(
+        attribute='Car travel time',
+        segmentation='Seg. time',
+        bounds=(None, 0),
+        validity=None,
+    ),
+    TermTuple(
+        attribute='Car travel cost',
+        segmentation='Seg. cost',
+        bounds=(None, 0),
+        validity=None,
+    ),
 ]
-
 
 utilities = {
     1: ('train', utility_train),
@@ -263,17 +472,47 @@ utilities = {
     3: ('car', utility_car),
 }
 
+## Step 9: availabilities
 availabilities = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 
-# We define potential candidates for the choice model.
+# Step 10: We define potential candidates for the choice model.
 def logit(V, av, choice):
-    """logit model"""
+    """logit model
+
+    :param V: the dictionary of utility functions.
+    :type V: dict(int, biogeme.expressions.Expression)
+
+    :param av: the dictionary of availability conditions
+    :type av: dict(int, biogeme.expressions.Expression)
+
+    :param choice: the expression to calculate the chosen alternative
+    :type choice: biogeme.expressions.Expression
+
+    :return: expression representing the contribution of each
+        observation to the log likelihood function
+    :rtype: biogeme.expressions.Expression
+
+    """
     return models.loglogit(V, av, choice)
 
 
 def nested1(V, av, choice):
-    """Nested logit model: existing / future"""
+    """Nested logit model: existing / future
+    :param V: the dictionary of utility functions.
+    :type V: dict(int, biogeme.expressions.Expression)
+
+    :param av: the dictionary of availability conditions
+    :type av: dict(int, biogeme.expressions.Expression)
+
+    :param choice: the expression to calculate the chosen alternative
+    :type choice: biogeme.expressions.Expression
+
+    :return: expression representing the contribution of each
+        observation to the log likelihood function
+    :rtype: biogeme.expressions.Expression
+
+    """
     existing = Beta('mu_existing', 1, 1, None, 0), [1, 3]
     future = 1.0, [2]
     nests = existing, future
@@ -281,7 +520,22 @@ def nested1(V, av, choice):
 
 
 def nested2(V, av, choice):
-    """Nested logit model: public / private"""
+    """Nested logit model: public / private
+
+    :param V: the dictionary of utility functions.
+    :type V: dict(int, biogeme.expressions.Expression)
+
+    :param av: the dictionary of availability conditions
+    :type av: dict(int, biogeme.expressions.Expression)
+
+    :param choice: the expression to calculate the chosen alternative
+    :type choice: biogeme.expressions.Expression
+
+    :return: expression representing the contribution of each
+        observation to the log likelihood function
+    :rtype: biogeme.expressions.Expression
+
+    """
     public = Beta('mu_public', 1, 1, None, 0), [1, 2]
     private = 1.0, [3]
     nests = public, private
@@ -289,7 +543,21 @@ def nested2(V, av, choice):
 
 
 def cnl1(V, av, choice):
-    """Cross nested logit: fixed alphas"""
+    """Cross nested logit: fixed alphas
+
+    :param V: the dictionary of utility functions.
+    :type V: dict(int, biogeme.expressions.Expression)
+
+    :param av: the dictionary of availability conditions
+    :type av: dict(int, biogeme.expressions.Expression)
+
+    :param choice: the expression to calculate the chosen alternative
+    :type choice: biogeme.expressions.Expression
+
+    :return: expression representing the contribution of each
+        observation to the log likelihood function
+    :rtype: biogeme.expressions.Expression
+    """
     mu_existing = Beta('mu_existing', 1, 1, None, 0)
     mu_public = Beta('mu_public', 1, 1, None, 0)
     alpha_existing = {1: 0.5, 2: 0, 3: 1}
@@ -301,7 +569,21 @@ def cnl1(V, av, choice):
 
 
 def cnl2(V, av, choice):
-    """Cross nested logit: fixed alphas"""
+    """Cross nested logit: fixed alphas
+
+    :param V: the dictionary of utility functions.
+    :type V: dict(int, biogeme.expressions.Expression)
+
+    :param av: the dictionary of availability conditions
+    :type av: dict(int, biogeme.expressions.Expression)
+
+    :param choice: the expression to calculate the chosen alternative
+    :type choice: biogeme.expressions.Expression
+
+    :return: expression representing the contribution of each
+        observation to the log likelihood function
+    :rtype: biogeme.expressions.Expression
+    """
     alpha = Beta('alpha', 0.5, 0, 1, 0)
     mu_existing = Beta('mu_existing', 1, 1, None, 0)
     mu_public = Beta('mu_public', 1, 1, None, 0)
@@ -322,16 +604,16 @@ myModels = {
     'CNL alpha est.': cnl2,
 }
 
-# Definition of the specification problem, gathering all information
+## Step 11:  Definition of the specification problem, gathering all information
 # defined above.
 theProblem = assisted.specificationProblem(
     'Swissmetro',
     database,
-    variables,
-    groupsOfVariables,
+    attributes,
+    groupsOfAttributes,
     genericForbiden,
     forceActive,
-    nonlinearSpecs,
+    transformations,
     segmentations,
     utilities,
     availabilities,
@@ -341,8 +623,9 @@ theProblem = assisted.specificationProblem(
 
 theProblem.maximumNumberOfParameters = 300
 
+# We propose several specifications to initialize the algorithm.
 # First model: three alternative specific attributes
-nl = {
+attr = {
     'Travel time': (0, False),
     'Travel cost': (0, False),
     'Headway': (0, False),
@@ -356,11 +639,11 @@ sg = {
 }
 
 initSolutions = [
-    theProblem.generateSolution(nl, sg, 'Logit'),
-    theProblem.generateSolution(nl, sg, 'Nested one stop'),
-    theProblem.generateSolution(nl, sg, 'Nested same'),
-    theProblem.generateSolution(nl, sg, 'CNL alpha fixed'),
-    theProblem.generateSolution(nl, sg, 'CNL alpha est.'),
+    theProblem.generateSolution(attr, sg, 'Logit'),
+    theProblem.generateSolution(attr, sg, 'Nested one stop'),
+    theProblem.generateSolution(attr, sg, 'Nested same'),
+    theProblem.generateSolution(attr, sg, 'CNL alpha fixed'),
+    theProblem.generateSolution(attr, sg, 'CNL alpha est.'),
 ]
 
 

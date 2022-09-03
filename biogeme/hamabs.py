@@ -69,7 +69,7 @@ class smoothing:
         # was used.  Each other value has a weight proportional to one
         # minus the batch of the last value, times a discounted factor
         scale = [self.batch[-1]] + [
-            discount ** k * (1.0 - self.batch[-1]) / (self.windowSize - 1)
+            discount**k * (1.0 - self.batch[-1]) / (self.windowSize - 1)
             for k in range(1, min(len(self.f), self.windowSize))
         ]
         normscale = [x / sum(scale) for x in scale]
@@ -210,9 +210,9 @@ def hamabs(fct, initBetas, fixedBetas, betaIds, bounds, parameters=None):
     tol = np.finfo(np.float64).eps ** 0.3333
     maxiter = 1000
     # The size of the first batch is such that it can be increased 5 times
-    firstBatch = 1.0 / 2.0 ** 4
+    firstBatch = 1.0 / 2.0**4
     # The critical of the batch when BFGS is applied allows for 2 increases
-    hybrid = 1.0 / 2.0 ** 2
+    hybrid = 1.0 / 2.0**2
     firstRadius = 1.0
     # Premature convergence for small batch sizes
     # scaleEps = 10.0
