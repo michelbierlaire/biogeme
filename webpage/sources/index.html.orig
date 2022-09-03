@@ -66,8 +66,11 @@
       </div>
       
       <div class="panel panel-default">
-	<div class="panel-heading">What's new in Biogeme 3.2.9</div>
+	<div class="panel-heading">What's new in Biogeme 3.2.10?</div>
 	<div class="panel-body">
+	  <p><strong>Note</strong>: versions 3.2.9 and 3.2.10 are
+	  identical. Therefore, version 3.2.9 has been removed from
+	  the official distribution platform. </p>
 	  <dl>
 	    <dt>New syntax for <code>DefineVariable</code></dt>
 	    <dd>
