@@ -2031,6 +2031,34 @@ class log(UnaryOperator):
         return np.log(self.child.getValue())
 
 
+class logzero(UnaryOperator):
+    """
+    logarithm expression. Returns zero if the argument is zero. 
+    """
+
+    def __init__(self, child):
+        """Constructor
+
+        :param child: first arithmetic expression
+        :type child: biogeme.expressions.Expression
+        """
+        UnaryOperator.__init__(self, child)
+
+    def __str__(self):
+        return f'logzero({self.child})'
+
+    def getValue(self):
+        """Evaluates the value of the expression
+
+        :return: value of the expression
+        :rtype: float
+        """
+        v = self.child.getValue()
+        if v == 0:
+            return 0
+        return np.log(v)
+
+    
 class Derive(UnaryOperator):
     """
     Derivative with respect to an elementary expression
@@ -3443,8 +3471,14 @@ class bioMultSum(Expression):
         :raise biogemeError: if one of the expressions is invalid, that is
             neither a numeric value or a
             biogeme.expressions.Expression object.
+        :raise biogemeError: if the list of expressions is empty
+        :raise biogemeError: if the list of expressions is neither a dict or a list
         """
         Expression.__init__(self)
+        if not listOfExpressions:
+            raise excep.biogemeError(
+                'The argument of bioMultSum cannot be empty'
+            )
         if isinstance(listOfExpressions, dict):
             for e in listOfExpressions.values():
                 if isNumeric(e):
@@ -3833,3 +3867,12 @@ class bioLinearUtility(Expression):
             )
         listOfSignatures += [signature.encode()]
         return listOfSignatures
+
+def list_of_expressions(dict_of_expressions):
+    """This function takes a dict of expressions as input. Each
+      expression is interpreted as a boolean, which is False if the
+      value is 0, and True otherwise.
+
+    It evaluates the expressions, and returns the list of keys corresponding to True
+    """
+    []

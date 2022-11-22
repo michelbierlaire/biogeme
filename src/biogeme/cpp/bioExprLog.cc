@@ -68,7 +68,12 @@ const bioDerivatives* bioExprLog::getValueAndDerivatives(std::vector<bioUInt> li
       if (hessian) {
 	for (bioUInt j = 0 ; j < n ; ++j) {
 	  bioReal fsquare = cf * cf ;
-	  theDerivatives.h[i][j] = childResult->h[i][j] / cf -  childResult->g[i] *  childResult->g[j] / fsquare ;
+	  if (cf != 0.0) { 
+	    theDerivatives.h[i][j] = childResult->h[i][j] / cf -  childResult->g[i] *  childResult->g[j] / fsquare ;
+	  }
+	  else {
+	    theDerivatives.h[i][j] = -std::numeric_limits<bioReal>::max() / 2.0 ;
+	  }
 	}
       }
     }

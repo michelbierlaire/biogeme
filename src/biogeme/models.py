@@ -115,7 +115,8 @@ def boxcox(x, ell):
         + ell**2 * expr.log(x) ** 3 / 6.0
         + ell**3 * expr.log(x) ** 4 / 24.0
     )
-    smooth = expr.Elem({0: regular, 1: mclaurin}, ell < expr.Numeric(1.0e-5))
+    close_to_zero = (ell < expr.Numeric(1.0e-5)) * (ell > -expr.Numeric(1.0e-5))
+    smooth = expr.Elem({0: regular, 1: mclaurin}, close_to_zero)
     return expr.Elem({0: smooth, 1: expr.Numeric(0)}, x == 0)
 
 
@@ -186,7 +187,8 @@ def piecewiseVariables(variable, thresholds):
         b = thresholds[1] - thresholds[0]
         results = [
             expr.bioMax(
-                expr.Numeric(0), expr.bioMin(variable - thresholds[0], b)
+                expr.Numeric(0),
+                expr.bioMin(variable - thresholds[0], b)
             )
         ]
 
@@ -194,7 +196,8 @@ def piecewiseVariables(variable, thresholds):
         b = thresholds[i + 1] - thresholds[i]
         results += [
             expr.bioMax(
-                expr.Numeric(0), expr.bioMin(variable - thresholds[i], b)
+                expr.Numeric(0),
+                expr.bioMin(variable - thresholds[i], b)
             )
         ]
 
@@ -205,7 +208,8 @@ def piecewiseVariables(variable, thresholds):
         b = thresholds[-1] - thresholds[-2]
         results += [
             expr.bioMax(
-                expr.Numeric(0), expr.bioMin(variable - thresholds[-2], b)
+                expr.Numeric(0),
+                expr.bioMin(variable - thresholds[-2], b)
             )
         ]
     return results
@@ -260,7 +264,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
         the_name = variable.name
     elif isinstance(variable, str):
         the_name = variable
-        the_valiable = expr.Variable(f'{variable}')
+        the_variable = expr.Variable(f'{variable}')
     else:
         errorMsg = (
             'The first argument of piecewiseFormula must be the '
@@ -586,7 +590,7 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
     )
 
 
-def getMevGeneratingForNested(V, availability, nests):
+def getMevGeneratingForNested(V, availability, nests, alone=None):
     """Implements the  MEV generating function for the nested logit model
 
     :param V: dict of objects representing the utility functions of
@@ -617,6 +621,9 @@ def getMevGeneratingForNested(V, availability, nests):
 
     :type nests: tuple
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: a dictionary mapping each alternative id with the function
 
     .. math:: G(e^{V_1},
@@ -643,10 +650,13 @@ def getMevGeneratingForNested(V, availability, nests):
             ]
         theSum = expr.bioMultSum(sumdict)
         termsForNests.append(theSum**1.0 / m[0])
+    if alone is not None:
+        for i in alone:
+            termsForNests.append(V[i])
     return expr.bioMultSum(termsForNests)
 
 
-def getMevForNested(V, availability, nests):
+def getMevForNested(V, availability, nests, alone=None):
     """Implements the derivatives of MEV generating function for the
     nested logit model
 
@@ -678,6 +688,9 @@ def getMevForNested(V, availability, nests):
 
     :type nests: tuple
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: a dictionary mapping each alternative id with the function
 
         .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1},
@@ -692,7 +705,10 @@ def getMevForNested(V, availability, nests):
 
     """
 
-    logGi = {}
+    if alone is None:
+        logGi = {}
+    else:
+        logGi = {i: 0 for i in alone}
     for m in nests:
         if availability is None:
             sumdict = [expr.exp(m[0] * V[i]) for i in m[1]]
@@ -712,7 +728,7 @@ def getMevForNested(V, availability, nests):
     return logGi
 
 
-def getMevForNestedMu(V, availability, nests, mu):
+def getMevForNestedMu(V, availability, nests, mu, alone=None):
     """Implements the MEV generating function for the nested logit model,
     including the scale parameter
 
@@ -748,6 +764,9 @@ def getMevForNestedMu(V, availability, nests, mu):
     :param mu: scale parameter
     :type mu: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: a dictionary mapping each alternative id with the function
 
         .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
@@ -761,7 +780,10 @@ def getMevForNestedMu(V, availability, nests, mu):
 
     """
 
-    logGi = {}
+    if alone is None:
+        logGi = {}
+    else:
+        logGi = {i: expr.log(mu) + (mu - 1) * V[i] for i in alone}
     for m in nests:
         if availability is None:
             sumdict = [expr.exp(m[0] * V[i]) for i in m[1]]
@@ -782,7 +804,7 @@ def getMevForNestedMu(V, availability, nests, mu):
     return logGi
 
 
-def nested(V, availability, nests, choice):
+def nested(V, availability, nests, choice, alone=None):
     """Implements the nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -817,6 +839,9 @@ def nested(V, availability, nests, choice):
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: choice probability for the nested logit model,
              based on the derivatives of the MEV generating function produced
              by the function getMevForNested
@@ -826,16 +851,16 @@ def nested(V, availability, nests, choice):
     :raise biogemeError: if the definition of the nests is invalid.
     """
 
-    ok, message = checkValidityNestedLogit(V, nests)
+    ok, message = checkValidityNestedLogit(V, nests, alone)
     if not ok:
         raise excep.biogemeError(message)
 
-    logGi = getMevForNested(V, availability, nests)
+    logGi = getMevForNested(V, availability, nests, alone)
     P = mev(V, logGi, availability, choice)
     return P
 
 
-def lognested(V, availability, nests, choice):
+def lognested(V, availability, nests, choice, alone=None):
     """Implements the log of a nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -871,6 +896,9 @@ def lognested(V, availability, nests, choice):
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: log of choice probability for the nested logit model,
              based on the derivatives of the MEV generating function produced
              by the function getMevForNested
@@ -879,15 +907,15 @@ def lognested(V, availability, nests, choice):
 
     :raise biogemeError: if the definition of the nests is invalid.
     """
-    ok, message = checkValidityNestedLogit(V, nests)
+    ok, message = checkValidityNestedLogit(V, nests, alone)
     if not ok:
         raise excep.biogemeError(message)
-    logGi = getMevForNested(V, availability, nests)
+    logGi = getMevForNested(V, availability, nests, alone)
     logP = logmev(V, logGi, availability, choice)
     return logP
 
 
-def nestedMevMu(V, availability, nests, choice, mu):
+def nestedMevMu(V, availability, nests, choice, mu, alone=None):
     """Implements the nested logit model as a MEV model, where mu is also
     a parameter, if the user wants to test different normalization
     schemes.
@@ -928,6 +956,9 @@ def nestedMevMu(V, availability, nests, choice, mu):
     :param mu: expression producing the value of the top-level scale parameter.
     :type mu:  biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: the nested logit choice probability based on the following
              derivatives of the MEV generating function:
 
@@ -941,10 +972,10 @@ def nestedMevMu(V, availability, nests, choice, mu):
     :rtype: biogeme.expressions.expr.Expression
 
     """
-    return expr.exp(lognestedMevMu(V, availability, nests, choice, mu))
+    return expr.exp(lognestedMevMu(V, availability, nests, choice, mu, alone))
 
 
-def lognestedMevMu(V, availability, nests, choice, mu):
+def lognestedMevMu(V, availability, nests, choice, mu, alone=None):
     """Implements the log of the nested logit model as a MEV model, where
     mu is also a parameter, if the user wants to test different
     normalization schemes.
@@ -986,6 +1017,9 @@ def lognestedMevMu(V, availability, nests, choice, mu):
     :param mu: expression producing the value of the top-level scale parameter.
     :type mu:  biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: the log of the nested logit choice probability based on the
         following derivatives of the MEV generating function:
 
@@ -1000,12 +1034,14 @@ def lognestedMevMu(V, availability, nests, choice, mu):
 
     """
 
-    logGi = getMevForNestedMu(V, availability, nests, mu)
+    logGi = getMevForNestedMu(V, availability, nests, mu, alone)
     logP = logmev(V, logGi, availability, choice)
     return logP
 
 
-def cnl_avail(V, availability, nests, choice):
+def cnl_avail(
+    V, availability, nests, choice, alone=None, sampling_log_probability=None
+):
     """Same as cnl. Maintained for backward compatibility
 
     :param V: dict of objects representing the utility functions of
@@ -1053,13 +1089,25 @@ def cnl_avail(V, availability, nests, choice):
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
+    :param sampling_log_probability: if not None, it means that the
+        choice set is actually a subset that has been sampled from the
+        full choice set. In that case, this is a dictionary mapping
+        each alternative with the logarithm of its probability to be
+        selected in the sample.
+    :type sampling_log_probability: dict(int: biogeme.expressions.Expression)
+
     :return: choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
     """
-    return cnl(V, availability, nests, choice)
+    return cnl(V, availability, nests, choice, alone, sampling_log_probability)
 
 
-def cnl(V, availability, nests, choice):
+def cnl(
+    V, availability, nests, choice, alone=None, sampling_log_probability=None
+):
     """Implements the cross-nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -1103,19 +1151,31 @@ def cnl(V, availability, nests, choice):
 
     :type nests: tuple
 
+    :param sampling_log_probability: if not None, it means that the
+        choice set is actually a subset that has been sampled from the
+        full choice set. In that case, this is a dictionary mapping
+        each alternative with the logarithm of its probability to be
+        selected in the sample.
+    :type sampling_log_probability: dict(int: biogeme.expressions.Expression)
+
     :param choice: id of the alternative for which the probability must be
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
-
-
     """
-    return expr.exp(logcnl(V, availability, nests, choice))
+    return expr.exp(
+        logcnl(V, availability, nests, choice, alone, sampling_log_probability)
+    )
 
 
-def logcnl_avail(V, availability, nests, choice):
+def logcnl_avail(
+    V, availability, nests, choice, alone=None, sampling_log_probability=None
+):
     """Same as logcnl. Maintained for backward compatibility
 
     :param V: dict of objects representing the utility functions of
@@ -1163,13 +1223,27 @@ def logcnl_avail(V, availability, nests, choice):
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
+    :param sampling_log_probability: if not None, it means that the
+        choice set is actually a subset that has been sampled from the
+        full choice set. In that case, this is a dictionary mapping
+        each alternative with the logarithm of its probability to be
+        selected in the sample.
+    :type sampling_log_probability: dict(int: biogeme.expressions.Expression)
+
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: log of choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
     """
-    return logcnl(V, availability, nests, choice)
+    return logcnl(
+        V, availability, nests, choice, alone, sampling_log_probability
+    )
 
 
-def getMevForCrossNested(V, availability, nests):
+def getMevForCrossNested(
+    V, availability, nests, alone=None, sampling_log_probability=None
+):
     """Implements the MEV generating function for the cross nested logit
     model as a MEV model.
 
@@ -1183,7 +1257,7 @@ def getMevForCrossNested(V, availability, nests):
         None. In this case, all alternatives are supposed to be
         always available.
 
-    :type availability: dict(int: biogeme.expressions.expr.Expression)
+    :type availability: dict(int: biogeme.expressions.Expression)
 
     :param nests: a tuple containing as many items as nests.
         Each item is also a tuple containing two items:
@@ -1214,43 +1288,88 @@ def getMevForCrossNested(V, availability, nests):
 
     :type nests: tuple
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
+    :param sampling_log_probability: if not None, it means that the
+        choice set is actually a subset that has been sampled from the
+        full choice set. In that case, this is a dictionary mapping
+        each alternative with the logarithm of its probability to be
+        selected in the sample.
+    :type sampling_log_probability: dict(int: biogeme.expressions.Expression)
+
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
 
     """
 
     Gi_terms = {}
-    logGi = {}
-    for i in V:
-        Gi_terms[i] = []
+    if alone is None:
+        logGi = {}
+        for i in V:
+            Gi_terms[i] = []
+    else:
+       logGi = {i: 0 for i in alone}
+       for i in set(V).difference(set(alone)):
+           Gi_terms[i] = []
     biosum = {}
     for m in nests:
         if availability is None:
-            biosum = expr.bioMultSum(
-                [
-                    a ** (m[0]) * expr.exp(m[0] * (V[i]))
-                    for i, a in m[1].items()
-                ]
-            )
+            if sampling_log_probability is None:
+                biosum = expr.bioMultSum(
+                    [
+                        a ** (m[0]) * expr.exp(m[0] * (V[i]))
+                        for i, a in m[1].items()
+                    ]
+                )
+            else:
+                biosum = expr.bioMultSum(
+                    [
+                        expr.exp(-sampling_log_probability[i])
+                        * a ** (m[0])
+                        * expr.exp(m[0] * (V[i]))
+                        for i, a in m[1].items()
+                    ]
+                )
         else:
-            biosum = expr.bioMultSum(
-                [
-                    availability[i] * a ** (m[0]) * expr.exp(m[0] * (V[i]))
-                    for i, a in m[1].items()
-                ]
-            )
+            if sampling_log_probability is None:
+                biosum = expr.bioMultSum(
+                    [
+                        availability[i] * a ** (m[0]) * expr.exp(m[0] * (V[i]))
+                        for i, a in m[1].items()
+                    ]
+                )
+            else:
+                biosum = expr.bioMultSum(
+                    [
+                        expr.exp(-sampling_log_probability[i])
+                        * availability[i]
+                        * a ** (m[0])
+                        * expr.exp(m[0] * (V[i]))
+                        for i, a in m[1].items()
+                    ]
+                )
         for i, a in m[1].items():
             Gi_terms[i] += [
                 a ** (m[0])
                 * expr.exp((m[0] - 1) * (V[i]))
                 * biosum ** ((1.0 / m[0]) - 1.0)
             ]
-    for k in V:
-        logGi[k] = expr.log(expr.bioMultSum(Gi_terms[k]))
+    for k, G in Gi_terms.items():
+        logGi[k] = expr.Elem(
+            {1: 0,
+             0: expr.log(expr.bioMultSum(G))
+            },
+            expr.bioMultSum(G) == 0
+        )
+        if sampling_log_probability is not None:
+            logGi[k] -= sampling_log_probability[k]
     return logGi
 
 
-def logcnl(V, availability, nests, choice):
+def logcnl(
+    V, availability, nests, choice, alone=None, sampling_log_probability=None
+):
     """Implements the log of the cross-nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -1298,22 +1417,34 @@ def logcnl(V, availability, nests, choice):
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
+    :param sampling_log_probability: if not None, it means that the
+        choice set is actually a subset that has been sampled from the
+        full choice set. In that case, this is a dictionary mapping
+        each alternative with the logarithm of its probability to be
+        selected in the sample.
+    :type sampling_log_probability: dict(int: biogeme.expressions.Expression)
+
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
 
     :raise biogemeError: if the definition of the nests is invalid.
     """
-    ok, message = checkValidityCNL(V, nests)
+    ok, message = checkValidityCNL(V, nests, alone)
     if not ok:
         raise excep.biogemeError(message)
     if message != '':
         logger.warning(f'CNL: {message}')
-    logGi = getMevForCrossNested(V, availability, nests)
+    logGi = getMevForCrossNested(
+        V, availability, nests, alone, sampling_log_probability
+    )
     logP = logmev(V, logGi, availability, choice)
     return logP
 
 
-def cnlmu(V, availability, nests, choice, mu):
+def cnlmu(V, availability, nests, choice, mu, alone=None):
     """Implements the cross-nested logit model as a MEV model with
     the homogeneity parameters is explicitly involved
 
@@ -1365,13 +1496,16 @@ def cnlmu(V, availability, nests, choice, mu):
     :param mu: Homogeneity parameter :math:`\\mu`.
     :type mu: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
     """
-    return expr.exp(logcnlmu(V, availability, nests, choice, mu))
+    return expr.exp(logcnlmu(V, availability, nests, choice, mu, alone))
 
 
-def getMevForCrossNestedMu(V, availability, nests, mu):
+def getMevForCrossNestedMu(V, availability, nests, mu, alone=None):
     """Implements the MEV generating function for the cross-nested logit
     model as a MEV model with the homogeneity parameters is explicitly
     involved.
@@ -1420,14 +1554,22 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
     :param mu: Homogeneity parameter :math:`\\mu`.
     :type mu: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
 
     """
     Gi_terms = {}
-    logGi = {}
-    for i in V:
-        Gi_terms[i] = []
+    if alone is None:
+        logGi = {}
+        for i in V:
+            Gi_terms[i] = []
+    else:
+        logGi = {i: expr.log(mu) + (mu - 1) * V[i] for i in alone}
+        for i in set(V).difference(set(alone)):
+            Gi_terms[i] = []
     biosum = {}
     for m in nests:
         if availability is None:
@@ -1452,12 +1594,12 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
                 * expr.exp((m[0] - 1) * (V[i]))
                 * biosum ** ((mu / m[0]) - 1.0)
             ]
-    for k in V:
-        logGi[k] = expr.log(mu * expr.bioMultSum(Gi_terms[k]))
+    for k, G in Gi_terms.items():
+        logGi[k] = expr.log(mu * expr.bioMultSum(G))
     return logGi
 
 
-def logcnlmu(V, availability, nests, choice, mu):
+def logcnlmu(V, availability, nests, choice, mu, alone=None):
     """Implements the log of the cross-nested logit model as a MEV model
     with the homogeneity parameters is explicitly involved.
 
@@ -1510,21 +1652,24 @@ def logcnlmu(V, availability, nests, choice, mu):
     :param mu: Homogeneity parameter :math:`\\mu`.
     :type mu: biogeme.expressions.expr.Expression
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
 
     :raise biogemeError: if the definition of the nests is invalid.
 
     """
-    ok, message = checkValidityCNL(V, nests)
+    ok, message = checkValidityCNL(V, nests, alone)
     if not ok:
         raise excep.biogemeError(message)
-    logGi = getMevForCrossNestedMu(V, availability, nests, mu)
+    logGi = getMevForCrossNestedMu(V, availability, nests, mu, alone)
     logP = logmev(V, logGi, availability, choice)
     return logP
 
 
-def checkValidityNestedLogit(V, nests):
+def checkValidityNestedLogit(V, nests, alone):
     """Verifies if the nested logit model is indeed based on a partition
     of the choice set.
 
@@ -1547,6 +1692,8 @@ def checkValidityNestedLogit(V, nests):
 
     :type nests: tuple
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
 
     :return: a tuple ok, message, where the message explains the
              problem is the nested structure is not OK.
@@ -1559,6 +1706,8 @@ def checkValidityNestedLogit(V, nests):
 
     fullChoiceSet = {i for i, v in V.items()}
     unionOfNests = set.union(*[set(n[1]) for n in nests])
+    if alone is not None:
+        unionOfNests = unionOfNests.union(alone)
     if fullChoiceSet != unionOfNests:
         ok = False
         d1 = fullChoiceSet.difference(unionOfNests)
@@ -1574,8 +1723,18 @@ def checkValidityNestedLogit(V, nests):
                 f'{d2}\n'
             )
 
-    # Consider all pairs of nests and verify that the intersection is empty
+    # Check that the set of alone alternatives is well defined
+    if alone is not None:
+        for n in nests:
+            inter = set(alone).intersection(n[1])
+            if inter:
+                ok = False
+                message += (
+                    f'A nest contains the following alternative(s): '
+                    f'{inter}, that is also declared alone in a nest.\n'
+                )
 
+    # Consider all pairs of nests and verify that the intersection is empty
     allPairs = [(n1, n2) for n1 in nests for n2 in nests if n1 != n2]
     for (n1, n2) in allPairs:
         inter = set(n1[1]).intersection(n2[1])
@@ -1592,7 +1751,7 @@ def checkValidityNestedLogit(V, nests):
     return ok, message
 
 
-def checkValidityCNL(V, nests):
+def checkValidityCNL(V, nests, alone):
     """Verifies if the cross-nested logit specifciation is valid
 
     :param V: dict of objects representing the utility functions of
@@ -1628,6 +1787,9 @@ def checkValidityCNL(V, nests):
 
     :type nests: tuple
 
+    :param alone: list of alternatives that are alone in a nest
+    :type alone: list(int)
+
     :return: a tuple ok, message, where the message explains the
              problem is the nested structure is not OK.
     :rtype: tuple(bool, str)
@@ -1648,8 +1810,9 @@ def checkValidityCNL(V, nests):
     problems_one = []
     for i, ell in alt.items():
         if not ell:
-            problems_zero.append(i)
-            ok = False
+            if alone is None or i not in alone:
+                problems_zero.append(i)
+                ok = False
         if len(ell) == 1 and isinstance(ell[0], expr.Expression):
             problems_one.append(i)
 

@@ -1,5 +1,0 @@
-cython
-pandas
-scipy
-tqdm
-

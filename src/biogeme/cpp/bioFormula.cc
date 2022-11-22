@@ -39,6 +39,7 @@
 #include "bioExprUnaryMinus.h"
 #include "bioExprExp.h"
 #include "bioExprLog.h"
+#include "bioExprLogzero.h"
 #include "bioExprMultSum.h"
 #include "bioExprLogLogit.h"
 #include "bioExprLogLogitFullChoiceSet.h"
@@ -436,6 +437,13 @@ bioExpression* bioFormula::processFormula(bioString f) {
     std::vector<bioString> items = split(f,',') ;
     std::map<bioString,bioExpression*>::iterator e = expressions.find(items[1]) ;
     theExpression = bioMemoryManagement::the()->get_bioExprLog(e->second) ;
+    expressions[id] = theExpression ;
+    return theExpression ;
+  }
+  else if (typeOfExpression == "logzero") {
+    std::vector<bioString> items = split(f,',') ;
+    std::map<bioString,bioExpression*>::iterator e = expressions.find(items[1]) ;
+    theExpression = bioMemoryManagement::the()->get_bioExprLogzero(e->second) ;
     expressions[id] = theExpression ;
     return theExpression ;
   }

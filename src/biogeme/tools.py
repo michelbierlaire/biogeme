@@ -406,7 +406,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         """
         return {
             colname
-            for colname, col in g.iteritems()
+            for colname, col in g.items()
             if not are_values_identical(col)
         }
 

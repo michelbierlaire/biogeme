@@ -10,15 +10,10 @@
 
 
 import datetime
+from importlib.metadata import version
 
 # Release date
 versionDate = f'{datetime.date.today()}'
-# Major version number
-versionMajor = 3
-# Minor version number
-versionMinor = 2
-# Release name
-versionRelease = '11a'
 author = 'Michel Bierlaire'
 urlAuthor = 'http://people.epfl.ch/michel.bierlaire'
 department = 'Transport and Mobility Laboratory'
@@ -28,6 +23,7 @@ urlUniversity = 'http://www.epfl.ch'
 urlBiogeme = 'http://biogeme.epfl.ch'
 urlForum = 'https://groups.google.com/d/forum/biogeme'
 
+__version__ = '3.2.11a1'
 
 def getVersion():
     """
@@ -36,11 +32,10 @@ def getVersion():
     :return:  version number, and the release.
     :rtype: string
     """
-    v = f'{versionMajor}.{versionMinor}.{versionRelease}'
-    return v
+    return __version__
 
 
-__version__ = getVersion()
+
 
 
 def getHtml():

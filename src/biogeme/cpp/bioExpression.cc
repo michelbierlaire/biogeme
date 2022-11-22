@@ -98,7 +98,6 @@ void bioExpression::setRandomVariableValuePtr(bioUInt rvId, bioReal* v) {
 bioReal bioExpression::getValue() {
   const bioDerivatives* r = getValueAndDerivatives(std::vector<bioUInt>(), false,false) ;
   return r->f ;
-
 }
 
 bioBoolean bioExpression::containsLiterals(std::vector<bioUInt> literalIds) const {

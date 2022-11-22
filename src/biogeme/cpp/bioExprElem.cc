@@ -34,14 +34,13 @@ bioExprElem::~bioExprElem() {
 }
 
 const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> literalIds,
-						    bioBoolean gradient,
-				      bioBoolean hessian) {
-
+							  bioBoolean gradient,
+							  bioBoolean hessian) {
+  
   theDerivatives.with_g = gradient ;
   theDerivatives.with_h = hessian ;
 
   theDerivatives.resize(literalIds.size()) ;
-
 
   bioUInt k = bioUInt(key->getValue()) ;
 
@@ -63,23 +62,27 @@ const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> l
   if (fgh == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"derivatives") ;
   }
-  theDerivatives.f = fgh->f ;
-  if (!std::isfinite(fgh->f)) {
-    std::stringstream str ;
-    str << "Invalid value for expression <" << found->second->print(true) << ">: " << fgh->f ;
-    throw bioExceptions(__FILE__,__LINE__,str.str()) ;
-  }
-  if (gradient) {
-    for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-      theDerivatives.g[k] = fgh->g[k] ;
-      if (hessian) {
-	for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-	  theDerivatives.h[k][l] = fgh->h[k][l] ;
-	}
-      }
-    }
-  }
-  return &theDerivatives ;
+
+  return fgh ;
+
+  // Why copying? 
+  // theDerivatives.f = fgh->f ;
+  // if (!std::isfinite(fgh->f)) {
+  //   std::stringstream str ;
+  //   str << "Invalid value for expression <" << found->second->print(true) << ">: " << fgh->f ;
+  //   throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+  // }
+  // if (gradient) {
+  //   for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
+  //     theDerivatives.g[k] = fgh->g[k] ;
+  //     if (hessian) {
+  // 	for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
+  // 	  theDerivatives.h[k][l] = fgh->h[k][l] ;
+  // 	}
+  //     }
+  //   }
+  // }
+  // return &theDerivatives ;
 }
 
 bioString bioExprElem::print(bioBoolean hp) const {

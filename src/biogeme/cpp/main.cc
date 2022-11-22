@@ -53,7 +53,6 @@ int main() {
   expr.push_back("<log>{4411402224}(1),4411402784") ;
   
   biogeme bio ;
-  DEBUG_MESSAGE("Run biogeme") ;
   bio.setExpressions(expr,std::vector<bioString>(),10);
   std::vector<bioReal> b ;
   b.push_back(1.0) ;
@@ -61,5 +60,4 @@ int main() {
   std::vector<bioReal> aRow(36,1.0) ;
   std::vector< std::vector<bioReal> > data(6768,aRow);
   bioReal r = bio.calculateLikelihood(b,fb,data) ;
-  DEBUG_MESSAGE("r=" << r) ;
 }

@@ -60,11 +60,7 @@ bioUInt bioThreadMemoryOneExpression::numberOfThreads() {
   return inputStructures.size() ;
 }
 bioUInt bioThreadMemoryOneExpression::dimension() {
-  DEBUG_MESSAGE("Size of input = " << inputStructures.size()) ;
-  DEBUG_MESSAGE("dimension") ;
-  DEBUG_MESSAGE("with_g = " << inputStructures[0].theDerivatives.with_g()) ;
   bioUInt n = inputStructures[0].theDerivatives.getSize() ;
-  DEBUG_MESSAGE("n = " << n) ;
   return n ;
 }
 

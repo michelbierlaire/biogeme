@@ -36,6 +36,7 @@
 #include "bioExprPanelTrajectory.h"
 #include "bioExprExp.h"
 #include "bioExprLog.h"
+#include "bioExprLogzero.h"
 #include "bioExprDerive.h"
 #include "bioExprIntegrate.h"
 #include "bioExprLogLogit.h"
@@ -228,6 +229,12 @@ void bioMemoryManagement::releaseAllMemory() {
     delete(*i) ;
   }
   a_bioExprLog.clear() ;
+  for (std::vector<bioExprLogzero*>::iterator i = a_bioExprLogzero.begin() ;
+       i != a_bioExprLogzero.end() ;
+       ++i) {
+    delete(*i) ;
+  }
+  a_bioExprLogzero.clear() ;
   for (std::vector<bioExprDerive*>::iterator i = a_bioExprDerive.begin() ;
        i != a_bioExprDerive.end() ;
        ++i) {
@@ -473,6 +480,12 @@ bioExprExp* bioMemoryManagement::get_bioExprExp(bioExpression* c) {
 bioExprLog* bioMemoryManagement::get_bioExprLog(bioExpression* c) {
   bioExprLog* ptr = new bioExprLog(c) ;
   a_bioExprLog.push_back(ptr) ;
+  return ptr ;
+}
+
+bioExprLogzero* bioMemoryManagement::get_bioExprLogzero(bioExpression* c) {
+  bioExprLogzero* ptr = new bioExprLogzero(c) ;
+  a_bioExprLogzero.push_back(ptr) ;
   return ptr ;
 }
 

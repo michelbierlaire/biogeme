@@ -53,12 +53,17 @@ class Database:
         :type pandasDatabase: pandas.DataFrame
 
         :raise biogemeError: if the audit function detects errors.
+        :raise biogemeError: if the database is empty.
         """
 
         self.name = name
         """ Name of the database. Used mainly for the file name when
         dumping data.
         """
+
+        if len(pandasDatabase.index) == 0:
+            error_msg = 'Database has no entry'
+            raise excep.biogemeError(error_msg)
 
         self.data = pandasDatabase  #: Pandas data frame containing the data.
 
@@ -395,8 +400,13 @@ class Database:
                  in the database, containing the calculated quantities.
         :rtype: numpy.Series
 
+        :raise biogemeError: if the database is empty.
         """
 
+        if len(self.data.index) == 0:
+            error_msg = 'Database has no entry'
+            raise excep.biogemeError(error_msg)
+        
         return expression.getValue_c(database=self, prepareIds=True)
 
     def checkAvailabilityOfChosenAlt(self, avail, choice):
@@ -416,10 +426,15 @@ class Database:
 
         :raise biogemeError: if the chosen alternative does not appear
             in the availability dict
+        :raise biogemeError: if the database is empty.
         """
         self._avail = avail
         self._choice = choice
 
+        if len(self.data.index) == 0:
+            error_msg = 'Database has no entry'
+            raise excep.biogemeError(error_msg)
+        
         choice_array = choice.getValue_c(
             database=self, aggregation=False, prepareIds=True
         )
@@ -456,7 +471,14 @@ class Database:
             it is chosen, and the number of time it is available.
         :rtype: dict(int: (int, int))
 
+        :raise biogemeError: if the database is empty.
         """
+        if len(self.data.index) == 0:
+            error_msg = 'Database has no entry'
+            raise excep.biogemeError(error_msg)
+        
+
+        
         self._avail = avail
         self._choice = choice
 
@@ -494,6 +516,7 @@ class Database:
 
         :raise biogemeError: if called.
         """
+        
         error_msg = 'Obsolete: use expression.getValue_c(database) instead'
         raise excep.biogemeError(error_msg)
 
@@ -708,8 +731,13 @@ class Database:
         :rtype: numpy.Series
 
         :raises ValueError: if the column name already exists.
+        :raise biogemeError: if the database is empty.
 
         """
+        if len(self.data.index) == 0:
+            error_msg = 'Database has no entry'
+            raise excep.biogemeError(error_msg)
+        
         if column in self.data.columns:
             raise ValueError(
                 f'Column {column} already exists in the database {self.name}'
