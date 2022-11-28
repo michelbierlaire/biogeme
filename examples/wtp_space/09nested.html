@@ -1,0 +1,89 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>09nested - Report from biogeme 3.2.11a1 [2022-11-28]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.2.11a1 [2022-11-28]">
+<meta name="author" content="{bv.author}">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<p>biogeme 3.2.11a1 [2022-11-28]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2022-11-28 18:49:01.723870</p>
+<table>
+<tr class=biostyle><td align=right><strong>Report file</strong>:	</td><td>09nested.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>swissmetro</td></tr>
+</table>
+<h1>Estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Number of estimated parameters</strong>: </td> <td>5</td></tr>
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>6768</td></tr>
+<tr class=biostyle><td align=right ><strong>Excluded observations</strong>: </td> <td>3960</td></tr>
+<tr class=biostyle><td align=right ><strong>Null log likelihood</strong>: </td> <td>-6964.663</td></tr>
+<tr class=biostyle><td align=right ><strong>Init log likelihood</strong>: </td> <td>-7034.631</td></tr>
+<tr class=biostyle><td align=right ><strong>Final log likelihood</strong>: </td> <td>-5236.9</td></tr>
+<tr class=biostyle><td align=right ><strong>Likelihood ratio test for the null model</strong>: </td> <td>3455.526</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square for the null model</strong>: </td> <td>0.248</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square-bar for the null model</strong>: </td> <td>0.247</td></tr>
+<tr class=biostyle><td align=right ><strong>Likelihood ratio test for the init. model</strong>: </td> <td>3595.462</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square for the init. model</strong>: </td> <td>0.256</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square-bar for the init. model</strong>: </td> <td>0.255</td></tr>
+<tr class=biostyle><td align=right ><strong>Akaike Information Criterion</strong>: </td> <td>10483.8</td></tr>
+<tr class=biostyle><td align=right ><strong>Bayesian Information Criterion</strong>: </td> <td>10517.9</td></tr>
+<tr class=biostyle><td align=right ><strong>Final gradient norm</strong>: </td> <td>4.0526E-02</td></tr>
+<tr class=biostyle><td align=right ><strong>Nbr of threads</strong>: </td> <td>16</td></tr>
+<tr class=biostyle><td align=right ><strong>Algorithm</strong>: </td> <td>Newton with trust region for simple bound constraints</td></tr>
+<tr class=biostyle><td align=right ><strong>Proportion analytical hessian</strong>: </td> <td>100.0%</td></tr>
+<tr class=biostyle><td align=right ><strong>Relative projected gradient</strong>: </td> <td>5.365858e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Relative change</strong>: </td> <td>0.0025731094971990173</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of iterations</strong>: </td> <td>8</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of function evaluations</strong>: </td> <td>23</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of gradient evaluations</strong>: </td> <td>8</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of hessian evaluations</strong>: </td> <td>8</td></tr>
+<tr class=biostyle><td align=right ><strong>Cause of termination</strong>: </td> <td>Relative gradient = 5.4e-06 <= 6.1e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Optimization time</strong>: </td> <td>0:00:00.383549</td></tr>
+</table>
+<h1>Estimated parameters</h1>
+<table border="1">
+<tr class=biostyle><th>Name</th><th>Value</th><th>Rob. Std err</th><th>Rob. t-test</th><th>Rob. p-value</th></tr>
+<tr class=biostyle><td>ASC_CAR</td><td>-0.195</td><td>0.0668</td><td>-2.92</td><td>0.00347</td></tr>
+<tr class=biostyle><td>ASC_TRAIN</td><td>-0.598</td><td>0.103</td><td>-5.77</td><td>7.72e-09</td></tr>
+<tr class=biostyle><td>B_TIME</td><td>-1.05</td><td>0.116</td><td>-9.07</td><td>0</td></tr>
+<tr class=biostyle><td>MU_NEST</td><td>1.76</td><td>0.149</td><td>11.8</td><td>0</td></tr>
+<tr class=biostyle><td>THETA</td><td>0.487</td><td>0.0389</td><td>12.5</td><td>0</td></tr>
+</table>
+<h2>Correlation of coefficients</h2>
+<table border="1">
+<tr class=biostyle><th>Coefficient1</th><th>Coefficient2</th><th>Covariance</th><th>Correlation</th><th>t-test</th><th>p-value</th><th>Rob. cov.</th><th>Rob. corr.</th><th>Rob. t-test</th><th>Rob. p-value</th></tr>
+<tr class=biostyle><td>ASC_TRAIN</td><td>ASC_CAR</td><td>0.00186</td><td>0.73</td><td>-10.2</td><td>0</td><td>0.00599</td><td>0.867</td><td>-7.12</td><td>1.05e-12</td></tr>
+<tr class=biostyle><td>B_TIME</td><td>ASC_CAR</td><td>-0.00146</td><td>-0.489</td><td>-8.8</td><td>0</td><td>-0.0057</td><td>-0.739</td><td>-4.99</td><td>5.92e-07</td></tr>
+<tr class=biostyle><td>B_TIME</td><td>ASC_TRAIN</td><td>-0.00117</td><td>-0.301</td><td>-4.48</td><td>7.58e-06</td><td>-0.00766</td><td>-0.64</td><td>-2.27</td><td>0.023</td></tr>
+<tr class=biostyle><td>MU_NEST</td><td>ASC_CAR</td><td>-0.000628</td><td>-0.142</td><td>17</td><td>0</td><td>0.000775</td><td>0.0778</td><td>12.3</td><td>0</td></tr>
+<tr class=biostyle><td>MU_NEST</td><td>ASC_TRAIN</td><td>0.00151</td><td>0.263</td><td>23.3</td><td>0</td><td>0.00661</td><td>0.428</td><td>16.8</td><td>0</td></tr>
+<tr class=biostyle><td>MU_NEST</td><td>B_TIME</td><td>0.004</td><td>0.594</td><td>34.8</td><td>0</td><td>0.00407</td><td>0.236</td><td>16.9</td><td>0</td></tr>
+<tr class=biostyle><td>THETA</td><td>ASC_CAR</td><td>0.000414</td><td>0.335</td><td>15.6</td><td>0</td><td>0.000526</td><td>0.202</td><td>9.72</td><td>0</td></tr>
+<tr class=biostyle><td>THETA</td><td>ASC_TRAIN</td><td>0.000218</td><td>0.136</td><td>18</td><td>0</td><td>-0.000227</td><td>-0.0562</td><td>9.63</td><td>0</td></tr>
+<tr class=biostyle><td>THETA</td><td>B_TIME</td><td>-0.000336</td><td>-0.179</td><td>19.9</td><td>0</td><td>-0.000396</td><td>-0.0881</td><td>12.3</td><td>0</td></tr>
+<tr class=biostyle><td>THETA</td><td>MU_NEST</td><td>-0.00154</td><td>-0.552</td><td>-10.8</td><td>0</td><td>-0.00372</td><td>-0.64</td><td>-7.2</td><td>6.02e-13</td></tr>
+</table>
+<p>Smallest eigenvalue: 80.1183</p>
+<p>Largest eigenvalue: 4190.41</p>
+<p>Condition number: 52.3028</p>
+</html>
