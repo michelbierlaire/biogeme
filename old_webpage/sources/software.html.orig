@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  HEADER
+  
+  
+  <body role="document">
+    
+    INCLUDEMENU
+    
+    BANNER
+    
+    <div class="container theme-showcase" role="main">
+      
+      <div class="page-header">
+	<h1>Discrete choice software</h1>
+      </div>
+      
+      <div class="panel panel-default">
+	<div class="panel-heading">mixl</div>
+	<div class="panel-body">
+	  Simulated Maximum Likelihood Estimation of Mixed Logit
+	  Models for Large Datasets, by Joseph Malloy
+	</div>
+	<div class="panel-footer">
+	  <a href="https://rdrr.io/cran/mixl"
+	     target="_blank">rdrr.io/cran/mixl</a>
+	</div>
+      </div>
+
+      <div class="panel panel-default">
+	<div class="panel-heading">LARCH</div>
+	<div class="panel-body">
+LARCH: A Freeware Package for Estimating Discrete Choice Models, by
+Jeffrey Newman.
+	</div>
+	<div class="panel-footer">
+	  <a href="https://larch.newman.me"
+	     target="_blank">larch.newman.me</a>
+	</div>
+      </div>
+      
+      <div class="panel panel-default">
+	<div class="panel-heading">Apollo</div>
+	<div class="panel-body">
+Apollo: a flexible, powerful and customisable freeware
+package for choice model estimation and application, by Stephane Hess
+and David Palma.
+	</div>
+	<div class="panel-footer">
+	  <a href="http://www.apollochoicemodelling.com/"
+	     target="_blank">apollochoicemodelling.com</a>
+	</div>
+      </div>
+
+      <div class="panel panel-default">
+	<div class="panel-heading">Pylogit</div>
+	<div class="panel-body">
+PyLogit is a Python package developed by Timothy Brathwaite for
+performing maximum likelihood estimation of conditional logit models
+and similar discrete choice models.
+	</div>
+	<div class="panel-footer">
+	  <a href="https://github.com/timothyb0912/pylogit"
+	     target="_blank">github.com/timothyb0912/pylogit</a>
+	</div>
+      </div>
+      
+    </div>
+    
+    FOOTER  
+    
+  </body>
+</html>
+
+
+https://github.com/timothyb0912/pylogit

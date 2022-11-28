@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+   HEADER
+
+
+  <body role="document">
+
+    INCLUDEMENU
+    
+    BANNER
+
+    <div class="container theme-showcase" role="main">
+
+      	<div class="page-header">
+     <h1>Starting with Biogeme</h1>
+        </div>
+
+
+	<div class="panel panel-default">
+	<div class="panel-heading">Starting with Biogeme</div>
+	<div class="panel-body">
+If you have not used PandasBiogeme before, here are some advices to get
+started.
+<ul>
+  <li>Install  <a href="https://www.python.org/"
+  target="_blank">Python</a>, <a href="https://jupyter.org/"
+  target="_blank">Jupyter notebook</a> and Biogeme on your computer. See instructions
+  for <a href="https://youtu.be/1TlNrhS2rFo"  target="_blank">Windows</a>
+  and for <a href="https://youtu.be/Swg1FUK-QaU" target="_blank">MacOSX</a>.
+  <li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier20.pdf"
+  target="_blank">Read the primer</a>
+  or <a href="https://youtu.be/vS-Sg0htQP4" target="_blank">watch the
+      video</a>.</li>
+  
+  <li><a href="examples.html">Look at the examples</a>.
+  <li>Modify one of the examples to implement your own model.</li>
+  <li>Post your questions on the users group:
+  <a href="https://groups.google.com/d/forum/biogeme" target="_blank">groups.google.com/d/forum/biogeme</a>.</li>
+  </ul>
+	</div>
+	<div class="panel-footer">
+Videos: <a href="https://youtu.be/1TlNrhS2rFo"
+  target="_blank">Install on
+  Windows</a>, <a href="https://youtu.be/Swg1FUK-QaU"
+  target="_blank">Install on
+  MacOSX</a>, <a href="https://youtu.be/vS-Sg0htQP4"
+  target="_blank">My first model</a>
+	</div>
+	
+	</div>
+
+
+		
+		</div>
+
+     
+
+
+
+FOOTER  
+
+    
+</body>
+</html>

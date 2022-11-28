@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  HEADER
+  
+  
+  <body role="document">
+    
+    INCLUDEMENU
+    
+    BANNER
+    
+    <div class="container theme-showcase" role="main">
+      
+      <div class="page-header">
+	<h1>Archives</h1>
+      </div>
+
+
+      
+    <div class="panel panel-default">
+      <div class="panel-heading">PandasBiogeme Version 3</div>
+      <div class="panel-body">
+	<p>
+	The releases of PandasBiogeme are available on the  <a href="https://pypi.org/project/biogeme/" target="_blank">Python
+	    Package Index</a> repository.
+	</p>
+	<p>Previous webpages:
+	  <ul>
+	    <li><a href="https://transp-or.epfl.ch/biogeme-3.2.8/"
+		   target="blank">Webpage for Pandasbiogeme 3.2.8</a></li>
+	    <li><a href="https://transp-or.epfl.ch/biogeme-3.2.6/"
+		   target="blank">Webpage for Pandasbiogeme 3.2.6</a></li>
+	    <li><a href="https://transp-or.epfl.ch/biogeme-3.2.5/"
+		   target="blank">Webpage for Pandasbiogeme 3.2.5</a></li>
+	    <li><a href="https://transp-or.epfl.ch/biogeme-3.2.2/"
+		   target="blank">Webpage for Pandasbiogeme 3.2.2</a></li>
+	    <li><a href="https://transp-or.epfl.ch/biogeme-3.2.1/"
+		   target="blank">Webpage for Pandasbiogeme 3.2.1</a></li>
+	    <li><a href="https://transp-or.epfl.ch/biogeme-3.1.0/"
+		   target="blank">Webpage for Pandasbiogeme 3.1.0</a></li>	  </ul>
+      </div>
+	<div class="panel-footer">
+       <a href="https://pypi.org/project/biogeme/"
+	  target="_blank">PandasBiogeme</a>
+       </div>
+    </div>
+    
+    
+    <a id="v25"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">PythonBiogeme Version 2.5</div>
+      <div class="panel-body">
+	
+	<ul>
+	  <li><a href="https://transp-or.epfl.ch/biogeme-2.5/home.html"
+	  target="_blank"> Webpage</a>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v25/biogeme-2.5.tar.gz">biogeme-2.5.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v25/examples-v25-bison.zip">examples-v25-bison.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v25/examples-v25-python.zip">examples-v25-python.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v25/PythonBiogeme-2.5-WindowsInstaller.exe">PythonBiogeme-2.5-WindowsInstaller.exe</a></li>
+	  
+	</ul>
+      </div>
+    </div>
+    
+    
+    
+    <a id="v24"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">PythonBiogeme Version 2.4</div>
+      <div class="panel-body">
+	<ul>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v24/biogeme-2.4.tar.gz">biogeme-2.4.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v24/examples-v24.zip">examples-v24.zip</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    
+    
+    <a id="v23"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">PythonBiogeme Version 2.3</div>
+      <div class="panel-body">
+	<ul>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v23/biogeme-2.3.tar.gz">biogeme-2.3.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v23/examples-v23.zip">examples-v23.zip</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    
+    <a id="v22"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">PythonBiogeme Version 2.2</div>
+      <div class="panel-body">
+	<ul>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v22/biogeme-2.2.tar.gz">biogeme-2.2.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v22/biogeme-v22.zip">biogeme-v22.zip</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    
+    <a id="v21"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">PythonBiogeme Version 2.1</div>
+      <div class="panel-body">
+	<ul>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v21/biogeme-2.1.mpkg.zip">biogeme-2.1.mpkg.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v21/biogeme-2.1beta.tar.gz">biogeme-2.1beta.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v21/biogeme-2.1gamma.tar.gz">biogeme-2.1gamma.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v21/examples-2.1beta.zip">examples-2.1beta.zip</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    
+    <a id="v20"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">PythonBiogeme Version 2.0</div>
+      <div class="panel-body">
+	<ul>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v20/biogeme-2.0.tar.gz">biogeme-2.0.tar.gz</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v20/biogeme-v20-macosx.zip">biogeme-v20-macosx.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v20/biogeme-v20.zip">biogeme-v20.zip</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    <a id="v18"></a>
+    <div class="panel panel-default">
+      <div class="panel-heading">BisonBiogeme Version 1.8</div>
+      <div class="panel-body">
+	<ul>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/biogeme-v18-macosx.zip">biogeme-v18-macosx.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/biogeme-v18-src.zip">biogeme-v18-src.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/biogeme-v18.zip">biogeme-v18.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/examples-v18.zip">examples-v18.zip</a></li>
+	  <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/tutorialv18.pdf">tutorialv18.pdf</a></li>
+	</ul>
+      </div>
+    </div>
+    
+    FOOTER  
+    
+  </body>
+</html>
