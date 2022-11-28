@@ -1,0 +1,12 @@
+<!-- Portfolio Grid-->
+<section class="page-section bg-light" id="data">
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-heading text-uppercase">__PORTTITLE__</h2>
+      <h3 class="section-subheading text-muted">__PORTDESC__</h3>
+    </div>
+    <div class="row">
+      __CONTENT__
+    </div>
+  </div>
+</section>

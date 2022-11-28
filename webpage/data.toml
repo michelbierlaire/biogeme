@@ -1,0 +1,57 @@
+# Description of the data sets
+
+[airline]
+title = 'Airline itinerary'
+picture = 'airline_fit.jpg'
+short_description = 'SP data collected by Boeing Commercial Airplanes in 2004 and 2005.'
+long_description = 'This data comes from an Internet choice survey conducted by Boeing Commercial Airplanes in 2004 and 2005. The survey, which was designed with the assistance of Jordan Louviere of the University of Technology, Sydney, is described in Garrow et al. (2007). Boeing was interested in understanding the sensitivity that air passengers have toward the attributes of an airline itinerary, such as fare, travel time, transfers, legroom, and aircraft. The survey was conducted by intercepting customers of an Internet airline booking service that searches for low-cost travel deals. While waiting for the search engine to return the real itineraries associated with the specific user request for a travel in a city pair, randomly selected customers were asked to complete a survey tailored to their origin and destination.'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_AirlineDescription.pdf'
+data_file = 'http://transp-or.epfl.ch/data/airline.dat'
+
+[netherlands]
+title = 'Mode choice in the Netherlands'
+picture = 'netherlands-fit.jpg'
+short_description = 'RP data collected in 1987 for the Netherlands Railways. Mode choice.'
+long_description = 'This case study deals with the estimation of a mode choice behavior model for intercity travelers using revealed preference data. The survey was conducted during 1987 for the Netherlands Railways to assess factors that influence the choice between rail and car for intercity travel from the city of Nijmegen. Nijmegen is a small city in the eastern side of the Netherlands near the border with Germany. The city has typical rail connections with the major cities in the western metropolitan area called the Randstad (that contains Amsterdam, Rotterdam and The Hague). Trips from Nijmegen to the Randstad take approximately two hours by both rail and car. A binary choice model can be developed to model the mode choice of travelers for intercity travel.'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_NetherlandsDescription.pdf'
+data_file = 'http://transp-or.epfl.ch/data/netherlands.dat'
+
+[optima]
+title = 'Mode choice in Switzerland'
+picture = 'optima-fit.jpg'
+short_description = 'RP data collected between 2009 and 2010 for CarPostal, a public transportation operator.'
+long_description = 'This case study deals with the estimation of a mode choice behavior model for inhabitants in Switzer- land using revealed preference data. This data was obtained within a project conducted by Professors Vincent Kaufmann (LASUR, EPFL), Michel Bierlaire (TRANSP-OR, EPFL) and Martin Schuler (CEAT, EPFL) with the objective to show the market potential for combined mobility, especially within agglomerations, taking into account the factors that influence travellers in their choice of trans- port. For additional information. The survey was conducted between 2009 and 2010 for CarPostal, the public transport branch of the Swiss Postal Service. The main purpose of this survey is to collect data for analyzing the travel behavior of people in low-density areas, where CarPostal typically serves. Additional information can be found in CarPostal and Transportation Center (EPFL).'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_OptimaDescription.pdf'
+data_file = 'http://transp-or.epfl.ch/data/optima.dat'
+
+[parking]
+title = 'Parking choice in Spain'
+picture = 'parking-fit.jpg'
+short_description = 'SP data'
+long_description = 'This case study aims at analyzing car driver’s behaviour when choosing a parking place. The objec- tive was to assess the economic viability of an underground car park that the municipality of Santoña (Spain) was planning to construct in order to solve the lack of available parking. Santoña is a a small coastal town of about 10,000 inhabitants in Cantabria, Spain (in 2007). The econ- omy of the town revolves around food preserves and tourism, the latter being especially important during the summer when the population grows considerably. The Regional Government of Cantabria, the local council and the private sector, put forward a project for constructing an underground car park to solve the lack of available parking in the study area. The local authorities asked the University of Cantabria to prepare an economic viability plan for the proposal. The GIST (Grupo de Investigacion de Sistemas de Transportes, University of Cantabria, Spain) con- ducted a stated-preferences survey that consisted of eight choice scenarios based on the following alternatives: (i) Free on-street parking (FSP), (ii) Paid on-street parking (PSP), and (iii) Paid parking in an underground car park (PUP). Additional explanations on the performance of the survey and the consequent study can be found in Ibeas et al. (2014).'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_ParkingDescription.pdf'
+data_file = 'http://transp-or.epfl.ch/data/parking.dat'
+
+[swissmetro]
+title = 'Swissmetro'
+picture = 'swissmetro-fit.jpg'
+short_description = 'SP data involving an hypothetical mode of transportation'
+long_description = 'This dataset consists of survey data collected on the trains between St. Gallen and Geneva, Switzer- land, during March 1998. The respondents provided information in order to analyze the impact of the modal innovation in transportation, represented by the Swissmetro, a revolutionary mag-lev un- derground system, against the usual transport modes represented by car and train. Innovation in the market for intercity passenger transportation is a difficult enterprise as the existing modes: private car, coach, rail as well as regional and long-distance air services continue to innovate in their own right by offering new combinations of speeds, services, prices and technologies. Consider for example high-speed rail links between the major centers or direct regional jet services between smaller countries. The Swissmetro SA in Geneva promoted such an innovation: a mag-lev underground system operating at speeds up to 500 km/h in partial vacuum connecting the major Swiss conurbations, in particular along the Mittelland corridor (St. Gallen, Zurich, Bern, Lausanne and Geneva). A more detailed description of the dataset as well as the data collection procedure is given in Bierlaire et al. (2001).'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_SwissmetroDescription.pdf'
+data_file = 'http://transp-or.epfl.ch/data/swissmetro.dat'
+
+[telephone]
+title = 'Telephone data'
+picture = 'telephone-fit.jpg'
+short_description = 'RP data collected in 1984 in Pennsylvania'
+long_description = 'Local telephone service typically involves the choice between flat (i.e., a fixed monthly charge for un- limited calls within a specified geographical area) and measured (i.e., a reduced fixed monthly charge for a limited number of calls and additional usage charges for additional calls) services. Various flat rate services differ by the size of the geographical area within which calling is provided at no extra charge, the monthly charge being higher for larger areas. Measured services differ with respect to the threshold number (or dollar value) of calls beyond which the customer is charged. The availability of each service may depend on the geographical location within the service area. In developing a model of the residential demand for local telephone service, it is necessary to explicitly account for the inter-relationship between class of service choice and usage patterns. For example, expected usage patterns will influence the household’s choice of service option since households with high usage levels typically could minimize their monthly bill for local telephone service by choosing some sort of flat rate service, while households with relatively low usage would be better off with a measured service. Given that a household has chosen a particular service option, usage patterns would be dependent to a certain extent upon the service option that is chosen since it determines the marginal price of calls. To accommodate these interrelationships, the model representing the household’s choice of calling patterns and service options needs to include: (1) choice of the service option, which is modeled conditional upon the calling portfolio chosen by the household; and (2) choice of the calling portfolio or the usage pattern as represented by the number and duration of calls by time of day and calling band. This case study deals only with the first choice.'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_TelephoneDescription.pdf'
+data_file = 'http://transp-or.epfl.ch/data/telephone.dat'
+
+[london]
+title = 'London Passenger Mode Choice'
+picture = 'london-fit.jpg'
+short_description = '81 086 trips from the London Travel Demand Survey from April 2012 to March 2015'
+long_description = 'This case study investigates mode choice on an urban multi-modal transport network. The objective was to be able to predict how people will react to changes to the transport network and conditions, to allow for more efficient transport network management and investment planning. Trip diaries from travel surveys are a commonly used source for historical trip data. However, like other revealed-preference (RP) data sources, they only contain details of the selected itinerary, and do not contain details of the choice-set. To address this, a data fusion framework was developed to add individual specific mode-alternative level-of-service (LOS) variables (e.g. in-vehicle travel time, public transport fares, fuel cost, etc.) to historical trip records. The approach uses an online journey planner to generate the routes for four transport modes (walking, cycling, public transport, and driv- ing). A closely tailored cost-model is then used to calculate individual specific public transport fares and driving fuel and congestion charge costs for each trip. The London Passenger Mode Choice (LPMC) dataset was created by using this framework with trip diary data from the London Travel Demand Survey (LTDS), a rolling household travel survey collected by Transport for London (TFL). This dataset is used to predict mode choice out of walking, cycling, public transport, and driving. Full details of the framework, dataset, and the models it was used to develop are given in Hillel et al. (2018). Please cite this paper in any work using this dataset.'
+pdf_file = 'http://transp-or.epfl.ch/documents/technicalReports/CS_LPMC.pdf'
+data_file = 'http://transp-or.epfl.ch/data/lpmc.dat'

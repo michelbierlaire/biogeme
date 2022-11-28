@@ -1,0 +1,1 @@
+convert YourFather.jpg -resize 240x360^ -gravity center -crop 240x360+0+0 +repage YourFather2.jpg

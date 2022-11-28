@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" >
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
+    <meta name="description" content="" >
+    <meta name="author" content="" >
+    <title>Biogeme 3.11</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" >
+    <!-- Font Awesome icons (free version)-->
+    <script src="https://use.fontawesome.com/releases/v6.2.1/js/all.js"
+	    crossorigin="anonymous">
+    </script>
+    <!-- Google fonts-->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" >
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" >
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" >
+  </head>
+  <body id="page-top">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand" href="#page-top">Home</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          Menu
+          <i class="fas fa-bars ms-1"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+            <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+            <li class="nav-item"><a class="nav-link" href="#install">Install</a></li>
+            <li class="nav-item"><a class="nav-link" href="#help">Help</a></li>
+            <li class="nav-item"><a class="nav-link" href="#doc">Documentation</a></li>
+            <li class="nav-item"><a class="nav-link"
+            href="https://github.com/michelbierlaire/biogeme/tree/master/examples"
+            target="_blank">Examples</a></li>
+            <li class="nav-item"><a class="nav-link" href="#res">Resources</a></li>
+            <li class="nav-item"><a class="nav-link" href="#archives">Archives</a></li>
+            <li class="nav-item"><a class="nav-link" href="#data">Data</a></li>
+            <li class="nav-item"><a class="nav-link" href="#history">History</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Masthead-->
+    <header class="masthead">
+      <div class="container">
+        <div class="masthead-subheading">Estimating discrete choice
+          models with</div>
+        <div class="masthead-heading text-uppercase">Biogeme</div>
+        <a class="btn btn-primary btn-xl text-uppercase" href="#start">Start</a>
+      </div>
+    </header>
+    <!-- Start-->
+    <section class="page-section" id="start">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-heading text-uppercase">Start</h2>
+          <h3 class="section-subheading text-muted">If you have not used PandasBiogeme before, here are some advices to get started.</h3>
+        </div>
+        <div class="row text-center">
+          <div class="col-md-3">
+            <span class="fa-stack fa-4x">
+              <i class="fas fa-circle fa-stack-2x text-primary"></i>
+              <i class="fas fa-download fa-stack-1x fa-inverse"></i>
+            </span>
+            <h4 class="my-3">Install</h4>
+            <p class="text-muted"><code>pip install
+                biogeme</code></p>
+	    <p class="text-muted">More detailed
+	      instructions <a href="#install">here</a>.</p>
+	    
+          </div>
+          <div class="col-md-3">
+            <span class="fa-stack fa-4x">
+              <i class="fas fa-circle fa-stack-2x text-primary"></i>
+              <i class="fas fa-book fa-stack-1x fa-inverse"></i>
+            </span>
+            <h4 class="my-3">Get started</h4>
+            <p class="text-muted">Read
+              the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier20.pdf"
+                     target="_blank">primer</a>.</p>
+            <p class="text-muted">Watch
+              the <a href="https://youtu.be/vS-Sg0htQP4" target="_blank"> video</a>.</p>
+          </div>
+          <div class="col-md-3">
+            <span class="fa-stack fa-4x">
+              <i class="fas fa-circle fa-stack-2x text-primary"></i>
+              <i class="fas fa-code fa-stack-1x fa-inverse"></i>
+            </span>
+            <h4 class="my-3">Examples</h4>
+            <p class="text-muted">Examples are available on <a href="https://github.com/michelbierlaire/biogeme/tree/master/examples" target="_blank">Github</a></p>
+          </div>
+          <div class="col-md-3">
+            <span class="fa-stack fa-4x">
+              <i class="fas fa-circle fa-stack-2x text-primary"></i>
+              <i class="fas fa-comments fa-stack-1x fa-inverse"></i>
+            </span>
+            <h4 class="my-3">Users group</h4>
+            <p class="text-muted">Post your questions on
+              the users
+              group: <a href="https://groups.google.com/d/forum/biogeme"
+                        target="_blank">groups.google.com/d/forum/biogeme</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- About-->
+    <section class="page-section" id="about">
+      <div class="container px-4">
+        <div class="row gx-4">
+	  <h1>About</h1>
+        </div>
+	__ABOUT__
+      </div>
+    </section>
+
+    <section id="install">
+      <div class="container px-4">
+        <div class="row gx-4">
+	  <h1>Install Biogeme</h1>
+	</div>
+	__INSTALL_
+      </div>
+    </section>
+    <section id="help">
+      <div class="container px-4">
+        <div class="row gx-4">
+	  <h1>Getting help</h1>
+	</div>
+	<div class="row gx-4 justify-content-center">
+	  <div class="col-lg-10">
+	    <div class="card bg-secondary text-white mb-3">
+	      <div class="card-body">
+		<h5 class="card-title">Biogeme users group</h5>
+		<p class="card-text">
+		  If you need help, submit your questions to the users'
+		  group:
+		</p>
+		<p class="card-text text-center"><a href="https://groups.google.com/d/forum/biogeme"
+					  target="_blank">groups.google.com/d/forum/biogeme</a>
+		</p>
+		<p class="card-text">
+		  The forum is moderated. 
+		  Please keep the following in mind before posting a question:
+		  <ul>
+		    <li>Check that the same question has not already been
+		      addressed on the forum.</li>
+		    <li>Try to submit only questions about the software. </li>
+		    <li>Make sure to read completely the documentation and to
+		      try the examples before submitting a question.</li>
+		    <li>Do not submit large files (typically, data files) to
+		      the forum.</li>
+		  </ul>
+		</p>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<div class="row gx-4 justify-content-center">
+	  <div class="col-lg-10">
+	    <div class="card bg-secondary text-white mb-3">
+	      <div class="card-body">
+		<h5 class="card-title">Frequently asked questions</h5>
+		<div class="accordion text-black" id="accordionExample">
+		  __FAQ__
+		</div>			
+	      </div>
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </section>
+
+    <!-- Documentation-->
+    <section class="page-section" id="doc">
+      <div class="container px-4">
+        <div class="row gx-4">
+	  <h1>Documentation</h1>
+        </div>
+	__DOC__
+      </div>
+    </section>
+    
+
+    <!-- Resources-->
+    <section class="page-section" id="res">
+      <div class="container px-4">
+        <div class="row gx-4">
+	  <h1>Resources</h1>
+        </div>
+	__RES__
+      </div>
+    </section>
+
+    <!-- Archives-->
+    <section class="page-section" id="archives">
+      <div class="container px-4">
+        <div class="row gx-4">
+	  <h1>Archives</h1>
+        </div>
+	__ARCHIVES__
+      </div>
+    </section>
+    
+    
+    <!-- Portfolio Grid-->
+    __PORTFOLIO__
+    <!-- About-->
+    <section class="page-section" id="history">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-heading
+                     text-uppercase">History of Biogeme</h2>
+          <h3 class="section-subheading text-muted">Several versions of Biogeme have been developed over the years. Several names of animals appear: Gnu, Bison, Python, and now, Pandas..</h3>
+        </div>
+        <ul class="timeline">
+          <li>
+            <div class="timeline-image"><img class="rounded-circle
+						    img-fluid"
+					     src="assets/img/about/borland-fit.jpg"
+					     alt="Borland C++" ></div>
+            <div class="timeline-panel">
+              <div class="timeline-heading">
+                <h4>1990</h4>
+                <h4 class="subheading">HieLoW</h4>
+              </div>
+              <div class="timeline-body"><p class="text-muted">Around 1990, Michel Bierlaire wrote a software package called HieLoW: Hierarchical Logit for Windows. It was written in Borland C++, and was the first discrete choice estimation software with a graphical user interface. It was designed for the estimation of logit and nested logit models. The user had to specify the models through a graphical user interface. This software was distributed by Stratec SA, Brussels.</p></div>
+            </div>
+          </li>
+          <li class="timeline-inverted">
+            <div class="timeline-image"><img class="rounded-circle
+						    img-fluid" src="assets/img/about/bison.png"
+					     alt="GNU Bison" ></div>
+            <div class="timeline-panel">
+              <div class="timeline-heading">
+                <h4>2000</h4>
+                <h4 class="subheading">BisonBiogeme</h4>
+              </div>
+              <div class="timeline-body"><p class="text-muted">Around 2000, the first version of Biogeme was
+		  released. Written in GNU C++, it was the first open source
+		  discrete choice software. It was designed to estimate the
+		  parameters of a list of predetermined discrete choice
+		  models such as logit, binary probit, nested logit,
+		  cross-nested logit, multivariate extreme value models,
+		  discrete and continuous mixtures of multivariate extreme
+		  value models, models with nonlinear utility functions,
+		  models designed for panel data, and heteroscedastic
+		  models. The modeling language was designed to be simple,
+		  and was developed using a a general-purpose parser
+		  generator
+		  called <a href="https://www.gnu.org/software/bison/"
+			    target="_blank">GNU Bison</a>. Later, it will be referred
+		  to as BisonBiogeme. The
+		  distributions can be found <a href='archives.html'>here</a>.</p></div>
+            </div>
+          </li>
+          <li>
+            <div class="timeline-image"><img class="rounded-circle img-fluid" src="assets/img/about/python.png" alt="Python" ></div>
+            <div class="timeline-panel">
+              <div class="timeline-heading">
+                <h4>2010</h4>
+                <h4 class="subheading">PythonBiogeme</h4>
+              </div>
+              <div class="timeline-body"><p class="text-muted">Around 2010, a more flexible version was designed for general purpose parametric models.  The  modeling language was extended, and based on
+		  the Python language. A series of discrete
+		  choice models were precoded for an easy use. Also written in GNU C++, the
+		  distributions can be found <a href='archives.html'>here</a>.</p></div>
+            </div>
+          </li>
+          <li class="timeline-inverted">
+            <div class="timeline-image"><img class="rounded-circle img-fluid" src="assets/img/about/pandas.png" alt="Pandas" ></div>
+            <div class="timeline-panel">
+              <div class="timeline-heading">
+                <h4>2018</h4>
+                <h4 class="subheading">PandasBiogeme</h4>
+              </div>
+              <div class="timeline-body"><p class="text-muted">In 2018, a completely new version of the software was
+		  released. It was not anymore a standalone executable, but a
+		  Python package. The package is written in Python, with the
+		  exception of the core calculations of the models, that are
+		  written in C++ for the sake of efficiency.  The motivation
+		  was to combine the simplicity of the usage (especially for
+		  teaching purposes), with the sophistication provided by
+		  Python (for research and applications purposes). Morever, the management of the data relies on the
+		  package Pandas, which has become the workhorse of data
+		  scientists. Therefore, the name PandasBiogeme has been
+		  adopted. It is distributed on the
+		  <a href="https://pypi.org/project/biogeme/" target="_blank">Python
+		    Package Index</a> repository.</p></div>
+            </div>
+          </li>
+          <li class="timeline-inverted">
+            <div class="timeline-image">
+              <h4>
+                The zoo 
+                <br >
+                must
+                <br >
+                go on!
+              </h4>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+    <!-- Footer-->
+    <footer class="footer py-4">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-4 text-lg-start">Copyright
+            &copy; Michel Bierlaire 2022</div>
+          <div class="col-lg-4 my-3 my-lg-0">
+            <a class="btn btn-dark btn-social mx-2"
+               target="_blank" href="https://groups.google.com/d/forum/biogeme"
+               aria-label="Google group"><i class="fab fa-google"></i></a>
+            <a class="btn btn-dark btn-social mx-2"
+               target="_blank" href="https://github.com/michelbierlaire/biogeme" aria-label="Github"><i class="fab fa-github"></i></a>
+            <a class="btn btn-dark btn-social mx-2"
+               target="_blank" href="https://www.linkedin.com/in/michel-bierlaire-528b655/" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <a class="link-dark text-decoration-none me-3"
+            href="http://transp-or.epfl.ch" target="_blank">TRANSP-OR</a>
+            <a class="link-dark text-decoration-none"
+            href="https://www.epfl.ch" target="_blank">EPFL</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- Portfolio Modals-->
+    __PORTFOLIO_MODALS__
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
+    <!-- Core theme JS-->
+    <script src="js/scripts.js"></script>
+  </body>
+</html>
