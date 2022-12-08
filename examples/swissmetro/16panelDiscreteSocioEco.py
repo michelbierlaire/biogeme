@@ -1,7 +1,7 @@
 """File 16panelDiscreteSocioEco.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Feb 14 14:47:54 2022
+:date: Tue Dec  6 18:06:50 2022
 
  Example of a discrete mixture of logit models, also called latent class model.
  The class membership model includes socio-economic variables.
@@ -218,7 +218,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(flat_database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(flat_database, logprob, parameter_file='draws.toml')
 biogeme.modelName = '16panelDiscreteSocioEco'
 
 # Estimate the parameters.

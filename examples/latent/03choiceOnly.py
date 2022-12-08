@@ -163,7 +163,7 @@ biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = '03choiceOnly'
 
 # Estimate the parameters
-results = biogeme.estimate(algorithm=opt.bioNewton)
+results = biogeme.estimate()
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')

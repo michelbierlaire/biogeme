@@ -1,7 +1,7 @@
 """File 05normalMixture.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sat Sep  7 18:23:01 2019
+:date: Tue Dec  6 17:55:10 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  Three alternatives: Train, Car and Swissmetro
@@ -109,7 +109,7 @@ userNotes = (
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(
-    database, logprob, numberOfDraws=100000, userNotes=userNotes
+    database, logprob, userNotes=userNotes, parameter_file='draws.toml'
 )
 biogeme.modelName = '05normalMixture'
 

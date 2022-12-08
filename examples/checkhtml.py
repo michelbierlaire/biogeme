@@ -59,6 +59,7 @@ htmlNotNeed = [
 
 version = '3.2.8'
 
+
 def checkFile(theFile):
     if theFile.is_file() and theFile.name.endswith('py'):
         current_file = os.path.split(theFile.path)
@@ -73,9 +74,12 @@ def checkFile(theFile):
                     with open(html) as f:
                         content = f.readlines()
                         for line in content:
-                            if ('<p>biogeme' in line and
-                                not f'biogeme {version}' in line):
+                            if (
+                                '<p>biogeme' in line
+                                and not f'biogeme {version}' in line
+                            ):
                                 print(f'Wrong version for {html}: {line}')
+
 
 with os.scandir('.') as root_dir:
     for path in root_dir:

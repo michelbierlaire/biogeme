@@ -1,7 +1,7 @@
 """File 25triangularMixture.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Sep  9 10:19:24 2019
+:date: Tue Dec  6 18:28:21 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  The mixing distirbution is specified by the user. Here, a triangular
@@ -65,17 +65,17 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 
 
-def theTriangularGenerator(sampleSize, numberOfDraws):
+def the_triangular_generator(sample_size, number_of_draws):
     """
     User-defined random number generator to the database.
     See the numpy.random documentation to obtain a list of other distributions.
     """
-    return np.random.triangular(-1, 0, 1, (sampleSize, numberOfDraws))
+    return np.random.triangular(-1, 0, 1, (sample_size, number_of_draws))
 
 
 myRandomNumberGenerators = {
     'TRIANGULAR': (
-        theTriangularGenerator,
+        the_triangular_generator,
         'Draws from a triangular distribution',
     )
 }
@@ -127,7 +127,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 biogeme.modelName = '25triangularMixture'
 
 # Estimate the parameters

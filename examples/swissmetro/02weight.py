@@ -1,7 +1,7 @@
 """File 02weight.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sat Sep  7 18:11:18 2019
+:date: Tue Dec  6 15:35:27 2022
 
  Example of a logit model with Weighted Exogenous Sample Maximum
  Likelihood (WESML).  Three alternatives: Train, Car and Swissmetro SP
@@ -112,8 +112,9 @@ biogeme = bio.BIOGEME(database, formulas, userNotes=userNotes)
 biogeme.modelName = '02weight'
 
 ## It is possible to control the generation of the HTML and the pickle files
-biogeme.generateHtml = True
-biogeme.generatePickle = False
+## Note that these parameters can also be modified in the .TOML configuration file
+biogeme.generate_html = True
+biogeme.generate_pickle = False
 results = biogeme.estimate()
 
 # Get the results in a pandas table

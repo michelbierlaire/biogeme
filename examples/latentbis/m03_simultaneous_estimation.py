@@ -15,7 +15,6 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
 import biogeme.results as res
-import biogeme.optimization as opt
 import biogeme.messaging as msg
 from biogeme import models
 from biogeme.expressions import (
@@ -309,7 +308,7 @@ biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = 'm03_simultaneous_estimation'
 
 # Estimate the parameters
-results = biogeme.estimate(algorithm=opt.bioBfgs)
+results = biogeme.estimate()
 print(results.getEstimatedParameters())
 
 print(f'Final log likelihood: {results.data.logLike:.3f}')

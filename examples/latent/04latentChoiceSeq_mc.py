@@ -6,7 +6,7 @@ Measurement equation for the indicators.
 Sequential estimation.
 
 :author: Michel Bierlaire, EPFL
-:date: Sat May 30 18:28:14 2020
+:date: Tue Dec  6 18:33:58 2022
 
 """
 
@@ -177,7 +177,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, loglike, parameter_file='draws.toml')
 biogeme.modelName = '04latentChoiceSeq_mc'
 
 # Estimate the parameters

@@ -1,7 +1,7 @@
 """File 17lognormalMixture.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sat Sep  7 18:23:01 2019
+:date: Tue Dec  6 18:07:32 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  The mixing distribution is distributed as a log normal.
@@ -114,7 +114,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 biogeme.modelName = '17lognormalMixture'
 
 # Estimate the parameters

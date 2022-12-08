@@ -1,7 +1,7 @@
 """File 05normalMixture_allAlgos.py
 
 :author: Michel Bierlaire, EPFL
-:date: Fri May  1 11:59:20 2020
+:date: Tue Dec  6 18:14:59 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  Three alternatives: Train, Car and Swissmetro
@@ -103,60 +103,63 @@ logger = msg.bioMessage()
 logger.setGeneral()
 # logger.setDetailed()
 
-# Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
-
 algos = {
-    'scipy                   ': opt.scipy,
-    'Line search             ': opt.newtonLineSearchForBiogeme,
-    'Trust region (dogleg)   ': opt.newtonTrustRegionForBiogeme,
-    'Trust region (cg)       ': opt.newtonTrustRegionForBiogeme,
-    'LS-BFGS                 ': opt.bfgsLineSearchForBiogeme,
-    'TR-BFGS                 ': opt.bfgsTrustRegionForBiogeme,
-    'Simple bounds Newton fCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds BFGS fCG  ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds hybrid fCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds Newton iCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds BFGS iCG  ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds hybrid iCG': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'scipy                ': 'scipy',
+    'Line search          ': 'LS-newton',
+    'Trust region (dogleg)': 'TR-newton',
+    'Trust region (cg)    ': 'TR-newton',
+    'LS-BFGS              ': 'LS-BFGS',
+    'TR-BFGS              ': 'TR-BFGS',
+    'Simple bounds Newton fCG': 'simple_bounds',
+    'Simple bounds BFGS fCG  ': 'simple_bounds',
+    'Simple bounds hybrid fCG': 'simple_bounds',
+    'Simple bounds Newton iCG': 'simple_bounds',
+    'Simple bounds BFGS iCG  ': 'simple_bounds',
+    'Simple bounds hybrid iCG': 'simple_bounds',
 }
 
 algoParameters = {
-    'Trust region (dogleg)   ': {'dogleg': True},
-    'Trust region (cg)       ': {'dogleg': False},
+    'Trust region (dogleg)': {'dogleg': True},
+    'Trust region (cg)    ': {'dogleg': False},
     'Simple bounds Newton fCG': {
-        'proportionAnalyticalHessian': 1.0,
-        'infeasibleConjugateGradient': False,
+        'second_derivatives': 1.0,
+        'infeasible_cg': False,
     },
     'Simple bounds BFGS fCG  ': {
-        'proportionAnalyticalHessian': 0.0,
-        'infeasibleConjugateGradient': False,
+        'second_derivatives': 0.0,
+        'infeasible_cg': False,
     },
     'Simple bounds hybrid fCG': {
-        'proportionAnalyticalHessian': 0.5,
-        'infeasibleConjugateGradient': False,
+        'second_derivatives': 0.5,
+        'infeasible_cg': False,
     },
     'Simple bounds Newton iCG': {
-        'proportionAnalyticalHessian': 1.0,
-        'infeasibleConjugateGradient': True,
+        'second_derivatives': 1.0,
+        'infeasible_cg': True,
     },
     'Simple bounds BFGS iCG  ': {
-        'proportionAnalyticalHessian': 0.0,
-        'infeasibleConjugateGradient': True,
+        'second_derivatives': 0.0,
+        'infeasible_cg': True,
     },
     'Simple bounds hybrid iCG': {
-        'proportionAnalyticalHessian': 0.5,
-        'infeasibleConjugateGradient': True,
+        'second_derivatives': 0.5,
+        'infeasible_cg': True,
     },
 }
 
 results = {}
 msg = ''
 for name, algo in algos.items():
+    # Create the Biogeme object
+    biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
+    biogeme.algorithm_name = algo
     biogeme.modelName = f'05normalMixture_allAlgos_{name}'.strip()
     p = algoParameters.get(name)
+    if p is not None:
+        for attr, value in p.items():
+            setattr(biogeme, attr, value)
     try:
-        results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
+        results[name] = biogeme.estimate()
         msg += (
             f'{name}\t{results[name].data.logLike:.2f}\t'
             f'{results[name].data.gradientNorm:.2g}\t'
@@ -170,9 +173,12 @@ for name, algo in algos.items():
         msg += f'{name}\tFailed to estimate the model'
 
 
-print('Algorithm\t\tloglike\t\tnormg\ttime\t\tdiagnostic')
-print('+++++++++\t\t+++++++\t\t+++++\t++++\t\t++++++++++')
-print(msg)
+summary_file = '05normalMixture_allAlgos.log'
+with open(summary_file, 'w', encoding='utf-8') as f:
+    print('Algorithm\t\tloglike\t\tnormg\ttime\t\tdiagnostic', file=f)
+    print('+++++++++\t\t+++++++\t\t+++++\t++++\t\t++++++++++', file=f)
+    print(msg, file=f)
+print(f'Summary reported in file {summary_file}')
 
 """
 Here are the results. Note that the draws are identical for all runs. Still, the algorithms

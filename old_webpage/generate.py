@@ -130,8 +130,7 @@ def generate_page(name):
 
 
 def generate_examples():
-    """Generates the HTML page for the examples
-    """
+    """Generates the HTML page for the examples"""
     dest = 'website/examples.html'
     i = 0
     all_files = {}
@@ -186,7 +185,6 @@ def generate_examples():
     replace_in_file(dest, 'THEEXAMPLES', result)
 
 
-
 def generate_all_pages(the_pages):
     """Generate all pages of the website
 
@@ -227,15 +225,13 @@ imageFiles = [
 
 for img_f in imageFiles:
     copy_file(
-        img_f,
-        '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/images'
+        img_f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/images'
     )
 
 cssFiles = ['biomenu.css', 'biopanel.css', 'biobacktotop.css']
 for css_f in cssFiles:
     copy_file(
-        css_f,
-        '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/css'
+        css_f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/css'
     )
 
 jsFiles = ['backtotop.js', 'os.js', 'menu.js']
@@ -383,7 +379,9 @@ def one_example(name, the_dir, all_files, html):
         for k, h_file in enumerate(hfiles):
             h_fname = f'examples/{the_dir}/{h_file}'
             result += '<tr>'
-            result += f'<td><a href="{h_fname}" target="_blank">{h_file}</a></td>'
+            result += (
+                f'<td><a href="{h_fname}" target="_blank">{h_file}</a></td>'
+            )
             if k == 0:
                 result += f'<td rowspan="{len(hfiles)}">{clean_doc(doc)}</td>'
             result += '</tr>'

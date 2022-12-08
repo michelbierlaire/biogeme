@@ -1,7 +1,7 @@
 """File: 02simpleIntegral.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 16:57:51 2019
+ Date: Tue Dec  6 18:57:27 2022
 
 Calculation of a simple integral using numerical integration and
 Monte-Carlo integration with various types of draws, including Halton
@@ -99,7 +99,7 @@ simulate = {
     'Error (MLHS)             ': error_mlhs,
 }
 
-biogeme = bio.BIOGEME(database, simulate, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
 biogeme.modelName = '02simpleIntegral'
 results = biogeme.simulate()
 print(f'Analytical integral:{results.iloc[0]["Analytical Integral"]:.6g}')

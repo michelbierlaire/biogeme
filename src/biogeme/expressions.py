@@ -2033,7 +2033,7 @@ class log(UnaryOperator):
 
 class logzero(UnaryOperator):
     """
-    logarithm expression. Returns zero if the argument is zero. 
+    logarithm expression. Returns zero if the argument is zero.
     """
 
     def __init__(self, child):
@@ -2058,7 +2058,7 @@ class logzero(UnaryOperator):
             return 0
         return np.log(v)
 
-    
+
 class Derive(UnaryOperator):
     """
     Derivative with respect to an elementary expression
@@ -3867,6 +3867,7 @@ class bioLinearUtility(Expression):
             )
         listOfSignatures += [signature.encode()]
         return listOfSignatures
+
 
 def list_of_expressions(dict_of_expressions):
     """This function takes a dict of expressions as input. Each

@@ -406,7 +406,7 @@ class Database:
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
             raise excep.biogemeError(error_msg)
-        
+
         return expression.getValue_c(database=self, prepareIds=True)
 
     def checkAvailabilityOfChosenAlt(self, avail, choice):
@@ -434,7 +434,7 @@ class Database:
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
             raise excep.biogemeError(error_msg)
-        
+
         choice_array = choice.getValue_c(
             database=self, aggregation=False, prepareIds=True
         )
@@ -476,9 +476,7 @@ class Database:
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
             raise excep.biogemeError(error_msg)
-        
 
-        
         self._avail = avail
         self._choice = choice
 
@@ -516,7 +514,7 @@ class Database:
 
         :raise biogemeError: if called.
         """
-        
+
         error_msg = 'Obsolete: use expression.getValue_c(database) instead'
         raise excep.biogemeError(error_msg)
 
@@ -737,7 +735,7 @@ class Database:
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
             raise excep.biogemeError(error_msg)
-        
+
         if column in self.data.columns:
             raise ValueError(
                 f'Column {column} already exists in the database {self.name}'

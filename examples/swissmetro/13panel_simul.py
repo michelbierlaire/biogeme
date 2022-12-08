@@ -1,7 +1,7 @@
 """File 13panel_simul.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Oct 31 16:25:16 2021
+:date: Tue Dec  6 18:00:39 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  The datafile is organized as panel data.
@@ -166,9 +166,7 @@ simulate = {
     'Denominator': denominator,
 }
 
-biosim = bio.BIOGEME(
-    database, simulate, numberOfDraws=100000, suggestScales=False
-)
+biosim = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
 sim = biosim.simulate()
 
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']

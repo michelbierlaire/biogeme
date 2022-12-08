@@ -6,7 +6,7 @@ Measurement equation for the indicators.
 Maximum likelihood (full information) estimation.
 
 :author: Michel Bierlaire, EPFL
-:date: Wed Sep 11 08:27:18 2019
+:date: Tue Dec  6 18:34:31 2022
 
 """
 
@@ -58,19 +58,16 @@ betas = results.getBetaValues()
 ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
 thresholds = [None, 4, 6, 8, 10, None]
 beta_names = [
-        'beta_ScaledIncome_minus_inf_4',
-        'beta_ScaledIncome_4_6',
-        'beta_ScaledIncome_6_8',
-        'beta_ScaledIncome_8_10',
-        'beta_ScaledIncome_10_inf',
+    'beta_ScaledIncome_minus_inf_4',
+    'beta_ScaledIncome_4_6',
+    'beta_ScaledIncome_6_8',
+    'beta_ScaledIncome_8_10',
+    'beta_ScaledIncome_10_inf',
 ]
 formulaIncome = models.piecewiseFormula(
     ScaledIncome,
     thresholds,
-    [
-        Beta(name, betas[name], None, None, 0)
-        for name in beta_names
-    ],
+    [Beta(name, betas[name], None, None, 0) for name in beta_names],
 )
 
 # Definition of other variables
@@ -407,7 +404,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, loglike, parameter_file='draws.toml')
 biogeme.modelName = '06serialCorrelation'
 
 # Estimate the parameters

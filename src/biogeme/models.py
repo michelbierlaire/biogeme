@@ -115,7 +115,9 @@ def boxcox(x, ell):
         + ell**2 * expr.log(x) ** 3 / 6.0
         + ell**3 * expr.log(x) ** 4 / 24.0
     )
-    close_to_zero = (ell < expr.Numeric(1.0e-5)) * (ell > -expr.Numeric(1.0e-5))
+    close_to_zero = (ell < expr.Numeric(1.0e-5)) * (
+        ell > -expr.Numeric(1.0e-5)
+    )
     smooth = expr.Elem({0: regular, 1: mclaurin}, close_to_zero)
     return expr.Elem({0: smooth, 1: expr.Numeric(0)}, x == 0)
 
@@ -187,8 +189,7 @@ def piecewiseVariables(variable, thresholds):
         b = thresholds[1] - thresholds[0]
         results = [
             expr.bioMax(
-                expr.Numeric(0),
-                expr.bioMin(variable - thresholds[0], b)
+                expr.Numeric(0), expr.bioMin(variable - thresholds[0], b)
             )
         ]
 
@@ -196,8 +197,7 @@ def piecewiseVariables(variable, thresholds):
         b = thresholds[i + 1] - thresholds[i]
         results += [
             expr.bioMax(
-                expr.Numeric(0),
-                expr.bioMin(variable - thresholds[i], b)
+                expr.Numeric(0), expr.bioMin(variable - thresholds[i], b)
             )
         ]
 
@@ -208,8 +208,7 @@ def piecewiseVariables(variable, thresholds):
         b = thresholds[-1] - thresholds[-2]
         results += [
             expr.bioMax(
-                expr.Numeric(0),
-                expr.bioMin(variable - thresholds[-2], b)
+                expr.Numeric(0), expr.bioMin(variable - thresholds[-2], b)
             )
         ]
     return results
@@ -1309,9 +1308,9 @@ def getMevForCrossNested(
         for i in V:
             Gi_terms[i] = []
     else:
-       logGi = {i: 0 for i in alone}
-       for i in set(V).difference(set(alone)):
-           Gi_terms[i] = []
+        logGi = {i: 0 for i in alone}
+        for i in set(V).difference(set(alone)):
+            Gi_terms[i] = []
     biosum = {}
     for m in nests:
         if availability is None:
@@ -1357,10 +1356,7 @@ def getMevForCrossNested(
             ]
     for k, G in Gi_terms.items():
         logGi[k] = expr.Elem(
-            {1: 0,
-             0: expr.log(expr.bioMultSum(G))
-            },
-            expr.bioMultSum(G) == 0
+            {1: 0, 0: expr.log(expr.bioMultSum(G))}, expr.bioMultSum(G) == 0
         )
         if sampling_log_probability is not None:
             logGi[k] -= sampling_log_probability[k]

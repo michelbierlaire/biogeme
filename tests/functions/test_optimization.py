@@ -14,10 +14,13 @@ Test the optimization module
 # pylint: disable=missing-function-docstring, missing-class-docstring
 
 
+import os
+import shutil
 import unittest
 import random as rnd
 
 import numpy as np
+import tempfile
 
 import biogeme.biogeme as bio
 from biogeme import models
@@ -96,13 +99,33 @@ class test_optimization(unittest.TestCase):
         V3 = 0
         V = {1: V1, 2: V2, 3: V3}
 
-        likelihood = models.loglogit(V, av=None, i=Choice)
-        self.myBiogeme = bio.BIOGEME(getData(1), likelihood)
-        self.myBiogeme.modelName = 'simpleExample'
+        self.likelihood = models.loglogit(V, av=None, i=Choice)
         self.theFunction = rosenbrock()
-        self.myBiogeme.saveIterations = False
-        self.myBiogeme.generateHtml = False
-        self.myBiogeme.generatePickle = False
+
+        # Create a temporary directory
+        self.test_dir = tempfile.mkdtemp()
+        self.scipy_file = os.path.join(self.test_dir, 'scipy.toml')
+        with open(self.scipy_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "scipy"', file=f)
+        self.ls_file = os.path.join(self.test_dir, 'line_search.toml')
+        with open(self.ls_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "LS-newton"', file=f)
+        self.tr_file = os.path.join(self.test_dir, 'trust_region.toml')
+        with open(self.tr_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "TR-newton"', file=f)
+        self.simple_bounds_file = os.path.join(
+            self.test_dir, 'simple_bounds.toml'
+        )
+        with open(self.simple_bounds_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "simple_bounds"', file=f)
+
+    def tearDown(self):
+        # Remove the directory after the test
+        shutil.rmtree(self.test_dir)
 
     def testSchnabelEskow(self):
         A = np.array(
@@ -154,31 +177,53 @@ class test_optimization(unittest.TestCase):
             self.assertAlmostEqual(i, 1, 4)
 
     def testBioScipy(self):
-        results = self.myBiogeme.estimate(algorithm=opt.scipy)
+        my_biogeme = bio.BIOGEME(
+            getData(1), self.likelihood, parameter_file=self.scipy_file
+        )
+        my_biogeme.modelName = 'simpleExample'
+        my_biogeme.generateHtml = False
+        my_biogeme.generatePickle = False
+        my_biogeme.saveIterations = False
+        results = my_biogeme.estimate()
         beta = results.getBetaValues()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 
     def testBioNewtonLineSearch(self):
-        results = self.myBiogeme.estimate(
-            algorithm=opt.newtonLineSearchForBiogeme
+        my_biogeme = bio.BIOGEME(
+            getData(1), self.likelihood, parameter_file=self.ls_file
         )
+        my_biogeme.modelName = 'simpleExample'
+        my_biogeme.generateHtml = False
+        my_biogeme.generatePickle = False
+        my_biogeme.saveIterations = False
+        results = my_biogeme.estimate()
         beta = results.getBetaValues()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 
     def testBioNewtonTrustRegion(self):
-        results = self.myBiogeme.estimate(
-            algorithm=opt.newtonTrustRegionForBiogeme
+        my_biogeme = bio.BIOGEME(
+            getData(1), self.likelihood, parameter_file=self.tr_file
         )
+        my_biogeme.modelName = 'simpleExample'
+        my_biogeme.generateHtml = False
+        my_biogeme.generatePickle = False
+        my_biogeme.saveIterations = False
+        results = my_biogeme.estimate()
         beta = results.getBetaValues()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 
     def testBioNewtonSimpleBounds(self):
-        results = self.myBiogeme.estimate(
-            algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme
+        my_biogeme = bio.BIOGEME(
+            getData(1), self.likelihood, parameter_file=self.simple_bounds_file
         )
+        my_biogeme.modelName = 'simpleExample'
+        my_biogeme.generateHtml = False
+        my_biogeme.generatePickle = False
+        my_biogeme.saveIterations = False
+        results = my_biogeme.estimate()
         beta = results.getBetaValues()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)

@@ -48,6 +48,7 @@ class test_biogeme(unittest.TestCase):
         self.myBiogeme = bio.BIOGEME(self.myData, dictOfExpressions)
         self.myBiogeme.generateHtml = False
         self.myBiogeme.generatePickle = False
+        self.myBiogeme.saveIterations = False
         self.myBiogeme.modelName = 'simpleExample'
 
     def test_saveIterationsFileName(self):
@@ -130,11 +131,9 @@ class test_biogeme(unittest.TestCase):
         self.myBiogeme.numberOfThreads = 1
         results = self.myBiogeme.estimate(bootstrap=10)
         self.assertAlmostEqual(results.data.logLike, -67.0654904797005, 5)
-        os.remove(self.myBiogeme._saveIterationsFileName())
 
     def test_simulate(self):
         results = self.myBiogeme.estimate()
-        os.remove(self.myBiogeme._saveIterationsFileName())
         s = self.myBiogeme.simulate(results.getBetaValues())
         self.assertAlmostEqual(s.loc[0, 'loglike'], -6.092208083991222, 3)
 

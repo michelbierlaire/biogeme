@@ -13,7 +13,9 @@ for test in file_list:
 #SBATCH --cpus-per-task 12
 #SBATCH --mem 192000
 #SBATCH --time 70:00:00
+#SBATCH -o biogeme%j.log
 
+ln -f biogeme%j.log {test}.log
 source ~/env_biogeme/bin/activate
 echo STARTING AT `date`
 echo {test}

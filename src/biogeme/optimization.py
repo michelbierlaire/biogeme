@@ -409,11 +409,11 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
           convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);
         - proportionAnalyticalHessian: proportion (between 0 and 1) of
           iterations when the analytical Hessian is calculated (default: 1).
-        - infeasibleConjugateGradient: if True, the conjugate
-          gradient algorithm may generate until termination.  The
-          result will then be projected on the feasible domain.  If
-          False, the algorithm stops as soon as an infeasible iterate
-          is generated (default: False).
+        - infeasibleConjugateGradient: if True, the conjugate gradient
+          algorithm may generate infeasible solutiona until
+          termination.  The result will then be projected on the
+          feasible domain.  If False, the algorithm stops as soon as
+          an infeasible iterate is generated (default: False).
         - maxiter: the maximum number of iterations (default: 1000).
         - radius: the initial radius of the trust region (default: 1.0).
         - eta1: threshold for failed iterations (default: 0.01).
@@ -618,3 +618,13 @@ def bioBfgs(fct, initBetas, bounds, parameters=None):
     return simpleBoundsNewtonAlgorithmForBiogeme(
         fct, initBetas, bounds, parameters
     )
+
+
+algorithms = {
+    'scipy': scipy,
+    'LS-newton': newtonLineSearchForBiogeme,
+    'TR-newton': newtonTrustRegionForBiogeme,
+    'LS-BFGS': bfgsLineSearchForBiogeme,
+    'TR-BFGS': bfgsTrustRegionForBiogeme,
+    'simple_bounds': simpleBoundsNewtonAlgorithmForBiogeme,
+}

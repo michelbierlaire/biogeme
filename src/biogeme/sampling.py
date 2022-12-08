@@ -13,6 +13,7 @@ import biogeme.expressions as expr
 
 LOG_PROBA_COL = '_log_proba'
 
+
 def sample_alternatives(alternatives, id_column, partition, chosen=None):
     """Performing the sampling of alternatives
 
@@ -40,7 +41,7 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
         of the partition.
 
     :raise biogemeError: if a set in the partition is empty.
-    
+
     :raise biogemeError: if the chosen alternative is unknown.
 
     """
@@ -63,15 +64,14 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
         if n == 0:
             error_msg = 'A stratum is empty'
             raise excep.biogemeError(error_msg)
-        
+
         k = stratum.sample_size
         logproba = np.log(k) - np.log(n)
         subset = alternatives[alternatives[id_column].isin(stratum.subset)]
-        if (chosen is not None and
-            chosen in stratum.subset):
-            chosen_alternative = (
-                alternatives[alternatives[id_column]==chosen].copy()
-            )
+        if chosen is not None and chosen in stratum.subset:
+            chosen_alternative = alternatives[
+                alternatives[id_column] == chosen
+            ].copy()
             if len(chosen_alternative) < 1:
                 error_msg = f'Unknown alternative: {chosen}'
                 raise excep.biogemeError(error_msg)
@@ -82,26 +82,19 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
             results.append(chosen_alternative)
 
             subset = subset.drop(
-                subset[subset[id_column] == chosen].index,
-                axis='index'
+                subset[subset[id_column] == chosen].index, axis='index'
             )
             n -= 1
             k -= 1
 
         if k > 0:
             sample = subset.sample(
-                n=k,
-                replace=False,
-                axis='index',
-                ignore_index=True
+                n=k, replace=False, axis='index', ignore_index=True
             )
             sample[LOG_PROBA_COL] = logproba
             results.append(sample)
 
     return pd.concat(results, ignore_index=True)
-
-
-
 
 
 def sampling_of_alternatives(
@@ -147,8 +140,7 @@ def sampling_of_alternatives(
 
     """
     for index_ind, the_individual_row in tqdm(
-            individuals.iterrows(),
-            total=individuals.shape[0]
+        individuals.iterrows(), total=individuals.shape[0]
     ):
         choice = the_individual_row[choice_column]
         the_alternatives = alternatives.copy(deep=True)
@@ -158,24 +150,19 @@ def sampling_of_alternatives(
             chosen = None
 
         sample = sample_alternatives(
-            the_alternatives,
-            id_column,
-            partition,
-            chosen=chosen
+            the_alternatives, id_column, partition, chosen=chosen
         )
         sample.reset_index(inplace=True, drop=True)
 
         if always_include_chosen:
             # Position the chosen alternative at the first row
-            chosen_alternative = (
-                sample.index[sample[id_column] == choice].tolist()[0]
-            )
-            new_index = (
-                [chosen_alternative] +
-                [i for i in range(len(sample)) if i != chosen_alternative]
-            )
+            chosen_alternative = sample.index[
+                sample[id_column] == choice
+            ].tolist()[0]
+            new_index = [chosen_alternative] + [
+                i for i in range(len(sample)) if i != chosen_alternative
+            ]
             sample = sample.reindex(new_index).reset_index(drop=True)
-
 
         row_elements = {
             f'{c}_{index}': alt[c]
@@ -185,6 +172,7 @@ def sampling_of_alternatives(
         individuals.loc[index_ind, row_elements.keys()] = row_elements.values()
 
     return individuals
+
 
 def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
     """Generate the expression of the CNL G_i function in the context
@@ -250,22 +238,22 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
             )
         for i, util in V.items():
             Gi_terms[i].append(
-                 expr.Variable(f'{nest}_{i}') ** mu
-                 * expr.exp((mu - 1) * (V[i]))
-                 * biosum ** ((1.0 / mu) - 1.0)
+                expr.Variable(f'{nest}_{i}') ** mu
+                * expr.exp((mu - 1) * (V[i]))
+                * biosum ** ((1.0 / mu) - 1.0)
             )
 
     log_gi = {
         k: expr.Elem(
-            {1: 0,
-             0: expr.log(expr.bioMultSum(G)) - sampling_log_probability[k]
-             },
-            expr.bioMultSum(G) == 0
-        ) if G else 0
+            {
+                1: 0,
+                0: expr.log(expr.bioMultSum(G)) - sampling_log_probability[k],
+            },
+            expr.bioMultSum(G) == 0,
+        )
+        if G
+        else 0
         for k, G in Gi_terms.items()
     }
-    log_gi = {
-        k: expr.Numeric(0)
-        for k, G in Gi_terms.items()
-    }
+    log_gi = {k: expr.Numeric(0) for k, G in Gi_terms.items()}
     return log_gi

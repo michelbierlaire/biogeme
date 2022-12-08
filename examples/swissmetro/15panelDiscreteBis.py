@@ -1,7 +1,7 @@
 """File 15panelDiscreteBis.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 19:30:31 2019
+:date: Tue Dec  6 18:26:15 2022
 
  Example of a discrete mixture of logit models, also called latent class model.
  The datafile is organized as panel data.
@@ -185,7 +185,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 biogeme.modelName = '15panelDiscreteBis'
 
 # Estimate the parameters.

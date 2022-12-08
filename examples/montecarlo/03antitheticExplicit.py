@@ -65,7 +65,7 @@ simulate = {
     'Error (MLHS)             ': error_mlhs,
 }
 
-biogeme = bio.BIOGEME(database, simulate, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
 biogeme.modelName = '03antitheticExplicit'
 results = biogeme.simulate()
 print(f"Analytical integral:{results.iloc[0]['Analytical Integral']:.6f}")

@@ -159,9 +159,7 @@ def setup(cythonize=True, **kwargs):
         with open(setup_cfg_file) as fp:
             parsed_setup_cfg = parse_setup_cfg(fp, cythonize=cythonize)
         cython_ext_modules = create_cython_ext_modules(
-            parsed_setup_cfg,
-            profile_cython=profile_cython,
-            debug=debug
+            parsed_setup_cfg, profile_cython=profile_cython, debug=debug
         )
 
         if cythonize:
@@ -178,8 +176,9 @@ def setup(cythonize=True, **kwargs):
     setuptools.setup(**kwargs)
 
 
-def create_cython_ext_modules(cython_modules, profile_cython=False,
-                              debug=False):
+def create_cython_ext_modules(
+    cython_modules, profile_cython=False, debug=False
+):
     """
     Create :class:`~distutils.extension.Extension` objects from
     *cython_modules*.
@@ -228,15 +227,14 @@ def parse_setup_cfg(fp, cythonize=False, pkg_config=None, base_dir=''):
     """
     if pkg_config is None:
         pkg_config = _run_pkg_config
-#    config = configparser.SafeConfigParser()
+    #    config = configparser.SafeConfigParser()
     config = configparser.ConfigParser()
-#    config.readfp(fp)
+    #    config.readfp(fp)
     config.read_file(fp)
     return _expand_cython_modules(config, cythonize, pkg_config, base_dir)
 
 
 class _StoreOrderedArgs(argparse.Action):
-
     def __call__(self, parser, namespace, values, option_string=None):
         if 'ordered_args' not in namespace:
             setattr(namespace, 'ordered_args', [])
@@ -270,31 +268,38 @@ def _expand_cython_modules(config, cythonize, pkg_config, base_dir):
     ret = {}
     for section in config.sections():
         if section.startswith(MODULE_SECTION_PREFIX):
-            module_name = section[len(MODULE_SECTION_PREFIX):].strip()
-            module_dict = _expand_one_cython_module(config, section, cythonize,
-                                                    pkg_config, base_dir)
+            module_name = section[len(MODULE_SECTION_PREFIX) :].strip()
+            module_dict = _expand_one_cython_module(
+                config, section, cythonize, pkg_config, base_dir
+            )
             ret[module_name] = module_dict
     return ret
 
 
-def _expand_one_cython_module(config, section, cythonize, pkg_config,
-                              base_dir):
-    (pc_include_dirs,
-     pc_extra_compile_args,
-     pc_library_dirs,
-     pc_libraries,
-     pc_extra_link_args) = _expand_pkg_config_pkgs(config, section, pkg_config)
+def _expand_one_cython_module(
+    config, section, cythonize, pkg_config, base_dir
+):
+    (
+        pc_include_dirs,
+        pc_extra_compile_args,
+        pc_library_dirs,
+        pc_libraries,
+        pc_extra_link_args,
+    ) = _expand_pkg_config_pkgs(config, section, pkg_config)
 
     module = {}
     module['language'] = _get_config_opt(config, section, 'language', None)
-    module['extra_compile_args'] = \
-        _get_config_list(config, section, 'extra_compile_args') + \
-        pc_extra_compile_args
-    module['extra_link_args'] = \
-        _get_config_list(config, section, 'extra_link_args') + \
-        pc_extra_link_args
-    module['sources'] = _expand_sources(config, section, module['language'],
-                                        cythonize)
+    module['extra_compile_args'] = (
+        _get_config_list(config, section, 'extra_compile_args')
+        + pc_extra_compile_args
+    )
+    module['extra_link_args'] = (
+        _get_config_list(config, section, 'extra_link_args')
+        + pc_extra_link_args
+    )
+    module['sources'] = _expand_sources(
+        config, section, module['language'], cythonize
+    )
     include_dirs = _get_config_list(config, section, 'include_dirs')
     include_dirs += pc_include_dirs
     include_dirs = _eval_strings(include_dirs)
@@ -319,8 +324,9 @@ def _expand_one_cython_module(config, section, cythonize, pkg_config,
 
 
 def _make_paths_absolute(paths, base_dir):
-    return [op.join(base_dir, p) if not p.startswith('/') else p
-            for p in paths]
+    return [
+        op.join(base_dir, p) if not p.startswith('/') else p for p in paths
+    ]
 
 
 def _eval_strings(values):
@@ -340,32 +346,41 @@ def _expand_pkg_config_pkgs(config, section, pkg_config):
 
     original_pkg_config_path = os.environ.get('PKG_CONFIG_PATH', '')
     pkg_config_path = original_pkg_config_path.split(":")
-    pkg_config_path.extend(_get_config_list(config, section,
-                                            'pkg_config_dirs'))
+    pkg_config_path.extend(
+        _get_config_list(config, section, 'pkg_config_dirs')
+    )
     env = os.environ.copy()
     env['PKG_CONFIG_PATH'] = ":".join(pkg_config_path)
 
     extra_compile_args = pkg_config(pkg_names, '--cflags', env)
     extra_link_args = pkg_config(pkg_names, '--libs', env)
 
-    extracted_args, extra_compile_args = extract_args(extra_compile_args,
-                                                      ['-I'])
+    extracted_args, extra_compile_args = extract_args(
+        extra_compile_args, ['-I']
+    )
     include_dirs = extracted_args.get('I', [])
-    extracted_args, extra_link_args = extract_args(extra_link_args,
-                                                   ['-L', '-l'])
+    extracted_args, extra_link_args = extract_args(
+        extra_link_args, ['-L', '-l']
+    )
     library_dirs = extracted_args.get('L', [])
     libraries = extracted_args.get('l', [])
 
     extra_compile_args = shlex.split(extra_compile_args)
     extra_link_args = shlex.split(extra_link_args)
 
-    return (include_dirs, extra_compile_args, library_dirs, libraries,
-            extra_link_args)
+    return (
+        include_dirs,
+        extra_compile_args,
+        library_dirs,
+        libraries,
+        extra_link_args,
+    )
 
 
 def _run_pkg_config(pkg_names, command, env):
-    return subprocess.check_output(['pkg-config', command] + pkg_names,
-                                   env=env).decode('utf8')
+    return subprocess.check_output(
+        ['pkg-config', command] + pkg_names, env=env
+    ).decode('utf8')
 
 
 def _expand_sources(config, section, language, cythonize):
@@ -418,7 +433,6 @@ def _str_to_bool(value):
     elif value in ('0', 'off', 'false', 'no'):
         return False
     raise ValueError('invalid boolean string %r' % value)
-
 
 
 if platform.system() == "Darwin":

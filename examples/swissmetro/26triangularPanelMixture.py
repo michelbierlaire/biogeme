@@ -1,7 +1,7 @@
 """File 26triangularPanelMixture.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Sep  9 10:27:40 2019
+:date: Tue Dec  6 18:30:44 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  THe micing distribution is user-defined (triangular, here).
@@ -150,7 +150,7 @@ logger.setDetailed()
 # logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 biogeme.modelName = '26triangularPanelMixture'
 
 # Estimate the parameters.

@@ -14,13 +14,18 @@ with os.scandir('.') as root_dir:
                     print(f'----- {path.path} -----')
                     for file in local:
                         if file.is_file() and file.name.endswith('py'):
-                            notebook_fname = f'{path.path}/{file.name.split(".")[0]}.ipynb'
-                            print(f'Convert {file.name} into {notebook_fname}') 
+                            notebook_fname = (
+                                f'{path.path}/{file.name.split(".")[0]}.ipynb'
+                            )
+                            print(f'Convert {file.name} into {notebook_fname}')
                             with open(f'{path.path}/{file.name}', 'r') as f:
                                 read_file = f.read()
                             with open(tmp_file, 'w') as f:
                                 f.write(f'#%%\n{read_file}')
-                            subprocess.call([(f'{sys.prefix}/bin/ipynb-py-convert'),
-                                             tmp_file,
-                                             notebook_fname])
-                            
+                            subprocess.call(
+                                [
+                                    (f'{sys.prefix}/bin/ipynb-py-convert'),
+                                    tmp_file,
+                                    notebook_fname,
+                                ]
+                            )

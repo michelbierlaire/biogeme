@@ -1,7 +1,7 @@
 """ File 01logit_allAlgos.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sat Sep  7 17:57:16 2019
+:date: Tue Dec  6 17:45:04 2022
 
  Logit model
  Three alternatives: Train, Car and Swissmetro
@@ -69,10 +69,6 @@ V = {1: V1, 2: V2, 3: V3}
 # Associate the availability conditions with the alternatives
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
-
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
 logprob = models.loglogit(V, av, CHOICE)
@@ -84,27 +80,24 @@ logger.setSilent()
 # logger.setGeneral()
 # logger.setDetailed()
 
-# Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-
 algos = {
-    'scipy                ': opt.scipy,
-    'Line search          ': opt.newtonLineSearchForBiogeme,
-    'Trust region (dogleg)': opt.newtonTrustRegionForBiogeme,
-    'Trust region (cg)    ': opt.newtonTrustRegionForBiogeme,
-    'LS-BFGS              ': opt.bfgsLineSearchForBiogeme,
-    'TR-BFGS              ': opt.bfgsTrustRegionForBiogeme,
-    'Simple bounds Newton ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds BFGS   ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds hybrid ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'scipy                ': 'scipy',
+    'Line search          ': 'LS-newton',
+    'Trust region (dogleg)': 'TR-newton',
+    'Trust region (cg)    ': 'TR-newton',
+    'LS-BFGS              ': 'LS-BFGS',
+    'TR-BFGS              ': 'TR-BFGS',
+    'Simple bounds Newton ': 'simple_bounds',
+    'Simple bounds BFGS   ': 'simple_bounds',
+    'Simple bounds hybrid ': 'simple_bounds',
 }
 
 algoParameters = {
     'Trust region (dogleg)': {'dogleg': True},
     'Trust region (cg)': {'dogleg': False},
-    'Simple bounds Newton ': {'proportionAnalyticalHessian': 1.0},
-    'Simple bounds BFGS   ': {'proportionAnalyticalHessian': 0.0},
-    'Simple bounds hybrid ': {'proportionAnalyticalHessian': 0.5},
+    'Simple bounds Newton ': {'second_derivatives': 1.0},
+    'Simple bounds BFGS   ': {'second_derivatives': 0.0},
+    'Simple bounds hybrid ': {'second_derivatives': 0.5},
 }
 
 results = {}
@@ -112,9 +105,15 @@ print("Algorithm\t\tloglike\t\tnormg\ttime\t\tdiagnostic")
 print("+++++++++\t\t+++++++\t\t+++++\t++++\t\t++++++++++")
 
 for name, algo in algos.items():
+    # Create the Biogeme object
+    biogeme = bio.BIOGEME(database, logprob)
+    biogeme.algorithm_name = algo
     biogeme.modelName = f'01logit_allAlgos_{name}'.strip()
     p = algoParameters.get(name)
-    results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
+    if p is not None:
+        for attr, value in p.items():
+            setattr(biogeme, attr, value)
+    results[name] = biogeme.estimate()
     print(
         f'{name}\t{results[name].data.logLike:.2f}\t'
         f'{results[name].data.gradientNorm:.2g}\t'

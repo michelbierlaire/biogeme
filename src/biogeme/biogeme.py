@@ -15,6 +15,7 @@ and the model specification.
 
 
 import glob
+from collections import namedtuple
 import multiprocessing as mp
 from datetime import datetime
 import pickle
@@ -31,15 +32,34 @@ import biogeme.filenames as bf
 import biogeme.messaging as msg
 import biogeme.optimization as opt
 from biogeme import tools
-from biogeme.algorithms import functionToMinimize
 from biogeme.idmanager import IdManager
+from biogeme.negative_likelihood import NegativeLikelihood
+from biogeme import toml
 
 # import yep
+
+DEFAULT_MODEL_NAME = 'biogemeModelDefaultName'
+
+OldNewParamTuple = namedtuple('OldNewParamTuple', 'old new section')
 
 logger = msg.bioMessage()
 """Logger that controls the output of
         messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`."""
+        Type: class :class:`biogeme.messaging.bioMessage`.
+"""
+
+
+def argument_warning(old_new_tuple):
+    """Displays a deprecation warning when parameters are provided as arguments."""
+    warning_msg = (
+        f'The use of argument {old_new_tuple.old} in the constructor of the '
+        f'BIOGEME object is deprecated and will be removed in future '
+        f'versions of Biogeme. Instead, define parameter {old_new_tuple.new} '
+        f'in section {old_new_tuple.section}'
+        f'of the .toml parameter file. The default file name is '
+        f'{toml.DEFAULT_FILE_NAME}'
+    )
+    logger.warning(warning_msg)
 
 
 class BIOGEME:
@@ -54,13 +74,10 @@ class BIOGEME:
         database,
         formulas,
         userNotes=None,
-        numberOfThreads=None,
-        numberOfDraws=1000,
-        seed=None,
-        skipAudit=False,
-        suggestScales=True,
-        missingData=99999,
+        parameter_file=None,
+        **kwargs,
     ):
+
         """Constructor
 
         :param database: choice data.
@@ -121,8 +138,47 @@ class BIOGEME:
            exception is raised.
 
         """
+        self.toml = toml.Toml(parameter_file)
 
-        if not skipAudit:
+        # Code for the transition period to inform th euser of the
+        # change of parameter management scheme
+        old_params = (
+            OldNewParamTuple(
+                old='numberOfThreads',
+                new='number_of_threads',
+                section='MultiThreading',
+            ),
+            OldNewParamTuple(
+                old='numberOfDraws',
+                new='number_of_draws',
+                section='MonteCarlo',
+            ),
+            OldNewParamTuple(old='seed', new='seed', section='MonteCarlo'),
+            OldNewParamTuple(
+                old='skipAudit', new='skip_audit', section='Specification'
+            ),
+            OldNewParamTuple(
+                old='suggestScales',
+                new='suggest_scales',
+                section='Specification',
+            ),
+            OldNewParamTuple(
+                old='missingData', new='missing_data', section='Specification'
+            ),
+        )
+
+        for the_param in old_params:
+            value = kwargs.get(the_param.old)
+            if value is not None:
+                argument_warning(the_param)
+                self.toml.parameters.set_value(
+                    the_param.new, value, the_param.section
+                )
+
+        self._algorithm = None
+        self.algoParameters = None
+
+        if not self.skipAudit:
             database.data = database.data.replace({True: 1, False: 0})
             listOfErrors, listOfWarnings = database._audit()
             if listOfWarnings:
@@ -139,7 +195,7 @@ class BIOGEME:
         """Keyword used for the name of the weight formula. Default: 'weight'
         """
 
-        self.modelName = 'biogemeModelDefaultName'
+        self.modelName = DEFAULT_MODEL_NAME
         """Name of the model. Default: 'biogemeModelDefaultName'
         """
         self.monteCarlo = False
@@ -147,30 +203,10 @@ class BIOGEME:
         Monte-Carlo integration.
         """
 
-        if seed is not None:
-            np.random.seed(seed)
-
-        self.saveIterations = True
-        """If True, the current iterate is saved after each iteration, in a
-        file named ``__[modelName].iter``, where ``[modelName]`` is the
-        name given to the model. If such a file exists, the starting
-        values for the estimation are replaced by the values saved in
-        the file.
-        """
-
-        self.missingData = missingData  #: code for missing data
+        if self.seed_param != 0:
+            np.random.seed(self.seed_param)
 
         self.database = database  #: :class:`biogeme.database.Database` object
-
-        self.numberOfThreads = (
-            mp.cpu_count() if numberOfThreads is None else numberOfThreads
-        )
-        """ Number of threads used for parallel computing. Default: the number
-        of available CPU.
-        """
-
-        self.numberOfDraws = numberOfDraws
-        """ Number of draws for Monte-Carlo integration."""
 
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
@@ -240,7 +276,7 @@ class BIOGEME:
 
         self.nullLogLike = None  #: Log likelihood of the null model
 
-        if suggestScales:
+        if self.suggestScales:
             suggestedScales = self.database.suggestScaling()
             if not suggestedScales.empty:
                 logger.detailed(
@@ -262,7 +298,7 @@ class BIOGEME:
 
         self._prepareDatabaseForFormula()
 
-        if not skipAudit:
+        if not self.skipAudit:
             self._audit()
 
         self.reset_id_manager()
@@ -275,23 +311,13 @@ class BIOGEME:
         self.theC.setData(self.database.data)
         self.theC.setMissingData(self.missingData)
 
-        self.generateHtml = True
-        """ Boolean variable, True if the HTML file with the results must
-        be generated.
-        """
-
-        self.generatePickle = True
-        """ Boolean variable, True if the pickle file with the results must
-        be generated.
-        """
-
         self.columnForBatchSamplingWeights = None
         """ Name of the column defining weights for batch sampling in
         stochastic optimization.
         """
 
         start_time = datetime.now()
-        self._generateDraws(numberOfDraws)
+        self._generateDraws(self.numberOfDraws)
         if self.monteCarlo:
             self.theC.setDraws(self.database.theDraws)
         self.drawsProcessingTime = datetime.now() - start_time
@@ -324,13 +350,336 @@ class BIOGEME:
         after completion.
         """
 
-        self.algoParameters = None
-        """ Parameters to be transferred to the optimization algorithm
-        """
-
-        self.algorithm = None  #: Optimization algorithm
-
         self.bestIteration = None  #: Store the best iteration found so far.
+
+
+    @property
+    def algorithm_name(self):
+        """Name of the optimization algorithm"""
+        return self.toml.parameters.get_value(
+            name='optimization_algorithm', section='Estimation'
+        )
+
+    @algorithm_name.setter
+    def algorithm_name(self, value):
+        self.toml.parameters.set_value(
+            name='optimization_algorithm',
+            value=value,
+            section='Estimation',
+        )
+
+    @property
+    def seed_param(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value('seed')
+
+    @seed_param.setter
+    def seed_param(self, value):
+        self.toml.parameters.set_value(
+            name='seed', value=value, section='MonteCarlo'
+        )
+
+    @property
+    def saveIterations(self):
+        """If True, the current iterate is saved after each iteration, in a
+        file named ``__[modelName].iter``, where ``[modelName]`` is the
+        name given to the model. If such a file exists, the starting
+        values for the estimation are replaced by the values saved in
+        the file.
+        """
+        return self.toml.parameters.get_value(
+            name='save_iterations', section='Estimation'
+        )
+
+    @saveIterations.setter
+    def saveIterations(self, value):
+        self.toml.parameters.set_value(
+            name='save_iterations', value=value, section='Estimation'
+        )
+
+    @property
+    def save_iterations(self):
+        """Same as saveIterations, with another syntax
+        """
+        return self.toml.parameters.get_value(
+            name='save_iterations', section='Estimation'
+        )
+
+    @save_iterations.setter
+    def save_iterations(self, value):
+        self.toml.parameters.set_value(
+            name='save_iterations', value=value, section='Estimation'
+        )
+
+    @property
+    def skipAudit(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='skip_audit', section='Specification'
+        )
+
+    @skipAudit.setter
+    def skipAudit(self, value):
+        self.toml.parameters.set_value(
+            name='skip_audit', value=value, section='Specification'
+        )
+
+    @property
+    def skip_audit(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='skip_audit', section='Specification'
+        )
+
+    @skip_audit.setter
+    def skip_audit(self, value):
+        self.toml.parameters.set_value(
+            name='skip_audit', value=value, section='Specification'
+        )
+
+    @property
+    def suggestScales(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='suggest_scales', section='Specification'
+        )
+
+    @suggestScales.setter
+    def suggestScales(self, value):
+        self.toml.parameters.set_value(
+            name='suggest_scales', value=value, section='Specification'
+        )
+
+    @property
+    def suggest_scales(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='suggest_scales', section='Specification'
+        )
+
+    @suggest_scales.setter
+    def suggest_scales(self, value):
+        self.toml.parameters.set_value(
+            name='suggest_scales', value=value, section='Specification'
+        )
+
+    @property
+    def missingData(self):
+        """Code for missing data"""
+        return self.toml.parameters.get_value(
+            name='missing_data', section='Specification'
+        )
+
+    @missingData.setter
+    def missingData(self, value):
+        self.toml.parameters.set_value(
+            name='missing_data', value=value, section='Specification'
+        )
+
+    @property
+    def missing_data(self):
+        """Code for missing data"""
+        return self.toml.parameters.get_value(
+            name='missing_data', section='Specification'
+        )
+
+    @missing_data.setter
+    def missing_data(self, value):
+        self.toml.parameters.set_value(
+            name='missing_data', value=value, section='Specification'
+        )
+
+    @property
+    def numberOfThreads(self):
+        """Number of threads used for parallel computing. Default: the number
+        of available CPU.
+        """
+        nbr_threads = self.toml.parameters.get_value(
+            'number_of_threads'
+        )
+        return (
+            mp.cpu_count()
+            if nbr_threads == 0
+            else nbr_threads
+        )
+
+    @numberOfThreads.setter
+    def numberOfThreads(self, value):
+        self.toml.parameters.set_value(
+            name='number_of_threads', value=value, section='MultiThreading'
+        )
+
+    @property
+    def number_of_threads(self):
+        """Number of threads used for parallel computing. Default: the number
+        of available CPU.
+        """
+        nbr_threads = self.toml.parameters.get_value(
+            'number_of_threads'
+        )
+        return (
+            mp.cpu_count()
+            if nbr_threads == 0
+            else nbr_threads
+        )
+
+    @number_of_threads.setter
+    def number_of_threads(self, value):
+        self.toml.parameters.set_value(
+            name='number_of_threads', value=value, section='MultiThreading'
+        )
+
+    @property
+    def numberOfDraws(self):
+        """Number of draws for Monte-Carlo integration."""
+        return self.toml.parameters.get_value(
+            'number_of_draws'
+        )
+
+    @numberOfDraws.setter
+    def numberOfDraws(self, value):
+        self.toml.parameters.set_value(
+            name='number_of_draws', value=value, section='MonteCarlo'
+        )
+
+    @property
+    def number_of_draws(self):
+        """Number of draws for Monte-Carlo integration."""
+        return self.toml.parameters.get_value(
+            'number_of_draws'
+        )
+
+    @number_of_draws.setter
+    def number_of_draws(self, value):
+        self.toml.parameters.set_value(
+            name='number_of_draws', value=value, section='MonteCarlo'
+        )
+
+    @property
+    def generateHtml(self):
+        """Boolean variable, True if the HTML file with the results must
+        be generated.
+        """
+        return self.toml.parameters.get_value(
+            'generate_html'
+        )
+
+    @generateHtml.setter
+    def generateHtml(self, value):
+        self.toml.parameters.set_value(
+            name='generate_html', value=value, section='Output'
+        )
+
+    @property
+    def generate_html(self):
+        """Boolean variable, True if the HTML file with the results must
+        be generated.
+        """
+        return self.toml.parameters.get_value(
+            'generate_html'
+        )
+
+    @generate_html.setter
+    def generate_html(self, value):
+        self.toml.parameters.set_value(
+            name='generate_html', value=value, section='Output'
+        )
+
+    @property
+    def generatePickle(self):
+        """Boolean variable, True if the PICKLE file with the results must
+        be generated.
+        """
+        return self.toml.parameters.get_value(
+            'generate_pickle'
+        )
+
+    @generatePickle.setter
+    def generatePickle(self, value):
+        self.toml.parameters.set_value(
+            name='generate_pickle', value=value, section='Output'
+        )
+
+    @property
+    def generate_pickle(self):
+        """Boolean variable, True if the PICKLE file with the results must
+        be generated.
+        """
+        return self.toml.parameters.get_value(
+            'generate_pickle'
+        )
+
+    @generate_pickle.setter
+    def generate_pickle(self, value):
+        self.toml.parameters.set_value(
+            name='generate_pickle', value=value, section='Output'
+        )
+
+    @property
+    def tolerance(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='tolerance', section='SimpleBounds'
+        )
+
+    @tolerance.setter
+    def tolerance(self, value):
+        self.toml.parameters.set_value(
+            name='tolerance', value=value, section='SimpleBounds'
+        )
+
+    @property
+    def second_derivatives(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='second_derivatives', section='SimpleBounds'
+        )
+
+    @second_derivatives.setter
+    def second_derivatives(self, value):
+        self.toml.parameters.set_value(
+            name='second_derivatives', value=value, section='SimpleBounds'
+        )
+
+    @property
+    def infeasible_cg(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='infeasible_cg', section='SimpleBounds'
+        )
+
+    @infeasible_cg.setter
+    def infeasible_cg(self, value):
+        self.toml.parameters.set_value(
+            name='infeasible_cg', value=value, section='SimpleBounds'
+        )
+
+    @property
+    def maxiter(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='max_iterations', section='SimpleBounds'
+        )
+
+    @maxiter.setter
+    def maxiter(self, value):
+        self.toml.parameters.set_value(
+            name='maxiter', value=value, section='SimpleBounds'
+        )
+
+    @property
+    def dogleg(self):
+        """ getter for the parameter """
+        return self.toml.parameters.get_value(
+            name='dogleg', section='TrustRegion'
+        )
+
+    @dogleg.setter
+    def dogleg(self, value):
+        self.toml.parameters.set_value(
+            name='dogleg', value=value, section='TrustRegion'
+        )
+
 
     def reset_id_manager(self):
         """Reset all the ids of the elementary expression in the formulas"""
@@ -346,6 +695,28 @@ class BIOGEME:
         )
         for f in self.formulas.values():
             f.setIdManager(id_manager=self.id_manager)
+
+    def set_algorithm(self):
+        """ Retrieve the function with the optimization algorithm from its name """
+        self._algorithm = opt.algorithms.get(self.algorithm_name)
+        if self._algorithm is None:
+            raise excep.biogemeError(
+                f'Unknown algorithm {self.algorithm_name}'
+            )
+
+        if self.algorithm_name == 'simple_bounds':
+            self.algoParameters = {
+                'proportionAnalyticalHessian': self.second_derivatives,
+                'infeasibleConjugateGradient': self.infeasible_cg,
+                'tolerance': self.tolerance,
+                'maxiter': self.maxiter,
+            }
+        elif self.algorithm_name in ['TR-newton', 'TR-BFGS']:
+            self.algoParameters = {
+                'dogleg': self.dogleg,
+            }
+        else:
+            self.algoParameters = None
 
     def _saveIterationsFileName(self):
         """
@@ -646,7 +1017,9 @@ class BIOGEME:
             if self.bestIteration is None:
                 self.bestIteration = f
             if f >= self.bestIteration:
-                with open(self._saveIterationsFileName(), 'w') as pf:
+                with open(
+                    self._saveIterationsFileName(), 'w', encoding='utf-8'
+                ) as pf:
                     for i, v in enumerate(x):
                         print(
                             f'{self.id_manager.free_betas.names[i]} = {v}',
@@ -736,7 +1109,7 @@ class BIOGEME:
         filename = self._saveIterationsFileName()
         betas = {}
         try:
-            with open(filename) as fp:
+            with open(filename, encoding='utf-8') as fp:
                 for line in fp:
                     ell = line.split('=')
                     betas[ell[0].strip()] = float(ell[1])
@@ -790,8 +1163,7 @@ class BIOGEME:
         self,
         recycle=False,
         bootstrap=0,
-        algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
-        algoParameters=None,
+        **kwargs,
     ):
 
         """Estimate the parameters of the model.
@@ -805,15 +1177,6 @@ class BIOGEME:
                bootstrapping. If the number is 0, bootstrapping is not
                applied. Default: 0.
         :type bootstrap: int
-
-        :param algorithm: optimization algorithm to use for the
-               maximum likelihood estimation. Default: Biogeme's
-               Newton's algorithm with simple bounds.
-        :type algorithm: function
-
-        :param algoParameters: parameters to transfer to the optimization
-            algorithm
-        :type algoParameters: dict
 
         :return: object containing the estimation results.
         :rtype: biogeme.bioResults
@@ -833,11 +1196,30 @@ class BIOGEME:
             likelihood
 
         """
-        if self.modelName == 'biogemeModelDefaultName':
+
+        self.set_algorithm()
+
+        if kwargs.get('algorithm') is not None:
+            error_msg = (
+                'The parameter "algorithm" is deprecated. Instead, define the '
+                'parameter "optimization_algorithm" in section "[Estimation]" '
+                'of the TOML parameter file'
+            )
+            raise excep.biogemeError(error_msg)
+
+        if kwargs.get('algoParameters') is not None:
+            error_msg = (
+                'The parameter "algoParameters" is deprecated. Instead, define the '
+                'parameters "max_iterations" and "tolerance" in section "[SimpleBounds]" '
+                'of the TOML parameter file'
+            )
+            raise excep.biogemeError(error_msg)
+
+        if self.modelName == DEFAULT_MODEL_NAME:
             logger.warning(
-                'You have not defined a name for the model. '
-                'The output files are named from the model name. '
-                'The default is [biogemeModelDefaultName]'
+                f'You have not defined a name for the model. '
+                f'The output files are named from the model name. '
+                f'The default is [{DEFAULT_MODEL_NAME}]'
             )
 
         if recycle:
@@ -880,8 +1262,6 @@ class BIOGEME:
                 f'obtained from the file {self._saveIterationsFileName()}'
             )
             self._loadSavedIteration()
-        self.algorithm = algorithm
-        self.algoParameters = algoParameters
 
         self.calculateInitLikelihood()
         self.bestIteration = None
@@ -955,24 +1335,11 @@ class BIOGEME:
             r.writePickle()
         return r
 
-    def quickEstimate(
-        self,
-        algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
-        algoParameters=None,
-    ):
+    def quickEstimate(self, **kwargs):
 
         """| Estimate the parameters of the model. Same as estimate, where any
              extra calculation is skipped (init loglikelihood,
              t-statistics, etc.)
-
-        :param algorithm: optimization algorithm to use for the
-               maximum likelihood estimation.Default: Biogeme's
-               Newton's algorithm with simple bounds.
-        :type algorithm: function
-
-        :param algoParameters: parameters to transfer to the optimization
-            algorithm
-        :type algoParameters: dict
 
         :return: object containing the estimation results.
         :rtype: biogeme.results.bioResults
@@ -992,6 +1359,22 @@ class BIOGEME:
             likelihood
 
         """
+        if kwargs.get('algorithm') is not None:
+            error_msg = (
+                'The parameter "algorithm" is deprecated. Instead, define the '
+                'parameter "optimization_algorithm" in section "[Estimation]" '
+                'of the TOML parameter file'
+            )
+            raise excep.biogemeError(error_msg)
+
+        if kwargs.get('algoParameters') is not None:
+            error_msg = (
+                'The parameter "algoParameters" is deprecated. Instead, define the '
+                'parameters "max_iterations" and "tolerance" in section "[SimpleBounds]" '
+                'of the TOML parameter file'
+            )
+            raise excep.biogemeError(error_msg)
+
         if self.loglike is None:
             raise excep.biogemeError(
                 'No log likelihood function has been specificed'
@@ -1002,8 +1385,7 @@ class BIOGEME:
                 f' in the formula: {self.loglike}.'
             )
 
-        self.algorithm = algorithm
-        self.algoParameters = algoParameters
+        self.set_algorithm()
 
         start_time = datetime.now()
         #        yep.start('profile.out')
@@ -1102,7 +1484,7 @@ class BIOGEME:
 
         :raises biogemeError: an error is raised if no algorithm is specified.
         """
-        theFunction = negLikelihood(
+        theFunction = NegativeLikelihood(
             like=self.calculateLikelihood,
             like_deriv=self.calculateLikelihoodAndDerivatives,
             scaled=True,
@@ -1111,14 +1493,15 @@ class BIOGEME:
         if startingValues is None:
             startingValues = self.id_manager.free_betas_values
 
-        if self.algorithm is None:
+        if self._algorithm is None:
             err = (
                 'An algorithm must be specified. The CFSQP algorithm '
                 'is not available anymore.'
             )
             raise excep.biogemeError(err)
 
-        results = self.algorithm(
+        logger.debug(f'Run {self._algorithm}')
+        results = self._algorithm(
             theFunction,
             startingValues,
             self.id_manager.bounds,
@@ -1312,132 +1695,3 @@ class BIOGEME:
         pattern2 = f'{self.modelName}~*.{extension}'
         files = glob.glob(pattern1) + glob.glob(pattern2)
         return files
-
-
-class negLikelihood(functionToMinimize):
-    """Provides the value of the function to be minimized, as well as its
-    derivatives. To be used by the opimization package.
-
-    """
-
-    # pylint: disable=too-many-instance-attributes
-
-    def __init__(self, like, like_deriv, scaled):
-        """Constructor"""
-        self.recalculate = True
-        """True if the log likelihood must be recalculated
-        """
-
-        self.x = None  #: Vector of unknown parameters values
-
-        self.batch = None
-        """Value betwen 0 and 1 defining the size of the batch, that is the
-        percentage of the data that should be used to approximate the
-        log likelihood.
-        """
-
-        self.fv = None  #: value of the function
-
-        self.gv = None  #: vector with the gradient
-
-        self.hv = None  #: second derivatives matrix
-
-        self.bhhhv = None  #: BHHH matrix
-
-        self.like = like  #: function calculating the log likelihood
-
-        self.like_deriv = like_deriv
-        """function calculating the log likelihood and its derivatives.
-        """
-
-        self.scaled = scaled
-        """if True, the value of the log likelihood is divided by the number
-        of observations used to calculate it. In this case, the values
-        with different sample sizes are comparable.
-        """
-
-    def setVariables(self, x):
-        self.recalculate = True
-        self.x = x
-        self.fv = None
-        self.gv = None
-        self.hv = None
-        self.bhhhv = None
-
-    def f(self, batch=None):
-        if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
-
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
-
-        if self.fv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-            self.fv = self.like(self.x, self.scaled, self.batch)
-            self.gv = None
-            self.hv = None
-            self.bhhhv = None
-
-        return -self.fv
-
-    def f_g(self, batch=None):
-        if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
-
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
-
-        if self.fv is None or self.gv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-            self.fv, self.gv, *_ = self.like_deriv(
-                self.x, self.scaled, hessian=False, bhhh=False, batch=batch
-            )
-            self.hv = None
-            self.bhhhv = None
-
-        return -self.fv, -self.gv
-
-    def f_g_h(self, batch=None):
-        if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
-
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
-
-        if self.fv is None or self.gv is None or self.hv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-
-            self.fv, self.gv, self.hv, _ = self.like_deriv(
-                self.x, self.scaled, hessian=True, bhhh=False, batch=batch
-            )
-            self.bhhhv = None
-
-        return -self.fv, -self.gv, -self.hv
-
-    def f_g_bhhh(self, batch=None):
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
-
-        if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
-
-        if self.fv is None or self.gv is None or self.bhhhv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-            self.fv, self.gv, _, self.bhhhv = self.like_deriv(
-                self.x, self.scaled, hessian=False, bhhh=True, batch=batch
-            )
-            self.hv = None
-
-        return (-self.fv, -self.gv, -self.bhhhv)

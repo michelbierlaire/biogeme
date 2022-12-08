@@ -12,7 +12,6 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.messaging as msg
 from biogeme.expressions import Beta, Variable
 
 # Read the data
@@ -98,12 +97,6 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # observation to the log likelihood function.
 logprob = models.loglogit(V, av, CHOICE)
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-logger.setDetailed()
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(database, logprob)

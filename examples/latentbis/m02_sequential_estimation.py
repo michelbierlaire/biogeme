@@ -17,7 +17,6 @@ import biogeme.biogeme as bio
 import biogeme.distributions as dist
 import biogeme.results as res
 import biogeme.messaging as msg
-import biogeme.optimization as opt
 from biogeme import models
 from biogeme.expressions import (
     Beta,
@@ -197,7 +196,7 @@ biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = 'm02_sequential_estimation'
 
 # Estimate the parameters
-results = biogeme.estimate(algorithm=opt.bioBfgs)
+results = biogeme.estimate()
 print(results.getEstimatedParameters())
 
 print(f'Final log likelihood: {results.data.logLike:.3f}')

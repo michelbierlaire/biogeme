@@ -1,7 +1,7 @@
 """File 12panel_flat.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Feb 14 13:10:32 2022
+:date: Tue Dec  6 18:25:19 2022
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  The datafile is organized as panel data, but a flat version is generated.
@@ -156,7 +156,7 @@ logger.setDetailed()
 # logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=100000)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 biogeme.modelName = '12panel_flat'
 
 # Estimate the parameters.

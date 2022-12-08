@@ -185,7 +185,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = '01oneLatentRegression'
 
 # Estimate the parameters

@@ -1,12 +1,9 @@
 """File 05normalMixture_simul.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sat Sep  7 18:42:55 2019
+:date: Tue Dec  6 18:17:10 2022
 
- Example of a mixture of logit models, using Monte-Carlo integration, and
- used for simulatiom
- Three alternatives: Train, Car and Swissmetro
- SP data
+Simulation of the mixture model, with estimation of the integration error.
 """
 
 import sys
@@ -22,9 +19,11 @@ from biogeme.expressions import Beta, Variable, bioDraws, MonteCarlo
 try:
     import matplotlib.pyplot as plt
 
-    plot = True
+    PLOT = True
 except ModuleNotFoundError:
-    plot = False
+    print('Install matplotlib to see the distribution of integration errors.')
+    print('pip install matplotlib')
+    PLOT = False
 
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
@@ -113,8 +112,7 @@ except biogemeError:
 prob = models.logit(V, av, CHOICE)
 
 # We calculate the integration error. Note that this formula assumes
-# independent draws, and is not valid for Haltom or antithetic draws.
-numberOfDraws = 100000
+# independent draws, and is not valid for Halton or antithetic draws.
 integral = MonteCarlo(prob)
 integralSquare = MonteCarlo(prob * prob)
 variance = integralSquare - integral * integral
@@ -132,7 +130,7 @@ simulate = {
 }
 
 # Create the Biogeme object
-biosim = bio.BIOGEME(database, simulate, numberOfDraws=numberOfDraws)
+biosim = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
 biosim.modelName = "05normalMixture_simul"
 
 # Simulate the requested quantities. The output is a Pandas data frame
@@ -148,7 +146,7 @@ simresults['right'] = np.log(
 
 print(f'Log likelihood: {np.log(simresults["Integral"]).sum()}')
 print(
-    f'Integration error for {numberOfDraws} draws: '
+    f'Integration error for {biosim.number_of_draws} draws: '
     f'{simresults["Integration error"].sum()}'
 )
 print(f'In average {simresults["Integration error"].mean()} per observation.')
@@ -161,7 +159,7 @@ print(
 simresults['beta'] = simresults['Numerator'] / simresults['Denominator']
 
 # Plot the histogram of individual parameters
-if plot:
+if PLOT:
     simresults['beta'].plot(kind='hist', density=True, bins=20)
 
 # Plot the general distribution of beta
@@ -181,6 +179,6 @@ def normalpdf(v, mu=0.0, s=1.0):
 
 betas = results.getBetaValues(['B_TIME', 'B_TIME_S'])
 x = np.arange(simresults['beta'].min(), simresults['beta'].max(), 0.01)
-if plot:
+if PLOT:
     plt.plot(x, normalpdf(x, betas['B_TIME'], betas['B_TIME_S']), '-')
     plt.show()

@@ -29,7 +29,6 @@ df = df.reset_index()
 database = db.Database('optima', df)
 
 
-
 class test_01(unittest.TestCase):
     def testQuickEstimate(self):
         logprob = models.loglogit(V, av, Choice)
@@ -37,8 +36,10 @@ class test_01(unittest.TestCase):
         biogeme.modelName = 'test_01'
         biogeme.generateHtml = False
         biogeme.generatePickle = False
+        biogeme.saveIterations = False
         results = biogeme.quickEstimate()
         self.assertAlmostEqual(results.data.logLike, -1068.758, 2)
+
 
 if __name__ == '__main__':
     unittest.main()

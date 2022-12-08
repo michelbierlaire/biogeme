@@ -4,7 +4,7 @@ Measurement equation where the indicators are discrete.
 Ordered probit.
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Sep  9 16:52:36 2019
+:date: Tue Dec  6 18:33:18 2022
 
 """
 
@@ -251,7 +251,7 @@ logger.setGeneral()
 
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = '02oneLatentOrdered'
 
 # Estimate the parameters

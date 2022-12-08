@@ -14,8 +14,8 @@ Test the tools module
 # pylint: disable=missing-function-docstring, missing-class-docstring
 
 import unittest
-import numpy as np
 from copy import deepcopy
+import numpy as np
 import pandas as pd
 from biogeme import tools
 import biogeme.exceptions as excep
@@ -162,6 +162,15 @@ class TestTools(unittest.TestCase):
         result_3 = tools.flatten_database(df, 'ID', identical_columns=[])
         output_flatten_3.index.name = 'ID'
         pd.testing.assert_frame_equal(result_3, output_flatten_3)
+
+    def test_temporary_file(self):
+        content = 'a random sentence'
+        with tools.TemporaryFile() as filename:
+            with open(filename, 'w', encoding='utf-8') as f:
+                f.write(content)
+            with open(filename, 'r', encoding='utf-8') as f:
+                check = f.read()
+            self.assertEqual(content, check)
 
 
 if __name__ == '__main__':

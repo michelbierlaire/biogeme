@@ -11,7 +11,7 @@
  Make sure to set large initial values for scale parameters.
 
 :author: Michel Bierlaire, EPFL
-:date: Wed Sep 11 15:40:43 2019
+:date: Tue Dec  6 18:32:20 2022
 
 """
 
@@ -261,7 +261,7 @@ logger.setGeneral()
 
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, loglike)
 biogeme.modelName = '07problem'
 
 # Estimate the parameters

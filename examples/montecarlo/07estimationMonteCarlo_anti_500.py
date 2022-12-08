@@ -1,7 +1,7 @@
 """ File: 07estimationMonteCarlo_anti_500.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 17:24:43 2019
+ Date: Tue Dec  6 18:52:50 2022
 
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration, with antithetic draws.
@@ -64,8 +64,7 @@ prob = models.logit(V, av, CHOICE)
 logprob = log(MonteCarlo(prob))
 
 
-R = 500
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws500.toml')
 
 biogeme.modelName = '07estimationMonteCarlo_anti_500'
 results = biogeme.estimate()

@@ -1,7 +1,7 @@
 """File: 03antithetic.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 17:00:05 2019
+ Date: Tue Dec  6 18:57:09 2022
 
 Calculation of a simple integral using Monte-Carlo integration. It
 illustrates how to use antithetic draws.
@@ -72,7 +72,7 @@ simulate = {
 }
 
 
-biogeme = bio.BIOGEME(database, simulate, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
 biogeme.modelName = '03antithetic'
 results = biogeme.simulate()
 print(f"Analytical integral:{results.iloc[0]['Analytical Integral']:.6f}")

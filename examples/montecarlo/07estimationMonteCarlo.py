@@ -1,7 +1,7 @@
 """ File: 07estimationMonteCarlo.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 17:25:14 2019
+ Date: Tue Dec  6 18:55:21 2022
 
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration.
@@ -65,8 +65,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 prob = models.logit(V, av, CHOICE)
 logprob = log(MonteCarlo(prob))
 
-R = 2000
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 
 biogeme.modelName = '07estimationMonteCarlo'
 results = biogeme.estimate()

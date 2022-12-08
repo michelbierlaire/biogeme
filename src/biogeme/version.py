@@ -23,7 +23,8 @@ urlUniversity = 'http://www.epfl.ch'
 urlBiogeme = 'http://biogeme.epfl.ch'
 urlForum = 'https://groups.google.com/d/forum/biogeme'
 
-__version__ = '3.2.11a1'
+__version__ = '3.2.11'
+
 
 def getVersion():
     """
@@ -33,9 +34,6 @@ def getVersion():
     :rtype: string
     """
     return __version__
-
-
-
 
 
 def getHtml():

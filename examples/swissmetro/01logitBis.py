@@ -1,13 +1,14 @@
 """File 01logitBis.py
 
 :author: Michel Bierlaire, EPFL
-:date: Thu Sep  6 15:14:39 2018
+:date: Tue Dec  6 15:30:55 2022
 
  Example of a logit model.
 
 Same as 01logit, using bioLinearUtility, and introducing some options
  and features.  Three alternatives: Train, Car and Swissmetro SP data
 
+Note that the parameters are defined in the file 01logitBis.toml
 """
 import pandas as pd
 
@@ -132,7 +133,7 @@ user_notes = (
 
 # Create the Biogeme object
 biogeme = bio.BIOGEME(
-    database, logprob, numberOfThreads=2, userNotes=user_notes
+    database, logprob, userNotes=user_notes, parameter_file='01logitBis.toml'
 )
 
 # As we have used starting values different from 0, the initial model
@@ -144,11 +145,7 @@ biogeme.modelName = '01logitBis'
 biogeme.saveIterations = False
 
 # Estimate the parameters
-results = biogeme.estimate(
-    bootstrap=100,
-    algorithm=opt.bioNewton,
-    algoParameters={'maxiter': 1000},
-)
+results = biogeme.estimate(bootstrap=100)
 
 biogeme.createLogFile(verbosity=3)
 

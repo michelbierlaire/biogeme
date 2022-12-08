@@ -1,0 +1,3 @@
+[MonteCarlo]
+number_of_draws = 500 # int: Number of draws for Monte-Carlo integration.
+

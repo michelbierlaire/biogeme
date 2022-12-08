@@ -1,7 +1,7 @@
 """File 19individualLevelParameters
 
 :author: Michel Bierlaire, EPFL
-:date: Wed Aug 26 14:56:49 2020
+:date: Tue Dec  6 18:08:28 2022
 
 Calculation of the individual level parameters for model 05normalMixture
 """
@@ -94,7 +94,7 @@ if os.path.isfile(pickle_file):
     with open(pickle_file, 'rb') as f:
         sim = pickle.load(f)
 else:
-    biosim = bio.BIOGEME(database, simulate, numberOfDraws=100000)
+    biosim = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
     sim = biosim.simulate()
     sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
     with open(pickle_file, 'wb') as f:

@@ -15,6 +15,9 @@ Simple estimation test from the Ben-Akiva and Lerman book
 # pylint: disable=missing-function-docstring, missing-class-docstring
 
 import unittest
+from os import path
+import shutil
+import tempfile
 
 import pandas as pd
 
@@ -55,6 +58,10 @@ CHOICE = Variable('CHOICE')
 
 class test_biogeme(unittest.TestCase):
     def setUp(self):
+        # Create a temporary directory
+        self.test_dir = tempfile.mkdtemp()
+        self.toml_file = path.join(self.test_dir, 'biogeme.toml')
+
         data = {
             'ID': pd.Series([i + 1 for i in range(21)]),
             'AutoTime': pd.Series(
@@ -115,6 +122,10 @@ class test_biogeme(unittest.TestCase):
 
         self.database = db.Database('akiva', pandas)
 
+    def tearDown(self):
+        # Remove the directory after the test
+        shutil.rmtree(self.test_dir)
+
     def testEstimation(self):
         AutoTime = Variable('AutoTime')
         TransitTime = Variable('TransitTime')
@@ -129,7 +140,9 @@ class test_biogeme(unittest.TestCase):
 
         logprob = models.loglogit(V, av, Choice)
 
-        biogeme = bio.BIOGEME(self.database, logprob)
+        biogeme = bio.BIOGEME(
+            self.database, logprob, parameter_file=self.toml_file
+        )
         biogeme.modelName = 'test'
         biogeme.generateHtml = False
         biogeme.generatePickle = False

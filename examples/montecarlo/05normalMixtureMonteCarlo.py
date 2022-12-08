@@ -1,7 +1,7 @@
 """File: 05normalMixtureMonteCarlo.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 17:11:45 2019
+ Date: Tue Dec  6 18:55:48 2022
 
 Calculation of a mixtures of logit models where the integral is
 calculated using numerical integration and Monte-Carlo integration
@@ -98,8 +98,7 @@ simulate = {
     'Antithetic MLHS': antimlhs,
 }
 
-R = 20000
-biogeme = bio.BIOGEME(database, simulate, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
 results = biogeme.simulate()
 print(f'Number of draws: {R}')
 for c in results.columns:

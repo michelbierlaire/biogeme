@@ -1,12 +1,10 @@
-""" File: 07estimationMonteCarlo_anti.py
+"""File: 07estimationMonteCarlo_anti.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 17:24:55 2019
+ Date: Tue Dec 6 18:53:22 2022
 
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration, with antithetic draws.
-
-
 
 """
 
@@ -67,8 +65,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 prob = models.logit(V, av, CHOICE)
 logprob = log(MonteCarlo(prob))
 
-R = 2000
-biogeme = bio.BIOGEME(database, logprob, numberOfDraws=R)
+biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
 
 biogeme.modelName = '07estimationMonteCarlo_anti'
 results = biogeme.estimate()

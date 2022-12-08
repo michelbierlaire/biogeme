@@ -1947,7 +1947,6 @@ def simpleBoundsNewtonAlgorithm(
     while cont:
         k += 1
 
-
         # Solve the quandratic problem in the subspace defined by the GCP
 
         xc, _ = truncatedConjugateGradientSubspace(
@@ -1975,7 +1974,7 @@ def simpleBoundsNewtonAlgorithm(
                 failed = True
 
             if failed:
-                
+
                 # Failure: reduce the trust region
                 delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
                 status = '-'

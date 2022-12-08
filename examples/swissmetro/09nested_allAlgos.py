@@ -1,7 +1,7 @@
 """File 09nested.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 00:36:04 2019
+:date: Tue Dec  6 18:24:29 2022
 
  Example of a nested logit model.
  Three alternatives: Train, Car and Swissmetro
@@ -12,7 +12,6 @@
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.optimization as opt
 from biogeme import models
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, Variable
@@ -103,32 +102,36 @@ logger = msg.bioMessage()
 logger.setGeneral()
 # logger.setDetailed()
 
-# Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
 
 algos = {
-    'scipy                   ': opt.scipy,
-    'Simple bounds Newton    ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds BFGS      ': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds hybrid 20%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds hybrid 50%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
-    'Simple bounds hybrid 80%': opt.simpleBoundsNewtonAlgorithmForBiogeme,
+    'scipy                   ': 'scipy',
+    'Simple bounds Newton    ': 'simple_bounds',
+    'Simple bounds BFGS      ': 'simple_bounds',
+    'Simple bounds hybrid 20%': 'simple_bounds',
+    'Simple bounds hybrid 50%': 'simple_bounds',
+    'Simple bounds hybrid 80%': 'simple_bounds',
 }
 
 algoParameters = {
-    'Simple bounds Newton': {'proportionAnalyticalHessian': 1.0},
-    'Simple bounds BFGS': {'proportionAnalyticalHessian': 0.0},
-    'Simple bounds hybrid 20%': {'proportionAnalyticalHessian': 0.2},
-    'Simple bounds hybrid 50%': {'proportionAnalyticalHessian': 0.5},
-    'Simple bounds hybrid 80%': {'proportionAnalyticalHessian': 0.8},
+    'Simple bounds Newton    ': {'second_derivatives': 1.0},
+    'Simple bounds BFGS      ': {'second_derivatives': 0.0},
+    'Simple bounds hybrid 20%': {'second_derivatives': 0.2},
+    'Simple bounds hybrid 50%': {'second_derivatives': 0.5},
+    'Simple bounds hybrid 80%': {'second_derivatives': 0.8},
 }
 
 results = {}
 msg = ''
 for name, algo in algos.items():
+    # Create the Biogeme object
+    biogeme = bio.BIOGEME(database, logprob)
     biogeme.modelName = f'09nested_allAlgos_{name}'.strip()
+    biogeme.algorithm_name = algo
     p = algoParameters.get(name)
-    results[name] = biogeme.estimate(algorithm=algo, algoParameters=p)
+    if p is not None:
+        for attr, value in p.items():
+            setattr(biogeme, attr, value)
+    results[name] = biogeme.estimate()
     msg += (
         f'{name}\t{results[name].data.logLike:.2f}\t'
         f'{results[name].data.gradientNorm:.2g}\t'
@@ -144,12 +147,13 @@ print(msg)
 """
 Here are the results.
 
-Algorithm		        loglike		normg	time		diagnostic
-+++++++++		        +++++++		+++++	++++		++++++++++
-scipy                   	-5236.90	0.00017	0:00:00.549708	b'CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL'
-Simple bounds Newton    	-5236.90	0.0027	0:00:00.412040	Relative gradient = 3.5e-07 <= 6.1e-06
-Simple bounds BFGS      	-5236.90	0.0027	0:00:00.403998	Relative gradient = 3.5e-07 <= 6.1e-06
-Simple bounds hybrid 20%	-5236.90	0.024	0:00:00.661252	Relative gradient = 2.7e-06 <= 6.1e-06
-Simple bounds hybrid 50%	-5236.90	0.0074	0:00:00.531165	Relative gradient = 1.4e-06 <= 6.1e-06
-Simple bounds hybrid 80%	-5236.90	0.0096	0:00:00.479969	Relative gradient = 1.9e-06 <= 6.1e-06
+Algorithm			loglike		normg	time		diagnostic
++++++++++			+++++++		+++++	++++		++++++++++
+scipy                   	-5236.90	0.00017	0:00:00.388892	CONVERGENCE: NORM_OF_PROJECTED_GRADIENT_<=_PGTOL
+Simple bounds Newton    	-5236.90	0.0027	0:00:00.221994	Relative gradient = 3.5e-07 <= 6.1e-06
+Simple bounds BFGS      	-5236.90	0.029	0:00:00.923152	Relative gradient = 5.1e-06 <= 6.1e-06
+Simple bounds hybrid 20%	-5236.90	0.024	0:00:00.495556	Relative gradient = 2.7e-06 <= 6.1e-06
+Simple bounds hybrid 50%	-5236.90	0.0074	0:00:00.374580	Relative gradient = 1.4e-06 <= 6.1e-06
+Simple bounds hybrid 80%	-5236.90	0.0096	0:00:00.336953	Relative gradient = 1.9e-06 <= 6.1e-06
+
 """

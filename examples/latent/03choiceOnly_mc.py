@@ -5,7 +5,7 @@ Mixture of logit, using Monte-Carlo integration
 No measurement equation for the indicators.
 
 :author: Michel Bierlaire, EPFL
-:date: Sat May 30 18:16:04 2020
+:date: Tue Dec  6 18:33:40 2022
 
 """
 
@@ -153,7 +153,7 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, numberOfDraws=20000)
+biogeme = bio.BIOGEME(database, loglike, parameter_file='draws.toml')
 biogeme.modelName = '03choiceOnly_mc'
 
 # Estimate the parameters

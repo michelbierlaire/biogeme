@@ -1,11 +1,12 @@
 import os
+import shutil
+import tempfile
 import unittest
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.optimization as opt
-from biogeme.expressions import Beta
+from biogeme.expressions import Beta, Variable
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
@@ -15,7 +16,19 @@ database = db.Database('swissmetro', df)
 # Pandas functions to invesigate the database
 # print(database.data.describe())
 
-globals().update(database.variables)
+PURPOSE = Variable('PURPOSE')
+CHOICE = Variable('CHOICE')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+TRAIN_TT = Variable('TRAIN_TT')
+SM_TT = Variable('SM_TT')
+CAR_TT = Variable('CAR_TT')
+CAR_CO = Variable('CAR_CO')
+SM_CO = Variable('SM_CO')
+SM_AV = Variable('SM_AV')
 
 # Here we use the 'biogeme' way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -57,14 +70,47 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 
 class test_01(unittest.TestCase):
+    def setUp(self):
+        """Create the configuration files"""
+        # Create a temporary directory
+        self.test_dir = tempfile.mkdtemp()
+        self.scipy_file = os.path.join(self.test_dir, 'scipy.toml')
+        with open(self.scipy_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "scipy"', file=f)
+            print('[MonteCarlo]', file=f)
+            print('seed = 10', file=f)
+        self.ls_file = os.path.join(self.test_dir, 'line_search.toml')
+        with open(self.ls_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "LS-newton"', file=f)
+            print('[MonteCarlo]', file=f)
+            print('seed = 10', file=f)
+        self.tr_file = os.path.join(self.test_dir, 'trust_region.toml')
+        with open(self.tr_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "TR-newton"', file=f)
+            print('[MonteCarlo]', file=f)
+            print('seed = 10', file=f)
+        self.simple_bounds_file = os.path.join(
+            self.test_dir, 'simple_bounds.toml'
+        )
+        with open(self.simple_bounds_file, 'w', encoding='utf-8') as f:
+            print('[Estimation]', file=f)
+            print('optimization_algorithm = "simple_bounds"', file=f)
+            print('[MonteCarlo]', file=f)
+            print('seed = 10', file=f)
+
     def testEstimationScipy(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, seed=10, numberOfThreads=1)
-        biogeme.saveIterations = False
+        biogeme = bio.BIOGEME(
+            database, logprob, parameter_file=self.scipy_file
+        )
+        biogeme.modelName = 'test_01'
         biogeme.generateHtml = False
         biogeme.generatePickle = False
-        biogeme.modelName = 'test_01'
-        results = biogeme.estimate(bootstrap=10, algorithm=opt.scipy)
+        biogeme.saveIterations = False
+        results = biogeme.estimate(bootstrap=10)
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
         self.assertAlmostEqual(
             results.data.betas[0].bootstrap_stdErr, 0.04773096176427237, 2
@@ -72,13 +118,13 @@ class test_01(unittest.TestCase):
 
     def testEstimationLineSearch(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, seed=10, numberOfThreads=1)
-        biogeme.saveIterations = False
+        biogeme = bio.BIOGEME(database, logprob, parameter_file=self.ls_file)
+        biogeme.modelName = 'test_01'
         biogeme.generateHtml = False
         biogeme.generatePickle = False
-        biogeme.modelName = 'test_01'
+        biogeme.saveIterations = False
         results = biogeme.estimate(
-            bootstrap=10, algorithm=opt.newtonLineSearchForBiogeme
+            bootstrap=10,
         )
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
         self.assertAlmostEqual(
@@ -87,18 +133,20 @@ class test_01(unittest.TestCase):
 
     def testEstimationTrustRegion(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, seed=10, numberOfThreads=1)
-        biogeme.saveIterations = False
+        biogeme = bio.BIOGEME(database, logprob, parameter_file=self.tr_file)
+        biogeme.modelName = 'test_01'
         biogeme.generateHtml = False
         biogeme.generatePickle = False
-        biogeme.modelName = 'test_01'
-        results = biogeme.estimate(
-            bootstrap=10, algorithm=opt.newtonTrustRegionForBiogeme
-        )
+        biogeme.saveIterations = False
+        results = biogeme.estimate(bootstrap=10)
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
         self.assertAlmostEqual(
             results.data.betas[0].bootstrap_stdErr, 0.04773096176427237, 2
         )
+
+    def tearDown(self):
+        # Remove the directory after the test
+        shutil.rmtree(self.test_dir)
 
 
 if __name__ == '__main__':

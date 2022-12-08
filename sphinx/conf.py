@@ -12,6 +12,7 @@
 #
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath('.hyperlearn'))
 
 
@@ -30,11 +31,12 @@ release = '3.2.9'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.viewcode',
-              'sphinx.ext.autosectionlabel',
-              'sphinx.ext.autosummary',
-              'sphinx.ext.todo'
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.todo',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -51,21 +53,46 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'setup.py']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'alabaster'
+# html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
-#html_theme = 'sphinx_book_theme'
-#html_theme = 'pydata_sphinx_theme'
+# html_theme = 'sphinx_book_theme'
+# html_theme = 'pydata_sphinx_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+
 def skip(app, what, name, obj, would_skip, options):
-    keep = ["__init__","__add__","__radd__","__sub__","__rsub__","__mul__","__rmul__","__div__","__rdiv__","__truediv__","__rtruediv__","__neg__","__pow__","__rpow__","__and__","__or__","__eq__","__ne__","__le__","__ge__","__lt__","__gt__"]
-    if name in keep :
+    keep = [
+        "__init__",
+        "__add__",
+        "__radd__",
+        "__sub__",
+        "__rsub__",
+        "__mul__",
+        "__rmul__",
+        "__div__",
+        "__rdiv__",
+        "__truediv__",
+        "__rtruediv__",
+        "__neg__",
+        "__pow__",
+        "__rpow__",
+        "__and__",
+        "__or__",
+        "__eq__",
+        "__ne__",
+        "__le__",
+        "__ge__",
+        "__lt__",
+        "__gt__",
+    ]
+    if name in keep:
         return False
     return would_skip
+
 
 def setup(app):
     app.connect("autodoc-skip-member", skip)
