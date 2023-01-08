@@ -352,7 +352,6 @@ class BIOGEME:
 
         self.bestIteration = None  #: Store the best iteration found so far.
 
-
     @property
     def algorithm_name(self):
         """Name of the optimization algorithm"""
@@ -370,7 +369,7 @@ class BIOGEME:
 
     @property
     def seed_param(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value('seed')
 
     @seed_param.setter
@@ -399,8 +398,7 @@ class BIOGEME:
 
     @property
     def save_iterations(self):
-        """Same as saveIterations, with another syntax
-        """
+        """Same as saveIterations, with another syntax"""
         return self.toml.parameters.get_value(
             name='save_iterations', section='Estimation'
         )
@@ -413,7 +411,7 @@ class BIOGEME:
 
     @property
     def skipAudit(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='skip_audit', section='Specification'
         )
@@ -426,7 +424,7 @@ class BIOGEME:
 
     @property
     def skip_audit(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='skip_audit', section='Specification'
         )
@@ -439,7 +437,7 @@ class BIOGEME:
 
     @property
     def suggestScales(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='suggest_scales', section='Specification'
         )
@@ -452,7 +450,7 @@ class BIOGEME:
 
     @property
     def suggest_scales(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='suggest_scales', section='Specification'
         )
@@ -494,14 +492,8 @@ class BIOGEME:
         """Number of threads used for parallel computing. Default: the number
         of available CPU.
         """
-        nbr_threads = self.toml.parameters.get_value(
-            'number_of_threads'
-        )
-        return (
-            mp.cpu_count()
-            if nbr_threads == 0
-            else nbr_threads
-        )
+        nbr_threads = self.toml.parameters.get_value('number_of_threads')
+        return mp.cpu_count() if nbr_threads == 0 else nbr_threads
 
     @numberOfThreads.setter
     def numberOfThreads(self, value):
@@ -514,14 +506,8 @@ class BIOGEME:
         """Number of threads used for parallel computing. Default: the number
         of available CPU.
         """
-        nbr_threads = self.toml.parameters.get_value(
-            'number_of_threads'
-        )
-        return (
-            mp.cpu_count()
-            if nbr_threads == 0
-            else nbr_threads
-        )
+        nbr_threads = self.toml.parameters.get_value('number_of_threads')
+        return mp.cpu_count() if nbr_threads == 0 else nbr_threads
 
     @number_of_threads.setter
     def number_of_threads(self, value):
@@ -532,9 +518,7 @@ class BIOGEME:
     @property
     def numberOfDraws(self):
         """Number of draws for Monte-Carlo integration."""
-        return self.toml.parameters.get_value(
-            'number_of_draws'
-        )
+        return self.toml.parameters.get_value('number_of_draws')
 
     @numberOfDraws.setter
     def numberOfDraws(self, value):
@@ -545,9 +529,7 @@ class BIOGEME:
     @property
     def number_of_draws(self):
         """Number of draws for Monte-Carlo integration."""
-        return self.toml.parameters.get_value(
-            'number_of_draws'
-        )
+        return self.toml.parameters.get_value('number_of_draws')
 
     @number_of_draws.setter
     def number_of_draws(self, value):
@@ -556,13 +538,26 @@ class BIOGEME:
         )
 
     @property
+    def only_robust_stats(self):
+        """True if only the robust statistics need to be reported. If
+        False, the statistics from the Rao-Cramer bound are also reported.
+
+        """
+        return self.toml.parameters.get_value('only_robust_stats')
+
+    @only_robust_stats.setter
+    def only_robust_stats(self, value):
+        self.toml.parameters.set_value(
+            name='only_robust_stats', value=value, section='Output'
+        )
+
+    @property
     def generateHtml(self):
+
         """Boolean variable, True if the HTML file with the results must
         be generated.
         """
-        return self.toml.parameters.get_value(
-            'generate_html'
-        )
+        return self.toml.parameters.get_value('generate_html')
 
     @generateHtml.setter
     def generateHtml(self, value):
@@ -575,9 +570,7 @@ class BIOGEME:
         """Boolean variable, True if the HTML file with the results must
         be generated.
         """
-        return self.toml.parameters.get_value(
-            'generate_html'
-        )
+        return self.toml.parameters.get_value('generate_html')
 
     @generate_html.setter
     def generate_html(self, value):
@@ -590,9 +583,7 @@ class BIOGEME:
         """Boolean variable, True if the PICKLE file with the results must
         be generated.
         """
-        return self.toml.parameters.get_value(
-            'generate_pickle'
-        )
+        return self.toml.parameters.get_value('generate_pickle')
 
     @generatePickle.setter
     def generatePickle(self, value):
@@ -605,9 +596,7 @@ class BIOGEME:
         """Boolean variable, True if the PICKLE file with the results must
         be generated.
         """
-        return self.toml.parameters.get_value(
-            'generate_pickle'
-        )
+        return self.toml.parameters.get_value('generate_pickle')
 
     @generate_pickle.setter
     def generate_pickle(self, value):
@@ -617,7 +606,7 @@ class BIOGEME:
 
     @property
     def tolerance(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='tolerance', section='SimpleBounds'
         )
@@ -630,7 +619,7 @@ class BIOGEME:
 
     @property
     def second_derivatives(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='second_derivatives', section='SimpleBounds'
         )
@@ -643,7 +632,7 @@ class BIOGEME:
 
     @property
     def infeasible_cg(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='infeasible_cg', section='SimpleBounds'
         )
@@ -656,7 +645,7 @@ class BIOGEME:
 
     @property
     def maxiter(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='max_iterations', section='SimpleBounds'
         )
@@ -669,7 +658,7 @@ class BIOGEME:
 
     @property
     def dogleg(self):
-        """ getter for the parameter """
+        """getter for the parameter"""
         return self.toml.parameters.get_value(
             name='dogleg', section='TrustRegion'
         )
@@ -680,6 +669,12 @@ class BIOGEME:
             name='dogleg', value=value, section='TrustRegion'
         )
 
+    def numerical_constants(self):
+        return {
+            'epsilon': self.theC.getNumericalEpsilon(),
+            'maximum float': self.theC.getNumericalMax(),
+            'minimum float': self.theC.getNumericalMax(),
+        }
 
     def reset_id_manager(self):
         """Reset all the ids of the elementary expression in the formulas"""
@@ -697,7 +692,7 @@ class BIOGEME:
             f.setIdManager(id_manager=self.id_manager)
 
     def set_algorithm(self):
-        """ Retrieve the function with the optimization algorithm from its name """
+        """Retrieve the function with the optimization algorithm from its name"""
         self._algorithm = opt.algorithms.get(self.algorithm_name)
         if self._algorithm is None:
             raise excep.biogemeError(
@@ -1330,7 +1325,7 @@ class BIOGEME:
         )
         r = res.bioResults(rawResults)
         if self.generateHtml:
-            r.writeHtml()
+            r.writeHtml(self.only_robust_stats)
         if self.generatePickle:
             r.writePickle()
         return r

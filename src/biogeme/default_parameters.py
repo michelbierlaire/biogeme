@@ -16,6 +16,18 @@ ParameterTuple = namedtuple(
 
 all_parameters_tuple = (
     ParameterTuple(
+        name='only_robust_stats',
+        default='True',
+        type=bool,
+        section='Output',
+        description=(
+            'bool: "True" if only the robust statistics need to be reported.'
+            ' If "False", the statistics from the Rao-Cramer bound are '
+            'also reported.'
+        ),
+        check=(cp.is_boolean,),
+    ),
+    ParameterTuple(
         name='generate_html',
         default='True',
         type=bool,
@@ -51,7 +63,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='number_of_draws',
-        default=1000,
+        default=20000,
         type=int,
         section='MonteCarlo',
         description=('int: Number of draws for Monte-Carlo integration.'),
@@ -183,5 +195,4 @@ all_parameters_tuple = (
         ),
         check=(cp.is_boolean,),
     ),
-
 )

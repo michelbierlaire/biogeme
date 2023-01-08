@@ -103,8 +103,11 @@ class biogeme {
   void setBounds(std::vector<bioReal> lb, std::vector<bioReal> ub) ;
   std::vector<bioReal> getLowerBounds() ;
   std::vector<bioReal> getUpperBounds() ;
-
   void resetFunctionEvaluations() ;
+
+  bioReal getNumericalEpsilon() ;
+  bioReal getNumericalMin() ;
+  bioReal getNumericalMax() ;
 private: // methods
   void prepareData() ;
   void prepareDataSimul() ;

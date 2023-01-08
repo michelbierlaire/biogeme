@@ -2054,9 +2054,7 @@ class logzero(UnaryOperator):
         :rtype: float
         """
         v = self.child.getValue()
-        if v == 0:
-            return 0
-        return np.log(v)
+        return 0 if v == 0 else np.log(v)
 
 
 class Derive(UnaryOperator):

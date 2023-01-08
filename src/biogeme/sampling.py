@@ -11,6 +11,8 @@ from tqdm import tqdm
 import biogeme.exceptions as excep
 import biogeme.expressions as expr
 
+StratumTuple = namedtuple('StratumTuple', 'subset sample_size')
+
 LOG_PROBA_COL = '_log_proba'
 
 
@@ -44,6 +46,11 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
 
     :raise biogemeError: if the chosen alternative is unknown.
 
+    :raise biogemeError: if the requested sample size for a stratum if
+        larger than the size of the stratum
+
+    :raise biogemeError: if some alternative do not appear in the partition
+
     """
     # Verify that we have a partition
     nbr_unique_elements = len(set.union(*[s.subset for s in partition]))
@@ -57,6 +64,19 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
         )
         raise excep.biogemeError(error_msg)
 
+    if nbr_unique_elements != alternatives.shape[0]:
+        error_msg = (
+            f'The partitions contain {nbr_unique_elements} alternatives '
+            f'while there are {alternatives.shape[0]} in the database'
+        )
+        raise excep.biogemeError(error_msg)
+    # Verify that all requested alternatives appear in the database of alternatives
+    for stratum in partition:
+        for alt in stratum.subset:
+            if alt not in alternatives[id_column]:
+                error_msg = f'Alternative {alt} does not appear in the database of alternaitves'
+                raise excep.biogemeError(error_msg)
+
     results = []
 
     for stratum in partition:
@@ -66,6 +86,10 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
             raise excep.biogemeError(error_msg)
 
         k = stratum.sample_size
+        if k > n:
+            error_msg = f'Cannot draw {k} elements in a stratum of size {n}'
+            raise excep.biogemeError(error_msg)
+
         logproba = np.log(k) - np.log(n)
         subset = alternatives[alternatives[id_column].isin(stratum.subset)]
         if chosen is not None and chosen in stratum.subset:
@@ -105,7 +129,7 @@ def sampling_of_alternatives(
     id_column,
     always_include_chosen=True,
 ):
-    """Generation of a database with samples of alternatives
+    """Generation of databases with samples of alternatives
 
       :param partition: each StratumTuple contains a set of IDs
         characterizing the subset, and the sample size, that is the
@@ -242,18 +266,12 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
                 * expr.exp((mu - 1) * (V[i]))
                 * biosum ** ((1.0 / mu) - 1.0)
             )
-
     log_gi = {
-        k: expr.Elem(
-            {
-                1: 0,
-                0: expr.log(expr.bioMultSum(G)) - sampling_log_probability[k],
-            },
-            expr.bioMultSum(G) == 0,
-        )
-        if G
-        else 0
+        k: expr.logzero(expr.bioMultSum(G)) if G else expr.Numeric(0)
         for k, G in Gi_terms.items()
     }
-    log_gi = {k: expr.Numeric(0) for k, G in Gi_terms.items()}
+    log_gi = {
+        k: G if G == 0 else G - sampling_log_probability[k]
+        for k, G in log_gi.items()
+    }
     return log_gi

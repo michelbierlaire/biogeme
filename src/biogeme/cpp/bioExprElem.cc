@@ -37,14 +37,16 @@ const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> l
 							  bioBoolean gradient,
 							  bioBoolean hessian) {
   
+  //DEBUG_MESSAGE("bioExprElem getValueAndDerivatives") ;
   theDerivatives.with_g = gradient ;
   theDerivatives.with_h = hessian ;
 
   theDerivatives.resize(literalIds.size()) ;
 
-  bioUInt k = bioUInt(key->getValue()) ;
-
-  std::map<bioUInt,bioExpression*>::const_iterator found = dictOfExpressions.find(k) ;
+  const bioDerivatives* the_key = key->getValueAndDerivatives(literalIds, false,false) ;
+  bioUInt k = bioUInt(the_key->f) ;
+ 
+  std::map<bioUInt, bioExpression*>::const_iterator found = dictOfExpressions.find(k) ;
   if (found == dictOfExpressions.end()) {
     std::stringstream str ;
     str << "Key (" << key->print(true) << "=" << k << ") is not present in dictionary: " << std::endl;
@@ -58,31 +60,31 @@ const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> l
   if (found->second == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"expression") ;
   }
-  const bioDerivatives* fgh =  found->second->getValueAndDerivatives(literalIds,gradient,hessian) ;
+  const bioDerivatives* fgh =  found->second->getValueAndDerivatives(literalIds, gradient, hessian) ;
   if (fgh == NULL) {
     throw bioExceptNullPointer(__FILE__,__LINE__,"derivatives") ;
   }
+  //DEBUG_MESSAGE("bioExprElem getValueAndDerivatives: RETURN") ;
 
-  return fgh ;
-
-  // Why copying? 
-  // theDerivatives.f = fgh->f ;
-  // if (!std::isfinite(fgh->f)) {
-  //   std::stringstream str ;
-  //   str << "Invalid value for expression <" << found->second->print(true) << ">: " << fgh->f ;
-  //   throw bioExceptions(__FILE__,__LINE__,str.str()) ;
-  // }
-  // if (gradient) {
-  //   for (std::size_t k = 0 ; k < literalIds.size() ; ++k) {
-  //     theDerivatives.g[k] = fgh->g[k] ;
-  //     if (hessian) {
-  // 	for (std::size_t l = 0 ; l < literalIds.size() ; ++l) {
-  // 	  theDerivatives.h[k][l] = fgh->h[k][l] ;
-  // 	}
-  //     }
-  //   }
-  // }
-  // return &theDerivatives ;
+  // Why copying? --> It seems to generate an error: "pointer being
+  // freed was not allocated" if I just return fgh.
+  theDerivatives.f = fgh->f ;
+  if (!std::isfinite(fgh->f)) {
+    std::stringstream str ;
+    str << "Invalid value for expression <" << found->second->print(true) << ">: " << fgh->f ;
+    throw bioExceptions(__FILE__,__LINE__,str.str()) ;
+  }
+  if (gradient) {
+    for (std::size_t kk = 0 ; kk < literalIds.size() ; ++kk) {
+      theDerivatives.g[kk] = fgh->g[kk] ;
+      if (hessian) {
+   	for (std::size_t ell = 0 ; ell < literalIds.size() ; ++ell) {
+   	  theDerivatives.h[kk][ell] = fgh->h[kk][ell] ;
+   	}
+      }
+    }
+  }
+  return &theDerivatives ;
 }
 
 bioString bioExprElem::print(bioBoolean hp) const {

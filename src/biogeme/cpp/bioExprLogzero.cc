@@ -73,6 +73,7 @@ const bioDerivatives* bioExprLogzero::getValueAndDerivatives(std::vector<bioUInt
     }
   }
   if (cf == 0.0) {
+    // Th argument was negative, but close to zero.
     theDerivatives.f = -std::numeric_limits<bioReal>::max() / 2.0 ;
   }
   else {    

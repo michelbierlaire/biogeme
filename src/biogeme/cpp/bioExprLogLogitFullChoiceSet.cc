@@ -32,6 +32,8 @@ const bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::
 							bioBoolean hessian) {
 
 
+  //  DEBUG_MESSAGE("bioExprLogLogitFullChoiceSet") ;
+
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
@@ -122,6 +124,8 @@ const bioDerivatives* bioExprLogLogitFullChoiceSet::getValueAndDerivatives(std::
       }
     }
   }
+  //  DEBUG_MESSAGE("bioExprLogLogitFullChoiceSet: RETURN") ;
+  
   return &theDerivatives ;
 }
 

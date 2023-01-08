@@ -8,6 +8,7 @@
 //--------------------------------------------------------------------
 
 #include "biogeme.h"
+#include "bioTypes.h"
 #include <iostream>
 #include <sstream>
 #include <cmath>
@@ -385,16 +386,21 @@ void *computeFunctionForThread(void* fctPtr) {
       for (row = input->startData ;
 	   row < input->endData ;
 	   ++row) {
-	
+
+	// if (row % 100 == 0) {
+	//   DEBUG_MESSAGE("Row " << row) ;
+	// }
 	try {
 	  if (input->theWeight.isDefined()) {
 	    w = input->theWeight.getExpression()->getValue() ;
 	  }
 
+	  //	  DEBUG_MESSAGE("getValueAndDerivatives") ;
 	  const bioDerivatives* fgh = myLoglike->getValueAndDerivatives(*input->literalIds,
 						  input->calcGradient,
 						  input->calcHessian) ;
 
+	  //	  DEBUG_MESSAGE("getValueAndDerivatives: done") ;
 	  if (!input->theWeight.isDefined()) {
 	    input->result += fgh->f ;
 
@@ -437,6 +443,7 @@ void *computeFunctionForThread(void* fctPtr) {
 	}
       }
     }
+    //DEBUG_MESSAGE("End of loop on rows") ;
     input->theLoglike.setRowIndex(NULL) ;
     input->theLoglike.setIndividualIndex(NULL) ;
     if (input->theWeight.isDefined()) {
@@ -448,6 +455,7 @@ void *computeFunctionForThread(void* fctPtr) {
     theExceptionPtr = std::current_exception() ;
   }
 
+  //DEBUG_MESSAGE("RETURN") ;
   return NULL ;
 }
 
@@ -921,4 +929,16 @@ std::vector<bioReal> biogeme::getUpperBounds() {
 
 void biogeme::resetFunctionEvaluations() {
   nbrFctEvaluations = 0 ;
+}
+
+bioReal biogeme::getNumericalEpsilon() {
+  return bioEpsilon ;
+}
+
+bioReal biogeme::getNumericalMin() {
+  return bioMinReal ;
+}
+
+bioReal biogeme::getNumericalMax() {
+  return bioMaxReal ;
 }

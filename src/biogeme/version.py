@@ -10,7 +10,6 @@
 
 
 import datetime
-from importlib.metadata import version
 
 # Release date
 versionDate = f'{datetime.date.today()}'

@@ -25,6 +25,7 @@ const bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt
 							     bioBoolean gradient,
 							     bioBoolean hessian) {
 
+  //DEBUG_MESSAGE("bioExprMultSum getValueAndDerivatives") ;
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,__LINE__,"If the hessian is needed, the gradient must be computed") ;
   }
@@ -62,6 +63,7 @@ const bioDerivatives* bioExprMultSum::getValueAndDerivatives(std::vector<bioUInt
     }
   }
   //  DEBUG_MESSAGE("MultiSum calculated " << str.length()) ;
+  //DEBUG_MESSAGE("bioExprMultSum getValueAndDerivatives: RETURN") ;
   return &theDerivatives ;
 }
 

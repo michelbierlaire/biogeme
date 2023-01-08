@@ -820,6 +820,7 @@ def calculate_correlation(nests, results, alternative_names=None):
         return correlation_cross_nested(estimated_nests)
     return correlation_nested(estimated_nests)
 
+
 class TemporaryFile:
     """Class generating a temporary file, so that the user does not
     both of its location, or even its name
@@ -829,11 +830,12 @@ class TemporaryFile:
         with open(filename, 'w') as f:
             print('stuff', file=f)
     """
+
     def __enter__(self, name=None):
         self.dir = tempfile.mkdtemp()
         name = str(uuid.uuid4()) if name is None else name
         return path.join(self.dir, name)
 
     def __exit__(self, ctype, value, traceback):
-        """ Destroys the temporary directory """
+        """Destroys the temporary directory"""
         shutil.rmtree(self.dir)

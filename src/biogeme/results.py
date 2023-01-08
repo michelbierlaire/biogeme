@@ -1054,8 +1054,11 @@ class bioResults:
                 table.loc[f'{k[0]}-{k[1]}'] = pd.Series(arow)
         return table
 
-    def getHtml(self):
+    def getHtml(self, onlyRobust=True):
         """Get the results coded in HTML
+
+        :param onlyRobust: if True, only the robust statistics are included
+        :type onlyRobust: bool
 
         :return: HTML code
         :rtype: string
@@ -1117,7 +1120,7 @@ class bioResults:
 
         h += '</table>\n'
 
-        table = self.getEstimatedParameters()
+        table = self.getEstimatedParameters(onlyRobust)
 
         h += '<h1>Estimated parameters</h1>\n'
         h += '<table border="1">\n'
@@ -1254,11 +1257,11 @@ class bioResults:
                 ]
         return vc
 
-    def writeHtml(self):
+    def writeHtml(self, onlyRobust=True):
         """Write the results in an HTML file."""
         self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
         with open(self.data.htmlFileName, 'w') as f:
-            f.write(self.getHtml())
+            f.write(self.getHtml(onlyRobust))
         logger.general(f'Results saved in file {self.data.htmlFileName}')
 
     def writeLaTeX(self):

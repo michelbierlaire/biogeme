@@ -38,6 +38,9 @@ const bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUIn
 							bioBoolean gradient,
 							bioBoolean hessian) {
 
+  //DEBUG_MESSAGE("bioExprLogLogit getValueAndDerivatives") ;
+  
+  
   if (!gradient && hessian) {
     throw bioExceptions(__FILE__,
 			__LINE__,
@@ -163,6 +166,7 @@ const bioDerivatives* bioExprLogLogit::getValueAndDerivatives(std::vector<bioUIn
       }
     }
   }
+  //DEBUG_MESSAGE("bioExprLogLogit getValueAndDerivatives: DONE") ;
   return &theDerivatives ;
 }
 

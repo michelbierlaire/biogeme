@@ -50,6 +50,48 @@ def loglogit(V, av, i):
     return expr._bioLogLogit(V, av, i)
 
 
+def loglogit_sampling(V, av, correction, i):
+    """The logarithm of the logit model, with samples of alternatives
+
+    The model is defined as
+
+    .. math:: \\frac{a_i e^{V_i + \\log \\pi_i}}{\\sum_{i=1}^J a_j e^{V_j+\\log \\pi_j}}
+
+    :param V: dict of objects representing the utility functions of
+              each alternative, indexed by numerical ids.
+
+    :type V: dict(int:biogeme.expressions.expr.Expression)
+
+    :param av: dict of objects representing the availability of each
+               alternative (:math:`a_i` in the above formula), indexed
+               by numerical ids. Must be consistent with V, or
+               None. In this case, all alternatives are supposed to be
+               always available.
+
+    :type av: dict(int:biogeme.expressions.expr.Expression)
+
+    :param correction: a dict of expressions for the correstion terms
+                       of each alternative.
+    :type correction: dict(int:biogeme.expressions.expr.Expression)
+
+    :param i: id of the alternative for which the probability must be
+              calculated.
+    :type i: int
+
+    :return: choice probability of alternative number i.
+    :rtype: biogeme.expressions.expr.Expression
+    """
+    if V.keys() != correction.keys():
+        error_msg = (
+            f'The keys of the correction must be the same as the keys of '
+            f'the utilities. Correction: {correction.keys()}. '
+            f'Utilities: {V.keys}'
+        )
+        raise excep.biogemeError(error_msg)
+    corrected_V = {k: v + correction[k] for k, v in V.items()}
+    return loglogit(corrected_V, av, i)
+
+
 def logit(V, av, i):
     """The logit model
 
