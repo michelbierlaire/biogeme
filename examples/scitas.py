@@ -18,18 +18,19 @@ exclude_dir = (
     'sampling',
 )
 
+
 class Example:
     def __init__(self, root, file):
         self.root = root
         self.file = file
         self.name, self.ext = os.path.splitext(self.file)
-        self.full_name = f'{root[2:]}_{self.name}' 
+        self.full_name = f'{root[2:]}_{self.name}'
         self.run_name = f'{self.full_name}.run'
-        self.log_name = os.path.join(root, f'{self.full_name}.log')        
+        self.log_name = os.path.join(root, f'{self.full_name}.log')
 
     def create_run_file(self):
         run_text = f'''#!/bin/bash -l
-#SBATCH --chdir /home/bierlair/examples/{self.root[2:]}
+#SBATCH --chdir /home/bierlair/biogeme/examples/{self.root[2:]}
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
 #SBATCH --cpus-per-task 12
@@ -56,14 +57,15 @@ rm biogeme${{SLURM_JOB_ID}}.log
         if not self.does_log_exist():
             return False
         with open(self.log_name, 'r') as f:
-            return 'error' in f.read():
-            
+            return 'error' in f.read()
+
     def launch_batch(self):
         subprocess.run(['sbatch', self.run_name], check=True)
 
     def __str__(self):
         return f'{self.root}/{self.name}'
-    
+
+
 def main():
     # Walk through the structure
     for root, dirs, files in os.walk(top='.', topdown=True):
@@ -72,11 +74,16 @@ def main():
             for file in files:
                 if file.endswith('.py') and file not in exclude_files:
                     the_example = Example(root, file)
-                    if the_example.error():
-                        print(f'***ERROR***: {the_example}')
+                    if the_example.does_log_exist():
+                        if the_example.error():
+                            print(f'***ERROR***: {the_example}')
+                        else:
+                            print(f'***FINISHED***: {the_example}')
                     else:
+                        print(f'File {the_example.log_name} does not exist')
                         the_example.create_run_file()
                         the_example.launch_batch()
 
-if __name__== "__main__":
-    main()                    
+
+if __name__ == "__main__":
+    main()
