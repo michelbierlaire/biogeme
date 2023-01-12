@@ -26,7 +26,7 @@ class Example:
         self.name, self.ext = os.path.splitext(self.file)
         self.full_name = f'{root[2:]}_{self.name}'
         self.run_name = f'{self.full_name}.run'
-        self.log_name = os.path.join(root, f'{self.full_name}.log')
+        self.log_name = os.path.join(root, f'/{self.full_name}.log')
 
     def create_run_file(self):
         run_text = f'''#!/bin/bash -l
