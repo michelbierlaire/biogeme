@@ -15,8 +15,10 @@ Implementation of class contaning and processing the estimation results.
 # pylint: disable=too-many-lines
 #
 
+import os
 import pickle
 import datetime
+import glob
 from collections import namedtuple
 import urllib.request as urlr
 import pandas as pd
@@ -308,7 +310,12 @@ class rawResults:
 class bioResults:
     """Class managing the estimation results"""
 
-    def __init__(self, theRawResults=None, pickleFile=None):
+    def __init__(
+        self,
+        theRawResults=None,
+        pickleFile=None,
+        identification_threshold=None,
+    ):
         """Constructor
 
         :param theRawResults: object with the results of the estimation.
@@ -317,11 +324,16 @@ class bioResults:
         :param pickleFile: name of the file containing the raw results in
             pickle format. It can be a URL. Default: None.
         :type pickleFile: string
+        :param identification_threshold: if the smallest eigenvalue of
+            the second derivative matrix is lesser or equal to this
+            parameter, the model is considered not identified.
+        :type identification_threshold: float
 
         :raise biogeme.exceptions.biogemeError: if no data is provided.
-        """
 
+        """
         if theRawResults is not None:
+            self.identification_threshold = identification_threshold
             self.data = theRawResults
             """Object of type :class:`biogeme.results.rawResults` contaning the
             raw estimation results.
@@ -1080,6 +1092,26 @@ class bioResults:
         )
         h += '</table>\n'
 
+        if (
+            np.abs(self.data.smallestEigenValue)
+            <= self.identification_threshold
+        ):
+            h += '<h2>Warning: identification issue</h2>\n'
+            h += (
+                f'<p>The second derivatives matrix is close to singularity. The smallest eigenvalue is {np.abs(self.data.smallestEigenValue):.3g}. This warning is triggered when it is smaller than the parameter <code>identification_threshold</code>={self.identification_threshold}.</p>'
+                f'<p>Variables involved:'
+            )
+            h += '<table>'
+            for i, ev in enumerate(self.data.smallestEigenVector):
+                if np.abs(ev) > self.identification_threshold:
+                    h += (
+                        f'<tr><td>{ev:.3g}</td>'
+                        f'<td> *</td>'
+                        f'<td> {self.data.betaNames[i]}</td></tr>\n'
+                    )
+            h += '</table>'
+            h += '</p>\n'
+
         if self.data.userNotes is not None:
             # User notes
             h += (
@@ -1160,21 +1192,6 @@ class bioResults:
             f'{self.data.largestEigenValue:.6g}</p>\n'
         )
         h += f'<p>Condition number: ' f'{self.data.conditionNumber:.6g}</p>\n'
-        if np.abs(self.data.smallestEigenValue) <= 1.0e-5:
-            h += (
-                '<p>The second derivatives matrix is close to singularity. '
-                'Variables involved:'
-            )
-            h += '<table>'
-            for i, ev in enumerate(self.data.smallestEigenVector):
-                if np.abs(ev) > 1.0e-5:
-                    h += (
-                        f'<tr><td>{ev:.3g}</td>'
-                        f'<td> *</td>'
-                        f'<td> {self.data.betaNames[i]}</td></tr>\n'
-                    )
-            h += '</table>'
-            h += '</p>\n'
 
         h += '</html>'
         return h
@@ -1503,9 +1520,15 @@ class bioResults:
             for j in range(0, i):
                 name = (coefi, coefNames[j])
                 if robustStdErr:
-                    corr = int(100000 * self.data.secondOrderTable[name][5])
+                    try:
+                        corr = int(100000 * self.data.secondOrderTable[name][5])
+                    except OverflowError:
+                        corr =999999
                 else:
-                    corr = int(100000 * self.data.secondOrderTable[name][1])
+                    try:
+                        corr = int(100000 * self.data.secondOrderTable[name][1])
+                    except OverflowError:
+                        corr =999999
                 results += f'{corr:7d}'
                 count += 1
                 if count % 10 == 0:
@@ -1561,6 +1584,9 @@ def compileEstimationResults(
         'Bayesian Information Criterion',
     ),
     include_parameter_estimates=True,
+    include_robust_stderr=False,
+    include_robust_ttest=True,
+    formatted=True,
 ):
 
     """Compile estimation results into a common table
@@ -1578,6 +1604,19 @@ def compileEstimationResults(
         estimates are included.
     :type include_parameter_estimates: bool
 
+    :param include_robust_stderr: if True, the robust standard errors
+         of the parameters are included.
+    :type include_robust_stderr: bool
+
+    :param include_robust_ttest: if True, the t-test
+         of the parameters are included.
+    :type include_robust_ttest: bool
+
+    :param formatted: if True, a formatted string in included in the
+         table results. If False, the numerical values are stored. Use
+         "True" if you need to print the results. Use "False" if you
+         need to use them for further calculation.
+
     :return: pandas dataframe with the requested results.
     :rtype: pandas.DataFrame
 
@@ -1588,17 +1627,98 @@ def compileEstimationResults(
         if not isinstance(res, bioResults):
             try:
                 res = bioResults(pickleFile=res)
-            except excep.biogemeError:
+            except Exception:
                 warning = f'Impossible to access result file {res}'
                 logger.warning(warning)
                 res = None
+
         if res is not None:
             stats_results = res.getGeneralStatistics()
             for s in statistics:
                 df.loc[s, col] = stats_results[s][0]
             if include_parameter_estimates:
-                betas = res.getBetaValues()
-                for name, value in betas.items():
-                    df.loc[name, col] = value
+                if formatted:
+                    for b in res.data.betas:
+                        std = (
+                            f'({b.robust_stdErr:.3g})'
+                            if include_robust_stderr
+                            else ''
+                        )
+                        ttest = (
+                            f'({b.robust_tTest:.3g})'
+                            if include_robust_ttest
+                            else ''
+                        )
+                        the_value = f'{b.value:.3g} {std} {ttest}'
+                        row_std = ' (std)' if include_robust_stderr else ''
+                        row_ttest = ' (t-test)' if include_robust_ttest else ''
+                        row_title = f'{b.name}{row_std}{row_ttest}'
+                        df.loc[row_title, col] = the_value
+                else:
+                    for b in res.data.betas:
+                        df.loc[b.name, col] = b.value
+                        if include_robust_stderr:
+                            df.loc[f'{b.name} (std)', col] = b.value
+                        if include_robust_ttest:
+                            df.loc[f'{b.name} (ttest)', col] = b.value
 
     return df.fillna('')
+
+
+def compile_results_in_directory(
+    statistics=(
+        'Number of estimated parameters',
+        'Sample size',
+        'Final log likelihood',
+        'Akaike Information Criterion',
+        'Bayesian Information Criterion',
+    ),
+    include_parameter_estimates=True,
+    include_robust_stderr=False,
+    include_robust_ttest=True,
+    formatted=True,
+):
+
+    """Compile estimation results found in the local directory into a
+        common table. The results are supposed to be in a file with
+        pickle extension.
+
+    :param statistics: list of statistics to include in the summary
+        table
+    :type statistics: tuple(str)
+
+    :param include_parameter_estimates: if True, the parameter
+        estimates are included.
+    :type include_parameter_estimates: bool
+
+    :param include_robust_stderr: if True, the robust standard errors
+         of the parameters are included.
+    :type include_robust_stderr: bool
+
+    :param include_robust_ttest: if True, the t-test
+         of the parameters are included.
+    :type include_robust_ttest: bool
+
+    :param formatted: if True, a formatted string in included in the
+         table results. If False, the numerical values are stored. Use
+         "True" if you need to print the results. Use "False" if you
+         need to use them for further calculation.
+
+    :return: pandas dataframe with the requested results, or None if no file was found.
+    :rtype: pandas.DataFrame
+
+    """
+    files = glob.glob('*.pickle')
+    if not files:
+        logger.warning(f'No .pickle file found in {os.getcwd()}')
+        return None
+
+    the_dict = {k: k for k in files}
+    return compileEstimationResults(
+        the_dict,
+        statistics,
+        include_parameter_estimates,
+        include_robust_stderr,
+        include_robust_ttest,
+        formatted,
+    )

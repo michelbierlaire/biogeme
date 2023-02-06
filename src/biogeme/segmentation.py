@@ -1,208 +1,247 @@
 """Class that provides some automatic specification for segmented parameters
 
 :author: Michel Bierlaire
-:date: Fri Dec 31 10:41:33 2021
+:date: Thu Feb  2 09:42:36 2023
 
 """
 
-from collections import namedtuple, deque
+from dataclasses import dataclass
 from biogeme.expressions import Beta, bioMultSum
+import biogeme.exceptions as excep
 
-DiscreteSegmentationTuple = namedtuple(
-    'DiscreteSegmentationTuple', 'variable mapping'
-)
-
-
-def combine_segmented_expressions(variable, mapping_of_expressions):
-    """Create an expressions that combines all the segments
-
-    :param variable: variable that characterizes the segmentation
-    :type variable: biogeme.expressions.Variable
-
-    :param mapping_of_expressions: dictionary that maps each value of
-        the variable with the expression for the corresponding
-        segment.
-    :type mapping_of_expressions: dict(int: biogeme.expressions.Expression)
-
-    :return: combined expression
-    :rtype: biogeme.expressions.bioMultSum
-
+@dataclass
+class DiscreteSegmentationTuple:
+    """ Characterization od a segmentation
     """
-    terms = [
-        expr * (variable == value)
-        for value, expr in mapping_of_expressions.items()
-    ]
-    return bioMultSum(terms)
+    def __init__(self, variable, mapping, reference=None):
+        """Ctor
 
+        :param variable: socio-economic variable used for the segmentation
+        :type variable: biogeme.expressions.Variable
 
-def code_to_combine_segmented_expressions(
-    variable, mapping_of_expressions, prefix
-):
-    """Create the Python code for an expressions that combines all the segments
+        :param mapping: maps the values of the variable with the name of a category
+        :type mapping: dict(int: str)
 
-    :param variable: variable that characterizes the segmentation
-    :type variable: biogeme.expressions.Variable
+        :param reference: name of the reference category. If None, an
+            arbitrary category is selected as reference.  :type:
+        :type reference: str
 
-    :param mapping_of_expressions: dictionary that maps each value of
-        the variable with the Python code of the expression for the
-        corresponding segment.
-    :type mapping_of_expressions: dict(int: biogeme.expressions.Expression)
+        :raise biogemeError: if the name of the reference category
+            does not appear in the list.
 
-    :param prefix: name of the current expression, used as prefix
-    :type prefix: str
-
-    :return: code for the combined expression
-    :rtype: str
-
-    """
-    result = ''
-    for value, _ in mapping_of_expressions.items():
-        result += (
-            f'{prefix}_{variable}_{value} = '
-            f'{prefix} * ({variable} == {value})\n'
-        )
-    terms = ', '.join(
-        [
-            f'{prefix}_{variable}_{value}'
-            for value, expr in mapping_of_expressions.items()
-        ]
-    )
-    result += f'{prefix}_{variable} = bioMultSum([{terms}])\n'
-    return result
-
-
-def create_segmented_parameter(parameter, mapping):
-    """Create a version of the parameter for each segment
-
-    :param parameter: parameter
-    :type parameter: biogeme.expressions.Beta
-
-    :param mapping: dictionary that maps each segment id with the name
-        of the segment.
-    :type mapping: dict(int: str)
-
-    :return: a dictionary that maps each segment id with the created parameters
-    :rtype: dict(int: biogeme.expressions.Beta)
-
-    """
-    segmented_parameters = {
-        value: Beta(
-            f'{parameter.name}_{name}',
-            parameter.initValue,
-            parameter.lb,
-            parameter.ub,
-            parameter.status,
-        )
-        for value, name in mapping.items()
-    }
-    return segmented_parameters
-
-
-def segment_parameter(
-    parameter, list_of_discrete_segmentations, combinatorial=False
-):
-    """Segment a parameter expression along several dimensions of segmentation
-
-    :param parameter: parameter to segment
-    :type parameter: biogeme.expressions.Beta
-
-    :param list_of_discrete_segmentations: each element of the list is a tuple
-        with the variable characterizing the segmentation, and a
-        dictionary mapping the values with the names of the segments.
-    :type list_of_discrete_segmentations:
-        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable,
-                                        dict(int:str)))
-
-    :param combinatorial: if True, a parameter is associated with each
-        combination of values for the discrete segmentations. If
-        :math:`N_s` is the number of values for segmentation s, the
-        total numper of parameters is :math:`\\prod_s N_s`.  If False,
-        for each segmentation in the list, a parameter is associated
-        with each value of this segmentation.  If `:math:`N_s` is the
-        number of values for segmentation s, the total number of
-        parameters is :math:`\\sum_s N_s`.  :type combinatorial: bool
-
-    :return: expression involving all the segments
-    :rtype: biogeme.expressions.Expression
-
-    """
-    if combinatorial:
-        # Recursive call to the function, based on a stack
-        stack_of_segmentations = deque(list_of_discrete_segmentations)
-        if not stack_of_segmentations:
-            return parameter
-
-        next_segment = stack_of_segmentations.pop()
-        segmented_parameters = create_segmented_parameter(
-            parameter, next_segment.mapping
-        )
-        map_of_expressions = {
-            key: segment_parameter(
-                value, stack_of_segmentations, combinatorial=True
+        """
+        self.variable = variable
+        self.mapping = mapping
+        if reference is None:
+            self.reference = next(iter(mapping.values()))
+        elif reference not in mapping.values():
+            error_msg = (
+                f'Reference category {reference} does not appear in the list '
+                f'of categories: {mapping.values()}'
             )
-            for key, value in segmented_parameters.items()
+            raise excep.biogemeError(error_msg)
+        self.reference = reference
+
+
+class OneSegmentation:
+    """ Single segmentation of a parameter
+    """
+    def __init__(self, beta, segmentation_tuple):
+        """ Ctor
+
+        :param beta: parameter to be segmented
+        :type beta: biogeme.expressions.Beta
+
+        :param segmentation_tuple: characterization of the segmentation
+        :type segmentation_tuple: DiscreteSegmentationTuple
+        """
+        self.beta = beta
+        self.variable = segmentation_tuple.variable
+        self.reference = segmentation_tuple.reference
+        self.mapping = {
+            k: v
+            for k, v in segmentation_tuple.mapping.items()
+            if v != self.reference
         }
-        return combine_segmented_expressions(
-            next_segment.variable, map_of_expressions
+
+    def beta_name(self, category):
+        """Construct the name of the parameter associated with a specific category
+
+        :param category: name of the category
+        :type category: str
+
+        :return: name of parameter for the category
+        :rtype: str
+
+        :raise biogemeError: if the category is not listed in the
+            mapping of the segmentation.
+        """
+        if not category in self.mapping.values():
+            error_msg = (
+                f'Unknown category: {category}. List of known categories: '
+                f'{self.mapping.values()}'
+            )
+            raise excep.biogemeError(error_msg)
+        return f'{self.beta.name}_{category}'
+
+    def beta_expression(self, category):
+        """Constructs the expression for the parameter associated with a specific category
+
+        :param category: name of the category
+        :type category: str
+
+        :return: expression of the parameter for the category
+        :rtype: biogeme.expressions.Beta
+        """
+        name = self.beta_name(category)
+        if category == self.reference:
+            lower_bound = self.beta.lb
+            upper_bound = self.beta.ub
+        else:
+            lower_bound = None
+            upper_bound = None
+        
+        return Beta(
+            name,
+            self.beta.initValue,
+            lower_bound,
+            upper_bound,
+            self.beta.status,
         )
 
-    # If not combinatorial, just a list of terms.
-    all_segments = [
-        expr * (s.variable == value)
-        for s in list_of_discrete_segmentations
-        for value, expr in create_segmented_parameter(
-            parameter, s.mapping
-        ).items()
-    ]
+    def beta_code(self, category, assignment):
+        """Constructs the Python code for the expression of the
+            parameter associated with a specific category
 
-    return bioMultSum(all_segments)
+        :param category: name of the category
+        :type category: str
 
+        :param assignment: if True, the code includes the assigbnment to a variable.
+        :type assignment: bool
 
-def code_to_segment_parameter(
-    parameter, list_of_discrete_segmentations, prefix=''
-):
-    """Generate the Python code to segment a parameter along several
-    dimensions of segmentation
+        :return: the Python code
+        :rtype: str
+        """
+        if category == self.reference:
+            lower_bound = self.beta.lb
+            upper_bound = self.beta.ub
+        else:
+            lower_bound = None
+            upper_bound = None
+        name = self.beta_name(category)
+        if assignment:
+            return (
+                f"{name} = Beta('{name}', {self.beta.initValue}, "
+                f"{lower_bound}, {upper_bound}, {self.beta.status})"
+                    )
+        return (
+            f"Beta('{name}', {self.beta.initValue}, {lower_bound}, "
+            f"{upper_bound}, {self.beta.status})"
+        )
 
-    :param parameter: parameter to segment
-    :type parameter: biogeme.expressions.Beta
+    def list_of_expressions(self):
+        """Create a list of expressions involved in the segmentation of the parameter
 
-    :param list_of_discrete_segmentations: each element of the list is a tuple
-        with the variable characterizing the segmentation, and a
-        dictionary mapping the values with the names of the segments.
-    :type list_of_discrete_segmentations:
-        tuple(DiscreteSegmentationTuple(biogeme.expressions.Variable,
-                                        dict(int:str)))
+        :return: list of expressions
+        :rtype: list(biogeme.expressions.Expression)
 
-    :param prefix: name of the current expression, used as prefix
-    :type prefix: str
-
-    :return: code for the segmentation
-    :rtype: str
-
-    """
-    stack_of_segmentations = deque(list_of_discrete_segmentations)
-    next_segment = stack_of_segmentations.pop()
-
-    if prefix == '':
-        prefix = parameter.name
-    # prefix = 'beta_var_1'
-    result = ''
-    if stack_of_segmentations:
-        for value in next_segment.mapping.values():
-            result += code_to_segment_parameter(
-                value, stack_of_segmentations, f'{prefix}_{value}'
-            )
-            result += '\n'
-    else:
-        for value in next_segment.mapping.values():
-            param_name = f'{prefix}_{value}'
-            result += f"{param_name} = Beta('{param_name}', 0, None, None)\n"
-    terms = ', '.join(
-        [
-            f'{prefix}_{value} * ({next_segment.variable.name} == {key}))'
-            for key, value in next_segment.mapping.items()
+        """
+        terms = [
+            self.beta_expression(category) * (self.variable == value)
+            for value, category in self.mapping.items()
         ]
-    )
-    result += f'{prefix} = bioMultSum([{terms}])'
-    return result
+        return terms
+
+    def list_of_code(self):
+        """Create a list of Python codes for the expressions involved
+            in the segmentation of the parameter
+
+        :return: list of codes
+        :rtype: list(str)
+
+        """
+        return [
+            (
+                f"{self.beta_name(category)} "
+                f"* (Variable('{self.variable.name}') == {value})"
+            )
+            for value, category in self.mapping.items()
+        ]
+
+
+class Segmentation:
+    """ Segmentation of a parameter, possibly with multiple socio-economic variables
+    """
+    def __init__(self, beta, segmentation_tuples, prefix='segmented'):
+        """Ctor
+
+        :param beta: parameter to be segmented
+        :type beta: biogeme.expressions.Beta
+
+        :param segmentation_tuples: characterization of the segmentations
+        :type segmentation_tuples: list(DiscreteSegmentationTuple)
+
+        :param prefix: prefix to be used to generated the name of the
+            segmented parameter
+        :type prefix: str
+        """
+        self.beta = beta
+        self.segmentations = tuple(
+            OneSegmentation(beta, s) for s in segmentation_tuples
+        )
+        self.prefix = prefix
+
+    def beta_code(self):
+        """Constructs the Python code for the parameter
+
+        :return: Python code
+        :rtype: str
+        """
+
+        beta_name = f"'{self.beta.name}'"
+        return (
+            f'Beta({beta_name}, {self.beta.initValue}, {self.beta.lb}, '
+            f'{self.beta.ub}, {self.beta.status})'
+        )
+
+    def segmented_beta(self):
+        """Create an expressions that combines all the segments
+
+        :return: combined expression
+        :rtype: biogeme.expressions.Expression
+
+        """
+        terms = [self.beta]
+        terms += [
+            element
+            for s in self.segmentations
+            for element in s.list_of_expressions()
+        ]
+        return bioMultSum(terms)
+
+    def segmented_code(self):
+        """Create the Python code for an expressions that combines all the segments
+
+        :return: Python code for the combined expression
+        :rtype: str
+        """
+        result = '\n'.join(
+            [
+                s.beta_code(c, assignment=True)
+                for s in self.segmentations
+                for c in s.mapping.values()
+            ]
+        )
+        result += '\n'
+
+        terms = [self.beta_code()]
+        terms += [
+            element for s in self.segmentations for element in s.list_of_code()
+        ]
+
+        if len(terms) == 1:
+            result += terms[0]
+        else:
+            joined_terms = ', '.join(terms)
+            result += f'{self.prefix}_{self.beta.name} = bioMultSum([{joined_terms}])'
+        return result

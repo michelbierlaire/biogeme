@@ -13,6 +13,7 @@
 # pylint: disable=invalid-name, too-many-locals, too-many-arguments
 # pylint: disable=too-many-instance-attributes, too-many-lines
 
+from copy import deepcopy
 from itertools import chain
 import numpy as np
 import biogeme.exceptions as excep
@@ -1261,6 +1262,14 @@ class Expression:
             e.changeInitValues(betas)
 
 
+    def contains_multiple_expressions(self):
+        """ Check if the expression contains multiple expressions
+
+        :return: True if one of the expressions is of type MultipleExpression
+        :rtype: bool
+        """
+        return False
+    
 class BinaryOperator(Expression):
     """
     Base class for arithmetic expressions that are binary operators.
@@ -1301,7 +1310,6 @@ class BinaryOperator(Expression):
             self.right = right
         self.children.append(self.left)
         self.children.append(self.right)
-
 
 class Plus(BinaryOperator):
     """

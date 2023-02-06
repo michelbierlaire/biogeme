@@ -3,6 +3,10 @@
 :author: Michel Bierlaire
 :date: Wed Nov 30 10:14:35 2022
 
+IMPORTANT: when only one "check" function is provided, do not forget
+to insert a comma at the end, before the closing parenthesis for the
+tuple.
+See https://www.w3schools.com/python/gloss_python_tuple_one_item.asp
 """
 
 from collections import namedtuple
@@ -15,6 +19,19 @@ ParameterTuple = namedtuple(
 )
 
 all_parameters_tuple = (
+    ParameterTuple(
+        name='identification_threshold',
+        default=1.0e-5,
+        type=float,
+        section='Output',
+        description=(
+            'float: if the smallest eigenvalue of the second derivative '
+            'matrix is lesser or equal to this parameter, the model is '
+            'considered not identified. The corresponding eigenvector '
+            'is then reported to identify the parameters involved in the issue.'
+        ),
+        check=(cp.is_number,),
+    ),
     ParameterTuple(
         name='only_robust_stats',
         default='True',
@@ -160,7 +177,7 @@ all_parameters_tuple = (
         type=float,
         section='SimpleBounds',
         description='float: the algorithm stops when this precision is reached',
-        check=(cp.zero_one, cp.is_number),
+        check=(cp.is_number,),
     ),
     ParameterTuple(
         name='max_iterations',

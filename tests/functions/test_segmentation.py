@@ -9,13 +9,69 @@ Test the segmentation module
 import unittest
 from biogeme.expressions import Beta, Variable
 import biogeme.segmentation as seg
+import biogeme.exceptions as excep
 
 
 class test_segmentation(unittest.TestCase):
+    def test_one_segmentation(self):
+        x = Variable('x')
+        mapping = {1: '1st', 2: '2nd', 3: '3rd'}
+
+        first_tuple = seg.DiscreteSegmentationTuple(
+            variable=x, mapping=mapping
+        )
+        second_tuple = seg.DiscreteSegmentationTuple(
+            variable=x, mapping=mapping, reference='3rd'
+        )
+        with self.assertRaises(excep.biogemeError):
+            third_tuple = seg.DiscreteSegmentationTuple(
+                variable=x, mapping=mapping, reference='anything'
+            )
+
+        beta = Beta('beta', 1, None, None, 0)
+
+        one_segmentation = seg.OneSegmentation(beta, first_tuple)
+
+        beta_name = one_segmentation.beta_name('2nd')
+        self.assertEqual(beta_name, 'beta_2nd')
+
+        beta_expression = one_segmentation.beta_expression('2nd')
+        self.assertEqual(str(beta_expression), 'beta_2nd(init=1)')
+
+        beta_code = one_segmentation.beta_code('2nd', assignment=False)
+        expected_code = "Beta('beta_2nd', 1, None, None, 0)"
+        self.assertEqual(beta_code, expected_code)
+
+        beta_code_assignment = one_segmentation.beta_code(
+            '2nd', assignment=True
+        )
+        expected_code_assignment = (
+            "beta_2nd = Beta('beta_2nd', 1, None, None, 0)"
+        )
+        self.assertEqual(beta_code_assignment, expected_code_assignment)
+
+        list_of_expressions = [
+            str(e) for e in one_segmentation.list_of_expressions()
+        ]
+        expected_list = [
+            '(beta_1st(init=1) * (x == `1.0`))',
+            '(beta_2nd(init=1) * (x == `2.0`))',
+            '(beta_3rd(init=1) * (x == `3.0`))',
+        ]
+        self.assertCountEqual(list_of_expressions, expected_list)
+
+        list_of_code = one_segmentation.list_of_code()
+        expected_list = [
+            "beta_1st * (Variable('x') == 1)",
+            "beta_2nd * (Variable('x') == 2)",
+            "beta_3rd * (Variable('x') == 3)",
+        ]
+        self.assertCountEqual(list_of_code, expected_list)
+
     def test_segmentation(self):
         variable_1 = Variable('Variable1')
         variable_2 = Variable('Variable2')
-        parameter = Beta('test', 0, None, None, 0)
+        parameter = Beta('test', 0, -10, 10, 0)
         mapping_1 = {
             1: 'var1',
             2: 'var2',
@@ -30,113 +86,60 @@ class test_segmentation(unittest.TestCase):
             40: 'my4',
             50: 'my5',
         }
-        expr_mapping = seg.create_segmented_parameter(parameter, mapping_1)
-        result_mapping = (
-            '{1: test_var1(init=0), '
-            '2: test_var2(init=0), '
-            '3: test_var3(init=0), '
-            '4: test_var4(init=0), '
-            '5: test_var5(init=0)}'
-        )
-        self.assertEqual(str(expr_mapping), result_mapping)
-        combined_expr = seg.combine_segmented_expressions(
-            variable_1, expr_mapping
-        )
-        result_combined = (
-            'bioMultSum('
-            '(test_var1(init=0) * (Variable1 == `1.0`)), '
-            '(test_var2(init=0) * (Variable1 == `2.0`)), '
-            '(test_var3(init=0) * (Variable1 == `3.0`)), '
-            '(test_var4(init=0) * (Variable1 == `4.0`)), '
-            '(test_var5(init=0) * (Variable1 == `5.0`)))'
-        )
-
-        self.assertEqual(str(combined_expr), result_combined)
         first_segmentation = seg.DiscreteSegmentationTuple(
-            variable=variable_1, mapping=mapping_1
+            variable=variable_1, mapping=mapping_1, reference='var1'
         )
-
         second_segmentation = seg.DiscreteSegmentationTuple(
-            variable=variable_2, mapping=mapping_2
+            variable=variable_2, mapping=mapping_2, reference='my1'
         )
 
-        tuple_of_segmentations = [
-            first_segmentation,
-            second_segmentation,
-        ]
-
-        segmented_expression = seg.segment_parameter(
-            parameter, tuple_of_segmentations
+        the_segmentation = seg.Segmentation(
+            parameter, (first_segmentation, second_segmentation)
         )
+
+        beta_code = the_segmentation.beta_code()
+        print(beta_code)
+        expected_code = "Beta('test', 0, -10, 10, 0)"
+        self.assertEqual(beta_code, expected_code)
+
+        segmented_expression = the_segmentation.segmented_beta()
         result_segment = (
             'bioMultSum('
-            '(test_var1(init=0) * (Variable1 == `1.0`)), '
+            'test(init=0), '
             '(test_var2(init=0) * (Variable1 == `2.0`)), '
             '(test_var3(init=0) * (Variable1 == `3.0`)), '
             '(test_var4(init=0) * (Variable1 == `4.0`)), '
             '(test_var5(init=0) * (Variable1 == `5.0`)), '
-            '(test_my1(init=0) * (Variable2 == `10.0`)), '
             '(test_my2(init=0) * (Variable2 == `20.0`)), '
             '(test_my3(init=0) * (Variable2 == `30.0`)), '
             '(test_my4(init=0) * (Variable2 == `40.0`)), '
             '(test_my5(init=0) * (Variable2 == `50.0`)))'
         )
+
         self.assertEqual(str(segmented_expression), result_segment)
-
-        combinatorial_expression = seg.segment_parameter(
-            parameter, tuple_of_segmentations, combinatorial=True
+        segmented_code = the_segmentation.segmented_code()
+        result_code = (
+            "test_var2 = Beta('test_var2', 0, None, None, 0)\n"
+            "test_var3 = Beta('test_var3', 0, None, None, 0)\n"
+            "test_var4 = Beta('test_var4', 0, None, None, 0)\n"
+            "test_var5 = Beta('test_var5', 0, None, None, 0)\n"
+            "test_my2 = Beta('test_my2', 0, None, None, 0)\n"
+            "test_my3 = Beta('test_my3', 0, None, None, 0)\n"
+            "test_my4 = Beta('test_my4', 0, None, None, 0)\n"
+            "test_my5 = Beta('test_my5', 0, None, None, 0)\n"
+            "segmented_test = bioMultSum(["
+            "Beta('test', 0, -10, 10, 0), "
+            "test_var2 * (Variable('Variable1') == 2), "
+            "test_var3 * (Variable('Variable1') == 3), "
+            "test_var4 * (Variable('Variable1') == 4), "
+            "test_var5 * (Variable('Variable1') == 5), "
+            "test_my2 * (Variable('Variable2') == 20), "
+            "test_my3 * (Variable('Variable2') == 30), "
+            "test_my4 * (Variable('Variable2') == 40), "
+            "test_my5 * (Variable('Variable2') == 50)])"
         )
-        result_combinatorial = (
-            'bioMultSum('
-            '(bioMultSum('
-            '(test_my1_var1(init=0) * (Variable1 == `1.0`)), '
-            '(test_my1_var2(init=0) * (Variable1 == `2.0`)), '
-            '(test_my1_var3(init=0) * (Variable1 == `3.0`)), '
-            '(test_my1_var4(init=0) * (Variable1 == `4.0`)), '
-            '(test_my1_var5(init=0) * (Variable1 == `5.0`))) '
-            '* (Variable2 == `10.0`)), '
-            '(bioMultSum('
-            '(test_my2_var1(init=0) * (Variable1 == `1.0`)), '
-            '(test_my2_var2(init=0) * (Variable1 == `2.0`)), '
-            '(test_my2_var3(init=0) * (Variable1 == `3.0`)), '
-            '(test_my2_var4(init=0) * (Variable1 == `4.0`)), '
-            '(test_my2_var5(init=0) * (Variable1 == `5.0`))) '
-            '* (Variable2 == `20.0`)), '
-            '(bioMultSum('
-            '(test_my3_var1(init=0) * (Variable1 == `1.0`)), '
-            '(test_my3_var2(init=0) * (Variable1 == `2.0`)), '
-            '(test_my3_var3(init=0) * (Variable1 == `3.0`)), '
-            '(test_my3_var4(init=0) * (Variable1 == `4.0`)), '
-            '(test_my3_var5(init=0) * (Variable1 == `5.0`))) '
-            '* (Variable2 == `30.0`)), '
-            '(bioMultSum('
-            '(test_my4_var1(init=0) * (Variable1 == `1.0`)), '
-            '(test_my4_var2(init=0) * (Variable1 == `2.0`)), '
-            '(test_my4_var3(init=0) * (Variable1 == `3.0`)), '
-            '(test_my4_var4(init=0) * (Variable1 == `4.0`)), '
-            '(test_my4_var5(init=0) * (Variable1 == `5.0`))) '
-            '* (Variable2 == `40.0`)), '
-            '(bioMultSum('
-            '(test_my5_var1(init=0) * (Variable1 == `1.0`)), '
-            '(test_my5_var2(init=0) * (Variable1 == `2.0`)), '
-            '(test_my5_var3(init=0) * (Variable1 == `3.0`)), '
-            '(test_my5_var4(init=0) * (Variable1 == `4.0`)), '
-            '(test_my5_var5(init=0) * (Variable1 == `5.0`))) '
-            '* (Variable2 == `50.0`)))'
-        )
-        self.assertEqual(str(combinatorial_expression), result_combinatorial)
+        self.assertEqual(str(segmented_code), result_code)
 
-        combined_code = seg.code_to_combine_segmented_expressions(
-            variable_1, expr_mapping, 'beta'
-        )
-        #        print(combined_code)
-
-        segmented_code = seg.code_to_segment_parameter(
-            parameter, tuple_of_segmentations
-        )
-
-
-#        print(segmented_code)
 
 if __name__ == '__main__':
     unittest.main()

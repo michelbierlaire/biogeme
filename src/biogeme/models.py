@@ -88,7 +88,7 @@ def loglogit_sampling(V, av, correction, i):
             f'Utilities: {V.keys}'
         )
         raise excep.biogemeError(error_msg)
-    corrected_V = {k: v + correction[k] for k, v in V.items()}
+    corrected_V = {k: v - correction[k] for k, v in V.items()}
     return loglogit(corrected_V, av, i)
 
 

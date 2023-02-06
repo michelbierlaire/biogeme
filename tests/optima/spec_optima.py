@@ -34,19 +34,21 @@ CostCarCHF_scaled = CostCarCHF / 10
 distance_km_scaled = distance_km / 5
 
 car_avail_segmentation = seg.DiscreteSegmentationTuple(
-    variable=CarAvail, mapping={1: 'car_avail', 3: 'car_unavail'}
+    variable=CarAvail,
+    mapping={1: 'car_avail', 3: 'car_unavail'},
+    reference=None,
 )
 
 language_segmentation = seg.DiscreteSegmentationTuple(
-    variable=LangCode, mapping={1: 'french', 2: 'german'}
+    variable=LangCode, mapping={1: 'french', 2: 'german'}, reference=None
 )
 
 occup_segmentation = seg.DiscreteSegmentationTuple(
-    variable=OccupStat, mapping={1: 'full_time', 2: 'part_time', 3: 'others'}
+    variable=OccupStat, mapping={1: 'full_time', 2: 'part_time', 3: 'others'}, reference=None
 )
 
 purpose_segmentation = seg.DiscreteSegmentationTuple(
-    variable=TripPurpose, mapping={1: 'work', 2: 'not_work'}
+    variable=TripPurpose, mapping={1: 'work', 2: 'not_work'}, reference=None
 )
 
 education_segmentation = seg.DiscreteSegmentationTuple(
@@ -57,33 +59,42 @@ education_segmentation = seg.DiscreteSegmentationTuple(
         6: 'higher_education',
         7: 'university',
     },
+    reference=None
 )
 
 ASC_PT_base = Beta('ASC_PT', 0, None, None, 0)
-ASC_PT = seg.segment_parameter(
-    ASC_PT_base,
-    [car_avail_segmentation, language_segmentation],
-    combinatorial=True,
+
+ASC_PT = (
+    seg.Segmentation(
+        ASC_PT_base,
+        [car_avail_segmentation, language_segmentation],
+    ).segmented_beta()
 )
 
 ASC_CAR_base = Beta('ASC_CAR', 0, None, None, 0)
-ASC_CAR = seg.segment_parameter(
-    ASC_CAR_base,
-    [car_avail_segmentation, language_segmentation],
-    combinatorial=True,
+ASC_CAR = (
+    seg.Segmentation(
+        ASC_CAR_base,
+        [car_avail_segmentation, language_segmentation],
+    ).segmented_beta()
 )
 
 BETA_TIME_base = Beta('BETA_TIME', 0, None, None, 0)
-BETA_TIME = seg.segment_parameter(BETA_TIME_base, [occup_segmentation])
+BETA_TIME = (
+    seg.Segmentation(
+        BETA_TIME_base,
+        [occup_segmentation]
+    ).segmented_beta()
+)
 
 BETA_COST_PT = Beta('BETA_COST_PT', 0, None, None, 0)
 BETA_COST_CAR = Beta('BETA_COST_CAR', 0, None, None, 0)
 
 BETA_WAITING_base = Beta('BETA_WAITING', 0, None, None, 0)
-BETA_WAITING = seg.segment_parameter(BETA_WAITING_base, [purpose_segmentation])
+BETA_WAITING = seg.Segmentation(BETA_WAITING_base, [purpose_segmentation]).segmented_beta()
 
 BETA_DIST_base = Beta('BETA_DIST', 0, None, None, 0)
-BETA_DIST = seg.segment_parameter(BETA_DIST_base, [education_segmentation])
+BETA_DIST = seg.Segmentation(BETA_DIST_base, [education_segmentation]).segmented_beta()
 
 LAMBDA_COST = 0.3214999879822265
 

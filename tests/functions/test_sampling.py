@@ -19,6 +19,7 @@ import pandas as pd
 import biogeme.sampling as sam
 import biogeme.exceptions as excep
 
+
 class TestSampling(unittest.TestCase):
     def setUp(self):
         self.nbr_of_alt = 20
@@ -32,7 +33,9 @@ class TestSampling(unittest.TestCase):
         self.individuals = pd.DataFrame(
             {
                 'Char1': np.random.randint(2, size=self.nbr_of_obs),
-                'choice': np.random.randint(self.nbr_of_alt, size=self.nbr_of_obs),
+                'choice': np.random.randint(
+                    self.nbr_of_alt, size=self.nbr_of_obs
+                ),
             }
         )
 
@@ -44,20 +47,17 @@ class TestSampling(unittest.TestCase):
             sam.StratumTuple(subset=set2, sample_size=3),
         )
         the_sample = sam.sampling_of_alternatives(
-            partition = partition,
-            individuals = self.individuals,
-            choice_column = 'choice',
-            alternatives = self.alternatives,
-            id_column = 'ID',
-            always_include_chosen = True
+            partition=partition,
+            individuals=self.individuals,
+            choice_column='choice',
+            alternatives=self.alternatives,
+            id_column='ID',
+            always_include_chosen=True,
         )
         the_sample = the_sample.astype({f'ID_{i}': int for i in range(6)})
         pd.testing.assert_series_equal(
-            the_sample['choice'],
-            the_sample['ID_0'],
-            check_names=False
+            the_sample['choice'], the_sample['ID_0'], check_names=False
         )
-
 
     def test_partition_1(self):
         set1 = set([1, 2, 3])
@@ -68,12 +68,12 @@ class TestSampling(unittest.TestCase):
         )
         with self.assertRaises(excep.biogemeError):
             the_sample = sam.sampling_of_alternatives(
-                partition = partition,
-                individuals = self.individuals,
-                choice_column = 'choice',
-                alternatives = self.alternatives,
-                id_column = 'ID',
-                always_include_chosen = True
+                partition=partition,
+                individuals=self.individuals,
+                choice_column='choice',
+                alternatives=self.alternatives,
+                id_column='ID',
+                always_include_chosen=True,
             )
 
     def test_partition_2(self):
@@ -85,12 +85,12 @@ class TestSampling(unittest.TestCase):
         )
         with self.assertRaises(excep.biogemeError):
             the_sample = sam.sampling_of_alternatives(
-                partition = partition,
-                individuals = self.individuals,
-                choice_column = 'choice',
-                alternatives = self.alternatives,
-                id_column = 'ID',
-                always_include_chosen = True
+                partition=partition,
+                individuals=self.individuals,
+                choice_column='choice',
+                alternatives=self.alternatives,
+                id_column='ID',
+                always_include_chosen=True,
             )
 
     def test_partition_3(self):
@@ -102,13 +102,14 @@ class TestSampling(unittest.TestCase):
         )
         with self.assertRaises(excep.biogemeError):
             the_sample = sam.sampling_of_alternatives(
-                partition = partition,
-                individuals = self.individuals,
-                choice_column = 'choice',
-                alternatives = self.alternatives,
-                id_column = 'ID',
-                always_include_chosen = True
+                partition=partition,
+                individuals=self.individuals,
+                choice_column='choice',
+                alternatives=self.alternatives,
+                id_column='ID',
+                always_include_chosen=True,
             )
-            
+
+
 if __name__ == '__main__':
     unittest.main()

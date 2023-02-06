@@ -49,18 +49,6 @@ logger = msg.bioMessage()
 """
 
 
-def argument_warning(old_new_tuple):
-    """Displays a deprecation warning when parameters are provided as arguments."""
-    warning_msg = (
-        f'The use of argument {old_new_tuple.old} in the constructor of the '
-        f'BIOGEME object is deprecated and will be removed in future '
-        f'versions of Biogeme. Instead, define parameter {old_new_tuple.new} '
-        f'in section {old_new_tuple.section}'
-        f'of the .toml parameter file. The default file name is '
-        f'{toml.DEFAULT_FILE_NAME}'
-    )
-    logger.warning(warning_msg)
-
 
 class BIOGEME:
     """Main class that combines the database and the model specification.
@@ -100,39 +88,9 @@ class BIOGEME:
         :param userNotes: these notes will be included in the report file.
         :type userNotes: str
 
-        :param numberOfThreads: multi-threading can be used for
-            estimation. This parameter defines the number of threads
-            to be used. If the parameter is set to None, the number of
-            available threads is calculated using
-            cpu_count(). Ignored in simulation mode. Defaults: None.
-        :type numberOfThreads:  int
-
-        :param numberOfDraws: number of draws used for Monte-Carlo
-            integration. Default: 1000.
-        :type numberOfDraws: int
-
-        :param seed: seed used for the pseudo-random number
-            generation. It is useful only when each run should
-            generate the exact same result. If None, a new seed is
-            used at each run. Default: None.
-        :type seed: int
-
-        :param skipAudit: if True, does not check the validity of the
-            formulas. It may save significant amount of time for large
-            models and large data sets. Default: False.
-        :type skipAudit: bool
-
-        :param suggestScales: if True, Biogeme suggests the scaling of
-            the variables in the database. Default: True.
-            See also :func:`biogeme.database.Database.suggestScaling`
-
-        :type suggestScales: bool.
-
-        :param missingData: if one variable has this value, it is
-           assumed that a data is missing and an exception will be
-           triggered. Default: 99999.
-        :type missingData: float
-
+        :param parameter_file: name of the .toml file where the parameters are read
+        :type parameter_file: str
+        
         :raise biogemeError: an audit of the formulas is performed.
            If a formula has issues, an error is detected and an
            exception is raised.
@@ -140,7 +98,7 @@ class BIOGEME:
         """
         self.toml = toml.Toml(parameter_file)
 
-        # Code for the transition period to inform th euser of the
+        # Code for the transition period to inform the user of the
         # change of parameter management scheme
         old_params = (
             OldNewParamTuple(
@@ -160,7 +118,7 @@ class BIOGEME:
             OldNewParamTuple(
                 old='suggestScales',
                 new='suggest_scales',
-                section='Specification',
+                section=None,
             ),
             OldNewParamTuple(
                 old='missingData', new='missing_data', section='Specification'
@@ -170,10 +128,14 @@ class BIOGEME:
         for the_param in old_params:
             value = kwargs.get(the_param.old)
             if value is not None:
-                argument_warning(the_param)
-                self.toml.parameters.set_value(
-                    the_param.new, value, the_param.section
-                )
+                if the_param.section is None:
+                    warning_msg = f'Parameter {the_param.old} is deprecated'
+                    logger.warning(warning_msg)
+                else:
+                    BIOGEME.argument_warning(the_param)
+                    self.toml.parameters.set_value(
+                        the_param.new, value, the_param.section
+                    )
 
         self._algorithm = None
         self.algoParameters = None
@@ -276,25 +238,25 @@ class BIOGEME:
 
         self.nullLogLike = None  #: Log likelihood of the null model
 
-        if self.suggestScales:
-            suggestedScales = self.database.suggestScaling()
-            if not suggestedScales.empty:
-                logger.detailed(
-                    'It is suggested to scale the following variables.'
-                )
-                for _, row in suggestedScales.iterrows():
-                    error_msg = (
-                        f'Multiply {row["Column"]} by\t{row["Scale"]} '
-                        'because the largest (abs) value is\t'
-                        f'{row["Largest"]}'
-                    )
-                    logger.detailed(error_msg)
-                error_msg = (
-                    'To remove this feature, set the parameter '
-                    'suggestScales to False when creating the '
-                    'BIOGEME object.'
-                )
-                logger.detailed(error_msg)
+#        if self.suggestScales:
+#            suggestedScales = self.database.suggestScaling()
+#            if not suggestedScales.empty:
+#                logger.detailed(
+#                    'It is suggested to scale the following variables.'
+#                )
+#                for _, row in suggestedScales.iterrows():
+#                    error_msg = (
+#                        f'Multiply {row["Column"]} by\t{row["Scale"]} '
+#                        'because the largest (abs) value is\t'
+#                        f'{row["Largest"]}'
+#                    )
+#                    logger.detailed(error_msg)
+#                error_msg = (
+#                    'To remove this feature, set the parameter '
+#                    'suggestScales to False when creating the '
+#                    'BIOGEME object.'
+#                )
+#                logger.detailed(error_msg)
 
         self._prepareDatabaseForFormula()
 
@@ -352,6 +314,20 @@ class BIOGEME:
 
         self.bestIteration = None  #: Store the best iteration found so far.
 
+    @staticmethod
+    def argument_warning(old_new_tuple):
+        """Displays a deprecation warning when parameters are provided as arguments."""
+        warning_msg = (
+            f'The use of argument {old_new_tuple.old} in the constructor of the '
+            f'BIOGEME object is deprecated and will be removed in future '
+            f'versions of Biogeme. Instead, define parameter {old_new_tuple.new} '
+            f'in section {old_new_tuple.section}'
+            f'of the .toml parameter file. The default file name is '
+            f'{toml.DEFAULT_FILE_NAME}'
+        )
+        logger.warning(warning_msg)
+
+        
     @property
     def algorithm_name(self):
         """Name of the optimization algorithm"""
@@ -365,6 +341,21 @@ class BIOGEME:
             name='optimization_algorithm',
             value=value,
             section='Estimation',
+        )
+
+    @property
+    def identification_threshold(self):
+        """Threshold for the eigenvalue to trigger an identification warning"""
+        return self.toml.parameters.get_value(
+            name='identification_threshold', section='Output'
+        )
+
+    @identification_threshold.setter
+    def identification_threshold(self, value):
+        self.toml.parameters.set_value(
+            name='identification_threshold',
+            value=value,
+            section='Output',
         )
 
     @property
@@ -433,32 +424,6 @@ class BIOGEME:
     def skip_audit(self, value):
         self.toml.parameters.set_value(
             name='skip_audit', value=value, section='Specification'
-        )
-
-    @property
-    def suggestScales(self):
-        """getter for the parameter"""
-        return self.toml.parameters.get_value(
-            name='suggest_scales', section='Specification'
-        )
-
-    @suggestScales.setter
-    def suggestScales(self, value):
-        self.toml.parameters.set_value(
-            name='suggest_scales', value=value, section='Specification'
-        )
-
-    @property
-    def suggest_scales(self):
-        """getter for the parameter"""
-        return self.toml.parameters.get_value(
-            name='suggest_scales', section='Specification'
-        )
-
-    @suggest_scales.setter
-    def suggest_scales(self, value):
-        self.toml.parameters.set_value(
-            name='suggest_scales', value=value, section='Specification'
         )
 
     @property
@@ -1323,7 +1288,9 @@ class BIOGEME:
         rawResults = res.rawResults(
             self, xstar, fgHb, bootstrap=self.bootstrap_results
         )
-        r = res.bioResults(rawResults)
+        r = res.bioResults(
+            rawResults, identification_threshold=self.identification_threshold
+        )
         if self.generateHtml:
             r.writeHtml(self.only_robust_stats)
         if self.generatePickle:
@@ -1400,7 +1367,9 @@ class BIOGEME:
         rawResults = res.rawResults(
             self, xstar, fgHb, bootstrap=self.bootstrap_results
         )
-        r = res.bioResults(rawResults)
+        r = res.bioResults(
+            rawResults, identification_threshold=self.identification_threshold
+        )
         return r
 
     def validate(self, estimationResults, validationData):

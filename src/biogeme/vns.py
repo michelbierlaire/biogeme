@@ -486,10 +486,15 @@ def vns(
 
     thePareto = paretoClass(maxNeighborhood, archiveInputFile)
 
+    logger.debug(f'Number of init solutions: {len(firstSolutions)}')
     if firstSolutions is not None:
+        logger.debug(f'Again number of init solutions: {len(firstSolutions)}')
         for s in firstSolutions:
+            logger.debug(f'Problem: {s}')
             valid, why = problem.isValid(s)
+            logger.debug(f'Problem is valid: {valid}')
             if valid:
+                logger.debug('Evaluate')
                 problem.evaluate(s)
                 thePareto.add(s)
                 logger.detailed(problem.describe(s))

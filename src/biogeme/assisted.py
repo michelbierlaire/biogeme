@@ -19,17 +19,31 @@ import biogeme.messaging as msg
 import biogeme.exceptions as excep
 from biogeme import vns
 from biogeme.expressions import Beta, bioMultSum
+from biogeme.segmentation import DiscreteSegmentationTuple, Segmentation
+
+# Constants describing the status of a group of variable
+MUST_BE_GENERIC = 0
+MUST_BE_ALT_SPEC = 1
+GENERIC_OR_ALT_SPEC = 2
+MUST_BE_ACTIVE = 3
+CAN_BE_DESACTIVATED = 4
 
 # This tuple is imported here, so that it can be imported from here later on.
-from biogeme.segmentation import DiscreteSegmentationTuple, segment_parameter
 
 logger = msg.bioMessage()
-
 
 TermTuple = namedtuple('TermTuple', 'attribute segmentation bounds validity')
 SegmentedParameterTuple = namedtuple(
     'SegmentedParameterTuple', 'dict combinatorial'
 )
+
+BoundsTuple = namedtuple('BoundsTuple', 'lower upper')
+
+GroupTuple = namedtuple(
+    'GroupTuple', 'name list_of_attributes coefficient_status activity_status'
+)
+
+GroupDecisions = namedtuple('GroupDecisions', 'active generic nonlinear')
 
 
 class variable:
@@ -122,9 +136,15 @@ class groupOfVariables:
 
     """
 
-    def __init__(self, name, variables, nonlinearSpecs):
-        """
-        Ctor
+    def __init__(
+        self,
+        name,
+        variables,
+        nonlinearSpecs,
+        coefficient_status,
+        activity_status,
+    ):
+        """Ctor
 
         :param name: name of the group of variables
         :type name: str
@@ -134,24 +154,62 @@ class groupOfVariables:
 
         :param nonlinearSpecs: list of possible nonlinear specifications
         :type nonlinearSpecs: list(function)
+
+        :param coefficient_status: can take one of the following values:
+            MUST_BE_GENERIC, MUST_BE_ALT_SPEC, GENERIC_OR_ALT_SPEC.
+        :type coefficient_status: int
+
+        :param activity_status: can take one of the folllowing values:
+            MUST_BE_ACTIVE, CAN_BE_DESACTIVATED
+        :type activity_status: int
         """
         self.name = name  #: name of the group of variables.
 
         self.variables = variables  #: list of variables in the group.
 
-        self.genericForbiden = len(self.variables) <= 1
-        """ True of the group cannot be made generic
-        """
+        if coefficient_status not in (
+            MUST_BE_GENERIC,
+            MUST_BE_ALT_SPEC,
+            GENERIC_OR_ALT_SPEC,
+        ):
+            error_msg = (
+                'The parameter "coefficient_status" must take one of the '
+                'following values: "MUST_BE_GENERIC", "MUST_BE_ALT_SPEC", '
+                '"GENERIC_OR_ALT_SPEC"'
+            )
+            raise excep.biogemeError(error_msg)
 
-        self.generic = not self.genericForbiden
+        self.coefficient_status = coefficient_status
+        self.activity_status = activity_status
+
+        if (
+            len(self.variables) == 1
+            and self.coefficient_status == MUST_BE_ALT_SPEC
+        ):
+            error_msg = (
+                f'The group {self.name} cannot be alternative specific as '
+                f'it contains only one variable: {self.variables[0]} '
+            )
+            raise excep.biogemeError(error_msg)
+        self.generic = (
+            self.coefficient_status != MUST_BE_ALT_SPEC
+            and len(self.variables) > 1
+        )
         """ True if the group is generic.
         """
 
+        self.active = True  #: True if the group is active.
         self.alwaysActive = False
         """ True if the group is always active.
         """
-
-        self.active = False  #: True if the group is active.
+        if self.activity_status == MUST_BE_ACTIVE:
+            self.forceActive()
+        elif self.activity_status != CAN_BE_DESACTIVATED:
+            error_msg = (
+                'The parameter "activity_status" must take one of the '
+                'two following values: "MUST_BE_ACTIVE" or "CAN_BE_DESACTIVATED"'
+            )
+            raise excep.biogemeError(error_msg)
 
         self.nonlinearSpecs = nonlinearSpecs
         """ list of possible nonlinear specifications
@@ -169,11 +227,6 @@ class groupOfVariables:
             return f'{self.name}: {v}  [generic][active:{self.active}]'
 
         return f'{self.name}: {v} [not generic][active:{self.active}]'
-
-    def forbidGeneric(self):
-        """Forbid the generic specification in the group"""
-        self.genericForbiden = True
-        self.generic = False
 
     def forceActive(self):
         """Force the variables in the group to be active."""
@@ -218,7 +271,7 @@ class groupOfVariables:
 
         :raise biogemeError: if the variable cannot be made generic.
         """
-        if yes and self.genericForbiden:
+        if yes and self.coefficient_status == MUST_BE_ALT_SPEC:
             raise excep.biogemeError(
                 f'Variable {self.name} ' f'cannot be made generic.'
             )
@@ -229,7 +282,7 @@ class groupOfVariables:
 
     def swapGeneric(self):
         """Change the generic/alt. specific status"""
-        if self.genericForbiden:
+        if self.coefficient_status == MUST_BE_ALT_SPEC:
             raise excep.biogemeError(
                 f'Variable {self.name} ' f'cannot be made generic.'
             )
@@ -287,81 +340,42 @@ class groupOfVariables:
         """The decision is an integer representing the decisions with
         respect to the group of variables:
 
-
         :return: decision with respect to the group of variables
-
-        - -3 if it is inactive
-        - -2 if it is active, generic and linear
-        - -1 if it is active, alt. specific and linear
-        - index of the nonlinear specification if active, generic
-          and nonlinear.
-        - 100 plus the index of the nonlinear specification if active,
-          alt. specific and nonlinear.
-
-        :rtype: int
+        :rtype: GroupDecisions
         """
-        if not self.active:
-            result = -3
-        elif self.linear and self.generic:
-            result = -2
-        elif self.linear and not self.generic:
-            result = -1
-        elif self.generic:
-            result = self.selection
-        else:
-            result = 100 + self.selection
+        decision = GroupDecisions(
+            active=self.active,
+            generic=self.generic,
+            nonlinear=None if self.linear else self.selection,
+        )
 
-        return result
+        return decision
 
     def setDecisions(self, decision):
         """
         Implement the decision, after verifying its validity
 
-        :param decision:
+        :param decision: describes the specification decisions for the group
+        :type decision: GroupDecisions
 
-        - -3 if it is inactive
-        - -2 if it is active, generic and linear
-        - -1 if it is active, alt. specific and linear
-        - index of the nonlinear specification if active, generic
-          and nonlinear.
-        - 100 plus the index of the nonlinear specification if active,
-          alt. specific and nonlinear.
-
-        :type decision: int
-
-        :raise biogemeError: if the decision is to deactive, while
+        :raise biogemeError: if the decision is to deactivate, while
             the group should always be active.
         """
-        if decision == -3 and self.alwaysActive:
+        if not decision.active and self.alwaysActive:
             error_msg = (
                 f'Group of variables {self.name} cannot be desactivated'
             )
             raise excep.biogemeError(error_msg)
-        self.activate(decision != -3)
-        if decision == -3:
-            return
-        if decision == -2:
-            self.makeGeneric(True)
-            self.setLinear(True)
-            return
-        if decision == -1:
-            self.makeGeneric(False)
-            self.setLinear(True)
-            return
-        self.setLinear(False)
-        if self.nonlinearSpecs is None:
-            raise excep.biogemeError(
-                f'No nonlinear specification has '
-                f'been provided for {self.name}'
-            )
-
-        if decision < 100:
-            self.makeGeneric(True)
-            self.setSelection(decision)
-            return
-        self.makeGeneric(False)
-        self.setSelection(decision - 100)
-        return
+        self.activate(decision.active)
+        self.setLinear(decision.nonlinear is None)
+        self.makeGeneric(decision.generic)
+        if decision.nonlinear is not None:
+            if self.nonlinearSpecs is None:
+                raise excep.biogemeError(
+                    f'No nonlinear specification has '
+                    f'been provided for {self.name}'
+                )
+            self.setSelection(decision.nonlinear)
 
 
 class term:
@@ -381,7 +395,7 @@ class term:
         :type aSegmentation: segmentation
 
         :param bounds: bounds on the coefficient
-        :type bounds: tuple(float, float)
+        :type bounds: BoundsTuple
 
         :param validity: function checking the validity of the coefficient.
         :type validity: bool f(float)
@@ -482,7 +496,7 @@ class term:
             if val is None:
                 p = list(estimatedValues.keys())
                 raise excep.biogemeError(
-                    f'Parameter {b}'
+                    f'Parameter {the_beta}'
                     f' has not been estimated. '
                     f'Estimated parameters: '
                     f'{p}'
@@ -508,7 +522,9 @@ class term:
         if self.var is None:
             coef_name = self.getBeta(altname)
             if self.segmentation is None:
-                return Beta(coef_name, 0, self.bounds[0], self.bounds[1], 0)
+                return Beta(
+                    coef_name, 0, self.bounds.lower, self.bounds.upper, 0
+                )
 
             self.coef_names = [coef_name]
             return self.segmentation.getExpression(coef_name, self.bounds)
@@ -521,7 +537,7 @@ class term:
         if self.segmentation is None:
             self.coef_names = [coef_name]
             return self.var.getExpression() * Beta(
-                coef_name, 0, self.bounds[0], self.bounds[1], 0
+                coef_name, 0, self.bounds.lower, self.bounds.upper, 0
             )
 
         theBeta = self.segmentation.getExpression(coef_name, self.bounds)
@@ -589,14 +605,14 @@ class utility:
 class socioEconomic:
     """Class representing  socio-economic characteristic"""
 
-    def __init__(self, name, expression, values):
+    def __init__(self, name, the_segmentation):
         """Ctor
 
         :param name: name of the segmentation variable
         :type name: str
 
-        :param expression: Biogeme expression of the variable
-        :type expression: meth:`biogeme.expressions.Expression`
+        :param the_segmentation: characterization of a discrete segmentation
+        :type the_segmentation: meth:`biogeme.segmentation.DiscreteSegmentationTuple`
 
         :param values: dict with values that it can take as keys, and a name
             describing them as values.
@@ -605,13 +621,16 @@ class socioEconomic:
         """
         self.name = name  #: name of the segmentation variable
 
-        self.expression = expression  #: Biogeme expression of the variable
+        self.expression = (
+            the_segmentation.variable
+        )  #: Biogeme expression of the variable
 
-        self.values = values
+        self.values = the_segmentation.mapping
         """dict with values that it can take as keys, and a name
         describing them as values.
         """
 
+        self.reference = the_segmentation.reference
         self.active = False  #: True if the segmentation variable is active.
 
     def combine(self, existingValues):
@@ -644,7 +663,7 @@ class segmentation:
         Ctor
         """
         self.dictOfSocioEco = {
-            k: socioEconomic(k, v[0], v[1]) for k, v in dictOfSocioEco.items()
+            k: socioEconomic(k, v) for k, v in dictOfSocioEco.items()
         }
         """dict of object of class socioEconomic characterizing the
         segmentation.
@@ -653,6 +672,10 @@ class segmentation:
         self.combinatorial = combinatorial
         """True if all combinations are considered"""
 
+        if combinatorial:
+            raise excep.biogemeError(
+                'Combinatorial segmentation: not yet implemented'
+            )
         self.listOfVariables = []  #: list of variables involved
 
         self.alwaysActive = False  #: True if it must always be active
@@ -737,7 +760,7 @@ class segmentation:
         :type coef_name: str
 
         :param bounds: bounds on the coefficient
-        :type bounds: tuple(float, float)
+        :type bounds: BoundsTuple
 
         :return: biogeme  expression for the segmentation
         :rtype: :class:`biogeme.expressions.bioMultSum`
@@ -764,15 +787,17 @@ class segmentation:
         #            listOfTerms.append(aTerm)
         #        before =  bioMultSum(listOfTerms)
 
-        the_coef = Beta(coef_name, 0, bounds[0], bounds[1], 0)
-        list_of_segmentations = [
-            DiscreteSegmentationTuple(variable=v.expression, mapping=v.values)
+        the_coef = Beta(coef_name, 0, bounds.lower, bounds.upper, 0)
+        list_of_segmentations = (
+            DiscreteSegmentationTuple(
+                variable=v.expression, mapping=v.values, reference=v.reference
+            )
             for v in self.dictOfSocioEco.values()
             if v.active
-        ]
-        return segment_parameter(
-            the_coef, list_of_segmentations, self.combinatorial
         )
+
+        the_segmented_parameter = Segmentation(the_coef, list_of_segmentations)
+        return the_segmented_parameter.segmented_beta()
 
     def describe(self):
         """Description of the segmentation
@@ -782,7 +807,7 @@ class segmentation:
         """
         active = [t.name for t in self.dictOfSocioEco.values() if t.active]
         if active:
-            return '<' + ', '.join(active) + '>'
+            return '(' + ', '.join(active) + ')'
         return ''
 
 
@@ -795,8 +820,6 @@ class specificationProblem(vns.problemClass):
         database,
         theVariables,
         theGroups,
-        genericForbiden,
-        forceActive,
         theNonlinearSpecs,
         theSegmentations,
         utilities,
@@ -819,15 +842,7 @@ class specificationProblem(vns.problemClass):
             transforms and activation status. Each group is characterized
             by its name, and is associated to a list of variables,
             identified by their name.
-        :type theGroups: dict(str: list(str))
-
-        :param genericForbiden: groups of variables that must be
-            alternative specific.
-
-        :type genericForbiden: list(str)
-
-        :param forceActive: groups of variables that must be in the model.
-        :type forceActive: list(str)
+        :type theGroups: list(GroupTuple)
 
         :param theNonlinearSpecs: associates a group of variables or a
             variable with a list of possible nonlinear
@@ -883,7 +898,7 @@ class specificationProblem(vns.problemClass):
 
             The specification is a list of terms. A term is a tuple with
             the name of the variable, the name of the segmentation, the
-            bounds on the coeffcient, and a function checking the validity
+            bounds on the coefficient, and a function checking the validity
             of the corresponding parameter (typically, check its
             sign). All can be None. If they are all None, it corresponds
             to the alternative specification constant, without any
@@ -974,13 +989,13 @@ class specificationProblem(vns.problemClass):
         # First check if all the variables are in a group. For those
         # who are not, create a group with a single variable
         groupForVar = {k: None for k in theVariables}
-        for group, listOfVars in theGroups.items():
-            for x in listOfVars:
+        for group in theGroups:
+            for x in group.list_of_attributes:
                 if groupForVar[x] is None:
-                    groupForVar[x] = group
+                    groupForVar[x] = group.name
                 else:
                     error_msg = (
-                        f'Var {x} cannot be both in group {group}'
+                        f'Var {x} cannot be both in group {group.name}'
                         f' and group {groupForVar[x]}'
                     )
                     raise excep.biogemeError(error_msg)
@@ -988,7 +1003,14 @@ class specificationProblem(vns.problemClass):
         for x, g in groupForVar.items():
             if g is None:
                 logger.detailed(f'Variable {x} is alone in a group.')
-                theGroups[x] = [x]
+                theGroups.append(
+                    GroupTuple(name=x,
+                               list_of_attributes = [x],
+                               coefficient_status=MUST_BE_GENERIC,
+                               activity_status=CAN_BE_DESACTIVATED
+                               )
+                )
+
 
         self.theVariables = {
             k: variable(k, v) for k, v in theVariables.items()
@@ -998,40 +1020,22 @@ class specificationProblem(vns.problemClass):
         """
 
         self.theGroups = {
-            k: groupOfVariables(
-                k, [self.theVariables[i] for i in v], theNonlinearSpecs.get(k)
+            group.name: groupOfVariables(
+                group.name,
+                [self.theVariables[i] for i in group.list_of_attributes],
+                theNonlinearSpecs.get(group.name),
+                group.coefficient_status,
+                group.activity_status,
             )
-            for k, v in theGroups.items()
+            for group in theGroups
         }
         """dict of groups of variables, where the keys are the names, and the
         values are objects of class ``groupOfVariables``
         """
 
-        if genericForbiden is not None:
-            for k in genericForbiden:
-                try:
-                    self.theGroups[k].forbidGeneric()
-                except KeyError as e:
-                    error_msg = (
-                        f'Unknown group of variables {k} '
-                        f'in the list {genericForbiden}'
-                    )
-                    raise excep.biogemeError(error_msg) from e
-
-        if forceActive is not None:
-            for k in forceActive:
-                try:
-                    self.theGroups[k].forceActive()
-                except KeyError as e:
-                    error_msg = (
-                        f'Unknown group of variables {k} '
-                        f'in the list {forceActive}'
-                    )
-                    raise excep.biogemeError(error_msg) from e
-
         check = {v: False for v in theVariables}
-        for k, myvars in theGroups.items():
-            for v in myvars:
+        for group in theGroups:
+            for v in group.list_of_attributes:
                 check[v] = True
         for k, c in check.items():
             if not c:
@@ -1193,7 +1197,6 @@ class specificationProblem(vns.problemClass):
         b = bio.BIOGEME(
             self.database,
             logprob,
-            suggestScales=False,
             userNotes=self.describeHtml(),
         )
         b.generateHtml = False
@@ -1339,6 +1342,7 @@ class specificationProblem(vns.problemClass):
         :raise biogemeError: if the model is unknown.
 
         """
+        logger.debug('*** Generate solution')
         self.reset()
         for k, (nl, generic) in nonlinearSpecs.items():
             if k in self.theGroups:
@@ -1480,6 +1484,7 @@ class specificationProblem(vns.problemClass):
             is invalid.
         :rtype: tuple(bool, str)
         """
+        logger.debug(f'Check validity for {aSolution}')
         if aSolution.valid is not None:
             return aSolution.valid, aSolution.causeInvalidity
 
@@ -1493,6 +1498,7 @@ class specificationProblem(vns.problemClass):
 
         estimationResults = self.archive.get(aSolution)
         if estimationResults is None:
+            logger.debug('Estimate the moduel')
             estimationResults = self.evaluate(aSolution)
             if aSolution.valid is not None:
                 return aSolution.valid, aSolution.causeInvalidity
@@ -1563,10 +1569,11 @@ class specificationProblem(vns.problemClass):
             )
             return estimationResults
 
-        algoParameters = {'proportionAnalyticalHessian': 0.0, 'maxiter': 200}
         try:
             logger.temporarySilence()
-            estimationResults = b.quickEstimate(algoParameters=algoParameters)
+            b.max_iterations = 200
+            b.second_derivatives = 0
+            estimationResults = b.quickEstimate()
             logger.resume()
             aSolution.objectives = [
                 -estimationResults.data.logLike,
@@ -1778,7 +1785,7 @@ class specificationProblem(vns.problemClass):
             g
             for g in self.theGroups.keys()
             if self.theGroups[g].active
-            and not self.theGroups[g].genericForbiden
+            and self.theGroups[g].coefficient_status == GENERIC_OR_ALT_SPEC
         ]
         random.shuffle(groups)
         changes = min([size, len(groups)])
@@ -1796,19 +1803,29 @@ class specificationProblem(vns.problemClass):
             for g in self.theGroups.keys()
             if self.theGroups[g].active and not self.theGroups[g].linear
         ]
+        logger.debug(f'Change nonlinearity: {len(groups)} groups')
         random.shuffle(groups)
         changes = min([size, len(groups)])
-        if not audit:
-            for i in range(changes):
-                # We need to select randomly a specification different
-                # from the current one
-                nbrOfValues = len(self.theGroups[groups[i]].nonlinearSpecs)
-                values = set(range(nbrOfValues))
-                values.remove(self.theGroups[groups[i]].selection)
-                sel = random.choice(list(values))
-                self.theGroups[groups[i]].setSelection(sel)
+        logger.debug(f'Number of changes: {changes}')
+        actual_changes = 0
+        for i in range(changes):
+            # We need to select randomly a specification different
+            # from the current one
+            nbrOfValues = len(self.theGroups[groups[i]].nonlinearSpecs)
+            logger.debug(f'{nbrOfValues=}')
+            values = set(range(nbrOfValues))
+            logger.debug(f'Before remove {values=}')
+            values.remove(self.theGroups[groups[i]].selection)
+            logger.debug(f'After remove {values=}')
+            if values:
+                actual_changes += 1
+                if not audit:
+                    sel = random.choice(list(values))
+                    logger.debug(f'{sel=}')
+                    logger.debug(f'{groups[i]=}')
+                    self.theGroups[groups[i]].setSelection(sel)
 
-        return changes
+        return actual_changes
 
     def changeModel(self, size=1, audit=False):
         """
@@ -1877,11 +1894,10 @@ class solution(vns.solutionClass):
             )
         res = self.description
         if self.objectivesNames is None:
-            raise excep.biogemeError(
-                'The attribute objectivesNames is not defined'
-            )
+            res += '\nThe attribute objectivesNames is not defined\n'
         if self.objectives is None:
-            raise excep.biogemeError('The attribute objectives is not defined')
-        for t, r in zip(self.objectivesNames, self.objectives):
-            res += f'\n{t}: {r}'
+            res += '\nThe attribute objectives is not defined'
+        else:
+            for t, r in zip(self.objectivesNames, self.objectives):
+                res += f'\n{t}: {r}'
         return res
