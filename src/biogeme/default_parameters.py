@@ -99,17 +99,6 @@ all_parameters_tuple = (
         check=(cp.is_boolean,),
     ),
     ParameterTuple(
-        name='suggest_scales',
-        default='True',
-        type=bool,
-        section='Specification',
-        description=(
-            'bool: If True, Biogeme suggests the scaling of'
-            ' the variables in the database.'
-        ),
-        check=(cp.is_boolean,),
-    ),
-    ParameterTuple(
         name='missing_data',
         default=99999,
         type=int,
@@ -200,6 +189,37 @@ all_parameters_tuple = (
             'generated'
         ),
         check=(cp.is_boolean,),
+    ),
+    ParameterTuple(
+        name='initial_radius',
+        default=100,
+        type=float,
+        section='SimpleBounds',
+        description='Initial radius of the trust region',
+        check=(cp.is_number, cp.is_positive)
+    ),
+    ParameterTuple(
+        name='steptol',
+        default=1.0e-5,
+        type=float,
+        section='SimpleBounds',
+        description=(
+            'The algorithm stops when the relative change in x is below '
+            'this threshold. Basically, if p significant digits of x '
+            'are needed, steptol should be set to 1.0e-p.'
+        ),
+        check=(cp.is_number, cp.is_positive)
+    ),
+    ParameterTuple(
+        name='enlarging_factor',
+        default=10,
+        type=float,
+        section='SimpleBounds',
+        description=(
+            'If an iteration is very successful, the radius of '
+            'the trust region is multiplied by this factor'
+        ),
+        check=(cp.is_number, cp.is_positive)
     ),
     ParameterTuple(
         name='dogleg',

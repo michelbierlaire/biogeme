@@ -48,8 +48,6 @@ logger = msg.bioMessage()
         Type: class :class:`biogeme.messaging.bioMessage`.
 """
 
-
-
 class BIOGEME:
     """Main class that combines the database and the model specification.
 
@@ -90,7 +88,7 @@ class BIOGEME:
 
         :param parameter_file: name of the .toml file where the parameters are read
         :type parameter_file: str
-        
+
         :raise biogemeError: an audit of the formulas is performed.
            If a formula has issues, an error is detected and an
            exception is raised.
@@ -116,11 +114,6 @@ class BIOGEME:
                 old='skipAudit', new='skip_audit', section='Specification'
             ),
             OldNewParamTuple(
-                old='suggestScales',
-                new='suggest_scales',
-                section=None,
-            ),
-            OldNewParamTuple(
                 old='missingData', new='missing_data', section='Specification'
             ),
         )
@@ -136,7 +129,13 @@ class BIOGEME:
                     self.toml.parameters.set_value(
                         the_param.new, value, the_param.section
                     )
-
+        obsolete = ('suggestScales')
+        for the_param in obsolete:
+            value = kwargs.get(the_param)
+            if value is not None:
+                warning_msg = f'Parameter {the_param} is obsolete and ignored.'
+                logger.warning(warning_msg)
+        
         self._algorithm = None
         self.algoParameters = None
 
@@ -327,7 +326,7 @@ class BIOGEME:
         )
         logger.warning(warning_msg)
 
-        
+
     @property
     def algorithm_name(self):
         """Name of the optimization algorithm"""
@@ -609,6 +608,46 @@ class BIOGEME:
         )
 
     @property
+    def initial_radius(self):
+        """getter for the parameter"""
+        return self.toml.parameters.get_value(
+            name='initial_radius', section='SimpleBounds'
+        )
+
+    @initial_radius.setter
+    def initial_radius(self, value):
+        self.toml.parameters.set_value(
+            name='initial_radius', value=value, section='SimpleBounds'
+        )
+
+    @property
+    def steptol(self):
+        """getter for the parameter"""
+        return self.toml.parameters.get_value(
+            name='steptol', section='SimpleBounds'
+        )
+
+    @steptol.setter
+    def steptol(self, value):
+        self.toml.parameters.set_value(
+            name='steptol', value=value, section='SimpleBounds'
+        )
+
+    @property
+    def enlarging_factor(self):
+        """getter for the parameter"""
+        return self.toml.parameters.get_value(
+            name='enlarging_factor', section='SimpleBounds'
+        )
+
+    @enlarging_factor.setter
+    def enlarging_factor(self, value):
+        self.toml.parameters.set_value(
+            name='enlarging_factor', value=value, section='SimpleBounds'
+        )
+
+
+    @property
     def maxiter(self):
         """getter for the parameter"""
         return self.toml.parameters.get_value(
@@ -668,6 +707,9 @@ class BIOGEME:
             self.algoParameters = {
                 'proportionAnalyticalHessian': self.second_derivatives,
                 'infeasibleConjugateGradient': self.infeasible_cg,
+                'radius': self.initial_radius,
+                'enlargingFactor': self.enlarging_factor,
+                'steptol': self.steptol,
                 'tolerance': self.tolerance,
                 'maxiter': self.maxiter,
             }
