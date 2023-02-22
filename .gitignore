@@ -376,3 +376,4 @@ examples/assisted/.ipynb_checkpoints/runknapsack-checkpoint.ipynb
 .secrets.*
 src/biogeme/cpp/cythonbiogeme.cpp
 src/biogeme/.DS_Store
+src/biogeme/cpp/.DS_Store
