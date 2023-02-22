@@ -374,3 +374,4 @@ examples/assisted/.ipynb_checkpoints/runknapsack-checkpoint.ipynb
 
 # Ignore dynaconf secret files
 .secrets.*
+src/biogeme/cpp/cythonbiogeme.cpp
