@@ -121,15 +121,11 @@ class BIOGEME:
         for the_param in old_params:
             value = kwargs.get(the_param.old)
             if value is not None:
-                if the_param.section is None:
-                    warning_msg = f'Parameter {the_param.old} is deprecated'
-                    logger.warning(warning_msg)
-                else:
-                    BIOGEME.argument_warning(the_param)
-                    self.toml.parameters.set_value(
-                        the_param.new, value, the_param.section
-                    )
-        obsolete = ('suggestScales')
+                BIOGEME.argument_warning(the_param)
+                self.toml.parameters.set_value(
+                    the_param.new, value, the_param.section
+                )
+        obsolete = ('suggestScales',)
         for the_param in obsolete:
             value = kwargs.get(the_param)
             if value is not None:

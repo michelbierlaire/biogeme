@@ -68,14 +68,20 @@ class Parameters:
             if the_tuple.section == section:
                 return the_tuple
 
-        error_msg = (
-            f'Parameter {name} not found'
-            if section is None
-            else f'Parameter {name} not found in section {section}'
-        )
-        raise excep.biogemeError(error_msg)
+    @staticmethod
+    def check_parameter_value(the_tuple, value):
+        """Check if the value of the parameter is valid
 
-    def check_parameter_value(self, the_tuple, value):
+        :param the_tuple: tuple to check
+        :type the_tuple: biogeme.default_parameters.ParameterTuple
+
+        :param value: value of the parameter
+        :type value: float, int or str
+
+        :return: a boolean that is True if the value is valid. If not,
+            diagnostics are provided.
+        :rtype: tuple(bool, list(str))
+        """
         ok = True
         messages = []
         for check in the_tuple.check:

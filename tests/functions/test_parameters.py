@@ -209,6 +209,16 @@ class TestParameters(unittest.TestCase):
                 name='missing_data', section='Estimation'
             )
 
+        with self.assertRaises(excep.biogemeError):
+            _ = self.the_parameters.get_param_tuple(
+                name='unknown_parameter'
+            )
+
+        with self.assertRaises(excep.biogemeError):
+            _ = self.the_parameters.get_param_tuple(
+                name='unknown_parameter', section='Estimation'
+            )
+            
     def test_get_param_tuple_4(self):
         """Test the error if the parameter does appears in two
         sections, and the section is not specified.
@@ -242,6 +252,38 @@ class TestParameters(unittest.TestCase):
         self.assertEqual(the_tuple.default, 'anything')
         self.assertEqual(the_tuple.section, 'Specification')
 
+    def test_check_parameter_value(self):
+        a_tuple = ParameterTuple(
+            name='param_name',
+            default=2.0,
+            type=float,
+            section='Estimation',
+            description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
+            check=(cp.zero_one, cp.is_number),
+        )
+        ok, msg = self.the_parameters.check_parameter_value(a_tuple, 5)
+        self.assertFalse(ok)
+
+    def test_set_value_from_tuple(self):
+        a_tuple = ParameterTuple(
+            name='param_name',
+            default=2.0,
+            type=float,
+            section='Estimation',
+            description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
+            check=(cp.zero_one, cp.is_number),
+        )
+        self.the_parameters.set_value_from_tuple(a_tuple, 1)
+        self.assertEqual(self.the_parameters.values[a_tuple], 1)
+        with self.assertRaises(excep.biogemeError):
+            self.the_parameters.set_value_from_tuple(a_tuple, 2)
+            
+                         
+    def test_set_get_value(self):
+        value = 1.0e-3
+        self.the_parameters.set_value('tolerance', value)
+        check = self.the_parameters.get_value('tolerance')
+        self.assertEqual(value, check)
 
 if __name__ == '__main__':
     unittest.main()

@@ -19,6 +19,20 @@ import numpy as np
 import pandas as pd
 import biogeme.database as db
 
+df0 = pd.DataFrame(
+    {
+        'Person': ['Max', 1, 1, 2, 2],
+        'Exclude': [0, 0, 1, 0, 1],
+        'Variable1': [1, np.nan, 3, 4, 5],
+        'Variable2': [10, 20, 30, 40, 50],
+        'Choice': [1, 2, 3, 1, 2],
+        'Av1': [0, 1, 1, 1, 1],
+        'Av2': [1, 1, 1, 1, 1],
+        'Av3': [0, 1, 1, 1, 1],
+    }
+)
+
+
 df1 = pd.DataFrame(
     {
         'Person': [1, 1, 1, 2, 2],
@@ -60,12 +74,28 @@ df3 = pd.DataFrame(
     }
 )
 
+df4 = pd.DataFrame(
+    {
+        'Person': [1, 2, 1, 3, 2],
+        'Age': [40, 40, 40, 18, 18],
+        'Exclude': [0, 0, 1, 0, 1],
+        'Variable1': [1, 2, 3, 4, 5],
+        'Variable2': [10, 20, 30, 40, 50],
+        'Choice': [1, 2, 3, 1, 2],
+        'Av1': [0, 1, 1, 1, 1],
+        'Av2': [1, 1, 1, 1, 1],
+        'Av3': [0, 1, 1, 1, 1],
+    }
+)
+
 
 def getData(myid):
     data_frames = {
+        0: deepcopy(df0),
         1: deepcopy(df1),
         2: deepcopy(df2),
         3: deepcopy(df3),
+        4: deepcopy(df4),
     }
     return db.Database(f'test_{myid}', data_frames[myid])
 

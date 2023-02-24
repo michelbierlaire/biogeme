@@ -19,7 +19,15 @@ import unittest
 import random as rnd
 import numpy as np
 import biogeme.biogeme as bio
-from biogeme.expressions import Variable, Beta, exp, bioDraws
+import biogeme.exceptions as excep
+from biogeme.expressions import (
+    Variable,
+    Beta,
+    exp,
+    bioDraws,
+    PanelLikelihoodTrajectory,
+    Numeric
+)
 from test_data import getData
 
 
@@ -38,19 +46,124 @@ class test_biogeme(unittest.TestCase):
             - beta2**4
         )
         simul = beta1 / Variable1 + beta2 / Variable2
-        dictOfExpressions = {
+        self.dictOfExpressions = {
             'loglike': self.likelihood,
+            'weight': Numeric(1),
             'beta1': beta1,
             'simul': simul,
         }
 
         self.myData = getData(1)
-        self.myBiogeme = bio.BIOGEME(self.myData, dictOfExpressions)
+        self.myBiogeme = bio.BIOGEME(self.myData, self.dictOfExpressions)
         self.myBiogeme.generateHtml = False
         self.myBiogeme.generatePickle = False
         self.myBiogeme.saveIterations = False
         self.myBiogeme.modelName = 'simpleExample'
 
+    def test_ctor(self):
+        # Test obsolete parameters
+        aBiogeme = bio.BIOGEME(
+            self.myData,
+            self.dictOfExpressions,
+            suggestScales=False,
+            seed=123
+        )
+        self.assertEqual(aBiogeme.seed_param, 123)
+        wrong_data = getData(1)
+        wrong_data.data.loc['Person', 0] = np.nan
+        with self.assertRaises(excep.biogemeError):
+            bBiogeme = bio.BIOGEME(
+                wrong_data,
+                self.dictOfExpressions,
+            )
+
+        with self.assertRaises(excep.biogemeError):
+            bBiogeme = bio.BIOGEME(
+                self.myData,
+                'wrong_object',
+            )
+
+        with self.assertRaises(excep.biogemeError):
+            bBiogeme = bio.BIOGEME(
+                self.myData,
+                {'loglike': 'wrong_object'},
+            )
+            
+        wrong_expression = (
+            Variable('Variable1') *
+            PanelLikelihoodTrajectory(Beta('beta1', -1.0, -3, 3, 0))
+        )
+        panel_data = getData(1)
+        panel_data.panel('Person')
+        with self.assertRaises(excep.biogemeError):
+            bBiogeme = bio.BIOGEME(
+                panel_data,
+                wrong_expression,
+            )
+
+        cBiogeme = bio.BIOGEME(
+            panel_data,
+            self.dictOfExpressions,
+        )
+
+    def test_parameters(self):
+        self.myBiogeme.algorithm_name = 'scipy'
+        self.assertEqual(self.myBiogeme.algorithm_name, 'scipy')
+
+        self.myBiogeme.identification_threshold = 1.0e-5
+        self.assertEqual(self.myBiogeme.identification_threshold, 1.0e-5)
+
+        self.myBiogeme.seed_param = 123
+        self.assertEqual(self.myBiogeme.seed_param, 123)
+
+        self.myBiogeme.save_iterations = False
+        self.assertEqual(self.myBiogeme.save_iterations, False)
+
+        self.myBiogeme.saveIterations = False
+        self.assertEqual(self.myBiogeme.saveIterations, False)
+
+        self.myBiogeme.skip_audit = True
+        self.assertEqual(self.myBiogeme.skip_audit, True)
+
+        self.myBiogeme.missing_data = 921967
+        self.assertEqual(self.myBiogeme.missing_data, 921967)
+
+        self.myBiogeme.missingData = 921967
+        self.assertEqual(self.myBiogeme.missingData, 921967)
+
+        self.myBiogeme.number_of_threads = 921967
+        self.assertEqual(self.myBiogeme.number_of_threads, 921967)
+
+        self.myBiogeme.number_of_draws = 921967
+        self.assertEqual(self.myBiogeme.number_of_draws, 921967)
+
+        self.myBiogeme.numberOfDraws = 921967
+        self.assertEqual(self.myBiogeme.numberOfDraws, 921967)
+
+        self.myBiogeme.only_robust_stats = True
+        self.assertEqual(self.myBiogeme.only_robust_stats, True)
+
+        self.myBiogeme.generate_html = False
+        self.assertEqual(self.myBiogeme.generate_html, False)
+        
+        self.myBiogeme.generateHtml = False
+        self.assertEqual(self.myBiogeme.generateHtml, False)
+        
+        self.myBiogeme.generate_pickle = False
+        self.assertEqual(self.myBiogeme.generate_pickle, False)
+        
+        self.myBiogeme.generatePickle = False
+        self.assertEqual(self.myBiogeme.generatePickle, False)
+        
+        self.myBiogeme.tolerance = 1.0e-5
+        self.assertEqual(self.myBiogeme.tolerance, 1.0e-5)
+        
+        self.myBiogeme.second_derivatives = 0.3
+        self.assertEqual(self.myBiogeme.second_derivatives, 0.3)
+        
+        self.myBiogeme.infeasible_cg = True
+        self.assertEqual(self.myBiogeme.infeasible_cg, True)
+        
     def test_saveIterationsFileName(self):
         f = self.myBiogeme._saveIterationsFileName()
         self.assertEqual(f, '__simpleExample.iter')

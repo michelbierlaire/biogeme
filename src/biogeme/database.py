@@ -42,228 +42,149 @@ logger = msg.bioMessage()
 
 class Database:
     """Class that contains and prepare the database."""
+    @staticmethod
+    def uniform_antithetic(sampleSize, numberOfDraws):
+        return draws.getAntithetic(
+            draws.getUniform, sampleSize, numberOfDraws
+        )
 
-    def __init__(self, name, pandasDatabase):
-        """Constructor
+    @staticmethod
+    def halton2(sampleSize, numberOfDraws):
+        return draws.getHaltonDraws(
+            sampleSize, numberOfDraws, base=2, skip=10
+        )
 
-        :param name: name of the database.
-        :type name: string
+    @staticmethod
+    def halton3(sampleSize, numberOfDraws):
+        return draws.getHaltonDraws(
+            sampleSize, numberOfDraws, base=3, skip=10
+        )
 
-        :param pandasDatabase: data stored in a pandas data frame.
-        :type pandasDatabase: pandas.DataFrame
+    @staticmethod
+    def halton5(sampleSize, numberOfDraws):
+        return draws.getHaltonDraws(
+            sampleSize, numberOfDraws, base=5, skip=10
+        )
 
-        :raise biogemeError: if the audit function detects errors.
-        :raise biogemeError: if the database is empty.
-        """
+    @staticmethod
+    def MLHS_anti(sampleSize, numberOfDraws):
+        return draws.getAntithetic(
+            draws.getLatinHypercubeDraws, sampleSize, numberOfDraws
+        )
 
-        self.name = name
-        """ Name of the database. Used mainly for the file name when
-        dumping data.
-        """
+    @staticmethod
+    def symm_uniform(sampleSize, numberOfDraws):
+        return draws.getUniform(sampleSize, numberOfDraws, symmetric=True)
 
-        if len(pandasDatabase.index) == 0:
-            error_msg = 'Database has no entry'
-            raise excep.biogemeError(error_msg)
+    @staticmethod
+    def symm_uniform_antithetic(sampleSize, numberOfDraws):
+        R = int(numberOfDraws / 2)
+        localDraws = Database.symm_uniform(sampleSize, R)
+        return np.concatenate((localDraws, -localDraws), axis=1)
 
-        self.data = pandasDatabase  #: Pandas data frame containing the data.
+    @staticmethod
+    def symm_halton2(sampleSize, numberOfDraws):
+        return draws.getHaltonDraws(
+            sampleSize, numberOfDraws, symmetric=True, base=2, skip=10
+        )
 
-        self.fullData = pandasDatabase
-        """Pandas data frame containing the full data. Useful when batches of
-        the sample are used for approximating the log likelihood.
-        """
+    @staticmethod
+    def symm_halton3(sampleSize, numberOfDraws):
+        return draws.getHaltonDraws(
+            sampleSize, numberOfDraws, symmetric=True, base=3, skip=10
+        )
 
-        self.variables = None
-        """names of the headers of the database so that they can be used as
-        an object of type biogeme.expressions.Expression. Initialized
-        by _generateHeaders()
-        """
+    @staticmethod
+    def symm_halton5(sampleSize, numberOfDraws):
+        return draws.getHaltonDraws(
+            sampleSize, numberOfDraws, symmetric=True, base=5, skip=10
+        )
 
-        self._generateHeaders()
+    @staticmethod
+    def symm_MLHS(sampleSize, numberOfDraws):
+        return draws.getLatinHypercubeDraws(
+            sampleSize, numberOfDraws, symmetric=True
+        )
 
-        self.excludedData = 0
-        """Number of observations removed by the function
-        :meth:`biogeme.Database.remove`
-        """
+    @staticmethod
+    def symm_MLHS_anti(sampleSize, numberOfDraws):
+        R = int(numberOfDraws / 2)
+        localDraws = Database.symm_MLHS(sampleSize, R)
+        return np.concatenate((localDraws, -localDraws), axis=1)
 
-        self.panelColumn = None
-        """Name of the column identifying the individuals in a panel
-        data context. None if data is not panel.
-        """
+    @staticmethod
+    def normal_antithetic(sampleSize, numberOfDraws):
+        return draws.getNormalWichuraDraws(
+            sampleSize=sampleSize,
+            numberOfDraws=numberOfDraws,
+            antithetic=True,
+        )
 
-        self.individualMap = None
-        """map identifying the range of observations for each individual in a
-        panel data context. None if data is not panel.
-        """
+    @staticmethod
+    def normal_halton2(sampleSize, numberOfDraws):
+        unif = draws.getHaltonDraws(
+            sampleSize, numberOfDraws, base=2, skip=10
+        )
+        return draws.getNormalWichuraDraws(
+            sampleSize,
+            numberOfDraws,
+            uniformNumbers=unif,
+            antithetic=False,
+        )
 
-        self.fullIndividualMap = None
-        """complete map identifying the range of observations for each
-        individual in a panel data context. None if data is not
-        panel. Useful when batches of the sample are used to
-        approximate the log likelihood function.
-        """
+    @staticmethod
+    def normal_halton3(sampleSize, numberOfDraws):
+        unif = draws.getHaltonDraws(
+            sampleSize, numberOfDraws, base=2, skip=10
+        )
+        return draws.getNormalWichuraDraws(
+            sampleSize,
+            numberOfDraws,
+            uniformNumbers=unif,
+            antithetic=False,
+        )
 
-        # Initialize the dictionary containing random number
-        # generators with a series of native generators.
-        self._initNativeRandomNumberGenerators()
+    @staticmethod
+    def normal_halton5(sampleSize, numberOfDraws):
+        unif = draws.getHaltonDraws(
+            sampleSize, numberOfDraws, base=2, skip=10
+        )
+        return draws.getNormalWichuraDraws(
+            sampleSize,
+            numberOfDraws,
+            uniformNumbers=unif,
+            antithetic=False,
+        )
 
-        self.userRandomNumberGenerators = {}
-        """Dictionary containing user defined random number
-        generators. Defined by the function
-        Database.setRandomNumberGenerators that checks that reserved
-        keywords are not used. The element of the dictionary is a
-        tuple with two elements: (0) the function generating the
-        draws, and (1) a string describing the type of draws
-        """
+    @staticmethod
+    def normal_MLHS(sampleSize, numberOfDraws):
+        unif = draws.getLatinHypercubeDraws(sampleSize, numberOfDraws)
+        return draws.getNormalWichuraDraws(
+            sampleSize,
+            numberOfDraws,
+            uniformNumbers=unif,
+            antithetic=False,
+        )
 
-        self.numberOfDraws = 0
-        """Number of draws generated by the function Database.generateDraws.
-        Value 0 if this function is not called.
-        """
+    @staticmethod
+    def normal_MLHS_anti(sampleSize, numberOfDraws):
+        unif = draws.getLatinHypercubeDraws(
+            sampleSize, int(numberOfDraws / 2)
+        )
+        return draws.getNormalWichuraDraws(
+            sampleSize, numberOfDraws, uniformNumbers=unif, antithetic=True
+        )
 
-        self.typesOfDraws = {}  #: Types of draws for Monte Carlo integration
 
-        self._auditDone = False
-
-        self.theDraws = None  #: Draws for Monte-Carlo integration
-
-        self._avail = None  #: Availability expression to check
-
-        self._choice = None  #: Choice expression to check
-
-        self._expression = None  #: Expression to check
-
-        listOfErrors, listOfWarnings = self._audit()
-        if listOfWarnings:
-            logger.warning('\n'.join(listOfWarnings))
-        if listOfErrors:
-            logger.warning('\n'.join(listOfErrors))
-            raise excep.biogemeError('\n'.join(listOfErrors))
-
-    def _initNativeRandomNumberGenerators(self):
-        def uniform_antithetic(sampleSize, numberOfDraws):
-            return draws.getAntithetic(
-                draws.getUniform, sampleSize, numberOfDraws
-            )
-
-        def halton2(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(
-                sampleSize, numberOfDraws, base=2, skip=10
-            )
-
-        def halton3(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(
-                sampleSize, numberOfDraws, base=3, skip=10
-            )
-
-        def halton5(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(
-                sampleSize, numberOfDraws, base=5, skip=10
-            )
-
-        def MLHS_anti(sampleSize, numberOfDraws):
-            return draws.getAntithetic(
-                draws.getLatinHypercubeDraws, sampleSize, numberOfDraws
-            )
-
-        def symm_uniform(sampleSize, numberOfDraws):
-            return draws.getUniform(sampleSize, numberOfDraws, symmetric=True)
-
-        def symm_uniform_antithetic(sampleSize, numberOfDraws):
-            R = int(numberOfDraws / 2)
-            localDraws = symm_uniform(sampleSize, R)
-            return np.concatenate((localDraws, -localDraws), axis=1)
-
-        def symm_halton2(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(
-                sampleSize, numberOfDraws, symmetric=True, base=2, skip=10
-            )
-
-        def symm_halton3(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(
-                sampleSize, numberOfDraws, symmetric=True, base=3, skip=10
-            )
-
-        def symm_halton5(sampleSize, numberOfDraws):
-            return draws.getHaltonDraws(
-                sampleSize, numberOfDraws, symmetric=True, base=5, skip=10
-            )
-
-        def symm_MLHS(sampleSize, numberOfDraws):
-            return draws.getLatinHypercubeDraws(
-                sampleSize, numberOfDraws, symmetric=True
-            )
-
-        def symm_MLHS_anti(sampleSize, numberOfDraws):
-            R = int(numberOfDraws / 2)
-            localDraws = symm_MLHS(sampleSize, R)
-            return np.concatenate((localDraws, -localDraws), axis=1)
-
-        def normal_antithetic(sampleSize, numberOfDraws):
-            return draws.getNormalWichuraDraws(
-                sampleSize=sampleSize,
-                numberOfDraws=numberOfDraws,
-                antithetic=True,
-            )
-
-        def normal_halton2(sampleSize, numberOfDraws):
-            unif = draws.getHaltonDraws(
-                sampleSize, numberOfDraws, base=2, skip=10
-            )
-            return draws.getNormalWichuraDraws(
-                sampleSize,
-                numberOfDraws,
-                uniformNumbers=unif,
-                antithetic=False,
-            )
-
-        def normal_halton3(sampleSize, numberOfDraws):
-            unif = draws.getHaltonDraws(
-                sampleSize, numberOfDraws, base=2, skip=10
-            )
-            return draws.getNormalWichuraDraws(
-                sampleSize,
-                numberOfDraws,
-                uniformNumbers=unif,
-                antithetic=False,
-            )
-
-        def normal_halton5(sampleSize, numberOfDraws):
-            unif = draws.getHaltonDraws(
-                sampleSize, numberOfDraws, base=2, skip=10
-            )
-            return draws.getNormalWichuraDraws(
-                sampleSize,
-                numberOfDraws,
-                uniformNumbers=unif,
-                antithetic=False,
-            )
-
-        def normal_MLHS(sampleSize, numberOfDraws):
-            unif = draws.getLatinHypercubeDraws(sampleSize, numberOfDraws)
-            return draws.getNormalWichuraDraws(
-                sampleSize,
-                numberOfDraws,
-                uniformNumbers=unif,
-                antithetic=False,
-            )
-
-        def normal_MLHS_anti(sampleSize, numberOfDraws):
-            unif = draws.getLatinHypercubeDraws(
-                sampleSize, int(numberOfDraws / 2)
-            )
-            return draws.getNormalWichuraDraws(
-                sampleSize, numberOfDraws, uniformNumbers=unif, antithetic=True
-            )
-
-        # Dictionary containing native random number generators.
-        self.nativeRandomNumberGenerators = {
-            'UNIFORM': (draws.getUniform, 'Uniform U[0, 1]'),
-            'UNIFORM_ANTI': (uniform_antithetic, 'Antithetic uniform U[0, 1]'),
-            'UNIFORM_HALTON2': (
-                halton2,
-                'Halton draws with base 2, skipping the first 10',
-            ),
-            'UNIFORM_HALTON3': (
+    # Dictionary containing native random number generators. Class attribute
+    nativeRandomNumberGenerators = {
+        'UNIFORM': (draws.getUniform, 'Uniform U[0, 1]'),
+        'UNIFORM_ANTI': (uniform_antithetic, 'Antithetic uniform U[0, 1]'),
+        'UNIFORM_HALTON2': (
+            halton2,
+            'Halton draws with base 2, skipping the first 10',
+        ),
+        'UNIFORM_HALTON3': (
                 halton3,
                 'Halton draws with base 3, skipping the first 10',
             ),
@@ -331,7 +252,8 @@ class Database:
             ),
         }
 
-    def descriptionOfNativeDraws(self):
+    @staticmethod
+    def descriptionOfNativeDraws():
         """Describe the draws available draws with Biogeme
 
         :return: dict, where the keys are the names of the draws,
@@ -346,10 +268,104 @@ class Database:
         :rtype: dict
 
         """
-        return [
-            f'{key}: {tuple[1]}'
-            for key, tuple in self.nativeRandomNumberGenerators.items()
-        ]
+        return {
+            key: tuple[1]
+            for key, tuple in Database.nativeRandomNumberGenerators.items()
+        }
+
+
+    def __init__(self, name, pandasDatabase):
+        """Constructor
+
+        :param name: name of the database.
+        :type name: string
+
+        :param pandasDatabase: data stored in a pandas data frame.
+        :type pandasDatabase: pandas.DataFrame
+
+        :raise biogemeError: if the audit function detects errors.
+        :raise biogemeError: if the database is empty.
+        """
+
+        self.name = name
+        """ Name of the database. Used mainly for the file name when
+        dumping data.
+        """
+
+        if len(pandasDatabase.index) == 0:
+            error_msg = 'Database has no entry'
+            raise excep.biogemeError(error_msg)
+
+        self.data = pandasDatabase  #: Pandas data frame containing the data.
+
+        self.fullData = pandasDatabase
+        """Pandas data frame containing the full data. Useful when batches of
+        the sample are used for approximating the log likelihood.
+        """
+
+        self.variables = None
+        """names of the headers of the database so that they can be used as
+        an object of type biogeme.expressions.Expression. Initialized
+        by _generateHeaders()
+        """
+
+        self._generateHeaders()
+
+        self.excludedData = 0
+        """Number of observations removed by the function
+        :meth:`biogeme.Database.remove`
+        """
+
+        self.panelColumn = None
+        """Name of the column identifying the individuals in a panel
+        data context. None if data is not panel.
+        """
+
+        self.individualMap = None
+        """map identifying the range of observations for each individual in a
+        panel data context. None if data is not panel.
+        """
+
+        self.fullIndividualMap = None
+        """complete map identifying the range of observations for each
+        individual in a panel data context. None if data is not
+        panel. Useful when batches of the sample are used to
+        approximate the log likelihood function.
+        """
+
+        self.userRandomNumberGenerators = {}
+        """Dictionary containing user defined random number
+        generators. Defined by the function
+        Database.setRandomNumberGenerators that checks that reserved
+        keywords are not used. The element of the dictionary is a
+        tuple with two elements: (0) the function generating the
+        draws, and (1) a string describing the type of draws
+        """
+
+        self.numberOfDraws = 0
+        """Number of draws generated by the function Database.generateDraws.
+        Value 0 if this function is not called.
+        """
+
+        self.typesOfDraws = {}  #: Types of draws for Monte Carlo integration
+
+        self.theDraws = None  #: Draws for Monte-Carlo integration
+
+        self._avail = None  #: Availability expression to check
+
+        self._choice = None  #: Choice expression to check
+
+        self._expression = None  #: Expression to check
+
+        listOfErrors, listOfWarnings = self._audit()
+        ## For now, the audit issues only errors. If warnings are
+        ## triggered in the future, the nexrt lines should be
+        ## uncommented.
+        #if listOfWarnings:
+        #    logger.warning('\n'.join(listOfWarnings))
+        if listOfErrors:
+            logger.warning('\n'.join(listOfErrors))
+            raise excep.biogemeError('\n'.join(listOfErrors))
 
     def _audit(self):
         """Performs a series of checks and reports warnings and errors.
@@ -365,9 +381,6 @@ class Database:
         """
         listOfErrors = []
         listOfWarnings = []
-        if self._auditDone:
-            return listOfErrors, listOfWarnings
-
         for col, dtype in self.data.dtypes.items():
             if not np.issubdtype(dtype, np.number):
                 theError = f'Column {col} in the database does contain {dtype}'
@@ -380,7 +393,6 @@ class Database:
             )
             listOfErrors.append(theError)
 
-        self._auditDone = True
         return listOfErrors, listOfWarnings
 
     def _generateHeaders(self):
