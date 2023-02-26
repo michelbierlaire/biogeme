@@ -661,32 +661,30 @@ class Database:
         if self.isPanel():
             if self.fullIndividualMap is None:
                 self.fullIndividualMap = self.individualMap
-            else:
-                # Check if the structure has not been modified since
-                # last sample
-                if set(self.fullIndividualMap.columns) != set(
-                    self.individualMap.columns
-                ):
-                    message = (
-                        'The structure of the database has been '
-                        'modified since last sample. '
-                    )
-                    left = set(self.fullIndividualMap.columns).difference(
-                        set(self.individualMap.columns)
-                    )
-                    if left:
-                        message += f' Columns that disappeared: {left}'
-                    right = set(self.individualMap.columns).difference(
-                        set(self.fullIndividualMap.columns)
-                    )
-                    if right:
-                        message += f' Columns that were added: {right}'
-                    raise excep.biogemeError(message)
+            # Check if the structure has not been modified since
+            # last sample
+            if set(self.fullIndividualMap.columns) != set(
+                self.individualMap.columns
+            ):
+                message = (
+                    'The structure of the database has been '
+                    'modified since last sample. '
+                )
+                left = set(self.fullIndividualMap.columns).difference(
+                    set(self.individualMap.columns)
+                )
+                if left:
+                    message += f' Columns that disappeared: {left}'
+                right = set(self.individualMap.columns).difference(
+                    set(self.fullIndividualMap.columns)
+                )
+                if right:
+                    message += f' Columns that were added: {right}'
+                raise excep.biogemeError(message)
 
             self.individualMap = self.fullIndividualMap.sample(
                 frac=samplingRate, weights=columnWithSamplingWeights
             )
-
         else:
             # Cross sectional data
             if self.fullData is None:

@@ -587,16 +587,18 @@ class bioResults:
                             prob,
                         ]
 
-            eigIndex = np.argmin(self.data.eigenValues)
-            self.data.smallestEigenValue = self.data.eigenValues[eigIndex]
-            self.data.smallestEigenVector = self.data.eigenVectors[:, eigIndex]
+            min_eigIndex = np.argmin(self.data.eigenValues)
+            self.data.smallestEigenValue = self.data.eigenValues[min_eigIndex]
+            self.data.smallestEigenVector = self.data.eigenVectors[:, min_eigIndex]
             self.data.smallestSingularValue = min(self.data.singularValues)
-            eigIndex = np.argmax(self.data.eigenValues)
-            self.data.largestEigenValue = self.data.eigenValues[eigIndex]
-            self.data.largestEigenVector = self.data.eigenVectors[:, eigIndex]
+            max_eigIndex = np.argmax(self.data.eigenValues)
+            self.data.largestEigenValue = self.data.eigenValues[max_eigIndex]
+            self.data.largestEigenVector = self.data.eigenVectors[:, max_eigIndex]
             self.data.largestSingularValue = max(self.data.singularValues)
             self.data.conditionNumber = (
                 self.data.largestEigenValue / self.data.smallestEigenValue
+                if self.data.smallestEigenValue
+                else np.finfo(np.float64).max
             )
 
     def shortSummary(self):

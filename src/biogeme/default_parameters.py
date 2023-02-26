@@ -87,18 +87,6 @@ all_parameters_tuple = (
         check=(cp.is_integer, cp.is_positive),
     ),
     ParameterTuple(
-        name='skip_audit',
-        default='False',
-        type=bool,
-        section='Specification',
-        description=(
-            'bool: If True, does not check the validity of the '
-            'formulas. It may save significant amount of '
-            'time for large models and large data sets. '
-        ),
-        check=(cp.is_boolean,),
-    ),
-    ParameterTuple(
         name='missing_data',
         default=99999,
         type=int,

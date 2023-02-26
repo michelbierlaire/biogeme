@@ -61,6 +61,7 @@ class BIOGEME:
         formulas,
         userNotes=None,
         parameter_file=None,
+        skip_audit=False,
         **kwargs,
     ):
 
@@ -95,6 +96,7 @@ class BIOGEME:
 
         """
         self.toml = toml.Toml(parameter_file)
+        self.skip_audit = skip_audit
 
         # Code for the transition period to inform the user of the
         # change of parameter management scheme
@@ -110,9 +112,6 @@ class BIOGEME:
                 section='MonteCarlo',
             ),
             OldNewParamTuple(old='seed', new='seed', section='MonteCarlo'),
-            OldNewParamTuple(
-                old='skipAudit', new='skip_audit', section='Specification'
-            ),
             OldNewParamTuple(
                 old='missingData', new='missing_data', section='Specification'
             ),
@@ -132,10 +131,10 @@ class BIOGEME:
                 warning_msg = f'Parameter {the_param} is obsolete and ignored.'
                 logger.warning(warning_msg)
         
-        self._algorithm = None
+        self._algorithm = opt.algorithms.get(self.algorithm_name)
         self.algoParameters = None
 
-        if not self.skipAudit:
+        if not self.skip_audit:
             database.data = database.data.replace({True: 1, False: 0})
             listOfErrors, listOfWarnings = database._audit()
             if listOfWarnings:
@@ -233,29 +232,9 @@ class BIOGEME:
 
         self.nullLogLike = None  #: Log likelihood of the null model
 
-#        if self.suggestScales:
-#            suggestedScales = self.database.suggestScaling()
-#            if not suggestedScales.empty:
-#                logger.detailed(
-#                    'It is suggested to scale the following variables.'
-#                )
-#                for _, row in suggestedScales.iterrows():
-#                    error_msg = (
-#                        f'Multiply {row["Column"]} by\t{row["Scale"]} '
-#                        'because the largest (abs) value is\t'
-#                        f'{row["Largest"]}'
-#                    )
-#                    logger.detailed(error_msg)
-#                error_msg = (
-#                    'To remove this feature, set the parameter '
-#                    'suggestScales to False when creating the '
-#                    'BIOGEME object.'
-#                )
-#                logger.detailed(error_msg)
-
         self._prepareDatabaseForFormula()
 
-        if not self.skipAudit:
+        if not self.skip_audit:
             self._audit()
 
         self.reset_id_manager()
@@ -337,6 +316,8 @@ class BIOGEME:
             value=value,
             section='Estimation',
         )
+        self._algorithm = opt.algorithms.get(self.algorithm_name)
+        
 
     @property
     def identification_threshold(self):
@@ -393,32 +374,6 @@ class BIOGEME:
     def save_iterations(self, value):
         self.toml.parameters.set_value(
             name='save_iterations', value=value, section='Estimation'
-        )
-
-    @property
-    def skipAudit(self):
-        """getter for the parameter"""
-        return self.toml.parameters.get_value(
-            name='skip_audit', section='Specification'
-        )
-
-    @skipAudit.setter
-    def skipAudit(self, value):
-        self.toml.parameters.set_value(
-            name='skip_audit', value=value, section='Specification'
-        )
-
-    @property
-    def skip_audit(self):
-        """getter for the parameter"""
-        return self.toml.parameters.get_value(
-            name='skip_audit', section='Specification'
-        )
-
-    @skip_audit.setter
-    def skip_audit(self, value):
-        self.toml.parameters.set_value(
-            name='skip_audit', value=value, section='Specification'
         )
 
     @property
@@ -653,7 +608,7 @@ class BIOGEME:
     @maxiter.setter
     def maxiter(self, value):
         self.toml.parameters.set_value(
-            name='maxiter', value=value, section='SimpleBounds'
+            name='max_iterations', value=value, section='SimpleBounds'
         )
 
     @property
@@ -668,13 +623,6 @@ class BIOGEME:
         self.toml.parameters.set_value(
             name='dogleg', value=value, section='TrustRegion'
         )
-
-    def numerical_constants(self):
-        return {
-            'epsilon': self.theC.getNumericalEpsilon(),
-            'maximum float': self.theC.getNumericalMax(),
-            'minimum float': self.theC.getNumericalMax(),
-        }
 
     def reset_id_manager(self):
         """Reset all the ids of the elementary expression in the formulas"""
@@ -691,14 +639,8 @@ class BIOGEME:
         for f in self.formulas.values():
             f.setIdManager(id_manager=self.id_manager)
 
-    def set_algorithm(self):
+    def _set_algorithm_parameters(self):
         """Retrieve the function with the optimization algorithm from its name"""
-        self._algorithm = opt.algorithms.get(self.algorithm_name)
-        if self._algorithm is None:
-            raise excep.biogemeError(
-                f'Unknown algorithm {self.algorithm_name}'
-            )
-
         if self.algorithm_name == 'simple_bounds':
             self.algoParameters = {
                 'proportionAnalyticalHessian': self.second_derivatives,
@@ -712,6 +654,9 @@ class BIOGEME:
         elif self.algorithm_name in ['TR-newton', 'TR-BFGS']:
             self.algoParameters = {
                 'dogleg': self.dogleg,
+                'radius': self.initial_radius,
+                'tolerance': self.tolerance,
+                'maxiter': self.maxiter,
             }
         else:
             self.algoParameters = None
@@ -811,19 +756,11 @@ class BIOGEME:
                 self.database.useFullSample()
             else:
                 logger.detailed(f'Use {100*sample}% of the data.')
-                if self.database.isPanel():
-                    self.database.sampleIndividualMapWithoutReplacement(
-                        sample, self.columnForBatchSamplingWeights
-                    )
-                else:
-                    self.database.sampleWithoutReplacement(
-                        sample, self.columnForBatchSamplingWeights
-                    )
+                self.database.sampleWithoutReplacement(
+                    sample,
+                    self.columnForBatchSamplingWeights
+                )
             self.lastSample = sample
-
-        # Rebuild the map for panel data
-        if self.database.isPanel():
-            self.database.buildPanelMap()
 
     def freeBetaNames(self):
         """Returns the names of the parameters that must be estimated
@@ -1195,8 +1132,6 @@ class BIOGEME:
 
         """
 
-        self.set_algorithm()
-
         if kwargs.get('algorithm') is not None:
             error_msg = (
                 'The parameter "algorithm" is deprecated. Instead, define the '
@@ -1219,6 +1154,8 @@ class BIOGEME:
                 f'The output files are named from the model name. '
                 f'The default is [{DEFAULT_MODEL_NAME}]'
             )
+
+        self._set_algorithm_parameters()
 
         if recycle:
             pickle_files = self.files_of_type('pickle')
@@ -1385,7 +1322,7 @@ class BIOGEME:
                 f' in the formula: {self.loglike}.'
             )
 
-        self.set_algorithm()
+        self._set_algorithm_parameters()
 
         start_time = datetime.now()
         #        yep.start('profile.out')
