@@ -14,10 +14,6 @@ import biogeme.exceptions as excep
 
 FILE_CONTENT = """
 [Specification]
-skip_audit = "False" # bool: If True, does not check the validity of the
-                         # formulas. It may save significant amount of
-                         # time for large models and large data sets.
-
 suggest_scales = "True" # bool: If True, Biogeme suggests the scaling of
                          # the variables in the database.
 missing_data = 99999 # number: If one variable has this value, it is assumed
@@ -73,8 +69,6 @@ class TestToml(unittest.TestCase):
         with open(test_file, 'w', encoding='utf-8') as f:
             print(FILE_CONTENT, file=f)
         the_toml = toml.Toml(parameter_file=test_file)
-        check_bool = the_toml.parameters.get_value('skip_audit')
-        self.assertEqual(check_bool, False)
 
         with self.assertRaises(excep.biogemeError):
             _ = the_toml.parameters.get_value('a_param', section='Estimation')
@@ -96,8 +90,6 @@ class TestToml(unittest.TestCase):
         test_dir = tempfile.mkdtemp()
         test_file = path.join(test_dir, 'any_file_name.toml')
         the_toml = toml.Toml(parameter_file=test_file)
-        check_bool = the_toml.parameters.get_value('skip_audit')
-        self.assertEqual(check_bool, False)
 
         with self.assertRaises(excep.biogemeError):
             _ = the_toml.parameters.get_value('a_param', section='Estimation')

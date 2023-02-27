@@ -99,6 +99,17 @@ def getData(myid):
     }
     return db.Database(f'test_{myid}', data_frames[myid])
 
+def getPanelData(myid):
+    data_frames = {
+        0: deepcopy(df0),
+        1: deepcopy(df1),
+        2: deepcopy(df2),
+        3: deepcopy(df3),
+        4: deepcopy(df4),
+    }
+    the_database = db.Database(f'test_{myid}', data_frames[myid])
+    the_database.panel('Person')
+    return the_database
 
 input_flatten = pd.DataFrame(
     {

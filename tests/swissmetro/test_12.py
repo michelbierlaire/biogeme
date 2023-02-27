@@ -14,6 +14,7 @@ from biogeme.expressions import (
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
+
 database = db.Database('swissmetro', df)
 
 database.panel('ID')
@@ -38,7 +39,6 @@ B_TIME_S = Beta('B_TIME_S', 0, None, None, 0)
 # Define a random parameter, normally distirbuted, designed to be used
 # for Monte-Carlo simulation
 B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL')
-
 
 SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)

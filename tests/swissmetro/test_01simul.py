@@ -75,6 +75,15 @@ simulate = {
 }
 
 
+the_betas_values = {
+    'ASC_TRAIN': -0.701188,
+    'B_TIME': -1.27786,
+    'B_COST': -1.08379,
+    'ASC_SM': 0,
+    'ASC_CAR': -0.154633
+}
+
+
 class test_01simul(unittest.TestCase):
     def testSimulation(self):
         biogeme = bio.BIOGEME(database, simulate)
@@ -82,7 +91,7 @@ class test_01simul(unittest.TestCase):
         biogeme.generateHtml = False
         biogeme.generatePickle = False
         biogeme.modelName = '01logit_simul'
-        results = biogeme.simulate()
+        results = biogeme.simulate(the_betas_values)
         self.assertAlmostEqual(sum(results['P1']), 907.9992101964821, 2)
         self.assertAlmostEqual(
             sum(results['logit elas. 1']), -12673.838605478186, 2

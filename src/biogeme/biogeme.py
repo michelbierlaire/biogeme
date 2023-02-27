@@ -247,11 +247,6 @@ class BIOGEME:
         self.theC.setData(self.database.data)
         self.theC.setMissingData(self.missingData)
 
-        self.columnForBatchSamplingWeights = None
-        """ Name of the column defining weights for batch sampling in
-        stochastic optimization.
-        """
-
         start_time = datetime.now()
         self._generateDraws(self.numberOfDraws)
         if self.monteCarlo:
@@ -734,34 +729,11 @@ class BIOGEME:
                 numberOfDraws,
             )
 
-    def _prepareDatabaseForFormula(self, sample=None):
-        # Prepare the dataset.
-        if sample is None:
-            if self.lastSample == 1.0:
-                # We continue to use the full data set. Nothing to be done.
-                return
-            self.lastSample = 1.0
-            self.database.useFullSample()
-        else:
-            # Check if the sample size is valid
-            if sample <= 0 or sample > 1.0:
-                error_msg = (
-                    f'The value of the parameter sample must be '
-                    f'strictly between 0.0 and 1.0,'
-                    f' and not {sample}'
-                )
-                raise ValueError(error_msg)
-
-            if sample == 1.0:
-                self.database.useFullSample()
-            else:
-                logger.detailed(f'Use {100*sample}% of the data.')
-                self.database.sampleWithoutReplacement(
-                    sample,
-                    self.columnForBatchSamplingWeights
-                )
-            self.lastSample = sample
-
+    def _prepareDatabaseForFormula(self):
+        # Rebuild the map for panel data
+        if self.database.isPanel():
+            self.database.buildPanelMap()
+            
     def freeBetaNames(self):
         """Returns the names of the parameters that must be estimated
 
@@ -844,7 +816,12 @@ class BIOGEME:
 
         :raises ValueError: if the length of the list x is incorrect.
 
+        :raises biogemeError: if calculatation with batch is requested
         """
+
+        if batch is not None:
+            raise excep.biogemeError('Calculation with batch not yet implemented')
+        
         if len(x) != len(self.id_manager.free_betas_values):
             error_msg = (
                 f'Input vector must be of length '
@@ -853,7 +830,7 @@ class BIOGEME:
             )
             raise ValueError(error_msg)
 
-        self._prepareDatabaseForFormula(batch)
+        self._prepareDatabaseForFormula()
         f = self.theC.calculateLikelihood(
             x, self.id_manager.fixed_betas_values
         )
@@ -907,7 +884,11 @@ class BIOGEME:
 
         :raises biogemeError: if the norm of the gradient is not finite, an
             error is raised.
+        :raises biogemeError: if calculatation with batch is requested
         """
+        if batch is not None:
+            raise excep.biogemeError('Calculation with batch not yet implemented')
+        
         n = len(x)
         if n != self.id_manager.number_of_free_betas:
             error_msg = (
@@ -915,7 +896,7 @@ class BIOGEME:
                 f'{self.id_manager.number_of_free_betas} and not {len(x)}'
             )
             raise ValueError(error_msg)
-        self._prepareDatabaseForFormula(batch)
+        self._prepareDatabaseForFormula()
 
         g = np.empty(n)
         h = np.empty([n, n])
@@ -998,11 +979,14 @@ class BIOGEME:
 
         return tools.findiff_H(theFunction, np.asarray(x))
 
-    def checkDerivatives(self, verbose=False):
+    def checkDerivatives(self, beta, verbose=False):
         """Verifies the implementation of the derivatives.
 
         It compares the analytical version with the finite differences
         approximation.
+
+        :param x: vector of values for the parameters.
+        :type x: list(float)
 
         :param verbose: if True, the comparisons are reported. Default: False.
         :type verbose: bool
@@ -1030,7 +1014,7 @@ class BIOGEME:
 
         return tools.checkDerivatives(
             theFunction,
-            np.asarray(self.id_manager.free_betas_values),
+            np.asarray(beta),
             self.id_manager.free_betas.names,
             verbose,
         )
@@ -1449,7 +1433,41 @@ class BIOGEME:
 
         return results
 
-    def simulate(self, theBetaValues=None):
+    def beta_values_dict_to_list(self, beta_dict):
+        """Transforms a dict with the names of the betas associated
+            with their values, into a list consistent with the
+            numbering of the ids.
+
+        :param beta_dict: dict with the values of  the parameters
+        :type beta_dict: dict(str: float)
+
+        :raises biogemeError: if the parameter is not a dict
+
+        :raises biogemeError: if a parameter is missing in the dict
+        """
+        if not isinstance(beta_dict, dict):
+            err = (
+                'A dictionary must be provided. '
+                'It can be obtained from results.getBetaValues()'
+            )
+            raise excep.biogemeError(err)
+        for x in beta_dict.keys():
+            if x not in self.id_manager.free_betas.names:
+                logger.warning(f'Parameter {x} not present in the model.')
+
+        beta_list = []
+        for i, x in enumerate(self.id_manager.free_betas.names):
+            v = beta_dict.get(x)
+            if v is None:
+                err = (
+                    f'Incomplete dict. The value of {x} is not provided.'
+                )
+                raise excep.biogemeError(err)
+            
+            beta_list.append(v)
+        return beta_list
+        
+    def simulate(self, theBetaValues):
         """Applies the formulas to each row of the database.
 
         :param theBetaValues: values of the parameters to be used in
@@ -1472,30 +1490,20 @@ class BIOGEME:
 
         :raises biogemeError: if the number of parameters is incorrect
 
+        :raises biogemeError: if theBetaValues is None.
         """
 
         if theBetaValues is None:
-            betaValues = self.id_manager.free_betas_values
-        else:
-            if not isinstance(theBetaValues, dict):
-                err = (
-                    'Deprecated. A dictionary must be provided. '
-                    'It can be obtained from results.getBetaValues()'
-                )
-                raise excep.biogemeError(err)
-            for x in theBetaValues.keys():
-                if x not in self.id_manager.free_betas.names:
-                    logger.warning(f'Parameter {x} not present in the model')
-            betaValues = []
-            for i, x in enumerate(self.id_manager.free_betas.names):
-                if x in theBetaValues:
-                    betaValues.append(theBetaValues[x])
-                else:
-                    logger.warning(
-                        f'Simulation: initial value of {x} not provided.'
-                    )
-                    betaValues.append(self.id_manager.free_betas_values[i])
+            err = (
+                'Contrarily to previous versions of Biogeme, the values of beta must '
+                'now be explicitly mentioned. They can be obtained from '
+                'results.getBetaValues()'
+            )
+            raise excep.biogemeError(err)
+            
 
+        betaValues = self.beta_values_dict_to_list(theBetaValues)
+        
         if self.database.isPanel():
             for f in self.formulas.values():
                 count = f.countPanelTrajectoryExpressions()

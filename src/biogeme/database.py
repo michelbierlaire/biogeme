@@ -644,87 +644,91 @@ class Database:
         ]
         return sample
 
-    def sampleWithoutReplacement(
-        self, samplingRate, columnWithSamplingWeights=None
-    ):
-        """Replace the data set by a sample for stochastic algorithms
 
-        :param samplingRate: the proportion of data to include in the sample.
-        :type samplingRate: float
-        :param columnWithSamplingWeights: name of the column with
-              the sampling weights. If None, each row has equal probability.
-        :type columnWithSamplingWeights: string
+    #####
+    # This has to be reimplemented in a cleaner way
+    ####
+#    def sampleWithoutReplacement(
+#        self, samplingRate, columnWithSamplingWeights=None
+#    ):
+#        """Replace the data set by a sample for stochastic algorithms
+#
+#        :param samplingRate: the proportion of data to include in the sample.
+#        :type samplingRate: float
+#        :param columnWithSamplingWeights: name of the column with
+#              the sampling weights. If None, each row has equal probability.
+#        :type columnWithSamplingWeights: string
+#
+#        :raise biogemeError: if the structure of the database has been modified
+#            since last sample.
+#        """
+#        if self.isPanel():
+#            if self.fullIndividualMap is None:
+#                self.fullIndividualMap = self.individualMap
+#            # Check if the structure has not been modified since
+#            # last sample
+#            if set(self.fullIndividualMap.columns) != set(
+#                self.individualMap.columns
+#            ):
+#                message = (
+#                    'The structure of the database has been '
+#                    'modified since last sample. '
+#                )
+#                left = set(self.fullIndividualMap.columns).difference(
+#                    set(self.individualMap.columns)
+#                )
+#                if left:
+#                    message += f' Columns that disappeared: {left}'
+#                right = set(self.individualMap.columns).difference(
+#                    set(self.fullIndividualMap.columns)
+#                )
+#                if right:
+#                    message += f' Columns that were added: {right}'
+#                raise excep.biogemeError(message)
+#
+#            self.individualMap = self.fullIndividualMap.sample(
+#                frac=samplingRate, weights=columnWithSamplingWeights
+#            )
+#        else:
+#            # Cross sectional data
+#            if self.fullData is None:
+#                self.fullData = self.data
+#            else:
+#                # Check if the structure has not been modified since
+#                # last sample
+#                if set(self.fullData.columns) != set(self.data.columns):
+#                    message = (
+#                        'The structure of the database has been modified '
+#                        'since last sample. '
+#                    )
+#                    left = set(self.fullData.columns).difference(
+#                        set(self.data.columns)
+#                    )
+#                    if left:
+#                        message += f' Columns that disappeared: {left}'
+#                    right = set(self.data.columns).difference(
+#                        set(self.fullData.columns)
+#                    )
+#                    if right:
+#                        message += f' Columns that were added: {right}'
+#                    raise excep.biogemeError(message)
+#
+#            self.data = self.fullData.sample(
+#                frac=samplingRate, weights=columnWithSamplingWeights
+#            )
 
-        :raise biogemeError: if the structure of the database has been modified
-            since last sample.
-        """
-        if self.isPanel():
-            if self.fullIndividualMap is None:
-                self.fullIndividualMap = self.individualMap
-            # Check if the structure has not been modified since
-            # last sample
-            if set(self.fullIndividualMap.columns) != set(
-                self.individualMap.columns
-            ):
-                message = (
-                    'The structure of the database has been '
-                    'modified since last sample. '
-                )
-                left = set(self.fullIndividualMap.columns).difference(
-                    set(self.individualMap.columns)
-                )
-                if left:
-                    message += f' Columns that disappeared: {left}'
-                right = set(self.individualMap.columns).difference(
-                    set(self.fullIndividualMap.columns)
-                )
-                if right:
-                    message += f' Columns that were added: {right}'
-                raise excep.biogemeError(message)
-
-            self.individualMap = self.fullIndividualMap.sample(
-                frac=samplingRate, weights=columnWithSamplingWeights
-            )
-        else:
-            # Cross sectional data
-            if self.fullData is None:
-                self.fullData = self.data
-            else:
-                # Check if the structure has not been modified since
-                # last sample
-                if set(self.fullData.columns) != set(self.data.columns):
-                    message = (
-                        'The structure of the database has been modified '
-                        'since last sample. '
-                    )
-                    left = set(self.fullData.columns).difference(
-                        set(self.data.columns)
-                    )
-                    if left:
-                        message += f' Columns that disappeared: {left}'
-                    right = set(self.data.columns).difference(
-                        set(self.fullData.columns)
-                    )
-                    if right:
-                        message += f' Columns that were added: {right}'
-                    raise excep.biogemeError(message)
-
-            self.data = self.fullData.sample(
-                frac=samplingRate, weights=columnWithSamplingWeights
-            )
-
-    def useFullSample(self):
-        """Re-establish the full sample for calculation of the likelihood"""
-        if self.isPanel():
-            if self.fullIndividualMap is None:
-                raise excep.biogemeError(
-                    'Full panel data set has not been saved.'
-                )
-            self.individualMap = self.fullIndividualMap
-        else:
-            if self.fullData is None:
-                raise excep.biogemeError('Full data set has not been saved.')
-            self.data = self.fullData
+#    def useFullSample(self):
+#        """Re-establish the full sample for calculation of the likelihood"""
+#        if self.isPanel():
+#            if self.fullIndividualMap is None:
+#                raise excep.biogemeError(
+#                    'Full panel data set has not been saved.'
+#                )
+#            self.individualMap = self.fullIndividualMap
+#        else:
+#            if self.fullData is None:
+#                raise excep.biogemeError('Full data set has not been saved.')
+#            self.data = self.fullData
 
     def addColumn(self, expression, column):
         """Add a new column in the database, calculated from an expression.
@@ -1099,6 +1103,9 @@ class Database:
         """Sorts the data so that the observations for each individuals are
         contiguous, and builds a map that identifies the range of indices of
         the observations of each individuals.
+
+        :param sample: if True, the data is a sample of the full data set
+        :type sample: bool
         """
         if self.panelColumn is not None:
             self.data = self.data.sort_values(by=self.panelColumn)

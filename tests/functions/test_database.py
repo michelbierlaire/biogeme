@@ -245,44 +245,6 @@ class testDatabase(unittest.TestCase):
         self.assertTupleEqual(dim1, (5, 8))
         self.assertTupleEqual(dim2, (12, 8))
         
-    def test_sampleWithoutReplacement(self):
-        rate = 0.2
-        orig_dim = self.myData1.data.shape
-        self.myData1.sampleWithoutReplacement(samplingRate=rate)
-        sample_dim = self.myData1.data.shape
-        self.assertTupleEqual(sample_dim, (orig_dim[0]*rate, orig_dim[1]))
-
-        self.myData1.useFullSample()
-        self.myData1.fullData = None
-        with self.assertRaises(excep.biogemeError):
-            self.myData1.useFullSample()
-        self.myData1.sampleWithoutReplacement(samplingRate=rate)
-        sample_dim = self.myData1.data.shape
-        self.assertTupleEqual(sample_dim, (orig_dim[0]*rate, orig_dim[1]))
-        self.myData1.fullData.columns = ['anything', 'Exclude', 'Variable1', 'Variable2', 'Choice', 'Av1', 'Av2', 'Av3']
-        with self.assertRaises(excep.biogemeError):
-            self.myData1.sampleWithoutReplacement(samplingRate=rate)
-
-        
-        rate = 1.0
-        self.myPanelData.panel('Person')
-        orig_dim = self.myPanelData.individualMap.shape
-        self.myPanelData.sampleWithoutReplacement(samplingRate=rate)
-        sample_dim = self.myPanelData.individualMap.shape
-        self.assertTupleEqual(sample_dim, (orig_dim[0]*rate, orig_dim[1]))
-        self.myPanelData.useFullSample()
-        self.myPanelData.fullIndividualMap = None
-        with self.assertRaises(excep.biogemeError):
-            self.myPanelData.useFullSample()
-        
-        self.myPanelData.sampleWithoutReplacement(samplingRate=rate)
-        sample_dim = self.myPanelData.individualMap.shape
-        self.assertTupleEqual(sample_dim, (orig_dim[0]*rate, orig_dim[1]))
-
-        self.myPanelData.fullIndividualMap.columns = ['anything', 'also_anything']
-        with self.assertRaises(excep.biogemeError):
-            self.myPanelData.sampleWithoutReplacement(samplingRate=rate)
-        
     def test_panel(self):
         # Data is not considered panel yet
         shouldBeFalse = self.myPanelData.isPanel()
