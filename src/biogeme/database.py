@@ -42,77 +42,77 @@ logger = msg.bioMessage()
 
 class Database:
     """Class that contains and prepare the database."""
-    @staticmethod
+    #@staticmethod
     def uniform_antithetic(sampleSize, numberOfDraws):
         return draws.getAntithetic(
             draws.getUniform, sampleSize, numberOfDraws
         )
 
-    @staticmethod
+    #@staticmethod
     def halton2(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, base=2, skip=10
         )
 
-    @staticmethod
+    #@staticmethod
     def halton3(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, base=3, skip=10
         )
 
-    @staticmethod
+    #@staticmethod
     def halton5(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, base=5, skip=10
         )
 
-    @staticmethod
+    #@staticmethod
     def MLHS_anti(sampleSize, numberOfDraws):
         return draws.getAntithetic(
             draws.getLatinHypercubeDraws, sampleSize, numberOfDraws
         )
 
-    @staticmethod
+    #@staticmethod
     def symm_uniform(sampleSize, numberOfDraws):
         return draws.getUniform(sampleSize, numberOfDraws, symmetric=True)
 
-    @staticmethod
+    #@staticmethod
     def symm_uniform_antithetic(sampleSize, numberOfDraws):
         R = int(numberOfDraws / 2)
         localDraws = Database.symm_uniform(sampleSize, R)
         return np.concatenate((localDraws, -localDraws), axis=1)
 
-    @staticmethod
+    #@staticmethod
     def symm_halton2(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, symmetric=True, base=2, skip=10
         )
 
-    @staticmethod
+    #@staticmethod
     def symm_halton3(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, symmetric=True, base=3, skip=10
         )
 
-    @staticmethod
+    #@staticmethod
     def symm_halton5(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, symmetric=True, base=5, skip=10
         )
 
-    @staticmethod
+    #@staticmethod
     def symm_MLHS(sampleSize, numberOfDraws):
         return draws.getLatinHypercubeDraws(
             sampleSize, numberOfDraws, symmetric=True
         )
 
-    @staticmethod
+    #@staticmethod
     def symm_MLHS_anti(sampleSize, numberOfDraws):
         R = int(numberOfDraws / 2)
         localDraws = Database.symm_MLHS(sampleSize, R)
         return np.concatenate((localDraws, -localDraws), axis=1)
 
-    @staticmethod
+    #@staticmethod
     def normal_antithetic(sampleSize, numberOfDraws):
         return draws.getNormalWichuraDraws(
             sampleSize=sampleSize,
@@ -120,7 +120,7 @@ class Database:
             antithetic=True,
         )
 
-    @staticmethod
+    #@staticmethod
     def normal_halton2(sampleSize, numberOfDraws):
         unif = draws.getHaltonDraws(
             sampleSize, numberOfDraws, base=2, skip=10
@@ -132,7 +132,7 @@ class Database:
             antithetic=False,
         )
 
-    @staticmethod
+    #@staticmethod
     def normal_halton3(sampleSize, numberOfDraws):
         unif = draws.getHaltonDraws(
             sampleSize, numberOfDraws, base=2, skip=10
@@ -144,7 +144,7 @@ class Database:
             antithetic=False,
         )
 
-    @staticmethod
+    #@staticmethod
     def normal_halton5(sampleSize, numberOfDraws):
         unif = draws.getHaltonDraws(
             sampleSize, numberOfDraws, base=2, skip=10
@@ -156,7 +156,7 @@ class Database:
             antithetic=False,
         )
 
-    @staticmethod
+    #@staticmethod
     def normal_MLHS(sampleSize, numberOfDraws):
         unif = draws.getLatinHypercubeDraws(sampleSize, numberOfDraws)
         return draws.getNormalWichuraDraws(
@@ -166,7 +166,7 @@ class Database:
             antithetic=False,
         )
 
-    @staticmethod
+    #@staticmethod
     def normal_MLHS_anti(sampleSize, numberOfDraws):
         unif = draws.getLatinHypercubeDraws(
             sampleSize, int(numberOfDraws / 2)
@@ -251,8 +251,8 @@ class Database:
                 ),
             ),
         }
-
-    @staticmethod
+    # This statement does not work for versions of python before 3.10
+    #@staticmethod
     def descriptionOfNativeDraws():
         """Describe the draws available draws with Biogeme
 

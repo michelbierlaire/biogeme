@@ -283,7 +283,7 @@ class BIOGEME:
 
         self.bestIteration = None  #: Store the best iteration found so far.
 
-    @staticmethod
+    #@staticmethod
     def argument_warning(old_new_tuple):
         """Displays a deprecation warning when parameters are provided as arguments."""
         warning_msg = (
