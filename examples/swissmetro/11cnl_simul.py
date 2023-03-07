@@ -10,46 +10,27 @@
 """
 
 import sys
-import pandas as pd
-import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.tools import calculate_correlation
 import biogeme.results as res
-from biogeme.expressions import Beta, Variable, Derive
+from biogeme.expressions import Beta, Derive
 import biogeme.exceptions as excep
-
-# Read the data
-df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
-
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
-
-PURPOSE = Variable('PURPOSE')
-CHOICE = Variable('CHOICE')
-GA = Variable('GA')
-TRAIN_CO = Variable('TRAIN_CO')
-CAR_AV = Variable('CAR_AV')
-SP = Variable('SP')
-TRAIN_AV = Variable('TRAIN_AV')
-TRAIN_TT = Variable('TRAIN_TT')
-SM_TT = Variable('SM_TT')
-CAR_TT = Variable('CAR_TT')
-CAR_CO = Variable('CAR_CO')
-SM_CO = Variable('SM_CO')
-SM_AV = Variable('SM_AV')
-
-# Removing some observations can be done directly using pandas.
-# remove = (((database.data.PURPOSE != 1) &
-#           (database.data.PURPOSE != 3)) |
-#          (database.data.CHOICE == 0))
-# database.data.drop(database.data[remove].index,inplace=True)
-
-# Here we use the "biogeme" way for backward compatibility
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
-database.remove(exclude)
+from swissmetro import (
+    database,
+    SM_AV,
+    CAR_AV_SP,
+    TRAIN_AV_SP,
+    TRAIN_TT_SCALED,
+    TRAIN_TT,
+    TRAIN_COST_SCALED,
+    SM_TT_SCALED,
+    SM_TT,
+    SM_COST_SCALED,
+    CAR_TT_SCALED,
+    CAR_TT,
+    CAR_CO_SCALED,
+)
 
 # Simulation should be done with estimated value of the
 # parameters. You can include them manually. Here, we prefer to set
@@ -65,22 +46,6 @@ MU_EXISTING = Beta('MU_EXISTING', 1, 1, None, 0)
 MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, None, 0)
 ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
 ALPHA_PUBLIC = 1 - ALPHA_EXISTING
-
-# Definition of new variables
-SM_COST = SM_CO * (GA == 0)
-TRAIN_COST = TRAIN_CO * (GA == 0)
-
-# Definition of new variables: in simulation, do not use the
-# DefineVariable operator, as it hides the functional
-# relationships. In particular, derivatives cannot be calculated.
-CAR_AV_SP = CAR_AV * (SP != 0)
-TRAIN_AV_SP = TRAIN_AV * (SP != 0)
-TRAIN_TT_SCALED = TRAIN_TT / 100.0
-TRAIN_COST_SCALED = TRAIN_COST / 100
-SM_TT_SCALED = SM_TT / 100.0
-SM_COST_SCALED = SM_COST / 100
-CAR_TT_SCALED = CAR_TT / 100
-CAR_CO_SCALED = CAR_CO / 100
 
 # Definition of the utility functions
 V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED

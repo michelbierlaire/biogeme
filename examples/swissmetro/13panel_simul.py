@@ -11,8 +11,6 @@
 
 import sys
 import pickle
-import pandas as pd
-import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.exceptions as excep
@@ -20,49 +18,24 @@ import biogeme.results as res
 import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
-    Variable,
     bioDraws,
     PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
 )
-
-
-# Read the data
-df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
-
-
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
-
-PURPOSE = Variable('PURPOSE')
-CHOICE = Variable('CHOICE')
-GA = Variable('GA')
-TRAIN_CO = Variable('TRAIN_CO')
-CAR_AV = Variable('CAR_AV')
-SP = Variable('SP')
-TRAIN_AV = Variable('TRAIN_AV')
-TRAIN_TT = Variable('TRAIN_TT')
-SM_TT = Variable('SM_TT')
-CAR_TT = Variable('CAR_TT')
-CAR_CO = Variable('CAR_CO')
-SM_CO = Variable('SM_CO')
-SM_AV = Variable('SM_AV')
-
-# Removing some observations can be done directly using pandas.
-# remove = (((database.data.PURPOSE != 1) &
-#           (database.data.PURPOSE != 3)) |
-#          (database.data.CHOICE == 0))
-# database.data.drop(database.data[remove].index,inplace=True)
-
-# Here we use the "biogeme" way for backward compatibility
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
-database.remove(exclude)
-
-# They are organized as panel data. The variable ID identifies each individual.
-database.panel("ID")
+from swissmetro_panel import (
+    database,
+    CHOICE,
+    SM_AV,
+    CAR_AV_SP,
+    TRAIN_AV_SP,
+    TRAIN_TT_SCALED,
+    TRAIN_COST_SCALED,
+    SM_TT_SCALED,
+    SM_COST_SCALED,
+    CAR_TT_SCALED,
+    CAR_CO_SCALED,
+)
 
 
 # Parameters to be estimated
@@ -90,22 +63,6 @@ ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws(
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
 ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'NORMAL_ANTI')
-
-# Definition of new variables
-SM_COST = SM_CO * (GA == 0)
-TRAIN_COST = TRAIN_CO * (GA == 0)
-
-# Definition of new variables: adding columns to the database
-CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
-TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
-TRAIN_COST_SCALED = database.DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100
-)
-SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
-SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
-CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
-CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 
 # Definition of the utility functions
 V1 = ASC_TRAIN_RND + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -167,14 +124,14 @@ simulate = {
 }
 
 biosim = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
-sim = biosim.simulate()
+sim = biosim.simulate(results.getBetaValues())
 
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
-pickleFile = '13panel_individual_parameters.pickle'
-with open(pickleFile, 'wb') as f:
+PICKLE_FILE = '13panel_individual_parameters.pickle'
+with open(PICKLE_FILE, 'wb') as f:
     pickle.dump(sim, f)
 
-htmlFile = '13panel_simul.html'
-with open(htmlFile, 'w') as h:
+HTML_FILE = '13panel_simul.html'
+with open(HTML_FILE, 'w', encoding='utf-8') as h:
     print(sim.to_html(), file=h)
-print(f'Simulated values available in {htmlFile}')
+print(f'Simulated values available in {HTML_FILE}')
