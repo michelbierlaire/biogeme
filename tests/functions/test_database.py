@@ -23,6 +23,7 @@ import numpy as np
 import biogeme.database as db
 import biogeme.exceptions as excep
 from biogeme.expressions import Variable, bioDraws
+from biogeme.elementary_expressions import TypeOfElementaryExpression
 from test_data import (
     getData,
     output_flatten_database_1,
@@ -183,7 +184,8 @@ class testDatabase(unittest.TestCase):
         the_random_draws = db.Database.descriptionOfNativeDraws()
         for draw_type in the_random_draws:
             random_draws = bioDraws('random_draws', draw_type )
-            types = random_draws.dictOfDraws()
+            types = random_draws.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
+            
             the_draws_table = self.myData1.generateDraws(
                 types, ['random_draws'], 10
             )
@@ -218,7 +220,7 @@ class testDatabase(unittest.TestCase):
         randomDraws1 = bioDraws('randomDraws1', 'LOGNORMAL')
         randomDraws2 = bioDraws('randomDraws2', 'EXP')
         x = randomDraws1 + randomDraws2
-        types = x.dictOfDraws()
+        types = x.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
         theDrawsTable = self.myData1.generateDraws(
             types, ['randomDraws1', 'randomDraws2'], 10
         )
@@ -262,7 +264,7 @@ class testDatabase(unittest.TestCase):
         randomDraws2 = bioDraws('randomDraws2', 'UNIFORMSYM')
         # We build an expression that involves the two random variables
         x = randomDraws1 + randomDraws2
-        types = x.dictOfDraws()
+        types = x.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
         self.myPanelData.panel('Person')
         theDrawsTable = self.myPanelData.generateDraws(
             types, ['randomDraws1', 'randomDraws2'], 10

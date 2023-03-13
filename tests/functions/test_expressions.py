@@ -21,6 +21,7 @@ import biogeme.exceptions as excep
 import biogeme.expressions as ex
 from biogeme import models
 from biogeme.idmanager import IdManager
+from biogeme.elementary_expressions import TypeOfElementaryExpression
 from test_data import getData
 
 
@@ -45,6 +46,18 @@ class test_expressions(unittest.TestCase):
         self.xi3 = ex.bioDraws('xi3', 'WRONGTYPE')
         self.addTypeEqualityFunc(pd.DataFrame, self.assertDataframeEqual)
 
+    def test_repr(self):
+        result = repr(self.beta1)
+        expected_result = 'beta1(init=0.2)'
+        self.assertEqual(result, expected_result)
+
+    def test_errors(self):
+        with self.assertRaises(excep.biogemeError):
+            _ = ex.Numeric(1) / 'ert'
+
+#        with self.assertRaises(excep.biogemeError):
+#            _ = 'ert' / Numeric(1)
+            
     def assertDataframeEqual(self, a, b, msg):
         try:
             pd.testing.assert_frame_equal(a, b)
@@ -63,16 +76,16 @@ class test_expressions(unittest.TestCase):
 
     def test_add(self):
         result = self.Variable1 + self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 + Variable2)')
+        self.assertEqual(str(result), '(Variable1 + Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 + 1
-        self.assertEqual(result.__str__(), '(Variable1 + `1.0`)')
+        self.assertEqual(str(result), '(Variable1 + `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 + self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` + Variable1)')
+        self.assertEqual(str(result), '(`1.0` + Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -83,16 +96,16 @@ class test_expressions(unittest.TestCase):
 
     def test_sub(self):
         result = self.Variable1 - self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 - Variable2)')
+        self.assertEqual(str(result), '(Variable1 - Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 - 1
-        self.assertEqual(result.__str__(), '(Variable1 - `1.0`)')
+        self.assertEqual(str(result), '(Variable1 - `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 - self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` - Variable1)')
+        self.assertEqual(str(result), '(`1.0` - Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -103,16 +116,16 @@ class test_expressions(unittest.TestCase):
 
     def test_mul(self):
         result = self.Variable1 * self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 * Variable2)')
+        self.assertEqual(str(result), '(Variable1 * Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 * 1
-        self.assertEqual(result.__str__(), '(Variable1 * `1.0`)')
+        self.assertEqual(str(result), '(Variable1 * `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 * self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` * Variable1)')
+        self.assertEqual(str(result), '(`1.0` * Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -123,16 +136,16 @@ class test_expressions(unittest.TestCase):
 
     def test_div(self):
         result = self.Variable1 / self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 / Variable2)')
+        self.assertEqual(str(result), '(Variable1 / Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 / 1
-        self.assertEqual(result.__str__(), '(Variable1 / `1.0`)')
+        self.assertEqual(str(result), '(Variable1 / `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 / self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` / Variable1)')
+        self.assertEqual(str(result), '(`1.0` / Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -143,21 +156,21 @@ class test_expressions(unittest.TestCase):
 
     def test_neg(self):
         result = -self.Variable1
-        self.assertEqual(result.__str__(), '(-Variable1)')
+        self.assertEqual(str(result), '(-Variable1)')
         self.assertTrue(result.children[0] is self.Variable1)
 
     def test_pow(self):
         result = self.Variable1**self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 ** Variable2)')
+        self.assertEqual(str(result), '(Variable1 ** Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1**1
-        self.assertEqual(result.__str__(), '(Variable1 ** `1.0`)')
+        self.assertEqual(str(result), '(Variable1 ** `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1**self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` ** Variable1)')
+        self.assertEqual(str(result), '(`1.0` ** Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -168,16 +181,16 @@ class test_expressions(unittest.TestCase):
 
     def test_and(self):
         result = self.Variable1 & self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 and Variable2)')
+        self.assertEqual(str(result), '(Variable1 and Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 & 1
-        self.assertEqual(result.__str__(), '(Variable1 and `1.0`)')
+        self.assertEqual(str(result), '(Variable1 and `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 & self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` and Variable1)')
+        self.assertEqual(str(result), '(`1.0` and Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -188,16 +201,16 @@ class test_expressions(unittest.TestCase):
 
     def test_or(self):
         result = self.Variable1 | self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 or Variable2)')
+        self.assertEqual(str(result), '(Variable1 or Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 | 1
-        self.assertEqual(result.__str__(), '(Variable1 or `1.0`)')
+        self.assertEqual(str(result), '(Variable1 or `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 | self.Variable1
-        self.assertEqual(result.__str__(), '(`1.0` or Variable1)')
+        self.assertEqual(str(result), '(`1.0` or Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -208,16 +221,16 @@ class test_expressions(unittest.TestCase):
 
     def test_eq(self):
         result = self.Variable1 == self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 == Variable2)')
+        self.assertEqual(str(result), '(Variable1 == Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 == 1
-        self.assertEqual(result.__str__(), '(Variable1 == `1.0`)')
+        self.assertEqual(str(result), '(Variable1 == `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 == self.Variable1
-        self.assertEqual(result.__str__(), '(Variable1 == `1.0`)')
+        self.assertEqual(str(result), '(Variable1 == `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -228,16 +241,16 @@ class test_expressions(unittest.TestCase):
 
     def test_neq(self):
         result = self.Variable1 != self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 != Variable2)')
+        self.assertEqual(str(result), '(Variable1 != Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 != 1
-        self.assertEqual(result.__str__(), '(Variable1 != `1.0`)')
+        self.assertEqual(str(result), '(Variable1 != `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 != self.Variable1
-        self.assertEqual(result.__str__(), '(Variable1 != `1.0`)')
+        self.assertEqual(str(result), '(Variable1 != `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -248,16 +261,16 @@ class test_expressions(unittest.TestCase):
 
     def test_le(self):
         result = self.Variable1 <= self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 <= Variable2)')
+        self.assertEqual(str(result), '(Variable1 <= Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 <= 1
-        self.assertEqual(result.__str__(), '(Variable1 <= `1.0`)')
+        self.assertEqual(str(result), '(Variable1 <= `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 <= self.Variable1
-        self.assertEqual(result.__str__(), '(Variable1 >= `1.0`)')
+        self.assertEqual(str(result), '(Variable1 >= `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -268,16 +281,16 @@ class test_expressions(unittest.TestCase):
 
     def test_ge(self):
         result = self.Variable1 >= self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 >= Variable2)')
+        self.assertEqual(str(result), '(Variable1 >= Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 >= 1
-        self.assertEqual(result.__str__(), '(Variable1 >= `1.0`)')
+        self.assertEqual(str(result), '(Variable1 >= `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 >= self.Variable1
-        self.assertEqual(result.__str__(), '(Variable1 <= `1.0`)')
+        self.assertEqual(str(result), '(Variable1 <= `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -288,16 +301,16 @@ class test_expressions(unittest.TestCase):
 
     def test_lt(self):
         result = self.Variable1 < self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 < Variable2)')
+        self.assertEqual(str(result), '(Variable1 < Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 < 1
-        self.assertEqual(result.__str__(), '(Variable1 < `1.0`)')
+        self.assertEqual(str(result), '(Variable1 < `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 < self.Variable1
-        self.assertEqual(result.__str__(), '(Variable1 > `1.0`)')
+        self.assertEqual(str(result), '(Variable1 > `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -308,16 +321,16 @@ class test_expressions(unittest.TestCase):
 
     def test_gt(self):
         result = self.Variable1 > self.Variable2
-        self.assertEqual(result.__str__(), '(Variable1 > Variable2)')
+        self.assertEqual(str(result), '(Variable1 > Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
         self.assertTrue(result.children[1] is self.Variable2)
 
         result = self.Variable1 > 1
-        self.assertEqual(result.__str__(), '(Variable1 > `1.0`)')
+        self.assertEqual(str(result), '(Variable1 > `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         result = 1 > self.Variable1
-        self.assertEqual(result.__str__(), '(Variable1 < `1.0`)')
+        self.assertEqual(str(result), '(Variable1 < `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(excep.biogemeError):
@@ -496,18 +509,18 @@ class test_expressions(unittest.TestCase):
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
             self.beta3 * (self.beta2 >= self.beta1)
         )
-        s = expr1.setOfBetas()
+        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.FREE_BETA)
         self.assertSetEqual(s, {'beta1', 'beta2'})
-        s = expr1.setOfBetas(free=False, fixed=True)
+        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.FIXED_BETA)
         self.assertSetEqual(s, {'beta3'})
-        s = expr1.setOfBetas(free=True, fixed=True)
+        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.BETA)
         self.assertSetEqual(s, {'beta1', 'beta2', 'beta3'})
 
     def test_setOfVariables(self):
         expr1 = 2 * self.Variable1 - ex.exp(-self.Variable2) / (
             self.Variable1 * (self.Variable1 >= self.Variable2)
         )
-        s = expr1.setOfVariables()
+        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.VARIABLE)
         self.assertSetEqual(s, {'Variable1', 'Variable2'})
 
     def test_getElementaryExpression(self):
@@ -535,7 +548,7 @@ class test_expressions(unittest.TestCase):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
             -self.beta2 * self.Variable2
         ) / (self.beta3 * (self.beta2 >= self.beta1))
-        b = expr2.dictOfBetas(free=True, fixed=True)
+        b = expr2.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.BETA)
         # Note that the following checks only the labels. Its probably
         # good enough for our purpose.
         self.assertDictEqual(
@@ -546,7 +559,7 @@ class test_expressions(unittest.TestCase):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
             -self.beta2 * self.Variable2
         ) / (self.beta3 * (self.beta2 >= self.beta1))
-        b = expr2.dictOfVariables()
+        b = expr2.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.VARIABLE)
         # Note that the following checks only the labels. Its probably
         # good enough for our purpose.
         self.assertDictEqual(
@@ -555,12 +568,12 @@ class test_expressions(unittest.TestCase):
 
     def test_dictOfRandomVariables(self):
         expr = -(self.omega1 + self.omega2 + self.Variable1)
-        b = expr.dictOfRandomVariables()
+        b = expr.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.RANDOM_VARIABLE)
         self.assertDictEqual(b, {'omega1': self.omega1, 'omega2': self.omega2})
 
     def test_dictOfDraws(self):
         expr = -(self.xi1 + self.xi2 - self.xi3 + self.Variable1)
-        b = expr.dictOfDraws()
+        b = expr.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
         self.assertDictEqual(
             b, {'xi1': 'NORMAL', 'xi2': 'UNIF', 'xi3': 'WRONGTYPE'}
         )
