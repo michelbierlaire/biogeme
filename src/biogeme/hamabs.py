@@ -46,13 +46,10 @@ class smoothing:
         if h is not None:
             if h.shape != (self.n, self.n):
                 raise excep.biogemeError(
-                    f'Incompatible dimensions {h.shape} '
-                    f'and ({self.n},{self.n})'
+                    f'Incompatible dimensions {h.shape} ' f'and ({self.n},{self.n})'
                 )
         if batch <= 0.0 or batch > 1.0:
-            raise excep.biogemeError(
-                f'Batch size must be between 0 and 1: {batch}'
-            )
+            raise excep.biogemeError(f'Batch size must be between 0 and 1: {batch}')
         self.f += [f]
         self.g += [g]
         self.h += [h]
@@ -279,9 +276,7 @@ def hamabs(fct, initBetas, fixedBetas, betaIds, bounds, parameters=None):
 
     while cont:
         logger.debug(f'***************** Iteration {k} **************')
-        logger.debug(
-            f'N={avging.numberOfValues()} xk={xk} avgf={avgf} delta={delta}'
-        )
+        logger.debug(f'N={avging.numberOfValues()} xk={xk} avgf={avgf} delta={delta}')
         k += 1
         if batch <= hybrid:
             success, xc, fc, gc, hc, delta = generateCandidateSecondOrder(

@@ -12,3 +12,7 @@
 
 class biogemeError(Exception):
     """Defines a generic exception for Biogeme."""
+
+
+class valueOutOfRange(biogemeError):
+    """Value of out range error."""

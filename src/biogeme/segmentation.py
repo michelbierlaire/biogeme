@@ -9,10 +9,11 @@ from dataclasses import dataclass
 from biogeme.expressions import Beta, bioMultSum
 import biogeme.exceptions as excep
 
+
 @dataclass
 class DiscreteSegmentationTuple:
-    """ Characterization od a segmentation
-    """
+    """Characterization od a segmentation"""
+
     def __init__(self, variable, mapping, reference=None):
         """Ctor
 
@@ -44,10 +45,10 @@ class DiscreteSegmentationTuple:
 
 
 class OneSegmentation:
-    """ Single segmentation of a parameter
-    """
+    """Single segmentation of a parameter"""
+
     def __init__(self, beta, segmentation_tuple):
-        """ Ctor
+        """Ctor
 
         :param beta: parameter to be segmented
         :type beta: biogeme.expressions.Beta
@@ -59,9 +60,7 @@ class OneSegmentation:
         self.variable = segmentation_tuple.variable
         self.reference = segmentation_tuple.reference
         self.mapping = {
-            k: v
-            for k, v in segmentation_tuple.mapping.items()
-            if v != self.reference
+            k: v for k, v in segmentation_tuple.mapping.items() if v != self.reference
         }
 
     def beta_name(self, category):
@@ -100,7 +99,7 @@ class OneSegmentation:
         else:
             lower_bound = None
             upper_bound = None
-        
+
         return Beta(
             name,
             self.beta.initValue,
@@ -133,7 +132,7 @@ class OneSegmentation:
             return (
                 f"{name} = Beta('{name}', {self.beta.initValue}, "
                 f"{lower_bound}, {upper_bound}, {self.beta.status})"
-                    )
+            )
         return (
             f"Beta('{name}', {self.beta.initValue}, {lower_bound}, "
             f"{upper_bound}, {self.beta.status})"
@@ -170,8 +169,8 @@ class OneSegmentation:
 
 
 class Segmentation:
-    """ Segmentation of a parameter, possibly with multiple socio-economic variables
-    """
+    """Segmentation of a parameter, possibly with multiple socio-economic variables"""
+
     def __init__(self, beta, segmentation_tuples, prefix='segmented'):
         """Ctor
 
@@ -213,9 +212,7 @@ class Segmentation:
         """
         terms = [self.beta]
         terms += [
-            element
-            for s in self.segmentations
-            for element in s.list_of_expressions()
+            element for s in self.segmentations for element in s.list_of_expressions()
         ]
         return bioMultSum(terms)
 
@@ -235,9 +232,7 @@ class Segmentation:
         result += '\n'
 
         terms = [self.beta_code()]
-        terms += [
-            element for s in self.segmentations for element in s.list_of_code()
-        ]
+        terms += [element for s in self.segmentations for element in s.list_of_code()]
 
         if len(terms) == 1:
             result += terms[0]

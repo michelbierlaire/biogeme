@@ -74,7 +74,9 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
     for stratum in partition:
         for alt in stratum.subset:
             if alt not in alternatives[id_column]:
-                error_msg = f'Alternative {alt} does not appear in the database of alternaitves'
+                error_msg = (
+                    f'Alternative {alt} does not appear in the database of alternaitves'
+                )
                 raise excep.biogemeError(error_msg)
 
     results = []
@@ -93,9 +95,7 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
         logproba = np.log(k) - np.log(n)
         subset = alternatives[alternatives[id_column].isin(stratum.subset)]
         if chosen is not None and chosen in stratum.subset:
-            chosen_alternative = alternatives[
-                alternatives[id_column] == chosen
-            ].copy()
+            chosen_alternative = alternatives[alternatives[id_column] == chosen].copy()
             if len(chosen_alternative) < 1:
                 error_msg = f'Unknown alternative: {chosen}'
                 raise excep.biogemeError(error_msg)
@@ -112,9 +112,7 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
             k -= 1
 
         if k > 0:
-            sample = subset.sample(
-                n=k, replace=False, axis='index', ignore_index=True
-            )
+            sample = subset.sample(n=k, replace=False, axis='index', ignore_index=True)
             sample[LOG_PROBA_COL] = logproba
             results.append(sample)
 
@@ -180,9 +178,7 @@ def sampling_of_alternatives(
 
         if always_include_chosen:
             # Position the chosen alternative at the first row
-            chosen_alternative = sample.index[
-                sample[id_column] == choice
-            ].tolist()[0]
+            chosen_alternative = sample.index[sample[id_column] == choice].tolist()[0]
             new_index = [chosen_alternative] + [
                 i for i in range(len(sample)) if i != chosen_alternative
             ]
@@ -271,7 +267,6 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
         for k, G in Gi_terms.items()
     }
     log_gi = {
-        k: G if G == 0 else G - sampling_log_probability[k]
-        for k, G in log_gi.items()
+        k: G if G == 0 else G - sampling_log_probability[k] for k, G in log_gi.items()
     }
     return log_gi

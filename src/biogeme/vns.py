@@ -143,14 +143,12 @@ class solutionClass(metaclass=abc.ABCMeta):
         """
         if self.objectives[0] is None:
             raise excep.biogemeError(
-                'No values are available for '
-                'the objective functions of ego.'
+                'No values are available for ' 'the objective functions of ego.'
             )
 
         if anotherSolution.objectives[0] is None:
             raise excep.biogemeError(
-                'No values are available for '
-                'the objective functions of alter.'
+                'No values are available for ' 'the objective functions of alter.'
             )
 
         if len(self.objectives) != len(anotherSolution.objectives):
@@ -312,8 +310,7 @@ class paretoClass:
                 )
             else:
                 logger.general(
-                    f'Unable to read file {archiveInputFile}. '
-                    f'Pareto set empty.'
+                    f'Unable to read file {archiveInputFile}. ' f'Pareto set empty.'
                 )
                 self.pareto = {}
                 self.removed = set()
@@ -377,9 +374,7 @@ class paretoClass:
         if S_dominated:
             return False
         self.pareto[elem] = 1
-        self.pareto = {
-            k: v for k, v in self.pareto.items() if k not in D_dominating
-        }
+        self.pareto = {k: v for k, v in self.pareto.items() if k not in D_dominating}
         self.removed |= D_dominating
         return True
 
@@ -503,9 +498,7 @@ def vns(
                 logger.warning(f'Default specification is invalid: {why}')
 
     if thePareto.length() == 0:
-        raise excep.biogemeError(
-            'Cannot start the algorithm with an empty Pareto set.'
-        )
+        raise excep.biogemeError('Cannot start the algorithm with an empty Pareto set.')
 
     logger.general(f'Initial pareto: {thePareto.length()}')
     thePareto.dump(pickleOutputFile)
@@ -528,8 +521,7 @@ def vns(
 
             if numberOfChanges == 0:
                 logger.warning(
-                    f'Neighbor of size {neighborhoodSize}: '
-                    f'generation failed'
+                    f'Neighbor of size {neighborhoodSize}: ' f'generation failed'
                 )
                 thePareto.changeNeighborhood(solutionToImprove)
                 continueWithSolution = False
@@ -553,15 +545,13 @@ def vns(
                         continueWithSolution = False
                     else:
                         logger.general(
-                            f'*** Neighbor of size '
-                            f'{neighborhoodSize}: dominated***'
+                            f'*** Neighbor of size ' f'{neighborhoodSize}: dominated***'
                         )
                         problem.neighborRejected(solutionToImprove, aNeighbor)
                         thePareto.changeNeighborhood(solutionToImprove)
                 else:
                     logger.general(
-                        f'*** Neighbor of size {neighborhoodSize}'
-                        f' invalid: {why}***'
+                        f'*** Neighbor of size {neighborhoodSize}' f' invalid: {why}***'
                     )
                     problem.neighborRejected(solutionToImprove, aNeighbor)
                     thePareto.changeNeighborhood(solutionToImprove)

@@ -99,9 +99,7 @@ class Toml:
                     )
                     raise excep.biogemeError(error_msg)
             else:
-                self.parameters.set_value_from_tuple(
-                    the_param, the_param.type(value)
-                )
+                self.parameters.set_value_from_tuple(the_param, the_param.type(value))
             if new_table:
                 self.document.add(the_param.section, the_table)
 
@@ -109,9 +107,7 @@ class Toml:
         """Generate the  TOML document"""
         doc = tk.document()
 
-        doc.add(
-            tk.comment(f'Default parameter file for Biogeme {getVersion()}')
-        )
+        doc.add(tk.comment(f'Default parameter file for Biogeme {getVersion()}'))
         doc.add(tk.comment(f'Automatically created on {date.today()}'))
 
         tables = {section: tk.table() for section in self.parameters.sections}

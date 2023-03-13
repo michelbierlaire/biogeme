@@ -60,8 +60,7 @@ all_parameters_tuple = (
         type=bool,
         section='Output',
         description=(
-            'bool: "True" if the pickle file with the '
-            'results must be generated.'
+            'bool: "True" if the pickle file with the ' 'results must be generated.'
         ),
         check=(cp.is_boolean,),
     ),
@@ -127,6 +126,19 @@ all_parameters_tuple = (
         check=(cp.is_boolean,),
     ),
     ParameterTuple(
+        name='maximum_number_catalog_expressions',
+        default=100,
+        type=int,
+        section='Estimation',
+        description=(
+            'If the expression contrains catalogs, the parameter sets an '
+            'upper bound of the total number of possible combinations '
+            'that can be estimated in the same loop.'
+        ),
+        check=(cp.is_integer, cp.is_positive,),
+    ),
+    
+    ParameterTuple(
         name='optimization_algorithm',
         default='simple_bounds',
         type=str,
@@ -184,7 +196,7 @@ all_parameters_tuple = (
         type=float,
         section='SimpleBounds',
         description='Initial radius of the trust region',
-        check=(cp.is_number, cp.is_positive)
+        check=(cp.is_number, cp.is_positive),
     ),
     ParameterTuple(
         name='steptol',
@@ -196,7 +208,7 @@ all_parameters_tuple = (
             'this threshold. Basically, if p significant digits of x '
             'are needed, steptol should be set to 1.0e-p.'
         ),
-        check=(cp.is_number, cp.is_positive)
+        check=(cp.is_number, cp.is_positive),
     ),
     ParameterTuple(
         name='enlarging_factor',
@@ -207,7 +219,7 @@ all_parameters_tuple = (
             'If an iteration is very successful, the radius of '
             'the trust region is multiplied by this factor'
         ),
-        check=(cp.is_number, cp.is_positive)
+        check=(cp.is_number, cp.is_positive),
     ),
     ParameterTuple(
         name='dogleg',

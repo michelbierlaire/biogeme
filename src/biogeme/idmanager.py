@@ -7,6 +7,7 @@ import inspect
 from collections import namedtuple
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
+from biogeme.elementary_expressions import TypeOfElementaryExpression
 
 ElementsTuple = namedtuple('ElementsTuple', 'expressions indices names')
 
@@ -16,9 +17,7 @@ logger = msg.bioMessage()
 class IdManager:
     """Class combining managing the ids of an arithmetic expression."""
 
-    def __init__(
-        self, expressions, database, number_of_draws, force_new_ids=False
-    ):
+    def __init__(self, expressions, database, number_of_draws, force_new_ids=False):
         """Ctor
 
         :param expressions: list of expressions
@@ -55,15 +54,15 @@ class IdManager:
         self.variables = None
         self.requires_draws = False
         for f in self.expressions:
-            the_variables = f.setOfVariables()
+            the_variables = f.set_of_elementary_expression(
+                the_type=TypeOfElementaryExpression.VARIABLE
+            )
             if the_variables and database is None:
                 raise excep.biogemeError(
                     f'No database is provided and an expression '
                     f'contains variables: {the_variables}'
                 )
-            if f.embedExpression('MonteCarlo') or f.embedExpression(
-                'bioDraws'
-            ):
+            if f.embedExpression('MonteCarlo') or f.embedExpression('bioDraws'):
                 self.requires_draws = True
 
         self.prepare()
@@ -86,9 +85,7 @@ class IdManager:
         listOfErrors = []
         listOfWarnings = []
         if self.database.isPanel():
-            dict_of_variables = (
-                self.expressions.dictOfVariablesOutsidePanelTrajectory()
-            )
+            dict_of_variables = self.expressions.dictOfVariablesOutsidePanelTrajectory()
             if dict_of_variables:
                 err_msg = (
                     f'Error in the loglikelihood function. '
@@ -140,9 +137,7 @@ class IdManager:
         for i, v in enumerate(names):
             indices[v] = i
 
-        return ElementsTuple(
-            expressions=dict_of_elements, indices=indices, names=names
-        )
+        return ElementsTuple(expressions=dict_of_elements, indices=indices, names=names)
 
     def prepare(self):
         """Extract from the formulas the literals (parameters,
@@ -163,10 +158,12 @@ class IdManager:
 
         """
 
-        # Free parameters (to be estimated), sortedby alphabetical order
+        # Free parameters (to be estimated), sorted by alphabetical order
         expr = {}
         for f in self.expressions:
-            d = f.dictOfBetas(free=True, fixed=False)
+            d = f.dict_of_elementary_expression(
+                the_type=TypeOfElementaryExpression.FREE_BETA
+            )
             expr = dict(expr, **d)
 
         self.free_betas = self.expressions_names_indices(expr)
@@ -182,21 +179,27 @@ class IdManager:
         # Fixed parameters (not to be estimated), sorted by alphatical order.
         expr = {}
         for f in self.expressions:
-            d = f.dictOfBetas(free=False, fixed=True)
+            d = f.dict_of_elementary_expression(
+                the_type=TypeOfElementaryExpression.FIXED_BETA
+            )
             expr = dict(expr, **d)
         self.fixed_betas = self.expressions_names_indices(expr)
 
         # Random variables for numerical integration
         expr = {}
         for f in self.expressions:
-            d = f.dictOfRandomVariables()
+            d = f.dict_of_elementary_expression(
+                the_type=TypeOfElementaryExpression.RANDOM_VARIABLE
+            )
             expr = dict(expr, **d)
         self.random_variables = self.expressions_names_indices(expr)
 
         # Draws
         expr = {}
         for f in self.expressions:
-            d = f.dictOfDraws()
+            d = f.dict_of_elementary_expression(
+                the_type=TypeOfElementaryExpression.DRAWS
+            )
             expr = dict(expr, **d)
         self.draws = self.expressions_names_indices(expr)
 
@@ -214,9 +217,7 @@ class IdManager:
                 names=variables_names,
             )
         else:
-            self.variables = ElementsTuple(
-                expressions=None, indices=None, names=[]
-            )
+            self.variables = ElementsTuple(expressions=None, indices=None, names=[])
 
         # Merge all the names
         elementary_expressions_names = (
@@ -227,9 +228,7 @@ class IdManager:
             + self.variables.names
         )
 
-        if len(elementary_expressions_names) != len(
-            set(elementary_expressions_names)
-        ):
+        if len(elementary_expressions_names) != len(set(elementary_expressions_names)):
             duplicates = {
                 x
                 for x in elementary_expressions_names
@@ -252,12 +251,10 @@ class IdManager:
         )
 
         self.free_betas_values = [
-            self.free_betas.expressions[x].initValue
-            for x in self.free_betas.names
+            self.free_betas.expressions[x].initValue for x in self.free_betas.names
         ]
         self.fixed_betas_values = [
-            self.fixed_betas.expressions[x].initValue
-            for x in self.fixed_betas.names
+            self.fixed_betas.expressions[x].initValue for x in self.fixed_betas.names
         ]
 
         if self.requires_draws:

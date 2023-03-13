@@ -33,9 +33,7 @@ CAN_BE_DESACTIVATED = 4
 logger = msg.bioMessage()
 
 TermTuple = namedtuple('TermTuple', 'attribute segmentation bounds validity')
-SegmentedParameterTuple = namedtuple(
-    'SegmentedParameterTuple', 'dict combinatorial'
-)
+SegmentedParameterTuple = namedtuple('SegmentedParameterTuple', 'dict combinatorial')
 
 BoundsTuple = namedtuple('BoundsTuple', 'lower upper')
 
@@ -89,15 +87,9 @@ class variable:
             return f'{self.name} [alt. spec.]'
 
         if self.generic:
-            return (
-                f'{self.name}_{self.nonlinearSpec(self.expression)[0]}'
-                f' [generic]'
-            )
+            return f'{self.name}_{self.nonlinearSpec(self.expression)[0]}' f' [generic]'
 
-        return (
-            f'{self.name}_{self.nonlinearSpec(self.expression)[0]}'
-            f' [alt. spec.]'
-        )
+        return f'{self.name}_{self.nonlinearSpec(self.expression)[0]}' f' [alt. spec.]'
 
     def makeGeneric(self, yes, name):
         """A variable can have two status: generic or alternative
@@ -182,18 +174,14 @@ class groupOfVariables:
         self.coefficient_status = coefficient_status
         self.activity_status = activity_status
 
-        if (
-            len(self.variables) == 1
-            and self.coefficient_status == MUST_BE_ALT_SPEC
-        ):
+        if len(self.variables) == 1 and self.coefficient_status == MUST_BE_ALT_SPEC:
             error_msg = (
                 f'The group {self.name} cannot be alternative specific as '
                 f'it contains only one variable: {self.variables[0]} '
             )
             raise excep.biogemeError(error_msg)
         self.generic = (
-            self.coefficient_status != MUST_BE_ALT_SPEC
-            and len(self.variables) > 1
+            self.coefficient_status != MUST_BE_ALT_SPEC and len(self.variables) > 1
         )
         """ True if the group is generic.
         """
@@ -230,9 +218,7 @@ class groupOfVariables:
 
     def forceActive(self):
         """Force the variables in the group to be active."""
-        logger.detailed(
-            f'Group of variables {self.name} ' f'must be in the model.'
-        )
+        logger.detailed(f'Group of variables {self.name} ' f'must be in the model.')
         self.activate(True)
         self.alwaysActive = True
 
@@ -328,8 +314,7 @@ class groupOfVariables:
 
         if sel < 0 or sel >= len(self.nonlinearSpecs):
             raise excep.biogemeError(
-                f'Index {sel} out of range [0, '
-                f'{len(self.nonlinearSpecs)-1}]'
+                f'Index {sel} out of range [0, ' f'{len(self.nonlinearSpecs)-1}]'
             )
         self.selection = sel
         if not self.linear:
@@ -362,9 +347,7 @@ class groupOfVariables:
             the group should always be active.
         """
         if not decision.active and self.alwaysActive:
-            error_msg = (
-                f'Group of variables {self.name} cannot be desactivated'
-            )
+            error_msg = f'Group of variables {self.name} cannot be desactivated'
             raise excep.biogemeError(error_msg)
         self.activate(decision.active)
         self.setLinear(decision.nonlinear is None)
@@ -372,8 +355,7 @@ class groupOfVariables:
         if decision.nonlinear is not None:
             if self.nonlinearSpecs is None:
                 raise excep.biogemeError(
-                    f'No nonlinear specification has '
-                    f'been provided for {self.name}'
+                    f'No nonlinear specification has ' f'been provided for {self.name}'
                 )
             self.setSelection(decision.nonlinear)
 
@@ -522,9 +504,7 @@ class term:
         if self.var is None:
             coef_name = self.getBeta(altname)
             if self.segmentation is None:
-                return Beta(
-                    coef_name, 0, self.bounds.lower, self.bounds.upper, 0
-                )
+                return Beta(coef_name, 0, self.bounds.lower, self.bounds.upper, 0)
 
             self.coef_names = [coef_name]
             return self.segmentation.getExpression(coef_name, self.bounds)
@@ -638,9 +618,7 @@ class socioEconomic:
         corresponding to segments.
         """
         if existingValues is None:
-            return [
-                ([self.expression], [k], [v]) for k, v in self.values.items()
-            ]
+            return [([self.expression], [k], [v]) for k, v in self.values.items()]
 
         combination = []
         for k, v in self.values.items():
@@ -673,9 +651,7 @@ class segmentation:
         """True if all combinations are considered"""
 
         if combinatorial:
-            raise excep.biogemeError(
-                'Combinatorial segmentation: not yet implemented'
-            )
+            raise excep.biogemeError('Combinatorial segmentation: not yet implemented')
         self.listOfVariables = []  #: list of variables involved
 
         self.alwaysActive = False  #: True if it must always be active
@@ -1004,17 +980,15 @@ class specificationProblem(vns.problemClass):
             if g is None:
                 logger.detailed(f'Variable {x} is alone in a group.')
                 theGroups.append(
-                    GroupTuple(name=x,
-                               list_of_attributes = [x],
-                               coefficient_status=MUST_BE_GENERIC,
-                               activity_status=CAN_BE_DESACTIVATED
-                               )
+                    GroupTuple(
+                        name=x,
+                        list_of_attributes=[x],
+                        coefficient_status=MUST_BE_GENERIC,
+                        activity_status=CAN_BE_DESACTIVATED,
+                    )
                 )
 
-
-        self.theVariables = {
-            k: variable(k, v) for k, v in theVariables.items()
-        }
+        self.theVariables = {k: variable(k, v) for k, v in theVariables.items()}
         """dict of variables, where the keys are the names, and the values are
         objects of class ``variable``
         """
@@ -1103,9 +1077,7 @@ class specificationProblem(vns.problemClass):
         the function imple,enting the operators.
         """
 
-        self.operatorsManagement = vns.operatorsManagement(
-            self.operators.keys()
-        )
+        self.operatorsManagement = vns.operatorsManagement(self.operators.keys())
         """ Object of type :class:`biogeme.vns.operatorsManagement`
         """
 
@@ -1133,9 +1105,7 @@ class specificationProblem(vns.problemClass):
                     t.attribute is not None
                     and self.theVariables.get(t.attribute) is None
                 ):
-                    raise excep.biogemeError(
-                        f'Attribute {t.attribute} does not exist'
-                    )
+                    raise excep.biogemeError(f'Attribute {t.attribute} does not exist')
                 self.theAlternatives[k] = utility(
                     k,
                     u[0],
@@ -1150,9 +1120,7 @@ class specificationProblem(vns.problemClass):
                     ],
                 )
                 if t.segmentation is not None:
-                    self.theSegmentations[
-                        t.segmentation
-                    ].listOfVariables.append(
+                    self.theSegmentations[t.segmentation].listOfVariables.append(
                         self.theVariables.get(t.attribute)
                     )
                 # If the segmentation is not associated with a
@@ -1191,9 +1159,7 @@ class specificationProblem(vns.problemClass):
     def getBiogemeModel(self):
         """Build the Biogeme expressions of a given specification"""
         V = {k: v.getExpression() for k, v in self.theAlternatives.items()}
-        logprob = self.models[self.selectedModel][1](
-            V, self.availability, self.choice
-        )
+        logprob = self.models[self.selectedModel][1](V, self.availability, self.choice)
         b = bio.BIOGEME(
             self.database,
             logprob,
@@ -1215,9 +1181,7 @@ class specificationProblem(vns.problemClass):
         :rtype: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)
         """
 
-        groupDecisions = {
-            k: v.getDecisions() for k, v in self.theGroups.items()
-        }
+        groupDecisions = {k: v.getDecisions() for k, v in self.theGroups.items()}
         termDecisions = {
             k: [t.getDecisions() for t in u.terms]
             for k, u in self.theAlternatives.items()
@@ -1358,8 +1322,7 @@ class specificationProblem(vns.problemClass):
                 self.theVariables[k].nonlinearSpecs = nl
                 if generic:
                     raise excep.biogemeError(
-                        f'Only groups of variables can '
-                        f'be made generic, not {k}'
+                        f'Only groups of variables can ' f'be made generic, not {k}'
                     )
             else:
                 raise excep.biogemeError(f'Unknown (group of) variable(s) {k}')
@@ -1403,8 +1366,7 @@ class specificationProblem(vns.problemClass):
         """
         if not isinstance(aSolution, vns.solutionClass):
             raise excep.biogemeError(
-                f'Wrong type: {type(aSolution)} '
-                f'instead of vns.solutionClass'
+                f'Wrong type: {type(aSolution)} ' f'instead of vns.solutionClass'
             )
 
         self.setDecisions(aSolution.decisions)
@@ -1460,8 +1422,7 @@ class specificationProblem(vns.problemClass):
 
         """
         result = (
-            f'<p><strong>Model: {self.models[self.selectedModel][0]}'
-            f'</strong></p>'
+            f'<p><strong>Model: {self.models[self.selectedModel][0]}' f'</strong></p>'
         )
         for v in self.theAlternatives.values():
             title = f'<p><strong>Alternative {v.name} [{v.id}]</strong></p>'
@@ -1549,8 +1510,7 @@ class specificationProblem(vns.problemClass):
 
         b = self.getBiogemeModel()
         logger.detailed(
-            f'Evaluate model with '
-            f'{len(b.id_manager.free_betas.names)} parameters.'
+            f'Evaluate model with ' f'{len(b.id_manager.free_betas.names)} parameters.'
         )
         if len(b.id_manager.free_betas.names) == 0:
             estimationResults = None
@@ -1584,9 +1544,7 @@ class specificationProblem(vns.problemClass):
             logger.warning(f'Exception raised: {e}')
             estimationResults = None
             aSolution.valid = False
-            aSolution.causeInvalidity = (
-                f'Exception raised during estimation: {e}'
-            )
+            aSolution.causeInvalidity = f'Exception raised during estimation: {e}'
         self.archive[aSolution] = estimationResults
         return estimationResults
 
@@ -1766,9 +1724,7 @@ class specificationProblem(vns.problemClass):
         Activate groups of variables
         """
         groups = [
-            g
-            for g in self.theGroups.keys()
-            if not self.theGroups[g].alwaysActive
+            g for g in self.theGroups.keys() if not self.theGroups[g].alwaysActive
         ]
         random.shuffle(groups)
         changes = min([size, len(groups)])
@@ -1889,9 +1845,7 @@ class solution(vns.solutionClass):
 
     def __str__(self):
         if self.description is None:
-            raise excep.biogemeError(
-                'Description of the solution not available'
-            )
+            raise excep.biogemeError('Description of the solution not available')
         res = self.description
         if self.objectivesNames is None:
             res += '\nThe attribute objectivesNames is not defined\n'

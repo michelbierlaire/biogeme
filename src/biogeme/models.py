@@ -157,9 +157,7 @@ def boxcox(x, ell):
         + ell**2 * expr.log(x) ** 3 / 6.0
         + ell**3 * expr.log(x) ** 4 / 24.0
     )
-    close_to_zero = (ell < expr.Numeric(1.0e-5)) * (
-        ell > -expr.Numeric(1.0e-5)
-    )
+    close_to_zero = (ell < expr.Numeric(1.0e-5)) * (ell > -expr.Numeric(1.0e-5))
     smooth = expr.Elem({0: regular, 1: mclaurin}, close_to_zero)
     return expr.Elem({0: smooth, 1: expr.Numeric(0)}, x == 0)
 
@@ -209,8 +207,7 @@ def piecewiseVariables(variable, thresholds):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.biogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -230,17 +227,13 @@ def piecewiseVariables(variable, thresholds):
     else:
         b = thresholds[1] - thresholds[0]
         results = [
-            expr.bioMax(
-                expr.Numeric(0), expr.bioMin(variable - thresholds[0], b)
-            )
+            expr.bioMax(expr.Numeric(0), expr.bioMin(variable - thresholds[0], b))
         ]
 
     for i in range(1, eye - 2):
         b = thresholds[i + 1] - thresholds[i]
         results += [
-            expr.bioMax(
-                expr.Numeric(0), expr.bioMin(variable - thresholds[i], b)
-            )
+            expr.bioMax(expr.Numeric(0), expr.bioMin(variable - thresholds[i], b))
         ]
 
     # Last variable
@@ -249,9 +242,7 @@ def piecewiseVariables(variable, thresholds):
     else:
         b = thresholds[-1] - thresholds[-2]
         results += [
-            expr.bioMax(
-                expr.Numeric(0), expr.bioMin(variable - thresholds[-2], b)
-            )
+            expr.bioMax(expr.Numeric(0), expr.bioMin(variable - thresholds[-2], b))
         ]
     return results
 
@@ -316,8 +307,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.biogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -340,13 +330,9 @@ def piecewiseFormula(variable, thresholds, betas=None):
         for i, a_threshold in enumerate(thresholds[:-1]):
             next_threshold = thresholds[i + 1]
             a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
-            next_name = (
-                'inf' if next_threshold is None else f'{next_threshold}'
-            )
+            next_name = 'inf' if next_threshold is None else f'{next_threshold}'
             betas.append(
-                expr.Beta(
-                    f'beta_{variable}_{a_name}_{next_name}', 0, None, None, 0
-                )
+                expr.Beta(f'beta_{variable}_{a_name}_{next_name}', 0, None, None, 0)
             )
 
     terms = [beta * theVars[i] for i, beta in enumerate(betas)]
@@ -391,8 +377,7 @@ def piecewiseFunction(x, thresholds, betas):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.biogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -519,7 +504,6 @@ def mev(V, logGi, av, choice):
 
 
 def logmev_endogenousSampling(V, logGi, av, correction, choice):
-
     """Log of choice probability for a MEV model, including the
     correction for endogenous sampling as proposed by `Bierlaire, Bolduc
     and McFadden (2008)`_.
@@ -626,9 +610,7 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
     :rtype: biogeme.expressions.expr.Expression
 
     """
-    return expr.exp(
-        logmev_endogenousSampling(V, logGi, av, correction, choice)
-    )
+    return expr.exp(logmev_endogenousSampling(V, logGi, av, correction, choice))
 
 
 def getMevGeneratingForNested(V, availability, nests, alone=None):
@@ -763,9 +745,7 @@ def getMevForNested(V, availability, nests, alone=None):
             ]
         theSum = expr.bioMultSum(sumdict)
         for i in m[1]:
-            logGi[i] = (m[0] - 1.0) * V[i] + (1.0 / m[0] - 1.0) * expr.log(
-                theSum
-            )
+            logGi[i] = (m[0] - 1.0) * V[i] + (1.0 / m[0] - 1.0) * expr.log(theSum)
     return logGi
 
 
@@ -830,9 +810,7 @@ def getMevForNestedMu(V, availability, nests, mu, alone=None):
             sumdict = [expr.exp(m[0] * V[i]) for i in m[1]]
         else:
             sumdict = [
-                expr.Elem(
-                    {0: 0.0, 1: expr.exp(m[0] * V[i])}, availability[i] != 0
-                )
+                expr.Elem({0: 0.0, 1: expr.exp(m[0] * V[i])}, availability[i] != 0)
                 for i in m[1]
             ]
         theSum = expr.bioMultSum(sumdict)
@@ -1146,9 +1124,7 @@ def cnl_avail(
     return cnl(V, availability, nests, choice, alone, sampling_log_probability)
 
 
-def cnl(
-    V, availability, nests, choice, alone=None, sampling_log_probability=None
-):
+def cnl(V, availability, nests, choice, alone=None, sampling_log_probability=None):
     """Implements the cross-nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -1277,9 +1253,7 @@ def logcnl_avail(
     :return: log of choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
     """
-    return logcnl(
-        V, availability, nests, choice, alone, sampling_log_probability
-    )
+    return logcnl(V, availability, nests, choice, alone, sampling_log_probability)
 
 
 def getMevForCrossNested(
@@ -1358,10 +1332,7 @@ def getMevForCrossNested(
         if availability is None:
             if sampling_log_probability is None:
                 biosum = expr.bioMultSum(
-                    [
-                        a ** (m[0]) * expr.exp(m[0] * (V[i]))
-                        for i, a in m[1].items()
-                    ]
+                    [a ** (m[0]) * expr.exp(m[0] * (V[i])) for i, a in m[1].items()]
                 )
             else:
                 biosum = expr.bioMultSum(
@@ -1405,9 +1376,7 @@ def getMevForCrossNested(
     return logGi
 
 
-def logcnl(
-    V, availability, nests, choice, alone=None, sampling_log_probability=None
-):
+def logcnl(V, availability, nests, choice, alone=None, sampling_log_probability=None):
     """Implements the log of the cross-nested logit model as a MEV model.
 
     :param V: dict of objects representing the utility functions of
@@ -1612,17 +1581,12 @@ def getMevForCrossNestedMu(V, availability, nests, mu, alone=None):
     for m in nests:
         if availability is None:
             biosum = expr.bioMultSum(
-                [
-                    a ** (m[0] / mu) * expr.exp(m[0] * (V[i]))
-                    for i, a in m[1].items()
-                ]
+                [a ** (m[0] / mu) * expr.exp(m[0] * (V[i])) for i, a in m[1].items()]
             )
         else:
             biosum = expr.bioMultSum(
                 [
-                    availability[i]
-                    * a ** (m[0] / mu)
-                    * expr.exp(m[0] * (V[i]))
+                    availability[i] * a ** (m[0] / mu) * expr.exp(m[0] * (V[i]))
                     for i, a in m[1].items()
                 ]
             )
@@ -1752,13 +1716,11 @@ def checkValidityNestedLogit(V, nests, alone):
         d2 = unionOfNests.difference(fullChoiceSet)
         if d1:
             message += (
-                f'Alternative(s) in the choice set, but not in any nest:'
-                f' {d1}\n'
+                f'Alternative(s) in the choice set, but not in any nest:' f' {d1}\n'
             )
         if d2:
             message += (
-                f'Alternative(s) in a nest, but not in the choice set: '
-                f'{d2}\n'
+                f'Alternative(s) in a nest, but not in the choice set: ' f'{d2}\n'
             )
 
     # Check that the set of alone alternatives is well defined
@@ -1774,14 +1736,11 @@ def checkValidityNestedLogit(V, nests, alone):
 
     # Consider all pairs of nests and verify that the intersection is empty
     allPairs = [(n1, n2) for n1 in nests for n2 in nests if n1 != n2]
-    for (n1, n2) in allPairs:
+    for n1, n2 in allPairs:
         inter = set(n1[1]).intersection(n2[1])
         if inter:
             ok = False
-            message += (
-                f'Two nests contain the following alternative(s): '
-                f'{inter}\n'
-            )
+            message += f'Two nests contain the following alternative(s): ' f'{inter}\n'
 
     if ok:
         message = 'The nested logit model is based on a partition. '

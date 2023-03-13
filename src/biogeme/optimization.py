@@ -28,7 +28,6 @@ logger = msg.bioMessage()
 
 
 def scipy(fct, initBetas, bounds, parameters=None):
-
     """Optimization interface for Biogeme, based on the scipy
     minimize function.
 
@@ -71,9 +70,7 @@ def scipy(fct, initBetas, bounds, parameters=None):
     if 'gtol' in opts.keys():
         logger.general(f'Minimize with tol {opts["gtol"]}')
 
-    results = sc.minimize(
-        f_and_grad, initBetas, bounds=bounds, jac=True, options=opts
-    )
+    results = sc.minimize(f_and_grad, initBetas, bounds=bounds, jac=True, options=opts)
 
     messages = {
         'Algorithm': 'scipy.optimize',
@@ -375,9 +372,7 @@ def bfgsTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
     )
 
 
-def simpleBoundsNewtonAlgorithmForBiogeme(
-    fct, initBetas, bounds, parameters=None
-):
+def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=None):
     """Optimization interface for Biogeme, based on variants of Newton
     method with simple bounds.
 
@@ -463,18 +458,12 @@ def simpleBoundsNewtonAlgorithmForBiogeme(
         if 'proportionAnalyticalHessian' in parameters:
             proportionTrueHessian = parameters['proportionAnalyticalHessian']
         if 'infeasibleConjugateGradient' in parameters:
-            infeasibleConjugateGradient = parameters[
-                'infeasibleConjugateGradient'
-            ]
+            infeasibleConjugateGradient = parameters['infeasibleConjugateGradient']
 
     if proportionTrueHessian == 1.0:
-        logger.detailed(
-            '** Optimization: Newton with trust region for simple bounds'
-        )
+        logger.detailed('** Optimization: Newton with trust region for simple bounds')
     elif proportionTrueHessian == 0.0:
-        logger.detailed(
-            '** Optimization: BFGS with trust region for simple bounds'
-        )
+        logger.detailed('** Optimization: BFGS with trust region for simple bounds')
     else:
         logger.detailed(
             f'** Optimization: Hybrid Newton '
@@ -554,9 +543,7 @@ def bioNewton(fct, initBetas, bounds, parameters=None):
         parameters = {'proportionAnalyticalHessian': 1}
     else:
         parameters['proportionAnalyticalHessian'] = 1
-    return simpleBoundsNewtonAlgorithmForBiogeme(
-        fct, initBetas, bounds, parameters
-    )
+    return simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters)
 
 
 def bioBfgs(fct, initBetas, bounds, parameters=None):
@@ -615,9 +602,7 @@ def bioBfgs(fct, initBetas, bounds, parameters=None):
         parameters = {'proportionAnalyticalHessian': 0}
     else:
         parameters['proportionAnalyticalHessian'] = 0
-    return simpleBoundsNewtonAlgorithmForBiogeme(
-        fct, initBetas, bounds, parameters
-    )
+    return simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters)
 
 
 algorithms = {

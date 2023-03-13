@@ -114,9 +114,7 @@ class beta:
 
         """
         if threshold < 0:
-            raise excep.biogemeError(
-                f'Threshold ({threshold}) must be non negative'
-            )
+            raise excep.biogemeError(f'Threshold ({threshold}) must be non negative')
 
         if self.lb is not None and np.abs(self.value - self.lb) <= threshold:
             return True
@@ -362,9 +360,7 @@ class bioResults:
         :return: name of the file.
         :rtype: string
         """
-        self.data.pickleFileName = bf.getNewFileName(
-            self.data.modelName, 'pickle'
-        )
+        self.data.pickleFileName = bf.getNewFileName(self.data.modelName, 'pickle')
         with open(self.data.pickleFileName, 'wb') as f:
             pickle.dump(self.data, f)
 
@@ -441,9 +437,7 @@ class bioResults:
         try:
             self.data.rhoBarSquare = (
                 np.nan_to_num(
-                    1.0
-                    - (self.data.logLike - self.data.nparam)
-                    / self.data.initLogLike
+                    1.0 - (self.data.logLike - self.data.nparam) / self.data.initLogLike
                 )
                 if self.data.initLogLike is not None
                 else None
@@ -453,9 +447,7 @@ class bioResults:
         try:
             self.data.rhoBarSquareNull = (
                 np.nan_to_num(
-                    1.0
-                    - (self.data.logLike - self.data.nparam)
-                    / self.data.nullLogLike
+                    1.0 - (self.data.logLike - self.data.nparam) / self.data.nullLogLike
                 )
                 if self.data.nullLogLike is not None
                 else None
@@ -464,35 +456,28 @@ class bioResults:
             self.data.rhoBarSquareNull = None
 
         self.data.akaike = 2.0 * self.data.nparam - 2.0 * self.data.logLike
-        self.data.bayesian = (
-            -2.0 * self.data.logLike
-            + self.data.nparam * np.log(self.data.sampleSize)
+        self.data.bayesian = -2.0 * self.data.logLike + self.data.nparam * np.log(
+            self.data.sampleSize
         )
         # We calculate the eigenstructure to report in case of singularity
         if self.data.H is not None:
             self.data.eigenValues, self.data.eigenVectors = linalg.eigh(
                 -np.nan_to_num(self.data.H)
             )
-            _, self.data.singularValues, _ = linalg.svd(
-                -np.nan_to_num(self.data.H)
-            )
+            _, self.data.singularValues, _ = linalg.svd(-np.nan_to_num(self.data.H))
             # We use the pseudo inverse in case the matrix is singular
             self.data.varCovar = -linalg.pinv(np.nan_to_num(self.data.H))
             for i in range(self.data.nparam):
                 if self.data.varCovar[i, i] < 0:
                     self.data.betas[i].setStdErr(np.finfo(float).max)
                 else:
-                    self.data.betas[i].setStdErr(
-                        np.sqrt(self.data.varCovar[i, i])
-                    )
+                    self.data.betas[i].setStdErr(np.sqrt(self.data.varCovar[i, i]))
 
             d = np.diag(self.data.varCovar)
             if (d > 0).all():
                 diag = np.diag(np.sqrt(d))
                 diagInv = linalg.inv(diag)
-                self.data.correlation = diagInv.dot(
-                    self.data.varCovar.dot(diagInv)
-                )
+                self.data.correlation = diagInv.dot(self.data.varCovar.dot(diagInv))
             else:
                 self.data.correlation = np.full_like(
                     self.data.varCovar, np.finfo(float).max
@@ -523,14 +508,10 @@ class bioResults:
 
             # Bootstrap
             if self.data.bootstrap is not None:
-                self.data.bootstrap_varCovar = np.cov(
-                    self.data.bootstrap, rowvar=False
-                )
+                self.data.bootstrap_varCovar = np.cov(self.data.bootstrap, rowvar=False)
                 for i in range(self.data.nparam):
                     if self.data.bootstrap_varCovar[i, i] < 0:
-                        self.data.betas[i].setBootstrapStdErr(
-                            np.finfo(float).max
-                        )
+                        self.data.betas[i].setBootstrapStdErr(np.finfo(float).max)
                     else:
                         self.data.betas[i].setBootstrapStdErr(
                             np.sqrt(self.data.bootstrap_varCovar[i, i])
@@ -555,9 +536,7 @@ class bioResults:
                     trob = self._calculateTest(i, j, self.data.robust_varCovar)
                     prob = calcPValue(trob)
                     if self.data.bootstrap is not None:
-                        tboot = self._calculateTest(
-                            i, j, self.data.bootstrap_varCovar
-                        )
+                        tboot = self._calculateTest(i, j, self.data.bootstrap_varCovar)
                         pboot = calcPValue(tboot)
                     name = (self.data.betaNames[i], self.data.betaNames[j])
                     if self.data.bootstrap is not None:
@@ -619,10 +598,7 @@ class bioResults:
                 f'{self.data.likelihoodRatioTestNull:.7g}\n'
             )
             r += f'Rho square (null):\t\t\t{self.data.rhoSquareNull:.3g}\n'
-            r += (
-                f'Rho bar square (null):\t\t\t'
-                f'{self.data.rhoBarSquareNull:.3g}\n'
-            )
+            r += f'Rho bar square (null):\t\t\t' f'{self.data.rhoBarSquareNull:.3g}\n'
         r += f'Akaike Information Criterion:\t{self.data.akaike:.7g}\n'
         r += f'Bayesian Information Criterion:\t{self.data.bayesian:.7g}\n'
         return r
@@ -650,10 +626,7 @@ class bioResults:
                 f'{self.data.likelihoodRatioTestNull:.7g}\n'
             )
             r += f'Rho square (null):\t\t\t{self.data.rhoSquareNull:.3g}\n'
-            r += (
-                f'Rho bar square (null):\t\t\t'
-                f'{self.data.rhoBarSquareNull:.3g}\n'
-            )
+            r += f'Rho bar square (null):\t\t\t' f'{self.data.rhoBarSquareNull:.3g}\n'
         if self.data.initLogLike is not None:
             r += (
                 f'Likelihood ratio test (init):\t\t'
@@ -684,10 +657,7 @@ class bioResults:
         """
         h = ''
         h += '%% This file is designed to be included into a LaTeX document\n'
-        h += (
-            '%% See http://www.latex-project.org for '
-            'information about LaTeX\n'
-        )
+        h += '%% See http://www.latex-project.org for ' 'information about LaTeX\n'
         h += (
             f'%% {self.data.modelName} - Report from '
             f'biogeme {bv.getVersion()} '
@@ -784,12 +754,8 @@ class bioResults:
         )
         nf = self.numberOfFreeParameters()
         if nf != self.data.nparam:
-            d['Number of free parameters'] = GeneralStatistic(
-                value=nf, format=''
-            )
-        d['Sample size'] = GeneralStatistic(
-            value=self.data.sampleSize, format=''
-        )
+            d['Number of free parameters'] = GeneralStatistic(value=nf, format='')
+        d['Sample size'] = GeneralStatistic(value=self.data.sampleSize, format='')
         if self.data.sampleSize != self.data.numberOfObservations:
             d['Observations'] = GeneralStatistic(
                 value=self.data.numberOfObservations, format=''
@@ -960,9 +926,7 @@ class bioResults:
                 if onlyRobust:
                     arow = {
                         'Value': b.value,
-                        'Active bound': {True: 1.0, False: 0.0}[
-                            b.isBoundActive()
-                        ],
+                        'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
                         'Rob. Std err': b.robust_stdErr,
                         'Rob. t-test': b.robust_tTest,
                         'Rob. p-value': b.robust_pValue,
@@ -970,9 +934,7 @@ class bioResults:
                 else:
                     arow = {
                         'Value': b.value,
-                        'Active bound': {True: 1.0, False: 0.0}[
-                            b.isBoundActive()
-                        ],
+                        'Active bound': {True: 1.0, False: 0.0}[b.isBoundActive()],
                         'Std err': b.stdErr,
                         't-test': b.tTest,
                         'p-value': b.pValue,
@@ -1094,10 +1056,7 @@ class bioResults:
         )
         h += '</table>\n'
 
-        if (
-            np.abs(self.data.smallestEigenValue)
-            <= self.identification_threshold
-        ):
+        if np.abs(self.data.smallestEigenValue) <= self.identification_threshold:
             h += '<h2>Warning: identification issue</h2>\n'
             h += (
                 f'<p>The second derivatives matrix is close to singularity. The smallest eigenvalue is {np.abs(self.data.smallestEigenValue):.3g}. This warning is triggered when it is smaller than the parameter <code>identification_threshold</code>={self.identification_threshold}.</p>'
@@ -1185,14 +1144,8 @@ class bioResults:
             h += '</tr>\n'
         h += '</table>\n'
 
-        h += (
-            f'<p>Smallest eigenvalue: '
-            f'{self.data.smallestEigenValue:.6g}</p>\n'
-        )
-        h += (
-            f'<p>Largest eigenvalue: '
-            f'{self.data.largestEigenValue:.6g}</p>\n'
-        )
+        h += f'<p>Smallest eigenvalue: ' f'{self.data.smallestEigenValue:.6g}</p>\n'
+        h += f'<p>Largest eigenvalue: ' f'{self.data.largestEigenValue:.6g}</p>\n'
         h += f'<p>Condition number: ' f'{self.data.conditionNumber:.6g}</p>\n'
 
         h += '</html>'
@@ -1271,9 +1224,7 @@ class bioResults:
         vc = pd.DataFrame(index=names, columns=names)
         for i, betai in enumerate(self.data.betas):
             for j, betaj in enumerate(self.data.betas):
-                vc.at[betai.name, betaj.name] = self.data.bootstrap_varCovar[
-                    i, j
-                ]
+                vc.at[betai.name, betaj.name] = self.data.bootstrap_varCovar[i, j]
         return vc
 
     def writeHtml(self, onlyRobust=True):
@@ -1301,12 +1252,10 @@ class bioResults:
         h += '<html>\n'
         h += '<head>\n'
         h += (
-            '<script src="http://transp-or.epfl.ch/biogeme/sorttable.js">'
-            '</script>\n'
+            '<script src="http://transp-or.epfl.ch/biogeme/sorttable.js">' '</script>\n'
         )
         h += (
-            '<meta http-equiv="Content-Type" content="text/html; '
-            'charset=utf-8" />\n'
+            '<meta http-equiv="Content-Type" content="text/html; ' 'charset=utf-8" />\n'
         )
         h += (
             f'<title>{self.data.modelName} - Report from '
@@ -1340,9 +1289,7 @@ class bioResults:
         h += '<body bgcolor="#ffffff">\n'
         return h
 
-    def getBetasForSensitivityAnalysis(
-        self, myBetas, size=100, useBootstrap=True
-    ):
+    def getBetasForSensitivityAnalysis(self, myBetas, size=100, useBootstrap=True):
         """Generate draws from the distribution of the estimates, for
         sensitivity analysis.
 
@@ -1383,9 +1330,7 @@ class bioResults:
             return results
 
         theMatrix = (
-            self.data.bootstrap_varCovar
-            if useBootstrap
-            else self.data.robust_varCovar
+            self.data.bootstrap_varCovar if useBootstrap else self.data.robust_varCovar
         )
         simulatedBetas = np.random.multivariate_normal(
             self.data.betaValues, theMatrix, size
@@ -1525,12 +1470,12 @@ class bioResults:
                     try:
                         corr = int(100000 * self.data.secondOrderTable[name][5])
                     except OverflowError:
-                        corr =999999
+                        corr = 999999
                 else:
                     try:
                         corr = int(100000 * self.data.secondOrderTable[name][1])
                     except OverflowError:
-                        corr =999999
+                        corr = 999999
                 results += f'{corr:7d}'
                 count += 1
                 if count % 10 == 0:
@@ -1571,9 +1516,7 @@ class bioResults:
         LU = other_model.data.logLike
         KR = self.data.nparam
         KU = other_model.data.nparam
-        return tools.likelihood_ratio_test(
-            (LU, KU), (LR, KR), significance_level
-        )
+        return tools.likelihood_ratio_test((LU, KU), (LR, KR), significance_level)
 
 
 def compileEstimationResults(
@@ -1590,7 +1533,6 @@ def compileEstimationResults(
     include_robust_ttest=True,
     formatted=True,
 ):
-
     """Compile estimation results into a common table
 
     :param dict_of_results: dictionary where the keys are the names of
@@ -1642,14 +1584,10 @@ def compileEstimationResults(
                 if formatted:
                     for b in res.data.betas:
                         std = (
-                            f'({b.robust_stdErr:.3g})'
-                            if include_robust_stderr
-                            else ''
+                            f'({b.robust_stdErr:.3g})' if include_robust_stderr else ''
                         )
                         ttest = (
-                            f'({b.robust_tTest:.3g})'
-                            if include_robust_ttest
-                            else ''
+                            f'({b.robust_tTest:.3g})' if include_robust_ttest else ''
                         )
                         the_value = f'{b.value:.3g} {std} {ttest}'
                         row_std = ' (std)' if include_robust_stderr else ''
@@ -1680,7 +1618,6 @@ def compile_results_in_directory(
     include_robust_ttest=True,
     formatted=True,
 ):
-
     """Compile estimation results found in the local directory into a
         common table. The results are supposed to be in a file with
         pickle extension.

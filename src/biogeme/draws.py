@@ -135,10 +135,7 @@ def getLatinHypercubeDraws(
 
     uniformNumbers.shape = (totalSize,)
     numbers = np.array(
-        [
-            (float(i) + uniformNumbers[i]) / float(totalSize)
-            for i in range(totalSize)
-        ]
+        [(float(i) + uniformNumbers[i]) / float(totalSize) for i in range(totalSize)]
     )
     if symmetric:
         numbers = 2.0 * numbers - 1.0
@@ -405,10 +402,7 @@ def getNormalWichuraDraws(
             (
                 (
                     (
-                        (
-                            ((a7 * r[cond1] + a6) * r[cond1] + a5) * r[cond1]
-                            + a4
-                        )
+                        (((a7 * r[cond1] + a6) * r[cond1] + a5) * r[cond1] + a4)
                         * r[cond1]
                         + a3
                     )
@@ -425,10 +419,7 @@ def getNormalWichuraDraws(
             (
                 (
                     (
-                        (
-                            ((b7 * r[cond1] + b6) * r[cond1] + b5) * r[cond1]
-                            + b4
-                        )
+                        (((b7 * r[cond1] + b6) * r[cond1] + b5) * r[cond1] + b4)
                         * r[cond1]
                         + b3
                     )
@@ -458,11 +449,7 @@ def getNormalWichuraDraws(
         (
             (
                 (
-                    (
-                        ((c7 * r[cond2d_a] + c6) * r[cond2d_a] + c5)
-                        * r[cond2d_a]
-                        + c4
-                    )
+                    (((c7 * r[cond2d_a] + c6) * r[cond2d_a] + c5) * r[cond2d_a] + c4)
                     * r[cond2d_a]
                     + c3
                 )
@@ -478,11 +465,7 @@ def getNormalWichuraDraws(
         (
             (
                 (
-                    (
-                        ((d7 * r[cond2d_a] + d6) * r[cond2d_a] + d5)
-                        * r[cond2d_a]
-                        + d4
-                    )
+                    (((d7 * r[cond2d_a] + d6) * r[cond2d_a] + d5) * r[cond2d_a] + d4)
                     * r[cond2d_a]
                     + d3
                 )
@@ -500,11 +483,7 @@ def getNormalWichuraDraws(
         (
             (
                 (
-                    (
-                        ((e7 * r[cond2d_b] + e6) * r[cond2d_b] + e5)
-                        * r[cond2d_b]
-                        + e4
-                    )
+                    (((e7 * r[cond2d_b] + e6) * r[cond2d_b] + e5) * r[cond2d_b] + e4)
                     * r[cond2d_b]
                     + e3
                 )
@@ -520,11 +499,7 @@ def getNormalWichuraDraws(
         (
             (
                 (
-                    (
-                        ((f7 * r[cond2d_b] + f6) * r[cond2d_b] + f5)
-                        * r[cond2d_b]
-                        + f4
-                    )
+                    (((f7 * r[cond2d_b] + f6) * r[cond2d_b] + f5) * r[cond2d_b] + f4)
                     * r[cond2d_b]
                     + f3
                 )

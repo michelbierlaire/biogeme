@@ -175,9 +175,7 @@ class BIOGEME:
             """
 
             if self.database.isPanel():
-                dict_of_variables = (
-                    formulas.dictOfVariablesOutsidePanelTrajectory()
-                )
+                dict_of_variables = formulas.dictOfVariablesOutsidePanelTrajectory()
                 if dict_of_variables:
                     err_msg = (
                         f'Error in the loglikelihood function. '
@@ -293,13 +291,10 @@ class BIOGEME:
         """ Time needed to generate the draws. """
 
         if self.loglike is not None:
-
             self.loglikeSignatures = self.loglike.getSignature()
             """ Internal signature of the formula for the loglikelihood."""
             if self.weight is None:
-                self.theC.setExpressions(
-                    self.loglikeSignatures, self.numberOfThreads
-                )
+                self.theC.setExpressions(self.loglikeSignatures, self.numberOfThreads)
 
             else:
                 self.weightSignatures = self.weight.getSignature()
@@ -352,9 +347,7 @@ class BIOGEME:
             listOfErrors += err
             listOfWarnings += war
         if self.weight is not None:
-            total = self.weight.getValue_c(
-                database=self.database, aggregation=True
-            )
+            total = self.weight.getValue_c(database=self.database, aggregation=True)
             s_size = self.database.getSampleSize()
             ratio = s_size / total
             if np.abs(ratio - 1) >= 0.01:
@@ -383,9 +376,7 @@ class BIOGEME:
         # Draws
         self.monteCarlo = len(self.allDraws) > 0
         if self.monteCarlo:
-            self.database.generateDraws(
-                self.allDraws, self.drawNames, numberOfDraws
-            )
+            self.database.generateDraws(self.allDraws, self.drawNames, numberOfDraws)
 
     def _prepareDatabaseForFormula(self, sample=None):
         # Prepare the dataset.
@@ -464,9 +455,7 @@ class BIOGEME:
         # for each free parameter
         self.bounds = []
         for x in self.freeBetaNames:
-            self.bounds.append(
-                (self.allFreeBetas[x].lb, self.allFreeBetas[x].ub)
-            )
+            self.bounds.append((self.allFreeBetas[x].lb, self.allFreeBetas[x].ub))
         # List of ids of the free beta parameters (those to be estimated)
         self.betaIds = list(range(len(self.freeBetaNames)))
 
@@ -510,9 +499,7 @@ class BIOGEME:
         :rtype: float.
         """
         # Value of the loglikelihood for the default values of the parameters.
-        self.initLogLike = self.calculateLikelihood(
-            self.betaInitValues, scaled=False
-        )
+        self.initLogLike = self.calculateLikelihood(self.betaInitValues, scaled=False)
         return self.initLogLike
 
     def calculateLikelihood(self, x, scaled, batch=None):
@@ -746,9 +733,7 @@ class BIOGEME:
             self.changeInitValues(betas)
             self.logger.detailed(f'Parameter values restored from {filename}')
         except IOError:
-            self.logger.warning(
-                f'Cannot read file {filename}. Statement is ignored.'
-            )
+            self.logger.warning(f'Cannot read file {filename}. Statement is ignored.')
 
     def setRandomInitValues(self, defaultBound=100.0):
         """Modifies the initial values of the parameters in all formulas,
@@ -795,7 +780,6 @@ class BIOGEME:
         algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
         algoParameters=None,
     ):
-
         """Estimate the parameters of the model.
 
         :param bootstrap: number of bootstrap resampling used to
@@ -831,13 +815,10 @@ class BIOGEME:
             likelihood
         """
         if self.loglike is None:
-            raise excep.biogemeError(
-                'No log likelihood function has been specified'
-            )
+            raise excep.biogemeError('No log likelihood function has been specified')
         if len(self.freeBetaNames) == 0:
             raise excep.biogemeError(
-                f'There is no parameter to estimate'
-                f' in the formula: {self.loglike}.'
+                f'There is no parameter to estimate' f' in the formula: {self.loglike}.'
             )
 
         if self.saveIterations:
@@ -877,8 +858,7 @@ class BIOGEME:
             finDiffHessian = self.likelihoodFiniteDifferenceHessian(xstar)
             if not np.isfinite(fgHb[2]).all():
                 self.logger.warning(
-                    'Numerical problems with finite '
-                    'difference hessian as well.'
+                    'Numerical problems with finite ' 'difference hessian as well.'
                 )
             else:
                 fgHb = fgHb[0], fgHb[1], finDiffHessian, fgHb[3]
@@ -889,7 +869,6 @@ class BIOGEME:
         #        - K is the number pf parameters to estimate
         self.bootstrap_results = None
         if bootstrap > 0:
-
             start_time = datetime.now()
 
             self.logger.general(
@@ -911,9 +890,7 @@ class BIOGEME:
             # Time needed to generate the bootstrap results
             self.bootstrap_time = datetime.now() - start_time
             self.logger.resume()
-        rawResults = res.rawResults(
-            self, xstar, fgHb, bootstrap=self.bootstrap_results
-        )
+        rawResults = res.rawResults(self, xstar, fgHb, bootstrap=self.bootstrap_results)
         r = res.bioResults(rawResults)
         if self.generateHtml:
             r.writeHtml()
@@ -926,7 +903,6 @@ class BIOGEME:
         algorithm=opt.simpleBoundsNewtonAlgorithmForBiogeme,
         algoParameters=None,
     ):
-
         """| Estimate the parameters of the model. Same as estimate, where any
              extra calculation is skipped (init loglikelihood,
              t-statistics, etc.)
@@ -960,13 +936,10 @@ class BIOGEME:
         """
 
         if self.loglike is None:
-            raise excep.biogemeError(
-                'No log likelihood function has been specificed'
-            )
+            raise excep.biogemeError('No log likelihood function has been specificed')
         if len(self.freeBetaNames) == 0:
             raise excep.biogemeError(
-                f'There is no parameter to estimate'
-                f' in the formula: {self.loglike}.'
+                f'There is no parameter to estimate' f' in the formula: {self.loglike}.'
             )
 
         self.algorithm = algorithm
@@ -987,9 +960,7 @@ class BIOGEME:
         f = self.calculateLikelihood(xstar, scaled=False)
 
         fgHb = f, None, None, None
-        rawResults = res.rawResults(
-            self, xstar, fgHb, bootstrap=self.bootstrap_results
-        )
+        rawResults = res.rawResults(self, xstar, fgHb, bootstrap=self.bootstrap_results)
         r = res.bioResults(rawResults)
         return r
 
@@ -1019,9 +990,7 @@ class BIOGEME:
             as panel data.
         """
         if self.database.isPanel():
-            raise excep.biogemeError(
-                'Validation for panel data is not yet implemented'
-            )
+            raise excep.biogemeError('Validation for panel data is not yet implemented')
 
         keepDatabase = self.database
 
@@ -1033,9 +1002,7 @@ class BIOGEME:
             estBiogeme = BIOGEME(database, self.loglike)
             results = estBiogeme.estimate()
             simulate = {'Loglikelihood': self.loglike}
-            simBiogeme = BIOGEME(
-                db.Database('Validation data', v.validation), simulate
-            )
+            simBiogeme = BIOGEME(db.Database('Validation data', v.validation), simulate)
             simResult = simBiogeme.simulate(results.getBetaValues())
             allSimulationResults.append(simResult)
 
@@ -1045,9 +1012,7 @@ class BIOGEME:
             pickleFileName = bf.getNewFileName(fname, 'pickle')
             with open(pickleFileName, 'wb') as f:
                 pickle.dump(allSimulationResults, f)
-            self.logger.general(
-                f'Simulation results saved in file {pickleFileName}'
-            )
+            self.logger.general(f'Simulation results saved in file {pickleFileName}')
 
         return allSimulationResults
 
@@ -1128,9 +1093,7 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    self.logger.warning(
-                        f'Parameter {x} not present in the model'
-                    )
+                    self.logger.warning(f'Parameter {x} not present in the model')
             betaValues = []
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:
@@ -1217,9 +1180,7 @@ class BIOGEME:
                 raise excep.biogemeError(err)
             for x in theBetaValues.keys():
                 if x not in self.freeBetaNames:
-                    self.logger.warning(
-                        f'Parameter {x} not present in the model'
-                    )
+                    self.logger.warning(f'Parameter {x} not present in the model')
             betaValues = list()
             for i, x in enumerate(self.freeBetaNames):
                 if x in theBetaValues:

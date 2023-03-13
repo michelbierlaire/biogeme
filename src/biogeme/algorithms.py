@@ -35,7 +35,6 @@ class functionToMinimize:
 
     @abstractmethod
     def setVariables(self, x):
-
         """Set the values of the variables for which the function
         has to be calculated.
 
@@ -158,11 +157,7 @@ class bioBounds:
         """ List of upper bounds """
 
         wrongBounds = np.array(
-            [
-                bb[0] > bb[1]
-                for bb in b
-                if bb[0] is not None and bb[1] is not None
-            ]
+            [bb[0] > bb[1] for bb in b if bb[0] is not None and bb[1] is not None]
         )
         if wrongBounds.any():
             errorMsg = (
@@ -179,7 +174,6 @@ class bioBounds:
         return self.bounds.__repr__()
 
     def project(self, x):
-
         """Project a point onto the feasible domain defined by the bounds.
 
         :param x: point to project
@@ -194,9 +188,7 @@ class bioBounds:
         """
 
         if len(x) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {len(x)}' f' and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
 
         y = x
         for i in range(self.n):
@@ -256,9 +248,7 @@ class bioBounds:
                 are inconsistent
         """
         if len(x) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {len(x)}' f' and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
 
         trustRegion = bioBounds([(xk - delta, xk + delta) for xk in x])
         return self.intersect(trustRegion)
@@ -281,9 +271,7 @@ class bioBounds:
                 f'Incompatible size: ' f'{len(selectedVariables)} and {self.n}'
             )
 
-        return bioBounds(
-            [i for i, j in zip(self.bounds, selectedVariables) if j]
-        )
+        return bioBounds([i for i, j in zip(self.bounds, selectedVariables) if j])
 
     def feasible(self, x):
         """Check if point verifies the bound constraints
@@ -298,9 +286,7 @@ class bioBounds:
                  are inconsistent
         """
         if len(x) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: ' f'{len(x)} and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: ' f'{len(x)} and {self.n}')
         for i in range(self.n):
             if (
                 self.lowerBounds[i] is not None
@@ -349,7 +335,6 @@ class bioBounds:
         return m, np.where(alpha == m)[0]
 
     def activity(self, x, epsilon=np.finfo(float).eps):
-
         """Determines the activity status of each variable.
 
         :param x: point for which the activity must be determined.
@@ -376,9 +361,7 @@ class bioBounds:
 
         """
         if len(x) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {len(x)}' f' and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
         if not self.feasible(x):
             raise excep.biogemeError(
                 f'{x} is not feasible for the ' f'bounds {self.bounds}'
@@ -386,14 +369,10 @@ class bioBounds:
 
         activity = np.zeros_like(x, dtype=int)
         for i in range(self.n):
-            if (
-                self.lowerBounds[i] != -np.inf
-                and x[i] - self.lowerBounds[i] <= epsilon
-            ):
+            if self.lowerBounds[i] != -np.inf and x[i] - self.lowerBounds[i] <= epsilon:
                 activity[i] = -1
             elif (
-                self.upperBounds[i] != np.inf
-                and self.upperBounds[i] - x[i] <= epsilon
+                self.upperBounds[i] != np.inf and self.upperBounds[i] - x[i] <= epsilon
             ):
                 activity[i] = 1
         return activity
@@ -420,9 +399,7 @@ class bioBounds:
 
         """
         if len(d) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {self.n}' f' and {len(d)}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {self.n}' f' and {len(d)}')
         bp = [
             (self.upperBounds[i] - x[i]) / d[i]
             if d[i] > np.finfo(float).eps
@@ -469,17 +446,11 @@ class bioBounds:
         """
 
         if len(xk) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {len(xk)}' f' and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {len(xk)}' f' and {self.n}')
         if len(gk) != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {len(gk)}' f' and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {len(gk)}' f' and {self.n}')
         if H.shape[0] != self.n or H.shape[1] != self.n:
-            raise excep.biogemeError(
-                f'Incompatible size: {H.shape}' f' and {self.n}'
-            )
+            raise excep.biogemeError(f'Incompatible size: {H.shape}' f' and {self.n}')
 
         if not self.feasible(xk):
             raise excep.biogemeError('Infeasible iterate')
@@ -497,8 +468,7 @@ class bioBounds:
         if fprime >= 0:
             if n <= 10:
                 logger.warning(
-                    f'GCP: direction {d} is not a descent '
-                    f'direction at {x}.'
+                    f'GCP: direction {d} is not a descent ' f'direction at {x}.'
                 )
             else:
                 logger.warning('GCP: not a descent direction.')
@@ -544,7 +514,6 @@ def schnabelEskow(
     taubar=np.finfo(np.float64).eps ** 0.6666,
     mu=0.1,
 ):
-
     """Modified Cholesky factorization by `Schnabel and Eskow (1999)`_.
 
     .. _`Schnabel and Eskow (1999)`: https://doi.org/10.1137/s105262349833266x
@@ -617,9 +586,7 @@ def schnabelEskow(
             # Switch rows and columns of i and j of A
             permute(i, j)
         if j < dim - 1 and (
-            (
-                A.diagonal()[j + 1 :] - A[j + 1 :, j] ** 2 / A.diagonal()[j]
-            ).min()
+            (A.diagonal()[j + 1 :] - A[j + 1 :, j] ** 2 / A.diagonal()[j]).min()
             < -mu * gamma
         ):
             phaseOne = False  # go to phase two
@@ -643,9 +610,7 @@ def schnabelEskow(
             # Calculate lower Gerschgorin bounds of A[k+1]
             for i in range(k + 1, dim):
                 g[i] = (
-                    A[i, i]
-                    - abs(A[i, k + 1 : i]).sum()
-                    - abs(A[i + 1 : dim, i]).sum()
+                    A[i, i] - abs(A[i, k + 1 : i]).sum() - abs(A[i + 1 : dim, i]).sum()
                 )
             # Modified Cholesky Decomposition
             for j in range(k + 1, dim - 2):
@@ -656,9 +621,7 @@ def schnabelEskow(
                     permute(i, j)
                 # Calculate E[j, j] and add to diagonal
                 norm_j = abs(A[j + 1 : dim, j]).sum()
-                E[j] = delta = max(
-                    0, -A[j, j] + max(norm_j, taubar * gamma), deltaPrev
-                )
+                E[j] = delta = max(0, -A[j, j] + max(norm_j, taubar * gamma), deltaPrev)
                 if delta > 0:
                     A[j, j] += delta
                     deltaPrev = delta  # deltaPrev will contain E_inf
@@ -800,10 +763,7 @@ def relativeGradient(x, f, g, typx, typf):
     :rtype: float
     """
     relgrad = np.array(
-        [
-            g[i] * max(abs(x[i]), typx[i]) / max(abs(f), typf)
-            for i in range(len(x))
-        ]
+        [g[i] * max(abs(x[i]), typx[i]) / max(abs(f), typf) for i in range(len(x))]
     )
     result = abs(relgrad).max()
     if np.isfinite(result):
@@ -812,9 +772,7 @@ def relativeGradient(x, f, g, typx, typf):
     return np.finfo(float).max
 
 
-def newtonLineSearch(
-    fct, x0, eps=np.finfo(np.float64).eps ** 0.3333, maxiter=100
-):
+def newtonLineSearch(fct, x0, eps=np.finfo(np.float64).eps ** 0.3333, maxiter=100):
     """
     Newton method with inexact line search (Wolfe conditions)
 
@@ -1868,9 +1826,7 @@ def simpleBoundsNewtonAlgorithm(
     """
 
     if len(x0) != bounds.n:
-        raise excep.biogemeError(
-            f'Incompatible size:' f' {len(x0)} and {len(bounds)}'
-        )
+        raise excep.biogemeError(f'Incompatible size:' f' {len(x0)} and {len(bounds)}')
 
     if not bounds.feasible(x0):
         logger.warning(
@@ -1954,7 +1910,6 @@ def simpleBoundsNewtonAlgorithm(
         )
 
         if np.isnan(xc).any():
-
             delta = delta / 2.0
             status = '-'
         else:
@@ -1974,7 +1929,6 @@ def simpleBoundsNewtonAlgorithm(
                 failed = True
 
             if failed:
-
                 # Failure: reduce the trust region
                 delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
                 status = '-'
@@ -1985,7 +1939,6 @@ def simpleBoundsNewtonAlgorithm(
                     and float(numberOfTrueHessian) / float(numberOfMatrices)
                     <= proportionTrueHessian
                 ):
-
                     try:
                         fc, gc, Hc = fct.f_g_h()
                         nfev += 1
@@ -2039,19 +1992,14 @@ def simpleBoundsNewtonAlgorithm(
                         status = '+'
 
                     projectedGradient = bounds.project(xk - g) - xk
-                    relgrad = relativeGradient(
-                        xk, f, projectedGradient, typx, typf
-                    )
+                    relgrad = relativeGradient(xk, f, projectedGradient, typx, typf)
                     if relgrad <= tol:
-                        message = (
-                            f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
-                        )
+                        message = f'Relative gradient = {relgrad:.2g} <= {tol:.2g}'
                         cont = False
                     relchange = relativeChange(xk, xpred, typx)
                     if relchange <= steptol:
                         message = (
-                            f'Relative change = '
-                            f'{relchange:.3g} <= {steptol:.2g}'
+                            f'Relative change = ' f'{relchange:.3g} <= {steptol:.2g}'
                         )
                         cont = False
             if delta <= minDelta:

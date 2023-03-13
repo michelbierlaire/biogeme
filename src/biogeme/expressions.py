@@ -13,27 +13,74 @@
 # pylint: disable=invalid-name, too-many-locals, too-many-arguments
 # pylint: disable=too-many-instance-attributes, too-many-lines
 
-from copy import deepcopy
+# flake8: noqa: E501
+
 from itertools import chain
 import numpy as np
 import biogeme.exceptions as excep
 import biogeme.messaging as msg
 import biogeme.cythonbiogeme as ee
 from biogeme.idmanager import IdManager
+from biogeme.elementary_expressions import TypeOfElementaryExpression
 
 logger = msg.bioMessage()
 
 
 def isNumeric(obj):
-    """Identifies if an object is numeric, that is int, float or bool.
+    """Checks if an object is numeric
+    :param obj: obj to be checked
+    :type obj: Object
 
-    :param obj: any object
-    :type obj: object
-
-    :return: True if the object is int, float or bool.
-    :rtype: bool
     """
     return isinstance(obj, (int, float, bool))
+
+
+def process_numeric(expression):
+    """Transforms a numeric value into an Expression object
+
+    :param expression: expression to process
+    :type expression: Expression or numeric
+
+    :raise biogemeError: if expression is not of type expression
+    """
+
+    if isinstance(expression, (int, float, bool)):
+        return Numeric(expression)
+    if not isinstance(expression, Expression):
+        raise excep.biogemeError(f'This is not a valid expression: {expression}')
+    return expression
+
+
+class MultipleExpressionsIterator:
+    """A multiple expression is an expression that contains
+    Catalog. This iterator loops on all possible specification based
+    on all catalogs in the expression."""
+
+    def __init__(self, the_expression):
+        """Ctor. self.the_groups is a set of CatalogExpressionDescription"""
+        self.the_expression = the_expression
+        self.the_expression.reset_expression_selection()
+        self.first = True
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.first:
+            self.first = False
+            result = (
+                self.the_expression.description_of_selected_expression(),
+                self.the_expression,
+            )
+            return result
+
+        if not self.the_expression.increment_selection():
+            raise StopIteration
+        result = (
+            self.the_expression.description_of_selected_expression(),
+            self.the_expression,
+        )
+        return result
 
 
 class Expression:
@@ -69,6 +116,9 @@ class Expression:
         """ Value interpreted as missing data
         """
 
+    def __iter__(self):
+        return MultipleExpressionsIterator(self)
+
     def check_panel_trajectory(self):
         """Set of variables defined outside of 'PanelLikelihoodTrajectory'
 
@@ -77,7 +127,7 @@ class Expression:
         """
         check_children = set(
             chain.from_iterable(
-                [e.check_panel_trajectory() for e in self.children]
+                [e.check_panel_trajectory() for e in self.get_children()]
             )
         )
         return check_children
@@ -89,7 +139,7 @@ class Expression:
         :rtype: set(str)
         """
         check_children = set(
-            chain.from_iterable([e.check_draws() for e in self.children])
+            chain.from_iterable([e.check_draws() for e in self.get_children()])
         )
         return check_children
 
@@ -100,7 +150,7 @@ class Expression:
         :rtype: set(str)
         """
         check_children = set(
-            chain.from_iterable([e.check_rv() for e in self.children])
+            chain.from_iterable([e.check_rv() for e in self.get_children()])
         )
         return check_children
 
@@ -114,13 +164,13 @@ class Expression:
         """
         with_id = set()
         without_id = set()
-        for e in self.children:
+        for e in self.get_children():
             yes, no = e.getStatusIdManager()
             with_id.update(yes)
             without_id.update(no)
         return with_id, without_id
 
-    def prepare(self, database, numberOfDraws=1000):
+    def prepare(self, database, numberOfDraws):
         """Prepare the expression to be evaluated
 
         :param database: Biogeme database
@@ -147,7 +197,7 @@ class Expression:
         :type id_manager: class IdManager
         """
         self.id_manager = id_manager
-        for e in self.children:
+        for e in self.get_children():
             e.setIdManager(id_manager)
 
     def __repr__(self):
@@ -175,9 +225,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during addition to {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during addition to {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Plus(self, other)
 
@@ -197,9 +245,7 @@ class Expression:
 
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during addition to {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during addition to {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Plus(other, self)
 
@@ -219,9 +265,7 @@ class Expression:
 
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during substraction to {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during substraction to {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Minus(self, other)
 
@@ -241,9 +285,7 @@ class Expression:
 
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during substraction of {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during substraction of {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Minus(other, self)
 
@@ -264,8 +306,7 @@ class Expression:
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             error_msg = (
-                f'Invalid expression during multiplication '
-                f'to {self}: [{other}]'
+                f'Invalid expression during multiplication ' f'to {self}: [{other}]'
             )
             raise excep.biogemeError(error_msg)
         return Times(self, other)
@@ -286,8 +327,7 @@ class Expression:
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             error_msg = (
-                f'Invalid expression during multiplication '
-                f'to {self}: [{other}]'
+                f'Invalid expression during multiplication ' f'to {self}: [{other}]'
             )
             raise excep.biogemeError(error_msg)
         return Times(other, self)
@@ -308,9 +348,7 @@ class Expression:
 
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during division of {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during division of {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Divide(self, other)
 
@@ -329,9 +367,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during division by {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during division by {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Divide(other, self)
 
@@ -350,9 +386,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during division of {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during division of {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Divide(self, other)
 
@@ -371,9 +405,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            error_msg = (
-                f'Invalid expression during division by {self}: [{other}]'
-            )
+            error_msg = f'Invalid expression during division by {self}: [{other}]'
             raise excep.biogemeError(error_msg)
         return Divide(other, self)
 
@@ -402,9 +434,7 @@ class Expression:
 
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Power(self, other)
 
     def __rpow__(self, other):
@@ -422,9 +452,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Power(other, self)
 
     def __and__(self, other):
@@ -442,9 +470,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return And(self, other)
 
     def __rand__(self, other):
@@ -462,9 +488,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return And(other, self)
 
     def __or__(self, other):
@@ -482,9 +506,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Or(self, other)
 
     def __ror__(self, other):
@@ -502,9 +524,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Or(other, self)
 
     def __eq__(self, other):
@@ -522,9 +542,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Equal(self, other)
 
     def __ne__(self, other):
@@ -542,9 +560,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return NotEqual(self, other)
 
     def __le__(self, other):
@@ -562,9 +578,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return LessOrEqual(self, other)
 
     def __ge__(self, other):
@@ -582,9 +596,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return GreaterOrEqual(self, other)
 
     def __lt__(self, other):
@@ -602,9 +614,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Less(self, other)
 
     def __gt__(self, other):
@@ -622,9 +632,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
-            raise excep.biogemeError(
-                f'This is not a valid expression: {other}'
-            )
+            raise excep.biogemeError(f'This is not a valid expression: {other}')
         return Greater(self, other)
 
     def createFunction(
@@ -726,7 +734,6 @@ class Expression:
         aggregation=False,
         prepareIds=False,
     ):
-
         """Evaluation of the expression, without the derivatives
 
         :param betas: values of the free parameters
@@ -857,9 +864,7 @@ class Expression:
             self.keep_id_manager = self.id_manager
             self.prepare(database, numberOfDraws)
         elif self.id_manager is None:
-            error_msg = (
-                'Expression evaluated out of context. Set prepareIds to True.'
-            )
+            error_msg = 'Expression evaluated out of context. Set prepareIds to True.'
             raise excep.biogemeError(error_msg)
 
         errors, warnings = self.audit(database)
@@ -876,7 +881,9 @@ class Expression:
                 'so is the gradient. The provided parameters are inconsistent.'
             )
         if database is None:
-            variables = self.setOfVariables()
+            variables = self.set_of_elementary_expression(
+                TypeOfElementaryExpression.VARIABLE
+            )
             if variables:
                 raise excep.biogemeError(
                     f'No database is provided and the expression '
@@ -966,84 +973,37 @@ class Expression:
         """
         return self.embedExpression('MonteCarlo')
 
-    def setOfBetas(self, free=True, fixed=False):
-        """
-        Extract the set of parameters from the expression.
+    def set_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a specific type
 
-        :param free: if True, the free parameters are included. Default: True.
-        :type free: bool
-        :param fixed: if True, the fixed parameters are included.
-            Default: False.
-        :type fixed: bool
-        :return: returns a set with the beta parameters appearing in the
-            expression.
-        :rtype: set(biogeme.expressions.Expression)
-        """
-        s = set()
-        for e in self.children:
-            s = s.union(e.setOfBetas(free, fixed))
-        return s
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
 
-    def setOfVariables(self):
-        """
-        Extract the set of variables used in the expression.
-
-        :return: returns a set with the variables appearing in the expression.
-        :rtype: set(biogeme.expressions.Expression)
-        """
-        return set(self.dictOfVariables().keys())
-
-    def dictOfBetas(self, free=True, fixed=False):
+        :return: returns a set with the names of the elementary expressions
+        :rtype: set(string.Expression)
 
         """
-        Extract the set of parameters from the expression.
+        return set(self.dict_of_elementary_expression(the_type).keys())
 
-        :param free: if True, the free parameters are included. Default: True.
-        :type free: bool
-        :param fixed: if True, the fixed parameters are included.
-             Default: False.
-        :type fixed: bool
+    def dict_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a specific type
 
-        :return: a dict with the beta parameters appearing in the expression,
-                 the keys being the names of the parameters.
-        :rtype: dict(string:biogeme.expressions.Expression)
-
-        """
-        s = {}
-        for e in self.children:
-            d = e.dictOfBetas(free, fixed)
-            s = dict(s, **d)
-        return s
-
-    def dictOfVariables(self):
-        """Recursively extract the variables appearing in the expression, and
-        store them in a dictionary.
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
 
         :return: returns a dict with the variables appearing in the
-                 expression the keys being their names.
+               expression the keys being their names.
         :rtype: dict(string:biogeme.expressions.Expression)
 
         """
-        s = {}
-        for e in self.children:
-            d = e.dictOfVariables()
-            s = dict(s, **d)
-        return s
-
-    def dictOfRandomVariables(self):
-        """Recursively extract the random variables appearing in the
-        expression, and store them in a dictionary.
-
-        :return: returns a dict with the random variables appearing in
-                 the expression the keys being their names.
-
-        :rtype: dict(string:biogeme.expressions.Expression)
-        """
-        s = {}
-        for e in self.children:
-            d = e.dictOfRandomVariables()
-            s = dict(s, **d)
-        return s
+        return dict(
+            chain(
+                *(
+                    e.dict_of_elementary_expression(the_type).items()
+                    for e in self.children
+                )
+            )
+        )
 
     def getElementaryExpression(self, name):
         """Return: an elementary expression from its name if it appears in the
@@ -1055,7 +1015,7 @@ class Expression:
         :return: the expression if it exists. None otherwise.
         :rtype: biogeme.expressions.Expression
         """
-        for e in self.children:
+        for e in self.get_children():
             if e.getElementaryExpression(name) is not None:
                 return e.getElementaryExpression(name)
         return None
@@ -1072,22 +1032,6 @@ class Expression:
         """
         raise excep.biogemeError("The function setRow is now obsolete.")
 
-    def dictOfDraws(self):
-        """Recursively extract the random variables
-        (draws for Monte-Carlo)
-        appearing in the expression, and store them in a dictionary.
-
-        :return: dict where the keys are the random variables and the elements
-             the type of draws
-        :rtype: dict(string:string)
-        """
-        draws = {}
-        for e in self.children:
-            d = e.dictOfDraws()
-            if d:
-                draws = dict(draws, **d)
-        return draws
-
     def rename_elementary(self, names, prefix=None, suffix=None):
         """Rename elementary expressions by adding a prefix and/or a suffix
 
@@ -1102,7 +1046,7 @@ class Expression:
             suffix defined by this argument.
         :type suffix: str
         """
-        for e in self.children:
+        for e in self.get_children():
             e.rename_elementary(names, prefix=prefix, suffix=suffix)
 
     def fix_betas(self, beta_values, prefix=None, suffix=None):
@@ -1122,7 +1066,7 @@ class Expression:
         :type suffix: str
 
         """
-        for e in self.children:
+        for e in self.get_children():
             e.fix_betas(beta_values, prefix=prefix, suffix=suffix)
 
     def getClassName(self):
@@ -1185,13 +1129,13 @@ class Expression:
 
         """
         listOfSignatures = []
-        for e in self.children:
+        for e in self.get_children():
             listOfSignatures += e.getSignature()
         mysignature = f'<{self.getClassName()}>'
-        mysignature += f'{{{id(self)}}}'
-        mysignature += f'({len(self.children)})'
-        for e in self.children:
-            mysignature += f',{id(e)}'
+        mysignature += f'{{{self.get_id()}}}'
+        mysignature += f'({len(self.get_children())})'
+        for e in self.get_children():
+            mysignature += f',{e.get_id()}'
         listOfSignatures += [mysignature.encode()]
         return listOfSignatures
 
@@ -1207,7 +1151,7 @@ class Expression:
         """
         if self.getClassName() == t:
             return True
-        for e in self.children:
+        for e in self.get_children():
             if e.embedExpression(t):
                 return True
         return False
@@ -1222,7 +1166,7 @@ class Expression:
         :rtype: int
         """
         nbr = 0
-        for e in self.children:
+        for e in self.get_children():
             nbr += e.countPanelTrajectoryExpressions()
         return nbr
 
@@ -1238,13 +1182,14 @@ class Expression:
         listOfErrors = []
         listOfWarnings = []
 
-        for e in self.children:
+        for e in self.get_children():
             if not isinstance(e, Expression):
                 theError = f'Invalid expression: {e}'
                 listOfErrors.append(theError)
             err, war = e.audit(database)
             listOfErrors += err
             listOfWarnings += war
+
         return listOfErrors, listOfWarnings
 
     def changeInitValues(self, betas):
@@ -1258,18 +1203,147 @@ class Expression:
         :type betas: dict(string:float)
         """
 
-        for e in self.children:
+        for e in self.get_children():
             e.changeInitValues(betas)
 
+    def dict_of_catalogs(self):
+        """Returns a dict with all catalogs in the expression.
 
-    def contains_multiple_expressions(self):
-        """ Check if the expression contains multiple expressions
+        :return: dict with all the catalogs
+        """
+        result = {}
+        for e in self.children:
+            a_dict = e.dict_of_catalogs()
+            for key, the_catalog in a_dict.items():
+                if key in result:
+                    error_msg = (
+                        f'Catalog {key} cannot appear twice in the same '
+                        f'expression. Use different names.'
+                    )
+                    raise excep.biogemeError(error_msg)
+                result[key] = the_catalog
+        return result
 
-        :return: True if one of the expressions is of type MultipleExpression
+    def contains_catalog(self, name):
+        """Check if the expression contains a specific catalog
+
+        :param name: name of the catalog to search.
+        :type name: str
+
+        :return: True if the given catalog is contained in the
+            expression. False otherwise.
         :rtype: bool
         """
-        return False
-    
+        all_catalogs = self.dict_of_catalogs()
+        return name in all_catalogs
+
+    def description_of_selected_expression(self):
+        """If the expression containts Catalog expressions, describes
+        the currently selected expression. The dict reports, for each catalog, the name of
+
+        :return: description of the selected expression
+        :rtype: str
+
+        """
+        all_catalogs = self.dict_of_catalogs()
+        return ';'.join(
+            [
+                f'{name}<{catalog.selected_name()}>'
+                for name, catalog in all_catalogs.items()
+            ]
+        )
+
+    def number_of_multiple_expressions(self):
+        """Reports the number of multiple expressions available through the iterator
+
+        :return: numbero  multiple expressions
+        :rtype: int
+        """
+        total = 1
+        [total := total * e.number_of_multiple_expressions() for e in self.children]
+        return total
+
+    def increment_selection(self):
+        """Increment recursively the selection of multiple
+        expressions.
+
+        :return: True if the increment has been implemented
+        :rtype: bool
+        """
+
+        def increment_children(list_of_expressions):
+            """Perform all possible increments for a list of expressions
+
+            :return: True if the increment has been implemented
+            :rtype: bool
+            """
+            if not list_of_expressions:
+                return False
+            first_expression = list_of_expressions[0]
+            other_expressions = list_of_expressions[1:]
+            if increment_children(other_expressions):
+                return True
+            if first_expression.increment_selection():
+                for e in other_expressions:
+                    e.reset_expression_selection()
+                return True
+            return False
+
+        done = increment_children(self.children)
+        return done
+
+    def reset_expression_selection(self):
+        """In each group of expressions, select the first one"""
+        for e in self.children:
+            e.reset_expression_selection()
+
+    def select_expression(self, group_name, index):
+        """Select a specific expression in a group
+
+        :param group_name: name of the group of expressions
+        :type group_name: str
+
+        :param index: index of the expression in the group
+        :type index: int
+
+        :return: number of changes made
+        :rtype: int
+
+        :raises biogemeError: if index is out of range
+        """
+        total = 0
+        [
+            total := total + e.select_expression(group_name, index)
+            for e in self.get_children()
+        ]
+        return total
+
+    def set_of_multiple_expressions(self):
+        """Set of the multiple expressions found in the current expression
+
+        :return: a set of descriptions of the multiple expressions
+        :rtype: set(MultipleExpressionDescription)
+        """
+        all_sets = [e.set_of_multiple_expressions() for e in self.get_children()]
+        return set(chain.from_iterable(all_sets))
+
+    def get_id(self):
+        """Retrieve the id of the expression used in the signature
+
+        :return: id of the object
+        :rtype: int
+        """
+        return id(self)
+
+    def get_children(self):
+        """Retrieve the list of children
+
+        :return: list of children
+        :rtype: list(Expression)
+        """
+        return self.children
+
+
 class BinaryOperator(Expression):
     """
     Base class for arithmetic expressions that are binary operators.
@@ -1296,20 +1370,17 @@ class BinaryOperator(Expression):
             self.left = Numeric(left)  #: left child
         else:
             if not isinstance(left, Expression):
-                raise excep.biogemeError(
-                    f'This is not a valid expression: {left}'
-                )
+                raise excep.biogemeError(f'This is not a valid expression: {left}')
             self.left = left
         if isNumeric(right):
             self.right = Numeric(right)  #: right child
         else:
             if not isinstance(right, Expression):
-                raise excep.biogemeError(
-                    f'This is not a valid expression: {right}'
-                )
+                raise excep.biogemeError(f'This is not a valid expression: {right}')
             self.right = right
         self.children.append(self.left)
         self.children.append(self.right)
+
 
 class Plus(BinaryOperator):
     """
@@ -1820,9 +1891,7 @@ class UnaryOperator(Expression):
             self.child = Numeric(child)  #: child
         else:
             if not isinstance(child, Expression):
-                raise excep.biogemeError(
-                    f'This is not a valid expression: {child}'
-                )
+                raise excep.biogemeError(f'This is not a valid expression: {child}')
             self.child = child
         self.children.append(self.child)
 
@@ -1906,10 +1975,7 @@ class MonteCarlo(UnaryOperator):
                 listOfErrors.append(theError)
 
         if not self.child.embedExpression('bioDraws'):
-            theError = (
-                f'The argument of MonteCarlo must contain a'
-                f' bioDraws: {self}'
-            )
+            theError = f'The argument of MonteCarlo must contain a' f' bioDraws: {self}'
             listOfErrors.append(theError)
         if self.child.embedExpression('MonteCarlo'):
             theError = (
@@ -2132,8 +2198,8 @@ class Derive(UnaryOperator):
         listOfSignatures = []
         listOfSignatures += self.child.getSignature()
         mysignature = f'<{self.getClassName()}>'
-        mysignature += f'{{{id(self)}}}'
-        mysignature += f',{id(self.child)}'
+        mysignature += f'{{{self.get_id()}}}'
+        mysignature += f',{self.child.get_id()}'
         mysignature += f',{elementaryIndex}'
         listOfSignatures += [mysignature.encode()]
         return listOfSignatures
@@ -2179,8 +2245,7 @@ class Integrate(UnaryOperator):
         listOfErrors, listOfWarnings = self.child.audit(database)
         if not self.child.embedExpression('RandomVariable'):
             theError = (
-                f'The argument of Integrate must contain a '
-                f'RandomVariable: {self}'
+                f'The argument of Integrate must contain a ' f'RandomVariable: {self}'
             )
             listOfErrors.append(theError)
         return listOfErrors, listOfWarnings
@@ -2239,8 +2304,8 @@ class Integrate(UnaryOperator):
         listOfSignatures = []
         listOfSignatures += self.child.getSignature()
         mysignature = f'<{self.getClassName()}>'
-        mysignature += f'{{{id(self)}}}'
-        mysignature += f',{id(self.child)}'
+        mysignature += f'{{{self.get_id()}}}'
+        mysignature += f',{self.child.get_id()}'
         mysignature += f',{randomVariableIndex}'
         listOfSignatures += [mysignature.encode()]
         return listOfSignatures
@@ -2326,6 +2391,14 @@ class Elementary(Expression):
             if suffix is not None:
                 self.name = f'{self.name}{suffix}'
 
+    def number_of_multiple_expressions(self):
+        """Count the number of "parallel" expressions
+
+        :return: the number of expressions
+        :rtype: int
+        """
+        return 1
+
 
 class bioDraws(Elementary):
     """
@@ -2371,9 +2444,7 @@ class bioDraws(Elementary):
             self.elementaryIndex = None
             self.drawId = None
             return
-        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
-            self.name
-        ]
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         self.drawId = self.id_manager.draws.indices[self.name]
 
     def getSignature(self):
@@ -2430,28 +2501,26 @@ class bioDraws(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary '
-                f'expression {self.name}.'
+                f'No id has been defined for elementary ' f'expression {self.name}.'
             )
             raise excep.biogemeError(error_msg)
         if self.drawId is None:
             error_msg = f'No id has been defined for draw {self.name}.'
             raise excep.biogemeError(error_msg)
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f'"{self.name}",{self.elementaryIndex},{self.drawId}'
         return [signature.encode()]
 
-    def dictOfDraws(self):
-        """Recursively extract the random variables
-        (draws for Monte-Carlo).  Overloads the generic function.
-        appearing in the expression, and store them in a dictionary.
+    def dict_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a dpecific type
 
-        :return: dict where the keys are the random variables and the
-                 elements the type of draws. Here, contains only one element.
-        :rtype: dict(string:string)
+        :param type: the type of expression
+        :type  type: TypeOfElementaryExpression
         """
-        return {self.name: self.drawType}
+        if the_type == TypeOfElementaryExpression.DRAWS:
+            return {self.name: self.drawType}
+        return {}
 
 
 class Numeric(Expression):
@@ -2525,7 +2594,7 @@ class Numeric(Expression):
         :rtype: list(string)
         """
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f',{self.value}'
         return [signature.encode()]
 
@@ -2585,24 +2654,18 @@ class Variable(Elementary):
             self.elementaryIndex = None
             self.variableId = None
             return
-        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
-            self.name
-        ]
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         self.variableId = self.id_manager.variables.indices[self.name]
 
-    def dictOfVariables(self):
-        """Recursively extract the variables appearing in the expression, and
-        store them in a dictionary.
+    def dict_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a specific type
 
-        Overload the generic function.
-
-        :return: returns a dict with the variables appearing in the
-               expression the keys being their names.
-               Here, it contains only one element.
-        :rtype: dict(string:biogeme.expressions.Expression)
-
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
         """
-        return {self.name: self}
+        if the_type == TypeOfElementaryExpression.VARIABLE:
+            return {self.name: self}
+        return {}
 
     def audit(self, database=None):
         """Performs various checks on the expressions.
@@ -2684,15 +2747,14 @@ class Variable(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary expression '
-                f'{self.name}.'
+                f'No id has been defined for elementary expression ' f'{self.name}.'
             )
             raise excep.biogemeError(error_msg)
         if self.variableId is None:
             error_msg = f'No id has been defined for variable {self.name}.'
             raise excep.biogemeError(error_msg)
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f'"{self.name}",{self.elementaryIndex},{self.variableId}'
         return [signature.encode()]
 
@@ -2711,7 +2773,7 @@ class DefineVariable(Variable):
         :param name: name of the variable.
         :type name: string
         :param expression: formula that defines the variable
-        :param type:  biogeme.expressions.Expression
+        :type expression:  biogeme.expressions.Expression
         :param database: object identifying the database.
         :type database: biogeme.database.Database
 
@@ -2766,23 +2828,18 @@ class RandomVariable(Elementary):
             self.elementaryIndex = None
             self.rvId = None
             return
-        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
-            self.name
-        ]
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         self.rvId = self.id_manager.random_variables.indices[self.name]
 
-    def dictOfRandomVariables(self):
-        """Recursively extract the random variables appearing in
-        the expression, and store them in a dictionary.
+    def dict_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a specific type
 
-        Overloads the generic function.
-
-        :return: returns a dict with the random variables appearing in
-                 the expression the keys being their names.
-
-        :rtype: dict(string:biogeme.expressions.Expression)
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
         """
-        return {self.name: self}
+        if the_type == TypeOfElementaryExpression.RANDOM_VARIABLE:
+            return {self.name: self}
+        return {}
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2838,18 +2895,15 @@ class RandomVariable(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary '
-                f'expression {self.name}.'
+                f'No id has been defined for elementary ' f'expression {self.name}.'
             )
             raise excep.biogemeError(error_msg)
         if self.rvId is None:
-            error_msg = (
-                f'No id has been defined for random variable {self.name}.'
-            )
+            error_msg = f'No id has been defined for random variable {self.name}.'
             raise excep.biogemeError(error_msg)
 
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f'"{self.name}",{self.elementaryIndex},{self.rvId}'
         return [signature.encode()]
 
@@ -2903,7 +2957,7 @@ class Beta(Elementary):
     def setIdManager(self, id_manager=None):
         """The ID manager contains the IDs of the elementary expressions.
 
-        It is externally created, as it may nee to coordinate the
+        It is externally created, as it may need to coordinate the
         numbering of several expressions. It is stored only in the
         expressions of type Elementary.
 
@@ -2916,9 +2970,7 @@ class Beta(Elementary):
             self.elementaryIndex = None
             self.betaId = None
             return
-        self.elementaryIndex = self.id_manager.elementary_expressions.indices[
-            self.name
-        ]
+        self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         if self.status != 0:
             self.betaId = self.id_manager.fixed_betas.indices[self.name]
         else:
@@ -2954,46 +3006,24 @@ class Beta(Elementary):
             if suffix is not None:
                 self.name = f'{self.name}{suffix}'
 
-    def setOfBetas(self, free=True, fixed=False):
-        """Extract the set of parameters from the expression. Overload the
-        generic function.
+    def dict_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a specific type
 
-        :param free: if True, the free parameters are included. Default: True.
-        :type free: bool
-        :param fixed: if True, the fixed parameters are included.
-            Default: False.
-        :type fixed: bool
-        :return: returns a set with the beta parameters appearing in the
-            expression.
-        :rtype: set(biogeme.expressions.Expression)
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
 
-        """
-        if fixed and self.status != 0:
-            return set([self.name])
-
-        if free and self.status == 0:
-            return set([self.name])
-
-        return set()
-
-    def dictOfBetas(self, free=True, fixed=False):
-        """Extract the set of parameters from the expression. Overload the
-        generic function.
-
-        :param free: if True, the free parameters are included. Default: True.
-        :type free: bool
-        :param fixed: if True, the fixed parameters are included.
-             Default: False.
-        :type fixed: bool
-
-        :return: a dict with the beta parameters appearing in the expression,
-                 the keys being the names of the parameters.
+        :return: returns a dict with the variables appearing in the
+               expression the keys being their names.
         :rtype: dict(string:biogeme.expressions.Expression)
+
         """
-        if fixed and self.status != 0:
+        if the_type == TypeOfElementaryExpression.BETA:
             return {self.name: self}
 
-        if free and self.status == 0:
+        if the_type == TypeOfElementaryExpression.FREE_BETA and self.status == 0:
+            return {self.name: self}
+
+        if the_type == TypeOfElementaryExpression.FIXED_BETA and self.status != 0:
             return {self.name: self}
 
         return {}
@@ -3076,8 +3106,7 @@ class Beta(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary '
-                f'expression {self.name}.'
+                f'No id has been defined for elementary ' f'expression {self.name}.'
             )
             raise excep.biogemeError(error_msg)
         if self.betaId is None:
@@ -3086,10 +3115,9 @@ class Beta(Elementary):
             )
 
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += (
-            f'"{self.name}"[{self.status}],'
-            f'{self.elementaryIndex},{self.betaId}'
+            f'"{self.name}"[{self.status}],' f'{self.elementaryIndex},{self.betaId}'
         )
         return [signature.encode()]
 
@@ -3135,9 +3163,7 @@ class LogLogit(Expression):
                 self.util[i] = Numeric(e)
             else:
                 if not isinstance(e, Expression):
-                    raise excep.biogemeError(
-                        f'This is not a valid expression: {e}'
-                    )
+                    raise excep.biogemeError(f'This is not a valid expression: {e}')
                 self.util[i] = e
         self.av = {}  #: dict of availability formulas
         if av is None:
@@ -3148,18 +3174,14 @@ class LogLogit(Expression):
                     self.av[i] = Numeric(e)
                 else:
                     if not isinstance(e, Expression):
-                        raise excep.biogemeError(
-                            f'This is not a valid expression: {e}'
-                        )
+                        raise excep.biogemeError(f'This is not a valid expression: {e}')
                     self.av[i] = e
         if isNumeric(choice):
             self.choice = Numeric(choice)
             """expression for the chosen alternative"""
         else:
             if not isinstance(choice, Expression):
-                raise excep.biogemeError(
-                    f'This is not a valid expression: {choice}'
-                )
+                raise excep.biogemeError(f'This is not a valid expression: {choice}')
             self.choice = choice
 
         self.children.append(self.choice)
@@ -3186,9 +3208,7 @@ class LogLogit(Expression):
             listOfWarnings += war
 
         if self.util.keys() != self.av.keys():
-            theError = (
-                'Incompatible list of alternatives in logit expression. '
-            )
+            theError = 'Incompatible list of alternatives in logit expression. '
             consistent = False
             myset = self.util.keys() - self.av.keys()
             if myset:
@@ -3231,10 +3251,9 @@ class LogLogit(Expression):
         if consistent:
             if database is None:
                 value_choice = self.choice.getValue_c()
-                if not value_choice in self.av.keys():
+                if value_choice not in self.av.keys():
                     theError = (
-                        f'The chosen alternative [{value_choice}] '
-                        f'is not available'
+                        f'The chosen alternative [{value_choice}] ' f'is not available'
                     )
                     listOfWarnings.append(theError)
             else:
@@ -3246,9 +3265,7 @@ class LogLogit(Expression):
                     incorrectChoices = choices[indexOfUnavailableChoices]
                     content = '-'.join(
                         '{}[{}]'.format(*t)
-                        for t in zip(
-                            indexOfUnavailableChoices, incorrectChoices
-                        )
+                        for t in zip(indexOfUnavailableChoices, incorrectChoices)
                     )
                     truncate = 100
                     if len(content) > truncate:
@@ -3374,14 +3391,14 @@ class LogLogit(Expression):
         :rtype: list(string)
         """
         listOfSignatures = []
-        for e in self.children:
+        for e in self.get_children():
             listOfSignatures += e.getSignature()
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.util)})'
-        signature += f',{id(self.choice)}'
+        signature += f',{self.choice.get_id()}'
         for i, e in self.util.items():
-            signature += f',{i},{id(e)},{id(self.av[i])}'
+            signature += f',{i},{e.get_id()},{self.av[i].get_id()}'
         listOfSignatures += [signature.encode()]
         return listOfSignatures
 
@@ -3482,9 +3499,7 @@ class bioMultSum(Expression):
         """
         Expression.__init__(self)
         if not listOfExpressions:
-            raise excep.biogemeError(
-                'The argument of bioMultSum cannot be empty'
-            )
+            raise excep.biogemeError('The argument of bioMultSum cannot be empty')
         if isinstance(listOfExpressions, dict):
             for e in listOfExpressions.values():
                 if isNumeric(e):
@@ -3492,9 +3507,7 @@ class bioMultSum(Expression):
                     self.children.append(theExpression)
                 else:
                     if not isinstance(e, Expression):
-                        raise excep.biogemeError(
-                            f'This is not a valid expression: {e}'
-                        )
+                        raise excep.biogemeError(f'This is not a valid expression: {e}')
                     self.children.append(e)
         elif isinstance(listOfExpressions, list):
             for e in listOfExpressions:
@@ -3503,29 +3516,24 @@ class bioMultSum(Expression):
                     self.children.append(theExpression)
                 else:
                     if not isinstance(e, Expression):
-                        raise excep.biogemeError(
-                            f'This is not a valid expression: {e}'
-                        )
+                        raise excep.biogemeError(f'This is not a valid expression: {e}')
                     self.children.append(e)
         else:
-            raise excep.biogemeError(
-                'Argument of bioMultSum must be a dict or a list.'
-            )
+            raise excep.biogemeError('Argument of bioMultSum must be a dict or a list.')
 
     def getValue(self):
-
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
         result = 0.0
-        for e in self.children:
+        for e in self.get_children():
             result += e.getValue()
         return result
 
     def __str__(self):
-        s = 'bioMultSum(' + ', '.join([f'{e}' for e in self.children]) + ')'
+        s = 'bioMultSum(' + ', '.join([f'{e}' for e in self.get_children()]) + ')'
         return s
 
 
@@ -3568,9 +3576,7 @@ class Elem(Expression):
                 self.dictOfExpressions[k] = Numeric(v)
             else:
                 if not isinstance(v, Expression):
-                    raise excep.biogemeError(
-                        f'This is not a valid expression: {v}'
-                    )
+                    raise excep.biogemeError(f'This is not a valid expression: {v}')
                 self.dictOfExpressions[k] = v
             self.children.append(self.dictOfExpressions[k])
 
@@ -3660,11 +3666,11 @@ class Elem(Expression):
         for i, e in self.dictOfExpressions.items():
             listOfSignatures += e.getSignature()
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.dictOfExpressions)})'
-        signature += f',{id(self.keyExpression)}'
+        signature += f',{self.keyExpression.get_id()}'
         for i, e in self.dictOfExpressions.items():
-            signature += f',{i},{id(e)}'
+            signature += f',{i},{e.get_id()}'
         listOfSignatures += [signature.encode()]
         return listOfSignatures
 
@@ -3725,85 +3731,29 @@ class bioLinearUtility(Expression):
     def __str__(self):
         return ' + '.join([f'{b} * {x}' for b, x in self.listOfTerms])
 
-    def setOfBetas(self, free=True, fixed=False):
-        """
-        Extract the set of parameters from the expression.
+    def dict_of_elementary_expression(self, the_type):
+        """Extract a dict with all elementary expressions of a specific type
 
-        :param free: if True, the free parameters are included. Default: True.
-        :type free: bool
-        :param fixed: if True, the fixed parameters are included.
-             Default: False.
-        :type fixed: bool
-        :return: returns a set with the beta parameters appearing in the
-            expression.
-        :rtype: set(biogeme.expressions.Expression)
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
 
-        """
-        if free:
-            return set(self.betas)
-
-        return set()
-
-    def dictOfBetas(self, free=True, fixed=False):
-        """
-        Extract the set of parameters from the expression.
-
-        :param free: if True, the free parameters are included. Default: True.
-        :type free: bool
-        :param fixed: if True, the fixed parameters are included.
-            Default: False.
-        :type fixed: bool
-
-        :return: a dict with the beta parameters appearing
-             in the expression, the keys being the names of the parameters.
+        :return: returns a dict with the variables appearing in the
+               expression the keys being their names.
         :rtype: dict(string:biogeme.expressions.Expression)
 
         """
-        freenames = {x.name: x for x in self.betas if x.status == 0}
-        fixednames = {x.name: x for x in self.betas if x.status != 0}
-        if free and fixed:
-            allnames = {**freenames, **fixednames}
-            return allnames
-        if free:
-            return freenames
-        if fixed:
-            return fixednames
-        return {}
+        if the_type == TypeOfElementaryExpression.BETA:
+            return {x.name: x for x in self.betas}
 
-    def dictOfVariables(self):
-        """Recursively extract the variables appearing in the expression, and
-        store them in a dictionary.
+        if the_type == TypeOfElementaryExpression.FREE_BETA:
+            return {x.name: x for x in self.betas if x.status == 0}
 
-        Overloads the generic function.
+        if the_type == TypeOfElementaryExpression.FIXED_BETA:
+            return {x.name: x for x in self.betas if x.status != 0}
 
-        :return: returns a dict with the variables appearing
-                 in the expression the keys being their names.
-        :rtype: dict(string:biogeme.expressions.Expression)
+        if the_type == TypeOfElementaryExpression.VARIABLE:
+            return {x.name: x for x in self.variables}
 
-        """
-        return {x.name: x for x in self.variables}
-
-    def dictOfRandomVariables(self):
-        """Recursively extract the random variables appearing in the
-        expression, and store them in a dictionary.
-
-        :return: returns a dict with the random variables appearing in
-                 the expression the keys being their names.
-
-        :rtype: dict(string:biogeme.expressions.Expression)
-
-        """
-        return {}
-
-    def dictOfDraws(self):
-        """Recursively extract the random variables
-        (draws for Monte-Carlo).  Overloads the generic function.
-        appearing in the expression, and store them in a dictionary.
-
-        :return: dict where the keys are the random variables and
-             the elements the type of draws. Here, returns an empty dict.
-        :rtype: dict(string:string)
-        """
         return {}
 
     def getSignature(self):
@@ -3861,25 +3811,15 @@ class bioLinearUtility(Expression):
         :rtype: list(string)
         """
         listOfSignatures = []
-        for e in self.children:
+        for e in self.get_children():
             listOfSignatures += e.getSignature()
         signature = f'<{self.getClassName()}>'
-        signature += f'{{{id(self)}}}'
+        signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.listOfTerms)})'
         for b, v in self.listOfTerms:
             signature += (
-                f',{id(b)},{b.elementaryIndex},{b.name},'
-                f'{id(v)},{v.elementaryIndex},{v.name}'
+                f',{b.get_id()},{b.elementaryIndex},{b.name},'
+                f'{v.get_id()},{v.elementaryIndex},{v.name}'
             )
         listOfSignatures += [signature.encode()]
         return listOfSignatures
-
-
-def list_of_expressions(dict_of_expressions):
-    """This function takes a dict of expressions as input. Each
-      expression is interpreted as a boolean, which is False if the
-      value is 0, and True otherwise.
-
-    It evaluates the expressions, and returns the list of keys corresponding to True
-    """
-    []

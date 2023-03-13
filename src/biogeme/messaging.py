@@ -67,9 +67,7 @@ class bioMessage(metaclass=Singleton):
         :return: all messages.
         :rtype: str.
         """
-        result = (
-            f'*** Messages from biogeme {bv.getVersion()} [{bv.versionDate}]\n'
-        )
+        result = f'*** Messages from biogeme {bv.getVersion()} [{bv.versionDate}]\n'
         for m, i in self.messages:
             if screenLevel is None or i <= screenLevel:
                 result += f'{m}\n'
@@ -102,8 +100,7 @@ class bioMessage(metaclass=Singleton):
             self.general(f'Log file created: {completeFileName}')
             print(f'*** File created {datetime.datetime.now()} ***', file=f)
             print(
-                f'*** Log file from biogeme {bv.getVersion()}'
-                f' [{bv.versionDate}]',
+                f'*** Log file from biogeme {bv.getVersion()}' f' [{bv.versionDate}]',
                 file=f,
             )
             for m, i in self.messages:
@@ -181,8 +178,7 @@ class bioMessage(metaclass=Singleton):
         """
         theLevel = f'< {self.types[level]} >'
         theMessage = (
-            f'[{datetime.datetime.now().strftime("%H:%M:%S")}] '
-            f'{theLevel:13} {text}'
+            f'[{datetime.datetime.now().strftime("%H:%M:%S")}] ' f'{theLevel:13} {text}'
         )
         if level != 0:
             self.messages.append((theMessage, level))

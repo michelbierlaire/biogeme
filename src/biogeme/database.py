@@ -29,9 +29,7 @@ from biogeme import draws
 
 from biogeme.expressions import Variable, isNumeric, Numeric
 
-EstimationValidation = namedtuple(
-    'EstimationValidation', 'estimation validation'
-)
+EstimationValidation = namedtuple('EstimationValidation', 'estimation validation')
 
 logger = msg.bioMessage()
 """Logger that controls the output of
@@ -42,77 +40,68 @@ logger = msg.bioMessage()
 
 class Database:
     """Class that contains and prepare the database."""
-    #@staticmethod
+
+    # @staticmethod
     def uniform_antithetic(sampleSize, numberOfDraws):
-        return draws.getAntithetic(
-            draws.getUniform, sampleSize, numberOfDraws
-        )
+        return draws.getAntithetic(draws.getUniform, sampleSize, numberOfDraws)
 
-    #@staticmethod
+    # @staticmethod
     def halton2(sampleSize, numberOfDraws):
-        return draws.getHaltonDraws(
-            sampleSize, numberOfDraws, base=2, skip=10
-        )
+        return draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
 
-    #@staticmethod
+    # @staticmethod
     def halton3(sampleSize, numberOfDraws):
-        return draws.getHaltonDraws(
-            sampleSize, numberOfDraws, base=3, skip=10
-        )
+        return draws.getHaltonDraws(sampleSize, numberOfDraws, base=3, skip=10)
 
-    #@staticmethod
+    # @staticmethod
     def halton5(sampleSize, numberOfDraws):
-        return draws.getHaltonDraws(
-            sampleSize, numberOfDraws, base=5, skip=10
-        )
+        return draws.getHaltonDraws(sampleSize, numberOfDraws, base=5, skip=10)
 
-    #@staticmethod
+    # @staticmethod
     def MLHS_anti(sampleSize, numberOfDraws):
         return draws.getAntithetic(
             draws.getLatinHypercubeDraws, sampleSize, numberOfDraws
         )
 
-    #@staticmethod
+    # @staticmethod
     def symm_uniform(sampleSize, numberOfDraws):
         return draws.getUniform(sampleSize, numberOfDraws, symmetric=True)
 
-    #@staticmethod
+    # @staticmethod
     def symm_uniform_antithetic(sampleSize, numberOfDraws):
         R = int(numberOfDraws / 2)
         localDraws = Database.symm_uniform(sampleSize, R)
         return np.concatenate((localDraws, -localDraws), axis=1)
 
-    #@staticmethod
+    # @staticmethod
     def symm_halton2(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, symmetric=True, base=2, skip=10
         )
 
-    #@staticmethod
+    # @staticmethod
     def symm_halton3(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, symmetric=True, base=3, skip=10
         )
 
-    #@staticmethod
+    # @staticmethod
     def symm_halton5(sampleSize, numberOfDraws):
         return draws.getHaltonDraws(
             sampleSize, numberOfDraws, symmetric=True, base=5, skip=10
         )
 
-    #@staticmethod
+    # @staticmethod
     def symm_MLHS(sampleSize, numberOfDraws):
-        return draws.getLatinHypercubeDraws(
-            sampleSize, numberOfDraws, symmetric=True
-        )
+        return draws.getLatinHypercubeDraws(sampleSize, numberOfDraws, symmetric=True)
 
-    #@staticmethod
+    # @staticmethod
     def symm_MLHS_anti(sampleSize, numberOfDraws):
         R = int(numberOfDraws / 2)
         localDraws = Database.symm_MLHS(sampleSize, R)
         return np.concatenate((localDraws, -localDraws), axis=1)
 
-    #@staticmethod
+    # @staticmethod
     def normal_antithetic(sampleSize, numberOfDraws):
         return draws.getNormalWichuraDraws(
             sampleSize=sampleSize,
@@ -120,11 +109,9 @@ class Database:
             antithetic=True,
         )
 
-    #@staticmethod
+    # @staticmethod
     def normal_halton2(sampleSize, numberOfDraws):
-        unif = draws.getHaltonDraws(
-            sampleSize, numberOfDraws, base=2, skip=10
-        )
+        unif = draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
         return draws.getNormalWichuraDraws(
             sampleSize,
             numberOfDraws,
@@ -132,11 +119,9 @@ class Database:
             antithetic=False,
         )
 
-    #@staticmethod
+    # @staticmethod
     def normal_halton3(sampleSize, numberOfDraws):
-        unif = draws.getHaltonDraws(
-            sampleSize, numberOfDraws, base=2, skip=10
-        )
+        unif = draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
         return draws.getNormalWichuraDraws(
             sampleSize,
             numberOfDraws,
@@ -144,11 +129,9 @@ class Database:
             antithetic=False,
         )
 
-    #@staticmethod
+    # @staticmethod
     def normal_halton5(sampleSize, numberOfDraws):
-        unif = draws.getHaltonDraws(
-            sampleSize, numberOfDraws, base=2, skip=10
-        )
+        unif = draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
         return draws.getNormalWichuraDraws(
             sampleSize,
             numberOfDraws,
@@ -156,7 +139,7 @@ class Database:
             antithetic=False,
         )
 
-    #@staticmethod
+    # @staticmethod
     def normal_MLHS(sampleSize, numberOfDraws):
         unif = draws.getLatinHypercubeDraws(sampleSize, numberOfDraws)
         return draws.getNormalWichuraDraws(
@@ -166,15 +149,12 @@ class Database:
             antithetic=False,
         )
 
-    #@staticmethod
+    # @staticmethod
     def normal_MLHS_anti(sampleSize, numberOfDraws):
-        unif = draws.getLatinHypercubeDraws(
-            sampleSize, int(numberOfDraws / 2)
-        )
+        unif = draws.getLatinHypercubeDraws(sampleSize, int(numberOfDraws / 2))
         return draws.getNormalWichuraDraws(
             sampleSize, numberOfDraws, uniformNumbers=unif, antithetic=True
         )
-
 
     # Dictionary containing native random number generators. Class attribute
     nativeRandomNumberGenerators = {
@@ -185,74 +165,72 @@ class Database:
             'Halton draws with base 2, skipping the first 10',
         ),
         'UNIFORM_HALTON3': (
-                halton3,
-                'Halton draws with base 3, skipping the first 10',
-            ),
-            'UNIFORM_HALTON5': (
-                halton5,
-                'Halton draws with base 5, skipping the first 10',
-            ),
-            'UNIFORM_MLHS': (
-                draws.getLatinHypercubeDraws,
-                'Modified Latin Hypercube Sampling on [0, 1]',
-            ),
-            'UNIFORM_MLHS_ANTI': (
-                MLHS_anti,
-                'Antithetic Modified Latin Hypercube Sampling on [0, 1]',
-            ),
-            'UNIFORMSYM': (symm_uniform, 'Uniform U[-1, 1]'),
-            'UNIFORMSYM_ANTI': (
-                symm_uniform_antithetic,
-                'Antithetic uniform U[-1, 1]',
-            ),
-            'UNIFORMSYM_HALTON2': (
-                symm_halton2,
-                'Halton draws on [-1, 1] with base 2, skipping the first 10',
-            ),
-            'UNIFORMSYM_HALTON3': (
-                symm_halton3,
-                'Halton draws on [-1, 1] with base 3, skipping the first 10',
-            ),
-            'UNIFORMSYM_HALTON5': (
-                symm_halton5,
-                'Halton draws on [-1, 1] with base 5, skipping the first 10',
-            ),
-            'UNIFORMSYM_MLHS': (
-                symm_MLHS,
-                'Modified Latin Hypercube Sampling on [-1, 1]',
-            ),
-            'UNIFORMSYM_MLHS_ANTI': (
-                symm_MLHS_anti,
-                'Antithetic Modified Latin Hypercube Sampling on [-1, 1]',
-            ),
-            'NORMAL': (draws.getNormalWichuraDraws, 'Normal N(0, 1) draws'),
-            'NORMAL_ANTI': (normal_antithetic, 'Antithetic normal draws'),
-            'NORMAL_HALTON2': (
-                normal_halton2,
-                'Normal draws from Halton base 2 sequence',
-            ),
-            'NORMAL_HALTON3': (
-                normal_halton3,
-                'Normal draws from Halton base 3 sequence',
-            ),
-            'NORMAL_HALTON5': (
-                normal_halton5,
-                'Normal draws from Halton base 5 sequence',
-            ),
-            'NORMAL_MLHS': (
-                normal_MLHS,
-                'Normal draws from Modified Latin Hypercube Sampling',
-            ),
-            'NORMAL_MLHS_ANTI': (
-                normal_MLHS_anti,
-                (
-                    'Antithetic normal draws from '
-                    'Modified Latin Hypercube Sampling'
-                ),
-            ),
-        }
+            halton3,
+            'Halton draws with base 3, skipping the first 10',
+        ),
+        'UNIFORM_HALTON5': (
+            halton5,
+            'Halton draws with base 5, skipping the first 10',
+        ),
+        'UNIFORM_MLHS': (
+            draws.getLatinHypercubeDraws,
+            'Modified Latin Hypercube Sampling on [0, 1]',
+        ),
+        'UNIFORM_MLHS_ANTI': (
+            MLHS_anti,
+            'Antithetic Modified Latin Hypercube Sampling on [0, 1]',
+        ),
+        'UNIFORMSYM': (symm_uniform, 'Uniform U[-1, 1]'),
+        'UNIFORMSYM_ANTI': (
+            symm_uniform_antithetic,
+            'Antithetic uniform U[-1, 1]',
+        ),
+        'UNIFORMSYM_HALTON2': (
+            symm_halton2,
+            'Halton draws on [-1, 1] with base 2, skipping the first 10',
+        ),
+        'UNIFORMSYM_HALTON3': (
+            symm_halton3,
+            'Halton draws on [-1, 1] with base 3, skipping the first 10',
+        ),
+        'UNIFORMSYM_HALTON5': (
+            symm_halton5,
+            'Halton draws on [-1, 1] with base 5, skipping the first 10',
+        ),
+        'UNIFORMSYM_MLHS': (
+            symm_MLHS,
+            'Modified Latin Hypercube Sampling on [-1, 1]',
+        ),
+        'UNIFORMSYM_MLHS_ANTI': (
+            symm_MLHS_anti,
+            'Antithetic Modified Latin Hypercube Sampling on [-1, 1]',
+        ),
+        'NORMAL': (draws.getNormalWichuraDraws, 'Normal N(0, 1) draws'),
+        'NORMAL_ANTI': (normal_antithetic, 'Antithetic normal draws'),
+        'NORMAL_HALTON2': (
+            normal_halton2,
+            'Normal draws from Halton base 2 sequence',
+        ),
+        'NORMAL_HALTON3': (
+            normal_halton3,
+            'Normal draws from Halton base 3 sequence',
+        ),
+        'NORMAL_HALTON5': (
+            normal_halton5,
+            'Normal draws from Halton base 5 sequence',
+        ),
+        'NORMAL_MLHS': (
+            normal_MLHS,
+            'Normal draws from Modified Latin Hypercube Sampling',
+        ),
+        'NORMAL_MLHS_ANTI': (
+            normal_MLHS_anti,
+            ('Antithetic normal draws from ' 'Modified Latin Hypercube Sampling'),
+        ),
+    }
+
     # This statement does not work for versions of python before 3.10
-    #@staticmethod
+    # @staticmethod
     def descriptionOfNativeDraws():
         """Describe the draws available draws with Biogeme
 
@@ -272,7 +250,6 @@ class Database:
             key: tuple[1]
             for key, tuple in Database.nativeRandomNumberGenerators.items()
         }
-
 
     def __init__(self, name, pandasDatabase):
         """Constructor
@@ -361,7 +338,7 @@ class Database:
         ## For now, the audit issues only errors. If warnings are
         ## triggered in the future, the nexrt lines should be
         ## uncommented.
-        #if listOfWarnings:
+        # if listOfWarnings:
         #    logger.warning('\n'.join(listOfWarnings))
         if listOfErrors:
             logger.warning('\n'.join(listOfErrors))
@@ -507,9 +484,7 @@ class Database:
                 prepareIds=True,
             )
         avail_stat = {k: sum(a) for k, a in calculated_avail.items()}
-        theResults = {
-            alt: (c, avail_stat[alt]) for alt, c in choice_stat.items()
-        }
+        theResults = {alt: (c, avail_stat[alt]) for alt, c in choice_stat.items()}
         return theResults
 
     def sumFromDatabase(self, expression):
@@ -609,9 +584,7 @@ class Database:
         """
         if size is None:
             size = len(self.data)
-        sample = self.data.iloc[
-            np.random.randint(0, len(self.data), size=size)
-        ]
+        sample = self.data.iloc[np.random.randint(0, len(self.data), size=size)]
         return sample
 
     def sampleIndividualMapWithReplacement(self, size=None):
@@ -644,91 +617,90 @@ class Database:
         ]
         return sample
 
-
     #####
     # This has to be reimplemented in a cleaner way
     ####
-#    def sampleWithoutReplacement(
-#        self, samplingRate, columnWithSamplingWeights=None
-#    ):
-#        """Replace the data set by a sample for stochastic algorithms
-#
-#        :param samplingRate: the proportion of data to include in the sample.
-#        :type samplingRate: float
-#        :param columnWithSamplingWeights: name of the column with
-#              the sampling weights. If None, each row has equal probability.
-#        :type columnWithSamplingWeights: string
-#
-#        :raise biogemeError: if the structure of the database has been modified
-#            since last sample.
-#        """
-#        if self.isPanel():
-#            if self.fullIndividualMap is None:
-#                self.fullIndividualMap = self.individualMap
-#            # Check if the structure has not been modified since
-#            # last sample
-#            if set(self.fullIndividualMap.columns) != set(
-#                self.individualMap.columns
-#            ):
-#                message = (
-#                    'The structure of the database has been '
-#                    'modified since last sample. '
-#                )
-#                left = set(self.fullIndividualMap.columns).difference(
-#                    set(self.individualMap.columns)
-#                )
-#                if left:
-#                    message += f' Columns that disappeared: {left}'
-#                right = set(self.individualMap.columns).difference(
-#                    set(self.fullIndividualMap.columns)
-#                )
-#                if right:
-#                    message += f' Columns that were added: {right}'
-#                raise excep.biogemeError(message)
-#
-#            self.individualMap = self.fullIndividualMap.sample(
-#                frac=samplingRate, weights=columnWithSamplingWeights
-#            )
-#        else:
-#            # Cross sectional data
-#            if self.fullData is None:
-#                self.fullData = self.data
-#            else:
-#                # Check if the structure has not been modified since
-#                # last sample
-#                if set(self.fullData.columns) != set(self.data.columns):
-#                    message = (
-#                        'The structure of the database has been modified '
-#                        'since last sample. '
-#                    )
-#                    left = set(self.fullData.columns).difference(
-#                        set(self.data.columns)
-#                    )
-#                    if left:
-#                        message += f' Columns that disappeared: {left}'
-#                    right = set(self.data.columns).difference(
-#                        set(self.fullData.columns)
-#                    )
-#                    if right:
-#                        message += f' Columns that were added: {right}'
-#                    raise excep.biogemeError(message)
-#
-#            self.data = self.fullData.sample(
-#                frac=samplingRate, weights=columnWithSamplingWeights
-#            )
+    #    def sampleWithoutReplacement(
+    #        self, samplingRate, columnWithSamplingWeights=None
+    #    ):
+    #        """Replace the data set by a sample for stochastic algorithms
+    #
+    #        :param samplingRate: the proportion of data to include in the sample.
+    #        :type samplingRate: float
+    #        :param columnWithSamplingWeights: name of the column with
+    #              the sampling weights. If None, each row has equal probability.
+    #        :type columnWithSamplingWeights: string
+    #
+    #        :raise biogemeError: if the structure of the database has been modified
+    #            since last sample.
+    #        """
+    #        if self.isPanel():
+    #            if self.fullIndividualMap is None:
+    #                self.fullIndividualMap = self.individualMap
+    #            # Check if the structure has not been modified since
+    #            # last sample
+    #            if set(self.fullIndividualMap.columns) != set(
+    #                self.individualMap.columns
+    #            ):
+    #                message = (
+    #                    'The structure of the database has been '
+    #                    'modified since last sample. '
+    #                )
+    #                left = set(self.fullIndividualMap.columns).difference(
+    #                    set(self.individualMap.columns)
+    #                )
+    #                if left:
+    #                    message += f' Columns that disappeared: {left}'
+    #                right = set(self.individualMap.columns).difference(
+    #                    set(self.fullIndividualMap.columns)
+    #                )
+    #                if right:
+    #                    message += f' Columns that were added: {right}'
+    #                raise excep.biogemeError(message)
+    #
+    #            self.individualMap = self.fullIndividualMap.sample(
+    #                frac=samplingRate, weights=columnWithSamplingWeights
+    #            )
+    #        else:
+    #            # Cross sectional data
+    #            if self.fullData is None:
+    #                self.fullData = self.data
+    #            else:
+    #                # Check if the structure has not been modified since
+    #                # last sample
+    #                if set(self.fullData.columns) != set(self.data.columns):
+    #                    message = (
+    #                        'The structure of the database has been modified '
+    #                        'since last sample. '
+    #                    )
+    #                    left = set(self.fullData.columns).difference(
+    #                        set(self.data.columns)
+    #                    )
+    #                    if left:
+    #                        message += f' Columns that disappeared: {left}'
+    #                    right = set(self.data.columns).difference(
+    #                        set(self.fullData.columns)
+    #                    )
+    #                    if right:
+    #                        message += f' Columns that were added: {right}'
+    #                    raise excep.biogemeError(message)
+    #
+    #            self.data = self.fullData.sample(
+    #                frac=samplingRate, weights=columnWithSamplingWeights
+    #            )
 
-#    def useFullSample(self):
-#        """Re-establish the full sample for calculation of the likelihood"""
-#        if self.isPanel():
-#            if self.fullIndividualMap is None:
-#                raise excep.biogemeError(
-#                    'Full panel data set has not been saved.'
-#                )
-#            self.individualMap = self.fullIndividualMap
-#        else:
-#            if self.fullData is None:
-#                raise excep.biogemeError('Full data set has not been saved.')
-#            self.data = self.fullData
+    #    def useFullSample(self):
+    #        """Re-establish the full sample for calculation of the likelihood"""
+    #        if self.isPanel():
+    #            if self.fullIndividualMap is None:
+    #                raise excep.biogemeError(
+    #                    'Full panel data set has not been saved.'
+    #                )
+    #            self.individualMap = self.fullIndividualMap
+    #        else:
+    #            if self.fullData is None:
+    #                raise excep.biogemeError('Full data set has not been saved.')
+    #            self.data = self.fullData
 
     def addColumn(self, expression, column):
         """Add a new column in the database, calculated from an expression.
@@ -782,9 +754,7 @@ class Database:
         else:
             self.addColumn(expression, columnName)
         self.excludedData = len(self.data[self.data[columnName] != 0].index)
-        self.data.drop(
-            self.data[self.data[columnName] != 0].index, inplace=True
-        )
+        self.data.drop(self.data[self.data[columnName] != 0].index, inplace=True)
         self.data.drop(columns=[columnName], inplace=True)
 
     def dumpOnFile(self):
@@ -949,9 +919,7 @@ class Database:
                         f'User defined: {user}'
                     )
                     raise excep.biogemeError(errorMsg)
-            listOfDraws[i] = theGenerator[0](
-                self.getSampleSize(), numberOfDraws
-            )
+            listOfDraws[i] = theGenerator[0](self.getSampleSize(), numberOfDraws)
             if listOfDraws[i].shape != (self.getSampleSize(), numberOfDraws):
                 errorMsg = (
                     f'The draw generator for {name} must'
@@ -1046,15 +1014,12 @@ class Database:
             np.random.shuffle(ids)
             the_slices_ids = np.array_split(ids, slices)
             theSlices = [
-                self.data[self.data[groups].isin(ids)]
-                for ids in the_slices_ids
+                self.data[self.data[groups].isin(ids)] for ids in the_slices_ids
             ]
         estimationSets = []
         validationSets = []
         for i, v in enumerate(theSlices):
-            estimationSets.append(
-                pd.concat(theSlices[:i] + theSlices[i + 1 :])
-            )
+            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
             validationSets.append(v)
         return [
             EstimationValidation(estimation=e, validation=v)
@@ -1133,9 +1098,7 @@ class Database:
         """
         return self.data[self.data[columnName] == value].count()[columnName]
 
-    def generateFlatPanelDataframe(
-        self, saveOnFile=None, identical_columns=[]
-    ):
+    def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=[]):
         """Generate a flat version of the panel data
 
         :param saveOnFile: if True, the flat database is saved on file.

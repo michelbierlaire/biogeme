@@ -109,7 +109,6 @@ class NegativeLikelihood(functionToMinimize):
             self.recalculate = True
 
         if self.recalculate:
-
             self.fv, self.gv, self.hv, _ = self.like_deriv(
                 self.x, self.scaled, hessian=True, bhhh=False, batch=batch
             )

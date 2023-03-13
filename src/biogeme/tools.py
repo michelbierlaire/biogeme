@@ -319,13 +319,9 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
     chi_df = df_ur - df_r
     threshold = chi2.ppf(1 - significance_level, chi_df)
     if stat <= threshold:
-        final_msg = (
-            f'H0 cannot be rejected at level {100*significance_level:.1f}%'
-        )
+        final_msg = f'H0 cannot be rejected at level {100*significance_level:.1f}%'
     else:
-        final_msg = (
-            f'H0 can be rejected at level {100*significance_level:.1f}%'
-        )
+        final_msg = f'H0 can be rejected at level {100*significance_level:.1f}%'
     return LRTuple(message=final_msg, statistic=stat, threshold=threshold)
 
 
@@ -408,11 +404,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
             within each group of data.
         :rtype: set(str)
         """
-        return {
-            colname
-            for colname, col in g.items()
-            if not are_values_identical(col)
-        }
+        return {colname for colname, col in g.items() if not are_values_identical(col)}
 
     if identical_columns is None:
         all_varying_cols = grouped.apply(get_varying_cols)
@@ -431,9 +423,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         )
         common_data.index = common_data[merge_id]
     # Treat the other columns
-    grouped_varying = df[[merge_id] + list(varying_columns)].groupby(
-        by=merge_id
-    )
+    grouped_varying = df[[merge_id] + list(varying_columns)].groupby(by=merge_id)
 
     def treat(x):
         """Treat a group of data.
@@ -449,10 +439,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         new columns.
         """
         if not are_values_identical(x[merge_id]):
-            err_msg = (
-                f'Group has different IDs: {x[merge_id]}. '
-                f'Rows id: {x.index}'
-            )
+            err_msg = f'Group has different IDs: {x[merge_id]}. ' f'Rows id: {x.index}'
             raise excep.biogemeError(err_msg)
         if row_name is not None and not x[row_name].is_unique:
             err_msg = (

@@ -75,9 +75,7 @@ def cnl_G(alternatives, nests):
             nest_specific_sum = 0.0
             for alpha_alt, alpha_value in alphas.items():
                 if alpha_value != 0 and y[order[alpha_alt]] != 0:
-                    nest_specific_sum += (
-                        alpha_value * y[order[alpha_alt]]
-                    ) ** mu_m
+                    nest_specific_sum += (alpha_value * y[order[alpha_alt]]) ** mu_m
             p1 = (1.0 / mu_m) - 1.0
             p2 = (1.0 / mu_m) - 2.0
             G += nest_specific_sum ** (1.0 / mu_m)
@@ -85,17 +83,11 @@ def cnl_G(alternatives, nests):
                 alpha_i = alphas.get(alternatives[i], 0)
                 if alpha_i != 0 and y[i] != 0:
                     Gi[i] += (
-                        alpha_i**mu_m
-                        * y[i] ** (mu_m - 1)
-                        * nest_specific_sum**p1
+                        alpha_i**mu_m * y[i] ** (mu_m - 1) * nest_specific_sum**p1
                     )
-                    Gij[i][i] += (
-                        1 - mu_m
-                    ) * nest_specific_sum**p2 * alpha_i ** (2 * mu_m) * y[
-                        i
-                    ] ** (
-                        2 * mu_m - 2.0
-                    ) + (
+                    Gij[i][i] += (1 - mu_m) * nest_specific_sum**p2 * alpha_i ** (
+                        2 * mu_m
+                    ) * y[i] ** (2 * mu_m - 2.0) + (
                         mu_m - 1
                     ) * nest_specific_sum**p1 * alpha_i**mu_m * y[
                         i
@@ -185,10 +177,7 @@ def cnl_CDF(alternatives, nests):
         Fij = np.zeros((J, J))
 
         for i in range(J):
-            Fij[i][i] = (
-                F * y[i] * y[i] * (Gi[i] * Gi[i] - Gii[i][i])
-                - F * Gi[i] * y[i]
-            )
+            Fij[i][i] = F * y[i] * y[i] * (Gi[i] * Gi[i] - Gii[i][i]) - F * Gi[i] * y[i]
             for j in range(i + 1, J):
                 Fij[i][j] = F * y[i] * y[j] * (Gi[i] * Gi[j] - Gii[i][j])
         for i in range(J):
