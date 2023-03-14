@@ -62,6 +62,31 @@ class Catalog(ex.Expression):
         }
         self.synchronized_catalogs = []
 
+    @classmethod
+    def from_dict(cls, catalog_name, dict_of_expressions):
+        """Ctor using a dict instead of a tuple.
+
+        Python does not guarantee the order of elements of a dict,
+        although, in practice, it is always preserved. If the order is
+        critical, it is better to use the main constructor. If not,
+        this constructor provides a more readable code.
+
+        :param catalog_name: name of the catalog
+        :type catalog_name: str
+
+        :param dict_of_expressions: dict associating the name of an
+            expression and the expression itself.
+        :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
+        
+        """
+        the_tuple = tuple(
+            [
+                NamedExpression(name=name, expression=expression)
+                for name, expression in dict_of_expressions.items()
+            ]
+        )
+        return cls(catalog_name, the_tuple)
+    
     def set_index(self, index):
         """Set the index of the selected expression, and update the synchronized catalogs
 
