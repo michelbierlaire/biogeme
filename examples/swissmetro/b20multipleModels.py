@@ -96,7 +96,7 @@ catalog_of_expressions = Catalog.from_dict(
 )
 
 biogeme = bio.BIOGEME(database, catalog_of_expressions)
-results = biogeme.estimate()
+results = biogeme.estimate_catalog()
 
 SUMMARY = compileEstimationResults(results)
 print(SUMMARY)

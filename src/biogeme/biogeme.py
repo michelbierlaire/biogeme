@@ -1071,14 +1071,9 @@ class BIOGEME:
             if value is not None:
                 self.id_manager.free_betas_values[i] = value
 
-    def estimate(
-        self,
-        recycle=False,
-        bootstrap=0,
-        **kwargs,
-    ):
-        """Estimate the parameters of the model(s). If the expression
-        contains Catalog, all possible specification are estimated.
+    def estimate_catalog(self, recycle=False, bootstrap=0):
+        """Estimate all the versions of a model with Catalog's,
+        corresponding to multiple specifications.
 
         :param recycle: if True, the results are read from the pickle
             file, if it exists. If False, the estimation is performed.
@@ -1090,24 +1085,36 @@ class BIOGEME:
                applied. Default: 0.
         :type bootstrap: int
 
-        :return: object containing the estimation results.
-        :rtype: biogeme.bioResults
+        :return: object containing the estimation results associated
+            with the name of each specification.
+        :rtype: dict(str:biogeme.bioResults)
 
         """
         if self.loglike is None:
-            return self.estimate_once(recycle, bootstrap, **kwargs)
+            raise excep.biogemeError('No log likelihood function has been specified')
         
-        if self.loglike.number_of_multiple_expressions() == 1:
-            return self.estimate_once(recycle, bootstrap, **kwargs)
-            
+        number_of_specifications =  self.loglike.number_of_multiple_expressions()
+
+        if number_of_specifications > self.maximum_number_catalog_expressions:
+            error_msg = (
+                f'There are about {number_of_specifications} different '
+                f'specifications for the log likelihood function. This is '
+                f'above the maximum number: '
+                f'{self.maximum_number_catalog_expressions}. Either simplify '
+                f'the specification, or change the value of the parameter '
+                f'maximum_number_catalog_expressions.'
+            )
+            raise excep.biogemeError(error_msg)
+        
         results = {}
         for name, _ in self.loglike:
-            self.modelName = f'multi_{name}'
-            results[name] = self.estimate_once()
+            b = BIOGEME(self.database, self.loglike)
+            b.modelName = name
+            results[name] = b.estimate(recycle=recycle, bootstrap=bootstrap)
 
         return results
                 
-    def estimate_once(
+    def estimate(
         self,
         recycle=False,
         bootstrap=0,
