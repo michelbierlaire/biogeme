@@ -12,7 +12,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, log
 from biogeme.results import compileEstimationResults
-from biogeme.multiple_expressions import NamedExpression, Catalog
+from biogeme.multiple_expressions import Catalog
 from swissmetro import (
     database,
     CHOICE,
@@ -41,15 +41,23 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 SEGMENTED_ASC_CAR = MALE * ASC_CAR_MALE + (1 - MALE) * ASC_CAR_FEMALE
 SEGMENTED_ASC_TRAIN = MALE * ASC_TRAIN_MALE + (1 - MALE) * ASC_TRAIN_FEMALE
 
-homog_asc_car = NamedExpression(name='homog_asc_car', expression=ASC_CAR)
-homog_asc_train = NamedExpression(name='homog_asc_train', expression=ASC_TRAIN)
+# We define a catalog with two different specifications for the ASC_CAR
+ASC_CAR_catalog = Catalog.from_dict(
+    'ASC_CAR_catalog',
+    {
+        'homog_asc_car': ASC_CAR,
+        'seg_asc_car': SEGMENTED_ASC_CAR
+    }
+)
 
-seg_asc_car = NamedExpression(name='seg_asc_car', expression = SEGMENTED_ASC_CAR)
-seg_asc_train = NamedExpression(name='seg_asc_train', expression = SEGMENTED_ASC_TRAIN)
-
-ASC_CAR_catalog = Catalog('ASC_CAR_catalog', (homog_asc_car, seg_asc_car))
-ASC_TRAIN_catalog = Catalog('ASC_TRAIN_catalog', (homog_asc_train, seg_asc_train))
-                          
+# We define a catalog with two different specifications for the ASC_TRAIN
+ASC_TRAIN_catalog = Catalog.from_dict(
+    'ASC_TRAIN_catalog',
+    {
+        'homog_asc_train': ASC_TRAIN,
+        'seg_asc_train': SEGMENTED_ASC_TRAIN
+    }
+)
 
 # Definition of the utility functions with linear cost
 V1 = ASC_TRAIN_catalog + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -65,8 +73,6 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
 logprob = models.loglogit(V, av, CHOICE)
-linear_spec = NamedExpression(name='linear_spec', expression=logprob)
-
 
 # We now consider a model with the log travel time instead of the cost
 # Definition of the utility functions with log cost
@@ -79,21 +85,18 @@ log_V = {1: log_V1, 2: log_V2, 3: log_V3}
 
 log_logprob = models.loglogit(log_V, av, CHOICE)
 
-log_spec = NamedExpression(name='log_spec', expression=log_logprob)
 
-catalog_of_expressions = Catalog(
+# We define a catalog with two different specifications of for the loglikelihood
+catalog_of_expressions = Catalog.from_dict(
     'loglikelihood',
-    (linear_spec, log_spec)
+    {
+        'linear_spec': logprob,
+        'log_spec': log_logprob,
+    }
 )
 
 biogeme = bio.BIOGEME(database, catalog_of_expressions)
 results = biogeme.estimate()
 
-for name, r in results.items():
-    print('========')
-    print(name)
-    print('========')
-    print(r)
-#summary = compileEstimationResults(results)
-
-#print(summary)
+SUMMARY = compileEstimationResults(results)
+print(SUMMARY)
