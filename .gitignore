@@ -71,7 +71,7 @@ archive/pybiogeme/pybiogeme
 .idea
 examples/notebooks/.ipynb_checkpoints/*
 examples/workingNotToDistribute
-examples/sampling
+examples/sampling/samples
 examples/latent/diagnostics
 examples/latent/*.tex
 src/cbiogeme.cpp
