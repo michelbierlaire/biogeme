@@ -3,15 +3,16 @@
 :author: Michel Bierlaire
 :date: Sat Jul 30 12:36:40 2022
 """
+import logging
 import inspect
 from collections import namedtuple
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
+
 from biogeme.elementary_expressions import TypeOfElementaryExpression
 
 ElementsTuple = namedtuple('ElementsTuple', 'expressions indices names')
 
-logger = msg.bioMessage()
+logger = logging.getLogger(__name__)
 
 
 class IdManager:
