@@ -55,9 +55,9 @@ class test_expressions(unittest.TestCase):
         with self.assertRaises(excep.biogemeError):
             _ = ex.Numeric(1) / 'ert'
 
-#        with self.assertRaises(excep.biogemeError):
-#            _ = 'ert' / Numeric(1)
-            
+    #        with self.assertRaises(excep.biogemeError):
+    #            _ = 'ert' / Numeric(1)
+
     def assertDataframeEqual(self, a, b, msg):
         try:
             pd.testing.assert_frame_equal(a, b)
@@ -340,15 +340,11 @@ class test_expressions(unittest.TestCase):
             result = self.Variable1 > self
 
     def test_getValue_c(self):
-        result = self.Variable1.getValue_c(
-            database=self.myData, prepareIds=True
-        )
+        result = self.Variable1.getValue_c(database=self.myData, prepareIds=True)
         np.testing.assert_equal(result, [10, 20, 30, 40, 50])
 
     def test_DefineVariable(self):
-        _ = self.myData.DefineVariable(
-            'newvar_b', self.Variable1 + self.Variable2
-        )
+        _ = self.myData.DefineVariable('newvar_b', self.Variable1 + self.Variable2)
         cols = self.myData.data.columns
         added = 'newvar_b' in cols
         self.assertTrue(added)
@@ -509,9 +505,13 @@ class test_expressions(unittest.TestCase):
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
             self.beta3 * (self.beta2 >= self.beta1)
         )
-        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.FREE_BETA)
+        s = expr1.set_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.FREE_BETA
+        )
         self.assertSetEqual(s, {'beta1', 'beta2'})
-        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.FIXED_BETA)
+        s = expr1.set_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.FIXED_BETA
+        )
         self.assertSetEqual(s, {'beta3'})
         s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.BETA)
         self.assertSetEqual(s, {'beta1', 'beta2', 'beta3'})
@@ -520,7 +520,9 @@ class test_expressions(unittest.TestCase):
         expr1 = 2 * self.Variable1 - ex.exp(-self.Variable2) / (
             self.Variable1 * (self.Variable1 >= self.Variable2)
         )
-        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.VARIABLE)
+        s = expr1.set_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.VARIABLE
+        )
         self.assertSetEqual(s, {'Variable1', 'Variable2'})
 
     def test_getElementaryExpression(self):
@@ -548,18 +550,20 @@ class test_expressions(unittest.TestCase):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
             -self.beta2 * self.Variable2
         ) / (self.beta3 * (self.beta2 >= self.beta1))
-        b = expr2.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.BETA)
+        b = expr2.dict_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.BETA
+        )
         # Note that the following checks only the labels. Its probably
         # good enough for our purpose.
-        self.assertDictEqual(
-            b, {'beta1': 0, 'beta2': self.beta2, 'beta3': self.beta3}
-        )
+        self.assertDictEqual(b, {'beta1': 0, 'beta2': self.beta2, 'beta3': self.beta3})
 
     def test_dictOfVariables(self):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
             -self.beta2 * self.Variable2
         ) / (self.beta3 * (self.beta2 >= self.beta1))
-        b = expr2.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.VARIABLE)
+        b = expr2.dict_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.VARIABLE
+        )
         # Note that the following checks only the labels. Its probably
         # good enough for our purpose.
         self.assertDictEqual(
@@ -568,15 +572,17 @@ class test_expressions(unittest.TestCase):
 
     def test_dictOfRandomVariables(self):
         expr = -(self.omega1 + self.omega2 + self.Variable1)
-        b = expr.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.RANDOM_VARIABLE)
+        b = expr.dict_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.RANDOM_VARIABLE
+        )
         self.assertDictEqual(b, {'omega1': self.omega1, 'omega2': self.omega2})
 
     def test_dictOfDraws(self):
         expr = -(self.xi1 + self.xi2 - self.xi3 + self.Variable1)
-        b = expr.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
-        self.assertDictEqual(
-            b, {'xi1': 'NORMAL', 'xi2': 'UNIF', 'xi3': 'WRONGTYPE'}
+        b = expr.dict_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.DRAWS
         )
+        self.assertDictEqual(b, {'xi1': 'NORMAL', 'xi2': 'UNIF', 'xi3': 'WRONGTYPE'})
 
     def test_getClassName(self):
         expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
@@ -604,9 +610,7 @@ class test_expressions(unittest.TestCase):
         expr_ok = ex.PanelLikelihoodTrajectory(self.Variable1)
         check_ok = expr_ok.check_panel_trajectory()
         self.assertEqual(len(check_ok), 0)
-        expr_not_ok = self.Variable2 + ex.PanelLikelihoodTrajectory(
-            self.Variable1
-        )
+        expr_not_ok = self.Variable2 + ex.PanelLikelihoodTrajectory(self.Variable1)
         check_not_ok = expr_not_ok.check_panel_trajectory()
         self.assertSetEqual(check_not_ok, {'Variable2'})
 
@@ -637,9 +641,7 @@ class test_expressions(unittest.TestCase):
         expr2 = ex.PanelLikelihoodTrajectory(self.beta1)
         c2 = expr2.countPanelTrajectoryExpressions()
         self.assertEqual(c2, 1)
-        expr3 = ex.PanelLikelihoodTrajectory(
-            ex.PanelLikelihoodTrajectory(self.beta1)
-        )
+        expr3 = ex.PanelLikelihoodTrajectory(ex.PanelLikelihoodTrajectory(self.beta1))
         c3 = expr3.countPanelTrajectoryExpressions()
         expr4 = self.Variable1 + ex.PanelLikelihoodTrajectory(
             ex.PanelLikelihoodTrajectory(self.beta1)
@@ -821,15 +823,11 @@ class test_expressions(unittest.TestCase):
         expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
         expr12 = ex.bioMax(expr5, expr10)
         res = expr12.getValue_c(database=self.myData, prepareIds=True)
-        for i, j in zip(
-            res, [0.5, 0.8413447460685283, 0.9772498680518218, 1.6, 2.0]
-        ):
+        for i, j in zip(res, [0.5, 0.8413447460685283, 0.9772498680518218, 1.6, 2.0]):
             self.assertAlmostEqual(i, j, 5)
 
     def test_expr13(self):
-        newvar = self.myData.DefineVariable(
-            'newvar', self.Variable1 + self.Variable2
-        )
+        newvar = self.myData.DefineVariable('newvar', self.Variable1 + self.Variable2)
         terms = [
             (self.beta1, ex.Variable('Variable1')),
             (self.beta2, ex.Variable('Variable2')),
@@ -872,14 +870,8 @@ class test_expressions(unittest.TestCase):
     def test_expr14(self):
         c1 = ex.bioDraws('draws1', 'NORMAL_HALTON2')
         c2 = ex.bioDraws('draws2', 'NORMAL_HALTON2')
-        U1 = (
-            ex.Beta('beta1', 0, None, None, 0) * ex.Variable('Variable1')
-            + 10 * c1
-        )
-        U2 = (
-            ex.Beta('beta2', 0, None, None, 0) * ex.Variable('Variable2')
-            + 10 * c2
-        )
+        U1 = ex.Beta('beta1', 0, None, None, 0) * ex.Variable('Variable1') + 10 * c1
+        U2 = ex.Beta('beta2', 0, None, None, 0) * ex.Variable('Variable2') + 10 * c2
         U3 = 0
         U = {1: U1, 2: U2, 3: U3}
         av = {1: self.Av1, 2: self.Av2, 3: self.Av3}
