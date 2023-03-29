@@ -8,15 +8,12 @@ section must have different names
 
 """
 
+import logging
 from collections import defaultdict
-import biogeme.messaging as msg
 import biogeme.exceptions as excep
 import biogeme.default_parameters as dp
 
-logger = msg.bioMessage()
-"""Logger that controls the output of
-        messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`."""
+logger = logging.getLogger(__name__)
 
 
 class Parameters:
