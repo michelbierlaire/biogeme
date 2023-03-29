@@ -104,7 +104,6 @@ class TestTools(unittest.TestCase):
             result = tools.calculatePrimeNumbers(0.3)
 
     def test_countNumberOfGroups(self):
-
         df = pd.DataFrame(
             {
                 'ID': [1, 1, 2, 3, 3, 1, 2, 3],
@@ -173,5 +172,17 @@ class TestTools(unittest.TestCase):
             self.assertEqual(content, check)
 
 
+    def test_model_names(self):
+        model_names = tools.ModelNames(prefix='Test_')
+
+        name_a = model_names('model_a')
+        correct_name_a = 'Test_0'
+        self.assertEqual(name_a, correct_name_a)
+        name_b = model_names('model_b')
+        correct_name_b = 'Test_1'
+        self.assertEqual(name_a, correct_name_a)
+        name_a = model_names('model_a')
+        self.assertEqual(name_a, correct_name_a)
+        
 if __name__ == '__main__':
     unittest.main()
