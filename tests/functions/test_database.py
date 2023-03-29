@@ -49,42 +49,33 @@ class testDatabase(unittest.TestCase):
         with self.assertRaises(excep.biogemeError):
             _ = db.Database('name', df)
 
-
     def test_bad_values(self):
         with self.assertRaises(excep.biogemeError):
             df = getData(0)
-        
+
     def test_valuesFromDatabase(self):
         expr = self.Variable1 + self.Variable2
         result = self.myData1.valuesFromDatabase(expr).tolist()
         self.assertListEqual(result, [11, 22, 33, 44, 55])
         # Check the exception when data is empty
         database = getData(1)
-        database.data = database.data[0: 0]
+        database.data = database.data[0:0]
         with self.assertRaises(excep.biogemeError):
             result = database.valuesFromDatabase(expr)
-            
+
     def test_checkAvailabilityOfChosenAlt(self):
         avail = {1: self.Av1, 2: self.Av2, 3: self.Av3}
-        result = self.myData1.checkAvailabilityOfChosenAlt(
-            avail, self.Choice
-        ).tolist()
+        result = self.myData1.checkAvailabilityOfChosenAlt(avail, self.Choice).tolist()
         self.assertListEqual(result, [False, True, True, True, True])
         # Check the exception when key is wrong
         with self.assertRaises(excep.biogemeError):
-            _ = self.myData1.checkAvailabilityOfChosenAlt(
-                {223: self.Av1},
-                self.Choice
-            )
-        
+            _ = self.myData1.checkAvailabilityOfChosenAlt({223: self.Av1}, self.Choice)
+
         # Check the exception when data is empty
         database = getData(1)
-        database.data = database.data[0: 0]
+        database.data = database.data[0:0]
         with self.assertRaises(excep.biogemeError):
-            _ = database.checkAvailabilityOfChosenAlt(
-                avail,
-                self.Choice
-            )
+            _ = database.checkAvailabilityOfChosenAlt(avail, self.Choice)
 
     def test_choiceAvailabilityStatistics(self):
         avail = {1: self.Av1, 2: self.Av2, 3: self.Av3}
@@ -93,12 +84,10 @@ class testDatabase(unittest.TestCase):
         self.assertDictEqual(result, expected_result)
         # Check the exception when data is empty
         database = getData(1)
-        database.data = database.data[0: 0]
+        database.data = database.data[0:0]
         with self.assertRaises(excep.biogemeError):
             _ = database.choiceAvailabilityStatistics(avail, self.Choice)
 
-
-        
     def test_sumFromDatabase(self):
         expression = self.Variable2 / self.Variable1
         result = expression.getValue_c(
@@ -112,7 +101,7 @@ class testDatabase(unittest.TestCase):
         self.myData1.scaleColumn('Variable1', 100)
         the_result = list(self.myData1.data['Variable1'])
         expected_result = [100, 200, 300, 400, 500]
-        self.assertListEqual(the_result,  expected_result)
+        self.assertListEqual(the_result, expected_result)
 
     def test_suggest_scaling(self):
         result = self.myData1.suggestScaling()
@@ -130,7 +119,7 @@ class testDatabase(unittest.TestCase):
         pd.testing.assert_frame_equal(result, expected_result, check_index_type=False)
         with self.assertRaises(excep.biogemeError):
             _ = self.myData1.suggestScaling(columns=['wrong_name'])
-        
+
     def test_addColumn(self):
         Variable1 = Variable('Variable1')
         Variable2 = Variable('Variable2')
@@ -141,7 +130,7 @@ class testDatabase(unittest.TestCase):
         with self.assertRaises(ValueError):
             result = self.myData1.addColumn(expression, 'Variable1')
         database = getData(1)
-        database.data = database.data[0: 0]
+        database.data = database.data[0:0]
         with self.assertRaises(excep.biogemeError):
             result = database.addColumn(expression, 'NewVariable')
 
@@ -155,7 +144,7 @@ class testDatabase(unittest.TestCase):
         with self.assertRaises(ValueError):
             result = self.myData1.DefineVariable('Variable1', expression)
         database = getData(1)
-        database.data = database.data[0: 0]
+        database.data = database.data[0:0]
         with self.assertRaises(excep.biogemeError):
             result = database.DefineVariable('NewVariable', expression)
 
@@ -183,12 +172,12 @@ class testDatabase(unittest.TestCase):
     def test_generateDraws(self):
         the_random_draws = db.Database.descriptionOfNativeDraws()
         for draw_type in the_random_draws:
-            random_draws = bioDraws('random_draws', draw_type )
-            types = random_draws.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
-            
-            the_draws_table = self.myData1.generateDraws(
-                types, ['random_draws'], 10
+            random_draws = bioDraws('random_draws', draw_type)
+            types = random_draws.dict_of_elementary_expression(
+                the_type=TypeOfElementaryExpression.DRAWS
             )
+
+            the_draws_table = self.myData1.generateDraws(types, ['random_draws'], 10)
             dim = the_draws_table.shape
             self.assertTupleEqual(dim, (5, 10, 1))
 
@@ -204,7 +193,6 @@ class testDatabase(unittest.TestCase):
         def wrong_logNormalDraws(sampleSize, numberOfDraws):
             return np.exp(np.random.randn(2 * sampleSize, 2 * numberOfDraws))
 
-        
         def exponentialDraws(sampleSize, numberOfDraws):
             return -1.0 * np.log(np.random.rand(sampleSize, numberOfDraws))
 
@@ -212,21 +200,25 @@ class testDatabase(unittest.TestCase):
         theDict = {
             'LOGNORMAL': (logNormalDraws, 'Draws from lognormal distribution'),
             'EXP': (exponentialDraws, 'Draws from exponential distributions'),
-            'WRONG_LOGNORMAL': (wrong_logNormalDraws, 'Draws from lognormal distribution'),
-         }
+            'WRONG_LOGNORMAL': (
+                wrong_logNormalDraws,
+                'Draws from lognormal distribution',
+            ),
+        }
         self.myData1.setRandomNumberGenerators(theDict)
 
         # We can now generate draws from these distributions
         randomDraws1 = bioDraws('randomDraws1', 'LOGNORMAL')
         randomDraws2 = bioDraws('randomDraws2', 'EXP')
         x = randomDraws1 + randomDraws2
-        types = x.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
+        types = x.dict_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.DRAWS
+        )
         theDrawsTable = self.myData1.generateDraws(
             types, ['randomDraws1', 'randomDraws2'], 10
         )
         dim = theDrawsTable.shape
         self.assertTupleEqual(dim, (5, 10, 2))
-
 
         with self.assertRaises(excep.biogemeError):
             the_draws_table = self.myData1.generateDraws(
@@ -237,7 +229,6 @@ class testDatabase(unittest.TestCase):
             self.myData1.setRandomNumberGenerators(
                 {'NORMAL': (logNormalDraws, 'Designed to generate an error')}
             )
-            
 
     def test_sampleWithReplacement(self):
         res1 = self.myData1.sampleWithReplacement()
@@ -246,7 +237,7 @@ class testDatabase(unittest.TestCase):
         dim2 = res2.shape
         self.assertTupleEqual(dim1, (5, 8))
         self.assertTupleEqual(dim2, (12, 8))
-        
+
     def test_panel(self):
         # Data is not considered panel yet
         shouldBeFalse = self.myPanelData.isPanel()
@@ -258,13 +249,15 @@ class testDatabase(unittest.TestCase):
         wrong_panel = getData(4)
         with self.assertRaises(excep.biogemeError):
             wrong_panel.panel('Person')
-            
+
     def test_panelDraws(self):
         randomDraws1 = bioDraws('randomDraws1', 'NORMAL')
         randomDraws2 = bioDraws('randomDraws2', 'UNIFORMSYM')
         # We build an expression that involves the two random variables
         x = randomDraws1 + randomDraws2
-        types = x.dict_of_elementary_expression(the_type=TypeOfElementaryExpression.DRAWS)
+        types = x.dict_of_elementary_expression(
+            the_type=TypeOfElementaryExpression.DRAWS
+        )
         self.myPanelData.panel('Person')
         theDrawsTable = self.myPanelData.generateDraws(
             types, ['randomDraws1', 'randomDraws2'], 10
@@ -286,9 +279,7 @@ class testDatabase(unittest.TestCase):
         compared1.index.name = 'Person'
         pd.testing.assert_frame_equal(result1, compared1)
         # Test with automatic detection of identical columns
-        result2 = self.myPanelData.generateFlatPanelDataframe(
-            identical_columns=None
-        )
+        result2 = self.myPanelData.generateFlatPanelDataframe(identical_columns=None)
         result2 = result2.reindex(sorted(result2.columns), axis='columns')
         compared2 = output_flatten_database_2.reindex(
             sorted(output_flatten_database_2.columns), axis='columns'
@@ -297,8 +288,7 @@ class testDatabase(unittest.TestCase):
         pd.testing.assert_frame_equal(result2, compared2)
         # Test with explicit list of identical columns
         result3 = self.myPanelData.generateFlatPanelDataframe(
-            identical_columns=['Age'],
-            saveOnFile=True
+            identical_columns=['Age'], saveOnFile=True
         )
         os.remove('test_3_flatten.csv')
         result3 = result3.reindex(sorted(result3.columns), axis='columns')
@@ -317,7 +307,6 @@ class testDatabase(unittest.TestCase):
         expected_result = 'biogeme database test_3'
         self.assertEqual(result, expected_result)
 
-        
     def test_getNumberOfObservations(self):
         self.myPanelData.panel('Person')
         self.assertEqual(self.myData1.getNumberOfObservations(), 5)
@@ -336,10 +325,10 @@ class testDatabase(unittest.TestCase):
         res = self.myPanelData.sampleIndividualMapWithReplacement(size=None)
         dim = res.shape
         self.assertTupleEqual(dim, (len(self.myPanelData.individualMap), 2))
-        
+
         with self.assertRaises(excep.biogemeError):
             _ = self.myData1.sampleIndividualMapWithReplacement(10)
-            
+
     def test_split(self):
         data = {
             'userID': [
@@ -400,6 +389,7 @@ class testDatabase(unittest.TestCase):
 
         result = self.myPanelData.split(2)
         self.assertEqual(len(result), 2)
-        
+
+
 if __name__ == '__main__':
     unittest.main()
