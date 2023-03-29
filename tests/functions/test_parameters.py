@@ -210,15 +210,13 @@ class TestParameters(unittest.TestCase):
             )
 
         with self.assertRaises(excep.biogemeError):
-            _ = self.the_parameters.get_param_tuple(
-                name='unknown_parameter'
-            )
+            _ = self.the_parameters.get_param_tuple(name='unknown_parameter')
 
         with self.assertRaises(excep.biogemeError):
             _ = self.the_parameters.get_param_tuple(
                 name='unknown_parameter', section='Estimation'
             )
-            
+
     def test_get_param_tuple_4(self):
         """Test the error if the parameter does appears in two
         sections, and the section is not specified.
@@ -277,13 +275,13 @@ class TestParameters(unittest.TestCase):
         self.assertEqual(self.the_parameters.values[a_tuple], 1)
         with self.assertRaises(excep.biogemeError):
             self.the_parameters.set_value_from_tuple(a_tuple, 2)
-            
-                         
+
     def test_set_get_value(self):
         value = 1.0e-3
         self.the_parameters.set_value('tolerance', value)
         check = self.the_parameters.get_value('tolerance')
         self.assertEqual(value, check)
+
 
 if __name__ == '__main__':
     unittest.main()
