@@ -12,6 +12,41 @@ NamedExpression = namedtuple('NamedExpression', 'name expression')
 
 CatalogItem = namedtuple('CatalogItem', 'catalog_name item_index item_name')
 
+SEPARATOR = ';'
+SELECTION_SEPARATOR = ':'
+
+
+def configuration_to_string_id(configuration):
+    """Transforms a configuration into a string ID
+
+    :param configuration: dict where the keys are the catalog names,
+       and the values are the selected configuration.
+    :type configuration: dict(str: str)
+
+    :return: string ID
+    :rtype: str
+    """
+    terms = [f'{k}{SELECTION_SEPARATOR}{v}' for k, v in configuration.items()]
+    return SEPARATOR.join(terms)
+
+
+def string_id_to_configuration(string_id):
+    """Transforms a string ID into a configuration
+
+    :param string_id: string ID
+    :type string_id: str
+
+    :return: dict where the keys are the catalog names,
+       and the values are the selected configuration.
+    :rtype: dict(str: str)
+    """
+    terms = string_id.split(SEPARATOR)
+    the_config = {}
+    for term in terms:
+        catalog, selection = term.split(SELECTION_SEPARATOR)
+        the_config[catalog] = selection
+    return the_config
+
 
 class Catalog(ex.Expression):
     """Catalog of expressions that are interchangeable. Only one of
@@ -77,23 +112,23 @@ class Catalog(ex.Expression):
         :param dict_of_expressions: dict associating the name of an
             expression and the expression itself.
         :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
-        
+
         """
         the_tuple = tuple(
-            [
-                NamedExpression(name=name, expression=expression)
-                for name, expression in dict_of_expressions.items()
-            ]
+            NamedExpression(name=name, expression=expression)
+            for name, expression in dict_of_expressions.items()
         )
         return cls(catalog_name, the_tuple)
-    
+
     def set_index(self, index):
-        """Set the index of the selected expression, and update the synchronized catalogs
+        """Set the index of the selected expression, and update the
+            synchronized catalogs
 
         :param index: value of the index
         :type index: int
 
         :raises biogemeError: if index is out of range
+
         """
         if index >= self.catalog_size():
             error_msg = (
@@ -105,7 +140,7 @@ class Catalog(ex.Expression):
             sync_catalog.current_index = index
 
     def catalog_size(self):
-        """ Provide the size of the catalog
+        """Provide the size of the catalog
 
         :return: number of expressions in the catalog
         :rtype: int
@@ -138,14 +173,14 @@ class Catalog(ex.Expression):
         _, the_expression = self.selected()
         return the_expression
 
-    def dict_of_catalogs(self):
+    def dict_of_catalogs(self, ignore_synchronized=False):
         """Returns a dict with all catalogs in the expression
 
         :return: dict with all the catalogs
         """
         result = {}
-        for _, e in self.tuple_of_named_expressions:
-            a_dict = e.dict_of_catalogs()
+        for _, expr in self.tuple_of_named_expressions:
+            a_dict = expr.dict_of_catalogs()
             for key, the_catalog in a_dict.items():
                 if key in result:
                     error_msg = (
@@ -159,17 +194,15 @@ class Catalog(ex.Expression):
 
     def number_of_multiple_expressions(self):
         """Reports the number of multiple expressions available through the iterator
-        
+
         :return: number of multiple expressions. It just gives an
             upper bound if some catalogs are synchronized
         :rtype: int
 
         """
         total = 0
-        [
-            total := total + e.number_of_multiple_expressions()
-            for _, e in self.tuple_of_named_expressions
-        ]
+        for _, expr in self.tuple_of_named_expressions:
+            total = total + expr.number_of_multiple_expressions()
         return total
 
     def increment_selection(self):
@@ -187,8 +220,61 @@ class Catalog(ex.Expression):
         self.selected_expression().reset_expression_selection()
         for sync_catalog in self.synchronized_catalogs:
             sync_catalog.selected_expression().reset_expression_selection()
-        
+
         return True
+
+    def increment_catalog(self, catalog_name, step):
+        """Increment the selection of a specific catalog
+
+        :param catalog_name: name of the catalog to change
+        :type catalog_name: str
+
+        :param step: number of increments to apply. Can be negative.
+        :type step: int
+        """
+        if step == 0:
+            return
+        if self.name == catalog_name:
+            if (
+                self.current_index + step >= self.catalog_size()
+                or self.current_index + step < 0
+            ):
+                raise excep.valueOutOfRange
+            self.current_index += step
+            return
+
+        for _, expr in self.tuple_of_named_expressions:
+            expr.increment_catalog(catalog_name, step)
+
+    def configure_catalogs(self, configuration):
+        """Select the items in each catalog corresponding to the
+            requested configuration
+
+        :param configuration: a dictionary such that the keys are the catalog
+            names, and the values are the selected specification in
+            the Catalog
+        :type configuration: dict(str: str)
+
+        """
+        selection = configuration.get(self.name)
+        if selection is not None:
+            self.current_index = self.dict_of_index[selection]
+
+        for _, expr in self.tuple_of_named_expressions:
+            expr.configure_catalogs(configuration)
+
+    def current_configuration(self):
+        """Obtain the current configuration of an expression with Catalog's
+
+        :return: a dictionary such that the keys are the catalog
+            names, and the values are the selected specification in
+            the Catalog
+
+        :rtype: dict(str: str)
+        """
+        the_result = self.selected_expression().current_configuration()
+        the_result[self.name] = self.selected_name()
+        return the_result
 
     def reset_expression_selection(self):
         """In each group of expressions, select the first one"""
@@ -220,8 +306,8 @@ class Catalog(ex.Expression):
         :return: value of the expression
         :rtype: float
         """
-        _, e = self.selected()
-        return e.getValue()
+        _, expr = self.selected()
+        return expr.getValue()
 
     def get_id(self):
         """Retrieve the id of the expression used in the signature
@@ -229,8 +315,8 @@ class Catalog(ex.Expression):
         :return: id of the object
         :rtype: int
         """
-        _, e = self.selected()
-        return e.get_id()
+        _, expr = self.selected()
+        return expr.get_id()
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -281,8 +367,8 @@ class Catalog(ex.Expression):
         :rtype: list(string)
 
         """
-        _, e = self.selected()
-        return e.getSignature()
+        _, expr = self.selected()
+        return expr.getSignature()
 
     def get_children(self):
         """Retrieve the list of children
@@ -290,8 +376,8 @@ class Catalog(ex.Expression):
         :return: list of children
         :rtype: list(Expression)
         """
-        _, e = self.selected()
-        return e.get_children()
+        _, expr = self.selected()
+        return expr.get_children()
 
     def __str__(self):
         named_expression = self.selected()
@@ -308,8 +394,8 @@ class Catalog(ex.Expression):
             elementary expressions. If None, all the IDs are set to None.
         :type id_manager: class IdManager
         """
-        _, e = self.selected()
-        e.setIdManager(id_manager)
+        _, expr = self.selected()
+        expr.setIdManager(id_manager)
 
     def check_panel_trajectory(self):
         """Set of variables defined outside of 'PanelLikelihoodTrajectory'
@@ -317,8 +403,8 @@ class Catalog(ex.Expression):
         :return: List of names of variables
         :rtype: set(str)
         """
-        _, e = self.selected()
-        return e.check_panel_trajectory()
+        _, expr = self.selected()
+        return expr.check_panel_trajectory()
 
     def check_draws(self):
         """Set of draws defined outside of 'MonteCarlo'
@@ -326,8 +412,8 @@ class Catalog(ex.Expression):
         :return: List of names of variables
         :rtype: set(str)
         """
-        _, e = self.selected()
-        return e.check_draws()
+        _, expr = self.selected()
+        return expr.check_draws()
 
     def check_rv(self):
         """Set of random variables defined outside of 'Integrate'
@@ -335,8 +421,8 @@ class Catalog(ex.Expression):
         :return: List of names of variables
         :rtype: set(str)
         """
-        _, e = self.selected()
-        return e.check_rv()
+        _, expr = self.selected()
+        return expr.check_rv()
 
     def getStatusIdManager(self):
         """Check the elementary expressions that are associated with
@@ -346,8 +432,8 @@ class Catalog(ex.Expression):
             without an ID manager.
         :rtype: tuple(set(str), set(str))
         """
-        _, e = self.selected()
-        return e.getStatusIdManager()
+        _, expr = self.selected()
+        return expr.getStatusIdManager()
 
     def getElementaryExpression(self, name):
         """Return: an elementary expression from its name if it appears in the
@@ -359,8 +445,8 @@ class Catalog(ex.Expression):
         :return: the expression if it exists. None otherwise.
         :rtype: biogeme.expressions.Expression
         """
-        _, e = self.selected()
-        return e.getElementaryExpression(name)
+        _, expr = self.selected()
+        return expr.getElementaryExpression(name)
 
     def set_of_elementary_expression(self, the_type):
         """Extract a dict with all elementary expressions of a specific type
@@ -372,8 +458,8 @@ class Catalog(ex.Expression):
         :rtype: set(string.Expression)
 
         """
-        _, e = self.selected()
-        return e.set_of_elementary_expression(the_type)
+        _, expr = self.selected()
+        return expr.set_of_elementary_expression(the_type)
 
     def dict_of_elementary_expression(self, the_type):
         """Extract a dict with all elementary expressions of a specific type
@@ -386,8 +472,8 @@ class Catalog(ex.Expression):
         :rtype: dict(string:biogeme.expressions.Expression)
 
         """
-        _, e = self.selected()
-        return e.dict_of_elementary_expression(the_type)
+        _, expr = self.selected()
+        return expr.dict_of_elementary_expression(the_type)
 
     def rename_elementary(self, names, prefix=None, suffix=None):
         """Rename elementary expressions by adding a prefix and/or a suffix
@@ -403,8 +489,8 @@ class Catalog(ex.Expression):
             suffix defined by this argument.
         :type suffix: str
         """
-        _, e = self.selected()
-        return e.rename_elementary(names, prefix, suffix)
+        _, expr = self.selected()
+        return expr.rename_elementary(names, prefix, suffix)
 
     def fix_betas(self, beta_values, prefix=None, suffix=None):
         """Fix all the values of the beta parameters appearing in the
@@ -423,8 +509,8 @@ class Catalog(ex.Expression):
         :type suffix: str
 
         """
-        _, e = self.selected()
-        return e.fix_betas(beta_values, prefix, suffix)
+        _, expr = self.selected()
+        return expr.fix_betas(beta_values, prefix, suffix)
 
     def embedExpression(self, t):
         """Check if the expression contains an expression of type t.
@@ -436,8 +522,8 @@ class Catalog(ex.Expression):
         :rtype: bool
 
         """
-        _, e = self.selected()
-        return e.embedExpression(t)
+        _, expr = self.selected()
+        return expr.embedExpression(t)
 
     def countPanelTrajectoryExpressions(self):
         """Count the number of times the PanelLikelihoodTrajectory
@@ -448,8 +534,8 @@ class Catalog(ex.Expression):
             is used in the formula
         :rtype: int
         """
-        _, e = self.selected()
-        return e.countPanelTrajectoryExpressions()
+        _, expr = self.selected()
+        return expr.countPanelTrajectoryExpressions()
 
     def changeInitValues(self, betas):
         """Modifies the initial values of the Beta parameters.
@@ -461,8 +547,8 @@ class Catalog(ex.Expression):
                       the parameters.
         :type betas: dict(string:float)
         """
-        _, e = self.selected()
-        e.changeInitValues(betas)
+        _, expr = self.selected()
+        expr.changeInitValues(betas)
 
 
 class SynchronizedCatalog(Catalog):
@@ -478,13 +564,40 @@ class SynchronizedCatalog(Catalog):
             error_msg = (
                 f'Catalog {name} contains {self.catalog_size()} expressions. '
                 f'It must contain the same number of expressions '
-                f'({controller.catalog_size()}) as its controller ({controller.name})'
+                f'({controller.catalog_size()}) as its controller '
+                f'({controller.name})'
             )
             raise excep.biogemeError(error_msg)
         self.controller.synchronized_catalogs.append(self)
 
+    @classmethod
+    def from_dict(cls, catalog_name, dict_of_expressions, controller):
+        """Ctor using a dict instead of a tuple.
+
+        Python does not guarantee the order of elements of a dict,
+        although, in practice, it is always preserved. If the order is
+        critical, it is better to use the main constructor. If not,
+        this constructor provides a more readable code.
+
+        :param catalog_name: name of the catalog
+        :type catalog_name: str
+
+        :param dict_of_expressions: dict associating the name of an
+            expression and the expression itself.
+        :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
+
+        :param controller: catalog that controls this one.
+        :type controller: Catalog
+        """
+        the_tuple = tuple(
+            NamedExpression(name=name, expression=expression)
+            for name, expression in dict_of_expressions.items()
+        )
+        return cls(catalog_name, the_tuple, controller)
+
     def set_index(self, index):
-        """Set the index of the selected expression, and update the synchronized catalogs
+        """Set the index of the selected expression, and update the
+        synchronized catalogs
 
         :param index: value of the index
         :type index: int
@@ -498,6 +611,38 @@ class SynchronizedCatalog(Catalog):
             f'It must be changed by its controller {self.controller.name}'
         )
         excep.biogemeError(error_msg)
+
+    def dict_of_catalogs(self, ignore_synchronized=False):
+        """Returns a dict with all catalogs in the expression
+
+        :return: dict with all the catalogs
+        """
+        result = {}
+        for _, expr in self.tuple_of_named_expressions:
+            a_dict = expr.dict_of_catalogs()
+            for key, the_catalog in a_dict.items():
+                if key in result:
+                    error_msg = (
+                        f'Catalog {key} cannot appear twice in the same '
+                        f'expression. Use different names.'
+                    )
+                    raise excep.biogemeError(error_msg)
+                result[key] = the_catalog
+        if not ignore_synchronized:
+            result[self.name] = self
+        return result
+
+    def current_configuration(self):
+        """Obtain the current configuration of an expression with Catalog's
+
+        :return: a dictionary such that the keys are the catalog
+            names, and the values are the selected specification in
+            the Catalog
+
+        :rtype: dict(str: str)
+        """
+        the_result = self.selected_expression().current_configuration()
+        return the_result
 
     def increment_selection(self):
         """Increment recursively the selection of multiple
