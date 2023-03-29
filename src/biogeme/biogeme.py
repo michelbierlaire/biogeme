@@ -1,19 +1,12 @@
-"""Implementation of the main Biogeme class that combines the database
+"""
+Implementation of the main Biogeme class that combines the database
 and the model specification.
 
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:45:15 2019
-
 """
 
-# Too constraining
-# pylint: disable=invalid-name,
-# pylint: disable=too-many-arguments, too-many-locals,
-# pylint: disable=too-many-statements, too-many-branches,
-# pylint: disable=too-many-instance-attributes, too-many-lines,
-# pylint: disable=too-many-function-args, invalid-unary-operand-type
-
-
+import logging
 import glob
 from collections import namedtuple
 import multiprocessing as mp
@@ -29,28 +22,27 @@ import biogeme.expressions as eb
 import biogeme.results as res
 import biogeme.exceptions as excep
 import biogeme.filenames as bf
-import biogeme.messaging as msg
 import biogeme.optimization as opt
 from biogeme import tools
 from biogeme.idmanager import IdManager
 from biogeme.negative_likelihood import NegativeLikelihood
 from biogeme import toml
+from biogeme.multiple_expressions import (
+    string_id_to_configuration,
+    configuration_to_string_id,
+)
 
 # import yep
 
 DEFAULT_MODEL_NAME = 'biogemeModelDefaultName'
+logger = logging.getLogger(__name__)
 
 OldNewParamTuple = namedtuple('OldNewParamTuple', 'old new section')
 
-logger = msg.bioMessage()
-"""Logger that controls the output of
-        messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`.
-"""
-
 
 class BIOGEME:
-    """Main class that combines the database and the model specification.
+    """Main class that combines the database and the model
+        specification.
 
     It works in two modes: estimation and simulation.
 
@@ -121,7 +113,11 @@ class BIOGEME:
             value = kwargs.get(the_param.old)
             if value is not None:
                 BIOGEME.argument_warning(the_param)
-                self.toml.parameters.set_value(the_param.new, value, the_param.section)
+                self.toml.parameters.set_value(
+                    the_param.new,
+                    value,
+                    the_param.section,
+                )
         obsolete = ('suggestScales',)
         for the_param in obsolete:
             value = kwargs.get(the_param)
@@ -255,7 +251,8 @@ class BIOGEME:
         self.reset_id_manager()
         if self.loglike is not None:
             self.loglikeSignatures = self.loglike.getSignature()
-            """ Internal signature of the formula for the loglikelihood."""
+            """Internal signature of the formula for the
+            loglikelihood."""
             if self.weight is None:
                 self.theC.setExpressions(self.loglikeSignatures, self.numberOfThreads)
             else:
@@ -281,7 +278,8 @@ class BIOGEME:
 
     # @staticmethod
     def argument_warning(old_new_tuple):
-        """Displays a deprecation warning when parameters are provided as arguments."""
+        """Displays a deprecation warning when parameters are provided
+        as arguments."""
         warning_msg = (
             f'The use of argument {old_new_tuple.old} in the constructor of the '
             f'BIOGEME object is deprecated and will be removed in future '
@@ -294,11 +292,11 @@ class BIOGEME:
 
     @property
     def maximum_number_catalog_expressions(self):
-        """Maximum number of multiple expressions when Catalog's are used.
-        """
+        """Maximum number of multiple expressions when Catalog's are used."""
         return self.toml.parameters.get_value(
             name='maximum_number_catalog_expressions', section='Estimation'
         )
+
     @maximum_number_catalog_expressions.setter
     def maximum_number_catalog_expressions(self, value):
         self.toml.parameters.set_value(
@@ -306,7 +304,7 @@ class BIOGEME:
             value=value,
             section='Estimation',
         )
-    
+
     @property
     def algorithm_name(self):
         """Name of the optimization algorithm"""
@@ -470,6 +468,7 @@ class BIOGEME:
 
     @property
     def generateHtml(self):
+        logger.warning('Obsolete syntax. Use generate_html instead of generateHtml')
         """Boolean variable, True if the HTML file with the results must
         be generated.
         """
@@ -477,6 +476,7 @@ class BIOGEME:
 
     @generateHtml.setter
     def generateHtml(self, value):
+        logger.warning('Obsolete syntax. Use generate_html instead of generateHtml')
         self.toml.parameters.set_value(
             name='generate_html', value=value, section='Output'
         )
@@ -499,10 +499,12 @@ class BIOGEME:
         """Boolean variable, True if the PICKLE file with the results must
         be generated.
         """
+        logger.warning('Obsolete syntax. Use generate_pickle instead of generatePickle')
         return self.toml.parameters.get_value('generate_pickle')
 
     @generatePickle.setter
     def generatePickle(self, value):
+        logger.warning('Obsolete syntax. Use generate_pickle instead of generatePickle')
         self.toml.parameters.set_value(
             name='generate_pickle', value=value, section='Output'
         )
@@ -832,9 +834,7 @@ class BIOGEME:
         self._prepareDatabaseForFormula()
         f = self.theC.calculateLikelihood(x, self.id_manager.fixed_betas_values)
 
-        logger.detailed(
-            f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
-        )
+        logger.debug(f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}')
 
         if scaled:
             return f / float(self.database.getSampleSize())
@@ -916,7 +916,7 @@ class BIOGEME:
         if bhhh:
             bhhhmsg = f'BHHH norm:  {np.linalg.norm(bh):10.1g}'
         gradnorm = np.linalg.norm(g)
-        logger.general(
+        logger.debug(
             f'Log likelihood (N = {self.database.getSampleSize()}): {f:10.7g}'
             f' Gradient norm: {gradnorm:10.1g}'
             f' {hmsg} {bhhhmsg}'
@@ -930,7 +930,11 @@ class BIOGEME:
             if self.bestIteration is None:
                 self.bestIteration = f
             if f >= self.bestIteration:
-                with open(self._saveIterationsFileName(), 'w', encoding='utf-8') as pf:
+                with open(
+                    self._saveIterationsFileName(),
+                    'w',
+                    encoding='utf-8',
+                ) as pf:
                     for i, v in enumerate(x):
                         print(
                             f'{self.id_manager.free_betas.names[i]} = {v}',
@@ -1028,9 +1032,9 @@ class BIOGEME:
                     ell = line.split('=')
                     betas[ell[0].strip()] = float(ell[1])
             self.changeInitValues(betas)
-            logger.detailed(f'Parameter values restored from {filename}')
+            logger.info(f'Parameter values restored from {filename}')
         except IOError:
-            logger.warning(f'Cannot read file {filename}. Statement is ignored.')
+            logger.info(f'Cannot read file {filename}. Statement is ignored.')
 
     def setRandomInitValues(self, defaultBound=100.0):
         """Modifies the initial values of the parameters in all formulas,
@@ -1071,9 +1075,22 @@ class BIOGEME:
             if value is not None:
                 self.id_manager.free_betas_values[i] = value
 
-    def estimate_catalog(self, recycle=False, bootstrap=0):
-        """Estimate all the versions of a model with Catalog's,
+    def estimate_catalog(
+        self,
+        selected_configurations=None,
+        quick_estimate=False,
+        recycle=False,
+        bootstrap=0,
+    ):
+        """Estimate all or selected versions of a model with Catalog's,
         corresponding to multiple specifications.
+
+        :param selected_configurations: set of configurations. If
+        None, all configurations are considered.
+        :type selected_configurations: set(biogeme.pareto.SetElement)
+
+        :param quick_estimate: if True, the final statistics are not calculated.
+        :type quick_estimate: bool
 
         :param recycle: if True, the results are read from the pickle
             file, if it exists. If False, the estimation is performed.
@@ -1086,34 +1103,49 @@ class BIOGEME:
         :type bootstrap: int
 
         :return: object containing the estimation results associated
-            with the name of each specification.
-        :rtype: dict(str:biogeme.bioResults)
+            with the name of each specification, as well as a
+            description of each configuration
+        :rtype: dict(str: bioResults)
 
         """
+        logger.debug('ESTIMATE CATALOG')
         if self.loglike is None:
             raise excep.biogemeError('No log likelihood function has been specified')
-        
-        number_of_specifications =  self.loglike.number_of_multiple_expressions()
 
-        if number_of_specifications > self.maximum_number_catalog_expressions:
-            error_msg = (
-                f'There are about {number_of_specifications} different '
-                f'specifications for the log likelihood function. This is '
-                f'above the maximum number: '
-                f'{self.maximum_number_catalog_expressions}. Either simplify '
-                f'the specification, or change the value of the parameter '
-                f'maximum_number_catalog_expressions.'
+        if selected_configurations is None:
+            number_of_specifications = self.loglike.number_of_multiple_expressions()
+#            logger.debug(f'{number_of_specifications=}')
+#            logger.debug(f'{self.maximum_number_catalog_expressions=}')
+
+            if number_of_specifications > self.maximum_number_catalog_expressions:
+                error_msg = (
+                    f'There are about {number_of_specifications} different '
+                    f'specifications for the log likelihood function. This is '
+                    f'above the maximum number: '
+                    f'{self.maximum_number_catalog_expressions}. Either simplify '
+                    f'the specification, or change the value of the parameter '
+                    f'maximum_number_catalog_expressions.'
+                )
+                raise excep.valueOutOfRange(error_msg)
+
+            the_iterator = iter(self.loglike)
+        else:
+            the_iterator = eb.SelectedExpressionsIterator(
+                self.loglike, selected_configurations
             )
-            raise excep.biogemeError(error_msg)
-        
-        results = {}
-        for name, _ in self.loglike:
-            b = BIOGEME(self.database, self.loglike)
-            b.modelName = name
-            results[name] = b.estimate(recycle=recycle, bootstrap=bootstrap)
+        configurations = {}
+        for config, expression in the_iterator:
+            config_id = configuration_to_string_id(config)
+            b = BIOGEME(self.database, expression)
+            b.modelName = config_id
+            if quick_estimate:
+                results = b.quickEstimate(recycle=recycle, bootstrap=bootstrap)
+            else:
+                results = b.estimate(recycle=recycle, bootstrap=bootstrap)
 
-        return results
-                
+            configurations[config_id] = results
+        return configurations
+
     def estimate(
         self,
         recycle=False,
@@ -1162,7 +1194,8 @@ class BIOGEME:
         if kwargs.get('algoParameters') is not None:
             error_msg = (
                 'The parameter "algoParameters" is deprecated. Instead, define the '
-                'parameters "max_iterations" and "tolerance" in section "[SimpleBounds]" '
+                'parameters "max_iterations" and "tolerance" in section '
+                '"[SimpleBounds]" '
                 'of the TOML parameter file'
             )
             raise excep.biogemeError(error_msg)
@@ -1206,7 +1239,7 @@ class BIOGEME:
             )
 
         if self.saveIterations:
-            logger.general(
+            logger.info(
                 f'*** Initial values of the parameters are '
                 f'obtained from the file {self._saveIterationsFileName()}'
             )
@@ -1253,11 +1286,11 @@ class BIOGEME:
         if bootstrap > 0:
             start_time = datetime.now()
 
-            logger.general(f'Re-estimate the model {bootstrap} times for bootstrapping')
+            logger.info(f'Re-estimate the model {bootstrap} times for bootstrapping')
             self.bootstrap_results = np.empty(shape=[bootstrap, len(xstar)])
-            hideProgress = logger.screenLevel == 0
-            logger.temporarySilence()
-            for b in tqdm.tqdm(range(bootstrap), disable=hideProgress):
+            current_logger_level = logger.level
+            logger.setLevel(logging.WARNING)
+            for b in tqdm.tqdm(range(bootstrap), disable=False):
                 if self.database.isPanel():
                     sample = self.database.sampleIndividualMapWithReplacement()
                     self.theC.setDataMap(sample)
@@ -1269,14 +1302,14 @@ class BIOGEME:
 
             # Time needed to generate the bootstrap results
             self.bootstrap_time = datetime.now() - start_time
-            logger.resume()
+            logger.setLevel(current_logger_level)
         rawResults = res.rawResults(self, xstar, fgHb, bootstrap=self.bootstrap_results)
         r = res.bioResults(
             rawResults, identification_threshold=self.identification_threshold
         )
-        if self.generateHtml:
+        if self.generate_html:
             r.writeHtml(self.only_robust_stats)
-        if self.generatePickle:
+        if self.generate_pickle:
             r.writePickle()
         return r
 
@@ -1314,13 +1347,14 @@ class BIOGEME:
         if kwargs.get('algoParameters') is not None:
             error_msg = (
                 'The parameter "algoParameters" is deprecated. Instead, define the '
-                'parameters "max_iterations" and "tolerance" in section "[SimpleBounds]" '
+                'parameters "max_iterations" and "tolerance" in section '
+                '"[SimpleBounds]" '
                 'of the TOML parameter file'
             )
             raise excep.biogemeError(error_msg)
 
         if self.loglike is None:
-            raise excep.biogemeError('No log likelihood function has been specificed')
+            raise excep.biogemeError('No log likelihood function has been specified')
         if len(self.id_manager.free_betas.names) == 0:
             raise excep.biogemeError(
                 f'There is no parameter to estimate' f' in the formula: {self.loglike}.'
@@ -1343,7 +1377,12 @@ class BIOGEME:
         f = self.calculateLikelihood(xstar, scaled=False)
 
         fgHb = f, None, None, None
-        rawResults = res.rawResults(self, xstar, fgHb, bootstrap=self.bootstrap_results)
+        rawResults = res.rawResults(
+            self,
+            xstar,
+            fgHb,
+            bootstrap=self.bootstrap_results,
+        )
         r = res.bioResults(
             rawResults, identification_threshold=self.identification_threshold
         )
@@ -1387,7 +1426,10 @@ class BIOGEME:
             estBiogeme = BIOGEME(database, self.loglike)
             results = estBiogeme.estimate()
             simulate = {'Loglikelihood': self.loglike}
-            simBiogeme = BIOGEME(db.Database('Validation data', v.validation), simulate)
+            simBiogeme = BIOGEME(
+                db.Database('Validation data', v.validation),
+                simulate,
+            )
             simResult = simBiogeme.simulate(results.getBetaValues())
             allSimulationResults.append(simResult)
 
@@ -1397,7 +1439,7 @@ class BIOGEME:
             pickleFileName = bf.getNewFileName(fname, 'pickle')
             with open(pickleFileName, 'wb') as f:
                 pickle.dump(allSimulationResults, f)
-            logger.general(f'Simulation results saved in file {pickleFileName}')
+            logger.info(f'Simulation results saved in file {pickleFileName}')
 
         return allSimulationResults
 
@@ -1435,7 +1477,8 @@ class BIOGEME:
             )
             raise excep.biogemeError(err)
 
-        logger.debug(f'Run {self._algorithm}')
+        logger.debug(f'Run {self.algorithm_name}')
+        #logger.debug(''.join(traceback.format_stack()))
         results = self._algorithm(
             theFunction,
             startingValues,
@@ -1468,7 +1511,7 @@ class BIOGEME:
                 logger.warning(f'Parameter {x} not present in the model.')
 
         beta_list = []
-        for i, x in enumerate(self.id_manager.free_betas.names):
+        for x in self.id_manager.free_betas.names:
             v = beta_dict.get(x)
             if v is None:
                 err = f'Incomplete dict. The value of {x} is not provided.'
@@ -1505,7 +1548,8 @@ class BIOGEME:
 
         if theBetaValues is None:
             err = (
-                'Contrarily to previous versions of Biogeme, the values of beta must '
+                'Contrarily to previous versions of Biogeme, '
+                'the values of beta must '
                 'now be explicitly mentioned. They can be obtained from '
                 'results.getBetaValues()'
             )
@@ -1601,26 +1645,6 @@ class BIOGEME:
         left = allResults.groupby(level=0).quantile(r)
         right = allResults.groupby(level=0).quantile(1.0 - r)
         return left, right
-
-    def createLogFile(self, verbosity=3):
-        """Creates a log file with the messages produced by Biogeme.
-
-        The name of the file is the name of the model with an extension .log
-
-        :param verbosity: types of messages to be captured
-
-            - 0: no output
-            - 1: warnings
-            - 2: only general information
-            - 3: more verbose
-            - 4: debug messages
-
-            Default: 3.
-
-        :type verbosity: int
-
-        """
-        logger.createLog(fileLevel=verbosity, fileName=self.modelName)
 
     def __str__(self):
         r = f'{self.modelName}: database [{self.database.name}]'
