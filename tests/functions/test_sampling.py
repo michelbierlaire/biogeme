@@ -33,9 +33,7 @@ class TestSampling(unittest.TestCase):
         self.individuals = pd.DataFrame(
             {
                 'Char1': np.random.randint(2, size=self.nbr_of_obs),
-                'choice': np.random.randint(
-                    self.nbr_of_alt, size=self.nbr_of_obs
-                ),
+                'choice': np.random.randint(self.nbr_of_alt, size=self.nbr_of_obs),
             }
         )
 
