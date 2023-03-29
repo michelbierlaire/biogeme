@@ -15,15 +15,16 @@
 
 # flake8: noqa: E501
 
+
+import logging
 from itertools import chain
 import numpy as np
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
 import biogeme.cythonbiogeme as ee
 from biogeme.idmanager import IdManager
 from biogeme.elementary_expressions import TypeOfElementaryExpression
 
-logger = msg.bioMessage()
+logger = logging.getLogger(__name__)
 
 
 def isNumeric(obj):
@@ -51,25 +52,72 @@ def process_numeric(expression):
     return expression
 
 
+class SelectedExpressionsIterator:
+    """A multiple expression is an expression that contains
+    Catalog. This iterator loops on pre-specified configurations
+    """
+
+    def __init__(self, the_expression, configurations):
+        """Ctor.
+
+        :param the_expression: expression containing Catalogs
+        :type the_expression: Expression
+
+        :param configurations: set of configurations
+        :type configurations: set(dict(str: str))
+        """
+
+        self.the_expression = the_expression
+        self.configurations = configurations
+        self.set_iterator = iter(configurations)
+        current_configuration = next(self.set_iterator)
+        self.the_expression.configure_catalogs(current_configuration)
+        self.first = True
+        self.number = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.number += 1
+        if self.first:
+            self.first = False
+            result = (
+                self.the_expression.current_configuration(),
+                self.the_expression,
+            )
+            return result
+
+        current_configuration = next(self.set_iterator)
+        self.the_expression.configure_catalogs(current_configuration)
+        result = (
+            self.the_expression.current_configuration(),
+            self.the_expression,
+        )
+        return result
+
+
 class MultipleExpressionsIterator:
     """A multiple expression is an expression that contains
     Catalog. This iterator loops on all possible specification based
     on all catalogs in the expression."""
 
     def __init__(self, the_expression):
-        """Ctor. self.the_groups is a set of CatalogExpressionDescription"""
+        """Ctor."""
         self.the_expression = the_expression
         self.the_expression.reset_expression_selection()
         self.first = True
+        self.number = 0
 
     def __iter__(self):
         return self
 
     def __next__(self):
+        self.number += 1
         if self.first:
             self.first = False
             result = (
-                self.the_expression.description_of_selected_expression(),
+                self.the_expression.current_configuration(),
                 self.the_expression,
             )
             return result
@@ -77,7 +125,7 @@ class MultipleExpressionsIterator:
         if not self.the_expression.increment_selection():
             raise StopIteration
         result = (
-            self.the_expression.description_of_selected_expression(),
+            self.the_expression.current_configuration(),
             self.the_expression,
         )
         return result
@@ -1206,14 +1254,14 @@ class Expression:
         for e in self.get_children():
             e.changeInitValues(betas)
 
-    def dict_of_catalogs(self):
+    def dict_of_catalogs(self, ignore_synchronized=False):
         """Returns a dict with all catalogs in the expression.
 
         :return: dict with all the catalogs
         """
         result = {}
         for e in self.children:
-            a_dict = e.dict_of_catalogs()
+            a_dict = e.dict_of_catalogs(ignore_synchronized)
             for key, the_catalog in a_dict.items():
                 if key in result:
                     error_msg = (
@@ -1237,22 +1285,6 @@ class Expression:
         all_catalogs = self.dict_of_catalogs()
         return name in all_catalogs
 
-    def description_of_selected_expression(self):
-        """If the expression containts Catalog expressions, describes
-        the currently selected expression. The dict reports, for each catalog, the name of
-
-        :return: description of the selected expression
-        :rtype: str
-
-        """
-        all_catalogs = self.dict_of_catalogs()
-        return ';'.join(
-            [
-                f'{name}<{catalog.selected_name()}>'
-                for name, catalog in all_catalogs.items()
-            ]
-        )
-
     def number_of_multiple_expressions(self):
         """Reports the number of multiple expressions available through the iterator
 
@@ -1260,8 +1292,16 @@ class Expression:
         :rtype: int
         """
         total = 1
-        [total := total * e.number_of_multiple_expressions() for e in self.children]
+        for e in self.children:
+            total = total * e.number_of_multiple_expressions()
         return total
+
+    def increment_catalog(self, catalog_name, step):
+        """Increment the selection of a specific catalog"""
+        if step == 0:
+            return
+        for e in self.children:
+            e.increment_catalog(catalog_name, step)
 
     def increment_selection(self):
         """Increment recursively the selection of multiple
@@ -1297,6 +1337,27 @@ class Expression:
         for e in self.children:
             e.reset_expression_selection()
 
+    def configure_catalogs(self, configuration):
+        """Select the items in each catalog corresponding to the requested configuration
+
+        :param configuration: a dictionary such that the keys are the catalog
+            names, and the values are the selected specification in
+            the Catalog
+        :type configuration: dict(str: str)
+        """
+        for e in self.children:
+            e.configure_catalogs(configuration)
+
+    def current_configuration(self):
+        """Obtain the current configuration of an expression with Catalog's
+
+        :return: a dictionary such that the keys are the catalog
+            names, and the values are the selected specification in
+            the Catalog
+        :rtype: dict(str: str)
+        """
+        return dict(chain(*(e.current_configuration().items() for e in self.children)))
+
     def select_expression(self, group_name, index):
         """Select a specific expression in a group
 
@@ -1312,10 +1373,9 @@ class Expression:
         :raises biogemeError: if index is out of range
         """
         total = 0
-        [
-            total := total + e.select_expression(group_name, index)
-            for e in self.get_children()
-        ]
+        for e in self.get_children():
+            total = total + e.select_expression(group_name, index)
+            
         return total
 
     def set_of_multiple_expressions(self):
