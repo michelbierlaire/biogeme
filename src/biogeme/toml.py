@@ -4,17 +4,15 @@
 :date: Fri Dec  2 12:36:05 2022
 
 """
+import logging
 from datetime import date
 import tomlkit as tk
 import biogeme.parameters as param
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
+
 from biogeme.version import getVersion
 
-logger = msg.bioMessage()
-"""Logger that controls the output of
-        messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`."""
+logger = logging.getLogger(__name__)
 
 
 TRUE_STR = ('True', 'true', 'Yes', 'yes')
