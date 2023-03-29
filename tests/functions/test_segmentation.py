@@ -17,9 +17,7 @@ class test_segmentation(unittest.TestCase):
         x = Variable('x')
         mapping = {1: '1st', 2: '2nd', 3: '3rd'}
 
-        first_tuple = seg.DiscreteSegmentationTuple(
-            variable=x, mapping=mapping
-        )
+        first_tuple = seg.DiscreteSegmentationTuple(variable=x, mapping=mapping)
         second_tuple = seg.DiscreteSegmentationTuple(
             variable=x, mapping=mapping, reference='3rd'
         )
@@ -42,17 +40,11 @@ class test_segmentation(unittest.TestCase):
         expected_code = "Beta('beta_2nd', 1, None, None, 0)"
         self.assertEqual(beta_code, expected_code)
 
-        beta_code_assignment = one_segmentation.beta_code(
-            '2nd', assignment=True
-        )
-        expected_code_assignment = (
-            "beta_2nd = Beta('beta_2nd', 1, None, None, 0)"
-        )
+        beta_code_assignment = one_segmentation.beta_code('2nd', assignment=True)
+        expected_code_assignment = "beta_2nd = Beta('beta_2nd', 1, None, None, 0)"
         self.assertEqual(beta_code_assignment, expected_code_assignment)
 
-        list_of_expressions = [
-            str(e) for e in one_segmentation.list_of_expressions()
-        ]
+        list_of_expressions = [str(e) for e in one_segmentation.list_of_expressions()]
         expected_list = [
             '(beta_1st(init=1) * (x == `1.0`))',
             '(beta_2nd(init=1) * (x == `2.0`))',
