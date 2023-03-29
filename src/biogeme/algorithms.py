@@ -16,15 +16,14 @@ Optimization algorithms.
 # pylint: disable=too-many-statements, too-many-return-statements
 # pylint: disable=bare-except
 
-
+import logging
 from abc import abstractmethod
 import numpy as np
 import scipy.linalg as la
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
 
 
-logger = msg.bioMessage()
+logger = logging.getLogger(__name__)
 
 
 class functionToMinimize:
@@ -847,9 +846,7 @@ def newtonLineSearch(fct, x0, eps=np.finfo(np.float64).eps ** 0.3333, maxiter=10
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(
-            f'{k} f={f:10.7g} relgrad={relgrad:6.2g}' f' alpha={alpha:6.2g}'
-        )
+        logger.debug(f'{k} f={f:10.7g} relgrad={relgrad:6.2g}' f' alpha={alpha:6.2g}')
 
     messages = {
         'Algorithm': 'Unconstrained Newton with line search',
@@ -1237,7 +1234,7 @@ def newtonTrustRegion(
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(
+        logger.debug(
             f'{k} f={f:10.7g} relgrad={relgrad:6.2g} '
             f'delta={delta:6.2g} '
             f'rho={rho:6.2g} {status}'
@@ -1414,9 +1411,7 @@ def bfgsLineSearch(
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(
-            f'{k} f={f:10.7g} relgrad={relgrad:6.2g}' f' alpha={alpha:6.2g}'
-        )
+        logger.debug(f'{k} f={f:10.7g} relgrad={relgrad:6.2g}' f' alpha={alpha:6.2g}')
     messages = {
         'Algorithm': 'Inverse BFGS with line search',
         'Relative gradient': relgrad,
@@ -1573,7 +1568,7 @@ def bfgsTrustRegion(
         if k == maxiter:
             message = f'Maximum number of iterations reached: {maxiter}'
             cont = False
-        logger.detailed(
+        logger.debug(
             f'{k} f={f:10.7g} relgrad={relgrad:6.2g}'
             f' delta={delta:6.2g} '
             f'rho={rho:6.2g} {status}'
@@ -2009,13 +2004,13 @@ def simpleBoundsNewtonAlgorithm(
                 message = f'Maximum number of iterations reached: {maxiter}'
                 cont = False
             if relchange is None:
-                logger.detailed(
+                logger.debug(
                     f'{k} f={f:10.7g} projected '
                     f'rel. grad.={relgrad:6.2g} '
                     f'delta={delta:6.2g} rho={rho:6.2g} {status}'
                 )
             else:
-                logger.detailed(
+                logger.debug(
                     f'{k} f={f:10.7g} projected '
                     f'rel. grad.={relgrad:6.2g} '
                     f'rel. change={relchange:6.2g} '
@@ -2026,7 +2021,7 @@ def simpleBoundsNewtonAlgorithm(
     else:
         actualProp = 0
     m = f'Proportion of Hessian calculation: ' f'{actualProp}%'
-    logger.detailed(m)
+    logger.info(m)
 
     messages = {
         'Algorithm': algo,
