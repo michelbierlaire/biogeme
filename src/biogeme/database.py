@@ -17,13 +17,13 @@ for specific services to Biogeme
 # pylint: disable=too-many-instance-attributes, too-many-lines,
 # pylint: disable=too-many-public-methods
 
+import logging
 from collections import namedtuple
 import numpy as np
 import pandas as pd
 
 import biogeme.exceptions as excep
 import biogeme.filenames as bf
-import biogeme.messaging as msg
 from biogeme import tools
 from biogeme import draws
 
@@ -31,10 +31,9 @@ from biogeme.expressions import Variable, isNumeric, Numeric
 
 EstimationValidation = namedtuple('EstimationValidation', 'estimation validation')
 
-logger = msg.bioMessage()
+logger = logging.getLogger()
 """Logger that controls the output of
         messages to the screen and log file.
-        Type: class :class:`biogeme.messaging.bioMessage`.
         """
 
 
@@ -766,7 +765,7 @@ class Database:
         theName = f'{self.name}_dumped'
         dataFileName = bf.getNewFileName(theName, 'dat')
         self.data.to_csv(dataFileName, sep='\t', index_label='__rowId')
-        logger.general(f'File {dataFileName} has been created')
+        logger.info(f'File {dataFileName} has been created')
         return dataFileName
 
     def setRandomNumberGenerators(self, rng):
@@ -1125,7 +1124,7 @@ class Database:
         if saveOnFile:
             file_name = f'{self.name}_flatten.csv'
             flat_data.to_csv(file_name)
-            logger.general(f'File {file_name} has been created.')
+            logger.info(f'File {file_name} has been created.')
         return flat_data
 
     def __str__(self):
