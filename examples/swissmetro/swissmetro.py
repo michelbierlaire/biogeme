@@ -17,6 +17,7 @@ database = db.Database('swissmetro', df)
 PURPOSE = Variable('PURPOSE')
 CHOICE = Variable('CHOICE')
 GA = Variable('GA')
+LUGGAGE = Variable('LUGGAGE')
 TRAIN_CO = Variable('TRAIN_CO')
 CAR_AV = Variable('CAR_AV')
 SP = Variable('SP')
@@ -29,6 +30,8 @@ SM_CO = Variable('SM_CO')
 SM_AV = Variable('SM_AV')
 MALE = Variable('MALE')
 GROUP = Variable('GROUP')
+TRAIN_HE = Variable('TRAIN_HE')
+SM_HE = Variable('SM_HE')
 
 # Removing some observations can be done directly using pandas.
 # remove = (((database.data.PURPOSE != 1) &
@@ -54,30 +57,3 @@ SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
 CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
 CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 
-from swissmetro import (
-    database,
-    PURPOSE,
-    CHOICE,
-    GA,
-    TRAIN_CO,
-    CAR_AV,
-    SP,
-    TRAIN_AV,
-    TRAIN_TT,
-    SM_TT,
-    CAR_TT,
-    CAR_CO,
-    SM_CO,
-    SM_AV,
-    MALE,
-    SM_COST,
-    TRAIN_COST,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
-)
