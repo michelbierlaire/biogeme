@@ -15,6 +15,7 @@ Implementation of class contaning and processing the estimation results.
 # pylint: disable=too-many-lines
 #
 
+import logging
 import os
 import pickle
 import datetime
@@ -28,10 +29,11 @@ from scipy import stats
 import biogeme.version as bv
 import biogeme.filenames as bf
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
+from biogeme import pareto
 from biogeme import tools
 
-logger = msg.bioMessage()
+
+logger = logging.getLogger(__name__)
 
 GeneralStatistic = namedtuple('GeneralStatistic', 'value format')
 
@@ -213,7 +215,6 @@ class rawResults:
             Default: None.
         :type bootstrap: numpy.array
         """
-
         self.modelName = theModel.modelName  #: Name of the model
 
         self.userNotes = theModel.userNotes  #: User notes
@@ -354,6 +355,14 @@ class bioResults:
 
         self._calculateStats()
 
+    def variance_covariance_missing(self):
+        """Check if the variance covariance matrix is missing
+
+        :return: True if missing.
+        :rtype: bool
+        """
+        return self.data.H is None
+
     def writePickle(self):
         """Dump the data in a file in pickle format.
 
@@ -364,7 +373,7 @@ class bioResults:
         with open(self.data.pickleFileName, 'wb') as f:
             pickle.dump(self.data, f)
 
-        logger.general(f'Results saved in file {self.data.pickleFileName}')
+        logger.info(f'Results saved in file {self.data.pickleFileName}')
         return self.data.pickleFileName
 
     def _calculateTest(self, i, j, matrix):
@@ -717,7 +726,7 @@ class bioResults:
 
             return f'{res}.0'
 
-        ## Need to check for old versions of Pandas.
+        # Need to check for old versions of Pandas.
         try:
             h += table.style.format(formatting).to_latex()
         except AttributeError:
@@ -858,7 +867,7 @@ class bioResults:
         """This is the number of estimated parameters, minus those that are at
         their bounds
         """
-        return sum([not b.isBoundActive() for b in self.data.betas])
+        return sum(not b.isBoundActive() for b in self.data.betas)
 
     def getEstimatedParameters(self, onlyRobust=True):
         """Gather the estimated parameters and the corresponding statistics in
@@ -1059,7 +1068,12 @@ class bioResults:
         if np.abs(self.data.smallestEigenValue) <= self.identification_threshold:
             h += '<h2>Warning: identification issue</h2>\n'
             h += (
-                f'<p>The second derivatives matrix is close to singularity. The smallest eigenvalue is {np.abs(self.data.smallestEigenValue):.3g}. This warning is triggered when it is smaller than the parameter <code>identification_threshold</code>={self.identification_threshold}.</p>'
+                f'<p>The second derivatives matrix is close to singularity. '
+                f'The smallest eigenvalue is '
+                f'{np.abs(self.data.smallestEigenValue):.3g}. This warning is '
+                f'triggered when it is smaller than the parameter '
+                f'<code>identification_threshold</code>='
+                f'{self.identification_threshold}.</p>'
                 f'<p>Variables involved:'
             )
             h += '<table>'
@@ -1230,16 +1244,16 @@ class bioResults:
     def writeHtml(self, onlyRobust=True):
         """Write the results in an HTML file."""
         self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
-        with open(self.data.htmlFileName, 'w') as f:
+        with open(self.data.htmlFileName, 'w', encoding='utf-8') as f:
             f.write(self.getHtml(onlyRobust))
-        logger.general(f'Results saved in file {self.data.htmlFileName}')
+        logger.info(f'Results saved in file {self.data.htmlFileName}')
 
     def writeLaTeX(self):
         """Write the results in a LaTeX file."""
         self.data.latexFileName = bf.getNewFileName(self.data.modelName, 'tex')
-        with open(self.data.latexFileName, 'w') as f:
+        with open(self.data.latexFileName, 'w', encoding='utf-8') as f:
             f.write(self.getLaTeX())
-        logger.general(f'Results saved in file {self.data.latexFileName}')
+        logger.info(f'Results saved in file {self.data.latexFileName}')
 
     def _getHtmlHeader(self):
         """Prepare the header for the HTML file, containing comments and the
@@ -1486,9 +1500,9 @@ class bioResults:
     def writeF12(self, robustStdErr=True):
         """Write the results in F12 file."""
         self.data.F12FileName = bf.getNewFileName(self.data.modelName, 'F12')
-        with open(self.data.F12FileName, 'w') as f:
+        with open(self.data.F12FileName, 'w', encoding='utf-8') as f:
             f.write(self.getF12(robustStdErr))
-        logger.general(f'Results saved in file {self.data.F12FileName}')
+        logger.info(f'Results saved in file {self.data.F12FileName}')
 
     def likelihood_ratio_test(self, other_model, significance_level=0.05):
         """This function performs a likelihood ratio test between a restricted
@@ -1532,13 +1546,14 @@ def compileEstimationResults(
     include_robust_stderr=False,
     include_robust_ttest=True,
     formatted=True,
+    use_short_names=False,
 ):
     """Compile estimation results into a common table
 
-    :param dict_of_results: dictionary where the keys are the names of
-        the models, and the values are either the estimation results,
-        or the name of the pickle file where to find them.
-    :type dict_of_results: dict(str:bioResults) or dict(str:str)
+    :param dict_results: dict of results, containing
+        for each model the name, the ID and the results, or ther name
+        of the pickle file containing them.
+    :type list_of_named_results: dict(str: bioResults)
 
     :param statistics: list of statistics to include in the summary
         table
@@ -1560,14 +1575,34 @@ def compileEstimationResults(
          table results. If False, the numerical values are stored. Use
          "True" if you need to print the results. Use "False" if you
          need to use them for further calculation.
+    :type formatted: bool
 
-    :return: pandas dataframe with the requested results.
-    :rtype: pandas.DataFrame
+    :param use_short_names: if True, short names, such as Model_1,
+        Model_2, are used to identify the model. It is nicer on for the
+        reporting.
+    :type use_short_names: bool
+
+    :return: pandas dataframe with the requested results, and the specification of each model
+    :rtype: tuple(pandas.DataFrame, dict(str:dict(str:str)))
 
     """
-    df = pd.DataFrame(columns=dict_of_results.keys())
+    model_names = tools.ModelNames()
 
-    for col, res in dict_of_results.items():
+    def the_name(col):
+        if use_short_names:
+            return model_names(col)
+        return col
+
+    columns = [the_name(k) for k in dict_of_results.keys()]
+    df = pd.DataFrame(columns=columns)
+
+    configurations = {the_name(col): col for col in dict_of_results.keys()}
+
+    for model, res in dict_of_results.items():
+        if use_short_names:
+            col = model_names(model)
+        else:
+            col = model
         if not isinstance(res, bioResults):
             try:
                 res = bioResults(pickleFile=res)
@@ -1584,10 +1619,18 @@ def compileEstimationResults(
                 if formatted:
                     for b in res.data.betas:
                         std = (
-                            f'({b.robust_stdErr:.3g})' if include_robust_stderr else ''
+                            (
+                                f'({b.robust_stdErr:.3g})'
+                                if include_robust_stderr
+                                else ''
+                            )
+                            if b.robust_stdErr is not None
+                            else '(???)'
                         )
                         ttest = (
-                            f'({b.robust_tTest:.3g})' if include_robust_ttest else ''
+                            (f'({b.robust_tTest:.3g})' if include_robust_ttest else '')
+                            if b.robust_tTest is not None
+                            else '(???)'
                         )
                         the_value = f'{b.value:.3g} {std} {ttest}'
                         row_std = ' (std)' if include_robust_stderr else ''
@@ -1602,7 +1645,7 @@ def compileEstimationResults(
                         if include_robust_ttest:
                             df.loc[f'{b.name} (ttest)', col] = b.value
 
-    return df.fillna('')
+    return df.fillna(''), configurations
 
 
 def compile_results_in_directory(
@@ -1643,7 +1686,8 @@ def compile_results_in_directory(
          "True" if you need to print the results. Use "False" if you
          need to use them for further calculation.
 
-    :return: pandas dataframe with the requested results, or None if no file was found.
+    :return: pandas dataframe with the requested results, or None if
+        no file was found.
     :rtype: pandas.DataFrame
 
     """
@@ -1661,3 +1705,45 @@ def compile_results_in_directory(
         include_robust_ttest,
         formatted,
     )
+
+
+def pareto_optimal(dict_of_results):
+    """Identifies the non dominated models, with respect to maximum
+    log likelihood and minimum number of parameters
+
+    :param dict_of_results: dict of results associated with their config ID
+    :type named_results: dict(str:bioResults)
+
+    :return: a list of named results with pareto optimal results
+    :rtype: list(NamedResults)
+    """
+    the_pareto = pareto.Pareto()
+    for config_id, res in dict_of_results.items():
+        the_element = pareto.SetElement(
+            element_id=config_id, objectives=[-res.data.logLike, res.data.nparam]
+        )
+        the_pareto.add(the_element)
+
+    selected_results = {
+        element.element_id: dict_of_results[element.element_id]
+        for element in the_pareto.pareto
+    }
+    return selected_results
+
+def loglikelihood_dimension(results):
+    """Function returning the negative log likelihood and the number
+    of parameters, designed for multi-objective optimization
+
+    :param results: estimation results
+    :type results: biogeme.results.bioResults
+    """
+    return [-results.data.logLike, results.data.nparam]
+
+def AIC_BIC_dimension(results):
+    """Function returning the AIC, BIC and the number
+    of parameters, designed for multi-objective optimization
+
+    :param results: estimation results
+    :type results: biogeme.results.bioResults
+    """
+    return [results.data.akaike, results.data.bayesian, results.data.nparam]
