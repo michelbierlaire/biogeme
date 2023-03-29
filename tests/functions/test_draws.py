@@ -18,6 +18,7 @@ import biogeme.draws as dr
 import numpy as np
 import biogeme.exceptions as excep
 
+
 class test_draws(unittest.TestCase):
     def setUp(self):
         np.random.seed(90267)
@@ -39,12 +40,11 @@ class test_draws(unittest.TestCase):
         self.assertTrue(np.max(draws) <= 1)
 
     def test_getUniform_exception(self):
-         with self.assertRaises(excep.biogemeError):
-             draws = dr.getUniform(sampleSize=5, numberOfDraws=-10, symmetric=True)
-         with self.assertRaises(excep.biogemeError):
-             draws = dr.getUniform(sampleSize=-5, numberOfDraws=10, symmetric=True)
-             
-        
+        with self.assertRaises(excep.biogemeError):
+            draws = dr.getUniform(sampleSize=5, numberOfDraws=-10, symmetric=True)
+        with self.assertRaises(excep.biogemeError):
+            draws = dr.getUniform(sampleSize=-5, numberOfDraws=10, symmetric=True)
+
     def test_getLatinHypercubeDraws(self):
         draws = dr.getLatinHypercubeDraws(sampleSize=5, numberOfDraws=10)
         r, c = draws.shape
@@ -52,7 +52,6 @@ class test_draws(unittest.TestCase):
         self.assertEqual(c, 10)
         self.assertTrue(np.min(draws) > 0)
         self.assertTrue(np.max(draws) <= 1)
-        
 
     def test_getLatinHypercubeDrawsSymmetric(self):
         draws = dr.getLatinHypercubeDraws(
@@ -64,7 +63,6 @@ class test_draws(unittest.TestCase):
         self.assertTrue(np.min(draws) > -1)
         self.assertTrue(np.max(draws) <= 1)
 
-        
     def test_getLatinHypercubeDraws_exception(self):
         with self.assertRaises(excep.biogemeError):
             draws = dr.getLatinHypercubeDraws(sampleSize=-5, numberOfDraws=10)
@@ -74,12 +72,9 @@ class test_draws(unittest.TestCase):
         uniform_numbers = np.random.uniform(size=2)
         with self.assertRaises(excep.biogemeError):
             draws = dr.getLatinHypercubeDraws(
-                sampleSize=5,
-                numberOfDraws=10,
-                uniformNumbers=uniform_numbers
+                sampleSize=5, numberOfDraws=10, uniformNumbers=uniform_numbers
             )
-        
-        
+
     def test_userDefinedDraws(self):
         myUnif = np.random.uniform(size=30)
         draws = dr.getLatinHypercubeDraws(
@@ -203,9 +198,7 @@ class test_draws(unittest.TestCase):
         diff = halton - h
         norm = np.linalg.norm(diff)
         self.assertAlmostEqual(norm, 0, 7)
-        halton = dr.getHaltonDraws(
-            sampleSize=1, numberOfDraws=10, base=3, skip=10
-        )
+        halton = dr.getHaltonDraws(sampleSize=1, numberOfDraws=10, base=3, skip=10)
         h = [
             0.7037037,
             0.14814815,
@@ -223,23 +216,25 @@ class test_draws(unittest.TestCase):
         self.assertAlmostEqual(norm, 0, 7)
 
     def test_halton_shuffled(self):
-        halton = dr.getHaltonDraws(sampleSize=1, numberOfDraws=100, base=5, shuffled=True)
-        self.assertEqual(halton.size, 100)
-                         
-    def test_halton_symmetric(self):
-        halton = dr.getHaltonDraws(sampleSize=1, numberOfDraws=100, base=5, symmetric=True)
-        self.assertEqual(halton.size, 100)
-                         
-    def test_halton_exception(self):
-         with self.assertRaises(excep.biogemeError):
-             halton = dr.getHaltonDraws(sampleSize=1, numberOfDraws=-100, base=3)
-         with self.assertRaises(excep.biogemeError):
-             halton = dr.getHaltonDraws(sampleSize=-1, numberOfDraws=100, base=3)
-        
-    def test_antithetic(self):
-        draws = dr.getAntithetic(
-            dr.getHaltonDraws, sampleSize=1, numberOfDraws=10
+        halton = dr.getHaltonDraws(
+            sampleSize=1, numberOfDraws=100, base=5, shuffled=True
         )
+        self.assertEqual(halton.size, 100)
+
+    def test_halton_symmetric(self):
+        halton = dr.getHaltonDraws(
+            sampleSize=1, numberOfDraws=100, base=5, symmetric=True
+        )
+        self.assertEqual(halton.size, 100)
+
+    def test_halton_exception(self):
+        with self.assertRaises(excep.biogemeError):
+            halton = dr.getHaltonDraws(sampleSize=1, numberOfDraws=-100, base=3)
+        with self.assertRaises(excep.biogemeError):
+            halton = dr.getHaltonDraws(sampleSize=-1, numberOfDraws=100, base=3)
+
+    def test_antithetic(self):
+        draws = dr.getAntithetic(dr.getHaltonDraws, sampleSize=1, numberOfDraws=10)
         d = [0.5, 0.25, 0.75, 0.125, 0.625, 0.5, 0.75, 0.25, 0.875, 0.375]
         self.assertListEqual(d, draws[0].tolist())
 
@@ -259,22 +254,18 @@ class test_draws(unittest.TestCase):
 
         with self.assertRaises(excep.biogemeError):
             draws = dr.getNormalWichuraDraws(
-                sampleSize=3,
-                numberOfDraws=9,
-                antithetic=True
+                sampleSize=3, numberOfDraws=9, antithetic=True
             )
 
         with self.assertRaises(excep.biogemeError):
             draws = dr.getNormalWichuraDraws(sampleSize=-3, numberOfDraws=10)
-             
+
         uniform_numbers = np.random.uniform(size=2)
         with self.assertRaises(excep.biogemeError):
             draws = dr.getNormalWichuraDraws(
-                sampleSize=3,
-                numberOfDraws=10,
-                uniformNumbers=uniform_numbers
+                sampleSize=3, numberOfDraws=10, uniformNumbers=uniform_numbers
             )
-             
+
 
 if __name__ == '__main__':
     unittest.main()
