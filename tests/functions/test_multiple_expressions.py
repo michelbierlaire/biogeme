@@ -79,7 +79,7 @@ class TestMultipleExpressions(unittest.TestCase):
         self.synchronized_expression_2 = catalog_40 + catalog_51
 
         self.wrong_expression = catalog_6 + catalog_6
-        
+
     def test_ctor(self):
         empty_tuple = tuple()
         with self.assertRaises(excep.biogemeError):
@@ -97,7 +97,7 @@ class TestMultipleExpressions(unittest.TestCase):
     def test_wrong_expression(self):
         with self.assertRaises(excep.biogemeError):
             _ = self.wrong_expression.dict_of_catalogs()
-        
+
     def test_names(self):
         result = [e.name for e in self.catalog_1.tuple_of_named_expressions]
         correct_result = ['g1_first', 'g1_second']
@@ -144,7 +144,7 @@ class TestMultipleExpressions(unittest.TestCase):
         the_number = another_expression.number_of_multiple_expressions()
         correct_number = 7
         self.assertEqual(the_number, correct_number)
-        
+
     def test_increment_and_reset(self):
         expression = self.catalog_1 + self.catalog_2
 
@@ -173,71 +173,203 @@ class TestMultipleExpressions(unittest.TestCase):
         self.assertEqual(total, 1)
         self.assertEqual(self.catalog_1.current_index, 1)
         self.assertEqual(self.catalog_2.current_index, 1)
-        
 
     def test_iterator(self):
         expression = self.catalog_1 + self.catalog_2
-        descriptions = [d for d, e in expression]
-        correct_descriptions = [
-            'catalog_1<g1_first>;catalog_2<g2_first>',
-            'catalog_1<g1_first>;catalog_2<g2_second>',
-            'catalog_1<g1_first>;catalog_2<g2_third>',
-            'catalog_1<g1_second>;catalog_2<g2_first>',
-            'catalog_1<g1_second>;catalog_2<g2_second>',
-            'catalog_1<g1_second>;catalog_2<g2_third>'
+        configurations = [configuration for configuration, e in expression]
+        correct_configurations = [
+            {'catalog_1': 'g1_first', 'catalog_2': 'g2_first'},
+            {'catalog_1': 'g1_first', 'catalog_2': 'g2_second'},
+            {'catalog_1': 'g1_first', 'catalog_2': 'g2_third'},
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_first'},
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_second'},
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_third'},
         ]
-        self.assertListEqual(descriptions, correct_descriptions)
+        for the_dict, the_correct_dict in zip(configurations, correct_configurations):
+            self.assertDictEqual(the_dict, the_correct_dict)
+
         size = expression.number_of_multiple_expressions()
-        self.assertEqual(size, len(descriptions))
-        
+        self.assertEqual(size, len(configurations))
+
         another_expression = ex.Numeric(2) + self.catalog_3
-        descriptions = [d for d, e in another_expression]
-        correct_descriptions = [
-            'catalog_1<g1_first>;catalog_3<one>',
-            'catalog_1<g1_first>;catalog_3<g2_first>',
-            'catalog_1<g1_first>;catalog_3<g2_second>',
-            'catalog_1<g1_first>;catalog_3<g2_third>',
-            'catalog_1<g1_first>;catalog_3<g2_fourth>',
-            'catalog_1<g1_second>;catalog_3<g2_fourth>'
+        configurations = [
+            configuration for configuration, e in another_expression
         ]
-        self.assertListEqual(descriptions, correct_descriptions)
+        correct_configurations = [
+            {'catalog_3': 'one'},
+            {'catalog_3': 'g2_first'},
+            {'catalog_3': 'g2_second'},
+            {'catalog_3': 'g2_third'},
+            {'catalog_1': 'g1_first', 'catalog_3': 'g2_fourth'},
+            {'catalog_1': 'g1_second', 'catalog_3': 'g2_fourth'},
+        ]
+        for the_dict, the_correct_dict in zip(configurations, correct_configurations):
+            self.assertDictEqual(the_dict, the_correct_dict)
+
         size = another_expression.number_of_multiple_expressions()
-        self.assertEqual(size, len(descriptions))
+        self.assertEqual(size, len(configurations))
 
-        descriptions = [d for d, e in self.complex_expression]
-        correct_descriptions = [
-            'catalog_6<two>;catalog_4<one>;catalog_7<five>;catalog_5<four>',
-            'catalog_6<two>;catalog_4<one>;catalog_7<five>;catalog_5<c7>',
-            'catalog_6<two>;catalog_4<one>;catalog_7<six>;catalog_5<c7>',
-            'catalog_6<two>;catalog_4<c6>;catalog_7<five>;catalog_5<four>',
-            'catalog_6<two>;catalog_4<c6>;catalog_7<five>;catalog_5<c7>',
-            'catalog_6<two>;catalog_4<c6>;catalog_7<six>;catalog_5<c7>',
-            'catalog_6<three>;catalog_4<c6>;catalog_7<five>;catalog_5<four>',
-            'catalog_6<three>;catalog_4<c6>;catalog_7<five>;catalog_5<c7>',
-            'catalog_6<three>;catalog_4<c6>;catalog_7<six>;catalog_5<c7>'
+        configurations = [
+            configuration for configuration, e in self.complex_expression
         ]
-        self.assertListEqual(descriptions, correct_descriptions)
+        correct_configurations = [
+            {'catalog_4': 'one', 'catalog_5': 'four'},
+            {'catalog_4': 'one', 'catalog_7': 'five', 'catalog_5': 'c7'},
+            {'catalog_4': 'one', 'catalog_7': 'six', 'catalog_5': 'c7'},
+            {'catalog_6': 'two', 'catalog_4': 'c6', 'catalog_5': 'four'},
+            {
+                'catalog_6': 'two',
+                'catalog_4': 'c6',
+                'catalog_7': 'five',
+                'catalog_5': 'c7',
+            },
+            {
+                'catalog_6': 'two',
+                'catalog_4': 'c6',
+                'catalog_7': 'six',
+                'catalog_5': 'c7',
+            },
+            {'catalog_6': 'three', 'catalog_4': 'c6', 'catalog_5': 'four'},
+            {
+                'catalog_6': 'three',
+                'catalog_4': 'c6',
+                'catalog_7': 'five',
+                'catalog_5': 'c7',
+            },
+            {
+                'catalog_6': 'three',
+                'catalog_4': 'c6',
+                'catalog_7': 'six',
+                'catalog_5': 'c7',
+            },
+        ]
+        for the_dict, the_correct_dict in zip(configurations, correct_configurations):
+            self.assertDictEqual(the_dict, the_correct_dict)
+
         size = self.complex_expression.number_of_multiple_expressions()
-        self.assertEqual(size, len(descriptions))
+        self.assertEqual(size, len(configurations))
 
-        descriptions = [d for d, e in self.synchronized_expression]
-        correct_descriptions = [
-            'catalog_60<two>;catalog_40<one>;catalog_70<five>;catalog_50<four>',
-            'catalog_60<two>;catalog_40<c60>;catalog_70<five>;catalog_50<c70>',
-            'catalog_60<three>;catalog_40<c60>;catalog_70<six>;catalog_50<c70>'            
+        configurations = [
+            configuration for configuration, e in self.synchronized_expression
         ]
-        self.assertListEqual(descriptions, correct_descriptions)
+        print(configurations)
+        correct_configurations = [
+            {'catalog_40': 'one', 'catalog_50': 'four'},
+            {
+                'catalog_60': 'two',
+                'catalog_40': 'c60',
+                'catalog_70': 'five',
+                'catalog_50': 'c70',
+            },
+            {
+                'catalog_60': 'three',
+                'catalog_40': 'c60',
+                'catalog_70': 'six',
+                'catalog_50': 'c70',
+            },
+        ]
+        for the_dict, the_correct_dict in zip(configurations, correct_configurations):
+            self.assertDictEqual(the_dict, the_correct_dict)
 
-        descriptions = [d for d, e in self.synchronized_expression_2]
-        correct_descriptions = [
-            'catalog_60<two>;catalog_40<one>;catalog_71<five>;catalog_51<four>',
-            'catalog_60<two>;catalog_40<c60>;catalog_71<five>;catalog_51<c71>',
-            'catalog_60<two>;catalog_40<c60>;catalog_71<six>;catalog_51<c71>',
-            'catalog_60<three>;catalog_40<c60>;catalog_71<five>;catalog_51<c71>',
-            'catalog_60<three>;catalog_40<c60>;catalog_71<six>;catalog_51<c71>'
+        configurations = [
+            configuration for configuration, e in self.synchronized_expression_2
         ]
-        #self.assertListEqual(descriptions, correct_descriptions)
-        
+        correct_configurations = [
+            {'catalog_40': 'one', 'catalog_51': 'four'},
+            {
+                'catalog_60': 'two',
+                'catalog_40': 'c60',
+                'catalog_71': 'five',
+                'catalog_51': 'c71',
+            },
+            {
+                'catalog_60': 'two',
+                'catalog_40': 'c60',
+                'catalog_71': 'six',
+                'catalog_51': 'c71',
+            },
+            {
+                'catalog_60': 'three',
+                'catalog_40': 'c60',
+                'catalog_71': 'five',
+                'catalog_51': 'c71',
+            },
+            {
+                'catalog_60': 'three',
+                'catalog_40': 'c60',
+                'catalog_71': 'six',
+                'catalog_51': 'c71',
+            },
+        ]
+        for the_dict, the_correct_dict in zip(configurations, correct_configurations):
+            self.assertDictEqual(the_dict, the_correct_dict)
+
+
+    def test_selected_iterator(self):
+        expression = self.catalog_1 + self.catalog_2
+        selected_configurations = [
+            {'catalog_1': 'g1_first', 'catalog_2': 'g2_second'},
+            {'catalog_1': 'g1_first', 'catalog_2': 'g2_third'},
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_second'},
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_third'},
+        ]
+        iterator = ex.SelectedExpressionsIterator(
+            expression,
+            selected_configurations
+        )
+        configurations = [configuration for configuration, e in iterator]
+        for the_dict, the_correct_dict in zip(configurations, selected_configurations):
+            self.assertDictEqual(the_dict, the_correct_dict)
+
+            
+    def test_configure_catalogs(self):
+        expression = self.catalog_1 + self.catalog_2
+        a_config = {'catalog_1': 'g1_first', 'catalog_2': 'g2_second'}
+        expression.configure_catalogs(a_config)
+        new_config = expression.current_configuration()
+        self.assertDictEqual(a_config, new_config)
+
+        a_config = {'catalog_4': 'one', 'catalog_7': 'five', 'catalog_5': 'c7'}
+        self.complex_expression.configure_catalogs(a_config)
+        new_config = self.complex_expression.current_configuration()
+        self.assertDictEqual(a_config, new_config)
+
+    def test_current_configuration(self):
+        expression = self.catalog_1 + self.catalog_2
+        expression.reset_expression_selection()
+        config = expression.current_configuration()
+        correct_config = {'catalog_1': 'g1_first', 'catalog_2': 'g2_first'}
+        self.assertDictEqual(config, correct_config)
+        expression.increment_selection()
+        config = expression.current_configuration()
+        correct_config = {'catalog_1': 'g1_first', 'catalog_2': 'g2_second'}
+        self.assertDictEqual(config, correct_config)
+
+    def test_increment_catalog(self):
+        expression = self.catalog_1 + self.catalog_2
+        expression.reset_expression_selection()
+        config = expression.current_configuration()
+        correct_config = {'catalog_1': 'g1_first', 'catalog_2': 'g2_first'}
+        self.assertDictEqual(config, correct_config)
+        expression.increment_catalog('catalog_1', 1)
+        config = expression.current_configuration()
+        correct_config = {'catalog_1': 'g1_second', 'catalog_2': 'g2_first'}
+        self.assertDictEqual(config, correct_config)
+        with self.assertRaises(excep.valueOutOfRange):
+            expression.increment_catalog('catalog_1', 1)
+
+        expression.reset_expression_selection()
+        expression.increment_catalog('catalog_2', 1)
+        config = expression.current_configuration()
+        correct_config = {'catalog_1': 'g1_first', 'catalog_2': 'g2_second'}
+        self.assertDictEqual(config, correct_config)
+        expression.increment_catalog('catalog_2', -1)
+        config = expression.current_configuration()
+        correct_config = {'catalog_1': 'g1_first', 'catalog_2': 'g2_first'}
+        self.assertDictEqual(config, correct_config)
+        with self.assertRaises(excep.valueOutOfRange):
+            expression.increment_catalog('catalog_2', -1)
+
         
 if __name__ == '__main__':
     unittest.main()
