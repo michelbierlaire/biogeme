@@ -144,8 +144,8 @@ class test_biogeme(unittest.TestCase):
             self.database, logprob, parameter_file=self.toml_file
         )
         biogeme.modelName = 'test'
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         biogeme.saveIterations = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike, -6.166042, 2)
