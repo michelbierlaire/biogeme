@@ -42,9 +42,7 @@ class TestResults(unittest.TestCase):
         beta1 = Beta('beta1', -1.0, -3, 3, 0)
         beta2 = Beta('beta2', 2.0, -3, 10, 0)
         likelihood = (
-            -(beta1**2) * Variable1
-            - exp(beta2 * beta1) * Variable2
-            - beta2**4
+            -(beta1**2) * Variable1 - exp(beta2 * beta1) * Variable2 - beta2**4
         )
         simul = beta1 / Variable1 + beta2 / Variable2
         dictOfExpressions = {
