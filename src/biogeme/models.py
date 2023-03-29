@@ -8,12 +8,11 @@
 # pylint: disable=invalid-name
 # pylint: disable=too-many-lines
 
+import logging
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
-
 import biogeme.expressions as expr
 
-logger = msg.bioMessage()
+logger = logging.getLogger(__name__)
 
 
 def loglogit(V, av, i):
