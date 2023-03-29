@@ -16,3 +16,7 @@ class biogemeError(Exception):
 
 class valueOutOfRange(biogemeError):
     """Value of out range error."""
+
+
+class valueOutOfRange(biogemeError):
+    """Value of out range error."""
