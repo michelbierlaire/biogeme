@@ -236,7 +236,6 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
     Gi_terms = defaultdict(list)
     biosum = {}
     for nest, mu in nests.items():
-        print(f'{nest=}')
         if availability is None:
             biosum = expr.bioMultSum(
                 [
