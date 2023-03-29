@@ -1,17 +1,19 @@
 """File knapsack.py
 
 :author: Michel Bierlaire
-:date: Fri Feb 19 15:19:14 2021
+:date: Fri Mar 17 08:24:33 2023
 
 This illustrates how to use the multi-objective VNS algorithm using a
 simple knapsack problem.  There are two objectives: maximize utility
 and minimize weight. The weight cannot go beyond capacity.
 
 """
+import random
 import numpy as np
 from biogeme import vns
-import biogeme.exceptions as excep
 import biogeme.messaging as msg
+import biogeme.exceptions as excep
+from biogeme.pareto import SetElement
 
 logger = msg.bioMessage()
 # logger.setDetailed()
@@ -20,239 +22,190 @@ logger.setDebug()
 # pylint: disable=invalid-name
 
 
-class oneSack(vns.solutionClass):
-    """Implements the virtual class. A solution here is a sack
-    configuration.
-
+class Sack:
+    """Implements a solution. Here, a sack configuration.
     """
 
-    def __init__(self, solution):
-        super().__init__()
-        self.x = solution
-        self.objectivesNames = ['Weight', 'Negative utility']
-        self.objectives = None
+    SEPARATOR = '-'
+    utility_data = None
+    weight_data = None
 
-    def isDefined(self):
-        """Check if the sack is well defined.
+    def __init__(self, string_representation):
+        """Creates a sack from a string representation"""
+        self.decisions = [
+            int(i)
+            for i in string_representation.split(self.SEPARATOR)
+        ]
+        self.utility = sum(
+            x * u
+            for x, u in zip(self.decisions, self.utility_data)
+        )
+        self.weight = sum(
+            x * u
+            for x, u in zip(self.decisions, self.weight_data)
+        )
 
-        :return: True if the configuration vector ``x`` is defined,
-            and the total weight and total utility are both defined.
-        :rtype: bool
-        """
-        if self.x is None:
-            return False
-        if self.objectives is None:
-            return False
-        return True
+    @classmethod
+    def from_decisions(cls, decisions):
+        """Creates a sack from the actual decisions"""
+        the_string = cls.code_decisions(decisions)
+        return cls(the_string)
+    
+    def __str__(self):
+        return self.describe()
 
     def __repr__(self):
-        return str(self.x)
+        return self.code_id()
 
-    def __str__(self):
-        return str(self.x)
+    @classmethod
+    def empty_sack(cls, size):
+        """
+        :return: empty sack of the same dimension.
+        :rtype: class Sack
+        """
+        element_id = cls.SEPARATOR.join(['0'] * size)
+        return cls(element_id)
+
+    def get_element(self):
+        """Implementation of abstract method"""
+        if self.utility is None or self.weight is None:
+            self.evaluate()
+        return SetElement(self.code_id(), [-self.utility, self.weight])
+
+    def describe(self):
+        """Short description of the solution. Used for reporting.
+
+        :return: short description of the solution.
+        :rtype: str
+        """
+        return f'{self.code_id()}: U={self.utility} W={self.weight}'
+
+    def code_id(self):
+        """Provide a string ID for the sack 
+
+        :return: identifier of the solution. Used to organize the Pareto set.
+        :rtype: str
+        """
+        return self.code_decisions(self.decisions)
+    
+    @classmethod
+    def code_decisions(cls, decisions):
+        """Provide a string ID for the sack given the decisions
+
+        :return: identifier of the solution. Used to organize the Pareto set.
+        :rtype: str
+        """
+        return cls.SEPARATOR.join([str(x) for x in decisions])
 
 
-def addItems(aSolution, size=1):
+# Operators
+def add_items(element, size=1):
     """Add ``size`` items in the sack
 
-    :param aSolution: current sack
-    :type aSolution: class oneSack
+    :param element: ID of the current sack
+    :type element: class SetElement
 
     :param size: number of items to add into the sack
     :type size: int
 
-    :return: new sack, and number of changes actually made
-    :rtype: tuple(class oneSack, int)
+    :return: Id of the new sack, and number of changes actually made
+    :rtype: tuple(class SetElement, int)
     """
-    absent = np.where(aSolution.x == 0)[0]
-    np.random.shuffle(absent)
+    solution = Sack(element.element_id)
+    absent = [i for i, x in enumerate(solution.decisions) if x == 0]
+    if not absent:
+        return None, 0
+    random.shuffle(absent)
     n = min(len(absent), size)
-    xplus = aSolution.x.copy()
-    xplus[absent[:n]] = 1
-    return oneSack(xplus), n
+    xplus = solution.decisions.copy()
+    for i in absent[:n]:
+        xplus[i] = 1
+    neighbor = Sack.from_decisions(xplus)
+    return neighbor.get_element(), n
 
 
-def removeItems(aSolution, size=1):
+def remove_items(element, size=1):
     """Remove ``size`` items from the sack
 
-    :param aSolution: current sack
-    :type aSolution: class oneSack
+    :param element: current sack
+    :type element: class Sack
 
     :param size: number of items to remove from the sack
     :type size: int
 
-    :return: new sack, and number of changes actually made
-    :rtype: tuple(class oneSack, int)
+    :return: Id of the new sack, and number of changes actually made
+    :rtype: tuple(class SetElement, int)
     """
-    present = np.where(aSolution.x == 1)[0]
-    np.random.shuffle(present)
+    solution = Sack(element.element_id)
+    present = [i for i, x in enumerate(solution.decisions) if x == 1]
+    if not present:
+        return None, 0
+    random.shuffle(present)
     n = min(len(present), size)
-    xplus = aSolution.x.copy()
-    xplus[present[:n]] = 0
-    return oneSack(xplus), n
+    xplus = solution.decisions.copy()
+    for i in present[:n]:
+        xplus[i] = 0
+    neighbor = Sack.from_decisions(xplus)
+    return neighbor.get_element(), n
 
 
-def changeDecisions(aSolution, size=1):
+def change_decisions(element, size=1):
     """Change the status of ``size`` items in the sack.
 
-    :param aSolution: current sack
-    :type aSolution: class oneSack
+    :param element: representation of the current sack
+    :type element: class SetElement
 
     :param size: number of items to modify
     :type size: int
 
-    :return: new sack, and number of changes actually made
-    :rtype: tuple(class oneSack, int)
+    :return: representation of the new sack, and number of changes actually made
+    :rtype: tuple(class SetElement, int)
 
     """
-    n = len(aSolution.x)
-    order = np.random.permutation(n)
-    xplus = aSolution.x.copy()
-    for i in range(min(n, size)):
+    solution = Sack(element.element_id)
+    length = len(solution.decisions)
+    n = min(length, size)
+    order = np.random.permutation(length)
+    xplus = solution.decisions.copy()
+    for i in range(n):
         xplus[order[i]] = 1 - xplus[order[i]]
-    return oneSack(xplus), n
+    neighbor = Sack.from_decisions(xplus)
+    return neighbor.get_element(), n
 
 
-class knapsack(vns.problemClass):
+class Knapsack(vns.ProblemClass):
     """Class defining the knapsack problem. Note the inheritance from the
     abstract class used by the VNS algorithm. It guarantees the
     compliance with the requirements of the algorithm.
 
     """
 
-    def __init__(self, aUtility, aWeight, aCapacity):
+    def __init__(self, utility, weight, capacity):
         """Ctor"""
-        super().__init__()
-        self.utility = aUtility
-        self.weight = aWeight
-        self.capacity = aCapacity
+        self.utility = utility
+        self.weight = weight
+        self.capacity = capacity
         self.operators = {
-            'Add items': addItems,
-            'Remove items': removeItems,
-            'Change decision for items': changeDecisions,
+            'Add items': add_items,
+            'Remove items': remove_items,
+            'Change decision for items': change_decisions,
         }
-        self.operatorsManagement = vns.operatorsManagement(
-            self.operators.keys()
-        )
         self.currentSolution = None
         self.lastOperator = None
+        super().__init__(self.operators)
 
-    def emptySack(self):
-        """
-        :return: empty sack of the same dimension.
-        :rtype: class oneSack
-        """
-        z = np.zeros_like(self.utility)
-        theSack = oneSack(z)
-        return oneSack(z)
-
-    def isValid(self, aSolution):
+    def is_valid(self, element):
         """Check if the sack verifies the capacity constraint
 
-        :param aSolution: sack to check
-        :type aSolution: class oneSack
+        Implementation of the abstract method
+
+        :param element: representation of the sack to check
+        :type element: class SetElement
 
         :return: True if the capacity constraint is verified
         :rtype: bool
         """
-        self.evaluate(aSolution)
-        return aSolution.objectives[0] <= self.capacity, 'Infeasible sack'
-
-    def evaluate(self, aSolution):
-        """Calculates the total weight and the total utility of a sack.
-
-        :param aSolution: sack to evaluate
-        :type aSolution: class oneSack
-
-        """
-        aSolution.objectives = [
-            np.inner(aSolution.x, self.weight),
-            -np.inner(aSolution.x, self.utility),
-        ]
-
-    def describe(self, aSolution):
-        """Short description of a sack
-
-        :param aSolution: sack to describe
-        :type aSolution: class oneSack
-
-        :return: description
-        :rtype: str
-        """
-        return str(aSolution)
-
-    def generateNeighbor(self, aSolution, neighborhoodSize):
-        """Generate a neighbor from the negihborhood of size
-        ``neighborhoodSize``using one of the operators
-
-        :param aSolution: current solution
-        :type aSolution: class oneSack
-
-        :param neighborhoodSize: size of the neighborhood
-        :type neighborhoodSize: int
-
-        :return: number of modifications actually made
-        :rtype: int
-
-        """
-        # Select one operator.
-        self.lastOperator = self.operatorsManagement.selectOperator()
-        return self.applyOperator(
-            aSolution, self.lastOperator, neighborhoodSize
-        )
-
-    def neighborRejected(self, aSolution, aNeighbor):
-        """Informs the operator management object that the neighbor has been
-        rejected.
-
-        :param aSolution: current solution
-        :type aSolution: class oneSack
-
-        :param aNeighbor: proposed neighbor
-        :type aNeighbor: class oneSack
-
-        :raise biogemeError: if no operator has been used yet.
-        """
-        if self.lastOperator is None:
-            raise excep.biogemeError('No operator has been used yet.')
-        self.operatorsManagement.decreaseScore(self.lastOperator)
-
-    def neighborAccepted(self, aSolution, aNeighbor):
-        """Informs the operator management object that the neighbor has been
-        accepted.
-
-        :param aSolution: current solution
-        :type aSolution: class oneSack
-
-        :param aNeighbor: proposed neighbor
-        :type aNeighbor: class oneSack
-
-        :raise biogemeError: if no operator has been used yet.
-        """
-        if self.lastOperator is None:
-            raise excep.biogemeError('No operator has been used yet.')
-        self.operatorsManagement.increaseScore(self.lastOperator)
-
-    def applyOperator(self, solution, name, size=1):
-        """Apply a specific operator on a solution, using a neighborhood of
-        size ``size``
-
-        :param solution: current solution
-        :type solution: class oneSack
-
-        :param name: name of the operator
-        :type name: str
-
-        :param size: size of the neighborhood
-        :type size: int
-
-        :return: number of modifications actually made
-        :rtype: int
-
-        :raise biogemeError: if the name of the operator is unknown.
-
-        """
-        op = self.operators.get(name)
-        if op is None:
-            raise excep.biogemeError(f'Unknown operator: {name}')
-        return op(solution, size)
+        solution = Sack(element.element_id)
+        if solution.weight <= self.capacity:
+            return True, None
+        return False, 'Infeasible sack'
