@@ -135,9 +135,11 @@ all_parameters_tuple = (
             'upper bound of the total number of possible combinations '
             'that can be estimated in the same loop.'
         ),
-        check=(cp.is_integer, cp.is_positive,),
+        check=(
+            cp.is_integer,
+            cp.is_positive,
+        ),
     ),
-    
     ParameterTuple(
         name='optimization_algorithm',
         default='simple_bounds',
