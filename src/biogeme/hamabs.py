@@ -9,12 +9,12 @@ Experimental algorithm by Gael Lederrey. Not yet documented.
 # pylint: disable=invalid-name, too-many-statements, too-many-branches
 # pylint: disable=too-many-arguments, too-many-locals
 
+import logging
 import numpy as np
 import biogeme.optimization as opt
-import biogeme.messaging as msg
 import biogeme.exceptions as excep
 
-logger = msg.bioMessage()
+logger = logging.getLogger(__name__)
 
 
 class smoothing:
@@ -242,7 +242,7 @@ def hamabs(fct, initBetas, fixedBetas, betaIds, bounds, parameters=None):
         if 'eta2' in parameters:
             eta2 = parameters['eta2']
 
-    logger.detailed("** Optimization: HAMABS")
+    logger.info("** Optimization: HAMABS")
 
     avging = smoothing()
 
@@ -338,11 +338,9 @@ def hamabs(fct, initBetas, fixedBetas, betaIds, bounds, parameters=None):
         if k == maxiter:
             message = f"Maximum number of iterations reached: {maxiter}"
             cont = False
-        logger.detailed(
-            f"{k} f={avgf:10.7g} delta={delta:6.2g} batch={100*batch:6.2g}%"
-        )
+        logger.info(f"{k} f={avgf:10.7g} delta={delta:6.2g} batch={100*batch:6.2g}%")
 
-    logger.detailed(message)
+    logger.info(message)
     messages = {
         'Algorithm': 'HAMABS prototype',
         'Relative gradient': relgrad,
