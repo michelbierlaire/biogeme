@@ -17,14 +17,14 @@ Optimization algorithms for Biogeme
 # pylint: disable=bare-except
 
 
+import logging
 import numpy as np
 import scipy.optimize as sc
 import biogeme.algorithms as alg
 import biogeme.exceptions as excep
-import biogeme.messaging as msg
 
 
-logger = msg.bioMessage()
+logger = logging.getLogger(__name__)
 
 
 def scipy(fct, initBetas, bounds, parameters=None):
@@ -68,7 +68,7 @@ def scipy(fct, initBetas, bounds, parameters=None):
         opts = {**opts, **parameters}
 
     if 'gtol' in opts.keys():
-        logger.general(f'Minimize with tol {opts["gtol"]}')
+        logger.info(f'Minimize with tol {opts["gtol"]}')
 
     results = sc.minimize(f_and_grad, initBetas, bounds=bounds, jac=True, options=opts)
 
@@ -136,7 +136,7 @@ def newtonLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
         if 'maxiter' in parameters:
             maxiter = parameters['maxiter']
 
-    logger.detailed('** Optimization: Newton with linesearch')
+    logger.info('** Optimization: Newton with linesearch')
     return alg.newtonLineSearch(fct, initBetas, eps=tol, maxiter=maxiter)
 
 
@@ -203,7 +203,7 @@ def newtonTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
         if 'radius' in parameters:
             radius = parameters['radius']
 
-    logger.detailed('** Optimization: Newton with trust region')
+    logger.info('** Optimization: Newton with trust region')
     return alg.newtonTrustRegion(
         fct,
         x0=initBetas,
@@ -281,7 +281,7 @@ def bfgsLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
             if 'initBfgs' in parameters:
                 initBfgs = parameters['initBfgs']
 
-    logger.detailed('** Optimization: BFGS with line search')
+    logger.info('** Optimization: BFGS with line search')
     return alg.bfgsLineSearch(
         fct, x0=initBetas, initBfgs=initBfgs, eps=tol, maxiter=maxiter
     )
@@ -360,7 +360,7 @@ def bfgsTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
         if 'initBfgs' in parameters:
             initBfgs = parameters['initBfgs']
 
-    logger.detailed('** Optimization: BFGS with trust region')
+    logger.info('** Optimization: BFGS with trust region')
     return alg.bfgsTrustRegion(
         fct,
         x0=initBetas,
@@ -461,11 +461,11 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=Non
             infeasibleConjugateGradient = parameters['infeasibleConjugateGradient']
 
     if proportionTrueHessian == 1.0:
-        logger.detailed('** Optimization: Newton with trust region for simple bounds')
+        logger.info('** Optimization: Newton with trust region for simple bounds')
     elif proportionTrueHessian == 0.0:
-        logger.detailed('** Optimization: BFGS with trust region for simple bounds')
+        logger.info('** Optimization: BFGS with trust region for simple bounds')
     else:
-        logger.detailed(
+        logger.info(
             f'** Optimization: Hybrid Newton '
             f'{100*proportionTrueHessian}%/BFGS '
             f'with trust region for simple bounds'
