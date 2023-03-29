@@ -8,6 +8,7 @@ Test the version module
 import unittest
 import biogeme.version as ver
 
+
 class TestVersion(unittest.TestCase):
     def test_get_html(self):
         html = ver.getHtml()
