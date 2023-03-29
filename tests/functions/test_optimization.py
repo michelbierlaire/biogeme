@@ -43,8 +43,7 @@ class rosenbrock(algo.functionToMinimize):
             raise excep.biogemeError('This function is not data driven.')
         n = len(self.x)
         f = sum(
-            100.0 * (self.x[i + 1] - self.x[i] ** 2) ** 2
-            + (1.0 - self.x[i]) ** 2
+            100.0 * (self.x[i + 1] - self.x[i] ** 2) ** 2 + (1.0 - self.x[i]) ** 2
             for i in range(n - 1)
         )
         return f
@@ -116,9 +115,7 @@ class test_optimization(unittest.TestCase):
         with open(self.tr_file, 'w', encoding='utf-8') as f:
             print('[Estimation]', file=f)
             print('optimization_algorithm = "TR-newton"', file=f)
-        self.simple_bounds_file = os.path.join(
-            self.test_dir, 'simple_bounds.toml'
-        )
+        self.simple_bounds_file = os.path.join(self.test_dir, 'simple_bounds.toml')
         with open(self.simple_bounds_file, 'w', encoding='utf-8') as f:
             print('[Estimation]', file=f)
             print('optimization_algorithm = "simple_bounds"', file=f)
