@@ -9,6 +9,7 @@
 # Too constraining
 # pylint: disable=invalid-name, too-many-locals
 
+import logging
 from os import path
 import shutil
 import itertools
@@ -19,11 +20,10 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2
 from scipy.integrate import dblquad
-import biogeme.messaging as msg
 import biogeme.exceptions as excep
 from biogeme.expressions import Expression
 
-logger = msg.bioMessage()
+logger = logging.getLogger()
 
 LRTuple = namedtuple('LRTuple', 'message statistic threshold')
 
@@ -148,17 +148,17 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
     if logg:
         if names is None:
             names = [f'x[{i}]' for i in range(len(x))]
-        logger.detailed('x\t\tGradient\tFinDiff\t\tDifference')
+        logger.info('x\t\tGradient\tFinDiff\t\tDifference')
         for k, v in enumerate(gdiff):
-            logger.detailed(f'{names[k]:15}\t{g[k]:+E}\t{g_num[k]:+E}\t{v:+E}')
+            logger.info(f'{names[k]:15}\t{g[k]:+E}\t{g_num[k]:+E}\t{v:+E}')
 
     h_num = findiff_H(theFunction, x)
     hdiff = h - h_num
     if logg:
-        logger.detailed('Row\t\tCol\t\tHessian\tFinDiff\t\tDifference')
+        logger.info('Row\t\tCol\t\tHessian\tFinDiff\t\tDifference')
         for row in range(len(hdiff)):
             for col in range(len(hdiff)):
-                logger.detailed(
+                logger.info(
                     f'{names[row]:15}\t{names[col]:15}\t{h[row,col]:+E}\t'
                     f'{h_num[row,col]:+E}\t{hdiff[row,col]:+E}'
                 )
@@ -826,3 +826,25 @@ class TemporaryFile:
     def __exit__(self, ctype, value, traceback):
         """Destroys the temporary directory"""
         shutil.rmtree(self.dir)
+
+
+class ModelNames:
+    """Class generating model names from unique configuration sring"""
+
+    def __init__(self, prefix='Model_'):
+        self.prefix = prefix
+        self.dict_of_names = {}
+        self.current_number = 0
+
+    def __call__(self, the_id):
+        """Get a short model name from a unique ID
+
+        :param the_id: Id of the model
+        :type the_id: str (or anything that can be used as a key for a dict)
+        """
+        the_name = self.dict_of_names.get(the_id)
+        if the_name is None:
+            the_name = f'{self.prefix}{self.current_number}'
+            self.current_number += 1
+            self.dict_of_names[the_id] = the_name
+        return the_name
