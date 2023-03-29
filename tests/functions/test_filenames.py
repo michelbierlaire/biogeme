@@ -9,6 +9,7 @@ import os
 import unittest
 import biogeme.filenames as fn
 
+
 class TestVersion(unittest.TestCase):
     def test_get_new_filename(self):
         the_name = fn.getNewFileName('the_name', 'ext')
