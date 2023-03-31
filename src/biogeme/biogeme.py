@@ -27,7 +27,7 @@ from biogeme import tools
 from biogeme.idmanager import IdManager
 from biogeme.negative_likelihood import NegativeLikelihood
 from biogeme import toml
-from biogeme.multiple_expressions import (
+from biogeme.catalog import (
     string_id_to_configuration,
     configuration_to_string_id,
 )
@@ -1114,8 +1114,8 @@ class BIOGEME:
 
         if selected_configurations is None:
             number_of_specifications = self.loglike.number_of_multiple_expressions()
-#            logger.debug(f'{number_of_specifications=}')
-#            logger.debug(f'{self.maximum_number_catalog_expressions=}')
+            #            logger.debug(f'{number_of_specifications=}')
+            #            logger.debug(f'{self.maximum_number_catalog_expressions=}')
 
             if number_of_specifications > self.maximum_number_catalog_expressions:
                 error_msg = (
@@ -1478,7 +1478,7 @@ class BIOGEME:
             raise excep.biogemeError(err)
 
         logger.debug(f'Run {self.algorithm_name}')
-        #logger.debug(''.join(traceback.format_stack()))
+        # logger.debug(''.join(traceback.format_stack()))
         results = self._algorithm(
             theFunction,
             startingValues,

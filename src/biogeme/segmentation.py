@@ -12,7 +12,7 @@ import biogeme.exceptions as excep
 
 @dataclass
 class DiscreteSegmentationTuple:
-    """Characterization od a segmentation"""
+    """Characterization of a segmentation"""
 
     def __init__(self, variable, mapping, reference=None):
         """Ctor

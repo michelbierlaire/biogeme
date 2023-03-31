@@ -12,7 +12,6 @@ import random
 import numpy as np
 from biogeme import vns
 
-import biogeme.exceptions as excep
 from biogeme.pareto import SetElement
 
 
@@ -65,8 +64,6 @@ class Sack:
 
     def get_element(self):
         """Implementation of abstract method"""
-        if self.utility is None or self.weight is None:
-            self.evaluate()
         return SetElement(self.code_id(), [-self.utility, self.weight])
 
     def describe(self):

@@ -11,11 +11,13 @@ from datetime import date
 import tomlkit as tk
 import biogeme.exceptions as excep
 import biogeme.version as bv
+
 try:
     import matplotlib.pyplot as plt
+
     CAN_PLOT = True
 except ModuleNotFoundError:
-    CAN_PLOT=False
+    CAN_PLOT = False
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +42,7 @@ class SetElement:
 
         for obj in objectives:
             if obj is None:
-                raise excep.biogemeError(
-                    f'All objectives ust be defined: {objectives}'
-                )
+                raise excep.biogemeError(f'All objectives ust be defined: {objectives}')
 
     def __eq__(self, other):
         if isinstance(other, SetElement):
@@ -151,9 +151,7 @@ class Pareto:
 
         considered_table = tk.table()
         for elem in self.considered:
-            considered_table[elem.element_id] = [
-                float(obj) for obj in elem.objectives
-            ]
+            considered_table[elem.element_id] = [float(obj) for obj in elem.objectives]
         doc['Considered'] = considered_table
 
         removed_table = tk.table()

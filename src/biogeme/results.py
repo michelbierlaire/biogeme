@@ -1730,6 +1730,7 @@ def pareto_optimal(dict_of_results):
     }
     return selected_results
 
+
 def loglikelihood_dimension(results):
     """Function returning the negative log likelihood and the number
     of parameters, designed for multi-objective optimization
@@ -1738,6 +1739,7 @@ def loglikelihood_dimension(results):
     :type results: biogeme.results.bioResults
     """
     return [-results.data.logLike, results.data.nparam]
+
 
 def AIC_BIC_dimension(results):
     """Function returning the AIC, BIC and the number

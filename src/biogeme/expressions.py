@@ -1375,7 +1375,7 @@ class Expression:
         total = 0
         for e in self.get_children():
             total = total + e.select_expression(group_name, index)
-            
+
         return total
 
     def set_of_multiple_expressions(self):

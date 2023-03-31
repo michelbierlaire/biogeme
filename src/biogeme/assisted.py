@@ -24,16 +24,15 @@ logger = logging.getLogger(__name__)
 class Specification:
     """Implements a specification"""
 
-    database = None #: :class:`biogeme.database.Database` object
-    pareto = None #: :class:`biogeme.paretoPareto` object
-    all_results = {} #: dict(str: `biogeme.results.bioResults`)
-    expression = None #: :class:`biogeme.expressions.Expression` object
+    database = None  #: :class:`biogeme.database.Database` object
+    pareto = None  #: :class:`biogeme.paretoPareto` object
+    all_results = {}  #: dict(str: `biogeme.results.bioResults`)
+    expression = None  #: :class:`biogeme.expressions.Expression` object
     multi_objectives = None
     """
         function that generates all the objectives:
         fct(bioResults) -> list[floatNone]
     """
-    
 
     def __init__(self, configuration_string):
         """Creates a specification from a string configuration"""
@@ -46,26 +45,22 @@ class Specification:
 
     @classmethod
     def get_pareto_ids(cls):
-        """ Returns a list with the Pareto optimal models
+        """Returns a list with the Pareto optimal models
 
         :return: list with the Pareto optimal models
         :rtype: list[str]
-        
+
         """
-        return [
-            element.element_id for element in cls.pareto.pareto
-        ]
+        return [element.element_id for element in cls.pareto.pareto]
 
     @classmethod
     def from_configuration(cls, configuration):
-        """ Constructor using a configuration
-        """
+        """Constructor using a configuration"""
         config_id = configuration_to_string_id(configuration)
         return cls(config_id)
 
     def configure_expression(self):
-        """ Configure the expression to the current configuration
-        """
+        """Configure the expression to the current configuration"""
         the_config = string_id_to_configuration(self.config_id)
         self.expression.configure_catalogs(the_config)
 
@@ -96,11 +91,11 @@ class Specification:
         results = b.quickEstimate()
         self.all_results[b.modelName] = results
         if self.multi_objectives is None:
-            error_msg = 'No function has been provided to calculate the objectives to minimize'
+            error_msg = (
+                'No function has been provided to calculate the objectives to minimize'
+            )
             raise excep.biogemeError(error_msg)
-        self.element = SetElement(
-            self.code_id(), self.multi_objectives(results)
-        )
+        self.element = SetElement(self.code_id(), self.multi_objectives(results))
         self.pareto.add(self.element)
 
     def describe(self):
@@ -320,11 +315,15 @@ class AssistedSpecification(vns.ProblemClass):
                 number_of_neighbors=number_of_neighbors,
             )
             pareto_after = self.pareto.length_of_all_sets()
-            
+
             self.pareto.dump(self.pareto_file_name)
             logger.info(f'Pareto file has been updated: {self.pareto_file_name}')
-            logger.info(f'Before the algorithm: {pareto_before[1]} models, with {pareto_before[0]} Pareto.')
-            logger.info(f'After the algorithm: {pareto_after[1]} models, with {pareto_after[0]} Pareto.')
+            logger.info(
+                f'Before the algorithm: {pareto_before[1]} models, with {pareto_before[0]} Pareto.'
+            )
+            logger.info(
+                f'After the algorithm: {pareto_after[1]} models, with {pareto_after[0]} Pareto.'
+            )
             logger.debug('Run the heuristic: done')
 
             if reestimate:

@@ -17,64 +17,64 @@ Test the multiple_expressions module
 import unittest
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
-import biogeme.multiple_expressions as me
-
+import biogeme.catalog as cat
+import biogeme.segmentation as seg
 
 class TestMultipleExpressions(unittest.TestCase):
     def setUp(self):
         betas = [ex.Beta(f'beta{i}', i * 0.1, None, None, 0) for i in range(10)]
-        g1_first = me.NamedExpression(name='g1_first', expression=betas[0])
-        g1_second = me.NamedExpression(name='g1_second', expression=betas[1])
+        g1_first = cat.NamedExpression(name='g1_first', expression=betas[0])
+        g1_second = cat.NamedExpression(name='g1_second', expression=betas[1])
         g1_tuple = (g1_first, g1_second)
-        self.catalog_1 = me.Catalog('catalog_1', g1_tuple)
+        self.catalog_1 = cat.Catalog('catalog_1', g1_tuple)
         self.assertEqual(self.catalog_1.current_index, 0)
 
-        g2_zero = me.NamedExpression(name='one', expression=ex.Numeric(1))
-        g2_first = me.NamedExpression(name='g2_first', expression=betas[2])
-        g2_second = me.NamedExpression(name='g2_second', expression=betas[3])
-        g2_third = me.NamedExpression(name='g2_third', expression=betas[4])
-        g2_fourth = me.NamedExpression(name='g2_fourth', expression=self.catalog_1)
+        g2_zero = cat.NamedExpression(name='one', expression=ex.Numeric(1))
+        g2_first = cat.NamedExpression(name='g2_first', expression=betas[2])
+        g2_second = cat.NamedExpression(name='g2_second', expression=betas[3])
+        g2_third = cat.NamedExpression(name='g2_third', expression=betas[4])
+        g2_fourth = cat.NamedExpression(name='g2_fourth', expression=self.catalog_1)
         g2_tuple = (g2_first, g2_second, g2_third)
-        self.catalog_2 = me.Catalog('catalog_2', g2_tuple)
+        self.catalog_2 = cat.Catalog('catalog_2', g2_tuple)
         self.assertEqual(self.catalog_2.current_index, 0)
 
         g3_tuple = (g2_zero, g2_first, g2_second, g2_third, g2_fourth)
-        self.catalog_3 = me.Catalog('catalog_3', g3_tuple)
+        self.catalog_3 = cat.Catalog('catalog_3', g3_tuple)
 
-        one = me.NamedExpression(name='one', expression=ex.Numeric(1))
-        two = me.NamedExpression(name='two', expression=ex.Numeric(2))
-        three = me.NamedExpression(name='three', expression=ex.Numeric(3))
-        four = me.NamedExpression(name='four', expression=ex.Numeric(4))
-        five = me.NamedExpression(name='five', expression=ex.Numeric(5))
-        six = me.NamedExpression(name='six', expression=ex.Numeric(6))
+        one = cat.NamedExpression(name='one', expression=ex.Numeric(1))
+        two = cat.NamedExpression(name='two', expression=ex.Numeric(2))
+        three = cat.NamedExpression(name='three', expression=ex.Numeric(3))
+        four = cat.NamedExpression(name='four', expression=ex.Numeric(4))
+        five = cat.NamedExpression(name='five', expression=ex.Numeric(5))
+        six = cat.NamedExpression(name='six', expression=ex.Numeric(6))
 
         c6_tuple = (two, three)
-        catalog_6 = me.Catalog('catalog_6', c6_tuple)
-        c6 = me.NamedExpression(name='c6', expression=catalog_6)
+        catalog_6 = cat.Catalog('catalog_6', c6_tuple)
+        c6 = cat.NamedExpression(name='c6', expression=catalog_6)
         c6_tuple = (five, six)
-        catalog_7 = me.Catalog('catalog_7', c6_tuple)
-        c7 = me.NamedExpression(name='c7', expression=catalog_7)
+        catalog_7 = cat.Catalog('catalog_7', c6_tuple)
+        c7 = cat.NamedExpression(name='c7', expression=catalog_7)
         c4_tuple = (one, c6)
-        catalog_4 = me.Catalog('catalog_4', c4_tuple)
+        catalog_4 = cat.Catalog('catalog_4', c4_tuple)
         c5_tuple = (four, c7)
-        catalog_5 = me.Catalog('catalog_5', c5_tuple)
+        catalog_5 = cat.Catalog('catalog_5', c5_tuple)
         self.complex_expression = catalog_4 + catalog_5
 
         # Same expression as above, where catalogs are synchronized
         c60_tuple = (two, three)
-        catalog_60 = me.Catalog('catalog_60', c60_tuple)
-        c60 = me.NamedExpression(name='c60', expression=catalog_60)
+        catalog_60 = cat.Catalog('catalog_60', c60_tuple)
+        c60 = cat.NamedExpression(name='c60', expression=catalog_60)
         c60_tuple = (five, six)
-        catalog_70 = me.SynchronizedCatalog('catalog_70', c60_tuple, catalog_60)
-        catalog_71 = me.Catalog('catalog_71', c60_tuple)
-        c70 = me.NamedExpression(name='c70', expression=catalog_70)
-        c71 = me.NamedExpression(name='c71', expression=catalog_71)
+        catalog_70 = cat.SynchronizedCatalog('catalog_70', c60_tuple, catalog_60)
+        catalog_71 = cat.Catalog('catalog_71', c60_tuple)
+        c70 = cat.NamedExpression(name='c70', expression=catalog_70)
+        c71 = cat.NamedExpression(name='c71', expression=catalog_71)
         c40_tuple = (one, c60)
-        catalog_40 = me.Catalog('catalog_40', c40_tuple)
+        catalog_40 = cat.Catalog('catalog_40', c40_tuple)
         c50_tuple = (four, c70)
         c51_tuple = (four, c71)
-        catalog_50 = me.SynchronizedCatalog('catalog_50', c50_tuple, catalog_40)
-        catalog_51 = me.SynchronizedCatalog('catalog_51', c51_tuple, catalog_40)
+        catalog_50 = cat.SynchronizedCatalog('catalog_50', c50_tuple, catalog_40)
+        catalog_51 = cat.SynchronizedCatalog('catalog_51', c51_tuple, catalog_40)
         self.synchronized_expression = catalog_40 + catalog_50
         self.synchronized_expression_2 = catalog_40 + catalog_51
 
@@ -83,12 +83,12 @@ class TestMultipleExpressions(unittest.TestCase):
     def test_ctor(self):
         empty_tuple = tuple()
         with self.assertRaises(excep.biogemeError):
-            _ = me.Catalog('the_name', empty_tuple)
+            _ = cat.Catalog('the_name', empty_tuple)
 
-        incorrect = me.NamedExpression(name='incorrect', expression='not_an_expression')
+        incorrect = cat.NamedExpression(name='incorrect', expression='not_an_expression')
         wrong_tuple = (incorrect,)
         with self.assertRaises(excep.biogemeError):
-            _ = me.Catalog('the_name', wrong_tuple)
+            _ = cat.Catalog('the_name', wrong_tuple)
 
         duplicate = self.catalog_1 * self.catalog_1
         with self.assertRaises(excep.biogemeError):
@@ -252,21 +252,12 @@ class TestMultipleExpressions(unittest.TestCase):
         configurations = [
             configuration for configuration, e in self.synchronized_expression
         ]
-        print(configurations)
+
+
         correct_configurations = [
-            {'catalog_40': 'one', 'catalog_50': 'four'},
-            {
-                'catalog_60': 'two',
-                'catalog_40': 'c60',
-                'catalog_70': 'five',
-                'catalog_50': 'c70',
-            },
-            {
-                'catalog_60': 'three',
-                'catalog_40': 'c60',
-                'catalog_70': 'six',
-                'catalog_50': 'c70',
-            },
+            {'catalog_40': 'one'},
+            {'catalog_60': 'two', 'catalog_40': 'c60'},
+            {'catalog_60': 'three', 'catalog_40': 'c60'}
         ]
         for the_dict, the_correct_dict in zip(configurations, correct_configurations):
             self.assertDictEqual(the_dict, the_correct_dict)
@@ -275,31 +266,11 @@ class TestMultipleExpressions(unittest.TestCase):
             configuration for configuration, e in self.synchronized_expression_2
         ]
         correct_configurations = [
-            {'catalog_40': 'one', 'catalog_51': 'four'},
-            {
-                'catalog_60': 'two',
-                'catalog_40': 'c60',
-                'catalog_71': 'five',
-                'catalog_51': 'c71',
-            },
-            {
-                'catalog_60': 'two',
-                'catalog_40': 'c60',
-                'catalog_71': 'six',
-                'catalog_51': 'c71',
-            },
-            {
-                'catalog_60': 'three',
-                'catalog_40': 'c60',
-                'catalog_71': 'five',
-                'catalog_51': 'c71',
-            },
-            {
-                'catalog_60': 'three',
-                'catalog_40': 'c60',
-                'catalog_71': 'six',
-                'catalog_51': 'c71',
-            },
+            {'catalog_40': 'one'},
+            {'catalog_60': 'two', 'catalog_40': 'c60', 'catalog_71': 'five'},
+            {'catalog_60': 'two', 'catalog_40': 'c60', 'catalog_71': 'six'},
+            {'catalog_60': 'three', 'catalog_40': 'c60', 'catalog_71': 'five'},
+            {'catalog_60': 'three', 'catalog_40': 'c60', 'catalog_71': 'six'}            
         ]
         for the_dict, the_correct_dict in zip(configurations, correct_configurations):
             self.assertDictEqual(the_dict, the_correct_dict)
@@ -370,6 +341,47 @@ class TestMultipleExpressions(unittest.TestCase):
         with self.assertRaises(excep.valueOutOfRange):
             expression.increment_catalog('catalog_2', -1)
 
+
+    def test_segmentation(self):
+        beta = ex.Beta('beta', 0, None, None, 0)
+        var1 = ex.Variable('var1')
+        mapping1 = {0: 'zero', 1: 'one'}
+        segmentation1 = seg.DiscreteSegmentationTuple(
+            variable=var1,
+            mapping=mapping1
+        )
+        var2 = ex.Variable('var2')
+        mapping2 = {0: 'no', 1: 'yes'}
+        segmentation2 = seg.DiscreteSegmentationTuple(
+            variable=var2,
+            mapping=mapping2
+        )
+        tuple_of_segmentations = (segmentation1, segmentation2,)
+
+        the_catalog = cat.SegmentationCatalog(
+            beta,
+            tuple_of_segmentations
+        )
+        configurations = [c for c, _ in the_catalog]
+        correct_configuration = [
+            {'segmented_beta': 'beta (no seg.)'},
+            {'segmented_beta': 'var2'},
+            {'segmented_beta': 'var1'},
+            {'segmented_beta': 'var1-var2'}
+        ]        
+        self.assertListEqual(configurations, correct_configuration)
+        the_catalog = cat.SegmentationCatalog(
+            beta,
+            tuple_of_segmentations,
+            maximum_number=1,
+        )
+        configurations = [c for c, _ in the_catalog]
+        correct_configuration = [
+            {'segmented_beta': 'beta (no seg.)'},
+            {'segmented_beta': 'var2'},
+            {'segmented_beta': 'var1'},
+        ]        
+        self.assertListEqual(configurations, correct_configuration)
         
 if __name__ == '__main__':
     unittest.main()

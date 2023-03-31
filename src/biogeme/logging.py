@@ -15,6 +15,8 @@ CRITICAL = logging.CRITICAL
 
 def get_screen_logger(level=WARNING):
     logger = logging.getLogger('biogeme')
+    # This has to be set to the lower level: DEBUG so that it does not
+    # supersed the handler
     logger.setLevel(DEBUG)
     formatter_debug = logging.Formatter(
         '[%(levelname)s] ' '%(asctime)s ' '%(message)s ' '<%(filename)s:%(lineno)d>'
@@ -30,6 +32,8 @@ def get_screen_logger(level=WARNING):
 
 def get_file_logger(filename, level=WARNING):
     logger = logging.getLogger('biogeme')
+    # This has to be set to the lower level: DEBUG so that it does not
+    # supersed the handler
     logger.setLevel(DEBUG)
     formatter = logging.Formatter(
         '[%(levelname)s] ' '%(asctime)s ' '%(message)s ' '<%(filename)s:%(lineno)d>'
