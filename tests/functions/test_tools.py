@@ -171,7 +171,6 @@ class TestTools(unittest.TestCase):
                 check = f.read()
             self.assertEqual(content, check)
 
-
     def test_model_names(self):
         model_names = tools.ModelNames(prefix='Test_')
 
@@ -183,6 +182,23 @@ class TestTools(unittest.TestCase):
         self.assertEqual(name_a, correct_name_a)
         name_a = model_names('model_a')
         self.assertEqual(name_a, correct_name_a)
-        
+
+    def test_generate_unique_ids(self):
+        list_1 = ['A', 'B', 'C']
+        correct_dict_1 = {'A': 'A', 'B': 'B', 'C': 'C'}
+        dict_1 = tools.generate_unique_ids(list_1)
+        self.assertDictEqual(correct_dict_1, dict_1)
+
+        list_2 = ['A', 'B', 'B']
+        correct_dict_2 = {'A': 'A', 'B_0': 'B', 'B_1': 'B'}
+        dict_2 = tools.generate_unique_ids(list_2)
+        self.assertDictEqual(correct_dict_2, dict_2)
+
+        list_3 = ['B', 'B', 'B']
+        correct_dict_3 = {'B_2': 'B', 'B_0': 'B', 'B_1': 'B'}
+        dict_3 = tools.generate_unique_ids(list_3)
+        self.assertDictEqual(correct_dict_3, dict_3)
+
+
 if __name__ == '__main__':
     unittest.main()

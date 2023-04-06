@@ -12,6 +12,8 @@ import tempfile
 from biogeme import vns
 from biogeme.pareto import SetElement
 from knapsack import Knapsack, Sack
+
+
 class TestVns(unittest.TestCase):
     def setUp(self):
         utility = np.array([80, 31, 48, 17, 27, 84, 34, 39, 46, 58, 23, 67])
@@ -25,9 +27,7 @@ class TestVns(unittest.TestCase):
 
     def test_vns_errors(self):
         # Empty set
-        the_pareto = vns.ParetoClass(
-            max_neighborhood=2, pareto_file=None
-        )
+        the_pareto = vns.ParetoClass(max_neighborhood=2, pareto_file=None)
         with self.assertRaises(excep.biogemeError):
             the_pareto = vns.vns(
                 self.the_knapsack,
@@ -35,12 +35,10 @@ class TestVns(unittest.TestCase):
                 the_pareto,
                 number_of_neighbors=10,
             )
-        
+
     def test_vns(self):
-        the_pareto = vns.ParetoClass(
-            max_neighborhood=2, pareto_file=None
-        )
-        
+        the_pareto = vns.ParetoClass(max_neighborhood=2, pareto_file=None)
+
         the_pareto = vns.vns(
             self.the_knapsack,
             [self.empty_sack.get_element()],
@@ -52,18 +50,15 @@ class TestVns(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdirname:
             filename = tmpdirname + 'tmp.pareto'
 
-            the_pareto = vns.ParetoClass(
-                max_neighborhood=2, pareto_file=filename
-            )
-            
+            the_pareto = vns.ParetoClass(max_neighborhood=2, pareto_file=filename)
+
             the_pareto = vns.vns(
                 self.the_knapsack,
                 [self.empty_sack.get_element()],
                 the_pareto,
                 number_of_neighbors=2,
             )
-        
+
 
 if __name__ == '__main__':
     unittest.main()
-        

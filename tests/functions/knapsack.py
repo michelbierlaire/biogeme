@@ -19,8 +19,7 @@ from biogeme.pareto import SetElement
 
 
 class Sack:
-    """Implements a solution. Here, a sack configuration.
-    """
+    """Implements a solution. Here, a sack configuration."""
 
     SEPARATOR = '-'
     utility_data = None
@@ -28,25 +27,16 @@ class Sack:
 
     def __init__(self, string_representation):
         """Creates a sack from a string representation"""
-        self.decisions = [
-            int(i)
-            for i in string_representation.split(self.SEPARATOR)
-        ]
-        self.utility = sum(
-            x * u
-            for x, u in zip(self.decisions, self.utility_data)
-        )
-        self.weight = sum(
-            x * u
-            for x, u in zip(self.decisions, self.weight_data)
-        )
+        self.decisions = [int(i) for i in string_representation.split(self.SEPARATOR)]
+        self.utility = sum(x * u for x, u in zip(self.decisions, self.utility_data))
+        self.weight = sum(x * u for x, u in zip(self.decisions, self.weight_data))
 
     @classmethod
     def from_decisions(cls, decisions):
         """Creates a sack from the actual decisions"""
         the_string = cls.code_decisions(decisions)
         return cls(the_string)
-    
+
     def __str__(self):
         return self.describe()
 
@@ -75,13 +65,13 @@ class Sack:
         return f'{self.code_id()}: U={self.utility} W={self.weight}'
 
     def code_id(self):
-        """Provide a string ID for the sack 
+        """Provide a string ID for the sack
 
         :return: identifier of the solution. Used to organize the Pareto set.
         :rtype: str
         """
         return self.code_decisions(self.decisions)
-    
+
     @classmethod
     def code_decisions(cls, decisions):
         """Provide a string ID for the sack given the decisions
