@@ -1,259 +1,253 @@
 """File airline.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Dec 21 15:24:50 2020
+:date: Fri Mar 31 10:45:43 2023
 
 Assisted specification for the airline cases tudy
 """
 
-# Too constraining
-# pylint: disable=invalid-name, undefined-variable
 
-import pandas as pd
-import biogeme.database as db
-import biogeme.messaging as msg
-from biogeme import models, vns, assisted
+from biogeme import models
+import biogeme.biogeme as bio
+from biogeme.assisted import AssistedSpecification
+from biogeme.results import compileEstimationResults, AIC_BIC_dimension
+from biogeme.catalog import Catalog, SynchronizedCatalog, segmentation_catalog
+from biogeme.segmentation import DiscreteSegmentationTuple
 from biogeme.expressions import (
     Beta,
     log,
-    Elem,
-    Numeric,
+    logzero,
     Variable,
 )
-from biogeme.assisted import (
-    DiscreteSegmentationTuple,
-    TermTuple,
-    SegmentedParameterTuple,
+
+from airline_data import (
+    database,
+    chosenAlternative,
+    Fare_1,
+    Fare_2,
+    Fare_3,
+    Legroom_1,
+    Legroom_2,
+    Legroom_3,
+    TripTimeHours_1,
+    TripTimeHours_2,
+    TripTimeHours_3,
+    Opt1_SchedDelayEarly,
+    Opt2_SchedDelayEarly,
+    Opt3_SchedDelayEarly,
+    Opt1_SchedDelayLate,
+    Opt2_SchedDelayLate,
+    Opt3_SchedDelayLate,
+    q02_TripPurpose,
+    q03_WhoPays,
+    q17_Gender,
+    q11_DepartureOrArrivalIsImportant,
+    q20_Education
 )
 
-## Step 1: data preparation. Identical to any Biogeme script.
-logger = msg.bioMessage()
-logger.setDebug()
+# Define the catalog for the time variable
 
-# Read the data
-df = pd.read_csv('airline.dat', sep='\t')
+ell_fare = Beta('lambda_fare', 1, None, None, 0)
 
-# Update some data
-df.loc[df['q17_Gender'] == 99, 'q17_Gender'] = -1
-df.loc[df['q20_Education'] == 99, 'q20_Education'] = -1
-
-database = db.Database('airline', df)
-globals().update(database.variables)
-
-exclude = ArrivalTimeHours_1 == -1
-database.remove(exclude)
-
-# Definition of new variables
-
-chosenAlternative = (
-    (BestAlternative_1 * 1) + (BestAlternative_2 * 2) + (BestAlternative_3 * 3)
+fare_direct_catalog = Catalog.from_dict(
+    catalog_name='fare_direct_catalog',
+    dict_of_expressions={
+        'linear': Fare_1,
+        'income_interaction_1': Fare_1 / Variable('Cont_Income'),
+        'income_interaction_2': Fare_1 + Fare_1 / Variable('Cont_Income'),
+        'log_income_interaction': log(Fare_1) / Variable('Cont_Income'),
+        'sqrt_income_interaction': Fare_1**0.5 / Variable('Cont_Income'),
+        'log': logzero(Fare_1),
+        'sqrt': Fare_1**0.5,
+        'square': Fare_1 * Fare_1,
+        'boxcox': models.boxcox(Fare_1, ell_fare),
+    },
 )
 
-DepartureTimeSensitive = database.DefineVariable(
-    'DepartureTimeSensitive', q11_DepartureOrArrivalIsImportant == 1
-)
-ArrivalTimeSensitive = database.DefineVariable(
-    'ArrivalTimeSensitive', q11_DepartureOrArrivalIsImportant == 2
-)
-
-DesiredDepartureTime = database.DefineVariable(
-    'DesiredDepartureTime', q12_IdealDepTime
-)
-DesiredArrivalTime = database.DefineVariable(
-    'DesiredArrivalTime', q13_IdealArrTime
-)
-ScheduledDelay_1 = database.DefineVariable(
-    'ScheduledDelay_1',
-    (DepartureTimeSensitive * (DepartureTimeMins_1 - DesiredDepartureTime))
-    + (ArrivalTimeSensitive * (ArrivalTimeMins_1 - DesiredArrivalTime)),
+fare_same_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='fare_same_catalog',
+    dict_of_expressions={
+        'linear': Fare_2,
+        'income_interaction_1': Fare_2 / Variable('Cont_Income'),
+        'income_interaction_2': Fare_2 + Fare_2 / Variable('Cont_Income'),
+        'log_income_interaction': log(Fare_2) / Variable('Cont_Income'),
+        'sqrt_income_interaction': Fare_2**0.5 / Variable('Cont_Income'),
+        'log': logzero(Fare_2),
+        'sqrt': Fare_2**0.5,
+        'square': Fare_2 * Fare_2,
+        'boxcox': models.boxcox(Fare_2, ell_fare),
+    },
+    controller=fare_direct_catalog,
 )
 
-ScheduledDelay_2 = database.DefineVariable(
-    'ScheduledDelay_2',
-    (DepartureTimeSensitive * (DepartureTimeMins_2 - DesiredDepartureTime))
-    + (ArrivalTimeSensitive * (ArrivalTimeMins_2 - DesiredArrivalTime)),
+fare_multiple_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='fare_multiple_catalog',
+    dict_of_expressions={
+        'linear': Fare_3,
+        'income_interaction_1': Fare_3 / Variable('Cont_Income'),
+        'income_interaction_2': Fare_3 + Fare_3 / Variable('Cont_Income'),
+        'log_income_interaction': log(Fare_3) / Variable('Cont_Income'),
+        'sqrt_income_interaction': Fare_3**0.5 / Variable('Cont_Income'),
+        'log': logzero(Fare_3),
+        'sqrt': Fare_3**0.5,
+        'square': Fare_3 * Fare_3,
+        'boxcox': models.boxcox(Fare_3, ell_fare),
+    },
+    controller=fare_direct_catalog,
 )
 
-ScheduledDelay_3 = database.DefineVariable(
-    'ScheduledDelay_3',
-    (DepartureTimeSensitive * (DepartureTimeMins_3 - DesiredDepartureTime))
-    + (ArrivalTimeSensitive * (ArrivalTimeMins_3 - DesiredArrivalTime)),
+legroom_direct_catalog = Catalog.from_dict(
+    catalog_name='legroom_direct_catalog',
+    dict_of_expressions={
+        'linear': Legroom_1,
+        'log': logzero(Legroom_1),
+        'sqrt': Legroom_1**0.5,
+        'square': Legroom_1 * Legroom_1,
+    },
 )
 
-Opt1_SchedDelayEarly = database.DefineVariable(
-    'Opt1_SchedDelayEarly', (-(ScheduledDelay_1) * (ScheduledDelay_1 < 0)) / 60
-)
-Opt2_SchedDelayEarly = database.DefineVariable(
-    'Opt2_SchedDelayEarly', (-(ScheduledDelay_2) * (ScheduledDelay_2 < 0)) / 60
-)
-Opt3_SchedDelayEarly = database.DefineVariable(
-    'Opt3_SchedDelayEarly', (-(ScheduledDelay_3) * (ScheduledDelay_3 < 0)) / 60
-)
-
-Opt1_SchedDelayLate = database.DefineVariable(
-    'Opt1_SchedDelayLate', (ScheduledDelay_1 * (ScheduledDelay_1 > 0)) / 60
-)
-Opt2_SchedDelayLate = database.DefineVariable(
-    'Opt2_SchedDelayLate', (ScheduledDelay_2 * (ScheduledDelay_2 > 0)) / 60
-)
-Opt3_SchedDelayLate = database.DefineVariable(
-    'Opt3_SchedDelayLate', (ScheduledDelay_3 * (ScheduledDelay_3 > 0)) / 60
+legroom_same_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='legroom_same_catalog',
+    dict_of_expressions={
+        'linear': Legroom_2,
+        'log': logzero(Legroom_2),
+        'sqrt': Legroom_2**0.5,
+        'square': Legroom_2 * Legroom_2,
+    },
+    controller=legroom_direct_catalog,
 )
 
-## Step 2: identify and name the relevant attributes of the alternatives
-# Define the attributes of the alternatives
+legroom_multiple_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='legroom_multiple_catalog',
+    dict_of_expressions={
+        'linear': Legroom_3,
+        'log': logzero(Legroom_3),
+        'sqrt': Legroom_3**0.5,
+        'square': Legroom_3 * Legroom_3,
+    },
+    controller=legroom_direct_catalog,
+)
 
-attributes = {
-    'Fare direct': Fare_1,
-    'Fare same': Fare_2,
-    'Fare multiple': Fare_3,
-    'Legroom direct': Legroom_1,
-    'Legroom same': Legroom_2,
-    'Legroom multiple': Legroom_3,
-    'Time direct': TripTimeHours_1,
-    'Time same': TripTimeHours_2,
-    'Time multiple': TripTimeHours_3,
-    'Early direct': Opt1_SchedDelayEarly,
-    'Early same': Opt2_SchedDelayEarly,
-    'Early multiple': Opt3_SchedDelayEarly,
-    'Late direct': Opt1_SchedDelayLate,
-    'Late same': Opt2_SchedDelayLate,
-    'Late multiple': Opt3_SchedDelayLate,
-}
+ell_time = Beta('lambda_time', 1, None, None, 0)
 
-## Step 3: define the group of attributes
+time_direct_catalog = Catalog.from_dict(
+    catalog_name='time_direct_catalog',
+    dict_of_expressions={
+        'linear': TripTimeHours_1,
+        'log': logzero(TripTimeHours_1),
+        'sqrt': TripTimeHours_1**0.5,
+        'square': TripTimeHours_1 * TripTimeHours_1,
+        'boxcox': models.boxcox(TripTimeHours_1, ell_time),
+        'piecewise_1': models.piecewise_as_variable(
+            TripTimeHours_1, [0, 2, 4, 6, 8, None]
+        ),
+        'piecewise_2': models.piecewise_as_variable(
+            TripTimeHours_1, [0, 2, 8, None]
+        ),
+    },
+)
 
-# Group the attributes. All attributes in the same group will be
-# associated with the same transformation, and the same
-# segmentation. Attributes in the same group can be generic or
-# alternative specific, except if mentioned otherwise
+time_same_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='time_same_catalog',
+    dict_of_expressions={
+        'linear': TripTimeHours_2,
+        'log': logzero(TripTimeHours_2),
+        'sqrt': TripTimeHours_2**0.5,
+        'square': TripTimeHours_2 * TripTimeHours_2,
+        'boxcox': models.boxcox(TripTimeHours_2, ell_time),
+        'piecewise_1': models.piecewise_as_variable(
+            TripTimeHours_2, [0, 2, 4, 6, 8, None]
+        ),
+        'piecewise_2': models.piecewise_as_variable(
+            TripTimeHours_2, [0, 2, 8, None]
+        ),
+    },
+    controller=time_direct_catalog,
+)
 
-groupsOfAttributes = {
-    'Fare': ['Fare direct', 'Fare same', 'Fare multiple'],
-    'Legroom': ['Legroom direct', 'Legroom same', 'Legroom multiple'],
-    'Time': ['Time direct', 'Time same', 'Time multiple'],
-    'Early': ['Early direct', 'Early same', 'Early multiple'],
-    'Late': ['Late direct', 'Late same', 'Late multiple'],
-}
+time_multiple_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='time_multiple_catalog',
+    dict_of_expressions={
+        'linear': TripTimeHours_3,
+        'log': logzero(TripTimeHours_3),
+        'sqrt': TripTimeHours_3**0.5,
+        'square': TripTimeHours_3 * TripTimeHours_3,
+        'boxcox': models.boxcox(TripTimeHours_3, ell_time),
+        'piecewise_1': models.piecewise_as_variable(
+            TripTimeHours_3, [0, 2, 4, 6, 8, None]
+        ),
+        'piecewise_2': models.piecewise_as_variable(
+            TripTimeHours_3, [0, 2, 8, None]
+        ),
+    },
+    controller=time_direct_catalog,
+)
 
-## Step 4: force some groups of attributes to be alternative specific.
-# In this example, no variable must be alternative specific
-genericForbiden = None
+early_direct_catalog = Catalog.from_dict(
+    catalog_name='early_direct_catalog',
+    dict_of_expressions={
+        'linear': Opt1_SchedDelayEarly,
+        'log': logzero(Opt1_SchedDelayEarly),
+        'sqrt': Opt1_SchedDelayEarly**0.5,
+        'square': Opt1_SchedDelayEarly * Opt1_SchedDelayEarly,
+    },
+)
 
-## Step 5: force some groups of attributes to be active.
-# In this example, all the variables must be in the model
-forceActive = list(groupsOfAttributes.keys())
+early_same_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='early_same_catalog',
+    dict_of_expressions={
+        'linear': Opt2_SchedDelayEarly,
+        'log': logzero(Opt2_SchedDelayEarly),
+        'sqrt': Opt2_SchedDelayEarly**0.5,
+        'square': Opt2_SchedDelayEarly * Opt2_SchedDelayEarly,
+    },
+    controller=early_direct_catalog,
+)
 
-## Step 6: define potential transformations of the attributes
-def incomeInteraction(x):
-    """Defines an interaction with income"""
-    return 'inc. interaction', x / Variable('Cont_Income')
+early_multiple_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='early_multiple_catalog',
+    dict_of_expressions={
+        'linear': Opt3_SchedDelayEarly,
+        'log': logzero(Opt3_SchedDelayEarly),
+        'sqrt': Opt3_SchedDelayEarly**0.5,
+        'square': Opt3_SchedDelayEarly * Opt3_SchedDelayEarly,
+    },
+    controller=early_direct_catalog,
+)
 
+late_direct_catalog = Catalog.from_dict(
+    catalog_name='late_direct_catalog',
+    dict_of_expressions={
+        'linear': Opt1_SchedDelayLate,
+        'log': logzero(Opt1_SchedDelayLate),
+        'sqrt': Opt1_SchedDelayLate**0.5,
+        'square': Opt1_SchedDelayLate * Opt1_SchedDelayLate,
+    },
+)
 
-def incomeInteraction2(x):
-    """Defines another interaction with income"""
-    return 'inc. interaction 2', x + x / Variable('Cont_Income')
+late_same_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='late_same_catalog',
+    dict_of_expressions={
+        'linear': Opt2_SchedDelayLate,
+        'log': logzero(Opt2_SchedDelayLate),
+        'sqrt': Opt2_SchedDelayLate**0.5,
+        'square': Opt2_SchedDelayLate * Opt2_SchedDelayLate,
+    },
+    controller=late_direct_catalog,
+)
 
+late_multiple_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='late_multiple_catalog',
+    dict_of_expressions={
+        'linear': Opt3_SchedDelayLate,
+        'log': logzero(Opt3_SchedDelayLate),
+        'sqrt': Opt3_SchedDelayLate**0.5,
+        'square': Opt3_SchedDelayLate * Opt3_SchedDelayLate,
+    },
+    controller=late_direct_catalog,
+)
 
-def logincomeInteraction(x):
-    """Defines an interaction with between the log and income"""
-    return 'inc. interaction', log(x) / Variable('Cont_Income')
-
-
-def sqrtincomeInteraction(x):
-    """Defines an interaction with between the sqrt and income"""
-    return 'inc. interaction', x**0.5 / Variable('Cont_Income')
-
-
-def mylog(x):
-    """Log of the variable"""
-    return 'log', Elem({0: log(x), 1: Numeric(0)}, x == 0)
-
-
-def sqrt(x):
-    """Sqrt of the variable"""
-    return 'sqrt', x**0.5
-
-
-def square(x):
-    """Square of the variable"""
-    return 'square', x**2
-
-
-def piecewise(x, thresholds, name):
-    """Piecewise linear specification"""
-    piecewiseVariables = models.piecewiseVariables(x, thresholds)
-    formula = piecewiseVariables[0]
-    for k in range(1, len(thresholds) - 1):
-        formula += (
-            Beta(
-                f'pw_{name}_{thresholds[k-1]}_{thresholds[k]}',
-                0,
-                None,
-                None,
-                0,
-            )
-            * piecewiseVariables[k]
-        )
-    return (f'piecewise_{thresholds}', formula)
-
-
-def piecewise_time_2(x):
-    """Piecewise linear for time :math:`0, 2, 8, +\\infty`"""
-    return piecewise(x, [0, 2, 8, None], 'time')
-
-
-def piecewise_time_1(x):
-    """Piecewise linear for time :math:`0, 2, 4, 6, 8, +\\infty`"""
-    return piecewise(x, [0, 2, 4, 6, 8, None], 'time')
-
-
-def boxcox(x, name):
-    """Box-Cox transform of the variable"""
-    ell = Beta(f'lambda_{name}', 1, 0.0001, 3.0, 0)
-    return f'Box-Cox_{name}', models.boxcox(x, ell)
-
-
-def boxcox_time(x):
-    """Box-Cox transform of the variable time"""
-    return boxcox(x, 'time')
-
-
-def boxcox_fare(x):
-    """Box-Cox transform of the variable fare"""
-    return boxcox(x, 'fare')
-
-
-## Step 7: Associate each group of attributes with possible
-## transformations. Define a dictionary where the keys are the names
-## of the groups of attributes, and the values are lists of functions
-## defined in the previous step.
-nonlinearSpecs = {
-    'Time': [
-        mylog,
-        sqrt,
-        square,
-        boxcox_time,
-        piecewise_time_1,
-        piecewise_time_2,
-    ],
-    'Fare': [
-        incomeInteraction,
-        incomeInteraction2,
-        logincomeInteraction,
-        sqrtincomeInteraction,
-        mylog,
-        sqrt,
-        square,
-        boxcox_fare,
-    ],
-    'Legroom': [mylog, sqrt, square],
-    'Early': [mylog, sqrt, square],
-    'Late': [mylog, sqrt, square],
-}
-
-
-## Step 7: define the potential segmentations
+# Define the potential segmentations
 all_segmentations = {
     'TripPurpose': DiscreteSegmentationTuple(
         variable=q02_TripPurpose,
@@ -281,7 +275,7 @@ all_segmentations = {
             7: 'master',
             8: 'professional',
             9: 'doctorate',
-            -1: 'unkonown',
+            -1: 'unknown',
         },
     ),
     'Importance': DiscreteSegmentationTuple(
@@ -294,253 +288,198 @@ all_segmentations = {
     ),
 }
 
-# Define segmentations
-segmentations = {
-    'Seg. cte': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
-    ),
-    'Seg. fare': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
-    ),
-    'Seg. time': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
-    ),
-    'Seg. delay': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
-    ),
-    'Seg. legroom': SegmentedParameterTuple(
-        dict=all_segmentations, combinatorial=False
-    ),
-}
+tuple_of_segmentations = tuple(all_segmentations.values())
 
 
-## Step 8: Specification of the utility function. For each term, it is possible
-## to define bounds on the coefficient, and to include a function that
-## verifies its validity a posteriori.
-
-utility_direct = [
-    TermTuple(
-        attribute='Fare direct',
-        segmentation='Seg. fare',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Legroom direct',
-        segmentation='Seg. legroom',
-        bounds=(0, None),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Early direct',
-        segmentation='Seg. delay',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Late direct',
-        segmentation='Seg. delay',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Time direct',
-        segmentation='Seg. time',
-        bounds=(None, 0),
-        validity=None,
-    ),
-]
-
-utility_same = [
-    TermTuple(
-        attribute=None,
-        segmentation='Seg. cte',
-        bounds=(None, None),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Fare same',
-        segmentation='Seg. fare',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Legroom same',
-        segmentation='Seg. legroom',
-        bounds=(0, None),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Early same',
-        segmentation='Seg. delay',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Late same',
-        segmentation='Seg. delay',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Time same',
-        segmentation='Seg. time',
-        bounds=(None, 0),
-        validity=None,
-    ),
-]
-
-utility_multiple = [
-    TermTuple(
-        attribute=None,
-        segmentation='Seg. cte',
-        bounds=(None, None),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Fare multiple',
-        segmentation='Seg. fare',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Legroom multiple',
-        segmentation='Seg. legroom',
-        bounds=(0, None),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Early multiple',
-        segmentation='Seg. delay',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Late multiple',
-        segmentation='Seg. delay',
-        bounds=(None, 0),
-        validity=None,
-    ),
-    TermTuple(
-        attribute='Time multiple',
-        segmentation='Seg. time',
-        bounds=(None, 0),
-        validity=None,
-    ),
-]
-
-utilities = {
-    1: ('Non stop', utility_direct),
-    2: ('Same airline', utility_same),
-    3: ('Multiple airlines', utility_multiple),
-}
-
-## Step 9: availabilities
-availabilities = {1: 1, 2: 1, 3: 1}
-
-
-# Step 10: We define potential candidates for the choice model.
-def logit(V, av, choice):
-    """logit model"""
-    return models.loglogit(V, av, choice)
-
-
-def nested1(V, av, choice):
-    """Nested logit model: no stop / one stop"""
-    onestop = Beta('mu_onestop', 1, 1, None, 0), [2, 3]
-    nonstop = 1.0, [1]
-    nests = nonstop, onestop
-    return models.lognested(V, av, nests, choice)
-
-
-def nested2(V, av, choice):
-    """Nested logit model: same / multiple"""
-    same = Beta('mu_same', 1, 1, None, 0), [1, 2]
-    multiple = 1.0, [3]
-    nests = same, multiple
-    return models.lognested(V, av, nests, choice)
-
-
-def cnl1(V, av, choice):
-    """Cross nested logit: fixed alphas"""
-    mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
-    mu_same = Beta('mu_same', 1, 1, None, 0)
-    alpha_onestop = {1: 1.0, 2: 0.5, 3: 1}
-    alpha_same = {1: 1.0, 2: 0.5, 3: 1}
-    nest_onestop = mu_onestop, alpha_onestop
-    nest_same = mu_same, alpha_same
-    nests = nest_onestop, nest_same
-    return models.logcnl_avail(V, av, nests, choice)
-
-
-def cnl2(V, av, choice):
-    """Cross nested logit: estimated alphas"""
-    alpha = Beta('alpha', 0.5, 0, 1, 0)
-    mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
-    mu_same = Beta('mu_same', 1, 1, None, 0)
-    alpha_onestop = {1: 1.0, 2: alpha, 3: 1}
-    alpha_same = {1: 1.0, 2: 1 - alpha, 3: 1}
-    nest_onestop = mu_onestop, alpha_onestop
-    nest_same = mu_same, alpha_same
-    nests = nest_onestop, nest_same
-    return models.logcnl_avail(V, av, nests, choice)
-
-
-# We provide names to these candidates
-myModels = {
-    'Logit': logit,
-    'Nested one stop': nested1,
-    'Nested same': nested2,
-    'CNL alpha fixed': cnl1,
-    'CNL alpha est.': cnl2,
-}
-
-## Step 11:  Definition of the specification problem, gathering all information
-# defined above.
-theProblem = assisted.specificationProblem(
-    'Airline',
-    database,
-    attributes,
-    groupsOfAttributes,
-    genericForbiden,
-    forceActive,
-    nonlinearSpecs,
-    segmentations,
-    utilities,
-    availabilities,
-    chosenAlternative,
-    myModels,
+cte_same = Beta('cte_same', 0, None, None, 0)
+cte_same_catalog = segmentation_catalog(
+    beta_parameter=cte_same,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+cte_multiple = Beta('cte_multiple', 0, None, None, 0)
+cte_multiple_catalog = segmentation_catalog(
+    beta_parameter=cte_multiple,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+    synchronized_with=cte_same_catalog,
 )
 
-theProblem.maximumNumberOfParameters = 300
+beta_fare = Beta('beta_fare', 0, None, 0, 0)
+beta_fare_catalog = segmentation_catalog(
+    beta_parameter=beta_fare,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
 
-# We propose several specifications to initialize the algorithm.
-# For each group of attributes, we decide if it is nonlinear, and generic.
-nl = {
-    'Time': (5, False),
-    'Fare': (0, False),
-    'Legroom': (None, False),
-    'Early': (None, False),
-    'Late': (None, False),
+beta_time = Beta('beta_time', 0, None, 0, 0)
+beta_time_catalog = segmentation_catalog(
+    beta_parameter=beta_time,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+
+beta_time_direct = Beta('beta_time_direct', 0, None, 0, 0)
+beta_time_direct_catalog = segmentation_catalog(
+    beta_parameter=beta_time_direct,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+beta_time_same = Beta('beta_time_same', 0, None, 0, 0)
+beta_time_same_catalog = segmentation_catalog(
+    beta_parameter=beta_time_same,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+beta_time_multiple = Beta('beta_time_multiple', 0, None, 0, 0)
+beta_time_multiple_catalog = segmentation_catalog(
+    beta_parameter=beta_time_multiple,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+
+
+beta_early = Beta('beta_early', 0, None, 0, 0)
+beta_early_catalog = segmentation_catalog(
+    beta_parameter=beta_early,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+
+beta_late = Beta('beta_late', 0, None, 0, 0)
+beta_late_catalog = segmentation_catalog(
+    beta_parameter=beta_late,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+
+beta_legroom = Beta('beta_legroom', 0, 0, None, 0)
+beta_legroom_catalog = segmentation_catalog(
+    beta_parameter=beta_legroom,
+    potential_segmentations=tuple_of_segmentations,
+    maximum_number=3,
+)
+
+# Time coef.  can be generic or alternatice specific
+term_time_direct_catalog = Catalog.from_dict(
+    catalog_name='term_time',
+    dict_of_expressions={
+        'generic': beta_time_catalog,
+        'alt. specific': beta_time_direct_catalog,
+    },
+)
+term_time_same_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='term_time',
+    dict_of_expressions={
+        'generic': beta_time_catalog,
+        'alt. specific': beta_time_same_catalog,
+    },
+    controller=term_time_direct_catalog,
+)
+term_time_multiple_catalog = SynchronizedCatalog.from_dict(
+    catalog_name='term_time',
+    dict_of_expressions={
+        'generic': beta_time_catalog,
+        'alt. specific': beta_time_multiple_catalog,
+    },
+    controller=term_time_direct_catalog,
+)
+
+utility_direct = (
+    beta_fare_catalog * fare_direct_catalog
+    + beta_legroom_catalog * legroom_direct_catalog
+    + beta_early_catalog * early_direct_catalog
+    + beta_late_catalog * late_direct_catalog
+    + term_time_direct_catalog
+)
+
+utility_same = (
+    cte_same_catalog
+    + beta_fare_catalog * fare_same_catalog
+    + beta_legroom_catalog * legroom_same_catalog
+    + beta_early_catalog * early_same_catalog
+    + beta_late_catalog * late_same_catalog
+    + term_time_same_catalog
+)
+
+utility_multiple = (
+    cte_multiple_catalog
+    + beta_fare_catalog * fare_multiple_catalog
+    + beta_legroom_catalog * legroom_multiple_catalog
+    + beta_early_catalog * early_multiple_catalog
+    + beta_late_catalog * late_multiple_catalog
+    + beta_time_catalog * time_multiple_catalog
+    + term_time_multiple_catalog
+)
+
+V = {
+    1: utility_direct,
+    2: utility_same,
+    3: utility_multiple,
 }
 
+# Step 9: availabilities
+av = {1: 1, 2: 1, 3: 1}
 
-# For each segmentation, we decided which dimensions are active.
-sg = {'Seg. cte': ['TripPurpose'], 'Seg. legroom': ['Gender']}
+# Nests
+onestop = Beta('mu_onestop', 1, 1, None, 0), [2, 3]
+nonstop = 1.0, [1]
+nests_1 = nonstop, onestop
+
+same = Beta('mu_same', 1, 1, None, 0), [1, 2]
+multiple = 1.0, [3]
+nests_2 = same, multiple
+
+mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
+mu_same = Beta('mu_same', 1, 1, None, 0)
+alpha_onestop = {1: 1.0, 2: 0.5, 3: 1}
+alpha_same = {1: 1.0, 2: 0.5, 3: 1}
+nest_onestop = mu_onestop, alpha_onestop
+nest_same = mu_same, alpha_same
+cnl_nests_1 = nest_onestop, nest_same
+
+alpha = Beta('alpha', 0.5, 0, 1, 0)
+mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
+mu_same = Beta('mu_same', 1, 1, None, 0)
+alpha_onestop = {1: 1.0, 2: alpha, 3: 1}
+alpha_same = {1: 1.0, 2: 1 - alpha, 3: 1}
+nest_onestop = mu_onestop, alpha_onestop
+nest_same = mu_same, alpha_same
+cnl_nests_2 = nest_onestop, nest_same
 
 
-initSolutions = [
-    theProblem.generateSolution(nl, sg, 'Logit'),
-    theProblem.generateSolution(nl, sg, 'Nested one stop'),
-    theProblem.generateSolution(nl, sg, 'Nested same'),
-    theProblem.generateSolution(nl, sg, 'CNL alpha fixed'),
-    theProblem.generateSolution(nl, sg, 'CNL alpha est.'),
-]
-
-# Optimization algorithm
-vns.vns(
-    theProblem,
-    initSolutions,
-    archiveInputFile='airlinePareto.pickle',
-    pickleOutputFile='airlinePareto.pickle',
+model_catalog = Catalog.from_dict(
+    catalog_name='model',
+    dict_of_expressions={
+        'logit': models.loglogit(V, av, chosenAlternative),
+        'nested_1': models.lognested(V, av, nests_1, chosenAlternative),
+        'nested_2': models.lognested(V, av, nests_2, chosenAlternative),
+        'CNL_1': models.logcnl_avail(V, av, cnl_nests_1, chosenAlternative),
+        'CNL_2': models.logcnl_avail(V, av, cnl_nests_2, chosenAlternative),
+    },
 )
+
+PARETO_FILENAME = 'airline.pareto'
+
+biogeme = bio.BIOGEME(database, model_catalog)
+
+nbr = model_catalog.number_of_multiple_expressions()
+print(f'There a {nbr} possible specifications')
+assisted_specification = AssistedSpecification(
+    biogeme, AIC_BIC_dimension, PARETO_FILENAME
+)
+print(assisted_specification.statistics())
+non_dominated_models = assisted_specification.run(
+    max_neighborhood=20,
+    number_of_neighbors=20,
+)
+
+summary, description = compileEstimationResults(
+    non_dominated_models, use_short_names=True
+)
+print(summary)
+for k, v in description.items():
+    if k != v:
+        print(f'{k}: {v}')
+
+assisted_specification.plot()
