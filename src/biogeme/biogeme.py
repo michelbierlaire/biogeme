@@ -27,10 +27,6 @@ from biogeme import tools
 from biogeme.idmanager import IdManager
 from biogeme.negative_likelihood import NegativeLikelihood
 from biogeme import toml
-from biogeme.catalog import (
-    string_id_to_configuration,
-    configuration_to_string_id,
-)
 
 # import yep
 
@@ -1135,7 +1131,7 @@ class BIOGEME:
             )
         configurations = {}
         for config, expression in the_iterator:
-            config_id = configuration_to_string_id(config)
+            config_id = config.get_string_id()
             b = BIOGEME(self.database, expression)
             b.modelName = config_id
             if quick_estimate:

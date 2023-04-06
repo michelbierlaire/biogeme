@@ -4,45 +4,15 @@
 :date: Fri Mar 31 08:54:07 2023
 
 """
+import logging
 from itertools import product
 from biogeme.multiple_expressions import MultipleExpression, NamedExpression
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
 import biogeme.segmentation as seg
+from biogeme.configuration import SelectionTuple, Configuration
 
-SEPARATOR = ';'
-SELECTION_SEPARATOR = ':'
-
-def configuration_to_string_id(configuration):
-    """Transforms a configuration into a string ID
-
-    :param configuration: dict where the keys are the catalog names,
-       and the values are the selected configuration.
-    :type configuration: dict(str: str)
-
-    :return: string ID
-    :rtype: str
-    """
-    terms = [f'{k}{SELECTION_SEPARATOR}{v}' for k, v in configuration.items()]
-    return SEPARATOR.join(terms)
-
-
-def string_id_to_configuration(string_id):
-    """Transforms a string ID into a configuration
-
-    :param string_id: string ID
-    :type string_id: str
-
-    :return: dict where the keys are the catalog names,
-       and the values are the selected configuration.
-    :rtype: dict(str: str)
-    """
-    terms = string_id.split(SEPARATOR)
-    the_config = {}
-    for term in terms:
-        catalog, selection = term.split(SELECTION_SEPARATOR)
-        the_config[catalog] = selection
-    return the_config
+logger = logging.getLogger(__name__)
 
 
 class Catalog(MultipleExpression):
@@ -117,9 +87,9 @@ class Catalog(MultipleExpression):
         return cls(catalog_name, the_tuple)
 
     def get_iterator(self):
-        """ Obtain an iterator on the names expressions """
+        """Obtain an iterator on the named expressions"""
         return iter(self.tuple_of_named_expressions)
-    
+
     def set_index(self, index):
         """Set the index of the selected expression, and update the
             synchronized catalogs
@@ -139,6 +109,28 @@ class Catalog(MultipleExpression):
         for sync_catalog in self.synchronized_catalogs:
             sync_catalog.current_index = index
 
+    def set_of_configurations(self):
+        """Set of possible configurations for a multiple
+        expression. If the expression is simple, an empty set is
+        returned.
+        """
+        results = set()
+        for name, expression in self.get_iterator():
+            this_selection = Configuration(
+                [SelectionTuple(catalog=self.name, selection=name)]
+            )
+            this_set = expression.set_of_configurations()
+            if this_set:
+                the_updated_set = {
+                    Configuration.from_tuple_of_configurations((conf, this_selection))
+                    for conf in this_set
+                }
+                results |= the_updated_set
+            else:
+                results.add(this_selection)
+
+        return results
+
     def selected(self):
         """Return the selected expression and its name
 
@@ -147,77 +139,82 @@ class Catalog(MultipleExpression):
         """
         return self.tuple_of_named_expressions[self.current_index]
 
-    def increment_selection(self):
-        """Increment recursively the selection of multiple
-        expressions.
-
-        :return: True if the increment has been implemented
-        :rtype: bool
-        """
-        if self.selected_expression().increment_selection():
-            return True
-        if self.current_index == self.catalog_size() - 1:
-            return False
-        self.set_index(self.current_index + 1)
-        self.selected_expression().reset_expression_selection()
-        for sync_catalog in self.synchronized_catalogs:
-            sync_catalog.selected_expression().reset_expression_selection()
-
-        return True
-
     def current_configuration(self):
-        """Obtain the current configuration of an expression with Catalog's
+        """Obtain the current configuration of an expression with Catalog
 
-        :return: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
+        :return: configuration
 
-        :rtype: dict(str: str)
+        :rtype: biogeme.configuration.Configuration
         """
         the_result = self.selected_expression().current_configuration()
-        the_result[self.name] = self.selected_name()
-        return the_result
-    
-    def increment_catalog(self, catalog_name, step):
-        """Increment the selection of a specific catalog
-
-        :param catalog_name: name of the catalog to change
-        :type catalog_name: str
-
-        :param step: number of increments to apply. Can be negative.
-        :type step: int
-        """
-        if step == 0:
-            return
-        if self.name == catalog_name:
-            if (
-                self.current_index + step >= self.catalog_size()
-                or self.current_index + step < 0
-            ):
-                raise excep.valueOutOfRange
-            self.current_index += step
-            return
-
-        for _, expr in self.tuple_of_named_expressions:
-            expr.increment_catalog(catalog_name, step)
+        current_selection = Configuration(
+            [SelectionTuple(catalog=self.name, selection=self.selected_name())]
+        )
+        if the_result is None:
+            return Configuration.from_tuple_of_configurations((current_selection,))
+        return Configuration.from_tuple_of_configurations(
+            (the_result, current_selection)
+        )
 
     def configure_catalogs(self, configuration):
         """Select the items in each catalog corresponding to the
             requested configuration
 
-        :param configuration: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
-        :type configuration: dict(str: str)
+        :param configuration: description of the configuration
+        :type configuration: biogeme.configuration.Configuration
 
         """
-        selection = configuration.get(self.name)
+        selection = configuration.get_selection(self.name)
         if selection is not None:
-            self.current_index = self.dict_of_index[selection]
+            self.set_index(self.dict_of_index[selection])
 
         for _, expr in self.tuple_of_named_expressions:
             expr.configure_catalogs(configuration)
 
+    def modify_catalogs(self, set_of_catalogs, step, circular):
+        """Modify the specification of several catalogs
+
+        :param set_of_catalogs: set of catalogs to modify
+        :type set_of_catalogs: set(str)
+
+        :param step: increment of the modifications. Can be negative.
+        :type step: int
+
+        :param circular: If True, the modificiation is always made. If
+            the selection needs to move past the last one, it comes
+            back to the first one. For instance, if the catalog is
+            currently at its last value, and the step is 1, it is set
+            to its first value. If circular is False, and the
+            selection needs to move past the last one, the selection
+            is set to the last one. It works symmetrically if the step
+            is negative
+        :type circular: bool
+        """
+        total_modif = 0
+        for _, e in self.tuple_of_named_expressions:
+            total_modif += e.modify_catalogs(set_of_catalogs, step, circular)
+
+        if self.name not in set_of_catalogs:
+            return total_modif
+
+        the_size = self.catalog_size()
+        new_index = self.current_index + step
+        if circular:
+            self.set_index(new_index % the_size)
+            return total_modif + step
+
+        if new_index < 0:
+            total_modif += self.current_index
+            self.set_index(0)
+            return total_modif
+
+        if new_index >= the_size:
+            total_modif += the_size - 1 - self.current_index
+            self.set_index(the_size - 1)
+            return total_modif
+
+        self.set_index(new_index)
+        return total_modif + step
 
     def reset_this_expression_selection(self):
         """In each group of expressions, select the first one"""
@@ -241,7 +238,7 @@ class Catalog(MultipleExpression):
             total += expression.select_expression(group_name, index)
         return total
 
-        
+
 class SynchronizedCatalog(Catalog):
     """A catalog is synchronized when the selection of its expression
     is controlled by another catalog of the same length.
@@ -286,6 +283,17 @@ class SynchronizedCatalog(Catalog):
         )
         return cls(catalog_name, the_tuple, controller)
 
+    def set_of_configurations(self):
+        """Set of possible configurations for a multiple
+        expression. If the expression is simple, an empty set is
+        returned.
+        """
+        results = set()
+        for _, expression in self.get_iterator():
+            the_set = expression.set_of_configurations()
+            results |= the_set
+        return results
+
     def set_index(self, index):
         """Set the index of the selected expression, and update the
         synchronized catalogs
@@ -315,15 +323,6 @@ class SynchronizedCatalog(Catalog):
         the_result = self.selected_expression().current_configuration()
         return the_result
 
-    def increment_selection(self):
-        """Increment recursively the selection of multiple
-        expressions.
-
-        :return: True if the increment has been implemented
-        :rtype: bool
-        """
-        return self.selected_expression().increment_selection()
-
     def select_expression(self, group_name, index):
         """Select a specific expression in a group
 
@@ -346,61 +345,63 @@ class SynchronizedCatalog(Catalog):
             total += expression.select_expression(group_name, index)
         return total
 
-class SegmentationCatalog(Catalog):
-    """ Possible segmentations of a parameter """
 
-    def __init__(self, beta_parameter, potential_segmentations, maximum_number=None):
-        """ Ctor
-        
-        :param beta_parameter: parameter to be segmented
-        :type beta_parameter: biogeme.expressions.Beta
+def segmentation_catalog(
+    beta_parameter, potential_segmentations, maximum_number, synchronized_with=None
+):
+    """Generate a catalog (possibly synchronized) for potential segmentations of a parameter
 
-        :param potential_segmentations: tuple of potential segmentations
-        :type potential_segmentations: tuple(biogeme.segmentation.DiscreteSegmentationTuple)
+    :param beta_parameter: parameter to be segmented
+    :type beta_parameter: biogeme.expressions.Beta
 
-        :param maximum_number: maximum number of segmentations to consider
-        :type maximum_number: int
-        """
-        self.beta_parameter = beta_parameter
-        self.potential_segmentations = potential_segmentations
-        if maximum_number is None:
-            maximum_number = len(potential_segmentations)
-        self.list_of_possiblities = [
-            p
-            for p in product([False, True], repeat=len(potential_segmentations))
-            if sum(p) <= maximum_number
-        ]
-        the_tuple_of_named_expressions = (
-            NamedExpression(
-                name=self.get_name_from_config(config),
-                expression=self.get_expression_from_config(config)
-            )
-            for config in self.list_of_possiblities
-        )
-        name = f'segmented_{beta_parameter.name}'
-        super().__init__(name, the_tuple_of_named_expressions)
+    :param potential_segmentations: tuple of potential segmentations
+    :type potential_segmentations: tuple(biogeme.segmentation.DiscreteSegmentationTuple)
 
-    def get_name_from_config(self, config):
-        """Assign a name to a config
-        """
-        if sum(config) == 0:
-            return f'{self.beta_parameter.name} (no seg.)'
+    :param maximum_number: maximum number of segmentations to consider
+    :type maximum_number: int
+
+    :param synchronized_with: Catalog that controls this one. If None, no control.
+    :type synchronized_with: Catalog
+
+    """
+
+    def get_name_from_combination(combination):
+        """Assign a name to a combination"""
+        if sum(combination) == 0:
+            return f'{beta_parameter.name} (no seg.)'
 
         return '-'.join(
             [
                 segment.variable.name
-                for keep, segment in zip(config, self.potential_segmentations)
+                for keep, segment in zip(combination, potential_segmentations)
                 if keep
             ]
         )
 
-    def get_expression_from_config(self, config):
-        """Assign an expression to a config
-        """
+    def get_expression_from_combination(combination):
+        """Assign an expression to a combination"""
         selected_expressions = (
-                segment
-                for keep, segment in zip(config, self.potential_segmentations)
-                if keep
+            segment
+            for keep, segment in zip(combination, potential_segmentations)
+            if keep
         )
-        the_segmentation = seg.Segmentation(self.beta_parameter, selected_expressions)
+        the_segmentation = seg.Segmentation(beta_parameter, selected_expressions)
         return the_segmentation.segmented_beta()
+
+    list_of_possiblities = [
+        p
+        for p in product([False, True], repeat=len(potential_segmentations))
+        if sum(p) <= maximum_number
+    ]
+    the_tuple_of_named_expressions = (
+        NamedExpression(
+            name=get_name_from_combination(combination),
+            expression=get_expression_from_combination(combination),
+        )
+        for combination in list_of_possiblities
+    )
+    name = f'segmented_{beta_parameter.name}'
+    if synchronized_with is None:
+        return Catalog(name, the_tuple_of_named_expressions)
+
+    return SynchronizedCatalog(name, the_tuple_of_named_expressions, synchronized_with)

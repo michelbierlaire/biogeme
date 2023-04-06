@@ -75,7 +75,7 @@ class OneSegmentation:
         :raise biogemeError: if the category is not listed in the
             mapping of the segmentation.
         """
-        if not category in self.mapping.values():
+        if category not in self.mapping.values():
             error_msg = (
                 f'Unknown category: {category}. List of known categories: '
                 f'{self.mapping.values()}'

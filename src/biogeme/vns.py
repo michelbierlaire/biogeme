@@ -38,7 +38,7 @@ class ProblemClass(metaclass=abc.ABCMeta):
         :rtype: tuple(bool, str)
         """
 
-    def generate_neighbor(self, element, neighborhood_size):
+    def generate_neighbor(self, element, neighborhood_size, attempts=5):
         """Generate a neighbor from the negihborhood of size
         ``neighborhood_size``using one of the operators
 
@@ -48,13 +48,20 @@ class ProblemClass(metaclass=abc.ABCMeta):
         :param neighborhood_size: size of the neighborhood
         :type neighborhood_size: int
 
+        :param attempts: number of attempts until we give up
+        :type attemps: int
+
         :return: number of modifications actually made
         :rtype: int
 
         """
         # Select one operator.
-        operator = self.operators_management.select_operator()
-        return operator(element, neighborhood_size)
+        for _ in range(attempts):
+            operator = self.operators_management.select_operator()
+            neighbor, number_of_changes = operator(element, neighborhood_size)
+            if number_of_changes > 0:
+                return neighbor, number_of_changes
+        return element, 0
 
     def last_neighbor_rejected(self):
         """Notify that a neighbor has been rejected by the
@@ -200,9 +207,8 @@ class ParetoClass(Pareto):
             that must be considered
         :type max_neighborhood: int
 
-        :param archiveInputFile: name of a pickle file contaning sets
-                                 from previous runs
-        :type archiveInputFile: str
+        :param pareto_file: name of a  file contaning sets  from previous runs
+        :type pareto_file: str
 
         """
         super().__init__(pareto_file)
@@ -324,29 +330,32 @@ def vns(
         continue_with_solution = True
         n = 0
         while continue_with_solution:
-            logger.info(f'----> Current solution: {solution_to_improve}')
-            logger.info(f'----> Neighbor {n} of size {neighborhood_size}')
+            logger.debug(f'----> Current solution: {solution_to_improve}')
+            logger.debug(f'----> Neighbor {n} of size {neighborhood_size}')
             a_neighbor, number_of_changes = problem.generate_neighbor(
                 solution_to_improve, neighborhood_size
             )
-            logger.info(
+            logger.debug(
                 f'----> Neighbor: {a_neighbor} Nbr of changes {number_of_changes}'
             )
 
             n += 1
+            logger.info(f'Iteration {n}/{number_of_neighbors} for current solution')
+
             if n == number_of_neighbors:
                 pareto.change_neighborhood(solution_to_improve)
                 continue_with_solution = False
 
             if number_of_changes == 0:
-                logger.warning(
-                    f'Neighbor of size {neighborhood_size}: ' f'generation failed'
+                logger.info(
+                    f'The solution could not be improved with neighborhood '
+                    f'of size {neighborhood_size}.'
                 )
                 pareto.change_neighborhood(solution_to_improve)
                 continue_with_solution = False
             elif a_neighbor in pareto.considered:
                 problem.last_neighbor_rejected()
-                logger.info(
+                logger.debug(
                     f'*** Neighbor of size {neighborhood_size}:'
                     f' already considered***'
                 )
@@ -362,14 +371,14 @@ def vns(
                         pareto.reset_neighborhood(solution_to_improve)
                         continue_with_solution = False
                     else:
-                        logger.info(
+                        logger.debug(
                             f'*** Neighbor of size '
                             f'{neighborhood_size}: dominated***'
                         )
                         problem.last_neighbor_rejected()
                         pareto.change_neighborhood(solution_to_improve)
                 else:
-                    logger.info(
+                    logger.debug(
                         f'*** Neighbor of size {neighborhood_size}'
                         f' invalid: {why}***'
                     )

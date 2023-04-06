@@ -235,7 +235,7 @@ class Pareto:
             warning_msg = (
                 f'Elem {element.element_id} has already been inserted in the set'
             )
-            logger.warning(warning_msg)
+            logger.debug(warning_msg)
             return False
 
         self.considered.add(element)

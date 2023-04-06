@@ -7,16 +7,14 @@ New version of the assisted specification using Catalogs
 
 """
 import logging
+import random
 from biogeme import vns
 from biogeme import biogeme
 import biogeme.exceptions as excep
-from biogeme.multiple_expressions import (
-    string_id_to_configuration,
-    configuration_to_string_id,
-)
 from biogeme.results import pareto_optimal
 from biogeme.pareto import SetElement
 from biogeme.vns import ParetoClass
+from biogeme.configuration import Configuration
 
 logger = logging.getLogger(__name__)
 
@@ -34,14 +32,23 @@ class Specification:
         fct(bioResults) -> list[floatNone]
     """
 
-    def __init__(self, configuration_string):
-        """Creates a specification from a string configuration"""
+    def __init__(self, configuration):
+        """Creates a specification from a  configuration
+
+        :param configuration: configuration of the multiple expression
+        :type configuration: biogeme.configuration.Configuration
+        """
         if self.pareto is None:
             raise excep.biogemeError('Pareto set has not been initialized.')
-        self.config_id = configuration_string
+        self.configuration = configuration
         self.element = self.pareto.get_element_from_id(self.config_id)
         if self.element is None:
             self.estimate()
+
+    @classmethod
+    def from_string_id(cls, configuration_id):
+        """Constructor using a configuration"""
+        return cls(Configuration.from_string(configuration_id))
 
     @classmethod
     def get_pareto_ids(cls):
@@ -53,27 +60,28 @@ class Specification:
         """
         return [element.element_id for element in cls.pareto.pareto]
 
-    @classmethod
-    def from_configuration(cls, configuration):
-        """Constructor using a configuration"""
-        config_id = configuration_to_string_id(configuration)
-        return cls(config_id)
-
     def configure_expression(self):
         """Configure the expression to the current configuration"""
-        the_config = string_id_to_configuration(self.config_id)
-        self.expression.configure_catalogs(the_config)
+        self.expression.configure_catalogs(self.configuration)
 
     @classmethod
     def default_specification(cls):
         """Alternative constructor for generate the default specification"""
         cls.expression.reset_expression_selection()
         the_config = cls.expression.current_configuration()
-        the_id = configuration_to_string_id(the_config)
-        return cls(the_id)
+        return cls(the_config)
+
+    @property
+    def config_id(self):
+        """Defined config_id as a property"""
+        return self.configuration.get_string_id()
+
+    @config_id.setter
+    def config_id(self, value):
+        self.configuration = Configuration.from_string(value)
 
     def __repr__(self):
-        return str(self.code_id())
+        return str(self.config_id)
 
     def get_element(self):
         """Implementation of abstract method"""
@@ -82,9 +90,9 @@ class Specification:
     def estimate(self):
         """Estimate the parameter of the current specification"""
         self.configure_expression()
-        logger.debug(f'Estimate {self.code_id()}')
+        logger.debug(f'Estimate {self.config_id}')
         b = biogeme.BIOGEME(self.database, self.expression)
-        b.modelName = self.code_id()
+        b.modelName = self.config_id
         b.generate_html = False
         b.generate_pickle = False
         logger.info(f'*** Estimate {b.modelName}')
@@ -95,7 +103,7 @@ class Specification:
                 'No function has been provided to calculate the objectives to minimize'
             )
             raise excep.biogemeError(error_msg)
-        self.element = SetElement(self.code_id(), self.multi_objectives(results))
+        self.element = SetElement(self.config_id, self.multi_objectives(results))
         self.pareto.add(self.element)
 
     def describe(self):
@@ -105,14 +113,6 @@ class Specification:
         :rtype: str
         """
         return f'{self.get_element()}'
-
-    def code_id(self):
-        """Provide a string ID for the specification
-
-        :return: identifier of the solution. Used to organize the Pareto set.
-        :rtype: str
-        """
-        return self.config_id
 
 
 # Operators
@@ -135,7 +135,7 @@ def increase_configuration(catalog_name, element, size=1):
     """
     logger.debug(f'Increase config for {catalog_name} {size=}')
     logger.debug(f'Current config: {element.element_id}')
-    specification = Specification(element.element_id)
+    specification = Specification.from_string_id(element.element_id)
     try:
         specification.expression.increment_catalog(catalog_name, step=size)
     except excep.valueOutOfRange:
@@ -143,9 +143,7 @@ def increase_configuration(catalog_name, element, size=1):
 
         return specification.get_element(), 0
 
-    new_specification = Specification.from_configuration(
-        specification.expression.current_configuration()
-    )
+    new_specification = Specification(specification.expression.current_configuration())
     logger.debug(f'New config: {new_specification.get_element().element_id}')
 
     return new_specification.get_element(), size
@@ -176,11 +174,65 @@ def decrease_configuration(catalog_name, element, size=1):
     except excep.valueOutOfRange:
         return specification.get_element(), 0
 
-    new_specification = Specification.from_configuration(
-        specification.expression.current_configuration()
-    )
+    new_specification = Specification(specification.expression.current_configuration())
 
     return new_specification.get_element(), size
+
+def modify_several_catalogs(element, step, size=1):
+    """Modify several catalogs in the specification
+
+    :param element: ID of the current specification
+    :type element: class SetElement
+
+    :param step: shift to apply to each catalog
+    :type step: int
+    
+    :param size: number of catalofs to modify
+    :type size: int
+
+    :return: Id of the neighbor, and actual number of modifications
+    :rtype: tuple(SetElement, int)
+    """
+    specification = Specification(element.element_id)
+    the_catalogs = list(specification.configuration.set_of_catalogs())
+    actual_size = max(size, len(the_catalogs))
+    the_selected_catalogs = set(random.choices(the_catalogs, k=actual_size))
+    specification.expression.modify_catalogs(
+        the_selected_catalogs, step=step, circular=True
+    )
+    new_specification = Specification(
+        specification.expression.current_configuration()
+    )
+    return new_specification.get_element(), actual_size
+
+
+def increment_several_catalogs(element, size=1):
+    """Increment several catalogs in the specification
+
+    :param element: ID of the current specification
+    :type element: class SetElement
+
+    :param size: number of catalofs to modify
+    :type size: int
+
+    :return: Id of the neighbor, and actual number of modifications
+    :rtype: tuple(SetElement, int)
+    """
+    return modify_several_catalogs(element=element, step=1, size=size)
+
+def decrement_several_catalogs(element, size=1):
+    """Increment several catalogs in the specification
+
+    :param element: ID of the current specification
+    :type element: class SetElement
+
+    :param size: number of catalofs to modify
+    :type size: int
+
+    :return: Id of the neighbor, and actual number of modifications
+    :rtype: tuple(SetElement, int)
+    """
+    return modify_several_catalogs(element=element, step=1, size=size)
 
 
 def generate_operator(name, the_function):
@@ -212,7 +264,13 @@ def generate_operator(name, the_function):
 class AssistedSpecification(vns.ProblemClass):
     """Class defining assisted specification problem for the VNS algorithm."""
 
-    def __init__(self, biogeme_object, multi_objectives, pareto_file_name):
+    def __init__(
+        self,
+        biogeme_object,
+        multi_objectives,
+        pareto_file_name,
+        max_neighborhood=20,
+    ):
         """Ctor
 
         :param biogeme_object: object containnig the loglikelihood and the database
@@ -223,12 +281,18 @@ class AssistedSpecification(vns.ProblemClass):
 
         :param pareto_file_name: file where to read and write the Pareto solutions
         :type pareto_file_name: str
+
+        :param max_neighborhood: maximum number of neighborhood
+            investigated by the algorithm
+        :type max_neighborhood: int
+
         """
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
         self.multi_objectives = staticmethod(multi_objectives)
-        self.pareto_file_name = pareto_file_name
-        self.pareto = None
+        self.pareto = ParetoClass(
+            max_neighborhood=max_neighborhood, pareto_file=pareto_file_name
+        )
         self.expression = biogeme_object.loglike
         if self.expression is None:
             error_msg = 'No log likelihood function is defined'
@@ -248,6 +312,8 @@ class AssistedSpecification(vns.ProblemClass):
             self.operators[f'Decrease {catalog}'] = generate_operator(
                 catalog, decrease_configuration
             )
+        self.operators['Increment several catalogs'] = increment_several_catalogs
+        self.operators['Decrement several catalogs'] = decrement_several_catalogs
 
         logger.debug('Ctor assisted specification: Done')
         super().__init__(self.operators)
@@ -273,7 +339,7 @@ class AssistedSpecification(vns.ProblemClass):
 
         new_results = {}
         for config_id in model_ids:
-            config = string_id_to_configuration(config_id)
+            config = Configuration.from_string(config_id)
             self.expression.configure_catalogs(config)
             b = biogeme.BIOGEME(self.database, self.expression)
             b.modelName = config_id
@@ -282,7 +348,7 @@ class AssistedSpecification(vns.ProblemClass):
 
         return new_results
 
-    def run(self, max_neighborhood=20, number_of_neighbors=20, reestimate=True):
+    def run(self, number_of_neighbors=20, reestimate=True):
         """Runs the VNS algorithm
 
         :return: object containing the estimation results associated
@@ -298,9 +364,6 @@ class AssistedSpecification(vns.ProblemClass):
             logger.debug('Prepare the heuristic')
             Specification.database = self.biogeme_object.database
             Specification.expression = self.biogeme_object.loglike
-            self.pareto = ParetoClass(
-                max_neighborhood=max_neighborhood, pareto_file=self.pareto_file_name
-            )
             Specification.pareto = self.pareto
             logger.debug('Default specification')
             default_specification = Specification.default_specification()
@@ -311,18 +374,19 @@ class AssistedSpecification(vns.ProblemClass):
                 problem=self,
                 first_solutions=[default_specification.get_element()],
                 pareto=self.pareto,
-                max_neighborhood=max_neighborhood,
                 number_of_neighbors=number_of_neighbors,
             )
             pareto_after = self.pareto.length_of_all_sets()
 
-            self.pareto.dump(self.pareto_file_name)
-            logger.info(f'Pareto file has been updated: {self.pareto_file_name}')
+            self.pareto.dump()
+            logger.info(f'Pareto file has been updated: {self.pareto.filename}')
             logger.info(
-                f'Before the algorithm: {pareto_before[1]} models, with {pareto_before[0]} Pareto.'
+                f'Before the algorithm: {pareto_before[1]} models, '
+                f'with {pareto_before[0]} Pareto.'
             )
             logger.info(
-                f'After the algorithm: {pareto_after[1]} models, with {pareto_after[0]} Pareto.'
+                f'After the algorithm: {pareto_after[1]} models, '
+                f'with {pareto_after[0]} Pareto.'
             )
             logger.debug('Run the heuristic: done')
 
@@ -345,11 +409,11 @@ class AssistedSpecification(vns.ProblemClass):
         if self.pareto is None:
             return ''
         msg = (
-            f'Initial Pareto: {self.pareto.size_init_pareto} '
-            f'Initial considered: {self.pareto.size_init_considered} '
-            f'Final Pareto: {len(self.pareto.pareto)} '
-            f'Condidered: {len(self.pareto.considered)} '
-            f'Removed: {len(self.pareto.removed)}'
+            f'Initial Pareto: {self.pareto.size_init_pareto} ',
+            f'Initial considered: {self.pareto.size_init_considered} ',
+            f'Final Pareto: {len(self.pareto.pareto)} ',
+            f'Condidered: {len(self.pareto.considered)} ',
+            f'Removed: {len(self.pareto.removed)}',
         )
         return msg
 

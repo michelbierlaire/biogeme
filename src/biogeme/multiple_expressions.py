@@ -5,11 +5,13 @@ considered in a specification
 :date: Sun Feb  5 15:34:56 2023
 
 """
+import logging
 import abc
 from collections import namedtuple
-import biogeme.exceptions as excep
 import biogeme.expressions as ex
+from biogeme.configuration import SelectionTuple
 
+logger = logging.getLogger(__name__)
 
 NamedExpression = namedtuple('NamedExpression', 'name expression')
 
@@ -25,33 +27,13 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
     def __init__(self, name):
         super().__init__()
         self.name = name
-        
+
     @abc.abstractmethod
     def selected(self):
         """Return the selected expression and its name
 
         :return: the name and the selected expression
         :rtype: tuple(str, biogeme.expressions.Expression)
-        """
-
-    @abc.abstractmethod
-    def increment_selection(self):
-        """Increment recursively the selection of multiple
-        expressions.
-
-        :return: True if the increment has been implemented
-        :rtype: bool
-        """
-
-    @abc.abstractmethod
-    def increment_catalog(self, catalog_name, step):
-        """Increment the selection of a specific catalog
-
-        :param catalog_name: name of the catalog to change
-        :type catalog_name: str
-
-        :param step: number of increments to apply. Can be negative.
-        :type step: int
         """
 
     @abc.abstractmethod
@@ -62,19 +44,38 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         :param configuration: a dictionary such that the keys are the catalog
             names, and the values are the selected specification in
             the Catalog
-        :type configuration: dict(str: str)
+        :type configuration: biogeme.configuration.Configuration
 
+        """
+
+    @abc.abstractmethod
+    def modify_catalogs(self, set_of_catalogs, step, circular):
+        """Modify the specification of several catalogs
+
+        :param set_of_catalogs: set of catalogs to modify
+        :type set_of_catalogs: set(str)
+
+        :param step: increment of the modifications. Can be negative.
+        :type step: int
+
+        :param circular: If True, the modificiation is always made. If
+            the selection needs to move past the last one, it comes
+            back to the first one. For instance, if the catalog is
+            currently at its last value, and the step is 1, it is set
+            to its first value. If circular is False, and the
+            selection needs to move past the last one, the selection
+            is set to the last one. It works symmetrically if the step
+            is negative
+        :type circular: bool
         """
 
     @abc.abstractmethod
     def get_iterator(self):
         """Returns an iterator on NamedExpression"""
 
-
     @abc.abstractmethod
     def reset_this_expression_selection(self):
         """In this group of expressions, select the first one"""
-
 
     @abc.abstractmethod
     def current_configuration(self):
@@ -84,7 +85,7 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
             names, and the values are the selected specification in
             the Catalog
 
-        :rtype: dict(str: str)
+        :rtype: biogeme.configuration.Configuration
         """
 
     def catalog_size(self):
@@ -124,29 +125,9 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         for _, expr in self.get_iterator():
             a_dict = expr.dict_of_catalogs()
             for key, the_catalog in a_dict.items():
-                if key in result:
-                    error_msg = (
-                        f'Catalog {key} cannot appear twice in the same '
-                        f'expression. Use different names.'
-                    )
-                    raise excep.biogemeError(error_msg)
                 result[key] = the_catalog
         result[self.name] = self
         return result
-
-    def number_of_multiple_expressions(self):
-        """Reports the number of multiple expressions available through the iterator
-
-        :return: number of multiple expressions. It just gives an
-            upper bound if some catalogs are synchronized
-        :rtype: int
-
-        """
-        the_iterator = self.get_iterator()
-        total = 0
-        for _, expr in the_iterator:
-            total = total + expr.number_of_multiple_expressions()
-        return total
 
     def reset_expression_selection(self):
         """In each group of expressions, select the first one"""

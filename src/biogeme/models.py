@@ -260,7 +260,9 @@ def piecewiseFormula(variable, thresholds, betas=None):
               \\text{otherwise}  \\end{array}\\right. \\;\\;\\;x_{Ti} =
               \\max(0, \\min(t-a, b))
 
-    New variables and new parameters are automatically created.
+    New variables and new parameters are automatically created to obtain the specification
+
+    .. math:: \sum_{i=1}^{K-1} \\beta_i x_{Ti}
 
     :param variable: name of the variable for which we need the
         piecewise linear transform.
@@ -337,6 +339,102 @@ def piecewiseFormula(variable, thresholds, betas=None):
     terms = [beta * theVars[i] for i, beta in enumerate(betas)]
 
     return expr.bioMultSum(terms)
+
+
+def piecewise_as_variable(variable, thresholds, betas=None):
+    """Generate the formula for a piecewise linear specification, seen
+    as a transformed variable.
+
+    If there are K thresholds, K-1 variables are generated. The first
+    and last thresholds can be defined as None, corresponding to
+    :math:`-\\infty` and :math:`+\\infty`, respectively. If :math:`t` is
+    the variable of interest, for each interval :math:`[a:a+b[`, we
+    define a variable defined as:
+
+    .. math:: x_{Ti} =\\left\\{  \\begin{array}{ll} 0 & \\text{if }
+              t < a \\\\ t-a & \\text{if } a \\leq t < a+b \\\\ b  &
+              \\text{otherwise}  \\end{array}\\right. \\;\\;\\;x_{Ti} =
+              \\max(0, \\min(t-a, b))
+
+    The specification this is returned is
+
+    .. math:: x_{T1} + \sum_{i=2}^{K-1} \beta_i x_{Ti}
+
+    :param variable: name of the variable for which we need the
+        piecewise linear transform.
+    :type variable: string
+
+    :param thresholds: list of thresholds
+    :type thresholds: list(float)
+
+    :param betas: list of beta parameters to be used in the
+        specification.  The number of entries should be the number of
+        thresholds, minus two. If None, for each interval, the
+        parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
+        where var is the name of the variable. Default: none.
+    :type betas:
+        list(biogeme.expresssions.Beta)
+
+    :return: expression of  the piecewise linear specification.
+    :rtype: biogeme.expressions.expr.Expression
+
+    :raise biogemeError: if the thresholds are not defined properly,
+        which means that only the first and the last threshold can be set
+        to None.
+
+    :raise biogemeError: if the length of list ``initialexpr.Betas`` is
+        not equal to the length of ``thresholds`` minus one.
+
+    .. seealso:: :meth:`piecewiseVariables`
+
+    """
+    if isinstance(variable, expr.Variable):
+        the_variable = variable
+        the_name = variable.name
+    elif isinstance(variable, str):
+        the_name = variable
+        the_variable = expr.Variable(f'{variable}')
+    else:
+        errorMsg = (
+            'The first argument of piecewiseFormula must be the '
+            'name of a variable, or the variable itself..'
+        )
+        raise excep.biogemeError(errorMsg)
+
+    eye = len(thresholds)
+    if all(t is None for t in thresholds):
+        errorMsg = (
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
+        )
+        raise excep.biogemeError(errorMsg)
+    if None in thresholds[1:-1]:
+        errorMsg = (
+            'For piecewise linear specification, only the first and '
+            'the last thresholds can be None'
+        )
+        raise excep.biogemeError(errorMsg)
+    if betas is not None:
+        if len(betas) != eye - 2:
+            errorMsg = (
+                f'As there are {eye} thresholds, a total of {eye-2} '
+                f'Beta parameters are needed, and not {len(betas)}.'
+            )
+            raise excep.biogemeError(errorMsg)
+
+    theVars = piecewiseVariables(expr.Variable(f'{variable}'), thresholds)
+    if betas is None:
+        betas = []
+        for i, a_threshold in enumerate(thresholds[1:-1]):
+            next_threshold = thresholds[i + 1]
+            a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
+            next_name = 'inf' if next_threshold is None else f'{next_threshold}'
+            betas.append(
+                expr.Beta(f'beta_{variable}_{a_name}_{next_name}', 0, None, None, 0)
+            )
+
+    terms = [beta * theVars[i] for i, beta in enumerate(betas)]
+
+    return theVars[0] + expr.bioMultSum(terms)
 
 
 def piecewiseFunction(x, thresholds, betas):

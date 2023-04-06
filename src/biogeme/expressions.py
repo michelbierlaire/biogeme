@@ -17,12 +17,13 @@
 
 
 import logging
-from itertools import chain
+from itertools import chain, product
 import numpy as np
 import biogeme.exceptions as excep
 import biogeme.cythonbiogeme as ee
 from biogeme.idmanager import IdManager
 from biogeme.elementary_expressions import TypeOfElementaryExpression
+from biogeme.configuration import Configuration
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +65,8 @@ class SelectedExpressionsIterator:
         :type the_expression: Expression
 
         :param configurations: set of configurations
-        :type configurations: set(dict(str: str))
+        :type configurations: set(biogeme.configuration.Configuration))
         """
-
         self.the_expression = the_expression
         self.configurations = configurations
         self.set_iterator = iter(configurations)
@@ -82,53 +82,11 @@ class SelectedExpressionsIterator:
         self.number += 1
         if self.first:
             self.first = False
-            result = (
-                self.the_expression.current_configuration(),
-                self.the_expression,
-            )
-            return result
+            return self.the_expression
 
         current_configuration = next(self.set_iterator)
         self.the_expression.configure_catalogs(current_configuration)
-        result = (
-            self.the_expression.current_configuration(),
-            self.the_expression,
-        )
-        return result
-
-
-class MultipleExpressionsIterator:
-    """A multiple expression is an expression that contains
-    Catalog. This iterator loops on all possible specification based
-    on all catalogs in the expression."""
-
-    def __init__(self, the_expression):
-        """Ctor."""
-        self.the_expression = the_expression
-        self.the_expression.reset_expression_selection()
-        self.first = True
-        self.number = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self.number += 1
-        if self.first:
-            self.first = False
-            result = (
-                self.the_expression.current_configuration(),
-                self.the_expression,
-            )
-            return result
-
-        if not self.the_expression.increment_selection():
-            raise StopIteration
-        result = (
-            self.the_expression.current_configuration(),
-            self.the_expression,
-        )
-        return result
+        return self.the_expression
 
 
 class Expression:
@@ -165,7 +123,8 @@ class Expression:
         """
 
     def __iter__(self):
-        return MultipleExpressionsIterator(self)
+        the_set = self.set_of_configurations()
+        return SelectedExpressionsIterator(self, the_set)
 
     def check_panel_trajectory(self):
         """Set of variables defined outside of 'PanelLikelihoodTrajectory'
@@ -1259,16 +1218,11 @@ class Expression:
 
         :return: dict with all the catalogs
         """
+
         result = {}
         for e in self.children:
             a_dict = e.dict_of_catalogs(ignore_synchronized)
             for key, the_catalog in a_dict.items():
-                if key in result:
-                    error_msg = (
-                        f'Catalog {key} cannot appear twice in the same '
-                        f'expression. Use different names.'
-                    )
-                    raise excep.biogemeError(error_msg)
                 result[key] = the_catalog
         return result
 
@@ -1285,52 +1239,35 @@ class Expression:
         all_catalogs = self.dict_of_catalogs()
         return name in all_catalogs
 
+    def set_of_configurations(self):
+        """Set of possible configurations for a multiple
+        expression. If the expression is simple, an empty set is
+        returned.
+
+        """
+        if not self.children:
+            return set()
+        each_config = [
+            e.set_of_configurations()
+            for e in self.children
+            if e.set_of_configurations()
+        ]
+        if not each_config:
+            return set()
+        all_combinations = product(*each_config)
+        final_set = set(
+            Configuration.from_tuple_of_configurations(the_tuple)
+            for the_tuple in all_combinations
+        )
+        return final_set
+
     def number_of_multiple_expressions(self):
         """Reports the number of multiple expressions available through the iterator
 
         :return: numbero  multiple expressions
         :rtype: int
         """
-        total = 1
-        for e in self.children:
-            total = total * e.number_of_multiple_expressions()
-        return total
-
-    def increment_catalog(self, catalog_name, step):
-        """Increment the selection of a specific catalog"""
-        if step == 0:
-            return
-        for e in self.children:
-            e.increment_catalog(catalog_name, step)
-
-    def increment_selection(self):
-        """Increment recursively the selection of multiple
-        expressions.
-
-        :return: True if the increment has been implemented
-        :rtype: bool
-        """
-
-        def increment_children(list_of_expressions):
-            """Perform all possible increments for a list of expressions
-
-            :return: True if the increment has been implemented
-            :rtype: bool
-            """
-            if not list_of_expressions:
-                return False
-            first_expression = list_of_expressions[0]
-            other_expressions = list_of_expressions[1:]
-            if increment_children(other_expressions):
-                return True
-            if first_expression.increment_selection():
-                for e in other_expressions:
-                    e.reset_expression_selection()
-                return True
-            return False
-
-        done = increment_children(self.children)
-        return done
+        return len(self.set_of_configurations())
 
     def reset_expression_selection(self):
         """In each group of expressions, select the first one"""
@@ -1340,23 +1277,50 @@ class Expression:
     def configure_catalogs(self, configuration):
         """Select the items in each catalog corresponding to the requested configuration
 
-        :param configuration: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
-        :type configuration: dict(str: str)
+        :param configuration: catalog configuration
+        :type configuration: biogeme.configuration.Configure
         """
         for e in self.children:
             e.configure_catalogs(configuration)
 
+    def modify_catalogs(self, set_of_catalogs, step, circular):
+        """Modify the specification of several catalogs
+
+        :param set_of_catalogs: set of catalogs to modify
+        :type set_of_catalogs: set(str)
+
+        :param step: increment of the modifications. Can be negative.
+        :type step: int
+
+        :param circular: If True, the modificiation is always made. If
+            the selection needs to move past the last one, it comes
+            back to the first one. For instance, if the catalog is
+            currently at its last value, and the step is 1, it is set
+            to its first value. If circular is False, and the
+            selection needs to move past the last one, the selection
+            is set to the last one. It works symmetrically if the step
+            is negative
+        :type circular: bool
+        """
+        for e in self.children:
+            e.modify_catalogs(set_of_catalogs, step, circular)
+
     def current_configuration(self):
         """Obtain the current configuration of an expression with Catalog's
 
-        :return: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
-        :rtype: dict(str: str)
+        :return: configuration
+        :rtype: biogeme.configuration.Configuration
         """
-        return dict(chain(*(e.current_configuration().items() for e in self.children)))
+        if not self.children:
+            return None
+        the_tuple_of_configurations = tuple(
+            e.current_configuration()
+            for e in self.children
+            if e.current_configuration() is not None
+        )
+        if not the_tuple_of_configurations:
+            return None
+        return Configuration.from_tuple_of_configurations(the_tuple_of_configurations)
 
     def select_expression(self, group_name, index):
         """Select a specific expression in a group
