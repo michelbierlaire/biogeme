@@ -39,16 +39,8 @@ V1 = (
     + B_TIME * models.boxcox(TRAIN_TT_SCALED, LAMBDA)
     + B_COST * TRAIN_COST_SCALED
 )
-V2 = (
-    ASC_SM
-    + B_TIME * models.boxcox(SM_TT_SCALED, LAMBDA)
-    + B_COST * SM_COST_SCALED
-)
-V3 = (
-    ASC_CAR
-    + B_TIME * models.boxcox(CAR_TT_SCALED, LAMBDA)
-    + B_COST * CAR_CO_SCALED
-)
+V2 = ASC_SM + B_TIME * models.boxcox(SM_TT_SCALED, LAMBDA) + B_COST * SM_COST_SCALED
+V3 = ASC_CAR + B_TIME * models.boxcox(CAR_TT_SCALED, LAMBDA) + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
 V = {1: V1, 2: V2, 3: V3}

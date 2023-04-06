@@ -65,9 +65,7 @@ TRAIN_COST = TRAIN_CO * (GA == 0)
 # Definition of new variables by adding columns to the database.
 # This is recommended for estimation. And not recommended for simulation.
 TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
-TRAIN_COST_SCALED = database.DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100
-)
+TRAIN_COST_SCALED = database.DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100)
 CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
 CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 

@@ -30,7 +30,7 @@ from swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
     MALE,
-    SM_AV
+    SM_AV,
 )
 
 

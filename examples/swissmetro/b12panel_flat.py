@@ -53,9 +53,7 @@ ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'NORMAL_ANTI')
 
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_TRAIN_S = Beta('ASC_TRAIN_S', 1, None, None, 0)
-ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws(
-    'ASC_TRAIN_RND', 'NORMAL_ANTI'
-)
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'NORMAL_ANTI')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
@@ -94,9 +92,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Conditional to the random parameters, the likelihood of one observation is
 # given by the logit model (called the kernel)
-obsprob = [
-    models.loglogit(V[t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)
-]
+obsprob = [models.loglogit(V[t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)]
 condprobIndiv = exp(bioMultSum(obsprob))
 # Conditional to the random parameters, the likelihood of all observations for
 # one individual (the trajectory) is the product of the likelihood of

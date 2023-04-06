@@ -36,20 +36,15 @@ from swissmetro_panel import (
 
 # Parameters to be estimated. One version for each latent class.
 NUMBER_OF_CLASSES = 2
-B_COST = [
-    Beta(f'B_COST_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)
-]
+B_COST = [Beta(f'B_COST_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)]
 
 # Define a random parameter, normally distributed across individuals,
 # designed to be used for Monte-Carlo simulation
-B_TIME = [
-    Beta(f'B_TIME_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)
-]
+B_TIME = [Beta(f'B_TIME_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)]
 
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = [
-    Beta(f'B_TIME_S_class{i}', 1, None, None, 0)
-    for i in range(NUMBER_OF_CLASSES)
+    Beta(f'B_TIME_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 B_TIME_RND = [
     B_TIME[i] + B_TIME_S[i] * bioDraws(f'B_TIME_RND_class{i}', 'NORMAL_ANTI')
@@ -61,35 +56,27 @@ ASC_CAR = [
     Beta(f'ASC_CAR_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_CAR_S = [
-    Beta(f'ASC_CAR_S_class{i}', 1, None, None, 0)
-    for i in range(NUMBER_OF_CLASSES)
+    Beta(f'ASC_CAR_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_CAR_RND = [
-    ASC_CAR[i]
-    + ASC_CAR_S[i] * bioDraws(f'ASC_CAR_RND_class{i}', 'NORMAL_ANTI')
+    ASC_CAR[i] + ASC_CAR_S[i] * bioDraws(f'ASC_CAR_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
 ASC_TRAIN = [
-    Beta(f'ASC_TRAIN_class{i}', 0, None, None, 0)
-    for i in range(NUMBER_OF_CLASSES)
+    Beta(f'ASC_TRAIN_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_TRAIN_S = [
-    Beta(f'ASC_TRAIN_S_class{i}', 1, None, None, 0)
-    for i in range(NUMBER_OF_CLASSES)
+    Beta(f'ASC_TRAIN_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_TRAIN_RND = [
-    ASC_TRAIN[i]
-    + ASC_TRAIN_S[i] * bioDraws(f'ASC_TRAIN_RND_class{i}', 'NORMAL_ANTI')
+    ASC_TRAIN[i] + ASC_TRAIN_S[i] * bioDraws(f'ASC_TRAIN_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
-ASC_SM = [
-    Beta(f'ASC_SM_class{i}', 0, None, None, 1) for i in range(NUMBER_OF_CLASSES)
-]
+ASC_SM = [Beta(f'ASC_SM_class{i}', 0, None, None, 1) for i in range(NUMBER_OF_CLASSES)]
 ASC_SM_S = [
-    Beta(f'ASC_SM_S_class{i}', 1, None, None, 0)
-    for i in range(NUMBER_OF_CLASSES)
+    Beta(f'ASC_SM_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_SM_RND = [
     ASC_SM[i] + ASC_SM_S[i] * bioDraws(f'ASC_SM_RND_class{i}', 'NORMAL_ANTI')
@@ -105,9 +92,7 @@ B_TIME_RND[0] = 0
 
 # Utility functions
 V1 = [
-    ASC_TRAIN_RND[i]
-    + B_TIME_RND[i] * TRAIN_TT_SCALED
-    + B_COST[i] * TRAIN_COST_SCALED
+    ASC_TRAIN_RND[i] + B_TIME_RND[i] * TRAIN_TT_SCALED + B_COST[i] * TRAIN_COST_SCALED
     for i in range(NUMBER_OF_CLASSES)
 ]
 V2 = [

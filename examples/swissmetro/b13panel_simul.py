@@ -56,9 +56,7 @@ ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'NORMAL_ANTI')
 
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_TRAIN_S = Beta('ASC_TRAIN_S', 1, None, None, 0)
-ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws(
-    'ASC_TRAIN_RND', 'NORMAL_ANTI'
-)
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'NORMAL_ANTI')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)

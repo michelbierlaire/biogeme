@@ -12,7 +12,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, log
 from biogeme.results import compileEstimationResults, pareto_optimal
-from biogeme.multiple_expressions import Catalog
+from biogeme.catalog import Catalog
 from swissmetro import (
     database,
     CHOICE,
@@ -43,20 +43,13 @@ SEGMENTED_ASC_TRAIN = MALE * ASC_TRAIN_MALE + (1 - MALE) * ASC_TRAIN_FEMALE
 
 # We define a catalog with two different specifications for the ASC_CAR
 ASC_CAR_catalog = Catalog.from_dict(
-    'ASC_CAR_catalog',
-    {
-        'homog_asc_car': ASC_CAR,
-        'seg_asc_car': SEGMENTED_ASC_CAR
-    }
+    'ASC_CAR_catalog', {'homog_asc_car': ASC_CAR, 'seg_asc_car': SEGMENTED_ASC_CAR}
 )
 
 # We define a catalog with two different specifications for the ASC_TRAIN
 ASC_TRAIN_catalog = Catalog.from_dict(
     'ASC_TRAIN_catalog',
-    {
-        'homog_asc_train': ASC_TRAIN,
-        'seg_asc_train': SEGMENTED_ASC_TRAIN
-    }
+    {'homog_asc_train': ASC_TRAIN, 'seg_asc_train': SEGMENTED_ASC_TRAIN},
 )
 
 # Definition of the utility functions with linear cost
@@ -78,25 +71,20 @@ logprob = models.loglogit(V, av, CHOICE)
 
 # We define a catalog with two different specifications for the ASC_CAR
 log_ASC_CAR_catalog = Catalog.from_dict(
-    'log_ASC_CAR_catalog',
-    {
-        'homog_asc_car': ASC_CAR,
-        'seg_asc_car': SEGMENTED_ASC_CAR
-    }
+    'log_ASC_CAR_catalog', {'homog_asc_car': ASC_CAR, 'seg_asc_car': SEGMENTED_ASC_CAR}
 )
 
 # We define a catalog with two different specifications for the ASC_TRAIN
 log_ASC_TRAIN_catalog = Catalog.from_dict(
     'log_ASC_TRAIN_catalog',
-    {
-        'homog_asc_train': ASC_TRAIN,
-        'seg_asc_train': SEGMENTED_ASC_TRAIN
-    }
+    {'homog_asc_train': ASC_TRAIN, 'seg_asc_train': SEGMENTED_ASC_TRAIN},
 )
 
 
 # Definition of the utility functions with log cost
-log_V1 = log_ASC_TRAIN_catalog + B_TIME * log(TRAIN_TT_SCALED) + B_COST * TRAIN_COST_SCALED
+log_V1 = (
+    log_ASC_TRAIN_catalog + B_TIME * log(TRAIN_TT_SCALED) + B_COST * TRAIN_COST_SCALED
+)
 log_V2 = B_TIME * log(SM_TT_SCALED) + B_COST * SM_COST_SCALED
 log_V3 = log_ASC_CAR_catalog + B_TIME * log(CAR_TT_SCALED) + B_COST * CAR_CO_SCALED
 
@@ -112,7 +100,7 @@ catalog_of_expressions = Catalog.from_dict(
     {
         'linear_spec': logprob,
         'log_spec': log_logprob,
-    }
+    },
 )
 
 biogeme = bio.BIOGEME(database, catalog_of_expressions)
@@ -121,14 +109,16 @@ dict_of_results = biogeme.estimate_catalog()
 print(f'A total of {len(dict_of_results)} models have been estimated:')
 for config, res in dict_of_results.items():
     print(f'{config}: LL={res.data.logLike:.2f} K={res.data.nparam}')
-    
+
 non_dominated_models = pareto_optimal(dict_of_results)
 print(f'Out of them, {len(non_dominated_models)} are non dominated.')
 for config, res in non_dominated_models.items():
     print(f'{config}')
 
 
-summary, description= compileEstimationResults(non_dominated_models, use_short_names=True)
+summary, description = compileEstimationResults(
+    non_dominated_models, use_short_names=True
+)
 print(summary)
 for k, v in description.items():
     if k != v:

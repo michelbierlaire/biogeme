@@ -77,7 +77,7 @@ ASC_CAR_catalog = Catalog.from_dict(
         'gender_segment': ASC_CAR_gender_segmentation.segmented_beta(),
         'luggage_segment': ASC_CAR_luggage_segmentation.segmented_beta(),
         'GA_segment': ASC_CAR_GA_segmentation.segmented_beta(),
-    }
+    },
 )
 
 ASC_TRAIN_catalog = SynchronizedCatalog.from_dict(
@@ -88,25 +88,19 @@ ASC_TRAIN_catalog = SynchronizedCatalog.from_dict(
         'luggage_segment': ASC_TRAIN_luggage_segmentation.segmented_beta(),
         'GA_segment': ASC_TRAIN_GA_segmentation.segmented_beta(),
     },
-    ASC_CAR_catalog
+    ASC_CAR_catalog,
 )
 
 # We define a catalog with two different specifications for headway
 TRAIN_HEADWAY_catalog = Catalog.from_dict(
     'TRAIN_HEADWAY_catalog',
-    {
-        'without_headway': 0,
-        'with_headway': B_HEADWAY * TRAIN_HE
-    }
+    {'without_headway': 0, 'with_headway': B_HEADWAY * TRAIN_HE},
 )
 
 SM_HEADWAY_catalog = SynchronizedCatalog.from_dict(
     'SM_HEADWAY_catalog',
-    {
-        'without_headway': 0,
-        'with_headway': B_HEADWAY * SM_HE
-    },
-    TRAIN_HEADWAY_catalog
+    {'without_headway': 0, 'with_headway': B_HEADWAY * SM_HE},
+    TRAIN_HEADWAY_catalog,
 )
 
 
@@ -121,8 +115,7 @@ TRAIN_TT_catalog = Catalog.from_dict(
         'piecewise_1': models.piecewiseFormula(TRAIN_TT_SCALED, [0, 0.1, None]),
         'piecewise_2': models.piecewiseFormula(TRAIN_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(TRAIN_TT_SCALED, ell_TT),
-
-    }
+    },
 )
 
 SM_TT_catalog = SynchronizedCatalog.from_dict(
@@ -135,7 +128,7 @@ SM_TT_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(SM_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(SM_TT_SCALED, ell_TT),
     },
-    TRAIN_TT_catalog
+    TRAIN_TT_catalog,
 )
 
 CAR_TT_catalog = SynchronizedCatalog.from_dict(
@@ -148,7 +141,7 @@ CAR_TT_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(CAR_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(CAR_TT_SCALED, ell_TT),
     },
-    TRAIN_TT_catalog
+    TRAIN_TT_catalog,
 )
 
 ell_COST = Beta('lambda_COST', 1, None, None, 0)
@@ -162,8 +155,7 @@ TRAIN_COST_catalog = Catalog.from_dict(
         'piecewise_1': models.piecewiseFormula(TRAIN_COST_SCALED, [0, 0.1, None]),
         'piecewise_2': models.piecewiseFormula(TRAIN_COST_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(TRAIN_COST_SCALED, ell_COST),
-
-    }
+    },
 )
 
 SM_COST_catalog = SynchronizedCatalog.from_dict(
@@ -176,7 +168,7 @@ SM_COST_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(SM_COST_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(SM_COST_SCALED, ell_COST),
     },
-    TRAIN_COST_catalog
+    TRAIN_COST_catalog,
 )
 
 CAR_COST_catalog = SynchronizedCatalog.from_dict(
@@ -189,18 +181,17 @@ CAR_COST_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(CAR_CO_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(CAR_CO_SCALED, ell_COST),
     },
-    TRAIN_COST_catalog
+    TRAIN_COST_catalog,
 )
-
 
 
 # Definition of the utility functions with linear cost
 V1 = (
-    ASC_TRAIN_catalog +
-    B_TIME * TRAIN_TT_catalog +
-    B_COST * TRAIN_COST_catalog +
-    TRAIN_HEADWAY_catalog
-    )
+    ASC_TRAIN_catalog
+    + B_TIME * TRAIN_TT_catalog
+    + B_COST * TRAIN_COST_catalog
+    + TRAIN_HEADWAY_catalog
+)
 V2 = B_TIME * SM_TT_catalog + B_COST * SM_COST_catalog + SM_HEADWAY_catalog
 V3 = ASC_CAR_catalog + B_TIME * CAR_TT_catalog + B_COST * CAR_COST_catalog
 
@@ -223,16 +214,16 @@ biogeme = bio.BIOGEME(database, logprob)
 nbr = logprob.number_of_multiple_expressions()
 print(f'There a {nbr} possible specifications')
 assisted_specification = AssistedSpecification(
-    biogeme,
-    AIC_BIC_dimension,
-    pareto_filename
+    biogeme, AIC_BIC_dimension, pareto_filename
 )
 print(assisted_specification.statistics())
-non_dominated_models = assisted_specification.run(max_neighborhood=20, number_of_neighbors=20,)
+non_dominated_models = assisted_specification.run(
+    max_neighborhood=20,
+    number_of_neighbors=20,
+)
 
 summary, description = compileEstimationResults(
-    non_dominated_models,
-    use_short_names=True
+    non_dominated_models, use_short_names=True
 )
 print(summary)
 for k, v in description.items():
@@ -240,5 +231,3 @@ for k, v in description.items():
         print(f'{k}: {v}')
 
 assisted_specification.plot()
-
-        

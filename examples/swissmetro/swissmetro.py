@@ -32,7 +32,7 @@ MALE = Variable('MALE')
 GROUP = Variable('GROUP')
 TRAIN_HE = Variable('TRAIN_HE')
 SM_HE = Variable('SM_HE')
-
+INCOME = Variable('INCOME')
 # Removing some observations can be done directly using pandas.
 # remove = (((database.data.PURPOSE != 1) &
 #           (database.data.PURPOSE != 3)) |
@@ -41,8 +41,6 @@ SM_HE = Variable('SM_HE')
 # Here we use the "biogeme" way:
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
-
-
 
 
 # Definition of new variables
@@ -56,4 +54,3 @@ SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100)
 SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
 CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
 CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
-

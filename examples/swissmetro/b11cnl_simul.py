@@ -73,16 +73,14 @@ try:
     results = res.bioResults(pickleFile='11cnl.pickle')
 except excep.biogemeError:
     print(
-        'Run first the script 11cnl.py in order to generate the file '
-        '11cnl.pickle.'
+        'Run first the script 11cnl.py in order to generate the file ' '11cnl.pickle.'
     )
     sys.exit()
 
 print('Estimation results: ', results.getEstimatedParameters())
 
 print(
-    'Calculating correlation matrix. '
-    'It may generate numerical warnings from scipy.'
+    'Calculating correlation matrix. ' 'It may generate numerical warnings from scipy.'
 )
 corr = calculate_correlation(
     nests, results, alternative_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'}

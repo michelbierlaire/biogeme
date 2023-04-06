@@ -41,8 +41,6 @@ exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
 database.remove(exclude)
 
 
-
-
 # Definition of new variables
 SM_COST = database.DefineVariable('SM_COST', SM_CO * (GA == 0))
 TRAIN_COST = database.DefineVariable('TRAIN_COST', TRAIN_CO * (GA == 0))

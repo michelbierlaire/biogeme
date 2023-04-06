@@ -94,9 +94,7 @@ ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'TRIANGULAR')
 
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_TRAIN_S = Beta('ASC_TRAIN_S', 1, None, None, 0)
-ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws(
-    'ASC_TRAIN_RND', 'TRIANGULAR'
-)
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'TRIANGULAR')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
@@ -110,9 +108,7 @@ TRAIN_COST = TRAIN_CO * (GA == 0)
 CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
 TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
 TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
-TRAIN_COST_SCALED = database.DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100
-)
+TRAIN_COST_SCALED = database.DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100)
 SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
 SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
 CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
