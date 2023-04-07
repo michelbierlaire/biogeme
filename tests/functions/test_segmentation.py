@@ -46,7 +46,6 @@ class test_segmentation(unittest.TestCase):
 
         list_of_expressions = [str(e) for e in one_segmentation.list_of_expressions()]
         expected_list = [
-            '(beta_1st(init=1) * (x == `1.0`))',
             '(beta_2nd(init=1) * (x == `2.0`))',
             '(beta_3rd(init=1) * (x == `3.0`))',
         ]
@@ -54,7 +53,6 @@ class test_segmentation(unittest.TestCase):
 
         list_of_code = one_segmentation.list_of_code()
         expected_list = [
-            "beta_1st * (Variable('x') == 1)",
             "beta_2nd * (Variable('x') == 2)",
             "beta_3rd * (Variable('x') == 3)",
         ]
@@ -90,7 +88,6 @@ class test_segmentation(unittest.TestCase):
         )
 
         beta_code = the_segmentation.beta_code()
-        print(beta_code)
         expected_code = "Beta('test', 0, -10, 10, 0)"
         self.assertEqual(beta_code, expected_code)
 
