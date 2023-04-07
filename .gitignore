@@ -378,3 +378,4 @@ src/biogeme/cpp/cythonbiogeme.cpp
 src/biogeme/.DS_Store
 src/biogeme/cpp/.DS_Store
 .coverage
+src/.DS_Store
