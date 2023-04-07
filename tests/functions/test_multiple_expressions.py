@@ -19,11 +19,8 @@ import biogeme.exceptions as excep
 import biogeme.expressions as ex
 import biogeme.catalog as cat
 import biogeme.segmentation as seg
+from biogeme.elementary_expressions import TypeOfElementaryExpression
 from biogeme.configuration import Configuration
-from biogeme.logging import get_screen_logger, DEBUG
-
-logger = get_screen_logger(DEBUG)
-
 
 class TestMultipleExpressions(unittest.TestCase):
     def setUp(self):
@@ -98,7 +95,7 @@ class TestMultipleExpressions(unittest.TestCase):
             _ = cat.Catalog('the_name', wrong_tuple)
 
     def test_names(self):
-        result = [e.name for e in self.catalog_1.tuple_of_named_expressions]
+        result = [e.name for e in self.catalog_1.list_of_named_expressions]
         correct_result = ['g1_first', 'g1_second']
         self.assertListEqual(result, correct_result)
 
@@ -145,6 +142,47 @@ class TestMultipleExpressions(unittest.TestCase):
         self.assertEqual(the_number, correct_number)
 
 
+    def test_synchronized(self):
+        expression = self.synchronized_expression
+        conf_1 = Configuration.from_dict({'catalog_40': 'one'})
+        conf_2 = Configuration.from_dict({'catalog_60': 'two', 'catalog_40': 'c60'})
+        conf_3 = Configuration.from_dict({'catalog_60': 'three', 'catalog_40': 'c60'})
+
+        check_1 = Configuration.from_dict(
+            {
+                'catalog_40': 'one',
+                'catalog_50': 'four',
+            }
+        )
+
+        check_2 = Configuration.from_dict(
+            {
+                'catalog_40': 'c60',
+                'catalog_50': 'c70',
+                'catalog_60': 'two',
+                'catalog_70': 'five'
+            }
+        )
+        check_3 = Configuration.from_dict(
+            {
+                'catalog_40': 'c60',
+                'catalog_50': 'c70',
+                'catalog_60': 'three',
+                'catalog_70': 'six'
+            }
+        )
+        expression.configure_catalogs(conf_1)
+        actual_1 = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_1, actual_1)
+
+        expression.configure_catalogs(conf_2)
+        actual_2 = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_2, actual_2)
+
+        expression.configure_catalogs(conf_3)
+        actual_3 = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_3, actual_3)
+        
     def test_select_expression(self):
         expression = self.catalog_1 + self.catalog_2
         expression.reset_expression_selection()
@@ -308,7 +346,6 @@ class TestMultipleExpressions(unittest.TestCase):
             segmentation1,
             segmentation2,
         )
-
         the_catalog = cat.segmentation_catalog(
             beta,
             tuple_of_segmentations,
@@ -322,6 +359,10 @@ class TestMultipleExpressions(unittest.TestCase):
             Configuration.from_dict({'segmented_beta': 'var1-var2'}),
         }
         self.assertSetEqual(configurations, correct_configuration)
+
+        for c in the_catalog:
+            the_betas = c.dict_of_elementary_expression(TypeOfElementaryExpression.FREE_BETA)
+        
         the_catalog = cat.segmentation_catalog(
             beta,
             tuple_of_segmentations,
@@ -334,7 +375,7 @@ class TestMultipleExpressions(unittest.TestCase):
             Configuration.from_dict({'segmented_beta': 'var1'}),
         }
         self.assertSetEqual(configurations, correct_configuration)
-
+            
     def test_set_of_configurations(self):
         expression = self.catalog_1 + self.catalog_2
         the_set = expression.set_of_configurations()
@@ -363,5 +404,139 @@ class TestMultipleExpressions(unittest.TestCase):
         }
         self.assertSetEqual(the_set, the_correct_set)
 
+    def test_modify_catalogs_a(self):
+        expression = self.catalog_3
+        #correct_configurations = {
+        #    Configuration.from_dict({'catalog_3': 'one'}),
+        #    Configuration.from_dict({'catalog_3': 'g2_first'}),
+        #    Configuration.from_dict({'catalog_3': 'g2_second'}),
+        #    Configuration.from_dict({'catalog_3': 'g2_third'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_first', 'catalog_3': 'g2_fourth'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_second', 'catalog_3': 'g2_fourth'}),
+        #}
+
+        a_config = Configuration.from_dict({'catalog_3': 'g2_first'})
+        expression.configure_catalogs(a_config)
+        check_config = expression.current_configuration()
+        self.assertEqual(a_config, check_config)
+
+        expression.modify_catalogs({'catalog_3'}, -1, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_3': 'one'}
+        )
+        self.assertEqual(correct_config, check_config)
+
+        expression.modify_catalogs({'catalog_3', 'catalog_1'}, 3, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_3': 'g2_third'}
+        )
+        self.assertEqual(correct_config, check_config)
+        
+        expression.modify_catalogs({'catalog_3'}, 1, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_3': 'g2_fourth', 'catalog_1': 'g1_second'}
+        )
+        self.assertEqual(correct_config, check_config)
+        
+    def test_modify_catalogs_b(self):
+        expression = self.catalog_1 + self.catalog_2
+        
+        # Set of configurations for this expressions
+        #the_correct_set = {
+        #    Configuration.from_dict({'catalog_1': 'g1_first', 'catalog_2': 'g2_first'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_first', 'catalog_2': 'g2_second'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_first', 'catalog_2': 'g2_third'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_second', 'catalog_2': 'g2_first'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_second', 'catalog_2': 'g2_second'}),
+        #    Configuration.from_dict({'catalog_1': 'g1_second', 'catalog_2': 'g2_third'}),
+        #}
+        a_config = Configuration.from_dict({'catalog_1': 'g1_second', 'catalog_2': 'g2_first'})
+        expression.configure_catalogs(a_config)
+        check_config = expression.current_configuration()
+        self.assertEqual(a_config, check_config)
+        
+        expression.modify_catalogs({'catalog_2'}, 1, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_second'}
+        )
+        self.assertEqual(correct_config, check_config)
+
+        expression.modify_catalogs({'catalog_2'}, 3, False)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_third'}
+        )
+        self.assertEqual(correct_config, check_config)
+
+        expression.modify_catalogs({'catalog_2'}, -3, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_third'}
+        )
+        self.assertEqual(correct_config, check_config)
+
+        expression.modify_catalogs({'catalog_1'}, -1, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_1': 'g1_first', 'catalog_2': 'g2_third'}
+        )
+        self.assertEqual(correct_config, check_config)
+
+        expression.modify_catalogs({'catalog_1', 'catalog_2'}, -1, True)
+        check_config = expression.current_configuration()
+        correct_config = Configuration.from_dict(
+            {'catalog_1': 'g1_second', 'catalog_2': 'g2_second'}
+        )
+        self.assertEqual(correct_config, check_config)
+        
+    def test_modify_catalogs_c(self):
+        expression = self.synchronized_expression
+        conf_1 = Configuration.from_dict({'catalog_40': 'one'})
+        conf_2 = Configuration.from_dict({'catalog_60': 'two', 'catalog_40': 'c60'})
+        conf_3 = Configuration.from_dict({'catalog_60': 'three', 'catalog_40': 'c60'})
+
+        check_1 = Configuration.from_dict(
+            {
+                'catalog_40': 'one',
+                'catalog_50': 'four',
+            }
+        )
+
+        check_2 = Configuration.from_dict(
+            {
+                'catalog_40': 'c60',
+                'catalog_50': 'c70',
+                'catalog_60': 'two',
+                'catalog_70': 'five'
+            }
+        )
+        check_3 = Configuration.from_dict(
+            {
+                'catalog_40': 'c60',
+                'catalog_50': 'c70',
+                'catalog_60': 'three',
+                'catalog_70': 'six'
+            }
+        )
+        
+        expression.configure_catalogs(conf_1)
+        # This should not do anything, as catalog_50 is controlled
+        expression.modify_catalogs({'catalog_50'}, -1, True)
+        check_config = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_config, check_1)
+        expression.modify_catalogs({'catalog_40'}, -1, True)
+        check_config = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_config, check_2)
+        expression.modify_catalogs({'catalog_40', 'catalog_60'}, 1, True)
+        check_config = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_config, check_1)
+        expression.modify_catalogs({'catalog_40'}, 1, False)
+        check_config = expression.current_configuration(includes_controlled_catalogs=True)
+        self.assertEqual(check_config, check_3)
+        
 if __name__ == '__main__':
     unittest.main()
