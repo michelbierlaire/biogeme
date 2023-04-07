@@ -15,6 +15,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 import biogeme.database as db
 import biogeme.cythonbiogeme as cb
@@ -464,10 +465,10 @@ class BIOGEME:
 
     @property
     def generateHtml(self):
-        logger.warning('Obsolete syntax. Use generate_html instead of generateHtml')
         """Boolean variable, True if the HTML file with the results must
         be generated.
         """
+        logger.warning('Obsolete syntax. Use generate_html instead of generateHtml')
         return self.toml.parameters.get_value('generate_html')
 
     @generateHtml.setter
@@ -1110,8 +1111,9 @@ class BIOGEME:
 
         if selected_configurations is None:
             number_of_specifications = self.loglike.number_of_multiple_expressions()
+            logger.info(f'Estimating {number_of_specifications} models.')
             #            logger.debug(f'{number_of_specifications=}')
-            #            logger.debug(f'{self.maximum_number_catalog_expressions=}')
+            # logger.info(f'{self.maximum_number_catalog_expressions=}')
 
             if number_of_specifications > self.maximum_number_catalog_expressions:
                 error_msg = (
@@ -1130,16 +1132,17 @@ class BIOGEME:
                 self.loglike, selected_configurations
             )
         configurations = {}
-        for config, expression in the_iterator:
-            config_id = config.get_string_id()
-            b = BIOGEME(self.database, expression)
-            b.modelName = config_id
-            if quick_estimate:
-                results = b.quickEstimate(recycle=recycle, bootstrap=bootstrap)
-            else:
-                results = b.estimate(recycle=recycle, bootstrap=bootstrap)
+        with logging_redirect_tqdm():
+            for expression in the_iterator:
+                config_id = expression.current_configuration().get_string_id()
+                b = BIOGEME(self.database, expression)
+                b.modelName = config_id
+                if quick_estimate:
+                    results = b.quickEstimate(recycle=recycle, bootstrap=bootstrap)
+                else:
+                    results = b.estimate(recycle=recycle, bootstrap=bootstrap)
 
-            configurations[config_id] = results
+                configurations[config_id] = results
         return configurations
 
     def estimate(

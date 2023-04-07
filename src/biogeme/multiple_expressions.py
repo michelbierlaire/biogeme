@@ -9,7 +9,12 @@ import logging
 import abc
 from collections import namedtuple
 import biogeme.expressions as ex
-from biogeme.configuration import SelectionTuple
+from biogeme.configuration import (
+    SelectionTuple,
+    Configuration,
+    SEPARATOR,
+    SELECTION_SEPARATOR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +30,12 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
     """
 
     def __init__(self, name):
+        if SEPARATOR in name or SELECTION_SEPARATOR in name:
+            error_msg = (
+                f'Invalid name: {name}. Cannot contain characters '
+                f'{SELECTION_SEPARATOR} or {SELECTION_SEPARATOR}'
+            )
+            raise excep.biogemeError(error_msg)
         super().__init__()
         self.name = name
 
@@ -67,6 +78,10 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
             is set to the last one. It works symmetrically if the step
             is negative
         :type circular: bool
+
+        :return: number of actual modifications
+        :rtype: int
+
         """
 
     @abc.abstractmethod

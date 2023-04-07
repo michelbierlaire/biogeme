@@ -1585,7 +1585,8 @@ def compileEstimationResults(
         reporting.
     :type use_short_names: bool
 
-    :return: pandas dataframe with the requested results, and the specification of each model
+    :return: pandas dataframe with the requested results, and the
+        specification of each model
     :rtype: tuple(pandas.DataFrame, dict(str:dict(str:str)))
 
     """
@@ -1710,17 +1711,23 @@ def compile_results_in_directory(
     )
 
 
-def pareto_optimal(dict_of_results):
+def pareto_optimal(dict_of_results, a_pareto=None):
     """Identifies the non dominated models, with respect to maximum
     log likelihood and minimum number of parameters
 
     :param dict_of_results: dict of results associated with their config ID
     :type named_results: dict(str:bioResults)
 
-    :return: a list of named results with pareto optimal results
-    :rtype: list(NamedResults)
+    :param pareto: if not None, Pareto set where the results will be inserted.
+    :type pareto: biogeme.pareto.Pareto
+
+    :return: a dict of named results with pareto optimal results
+    :rtype: dict(str: biogeme.results.bioResult)
     """
-    the_pareto = pareto.Pareto()
+    if pareto is None:
+        the_pareto = pareto.Pareto()
+    else:
+        the_pareto = a_pareto
     for config_id, res in dict_of_results.items():
         the_element = pareto.SetElement(
             element_id=config_id, objectives=[-res.data.logLike, res.data.nparam]
@@ -1731,6 +1738,7 @@ def pareto_optimal(dict_of_results):
         element.element_id: dict_of_results[element.element_id]
         for element in the_pareto.pareto
     }
+    the_pareto.dump()
     return selected_results
 
 

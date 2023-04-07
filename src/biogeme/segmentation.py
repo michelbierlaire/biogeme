@@ -10,7 +10,6 @@ from biogeme.expressions import Beta, bioMultSum
 import biogeme.exceptions as excep
 
 
-@dataclass
 class DiscreteSegmentationTuple:
     """Characterization of a segmentation"""
 
@@ -41,7 +40,19 @@ class DiscreteSegmentationTuple:
                 f'of categories: {mapping.values()}'
             )
             raise excep.biogemeError(error_msg)
-        self.reference = reference
+        else:
+            self.reference = reference
+
+        if self.reference is None:
+            raise excep.biogemeError('Reference should not be None')
+
+    def __repr__(self):
+        result = f'{self.variable.name}: [{self.mapping}] ref: {self.reference}'
+        return result
+
+    def __str__(self):
+        result = f'{self.variable.name}: [{self.mapping}] ref: {self.reference}'
+        return result
 
 
 class OneSegmentation:
@@ -210,10 +221,18 @@ class Segmentation:
         :rtype: biogeme.expressions.Expression
 
         """
-        terms = [self.beta]
+        ref_beta = Beta(
+            name=self.beta.name,
+            value=self.beta.initValue,
+            lowerbound=self.beta.lb,
+            upperbound=self.beta.ub,
+            status=self.beta.status,
+        )
+        terms = [ref_beta]
         terms += [
             element for s in self.segmentations for element in s.list_of_expressions()
         ]
+
         return bioMultSum(terms)
 
     def segmented_code(self):

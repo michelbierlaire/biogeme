@@ -58,7 +58,7 @@ class Configuration:
         for term in terms:
             catalog, selection = term.split(SELECTION_SEPARATOR)
             the_config[catalog] = selection
-            return cls.from_dict(the_config)
+        return cls.from_dict(the_config)
 
     @classmethod
     def from_dict(cls, dict_of_selections):
@@ -95,10 +95,6 @@ class Configuration:
                     if selection.catalog not in known_catalogs:
                         list_of_selections.append(selection)
                         known_catalogs.add(selection.catalog)
-                    else:
-                        logger.warning(
-                            f'Catalog {selection.catalog} appears several times.'
-                        )
         return cls(list_of_selections)
 
     def set_of_catalogs(self):

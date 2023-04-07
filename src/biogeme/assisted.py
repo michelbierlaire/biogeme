@@ -11,8 +11,8 @@ import random
 from biogeme import vns
 from biogeme import biogeme
 import biogeme.exceptions as excep
-from biogeme.results import pareto_optimal
 from biogeme.pareto import SetElement
+from biogeme.elementary_expressions import TypeOfElementaryExpression
 from biogeme.vns import ParetoClass
 from biogeme.configuration import Configuration
 
@@ -38,6 +38,9 @@ class Specification:
         :param configuration: configuration of the multiple expression
         :type configuration: biogeme.configuration.Configuration
         """
+        if not isinstance(configuration, Configuration):
+            error_msg = 'Ctor needs an object of type Configuration'
+            raise excep.biogemeError(error_msg)
         if self.pareto is None:
             raise excep.biogemeError('Pareto set has not been initialized.')
         self.configuration = configuration
@@ -116,6 +119,61 @@ class Specification:
 
 
 # Operators
+
+
+def modify_several_catalogs(selected_catalogs, element, step):
+    """Modify several catalogs in the specification
+
+    :param selected_catalogs: names of the catalogs to be modified. If
+        a name does not appear in the current configuration, it is
+        ignored.
+    :type selected_catalogs: set(str)
+
+    :param element: ID of the current specification
+    :type element: class SetElement
+
+    :param step: shift to apply to each catalog
+    :type step: int
+
+    :param size: number of catalofs to modify
+    :type size: int
+
+    :return: Id of the neighbor, and actual number of modifications
+    :rtype: tuple(SetElement, int)
+
+    """
+    specification = Specification.from_string_id(element.element_id)
+    number_of_modifications = specification.expression.modify_catalogs(
+        selected_catalogs, step=step, circular=True
+    )
+    new_specification = Specification(specification.expression.current_configuration())
+    return new_specification.get_element(), number_of_modifications
+
+
+def modify_random_catalogs(element, step, size=1):
+    """Modify several catalogs in the specification
+
+    :param element: ID of the current specification
+    :type element: class SetElement
+
+    :param step: shift to apply to each catalog
+    :type step: int
+
+    :param size: number of catalofs to modify
+    :type size: int
+
+    :return: Id of the neighbor, and actual number of modifications
+    :rtype: tuple(SetElement, int)
+    """
+    specification = Specification.from_string_id(element.element_id)
+    the_catalogs = list(specification.configuration.set_of_catalogs())
+    actual_size = max(size, len(the_catalogs))
+    the_selected_catalogs = set(random.choices(the_catalogs, k=actual_size))
+    return modify_several_catalogs(
+        selected_catalogs=the_selected_catalogs, element=element, step=step
+    )
+
+
 def increase_configuration(catalog_name, element, size=1):
     """Change the configuration of a catalog
 
@@ -133,20 +191,9 @@ def increase_configuration(catalog_name, element, size=1):
     :rtype: tuple(class SetElement, int)
 
     """
-    logger.debug(f'Increase config for {catalog_name} {size=}')
-    logger.debug(f'Current config: {element.element_id}')
-    specification = Specification.from_string_id(element.element_id)
-    try:
-        specification.expression.increment_catalog(catalog_name, step=size)
-    except excep.valueOutOfRange:
-        logger.debug('Value out of range')
-
-        return specification.get_element(), 0
-
-    new_specification = Specification(specification.expression.current_configuration())
-    logger.debug(f'New config: {new_specification.get_element().element_id}')
-
-    return new_specification.get_element(), size
+    return modify_several_catalogs(
+        selected_catalogs={catalog_name}, element=element, step=size
+    )
 
 
 def decrease_configuration(catalog_name, element, size=1):
@@ -166,44 +213,9 @@ def decrease_configuration(catalog_name, element, size=1):
     :rtype: tuple(class SetElement, int)
 
     """
-    logger.debug(f'Decrease config for {catalog_name} {size=}')
-    logger.debug(f'Current config: {element.element_id}')
-    specification = Specification(element.element_id)
-    try:
-        specification.expression.increment_catalog(catalog_name, step=-size)
-    except excep.valueOutOfRange:
-        return specification.get_element(), 0
-
-    new_specification = Specification(specification.expression.current_configuration())
-
-    return new_specification.get_element(), size
-
-def modify_several_catalogs(element, step, size=1):
-    """Modify several catalogs in the specification
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param step: shift to apply to each catalog
-    :type step: int
-    
-    :param size: number of catalofs to modify
-    :type size: int
-
-    :return: Id of the neighbor, and actual number of modifications
-    :rtype: tuple(SetElement, int)
-    """
-    specification = Specification(element.element_id)
-    the_catalogs = list(specification.configuration.set_of_catalogs())
-    actual_size = max(size, len(the_catalogs))
-    the_selected_catalogs = set(random.choices(the_catalogs, k=actual_size))
-    specification.expression.modify_catalogs(
-        the_selected_catalogs, step=step, circular=True
+    return modify_several_catalogs(
+        selected_catalogs={catalog_name}, element=element, step=-size
     )
-    new_specification = Specification(
-        specification.expression.current_configuration()
-    )
-    return new_specification.get_element(), actual_size
 
 
 def increment_several_catalogs(element, size=1):
@@ -218,7 +230,8 @@ def increment_several_catalogs(element, size=1):
     :return: Id of the neighbor, and actual number of modifications
     :rtype: tuple(SetElement, int)
     """
-    return modify_several_catalogs(element=element, step=1, size=size)
+    return modify_random_catalogs(element=element, step=1, size=size)
+
 
 def decrement_several_catalogs(element, size=1):
     """Increment several catalogs in the specification
@@ -232,7 +245,7 @@ def decrement_several_catalogs(element, size=1):
     :return: Id of the neighbor, and actual number of modifications
     :rtype: tuple(SetElement, int)
     """
-    return modify_several_catalogs(element=element, step=1, size=size)
+    return modify_random_catalogs(element=element, step=1, size=size)
 
 
 def generate_operator(name, the_function):
@@ -330,25 +343,27 @@ class AssistedSpecification(vns.ProblemClass):
         """
         return True, None
 
-    def reestimate(self, model_ids):
+    def reestimate(self):
         """The assisted specification uses quickEstimate to estimate
         the models. A complete estimation is necessary to obtain the
         full estimation results.
 
         """
-
         new_results = {}
-        for config_id in model_ids:
+        for element in self.pareto.pareto:
+            config_id = element.element_id
+            logger.debug(f'REESTIMATE {config_id}')
             config = Configuration.from_string(config_id)
             self.expression.configure_catalogs(config)
+            self.expression.locked = True
             b = biogeme.BIOGEME(self.database, self.expression)
             b.modelName = config_id
             the_result = b.estimate()
             new_results[config_id] = the_result
-
+            self.expression.locked = False
         return new_results
 
-    def run(self, number_of_neighbors=20, reestimate=True):
+    def run(self, number_of_neighbors=20):
         """Runs the VNS algorithm
 
         :return: object containing the estimation results associated
@@ -357,57 +372,80 @@ class AssistedSpecification(vns.ProblemClass):
 
         """
         logger.debug('Run assisted specification')
+        logger.debug('Pareto solutions BEFORE')
+        for elem in self.pareto.pareto:
+            logger.debug(elem.element_id)
         # We first try to estimate all possible configurations
-        try:
-            all_results = self.biogeme_object.estimate_catalog(quick_estimate=True)
-        except excep.valueOutOfRange:
-            logger.debug('Prepare the heuristic')
-            Specification.database = self.biogeme_object.database
-            Specification.expression = self.biogeme_object.loglike
-            Specification.pareto = self.pareto
-            logger.debug('Default specification')
-            default_specification = Specification.default_specification()
-            logger.debug('Default specification: done')
-            logger.debug('Run the heuristic')
-            pareto_before = self.pareto.length_of_all_sets()
+        Specification.database = self.biogeme_object.database
+        Specification.expression = self.biogeme_object.loglike
+        Specification.pareto = self.pareto
+        logger.debug('Default specification')
+        default_specification = Specification.default_specification()
+        logger.debug('Default specification: done')
+        pareto_before = self.pareto.length_of_all_sets()
+
+        # Check if we can estimate everything
+        number_of_specifications = (
+            self.biogeme_object.loglike.number_of_multiple_expressions()
+        )
+        maximum_number = self.biogeme_object.maximum_number_catalog_expressions
+        if number_of_specifications <= maximum_number:
+            logger.info('We consider all possible combinations of the catalogs.')
+            for c in self.biogeme_object.loglike:
+                the_config = c.current_configuration()
+                _ = Specification(the_config)
+        else:
+            logger.info(
+                f'The number of possible specifications [{number_of_specifications}] '
+                f'exceeds the maximum number [{maximum_number}]. '
+                f'A heuristc algorithm is applied.'
+            )
+
             self.pareto = vns.vns(
                 problem=self,
                 first_solutions=[default_specification.get_element()],
                 pareto=self.pareto,
                 number_of_neighbors=number_of_neighbors,
             )
-            pareto_after = self.pareto.length_of_all_sets()
+        logger.debug('Pareto solutions AFTER')
+        for elem in self.pareto.pareto:
+            logger.debug(elem.element_id)
 
-            self.pareto.dump()
-            logger.info(f'Pareto file has been updated: {self.pareto.filename}')
-            logger.info(
-                f'Before the algorithm: {pareto_before[1]} models, '
-                f'with {pareto_before[0]} Pareto.'
-            )
-            logger.info(
-                f'After the algorithm: {pareto_after[1]} models, '
-                f'with {pareto_after[0]} Pareto.'
-            )
-            logger.debug('Run the heuristic: done')
+        pareto_after = self.pareto.length_of_all_sets()
 
-            if reestimate:
-                return self.reestimate(Specification.get_pareto_ids())
-            # If it is not asked to restimate, the partial results are returned
-            all_results = {
-                element.element_id: Specification.all_results[element.element_id]
-                for element in self.pareto.pareto
-            }
-            return all_results
+        self.pareto.dump()
+        logger.info(f'Pareto file has been updated: {self.pareto.filename}')
+        logger.info(
+            f'Before the algorithm: {pareto_before[1]} models, '
+            f'with {pareto_before[0]} Pareto.'
+        )
+        logger.info(
+            f'After the algorithm: {pareto_after[1]} models, '
+            f'with {pareto_after[0]} Pareto.'
+        )
 
-        non_dominated_models = pareto_optimal(all_results)
-        if reestimate:
-            return self.reestimate(non_dominated_models.keys())
-        return non_dominated_models
+        logger.info('Non dominated models are reestimated to obtain the statistics.')
+        reestimated_models = self.reestimate()
+        logger.debug('RESTIMATED MODELS')
+        for key in reestimated_models:
+            logger.debug(key)
+        logger.info('Information about the Pareto set')
+        self.log_statistics()
+        return reestimated_models
+
+    def log_statistics(self):
+        """Report some statistics about the process in the logger"""
+        for msg in self.statistics():
+            logger.info(msg)
 
     def statistics(self):
-        """Report some statistics about the process"""
+        """Report some statistics about the process
+
+        :return: tuple of messages, possibly empty.
+        :rtype: tuple(str)
+        """
         if self.pareto is None:
-            return ''
+            return tuple()
         msg = (
             f'Initial Pareto: {self.pareto.size_init_pareto} ',
             f'Initial considered: {self.pareto.size_init_considered} ',

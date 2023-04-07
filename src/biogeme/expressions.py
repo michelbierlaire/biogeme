@@ -122,7 +122,18 @@ class Expression:
         """ Value interpreted as missing data
         """
 
+        self.locked = False
+        """ Meaningful only for multiple expressions (Catalogs). If
+        True, it is not possible to change the specification.
+        """
+
     def __iter__(self):
+        if self.locked:
+            error_msg(
+                'The expression is locked. It is not possible to obtain an '
+                'iterator. Set the locked attributes to False.'
+            )
+            raise excep.biogemeError(error_msg)
         the_set = self.set_of_configurations()
         return SelectedExpressionsIterator(self, the_set)
 
@@ -1271,6 +1282,13 @@ class Expression:
 
     def reset_expression_selection(self):
         """In each group of expressions, select the first one"""
+        if self.locked:
+            error_msg(
+                'The expression is locked. It is not possible to change its '
+                'specification. Set the locked attributes to False.'
+            )
+            raise excep.biogemeError(error_msg)
+
         for e in self.children:
             e.reset_expression_selection()
 
@@ -1278,8 +1296,14 @@ class Expression:
         """Select the items in each catalog corresponding to the requested configuration
 
         :param configuration: catalog configuration
-        :type configuration: biogeme.configuration.Configure
+        :type configuration: biogeme.configuration.Configuration
         """
+        if self.locked:
+            error_msg = (
+                'The expression is locked. It is not possible to change its '
+                'specification. Set the locked attributes to False.'
+            )
+            raise excep.biogemeError(error_msg)
         for e in self.children:
             e.configure_catalogs(configuration)
 
@@ -1301,22 +1325,39 @@ class Expression:
             is set to the last one. It works symmetrically if the step
             is negative
         :type circular: bool
-        """
-        for e in self.children:
-            e.modify_catalogs(set_of_catalogs, step, circular)
 
-    def current_configuration(self):
+        :return: number of actual modifications
+        :rtype: int
+        """
+        if self.locked:
+            error_msg(
+                'The expression is locked. It is not possible to change its '
+                'specification. Set the locked attributes to False.'
+            )
+            raise excep.biogemeError(error_msg)
+        total = 0
+        for e in self.children:
+            total += e.modify_catalogs(set_of_catalogs, step, circular)
+        return total
+
+    def current_configuration(self, includes_controlled_catalogs=False):
         """Obtain the current configuration of an expression with Catalog's
 
-        :return: configuration
-        :rtype: biogeme.configuration.Configuration
+        :param includes_controlled_catalogs: if True, the controlled
+            catalogs are included in the configuration. This is used
+            mainly for debugging purposes.
+        :type includes_controlled_catalogs: bool
+
+        :return: configuration :rtype:
+        biogeme.configuration.Configuration
+
         """
         if not self.children:
             return None
         the_tuple_of_configurations = tuple(
-            e.current_configuration()
+            e.current_configuration(includes_controlled_catalogs)
             for e in self.children
-            if e.current_configuration() is not None
+            if e.current_configuration(includes_controlled_catalogs) is not None
         )
         if not the_tuple_of_configurations:
             return None
@@ -1336,6 +1377,12 @@ class Expression:
 
         :raises biogemeError: if index is out of range
         """
+        if self.locked:
+            error_msg(
+                'The expression is locked. It is not possible to change its '
+                'specification. Set the locked attributes to False.'
+            )
+            raise excep.biogemeError(error_msg)
         total = 0
         for e in self.get_children():
             total = total + e.select_expression(group_name, index)

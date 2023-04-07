@@ -10,7 +10,12 @@ from biogeme.multiple_expressions import MultipleExpression, NamedExpression
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
 import biogeme.segmentation as seg
-from biogeme.configuration import SelectionTuple, Configuration
+from biogeme.configuration import (
+    SelectionTuple,
+    Configuration,
+    SEPARATOR,
+    SELECTION_SEPARATOR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -21,35 +26,36 @@ class Catalog(MultipleExpression):
     modified algorithmically.
     """
 
-    def __init__(self, name, tuple_of_named_expressions):
+    def __init__(self, name, list_of_named_expressions):
         """Ctor
 
         :param name: name of the catalog of expressions
         :type name: str
 
-        :param tuple_of_named_expressions: tuple of NamedExpression,
+        :param list_of_named_expressions: list of NamedExpression,
             each containing a name and an expression.
-        :type tuple_of_named_expressions: tuple(NamedExpression)
+        :type list_of_named_expressions: list(NamedExpression)
 
-        :raise biogemeError: if tuple_of_named_expressions is empty
+        :raise biogemeError: if list_of_named_expressions is empty
 
         """
         super().__init__(name)
 
-        if not tuple_of_named_expressions:
+        if not list_of_named_expressions:
             raise excep.biogemeError(
-                f'{name}: cannot create a catalog from an empty tuple.'
+                f'{name}: cannot create a catalog from an empty list.'
             )
 
-        self.tuple_of_named_expressions = tuple(
+        # Transform numeric values into Biogeme expressions
+        self.list_of_named_expressions = list(
             NamedExpression(
                 name=named.name, expression=ex.process_numeric(named.expression)
             )
-            for named in tuple_of_named_expressions
+            for named in list_of_named_expressions
         )
 
         # Check if the name of the catalog was not already used.
-        for named_expression in self.tuple_of_named_expressions:
+        for named_expression in self.list_of_named_expressions:
             if named_expression.expression.contains_catalog(self.name):
                 error_msg = (
                     f'Catalog {self.name} cannot contain itself. Use different names'
@@ -59,13 +65,13 @@ class Catalog(MultipleExpression):
         self.current_index = 0
         self.dict_of_index = {
             expression.name: index
-            for index, expression in enumerate(self.tuple_of_named_expressions)
+            for index, expression in enumerate(self.list_of_named_expressions)
         }
         self.synchronized_catalogs = []
 
     @classmethod
     def from_dict(cls, catalog_name, dict_of_expressions):
-        """Ctor using a dict instead of a tuple.
+        """Ctor using a dict instead of a list.
 
         Python does not guarantee the order of elements of a dict,
         although, in practice, it is always preserved. If the order is
@@ -80,15 +86,15 @@ class Catalog(MultipleExpression):
         :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
 
         """
-        the_tuple = tuple(
+        the_list = list(
             NamedExpression(name=name, expression=expression)
             for name, expression in dict_of_expressions.items()
         )
-        return cls(catalog_name, the_tuple)
+        return cls(catalog_name, the_list)
 
     def get_iterator(self):
         """Obtain an iterator on the named expressions"""
-        return iter(self.tuple_of_named_expressions)
+        return iter(self.list_of_named_expressions)
 
     def set_index(self, index):
         """Set the index of the selected expression, and update the
@@ -105,6 +111,9 @@ class Catalog(MultipleExpression):
                 f'Wrong index {index}. ' f'Must be in [0, {self.catalog_size()}]'
             )
             raise excep.biogemeError(error_msg)
+        logger.debug(
+            f'Set catalog {self.name} to {self.list_of_named_expressions[index].name}'
+        )
         self.current_index = index
         for sync_catalog in self.synchronized_catalogs:
             sync_catalog.current_index = index
@@ -135,18 +144,24 @@ class Catalog(MultipleExpression):
         """Return the selected expression and its name
 
         :return: the name and the selected expression
-        :rtype: tuple(str, biogeme.expressions.Expression)
+        :rtype: NamedExpression
         """
-        return self.tuple_of_named_expressions[self.current_index]
+        return self.list_of_named_expressions[self.current_index]
 
-    def current_configuration(self):
+    def current_configuration(self, includes_controlled_catalogs=False):
         """Obtain the current configuration of an expression with Catalog
 
-        :return: configuration
+        :param includes_controlled_catalogs: if True, the controlled
+            catalogs are included in the configuration. This is used
+            mainly for debugging purposes.
+        :type includes_controlled_catalogs: bool
 
+        :return: configuration
         :rtype: biogeme.configuration.Configuration
         """
-        the_result = self.selected_expression().current_configuration()
+        the_result = self.selected_expression().current_configuration(
+            includes_controlled_catalogs
+        )
         current_selection = Configuration(
             [SelectionTuple(catalog=self.name, selection=self.selected_name())]
         )
@@ -168,7 +183,7 @@ class Catalog(MultipleExpression):
         if selection is not None:
             self.set_index(self.dict_of_index[selection])
 
-        for _, expr in self.tuple_of_named_expressions:
+        for _, expr in self.list_of_named_expressions:
             expr.configure_catalogs(configuration)
 
     def modify_catalogs(self, set_of_catalogs, step, circular):
@@ -189,9 +204,13 @@ class Catalog(MultipleExpression):
             is set to the last one. It works symmetrically if the step
             is negative
         :type circular: bool
+
+        :return: number of actual modifications
+        :rtype: int
+
         """
         total_modif = 0
-        for _, e in self.tuple_of_named_expressions:
+        for _, e in self.list_of_named_expressions:
             total_modif += e.modify_catalogs(set_of_catalogs, step, circular)
 
         if self.name not in set_of_catalogs:
@@ -234,7 +253,7 @@ class Catalog(MultipleExpression):
         if self.name == group_name:
             total = 1
             self.set_index(index)
-        for _, expression in self.tuple_of_named_expressions:
+        for _, expression in self.list_of_named_expressions:
             total += expression.select_expression(group_name, index)
         return total
 
@@ -311,17 +330,30 @@ class SynchronizedCatalog(Catalog):
         )
         excep.biogemeError(error_msg)
 
-    def current_configuration(self):
-        """Obtain the current configuration of an expression with Catalog's
+    def current_configuration(self, includes_controlled_catalogs=False):
+        """Obtain the current configuration of an expression with Catalog
 
-        :return: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
+        :param includes_controlled_catalogs: if True, the controlled
+            catalogs are included in the configuration. This is used
+            mainly for debugging purposes.
+        :type includes_controlled_catalogs: bool
 
-        :rtype: dict(str: str)
+        :return: configuration
+        :rtype: biogeme.configuration.Configuration
         """
-        the_result = self.selected_expression().current_configuration()
-        return the_result
+        the_result = self.selected_expression().current_configuration(
+            includes_controlled_catalogs
+        )
+        if not includes_controlled_catalogs:
+            return the_result
+        current_selection = Configuration(
+            [SelectionTuple(catalog=self.name, selection=self.selected_name())]
+        )
+        if the_result is None:
+            return Configuration.from_tuple_of_configurations((current_selection,))
+        return Configuration.from_tuple_of_configurations(
+            (the_result, current_selection)
+        )
 
     def select_expression(self, group_name, index):
         """Select a specific expression in a group
@@ -341,7 +373,7 @@ class SynchronizedCatalog(Catalog):
             )
             raise excep.biogemeError(error_msg)
         total = 0
-        for _, expression in self.tuple_of_named_expressions:
+        for _, expression in self.list_of_named_expressions:
             total += expression.select_expression(group_name, index)
         return total
 
