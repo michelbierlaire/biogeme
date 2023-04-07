@@ -7,7 +7,6 @@
  assisted specification algorithm Three alternatives: Train, Car and
 
 """
-
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, logzero
@@ -15,6 +14,8 @@ from biogeme.results import compileEstimationResults, loglikelihood_dimension
 from biogeme.catalog import Catalog, SynchronizedCatalog, segmentation_catalog
 from biogeme.segmentation import DiscreteSegmentationTuple
 from biogeme.assisted import AssistedSpecification
+from biogeme.logging import get_screen_logger, INFO
+
 from swissmetro import (
     database,
     CHOICE,
@@ -31,6 +32,9 @@ from swissmetro import (
     INCOME,
     GA,
 )
+
+logger = get_screen_logger(INFO)
+logger.info('Example b21multipleModels')
 
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -125,7 +129,6 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # observation to the log likelihood function.
 logprob = models.loglogit(V, av, CHOICE)
 
-
 print(
     f'Total number of possible specifications: '
     f'{logprob.number_of_multiple_expressions()}'
@@ -150,3 +153,5 @@ print(summary)
 for k, v in description.items():
     if k != v:
         print(f'{k}: {v}')
+
+        

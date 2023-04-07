@@ -1,11 +1,9 @@
-"""File 22multipleModels.py
+"""File 22multipleModels_bis.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Mar 20 19:53:55 2023
+:date: Fri Apr  7 18:25:46 2023
 
- Example of the estimation of several versions of the model. In this
-case, the number fo specifications exceed the maximum limit, so a heuristic is applied.
-It may actually end up enumerating all possiblities. 
+Same example as b22multipleModels, where we enumerate explicitly all specifications
 
 """
 import biogeme.logging as blog
@@ -36,7 +34,6 @@ from swissmetro import (
     GA,
 )
 
-screen_logger = blog.get_screen_logger(blog.INFO)
 
 
 # Parameters to be estimated
@@ -207,9 +204,13 @@ logprob = models.loglogit(V, av, CHOICE)
 
 # We now consider a model with the log travel time instead of the cost
 
-PARETO_FILE_NAME = 'b22multipleModels.pareto'
+PARETO_FILE_NAME = 'b22multipleModels_bis.pareto'
 
 the_biogeme = bio.BIOGEME(database, logprob)
+# We increase the maximum number of specification, to force the
+# algorithm to enumerate all of them
+the_biogeme.maximum_number_catalog_expressions = 300
+
 
 nbr = logprob.number_of_multiple_expressions()
 print(f'There a {nbr} possible specifications')
