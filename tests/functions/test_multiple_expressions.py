@@ -20,15 +20,15 @@ import biogeme.expressions as ex
 import biogeme.catalog as cat
 import biogeme.segmentation as seg
 from biogeme.elementary_expressions import TypeOfElementaryExpression
-from biogeme.configuration import Configuration
+from biogeme.configuration import Configuration, SEPARATOR, SELECTION_SEPARATOR
 
 class TestMultipleExpressions(unittest.TestCase):
     def setUp(self):
         betas = [ex.Beta(f'beta{i}', i * 0.1, None, None, 0) for i in range(10)]
         g1_first = cat.NamedExpression(name='g1_first', expression=betas[0])
         g1_second = cat.NamedExpression(name='g1_second', expression=betas[1])
-        g1_tuple = (g1_first, g1_second)
-        self.catalog_1 = cat.Catalog('catalog_1', g1_tuple)
+        self.g1_tuple = (g1_first, g1_second)
+        self.catalog_1 = cat.Catalog('catalog_1', self.g1_tuple)
         self.assertEqual(self.catalog_1.current_index, 0)
 
         g2_zero = cat.NamedExpression(name='one', expression=ex.Numeric(1))
@@ -94,6 +94,14 @@ class TestMultipleExpressions(unittest.TestCase):
         with self.assertRaises(excep.biogemeError):
             _ = cat.Catalog('the_name', wrong_tuple)
 
+        with self.assertRaises(excep.biogemeError):
+            _ = cat.Catalog(f'the_name{SEPARATOR}', self.g1_tuple)
+
+        with self.assertRaises(excep.biogemeError):
+            _ = cat.Catalog(f'the_name{SELECTION_SEPARATOR}', self.g1_tuple)
+            
+
+        
     def test_names(self):
         result = [e.name for e in self.catalog_1.list_of_named_expressions]
         correct_result = ['g1_first', 'g1_second']
@@ -323,6 +331,10 @@ class TestMultipleExpressions(unittest.TestCase):
         a_config = Configuration.from_dict(
             {'catalog_1': 'g1_first', 'catalog_2': 'g2_second'}
         )
+        the_config_id = a_config.get_string_id()
+        test_config = Configuration.from_string(the_config_id)
+        self.assertEqual(a_config, test_config)
+        self.assertEqual(the_config_id, test_config.get_string_id())
         expression.configure_catalogs(a_config)
         new_config = expression.current_configuration()
         self.assertEqual(a_config, new_config)
