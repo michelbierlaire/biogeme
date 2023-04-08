@@ -9,6 +9,7 @@ import logging
 import abc
 from collections import namedtuple
 import biogeme.expressions as ex
+import biogeme.exceptions as excep
 from biogeme.configuration import (
     SelectionTuple,
     Configuration,
@@ -81,7 +82,7 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
 
         :return: number of actual modifications
         :rtype: int
-
+        
         """
 
     @abc.abstractmethod
