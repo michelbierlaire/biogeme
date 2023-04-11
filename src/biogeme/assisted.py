@@ -8,8 +8,7 @@ New version of the assisted specification using Catalogs
 """
 import logging
 import random
-from biogeme import vns
-from biogeme import biogeme
+from biogeme import vns, biogeme, tools
 import biogeme.exceptions as excep
 from biogeme.vns import ParetoClass
 from biogeme.configuration import Configuration
@@ -331,7 +330,7 @@ class AssistedSpecification(vns.ProblemClass):
         )
 
         logger.info('Non dominated models are reestimated to obtain the statistics.')
-        reestimated_models = self.reestimate()
+        reestimated_models = self.reestimate(recycle=False)
         logger.debug('RESTIMATED MODELS')
         for key in reestimated_models:
             logger.debug(key)
