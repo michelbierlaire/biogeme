@@ -1724,7 +1724,7 @@ def pareto_optimal(dict_of_results, a_pareto=None):
     :return: a dict of named results with pareto optimal results
     :rtype: dict(str: biogeme.results.bioResult)
     """
-    if pareto is None:
+    if a_pareto is None:
         the_pareto = pareto.Pareto()
     else:
         the_pareto = a_pareto

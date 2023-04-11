@@ -38,7 +38,6 @@ from swissmetro import (
 )
 
 
-
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
@@ -115,5 +114,3 @@ results = the_biogeme.estimate()
 # Get the results in a pandas table
 pandasResults = results.getEstimatedParameters()
 print(pandasResults)
-
-

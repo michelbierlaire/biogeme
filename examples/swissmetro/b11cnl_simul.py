@@ -1,22 +1,21 @@
-"""File 11cnl_simul.py
+"""File b11cnl_simul.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 11:13:22 2019
+:date: Sun Apr  9 18:08:29 2023
 
  Example of simulation with a cross-nested logit model.
  Three alternatives: Train, Car and Swissmetro
  Train and car are in the same nest.
- SP data
 """
 
 import sys
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.tools import calculate_correlation
+from biogeme.results import calculate_correlation
 import biogeme.results as res
 from biogeme.expressions import Beta, Derive
 import biogeme.exceptions as excep
-from swissmetro import (
+from swissmetro_data import (
     database,
     SM_AV,
     CAR_AV_SP,
@@ -70,17 +69,19 @@ nests = nest_existing, nest_public
 # Instead of estimating the parameters, read the estimation
 # results from the pickle file.
 try:
-    results = res.bioResults(pickleFile='11cnl.pickle')
+    results = res.bioResults(pickleFile='b11cnl.pickle')
 except excep.biogemeError:
     print(
-        'Run first the script 11cnl.py in order to generate the file ' '11cnl.pickle.'
+        'Run first the script b11cnl.py in order to generate the file '
+        '11cnl.pickle.'
     )
     sys.exit()
 
 print('Estimation results: ', results.getEstimatedParameters())
 
 print(
-    'Calculating correlation matrix. ' 'It may generate numerical warnings from scipy.'
+    'Calculating correlation matrix. '
+    'It may generate numerical warnings from scipy.'
 )
 corr = calculate_correlation(
     nests, results, alternative_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'}
@@ -109,7 +110,7 @@ simulate = {
 
 # Create the Biogeme object
 biosim = bio.BIOGEME(database, simulate)
-biosim.modelName = '11cnl_simul'
+biosim.modelName = 'b11cnl_simul'
 
 # Perform the simulation
 simresults = biosim.simulate(results.getBetaValues())

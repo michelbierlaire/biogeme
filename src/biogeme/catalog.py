@@ -13,8 +13,6 @@ import biogeme.segmentation as seg
 from biogeme.configuration import (
     SelectionTuple,
     Configuration,
-    SEPARATOR,
-    SELECTION_SEPARATOR,
 )
 
 logger = logging.getLogger(__name__)
@@ -111,9 +109,6 @@ class Catalog(MultipleExpression):
                 f'Wrong index {index}. ' f'Must be in [0, {self.catalog_size()}]'
             )
             raise excep.biogemeError(error_msg)
-        logger.debug(
-            f'Set catalog {self.name} to {self.list_of_named_expressions[index].name}'
-        )
         self.current_index = index
         for sync_catalog in self.synchronized_catalogs:
             sync_catalog.current_index = index
@@ -121,7 +116,14 @@ class Catalog(MultipleExpression):
     def set_of_configurations(self):
         """Set of possible configurations for a multiple
         expression. If the expression is simple, an empty set is
-        returned.
+        returned. If the number of configurations exceeds the maximum
+        length, None is returned.
+
+        :param maximum_length: maximum length for complete enumeration
+        :type maximum_length: int
+
+        :return: set of configurations, or None
+        :rtype: set(biogeme.configure.Configuration)
         """
         results = set()
         for name, expression in self.get_iterator():
@@ -129,6 +131,8 @@ class Catalog(MultipleExpression):
                 [SelectionTuple(catalog=self.name, selection=name)]
             )
             this_set = expression.set_of_configurations()
+            if this_set is None:
+                return None
             if this_set:
                 the_updated_set = {
                     Configuration.from_tuple_of_configurations((conf, this_selection))
@@ -138,6 +142,8 @@ class Catalog(MultipleExpression):
             else:
                 results.add(this_selection)
 
+            if len(results) > self.maximum_number_of_configurations:
+                return None
         return results
 
     def selected(self):
@@ -266,6 +272,12 @@ class SynchronizedCatalog(Catalog):
 
     def __init__(self, name, tuple_of_named_expressions, controller):
         super().__init__(name, tuple_of_named_expressions)
+        if not isinstance(controller, Catalog):
+            error_msg = (
+                f'The controller of a synchronized catalog must be of type '
+                f'Catalog, and not {type(controller)}'
+            )
+            raise excep.biogemeError(error_msg)
         self.controller = controller
         if self.catalog_size() != controller.catalog_size():
             error_msg = (

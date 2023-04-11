@@ -82,7 +82,7 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
 
         :return: number of actual modifications
         :rtype: int
-        
+
         """
 
     @abc.abstractmethod
@@ -133,13 +133,13 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         return the_expression
 
     def dict_of_catalogs(self, ignore_synchronized=False):
-        """Returns a dict with all catalogs in the expression
+        """Returns a dict with all catalogs in the expression.
 
         :return: dict with all the catalogs
         """
         result = {}
         for _, expr in self.get_iterator():
-            a_dict = expr.dict_of_catalogs()
+            a_dict = expr.dict_of_catalogs(ignore_synchronized)
             for key, the_catalog in a_dict.items():
                 result[key] = the_catalog
         result[self.name] = self

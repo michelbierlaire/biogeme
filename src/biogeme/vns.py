@@ -326,6 +326,7 @@ def vns(
 
     solution_to_improve, neighborhood_size = pareto.select()
 
+    pareto.dump()
     while solution_to_improve is not None:
         continue_with_solution = True
         n = 0
@@ -367,7 +368,6 @@ def vns(
                         logger.info('*** New pareto solution: ')
                         logger.info(a_neighbor)
                         problem.last_neighbor_accepted()
-                        pareto.dump()
                         pareto.reset_neighborhood(solution_to_improve)
                         continue_with_solution = False
                     else:
@@ -384,7 +384,9 @@ def vns(
                     )
                     problem.last_neighbor_rejected()
                     pareto.change_neighborhood(solution_to_improve)
+            pareto.dump()
 
         solution_to_improve, neighborhood_size = pareto.select()
 
+    pareto.dump()
     return pareto

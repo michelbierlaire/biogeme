@@ -146,7 +146,7 @@ logger.setDetailed()
 # logger.setDebug()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
+biogeme = bio.BIOGEME(database, logprob)
 biogeme.modelName = '26triangularPanelMixture'
 
 # Estimate the parameters.

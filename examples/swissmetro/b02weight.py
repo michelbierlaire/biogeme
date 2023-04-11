@@ -1,11 +1,10 @@
-"""File 02weight.py
+"""File b02weight.py
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Dec  6 15:35:27 2022
+:date: Sun Apr  9 17:02:59 2023
 
  Example of a logit model with Weighted Exogenous Sample Maximum
- Likelihood (WESML).  Three alternatives: Train, Car and Swissmetro SP
- data
+ Likelihood (WESML).  
 
 """
 
@@ -13,7 +12,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
 
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -52,14 +51,6 @@ logprob = models.loglogit(V, av, CHOICE)
 
 # Definition of the weight
 weight = 8.890991e-01 * (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
-# weight =  (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
-
-# Define level of verbosity
-# logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-# logger.setDetailed()
 
 # These notes will be included as such in the report file.
 USER_NOTES = (
@@ -71,15 +62,15 @@ USER_NOTES = (
 
 # Create the Biogeme object
 formulas = {'loglike': logprob, 'weight': weight}
-biogeme = bio.BIOGEME(database, formulas, userNotes=USER_NOTES)
-biogeme.modelName = '02weight'
+the_biogeme = bio.BIOGEME(database, formulas, userNotes=USER_NOTES)
+the_biogeme.modelName = 'b02weight'
 
 # It is possible to control the generation of the HTML and the pickle
 # files Note that these parameters can also be modified in the .TOML
 # configuration file
-biogeme.generate_html = True
-biogeme.generate_pickle = False
-results = biogeme.estimate()
+the_biogeme.generate_html = True
+the_biogeme.generate_pickle = False
+results = the_biogeme.estimate()
 
 # Get the results in a pandas table
 pandasResults = results.getEstimatedParameters()

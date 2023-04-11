@@ -1,20 +1,16 @@
-"""File 03scale.py
+"""File b03scale.py
 
 :author: Michel Bierlaire, EPFL
-:date: Thu Sep  6 15:14:39 2018
+:date: Sun Apr  9 17:23:03 2023
 
  Illustrates heteroscedastic specification. A different scale is
  associated with different segments of the sample.
- Three alternatives: Train, Car and Swissmetro
- SP data
 
 """
-
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.messaging as msg
 from biogeme.expressions import Beta
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -57,13 +53,6 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # observation to the log likelihood function.
 logprob = models.loglogit(V, av, CHOICE)
 
-# Define level of verbosity
-logger = msg.bioMessage()
-logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-# logger.setDetailed()
-
 # These notes will be included as such in the report file.
 USER_NOTES = (
     'Illustrates heteroscedastic specification. A different scale is'
@@ -71,10 +60,10 @@ USER_NOTES = (
 )
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, user_notes=USER_NOTES)
-biogeme.modelName = '03scale'
+the_biogeme = bio.BIOGEME(database, logprob, user_notes=USER_NOTES)
+the_biogeme.modelName = 'b03scale'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
 pandasResults = results.getEstimatedParameters()
 print(pandasResults)

@@ -111,9 +111,7 @@ userNotes = (
 )
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(
-    database, logprob, userNotes=userNotes, parameter_file='draws.toml'
-)
+biogeme = bio.BIOGEME(database, logprob, userNotes=userNotes)
 biogeme.modelName = '24haltonMixture'
 
 # Estimate the parameters

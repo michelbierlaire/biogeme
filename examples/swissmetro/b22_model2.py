@@ -115,4 +115,3 @@ results = the_biogeme.estimate()
 # Get the results in a pandas table
 pandasResults = results.getEstimatedParameters()
 print(pandasResults)
-

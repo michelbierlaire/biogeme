@@ -1,17 +1,16 @@
-"""File 01logit.py
+"""File b01logit.py
 
 :author: Michel Bierlaire, EPFL
-:date: Thu Sep  6 15:14:39 2018
+:date: Sun Apr  9 17:02:18 2023
 
  Example of a logit model.
  Three alternatives: Train, Car and Swissmetro
  SP data
 """
-
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -49,14 +48,14 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 logprob = models.loglogit(V, av, CHOICE)
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '01logit'
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b01logit'
 
 # Calculate the null log likelihood for reporting.
-biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculateNullLoglikelihood(av)
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
 
 # Get the results in a pandas table
 pandasResults = results.getEstimatedParameters()

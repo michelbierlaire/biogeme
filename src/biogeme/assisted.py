@@ -11,111 +11,11 @@ import random
 from biogeme import vns
 from biogeme import biogeme
 import biogeme.exceptions as excep
-from biogeme.pareto import SetElement
-from biogeme.elementary_expressions import TypeOfElementaryExpression
 from biogeme.vns import ParetoClass
 from biogeme.configuration import Configuration
+from biogeme.specification import Specification
 
 logger = logging.getLogger(__name__)
-
-
-class Specification:
-    """Implements a specification"""
-
-    database = None  #: :class:`biogeme.database.Database` object
-    pareto = None  #: :class:`biogeme.paretoPareto` object
-    all_results = {}  #: dict(str: `biogeme.results.bioResults`)
-    expression = None  #: :class:`biogeme.expressions.Expression` object
-    multi_objectives = None
-    """
-        function that generates all the objectives:
-        fct(bioResults) -> list[floatNone]
-    """
-
-    def __init__(self, configuration):
-        """Creates a specification from a  configuration
-
-        :param configuration: configuration of the multiple expression
-        :type configuration: biogeme.configuration.Configuration
-        """
-        if not isinstance(configuration, Configuration):
-            error_msg = 'Ctor needs an object of type Configuration'
-            raise excep.biogemeError(error_msg)
-        if self.pareto is None:
-            raise excep.biogemeError('Pareto set has not been initialized.')
-        self.configuration = configuration
-        self.element = self.pareto.get_element_from_id(self.config_id)
-        if self.element is None:
-            self.estimate()
-
-    @classmethod
-    def from_string_id(cls, configuration_id):
-        """Constructor using a configuration"""
-        return cls(Configuration.from_string(configuration_id))
-
-    @classmethod
-    def get_pareto_ids(cls):
-        """Returns a list with the Pareto optimal models
-
-        :return: list with the Pareto optimal models
-        :rtype: list[str]
-
-        """
-        return [element.element_id for element in cls.pareto.pareto]
-
-    def configure_expression(self):
-        """Configure the expression to the current configuration"""
-        self.expression.configure_catalogs(self.configuration)
-
-    @classmethod
-    def default_specification(cls):
-        """Alternative constructor for generate the default specification"""
-        cls.expression.reset_expression_selection()
-        the_config = cls.expression.current_configuration()
-        return cls(the_config)
-
-    @property
-    def config_id(self):
-        """Defined config_id as a property"""
-        return self.configuration.get_string_id()
-
-    @config_id.setter
-    def config_id(self, value):
-        self.configuration = Configuration.from_string(value)
-
-    def __repr__(self):
-        return str(self.config_id)
-
-    def get_element(self):
-        """Implementation of abstract method"""
-        return self.element
-
-    def estimate(self):
-        """Estimate the parameter of the current specification"""
-        self.configure_expression()
-        logger.debug(f'Estimate {self.config_id}')
-        b = biogeme.BIOGEME(self.database, self.expression)
-        b.modelName = self.config_id
-        b.generate_html = False
-        b.generate_pickle = False
-        logger.info(f'*** Estimate {b.modelName}')
-        results = b.quickEstimate()
-        self.all_results[b.modelName] = results
-        if self.multi_objectives is None:
-            error_msg = (
-                'No function has been provided to calculate the objectives to minimize'
-            )
-            raise excep.biogemeError(error_msg)
-        self.element = SetElement(self.config_id, self.multi_objectives(results))
-        self.pareto.add(self.element)
-
-    def describe(self):
-        """Short description of the solution. Used for reporting.
-
-        :return: short description of the solution.
-        :rtype: str
-        """
-        return f'{self.get_element()}'
 
 
 # Operators
@@ -302,6 +202,7 @@ class AssistedSpecification(vns.ProblemClass):
         """
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
+        Specification.generic_name = biogeme_object.modelName
         self.multi_objectives = staticmethod(multi_objectives)
         self.pareto = ParetoClass(
             max_neighborhood=max_neighborhood, pareto_file=pareto_file_name
@@ -328,6 +229,7 @@ class AssistedSpecification(vns.ProblemClass):
         self.operators['Increment several catalogs'] = increment_several_catalogs
         self.operators['Decrement several catalogs'] = decrement_several_catalogs
 
+        self.model_names = None
         logger.debug('Ctor assisted specification: Done')
         super().__init__(self.operators)
         logger.debug('Ctor assisted specification: Done')
@@ -343,12 +245,15 @@ class AssistedSpecification(vns.ProblemClass):
         """
         return True, None
 
-    def reestimate(self):
+    def reestimate(self, recycle):
         """The assisted specification uses quickEstimate to estimate
         the models. A complete estimation is necessary to obtain the
         full estimation results.
 
         """
+        if self.model_names is None:
+            self.model_names = tools.ModelNames(prefix=self.biogeme_object.modelName)
+            
         new_results = {}
         for element in self.pareto.pareto:
             config_id = element.element_id
@@ -356,9 +261,10 @@ class AssistedSpecification(vns.ProblemClass):
             config = Configuration.from_string(config_id)
             self.expression.configure_catalogs(config)
             self.expression.locked = True
-            b = biogeme.BIOGEME(self.database, self.expression)
-            b.modelName = config_id
-            the_result = b.estimate()
+            userNotes = config.get_html()
+            b = biogeme.BIOGEME(self.database, self.expression, userNotes=userNotes)
+            b.modelName = self.model_names(config_id)
+            the_result = b.estimate(recycle=recycle)
             new_results[config_id] = the_result
             self.expression.locked = False
         return new_results
@@ -389,16 +295,16 @@ class AssistedSpecification(vns.ProblemClass):
             self.biogeme_object.loglike.number_of_multiple_expressions()
         )
         maximum_number = self.biogeme_object.maximum_number_catalog_expressions
-        if number_of_specifications <= maximum_number:
+        if number_of_specifications is not None:
             logger.info('We consider all possible combinations of the catalogs.')
             for c in self.biogeme_object.loglike:
                 the_config = c.current_configuration()
                 _ = Specification(the_config)
         else:
             logger.info(
-                f'The number of possible specifications [{number_of_specifications}] '
+                f'The number of possible specifications '
                 f'exceeds the maximum number [{maximum_number}]. '
-                f'A heuristc algorithm is applied.'
+                f'A heuristic algorithm is applied.'
             )
 
             self.pareto = vns.vns(
@@ -492,6 +398,6 @@ class AssistedSpecification(vns.ProblemClass):
 
         """
 
-        self.pareto.plot(
+        return self.pareto.plot(
             objective_x, objective_y, label_x, label_y, margin_x, margin_y, ax
         )

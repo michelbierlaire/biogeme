@@ -1,17 +1,14 @@
-"""File 04validation.py
+"""File b04validation.py
 
 :author: Michel Bierlaire, EPFL
-:date: Thu Jun  4 17:55:27 2020
+:date: Sun Apr  9 17:24:32 2023
 
  Example of the out-of-sample validation of a logit model.
- Three alternatives: Train, Car and Swissmetro
- SP data
 """
-
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -48,11 +45,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 logprob = models.loglogit(V, av, CHOICE)
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '04validation'
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b04validation'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
 
 # The validation consists in organizing the data into several slices
 # of about the same size, randomly defined. Each slice is considered
@@ -65,7 +62,7 @@ results = biogeme.estimate()
 
 validationData = database.split(slices=5)
 
-validation_results = biogeme.validate(results, validationData)
+validation_results = the_biogeme.validate(results, validationData)
 
 for slide in validation_results:
     print(

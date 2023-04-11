@@ -1,20 +1,19 @@
-"""File 11cnl_sparse.py
+"""File b11cnl_sparse.py
 
 :author: Michel Bierlaire, EPFL
-:date: Thu Apr 30 18:55:02 2020
+:date: Sun Apr  9 18:10:35 2023
 
  Example of a cross-nested logit model.
  Same as 11cnl, where the zero alphas are not included.
  Three alternatives: Train, Car and Swissmetro
  Train and car are in the same nest.
- SP data
 """
 
+import biogeme.logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.messaging as msg
 from biogeme.expressions import Beta
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -27,6 +26,9 @@ from swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b11cnl_sparse.py')
 
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -64,18 +66,11 @@ nests = nest_existing, nest_public
 # The choice model is a cross-nested logit, with availability conditions
 logprob = models.logcnl_avail(V, av, nests, CHOICE)
 
-# Define level of verbosity
-logger = msg.bioMessage()
-logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-# logger.setDetailed()
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '11cnl_sparse'
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b11cnl_sparse'
 
 # Estimate the parameters
-results = biogeme.estimate()
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+results = the_biogeme.estimate()
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)

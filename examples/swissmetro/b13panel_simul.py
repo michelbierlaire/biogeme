@@ -1,21 +1,21 @@
-"""File 13panel_simul.py
+"""File b13panel_simul.py
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Dec  6 18:00:39 2022
+:date: Sun Apr  9 18:16:29 2023
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  The datafile is organized as panel data.
  Three alternatives: Train, Car and Swissmetro
- SP data
+
 """
 
 import sys
 import pickle
+import biogeme.logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.exceptions as excep
 import biogeme.results as res
-import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
     bioDraws,
@@ -37,6 +37,10 @@ from swissmetro_panel import (
     CAR_CO_SCALED,
 )
 
+NUMBER_OF_DRAWS = 1000
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b13panel_simul.py')
 
 # Parameters to be estimated
 B_COST = Beta('B_COST', 0, None, None, 0)
@@ -85,29 +89,22 @@ condprobIndiv = PanelLikelihoodTrajectory(obsprob)
 # We integrate over the random parameters using Monte-Carlo
 logprob = log(MonteCarlo(condprobIndiv))
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-logger.setDetailed()
-# logger.setDebug()
-
 # Estimate the parameters.
 try:
-    results = res.bioResults(pickleFile='12panel.pickle')
+    results = res.bioResults(pickleFile='b12panel.pickle')
 except excep.biogemeError:
     sys.exit(
-        'Run first the script 12panel.py '
+        'Run first the script b12panel.py '
         'in order to generate the '
-        'file 12panel.pickle.'
+        'file b12panel.pickle.'
     )
 
-# Simulate to recalculate the log likelihood
+# Simulate to recalculate the log likelihood directly from the
+# formula, without the Biogeme object
 simulated_loglike = logprob.getValue_c(
     database=database,
     betas=results.getBetaValues(),
-    numberOfDraws=100000,
+    numberOfDraws=NUMBER_OF_DRAWS,
     aggregation=True,
     prepareIds=True,
 )
@@ -121,15 +118,15 @@ simulate = {
     'Denominator': denominator,
 }
 
-biosim = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
+biosim = bio.BIOGEME(database, simulate)
 sim = biosim.simulate(results.getBetaValues())
 
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
-PICKLE_FILE = '13panel_individual_parameters.pickle'
+PICKLE_FILE = 'b13panel_individual_parameters.pickle'
 with open(PICKLE_FILE, 'wb') as f:
     pickle.dump(sim, f)
 
-HTML_FILE = '13panel_simul.html'
+HTML_FILE = 'b13panel_simul.html'
 with open(HTML_FILE, 'w', encoding='utf-8') as h:
     print(sim.to_html(), file=h)
 print(f'Simulated values available in {HTML_FILE}')

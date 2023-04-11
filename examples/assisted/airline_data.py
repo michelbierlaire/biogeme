@@ -65,12 +65,8 @@ ArrivalTimeSensitive = database.DefineVariable(
     'ArrivalTimeSensitive', q11_DepartureOrArrivalIsImportant == 2
 )
 
-DesiredDepartureTime = database.DefineVariable(
-    'DesiredDepartureTime', q12_IdealDepTime
-)
-DesiredArrivalTime = database.DefineVariable(
-    'DesiredArrivalTime', q13_IdealArrTime
-)
+DesiredDepartureTime = database.DefineVariable('DesiredDepartureTime', q12_IdealDepTime)
+DesiredArrivalTime = database.DefineVariable('DesiredArrivalTime', q13_IdealArrTime)
 ScheduledDelay_1 = database.DefineVariable(
     'ScheduledDelay_1',
     (DepartureTimeSensitive * (DepartureTimeMins_1 - DesiredDepartureTime))
@@ -108,4 +104,3 @@ Opt2_SchedDelayLate = database.DefineVariable(
 Opt3_SchedDelayLate = database.DefineVariable(
     'Opt3_SchedDelayLate', (ScheduledDelay_3 * (ScheduledDelay_3 > 0)) / 60
 )
-

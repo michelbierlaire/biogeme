@@ -43,6 +43,7 @@ class Configuration:
     @selections.setter
     def selections(self, value):
         self.__selections = sorted(value)
+        self.__check_list_validity()
         self.string_id = self.get_string_id()
 
     @classmethod
@@ -124,6 +125,15 @@ class Configuration:
         ]
         return SEPARATOR.join(terms)
 
+    def get_html(self):
+        html = '<p>Specification</p><p><ul>\n'
+        for selection_tuple in self.selections:
+            html += (
+                f'<li>{selection_tuple.catalog}: ' f'{selection_tuple.selection}</li>\n'
+            )
+        html += '</ul></p>\n'
+        return html
+
     def get_selection(self, catalog_name):
         """Retrieve the selection of a given catalog
 
@@ -137,3 +147,18 @@ class Configuration:
             if selection.catalog == catalog_name:
                 return selection.selection
         return None
+
+    def __check_list_validity(self):
+        """Check the validity of the list.
+
+        :raise biogemeError: if the same catalog appears more than once in the list
+        """
+        unique_items = set()
+        for item in self.__selections:
+            if item.catalog in unique_items:
+                error_msg = (
+                    f'Catalog {item.catalog} appears more than once in the '
+                    f'configuration: {self.__selections}'
+                )
+                raise excep.biogemeError(error_msg)
+            unique_items.add(item.catalog)

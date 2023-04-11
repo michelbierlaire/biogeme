@@ -94,6 +94,11 @@ class Expression:
     It serves as a base class for concrete expressions.
     """
 
+    maximum_number_of_configurations = 100
+    """For multiple expressions (Catalogs), maximum number of
+           configurations allowed for full enumeration.
+    """
+
     def __init__(self):
         """Constructor"""
 
@@ -129,12 +134,18 @@ class Expression:
 
     def __iter__(self):
         if self.locked:
-            error_msg(
+            error_msg = (
                 'The expression is locked. It is not possible to obtain an '
                 'iterator. Set the locked attributes to False.'
             )
             raise excep.biogemeError(error_msg)
         the_set = self.set_of_configurations()
+        if the_set is None:
+            error_msg = (
+                f'The total number of possible specifications exceeds '
+                f'{self.maximum_number_of_configurations}. No iterator is available. '
+            )
+            raise excep.valueOutOfRange(error_msg)
         return SelectedExpressionsIterator(self, the_set)
 
     def check_panel_trajectory(self):
@@ -1253,8 +1264,11 @@ class Expression:
     def set_of_configurations(self):
         """Set of possible configurations for a multiple
         expression. If the expression is simple, an empty set is
-        returned.
+        returned. If the number of configurations exceeds the maximum
+        length, None is returned.
 
+        :return: set of configurations, or None
+        :rtype: set(biogeme.configure.Configuration)
         """
         if not self.children:
             return set()
@@ -1263,6 +1277,13 @@ class Expression:
             for e in self.children
             if e.set_of_configurations()
         ]
+        if None in each_config:
+            return None
+        total = 1
+        for conf in each_config:
+            total *= len(conf)
+            if total > self.maximum_number_of_configurations:
+                return None
         if not each_config:
             return set()
         all_combinations = product(*each_config)
@@ -1275,15 +1296,18 @@ class Expression:
     def number_of_multiple_expressions(self):
         """Reports the number of multiple expressions available through the iterator
 
-        :return: numbero  multiple expressions
+        :return: number of  multiple expressions
         :rtype: int
         """
-        return len(self.set_of_configurations())
+        the_set = self.set_of_configurations()
+        if the_set is None:
+            return None
+        return len(the_set)
 
     def reset_expression_selection(self):
         """In each group of expressions, select the first one"""
         if self.locked:
-            error_msg(
+            error_msg = (
                 'The expression is locked. It is not possible to change its '
                 'specification. Set the locked attributes to False.'
             )
@@ -1330,7 +1354,7 @@ class Expression:
         :rtype: int
         """
         if self.locked:
-            error_msg(
+            error_msg = (
                 'The expression is locked. It is not possible to change its '
                 'specification. Set the locked attributes to False.'
             )
@@ -1378,7 +1402,7 @@ class Expression:
         :raises biogemeError: if index is out of range
         """
         if self.locked:
-            error_msg(
+            error_msg = (
                 'The expression is locked. It is not possible to change its '
                 'specification. Set the locked attributes to False.'
             )
@@ -3483,33 +3507,6 @@ class _bioLogLogit(LogLogit):
     uses only the C++ implementation.
     """
 
-    def __init__(self, util, av, choice):
-        """Constructor
-
-        :param util: dictionary where the keys are the identifiers of
-                     the alternatives, and the elements are objects
-                     defining the utility functions.
-
-        :type util: dict(int:biogeme.expressions.Expression)
-
-        :param av: dictionary where the keys are the identifiers of
-                   the alternatives, and the elements are object of
-                   type biogeme.expressions.Expression defining the
-                   availability conditions. If av is None, all the
-                   alternatives are assumed to be always available
-
-        :type av: dict(int:biogeme.expressions.Expression)
-
-        :param choice: formula to obtain the alternative for which the
-                       logit probability must be calculated.
-        :type choice: biogeme.expressions.Expression
-
-        :raise biogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
-            biogeme.expressions.Expression object.
-        """
-        super().__init__(util, av, choice)
-
 
 class _bioLogLogitFullChoiceSet(LogLogit):
     """This expression captures the logarithm of the logit formula, where
@@ -3519,33 +3516,6 @@ class _bioLogLogitFullChoiceSet(LogLogit):
        formulas for the utilities. It uses only the C++ implementation.
 
     """
-
-    def __init__(self, util, av, choice):
-        """Constructor
-
-        :param util: dictionary where the keys are the identifiers of
-                     the alternatives, and the elements are objects
-                     defining the utility functions.
-
-        :type util: dict(int:biogeme.expressions.Expression)
-
-        :param av: dictionary where the keys are the identifiers of
-                   the alternatives, and the elements are object of
-                   type biogeme.expressions.Expression defining the
-                   availability conditions. If av is None, all the
-                   alternatives are assumed to be always available
-
-        :type av: dict(int:biogeme.expressions.Expression)
-
-        :param choice: formula to obtain the alternative for which the
-                       logit probability must be calculated.
-        :type choice: biogeme.expressions.Expression
-
-        :raise biogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
-            biogeme.expressions.Expression object.
-        """
-        super().__init__(util, av, choice)
 
 
 class bioMultSum(Expression):

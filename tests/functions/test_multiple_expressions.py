@@ -82,6 +82,10 @@ class TestMultipleExpressions(unittest.TestCase):
 
         self.wrong_expression = catalog_6 + catalog_6
 
+        c81 = cat.NamedExpression(name='c81', expression=self.catalog_1)
+        c82 = cat.NamedExpression(name='c82', expression=self.catalog_1)
+        self.catalog_8 = cat.Catalog('catalog_of_catalogs', (c81, c82) )
+        
     def test_ctor(self):
         empty_tuple = tuple()
         with self.assertRaises(excep.biogemeError):
@@ -118,6 +122,9 @@ class TestMultipleExpressions(unittest.TestCase):
         size = self.catalog_1.catalog_size()
         self.assertEqual(size, 2)
 
+        size = self.catalog_8.catalog_size()
+        self.assertEqual(size, 2)
+
     def test_selected(self):
         self.catalog_1.set_index(1)
         name = self.catalog_1.selected_name()
@@ -126,6 +133,7 @@ class TestMultipleExpressions(unittest.TestCase):
         expression = self.catalog_1.selected_expression()
         correct_expression = 'beta1(init=0.1)'
         self.assertEqual(str(expression), correct_expression)
+        
 
     def test_dict_of_catalogs(self):
         expression = self.catalog_1 + self.catalog_2
@@ -138,17 +146,29 @@ class TestMultipleExpressions(unittest.TestCase):
         correct_keys = ['catalog_1', 'catalog_3']
         self.assertListEqual(list(another_dict.keys()), correct_keys)
 
-    def number_of_multiple_expressions(self):
+        the_dict = self.catalog_8.dict_of_catalogs()
+        correct_keys = ['catalog_1', 'catalog_of_catalogs']
+        self.assertListEqual(list(the_dict.keys()), correct_keys)
+        
+    def test_number_of_multiple_expressions(self):
         expression = self.catalog_1 + self.catalog_2
         the_number = expression.number_of_multiple_expressions()
         correct_number = 6
         self.assertEqual(the_number, correct_number)
 
+        expression.maximum_number_of_configurations = 2
+        the_number = expression.number_of_multiple_expressions()
+        self.assertIsNone(the_number)
+        
         another_expression = ex.Numeric(2) + self.catalog_3
         the_number = another_expression.number_of_multiple_expressions()
-        correct_number = 7
+        correct_number = 6
         self.assertEqual(the_number, correct_number)
 
+        the_number = self.catalog_8.number_of_multiple_expressions()
+        correct_number = 4
+        self.assertEqual(the_number, correct_number)
+        
 
     def test_synchronized(self):
         expression = self.synchronized_expression
@@ -205,6 +225,11 @@ class TestMultipleExpressions(unittest.TestCase):
 
     def test_iterator(self):
         expression = self.catalog_1 + self.catalog_2
+        expression.maximum_number_of_configurations = 2
+        with self.assertRaises(excep.valueOutOfRange):
+            for e in expression:
+                pass
+        expression.maximum_number_of_configurations = 100
         configurations = {e.current_configuration() for e in expression}
         correct_configurations = {
             Configuration.from_dict({'catalog_1': 'g1_first', 'catalog_2': 'g2_first'}),
@@ -314,6 +339,17 @@ class TestMultipleExpressions(unittest.TestCase):
         }
         self.assertSetEqual(configurations, correct_configurations)
 
+        configurations = {
+            e.current_configuration() for e in self.catalog_8
+        }
+        correct_configurations = {
+            Configuration.from_string('catalog_1:g1_first;catalog_of_catalogs:c81'),
+            Configuration.from_string('catalog_1:g1_second;catalog_of_catalogs:c81'),
+            Configuration.from_string('catalog_1:g1_first;catalog_of_catalogs:c82'),
+            Configuration.from_string('catalog_1:g1_second;catalog_of_catalogs:c82')
+        }
+        self.assertSetEqual(configurations, correct_configurations)
+
     def test_selected_iterator(self):
         expression = self.catalog_1 + self.catalog_2
         selected_configurations = [
@@ -390,6 +426,10 @@ class TestMultipleExpressions(unittest.TestCase):
             
     def test_set_of_configurations(self):
         expression = self.catalog_1 + self.catalog_2
+        expression.maximum_number_of_configurations = 2
+        the_set = expression.set_of_configurations()
+        self.assertIsNone(the_set)
+        expression.maximum_number_of_configurations = 100
         the_set = expression.set_of_configurations()
         the_correct_set = {
             Configuration.from_dict({'catalog_1': 'g1_first', 'catalog_2': 'g2_first'}),
@@ -400,7 +440,9 @@ class TestMultipleExpressions(unittest.TestCase):
             Configuration.from_dict({'catalog_1': 'g1_second', 'catalog_2': 'g2_third'}),
         }
         self.assertSetEqual(the_set, the_correct_set)
-
+        the_size = expression.number_of_multiple_expressions()
+        self.assertEqual(the_size, len(the_set))
+        
         the_set = self.synchronized_expression.set_of_configurations()
         the_correct_set = {
             Configuration.from_dict({'catalog_40': 'one'}),
@@ -408,6 +450,8 @@ class TestMultipleExpressions(unittest.TestCase):
             Configuration.from_dict({'catalog_60': 'three', 'catalog_40': 'c60'}),
         }
         self.assertSetEqual(the_set, the_correct_set)
+        the_size = self.synchronized_expression.number_of_multiple_expressions()
+        self.assertEqual(the_size, len(the_set))
 
         the_set = self.catalog_1.set_of_configurations()
         the_correct_set = {
@@ -415,6 +459,8 @@ class TestMultipleExpressions(unittest.TestCase):
             Configuration.from_dict({'catalog_1': 'g1_second'}),
         }
         self.assertSetEqual(the_set, the_correct_set)
+        the_size = self.catalog_1.number_of_multiple_expressions()
+        self.assertEqual(the_size, len(the_set))
 
     def test_modify_catalogs_a(self):
         expression = self.catalog_3

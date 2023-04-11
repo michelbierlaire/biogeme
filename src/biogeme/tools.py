@@ -12,7 +12,6 @@
 import logging
 from os import path
 import shutil
-import itertools
 from collections import namedtuple, defaultdict
 import tempfile
 import uuid
@@ -479,7 +478,7 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
 
 class TemporaryFile:
     """Class generating a temporary file, so that the user does not
-    both of its location, or even its name
+    bother about its location, or even its name
 
     Usage:
     with TemporaryFile() as filename:
@@ -498,9 +497,9 @@ class TemporaryFile:
 
 
 class ModelNames:
-    """Class generating model names from unique configuration sring"""
+    """Class generating model names from unique configuration string"""
 
-    def __init__(self, prefix='Model_'):
+    def __init__(self, prefix='Model'):
         self.prefix = prefix
         self.dict_of_names = {}
         self.current_number = 0
@@ -513,7 +512,7 @@ class ModelNames:
         """
         the_name = self.dict_of_names.get(the_id)
         if the_name is None:
-            the_name = f'{self.prefix}{self.current_number}'
+            the_name = f'{self.prefix}_{self.current_number:06d}'
             self.current_number += 1
             self.dict_of_names[the_id] = the_name
         return the_name

@@ -1,9 +1,11 @@
-"""File swissmetro.py
+"""File swissmetro_panel.py
 
 :author: Michel Bierlaire, EPFL
 :date: Mon Mar  6 15:17:03 2023
 
-Data preparation for Swissmetro, and definition of the variables
+Data preparation for Swissmetro, and definition of the variables in
+panel configuration
+
 """
 
 import pandas as pd

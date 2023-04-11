@@ -1,18 +1,16 @@
-"""File 12panel.py
+"""File b12panel.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 18:55:38 2019
+:date: Sun Apr  9 18:12:17 2023
 
  Example of a mixture of logit models, using Monte-Carlo integration.
  The datafile is organized as panel data.
- Three alternatives: Train, Car and Swissmetro
- SP data
 """
 
 import numpy as np
+import biogeme.logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.messaging as msg
 from biogeme.expressions import (
     Beta,
     bioDraws,
@@ -33,6 +31,9 @@ from swissmetro_panel import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b12panel.py')
 
 np.random.seed(seed=90267)
 
@@ -84,19 +85,11 @@ condprobIndiv = PanelLikelihoodTrajectory(obsprob)
 # We integrate over the random parameters using Monte-Carlo
 logprob = log(MonteCarlo(condprobIndiv))
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-logger.setDetailed()
-# logger.setDebug()
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob, parameter_file='draws.toml')
-biogeme.modelName = '12panel'
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b12panel'
 
 # Estimate the parameters.
-results = biogeme.estimate()
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+results = the_biogeme.estimate()
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)

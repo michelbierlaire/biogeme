@@ -55,6 +55,8 @@ class Toml:
             DEFAULT_FILE_NAME if parameter_file is None else parameter_file
         )
 
+        logger.info(f'Parameters read from {self.parameter_file}')
+
         self.read_file()
         self.record_values()
 

@@ -138,6 +138,7 @@ class Pareto:
         :raise biogemeError: if a problem has occured during dumping.
         """
         if self.filename is None:
+            logger.warning('No Pareto file has been provided')
             return
         doc = tk.document()
         doc.add(tk.comment(f'Biogeme {bv.getVersion()} [{bv.versionDate}]'))
@@ -341,3 +342,4 @@ class Pareto:
         ax.set_xlabel(label_x)
         ax.set_ylabel(label_y)
         ax.legend()
+        return ax

@@ -172,13 +172,13 @@ class TestTools(unittest.TestCase):
             self.assertEqual(content, check)
 
     def test_model_names(self):
-        model_names = tools.ModelNames(prefix='Test_')
+        model_names = tools.ModelNames(prefix='Test')
 
         name_a = model_names('model_a')
-        correct_name_a = 'Test_0'
+        correct_name_a = 'Test_000000'
         self.assertEqual(name_a, correct_name_a)
         name_b = model_names('model_b')
-        correct_name_b = 'Test_1'
+        correct_name_b = 'Test_000001'
         self.assertEqual(name_a, correct_name_a)
         name_a = model_names('model_a')
         self.assertEqual(name_a, correct_name_a)
@@ -200,5 +200,8 @@ class TestTools(unittest.TestCase):
         self.assertDictEqual(correct_dict_3, dict_3)
 
 
+        
 if __name__ == '__main__':
     unittest.main()
+
+    

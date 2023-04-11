@@ -63,7 +63,10 @@ income_segmentation = DiscreteSegmentationTuple(
 
 ga_segmentation = DiscreteSegmentationTuple(variable=GA, mapping={1: 'GA', 0: 'noGA'})
 
-asc_segmentations = (gender_segmentation, ga_segmentation,)
+asc_segmentations = (
+    gender_segmentation,
+    ga_segmentation,
+)
 ASC_CAR_catalog = segmentation_catalog(
     beta_parameter=ASC_CAR,
     potential_segmentations=asc_segmentations,
@@ -76,7 +79,10 @@ ASC_TRAIN_catalog = segmentation_catalog(
     synchronized_with=ASC_CAR_catalog,
 )
 
-cost_segmentations = (ga_segmentation, income_segmentation,)
+cost_segmentations = (
+    ga_segmentation,
+    income_segmentation,
+)
 B_COST_catalog = segmentation_catalog(
     beta_parameter=B_COST,
     potential_segmentations=cost_segmentations,
@@ -153,5 +159,3 @@ print(summary)
 for k, v in description.items():
     if k != v:
         print(f'{k}: {v}')
-
-        

@@ -1,21 +1,19 @@
-"""File 09nested.py
+"""File b09nested.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 00:36:04 2019
+:date: Sun Apr  9 17:59:12 2023
 
  Example of a nested logit model.
- Three alternatives: Train, Car and Swissmetro
- Train and car are in the same nest.
- SP data
+
 """
 
+import biogeme.logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.tools import calculate_correlation
-import biogeme.messaging as msg
+from biogeme.results import calculate_correlation
 from biogeme.expressions import Beta
 
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -28,6 +26,9 @@ from swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b09nested')
 
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -60,24 +61,17 @@ nests = existing, future
 # The choice model is a nested logit, with availability conditions
 logprob = models.lognested(V, av, nests, CHOICE)
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-logger.setGeneral()
-# logger.setDetailed()
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = "09nested"
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = "b09nested"
 
 # Calculate the null log likelihood for reporting.
-biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculateNullLoglikelihood(av)
 
 # Estimate the parameters
-results = biogeme.estimate()
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+results = the_biogeme.estimate()
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)
 
 corr = calculate_correlation(
     nests, results, alternative_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'}

@@ -1,17 +1,16 @@
-"""File 08boxcox.py
+"""File b08boxcox.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Sep  8 00:33:03 2019
+:date: Sun Apr  9 17:58:15 2023
 
  Example of a logit model, with a Box-Cox transform of variables.
- Three alternatives: Train, Car and Swissmetro
- SP data
+
 """
 
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -54,12 +53,12 @@ logprob = models.loglogit(V, av, CHOICE)
 
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '08boxcox'
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b08boxcox'
 
-biogeme.checkDerivatives(beta=[0, 0, 0, 0, 0], verbose=True)
+the_biogeme.checkDerivatives(beta=[0, 0, 0, 0, 0], verbose=True)
 
 # Estimate the parameters
-results = biogeme.estimate()
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+results = the_biogeme.estimate()
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)

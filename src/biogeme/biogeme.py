@@ -27,6 +27,7 @@ import biogeme.optimization as opt
 from biogeme import tools
 from biogeme.idmanager import IdManager
 from biogeme.negative_likelihood import NegativeLikelihood
+from biogeme.specification import Specification
 from biogeme import toml
 
 # import yep
@@ -155,6 +156,7 @@ class BIOGEME:
 
         self.database = database  #: :class:`biogeme.database.Database` object
 
+        self.short_names = None  #:  :class:`biogeme.tools.ModelNames` 
         if not isinstance(formulas, dict):
             if not isinstance(formulas, eb.Expression):
                 raise excep.biogemeError(
@@ -301,6 +303,7 @@ class BIOGEME:
             value=value,
             section='Estimation',
         )
+        eb.Expression.maximum_number_of_configurations = value
 
     @property
     def algorithm_name(self):
@@ -1105,6 +1108,9 @@ class BIOGEME:
         :rtype: dict(str: bioResults)
 
         """
+        if self.short_names is None:
+            self.short_names = tools.ModelNames(prefix=self.modelName)
+        
         logger.debug('ESTIMATE CATALOG')
         if self.loglike is None:
             raise excep.biogemeError('No log likelihood function has been specified')
@@ -1134,15 +1140,20 @@ class BIOGEME:
         configurations = {}
         with logging_redirect_tqdm():
             for expression in the_iterator:
-                config_id = expression.current_configuration().get_string_id()
-                b = BIOGEME(self.database, expression)
-                b.modelName = config_id
+                config = expression.current_configuration()
+                config_id = config.get_string_id()
+                expression.locked = True
+                user_notes = config.get_html()
+                b = BIOGEME(self.database, expression, userNotes=user_notes)
+                b.modelName = self.short_names(config_id)
                 if quick_estimate:
                     results = b.quickEstimate(recycle=recycle, bootstrap=bootstrap)
                 else:
                     results = b.estimate(recycle=recycle, bootstrap=bootstrap)
 
                 configurations[config_id] = results
+                expression.locked = False
+
         return configurations
 
     def estimate(
@@ -1418,22 +1429,26 @@ class BIOGEME:
         keepDatabase = self.database
 
         allSimulationResults = []
+        count = 0
         for v in validationData:
+            count += 1
             # v[0] is the estimation data set
             database = db.Database('Estimation data', v.estimation)
             self.loglike.changeInitValues(estimationResults.getBetaValues())
-            estBiogeme = BIOGEME(database, self.loglike)
-            results = estBiogeme.estimate()
+            est_biogeme = BIOGEME(database, self.loglike)
+            est_biogeme.modelName = f'{self.modelName}_val_est_{count}'
+            results = est_biogeme.estimate()
             simulate = {'Loglikelihood': self.loglike}
-            simBiogeme = BIOGEME(
+            sim_biogeme = BIOGEME(
                 db.Database('Validation data', v.validation),
                 simulate,
             )
-            simResult = simBiogeme.simulate(results.getBetaValues())
-            allSimulationResults.append(simResult)
+            sim_biogeme.modelName = f'{self.modelName}_val_sim_{count}'
+            sim_result = sim_biogeme.simulate(results.getBetaValues())
+            allSimulationResults.append(sim_result)
 
         self.database = keepDatabase
-        if self.generatePickle:
+        if self.generate_pickle:
             fname = f'{self.modelName}_validation'
             pickleFileName = bf.getNewFileName(fname, 'pickle')
             with open(pickleFileName, 'wb') as f:
