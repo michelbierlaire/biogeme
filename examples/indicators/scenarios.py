@@ -1,7 +1,7 @@
 """File scenarios.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Oct 31 09:40:59 2021
+:date: Wed Apr 12 20:51:37 2023
 
  Specification of a nested logit model, that will be estimated, and
  used for simulation.  Three alternatives: public transporation, car
@@ -12,32 +12,19 @@
 
 """
 
-import pandas as pd
-import biogeme.database as db
-from biogeme.expressions import Beta, Variable
-
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-# Variables from the data
-Choice = Variable('Choice')
-TimePT = Variable('TimePT')
-TimeCar = Variable('TimeCar')
-MarginalCostPT = Variable('MarginalCostPT')
-CostCarCHF = Variable('CostCarCHF')
-distance_km = Variable('distance_km')
-Gender = Variable('Gender')
-OccupStat = Variable('OccupStat')
-Weight = Variable('Weight')
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-# Normalize the weights
-sumWeight = database.data['Weight'].sum()
-numberOfRows = database.data.shape[0]
-normalizedWeight = Weight * numberOfRows / sumWeight
+from biogeme.expressions import Beta
+from optima_data import (
+    database,
+    Choice,
+    TimePT,
+    TimeCar,
+    CostCarCHF,
+    MarginalCostPT,
+    distance_km,
+    Gender,
+    OccupStat,
+    normalized_weight,
+)
 
 # List of parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -79,22 +66,22 @@ def scenario(factor=1.0):
     :rtype: dict(int: biogeme.expression), tuple(biogeme.expression,
         list(int)), biogeme.expression
     """
-    MarginalCostScenario = MarginalCostPT * factor
-    MarginalCostPT_scaled = MarginalCostScenario / 10
+    marginal_cost_scenario = MarginalCostPT * factor
+    marginal_cost_pt_scaled = marginal_cost_scenario / 10
     # Definition of utility functions:
-    V_PT = (
+    v_pt = (
         ASC_PT
         + BETA_TIME_FULLTIME * TimePT_scaled * fulltime
         + BETA_TIME_OTHER * TimePT_scaled * notfulltime
-        + BETA_COST * MarginalCostPT_scaled
+        + BETA_COST * marginal_cost_pt_scaled
     )
-    V_CAR = (
+    v_car = (
         ASC_CAR
         + BETA_TIME_FULLTIME * TimeCar_scaled * fulltime
         + BETA_TIME_OTHER * TimeCar_scaled * notfulltime
         + BETA_COST * CostCarCHF_scaled
     )
-    V_SM = (
+    v_sm = (
         ASC_SM
         + BETA_DIST_MALE * distance_km_scaled * male
         + BETA_DIST_FEMALE * distance_km_scaled * female
@@ -102,14 +89,14 @@ def scenario(factor=1.0):
     )
 
     # Associate utility functions with the numbering of alternatives
-    V = {0: V_PT, 1: V_CAR, 2: V_SM}
+    V = {0: v_pt, 1: v_car, 2: v_sm}
 
     # Definition of the nests:
     # 1: nests parameter
     # 2: list of alternatives
-    MU_NOCAR = Beta('MU_NOCAR', 1.0, 1.0, None, 0)
+    mu_nocar = Beta('mu_nocar', 1.0, 1.0, None, 0)
 
-    CAR_NEST = 1.0, [1]
-    NO_CAR_NEST = MU_NOCAR, [0, 2]
-    nests = CAR_NEST, NO_CAR_NEST
-    return V, nests, Choice, MarginalCostScenario
+    car_nest = 1.0, [1]
+    no_car_nest = mu_nocar, [0, 2]
+    nests = car_nest, no_car_nest
+    return V, nests, Choice, marginal_cost_scenario
