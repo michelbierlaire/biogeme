@@ -120,12 +120,12 @@ class OperatorsManagement:
     def increase_score_last_operator(self):
         """Increase the score of the last operator.
 
-        :raise biogemeError: if the operator is not known.
+        :raise BiogemeError: if the operator is not known.
         """
         try:
             self.scores[self.last_operator_name] += 1
         except KeyError as e:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'Unknown operator: {self.last_operator_name}'
             ) from e
 
@@ -133,12 +133,12 @@ class OperatorsManagement:
         """Decrease the score of the last operator. If it has already the minimum
         score, it increases the others.
 
-        :raise biogemeError: if the operator is not known.
+        :raise BiogemeError: if the operator is not known.
         """
         try:
             self.scores[self.last_operator_name] -= 1
         except KeyError as e:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'Unknown operator: {self.last_operator_name}'
             ) from e
 
@@ -158,14 +158,14 @@ class OperatorsManagement:
         :return: name of the selected operator
         :rtype: str
 
-        :raise biogemeError: if the minimum probability is too large
+        :raise BiogemeError: if the minimum probability is too large
             for the number of operators. It must be less or equal to 1 /
             N, where N is the number of operators.
 
         """
 
         if min_probability > 1.0 / len(self.scores):
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'Cannot impose min. probability '
                 f'{min_probability} '
                 f'with {len(self.scores)} operators. '
@@ -222,20 +222,22 @@ class ParetoClass(Pareto):
             self.neighborhood_size[elem] = 1
 
     def change_neighborhood(self, element):
-        """
-        Change the size of the neighborhood for a solution in the Pareto set.
+        """Change the size of the neighborhood for a solution in the Pareto set.
 
-        :param element: ID of the solution for which the neighborhood size must be increased.
+        :param element: ID of the solution for which the neighborhood
+            size must be increased.
         :type element: SetElement
+
         """
         self.neighborhood_size[element] += 1
 
     def reset_neighborhood(self, element):
-        """
-        Reset the size of the neighborhood to 1 for a solution.
+        """Reset the size of the neighborhood to 1 for a solution.
 
-        :param element: ID of the solution for which the neighborhood size must be reset.
+        :param element: ID of the solution for which the neighborhood
+            size must be reset.
         :type element: biogeme.pareto.SetElement
+
         """
         self.neighborhood_size[element] = 1
 
@@ -283,6 +285,7 @@ def vns(
     first_solutions,
     pareto,
     number_of_neighbors=10,
+    maximum_attempts=100,
 ):
     """Multi objective Variable Neighborhood Search
 
@@ -300,12 +303,19 @@ def vns(
                               optimum has been reached.
     :type number_of_neighbors: int
 
+    :param maximum_attempts: an attempts consists in selecting a
+        solution in the Pareto set, and trying to improve it. The
+        parameters imposes an upper bound on the total number of
+        attemps, irrespectively if they are successful or not.
+
+    :type maximum_attempts: int
+
     :return: the pareto set, the set of models that have been in the
              pareto set and then removed, and the set of all models
              considered by the algorithm.
     :rtype: class :class:`biogeme.vns.ParetoClass`
 
-    :raise biogemeError: if the first Pareto set is empty.
+    :raise BiogemeError: if the first Pareto set is empty.
 
     """
 
@@ -320,14 +330,17 @@ def vns(
                 logger.warning(f'Default specification is invalid: {why}')
 
     if pareto.length() == 0:
-        raise excep.biogemeError('Cannot start the algorithm with an empty Pareto set.')
+        raise excep.BiogemeError('Cannot start the algorithm with an empty Pareto set.')
 
     logger.info(f'Initial pareto: {pareto.length()}')
 
     solution_to_improve, neighborhood_size = pareto.select()
 
     pareto.dump()
-    while solution_to_improve is not None:
+    attempts = 0
+    while solution_to_improve is not None and attempts <= maximum_attempts:
+        attempts += 1
+        logger.info(f'Attempt {attempts}/{maximum_attempts}')
         continue_with_solution = True
         n = 0
         while continue_with_solution:

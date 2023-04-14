@@ -34,7 +34,7 @@ import biogeme.exceptions as excep
 from biogeme.expressions import Expression
 from biogeme import pareto
 from biogeme import tools
-
+from biogeme.default_parameters import get_default_value
 
 logger = logging.getLogger(__name__)
 
@@ -115,11 +115,11 @@ class beta:
         :return: True is one of the two bounds is numericall y active.
         :rtype: bool
 
-        :raise biogemeError: if ``threshold`` is negative.
+        :raise BiogemeError: if ``threshold`` is negative.
 
         """
         if threshold < 0:
-            raise excep.biogemeError(f'Threshold ({threshold}) must be non negative')
+            raise excep.BiogemeError(f'Threshold ({threshold}) must be non negative')
 
         if self.lb is not None and np.abs(self.value - self.lb) <= threshold:
             return True
@@ -331,11 +331,16 @@ class bioResults:
             parameter, the model is considered not identified.
         :type identification_threshold: float
 
-        :raise biogeme.exceptions.biogemeError: if no data is provided.
+        :raise biogeme.exceptions.BiogemeError: if no data is provided.
 
         """
-        if theRawResults is not None:
+        if identification_threshold is None:
+            self.identification_threshold = get_default_value(
+                'identification_threshold'
+            )
+        else:
             self.identification_threshold = identification_threshold
+        if theRawResults is not None:
             self.data = theRawResults
             """Object of type :class:`biogeme.results.rawResults` contaning the
             raw estimation results.
@@ -351,10 +356,10 @@ class bioResults:
                     self.data = pickle.load(f)
             except FileNotFoundError as e:
                 error_msg = f'File {pickleFile} not found'
-                raise excep.biogemeError(error_msg) from e
+                raise excep.BiogemeError(error_msg) from e
 
         else:
-            raise excep.biogemeError('No data provided.')
+            raise excep.BiogemeError('No data provided.')
 
         self._calculateStats()
 
@@ -1179,7 +1184,7 @@ class bioResults:
         :rtype: dict(string:float)
 
 
-        :raise biogeme.exceptions.biogemeError: if some requested parameters
+        :raise biogeme.exceptions.BiogemeError: if some requested parameters
             are not available.
         """
         values = {}
@@ -1197,7 +1202,7 @@ class bioResults:
                     f'The value of {b} is not available in the results. '
                     f'The following parameters are available: {keys}'
                 )
-                raise excep.biogemeError(err) from e
+                raise excep.BiogemeError(err) from e
         return values
 
     def getVarCovar(self):
@@ -1321,7 +1326,7 @@ class bioResults:
                   distribution. Default: True.
         :type useBootstrap: bool
 
-        :raise biogeme.exceptions.biogemeError: if useBootstrap is True and
+        :raise biogeme.exceptions.BiogemeError: if useBootstrap is True and
             the bootstrap results are not available
 
         :return: list of dict. Each dict has a many entries as parameters.
@@ -1334,7 +1339,7 @@ class bioResults:
                 'Bootstrap results are not available for simulation. '
                 'Use useBootstrap=False.'
             )
-            raise excep.biogemeError(err)
+            raise excep.BiogemeError(err)
 
         index = [self.data.betaNames.index(b) for b in myBetas]
 
@@ -1762,7 +1767,7 @@ def AIC_BIC_dimension(results):
     return [results.data.akaike, results.data.bayesian, results.data.nparam]
 
 
-def correlation_nested(nests):
+def correlation_nested(nests, mu=1.0):
     """Calculate the correlation matrix of the error terms of all
     alternatives of a nested logit model. It is assumed that the
     homogeneity parameter mu of the model has been normalized to one.
@@ -1796,10 +1801,11 @@ def correlation_nested(nests):
         mu_m = m[0]
         alt_m = m[1]
         for i, j in itertools.combinations(alt_m, 2):
-            correlation[index[i]][index[j]] = correlation[index[j]][
-                index[i]
-            ] = 1.0 - 1.0 / (mu_m * mu_m)
-
+            correlation[index[i]][index[j]] = correlation[index[j]][index[i]] = (
+                1.0 - 1.0 / (mu_m * mu_m)
+                if mu == 1.0
+                else 1.0 - (mu * mu) / (mu_m * mu_m)
+            )
     return pd.DataFrame(
         correlation, index=list_of_alternatives, columns=list_of_alternatives
     )
@@ -1844,7 +1850,7 @@ def correlation_cross_nested(nests):
     :return: value of the correlation
     :rtype: float
 
-    :raise biogemeError: if the requested number is non positive or a float
+    :raise BiogemeError: if the requested number is non positive or a float
 
     :return: correlation matrix
     :rtype: pd.DataFrame
@@ -1914,15 +1920,15 @@ def covariance_cross_nested(i, j, nests):
     :return: value of the correlation
     :rtype: float
 
-    :raise biogemeError: if the requested number is non positive or a float
+    :raise BiogemeError: if the requested number is non positive or a float
 
     """
     set_of_alternatives = {alt for m in nests for alt in m[1]}
 
     if i not in set_of_alternatives:
-        raise excep.biogemeError(f'Unknown alternative: {i}')
+        raise excep.BiogemeError(f'Unknown alternative: {i}')
     if j not in set_of_alternatives:
-        raise excep.biogemeError(f'Unknown alternative: {j}')
+        raise excep.BiogemeError(f'Unknown alternative: {j}')
 
     if i == j:
         return np.pi * np.pi / 6.0
@@ -1988,7 +1994,7 @@ def covariance_cross_nested(i, j, nests):
     return integral - np.euler_gamma * np.euler_gamma
 
 
-def calculate_correlation(nests, results, alternative_names=None):
+def calculate_correlation(nests, results, mu=None, alternative_names=None):
     """Calculate the correlation matrix of a nested or cross-nested
     logit model.
 
@@ -2038,9 +2044,14 @@ def calculate_correlation(nests, results, alternative_names=None):
     :param results: estimation results
     :type results: biogeme.results.bioResults
 
+    :param mu: name of the scale parameter in the MEV function. If None, the scale
+        parameter is assumed to have been normalized to 1.
+    :type mu: str
+
     :param alternative_names: a dictionary mapping the alternative IDs
         with their name. If None, the IDs are used as names.
     :type alternative_names: dict(int: str)
+
     """
 
     betas = results.getBetaValues()
@@ -2056,7 +2067,7 @@ def calculate_correlation(nests, results, alternative_names=None):
         :return: calculated value
         :rtype: float
 
-        :raise biogemeError: if the input value is not an expression
+        :raise BiogemeError: if the input value is not an expression
             or a float.
 
         """
@@ -2066,7 +2077,7 @@ def calculate_correlation(nests, results, alternative_names=None):
             return expr.getValue_c(prepareIds=True)
         if isinstance(expr, (int, float)):
             return expr
-        raise excep.biogemeError(f'Invalid type: {type(expr)}')
+        raise excep.BiogemeError(f'Invalid type: {type(expr)}')
 
     def numerical_tuple(the_tuple):
         mu_m = get_estimated_expression(the_tuple[0])
@@ -2088,5 +2099,11 @@ def calculate_correlation(nests, results, alternative_names=None):
     estimated_nests = tuple(numerical_tuple(m) for m in nests)
 
     if cnl:
+        if mu is not None:
+            error_msg = (
+                'Correlation matrix not implemented if mu is not normlaized to 1'
+            )
+            raise excep.BiogemeError(error_msg)
         return correlation_cross_nested(estimated_nests)
-    return correlation_nested(estimated_nests)
+    the_mu = 1 if mu is None else betas[mu]
+    return correlation_nested(estimated_nests, mu=the_mu)

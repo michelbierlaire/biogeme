@@ -235,3 +235,19 @@ all_parameters_tuple = (
         check=(cp.is_boolean,),
     ),
 )
+
+
+def get_default_value(parameter_name):
+    """Return the default value of a parameter
+
+    :param parameter_name: name of the parameter
+    :type parameter_name: str
+
+    :return: default value, or None if the parameter is not found.
+    :rtype: depends on the type of parameter
+    """
+
+    for the_param in all_parameters_tuple:
+        if the_param.name == parameter_name:
+            return the_param.default
+    return None

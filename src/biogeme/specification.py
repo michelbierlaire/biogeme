@@ -37,14 +37,14 @@ class Specification:
         """
         if not isinstance(configuration, Configuration):
             error_msg = 'Ctor needs an object of type Configuration'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         if self.pareto is None:
-            raise excep.biogemeError('Pareto set has not been initialized.')
+            raise excep.BiogemeError('Pareto set has not been initialized.')
         self.configuration = configuration
+        self.model_names = None
         self.element = self.pareto.get_element_from_id(self.config_id)
         if self.element is None:
             self.estimate()
-        self.model_names = None
 
     @classmethod
     def from_string_id(cls, configuration_id):
@@ -96,8 +96,8 @@ class Specification:
         the_config = self.expression.current_configuration()
         self.configure_expression()
         logger.debug(f'Estimate {self.config_id}')
-        userNotes = the_config.get_html()
-        b = bio.BIOGEME(self.database, self.expression, userNotes=userNotes)
+        user_notes = the_config.get_html()
+        b = bio.BIOGEME(self.database, self.expression, userNotes=user_notes)
         b.modelName = self.model_names(self.config_id)
         b.generate_html = False
         b.generate_pickle = False
@@ -108,7 +108,7 @@ class Specification:
             error_msg = (
                 'No function has been provided to calculate the objectives to minimize'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         self.element = SetElement(self.config_id, self.multi_objectives(results))
         self.pareto.add(self.element)
 

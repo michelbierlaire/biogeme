@@ -86,7 +86,7 @@ def loglogit_sampling(V, av, correction, i):
             f'the utilities. Correction: {correction.keys()}. '
             f'Utilities: {V.keys}'
         )
-        raise excep.biogemeError(error_msg)
+        raise excep.BiogemeError(error_msg)
     corrected_V = {k: v - correction[k] for k, v in V.items()}
     return loglogit(corrected_V, av, i)
 
@@ -161,16 +161,6 @@ def boxcox(x, ell):
     return expr.Elem({0: smooth, 1: expr.Numeric(0)}, x == 0)
 
 
-def piecewise(variable, thresholds):
-    """Obsolete function. Present for compatibility only"""
-    errorMsg = (
-        'The function "piecewise" is obsolete and has been replaced '
-        'by "piecewiseVariables". Its use has changed. Please refer '
-        'to the documentation.'
-    )
-    raise excep.biogemeError(errorMsg)
-
-
 def piecewiseVariables(variable, thresholds):
     """Generate the variables to include in a piecewise linear specification.
 
@@ -196,7 +186,7 @@ def piecewiseVariables(variable, thresholds):
     :return: list of variables to for the piecewise linear specification.
     :rtype: list(biogeme.expressions.expr.Expression)
 
-    :raise biogemeError: if the thresholds are not defined properly,
+    :raise BiogemeError: if the thresholds are not defined properly,
         as only the first and the last thresholds can be set
         to None.
 
@@ -206,15 +196,16 @@ def piecewiseVariables(variable, thresholds):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
         errorMsg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
 
     # If the name of the variable is given, we transform it into an expression.
     if isinstance(variable, str):
@@ -260,9 +251,10 @@ def piecewiseFormula(variable, thresholds, betas=None):
               \\text{otherwise}  \\end{array}\\right. \\;\\;\\;x_{Ti} =
               \\max(0, \\min(t-a, b))
 
-    New variables and new parameters are automatically created to obtain the specification
+    New variables and new parameters are automatically created to
+    obtain the specification
 
-    .. math:: \sum_{i=1}^{K-1} \\beta_i x_{Ti}
+    .. math:: \\sum_{i=1}^{K-1} \\beta_i x_{Ti}
 
     :param variable: name of the variable for which we need the
         piecewise linear transform.
@@ -282,11 +274,11 @@ def piecewiseFormula(variable, thresholds, betas=None):
     :return: expression of  the piecewise linear specification.
     :rtype: biogeme.expressions.expr.Expression
 
-    :raise biogemeError: if the thresholds are not defined properly,
+    :raise BiogemeError: if the thresholds are not defined properly,
         which means that only the first and the last threshold can be set
         to None.
 
-    :raise biogemeError: if the length of list ``initialexpr.Betas`` is
+    :raise BiogemeError: if the length of list ``initialexpr.Betas`` is
         not equal to the length of ``thresholds`` minus one.
 
     .. seealso:: :meth:`piecewiseVariables`
@@ -303,29 +295,30 @@ def piecewiseFormula(variable, thresholds, betas=None):
             'The first argument of piecewiseFormula must be the '
             'name of a variable, or the variable itself..'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
 
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
         errorMsg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if betas is not None:
         if len(betas) != eye - 1:
             errorMsg = (
                 f'As there are {eye} thresholds, a total of {eye-1} '
                 f'Beta parameters are needed, and not {len(betas)}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
 
-    theVars = piecewiseVariables(expr.Variable(f'{variable}'), thresholds)
+    theVars = piecewiseVariables(the_variable, thresholds)
     if betas is None:
         betas = []
         for i, a_threshold in enumerate(thresholds[:-1]):
@@ -333,7 +326,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
             a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
             next_name = 'inf' if next_threshold is None else f'{next_threshold}'
             betas.append(
-                expr.Beta(f'beta_{variable}_{a_name}_{next_name}', 0, None, None, 0)
+                expr.Beta(f'beta_{the_name}_{a_name}_{next_name}', 0, None, None, 0)
             )
 
     terms = [beta * theVars[i] for i, beta in enumerate(betas)]
@@ -358,7 +351,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
 
     The specification this is returned is
 
-    .. math:: x_{T1} + \sum_{i=2}^{K-1} \beta_i x_{Ti}
+    .. math:: x_{T1} + \\sum_{i=2}^{K-1} \beta_i x_{Ti}
 
     :param variable: name of the variable for which we need the
         piecewise linear transform.
@@ -378,11 +371,11 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     :return: expression of  the piecewise linear specification.
     :rtype: biogeme.expressions.expr.Expression
 
-    :raise biogemeError: if the thresholds are not defined properly,
+    :raise BiogemeError: if the thresholds are not defined properly,
         which means that only the first and the last threshold can be set
         to None.
 
-    :raise biogemeError: if the length of list ``initialexpr.Betas`` is
+    :raise BiogemeError: if the length of list ``initialexpr.Betas`` is
         not equal to the length of ``thresholds`` minus one.
 
     .. seealso:: :meth:`piecewiseVariables`
@@ -399,29 +392,30 @@ def piecewise_as_variable(variable, thresholds, betas=None):
             'The first argument of piecewiseFormula must be the '
             'name of a variable, or the variable itself..'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
 
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
         errorMsg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if betas is not None:
         if len(betas) != eye - 2:
             errorMsg = (
                 f'As there are {eye} thresholds, a total of {eye-2} '
                 f'Beta parameters are needed, and not {len(betas)}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
 
-    theVars = piecewiseVariables(expr.Variable(f'{variable}'), thresholds)
+    theVars = piecewiseVariables(the_variable, thresholds)
     if betas is None:
         betas = []
         for i, a_threshold in enumerate(thresholds[1:-1]):
@@ -429,7 +423,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
             a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
             next_name = 'inf' if next_threshold is None else f'{next_threshold}'
             betas.append(
-                expr.Beta(f'beta_{variable}_{a_name}_{next_name}', 0, None, None, 0)
+                expr.Beta(f'beta_{the_name}_{a_name}_{next_name}', 0, None, None, 0)
             )
 
     terms = [beta * theVars[i] for i, beta in enumerate(betas)]
@@ -465,7 +459,7 @@ def piecewiseFunction(x, thresholds, betas):
     :return: value of the numpy function
     :rtype: float
 
-    :raise biogemeError: if the thresholds are not defined properly,
+    :raise BiogemeError: if the thresholds are not defined properly,
         which means that only the first and the last threshold can be set
         to None.
 
@@ -474,22 +468,23 @@ def piecewiseFunction(x, thresholds, betas):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification '
+            'are set to None.'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
         errorMsg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     if len(betas) != eye - 1:
         errorMsg = (
             f'As there are {eye} thresholds, a total of {eye-1} values '
             f'are needed to initialize the parameters. But '
             f'{len(betas)} are provided'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
 
     # If the first threshold is not -infinity, we need to check if
     # x is beyond it.
@@ -964,12 +959,12 @@ def nested(V, availability, nests, choice, alone=None):
 
     :rtype: biogeme.expressions.expr.Expression
 
-    :raise biogemeError: if the definition of the nests is invalid.
+    :raise BiogemeError: if the definition of the nests is invalid.
     """
 
     ok, message = checkValidityNestedLogit(V, nests, alone)
     if not ok:
-        raise excep.biogemeError(message)
+        raise excep.BiogemeError(message)
 
     logGi = getMevForNested(V, availability, nests, alone)
     P = mev(V, logGi, availability, choice)
@@ -1021,11 +1016,11 @@ def lognested(V, availability, nests, choice, alone=None):
 
     :rtype: biogeme.expressions.expr.Expression
 
-    :raise biogemeError: if the definition of the nests is invalid.
+    :raise BiogemeError: if the definition of the nests is invalid.
     """
     ok, message = checkValidityNestedLogit(V, nests, alone)
     if not ok:
-        raise excep.biogemeError(message)
+        raise excep.BiogemeError(message)
     logGi = getMevForNested(V, availability, nests, alone)
     logP = logmev(V, logGi, availability, choice)
     return logP
@@ -1534,11 +1529,11 @@ def logcnl(V, availability, nests, choice, alone=None, sampling_log_probability=
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
 
-    :raise biogemeError: if the definition of the nests is invalid.
+    :raise BiogemeError: if the definition of the nests is invalid.
     """
     ok, message = checkValidityCNL(V, nests, alone)
     if not ok:
-        raise excep.biogemeError(message)
+        raise excep.BiogemeError(message)
     if message != '':
         logger.warning(f'CNL: {message}')
     logGi = getMevForCrossNested(
@@ -1757,12 +1752,12 @@ def logcnlmu(V, availability, nests, choice, mu, alone=None):
     :return: log of the choice probability for the cross-nested logit model.
     :rtype: biogeme.expressions.expr.Expression
 
-    :raise biogemeError: if the definition of the nests is invalid.
+    :raise BiogemeError: if the definition of the nests is invalid.
 
     """
     ok, message = checkValidityCNL(V, nests, alone)
     if not ok:
-        raise excep.biogemeError(message)
+        raise excep.BiogemeError(message)
     logGi = getMevForCrossNestedMu(V, availability, nests, mu, alone)
     logP = logmev(V, logGi, availability, choice)
     return logP
@@ -1894,7 +1889,7 @@ def checkValidityCNL(V, nests, alone):
 
     alt = {i: [] for i in V}
     number = 0
-    for mu, alpha in nests:
+    for _, alpha in nests:
         for i, a in alpha.items():
             if a != 0.0:
                 alt[i].append(a)

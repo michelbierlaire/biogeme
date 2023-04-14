@@ -224,7 +224,10 @@ class Database:
         ),
         'NORMAL_MLHS_ANTI': (
             normal_MLHS_anti,
-            ('Antithetic normal draws from ' 'Modified Latin Hypercube Sampling'),
+            (
+                'Antithetic normal draws from '
+                'Modified Latin Hypercube Sampling'
+            ),
         ),
     }
 
@@ -259,8 +262,8 @@ class Database:
         :param pandasDatabase: data stored in a pandas data frame.
         :type pandasDatabase: pandas.DataFrame
 
-        :raise biogemeError: if the audit function detects errors.
-        :raise biogemeError: if the database is empty.
+        :raise BiogemeError: if the audit function detects errors.
+        :raise BiogemeError: if the database is empty.
         """
 
         self.name = name
@@ -270,7 +273,7 @@ class Database:
 
         if len(pandasDatabase.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         self.data = pandasDatabase  #: Pandas data frame containing the data.
 
@@ -333,15 +336,15 @@ class Database:
 
         self._expression = None  #: Expression to check
 
-        listOfErrors, listOfWarnings = self._audit()
-        ## For now, the audit issues only errors. If warnings are
-        ## triggered in the future, the nexrt lines should be
-        ## uncommented.
+        listOfErrors, _ = self._audit()
+        # For now, the audit issues only errors. If warnings are
+        # triggered in the future, the nexrt lines should be
+        # uncommented.
         # if listOfWarnings:
         #    logger.warning('\n'.join(listOfWarnings))
         if listOfErrors:
             logger.warning('\n'.join(listOfErrors))
-            raise excep.biogemeError('\n'.join(listOfErrors))
+            raise excep.BiogemeError('\n'.join(listOfErrors))
 
     def _audit(self):
         """Performs a series of checks and reports warnings and errors.
@@ -388,12 +391,12 @@ class Database:
                  in the database, containing the calculated quantities.
         :rtype: numpy.Series
 
-        :raise biogemeError: if the database is empty.
+        :raise BiogemeError: if the database is empty.
         """
 
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         return expression.getValue_c(database=self, prepareIds=True)
 
@@ -412,16 +415,16 @@ class Database:
                  available, False otherwise.
         :rtype: numpy.Series
 
-        :raise biogemeError: if the chosen alternative does not appear
+        :raise BiogemeError: if the chosen alternative does not appear
             in the availability dict
-        :raise biogemeError: if the database is empty.
+        :raise BiogemeError: if the database is empty.
         """
         self._avail = avail
         self._choice = choice
 
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         choice_array = choice.getValue_c(
             database=self, aggregation=False, prepareIds=True
@@ -435,7 +438,7 @@ class Database:
             avail_chosen = np.array(
                 [calculated_avail[c][i] for i, c in enumerate(choice_array)]
             )
-        except KeyError as e:
+        except KeyError as exc:
             for c in choice_array:
                 err_msg = ''
                 if c not in calculated_avail:
@@ -443,7 +446,7 @@ class Database:
                         f'Chosen alternative {c} does not appear in '
                         f'availability dict: {calculated_avail.keys()}'
                     )
-                    raise excep.biogemeError(err_msg)
+                    raise excep.BiogemeError(err_msg) from exc
         return avail_chosen != 0
 
     def choiceAvailabilityStatistics(self, avail, choice):
@@ -459,11 +462,11 @@ class Database:
             it is chosen, and the number of time it is available.
         :rtype: dict(int: (int, int))
 
-        :raise biogemeError: if the database is empty.
+        :raise BiogemeError: if the database is empty.
         """
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         self._avail = avail
         self._choice = choice
@@ -485,24 +488,6 @@ class Database:
         avail_stat = {k: sum(a) for k, a in calculated_avail.items()}
         theResults = {alt: (c, avail_stat[alt]) for alt, c in choice_stat.items()}
         return theResults
-
-    def sumFromDatabase(self, expression):
-        """Calculates the value of an expression for each entry
-        in the database, and returns the sum.
-
-        Obsolete since 3.2.9.
-
-        :param expression: expression to evaluate
-        :type expression: biogeme.expressions.Expression
-
-        :return: sum of the expressions over the database.
-        :rtype: float
-
-        :raise biogemeError: if called.
-        """
-
-        error_msg = 'Obsolete: use expression.getValue_c(database) instead'
-        raise excep.biogemeError(error_msg)
 
     def scaleColumn(self, column, scale):
         """Multiply an entire column by a scale value
@@ -542,7 +527,7 @@ class Database:
 
         :rtype: pandas.DataFrame
 
-        :raise biogemeError: if a variable in ``columns`` is unknown.
+        :raise BiogemeError: if a variable in ``columns`` is unknown.
         """
         if columns is None:
             columns = self.data.columns
@@ -550,7 +535,7 @@ class Database:
             for c in columns:
                 if c not in self.data:
                     errorMsg = f'Variable {c} not found.'
-                    raise excep.biogemeError(errorMsg)
+                    raise excep.BiogemeError(errorMsg)
 
         largestValue = [
             max(np.abs(self.data[col].max()), np.abs(self.data[col].min()))
@@ -600,14 +585,14 @@ class Database:
         :return: pandas dataframe with the sample.
         :rtype: pandas.DataFrame
 
-        :raise biogemeError: if the database in not in panel mode.
+        :raise BiogemeError: if the database in not in panel mode.
         """
         if not self.isPanel():
             errorMsg = (
                 'Function sampleIndividualMapWithReplacement'
                 ' is available only on panel data.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
 
         if size is None:
             size = len(self.individualMap)
@@ -630,7 +615,7 @@ class Database:
     #              the sampling weights. If None, each row has equal probability.
     #        :type columnWithSamplingWeights: string
     #
-    #        :raise biogemeError: if the structure of the database has been modified
+    #        :raise BiogemeError: if the structure of the database has been modified
     #            since last sample.
     #        """
     #        if self.isPanel():
@@ -655,7 +640,7 @@ class Database:
     #                )
     #                if right:
     #                    message += f' Columns that were added: {right}'
-    #                raise excep.biogemeError(message)
+    #                raise excep.BiogemeError(message)
     #
     #            self.individualMap = self.fullIndividualMap.sample(
     #                frac=samplingRate, weights=columnWithSamplingWeights
@@ -682,7 +667,7 @@ class Database:
     #                    )
     #                    if right:
     #                        message += f' Columns that were added: {right}'
-    #                    raise excep.biogemeError(message)
+    #                    raise excep.BiogemeError(message)
     #
     #            self.data = self.fullData.sample(
     #                frac=samplingRate, weights=columnWithSamplingWeights
@@ -692,13 +677,13 @@ class Database:
     #        """Re-establish the full sample for calculation of the likelihood"""
     #        if self.isPanel():
     #            if self.fullIndividualMap is None:
-    #                raise excep.biogemeError(
+    #                raise excep.BiogemeError(
     #                    'Full panel data set has not been saved.'
     #                )
     #            self.individualMap = self.fullIndividualMap
     #        else:
     #            if self.fullData is None:
-    #                raise excep.biogemeError('Full data set has not been saved.')
+    #                raise excep.BiogemeError('Full data set has not been saved.')
     #            self.data = self.fullData
 
     def addColumn(self, expression, column):
@@ -714,12 +699,12 @@ class Database:
         :rtype: numpy.Series
 
         :raises ValueError: if the column name already exists.
-        :raise biogemeError: if the database is empty.
+        :raise BiogemeError: if the database is empty.
 
         """
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         if column in self.data.columns:
             raise ValueError(
@@ -890,9 +875,9 @@ class Database:
                   ['randomDraws1', 'randomDraws2', 'randomDraws3'], 10)
 
 
-        :raise biogemeError: if a type of draw is unknown.
+        :raise BiogemeError: if a type of draw is unknown.
 
-        :raise biogemeError: if the output of the draw generator does not
+        :raise BiogemeError: if the output of the draw generator does not
             have the requested dimensions.
         """
         self.numberOfDraws = numberOfDraws
@@ -917,7 +902,7 @@ class Database:
                         f'Native types: {native}. '
                         f'User defined: {user}'
                     )
-                    raise excep.biogemeError(errorMsg)
+                    raise excep.BiogemeError(errorMsg)
             listOfDraws[i] = theGenerator[0](self.getSampleSize(), numberOfDraws)
             if listOfDraws[i].shape != (self.getSampleSize(), numberOfDraws):
                 errorMsg = (
@@ -926,7 +911,7 @@ class Database:
                     f' ({self.getSampleSize()}, {numberOfDraws})'
                     f' instead of {listOfDraws[i].shape}'
                 )
-                raise excep.biogemeError(errorMsg)
+                raise excep.BiogemeError(errorMsg)
 
         self.theDraws = np.array(listOfDraws)
         # Draws as a three-dimensional numpy series. The dimensions
@@ -983,7 +968,7 @@ class Database:
         :return: list of estimation and validation data sets
         :rtype: list(tuple(pandas.DataFrame, pandas.DataFrame))
 
-        :raise biogemeError: if the number of slices is less than two
+        :raise BiogemeError: if the number of slices is less than two
 
         """
         if slices < 2:
@@ -991,7 +976,7 @@ class Database:
                 f'The number of slices is {slices}. It must be greater '
                 f'or equal to 2.'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         if groups is not None and self.isPanel():
             if groups != self.panelColumn:
@@ -1000,7 +985,7 @@ class Database:
                     f'{self.panelColumn}. The grouping by {groups} '
                     f'cannot be done.'
                 )
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
 
         if self.isPanel():
             groups = self.panelColumn
@@ -1018,7 +1003,7 @@ class Database:
         estimationSets = []
         validationSets = []
         for i, v in enumerate(theSlices):
-            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
+            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1:]))
             validationSets.append(v)
         return [
             EstimationValidation(estimation=e, validation=v)
@@ -1039,7 +1024,7 @@ class Database:
         :param columnName: name of the columns that identifies individuals.
         :type columnName: string
 
-        :raise biogemeError: if the data are not sorted properly, that
+        :raise BiogemeError: if the data are not sorted properly, that
             is if the data for the one individuals are not consecutive.
 
         """
@@ -1059,7 +1044,7 @@ class Database:
                 f'in the sample, and {nGroups} groups of '
                 f'data for column {self.panelColumn}.'
             )
-            raise excep.biogemeError(theError)
+            raise excep.BiogemeError(theError)
 
         self.buildPanelMap()
 
@@ -1102,22 +1087,22 @@ class Database:
 
         :param saveOnFile: if True, the flat database is saved on file.
         :type saveOnFile: bool
-
+    
         :param identical_columns: list of columns that contain the
-            same values for all observations of the same individual. If
-            None, these columns are automatically detected. Default: empty
-            list.
+            same values for all observations of the same
+            individual. Default: empty list.
+        
         :type identical_columns: list(str)
 
         :return: the flatten database, in Pandas format
         :rtype: pandas.DataFrame
 
-        :raise biogemeError: if the database in not panel
+        :raise BiogemeError: if the database in not panel
 
         """
         if not self.isPanel():
             error_msg = 'This function can only be called for panel data'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         flat_data = tools.flatten_database(
             self.data, self.panelColumn, identical_columns=identical_columns
         )

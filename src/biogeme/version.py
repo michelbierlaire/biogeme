@@ -77,7 +77,6 @@ def getText():
     """
 
     h = f'biogeme {getVersion()} [{versionDate}]\n'
-    h += 'Version entirely written in Python\n'
     h += f'Home page: {urlBiogeme}\n'
     h += f'Submit questions to {urlForum}\n'
     h += f'{author}, {department}, {university}\n'

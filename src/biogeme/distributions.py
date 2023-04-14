@@ -6,14 +6,6 @@
 
 """
 
-# There seems to be a bug in PyLint.
-# pylint: disable=invalid-unary-operand-type, too-many-function-args
-
-# Too constraining
-# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements,
-# pylint: disable=too-many-branches, too-many-instance-attributes, too-many-lines,
-# pylint: disable=too-many-public-methods
-
 from biogeme.expressions import log, exp, Numeric
 
 

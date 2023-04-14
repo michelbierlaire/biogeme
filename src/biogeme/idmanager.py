@@ -4,7 +4,6 @@
 :date: Sat Jul 30 12:36:40 2022
 """
 import logging
-import inspect
 from collections import namedtuple
 import biogeme.exceptions as excep
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 class IdManager:
     """Class combining managing the ids of an arithmetic expression."""
 
-    def __init__(self, expressions, database, number_of_draws, force_new_ids=False):
+    def __init__(self, expressions, database, number_of_draws):
         """Ctor
 
         :param expressions: list of expressions
@@ -30,13 +29,7 @@ class IdManager:
         :param number_of_draws: number of draws for Monte-Carlo integration
         :type number_of_draws: int
 
-        :param force_new_ids: if True, new ids are calculated for all
-            expressions, even if they have already an ID. If False,
-            and some expressions already have an ID, an error is
-            raised.
-        :type force_new_ids: bool
-
-        :raises biogemeError: if an expression contains a variable and
+        :raises BiogemeError: if an expression contains a variable and
             no database is provided.
 
         """
@@ -59,7 +52,7 @@ class IdManager:
                 the_type=TypeOfElementaryExpression.VARIABLE
             )
             if the_variables and database is None:
-                raise excep.biogemeError(
+                raise excep.BiogemeError(
                     f'No database is provided and an expression '
                     f'contains variables: {the_variables}'
                 )
@@ -239,7 +232,7 @@ class IdManager:
                 f'The following elementary expressions are defined '
                 f'more than once: {duplicates}.'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         elementary_expressions_indices = {
             v: i for i, v in enumerate(elementary_expressions_names)

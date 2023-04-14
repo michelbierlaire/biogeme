@@ -5,7 +5,6 @@
 
 """
 
-from dataclasses import dataclass
 from biogeme.expressions import Beta, bioMultSum
 import biogeme.exceptions as excep
 
@@ -26,7 +25,7 @@ class DiscreteSegmentationTuple:
             arbitrary category is selected as reference.  :type:
         :type reference: str
 
-        :raise biogemeError: if the name of the reference category
+        :raise BiogemeError: if the name of the reference category
             does not appear in the list.
 
         """
@@ -39,12 +38,12 @@ class DiscreteSegmentationTuple:
                 f'Reference category {reference} does not appear in the list '
                 f'of categories: {mapping.values()}'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         else:
             self.reference = reference
 
         if self.reference is None:
-            raise excep.biogemeError('Reference should not be None')
+            raise excep.BiogemeError('Reference should not be None')
 
     def __repr__(self):
         result = f'{self.variable.name}: [{self.mapping}] ref: {self.reference}'
@@ -83,7 +82,7 @@ class OneSegmentation:
         :return: name of parameter for the category
         :rtype: str
 
-        :raise biogemeError: if the category is not listed in the
+        :raise BiogemeError: if the category is not listed in the
             mapping of the segmentation.
         """
         if category not in self.mapping.values():
@@ -91,17 +90,19 @@ class OneSegmentation:
                 f'Unknown category: {category}. List of known categories: '
                 f'{self.mapping.values()}'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         return f'{self.beta.name}_{category}'
 
     def beta_expression(self, category):
-        """Constructs the expression for the parameter associated with a specific category
+        """Constructs the expression for the parameter associated with
+            a specific category
 
         :param category: name of the category
         :type category: str
 
         :return: expression of the parameter for the category
         :rtype: biogeme.expressions.Beta
+
         """
         name = self.beta_name(category)
         if category == self.reference:

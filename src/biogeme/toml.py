@@ -22,6 +22,14 @@ ROW_LENGTH = 80
 
 
 def format_comment(the_param):
+    """Format the content of the file, in particular the description of the parameter
+
+    :param the_param: parmeter to format
+    :type the_param: biogeme.default_parameters.ParameterTuple
+
+    :return: formatted text
+    :rtype: str
+    """
     the_str = f'{the_param.name} = {the_param.default}'
     multiplier = len(the_str) + 1
     words = the_param.description.split(' ')
@@ -61,6 +69,8 @@ class Toml:
         self.record_values()
 
     def read_file(self):
+        """Read TOML file
+        """
         try:
             with open(self.parameter_file, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -71,12 +81,16 @@ class Toml:
             self.dump_file()
 
     def dump_file(self):
+        """Dump the values of the parameters in the TOML file
+        """
         self.document = self.generate_document()
         with open(self.parameter_file, 'w', encoding='utf-8') as f:
             print(tk.dumps(self.document), file=f)
         logger.warning(f'File {self.parameter_file} has been created')
 
     def record_values(self):
+        """Record the values of the parameters in the TOML document
+        """
         for the_param in self.parameters.default_parameters:
             the_table = self.document.get(the_param.section)
             new_table = False
@@ -97,13 +111,13 @@ class Toml:
                         f'Error with parameter {the_param.name}: '
                         f'{value} is not a valid boolean. Use "True" of "False"'
                     )
-                    raise excep.biogemeError(error_msg)
+                    raise excep.BiogemeError(error_msg)
             else:
                 self.parameters.set_value_from_tuple(the_param, the_param.type(value))
             if new_table:
                 self.document.add(the_param.section, the_table)
 
-    def generate_document(self, default=True):
+    def generate_document(self):
         """Generate the  TOML document"""
         doc = tk.document()
 

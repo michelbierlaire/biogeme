@@ -42,7 +42,7 @@ class SetElement:
 
         for obj in objectives:
             if obj is None:
-                raise excep.biogemeError(f'All objectives ust be defined: {objectives}')
+                raise excep.BiogemeError(f'All objectives ust be defined: {objectives}')
 
     def __eq__(self, other):
         if isinstance(other, SetElement):
@@ -53,7 +53,7 @@ class SetElement:
                         f'objective values: {self.objectives} and '
                         f'{other.objectives}'
                     )
-                    raise excep.biogemeError(error_msg)
+                    raise excep.BiogemeError(error_msg)
                 return True
         return False
 
@@ -73,7 +73,7 @@ class SetElement:
         :type other: SetElement
         """
         if len(self.objectives) != len(other.objectives):
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'Incompatible sizes: '
                 f'{len(self.objectives)}'
                 f' and {len(other.objectives)}'
@@ -94,26 +94,25 @@ class Pareto:
         self.size_init_pareto = 0
         self.size_init_considered = 0
         self.filename = filename
-        if filename is None:
-            self.pareto = set()
-            """dict containing the pareto set. The keys are the solutions
-                (class :class:`biogeme.vns.solutionClass`), and the values are
-                the size of the neighborhood that must be applied the next
-                time tat the solution is selected by the algorithm.
+        self.pareto = set()
+        """dict containing the pareto set. The keys are the solutions
+            (class :class:`biogeme.vns.solutionClass`), and the values are
+            the size of the neighborhood that must be applied the next
+            time tat the solution is selected by the algorithm.
 
-            """
+        """
 
-            self.removed = set()
-            """set of solutions that have been in the Pareto set ar some point,
-                but have been removed because dominated by another
-                solution.
-            """
+        self.removed = set()
+        """set of solutions that have been in the Pareto set ar some point,
+            but have been removed because dominated by another
+            solution.
+        """
 
-            self.considered = set()
-            """set of solutions that have been considered at some point by the
-                algorithm
-            """
-        else:
+        self.considered = set()
+        """set of solutions that have been considered at some point by the
+            algorithm
+        """
+        if filename is not None:
             if self.restore():
                 logger.debug('RESTORE PARETO FROM FILE')
                 self.size_init_pareto = len(self.pareto)
@@ -135,7 +134,7 @@ class Pareto:
         """
         Dump the three sets on a file using pickle
 
-        :raise biogemeError: if a problem has occured during dumping.
+        :raise BiogemeError: if a problem has occured during dumping.
         """
         if self.filename is None:
             logger.warning('No Pareto file has been provided')
@@ -177,7 +176,7 @@ class Pareto:
             return None
         if len(found) > 1:
             error_msg = f'There are {len(found)} elements with ID {the_id}'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         return next(iter(found))
 
     def restore(self):
@@ -189,16 +188,28 @@ class Pareto:
         except FileNotFoundError:
             return False
 
-        self.pareto = {
-            SetElement(id, list(values)) for id, values in document['Pareto'].items()
-        }
-        self.considered = {
-            SetElement(id, list(values))
-            for id, values in document['Considered'].items()
-        }
-        self.removed = {
-            SetElement(id, list(values)) for id, values in document['Removed'].items()
-        }
+        try:
+            self.pareto = {
+                SetElement(id, list(values))
+                for id, values in document['Pareto'].items()
+            }
+        except tk.exceptions.NonExistentKey:
+            logger.warning('No Pareto section in pareto file')
+        try:
+            self.considered = {
+                SetElement(id, list(values))
+                for id, values in document['Considered'].items()
+            }
+        except tk.exceptions.NonExistentKey:
+            logger.warning('No Considered section in pareto file')
+
+        try:
+            self.removed = {
+                SetElement(id, list(values))
+                for id, values in document['Removed'].items()
+            }
+        except tk.exceptions.NonExistentKey:
+            logger.warning('No Removed section in pareto file')
         return True
 
     def length(self):
@@ -291,17 +302,17 @@ class Pareto:
 
         """
         if not CAN_PLOT:
-            raise excep.biogemeError('Install matplotlib.')
+            raise excep.BiogemeError('Install matplotlib.')
         ax = ax or plt.gca()
 
         if self.length() == 0:
-            raise excep.biogemeError('Cannot plot an empty Pareto set')
+            raise excep.BiogemeError('Cannot plot an empty Pareto set')
 
         first_elem = next(iter(self.pareto))
         number_of_objectives = len(first_elem.objectives)
 
         if number_of_objectives < 2:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 'At least two objectives functions are required for the plot of '
                 'the Pateto set.'
             )
@@ -312,7 +323,7 @@ class Pareto:
                 f'only {number_of_objectives}. Give a number between 0 '
                 'and {number_of_objectives-1}.'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         par_x = [elem.objectives[objective_x] for elem in self.pareto]
         par_y = [elem.objectives[objective_y] for elem in self.pareto]

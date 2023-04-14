@@ -39,17 +39,17 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
         deterministically to the choice set.
     :type chosen: int
 
-    :raise biogemeError: if one alternative belongs to several subsets
+    :raise BiogemeError: if one alternative belongs to several subsets
         of the partition.
 
-    :raise biogemeError: if a set in the partition is empty.
+    :raise BiogemeError: if a set in the partition is empty.
 
-    :raise biogemeError: if the chosen alternative is unknown.
+    :raise BiogemeError: if the chosen alternative is unknown.
 
-    :raise biogemeError: if the requested sample size for a stratum if
+    :raise BiogemeError: if the requested sample size for a stratum if
         larger than the size of the stratum
 
-    :raise biogemeError: if some alternative do not appear in the partition
+    :raise BiogemeError: if some alternative do not appear in the partition
 
     """
     # Verify that we have a partition
@@ -62,14 +62,14 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
             f'is {total_nbr}. Some elements are therefore present '
             f'in more than one subset.'
         )
-        raise excep.biogemeError(error_msg)
+        raise excep.BiogemeError(error_msg)
 
     if nbr_unique_elements != alternatives.shape[0]:
         error_msg = (
             f'The partitions contain {nbr_unique_elements} alternatives '
             f'while there are {alternatives.shape[0]} in the database'
         )
-        raise excep.biogemeError(error_msg)
+        raise excep.BiogemeError(error_msg)
     # Verify that all requested alternatives appear in the database of alternatives
     for stratum in partition:
         for alt in stratum.subset:
@@ -77,7 +77,7 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
                 error_msg = (
                     f'Alternative {alt} does not appear in the database of alternaitves'
                 )
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
 
     results = []
 
@@ -85,12 +85,12 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
         n = len(stratum.subset)
         if n == 0:
             error_msg = 'A stratum is empty'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         k = stratum.sample_size
         if k > n:
             error_msg = f'Cannot draw {k} elements in a stratum of size {n}'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         logproba = np.log(k) - np.log(n)
         subset = alternatives[alternatives[id_column].isin(stratum.subset)]
@@ -98,10 +98,10 @@ def sample_alternatives(alternatives, id_column, partition, chosen=None):
             chosen_alternative = alternatives[alternatives[id_column] == chosen].copy()
             if len(chosen_alternative) < 1:
                 error_msg = f'Unknown alternative: {chosen}'
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
             if len(chosen_alternative) > 1:
                 error_msg = f'Duplicate alternative: {chosen}'
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
             chosen_alternative[LOG_PROBA_COL] = logproba
             results.append(chosen_alternative)
 

@@ -151,7 +151,7 @@ class Configuration:
     def __check_list_validity(self):
         """Check the validity of the list.
 
-        :raise biogemeError: if the same catalog appears more than once in the list
+        :raise BiogemeError: if the same catalog appears more than once in the list
         """
         unique_items = set()
         for item in self.__selections:
@@ -160,5 +160,5 @@ class Configuration:
                     f'Catalog {item.catalog} appears more than once in the '
                     f'configuration: {self.__selections}'
                 )
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
             unique_items.add(item.catalog)

@@ -11,8 +11,6 @@ from collections import namedtuple
 import biogeme.expressions as ex
 import biogeme.exceptions as excep
 from biogeme.configuration import (
-    SelectionTuple,
-    Configuration,
     SEPARATOR,
     SELECTION_SEPARATOR,
 )
@@ -36,7 +34,7 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
                 f'Invalid name: {name}. Cannot contain characters '
                 f'{SELECTION_SEPARATOR} or {SELECTION_SEPARATOR}'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         super().__init__()
         self.name = name
 

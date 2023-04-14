@@ -60,7 +60,7 @@ class NegativeLikelihood(functionToMinimize):
 
     def f(self, batch=None):
         if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
+            raise excep.BiogemeError('The variables must be set first.')
 
         if batch is not None or self.batch is not None:
             self.batch = batch
@@ -79,7 +79,7 @@ class NegativeLikelihood(functionToMinimize):
 
     def f_g(self, batch=None):
         if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
+            raise excep.BiogemeError('The variables must be set first.')
 
         if batch is not None or self.batch is not None:
             self.batch = batch
@@ -99,7 +99,7 @@ class NegativeLikelihood(functionToMinimize):
 
     def f_g_h(self, batch=None):
         if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
+            raise excep.BiogemeError('The variables must be set first.')
 
         if batch is not None or self.batch is not None:
             self.batch = batch
@@ -122,7 +122,7 @@ class NegativeLikelihood(functionToMinimize):
             self.recalculate = True
 
         if self.x is None:
-            raise excep.biogemeError('The variables must be set first.')
+            raise excep.BiogemeError('The variables must be set first.')
 
         if self.fv is None or self.gv is None or self.bhhhv is None:
             self.recalculate = True

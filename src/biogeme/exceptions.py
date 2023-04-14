@@ -10,13 +10,13 @@
 # pylint: disable=invalid-name
 
 
-class biogemeError(Exception):
+class BiogemeError(Exception):
     """Defines a generic exception for Biogeme."""
 
 
-class valueOutOfRange(biogemeError):
+class ValueOutOfRange(BiogemeError):
     """Value of out range error."""
 
 
-class duplicateError(biogemeError):
+class DuplicateError(BiogemeError):
     """duplicate error."""

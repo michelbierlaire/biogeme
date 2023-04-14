@@ -50,15 +50,15 @@ def getUniform(sampleSize, numberOfDraws, symmetric=False):
                0.40114744, -0.61327161,  0.08900539, -0.20985417,  0.67542226]]
         )
 
-    :raise biogemeError: if the number of draws is not positive.
+    :raise BiogemeError: if the number of draws is not positive.
 
-    :raise biogemeError: if the sample size is not positive.
+    :raise BiogemeError: if the sample size is not positive.
     """
     if numberOfDraws <= 0:
-        raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
+        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if sampleSize <= 0:
-        raise excep.biogemeError(
+        raise excep.BiogemeError(
             f'Invalid sample size: {sampleSize} when generating draws.'
         )
     totalSize = numberOfDraws * sampleSize
@@ -108,17 +108,17 @@ def getLatinHypercubeDraws(
                [0.49676864, 0.67073483, 0.9788854 , 0.5726069 , 0.11894558,
                 0.05515471, 0.2640275 , 0.82093696, 0.92034628, 0.64866597]])
 
-    :raise biogemeError: if the number of draws is not positive.
+    :raise BiogemeError: if the number of draws is not positive.
 
-    :raise biogemeError: if the sample size is not positive.
+    :raise BiogemeError: if the sample size is not positive.
 
-    :raise biogemeError: if the number of uniform draws is inconsistent.
+    :raise BiogemeError: if the number of uniform draws is inconsistent.
     """
     if numberOfDraws <= 0:
-        raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
+        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if sampleSize <= 0:
-        raise excep.biogemeError(
+        raise excep.BiogemeError(
             f'Invalid sample size: {sampleSize} when generating draws.'
         )
     totalSize = numberOfDraws * sampleSize
@@ -131,7 +131,7 @@ def getLatinHypercubeDraws(
                 f'A total of {totalSize} uniform draws '
                 f'must be provided, and not {uniformNumbers.size}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
 
     uniformNumbers.shape = (totalSize,)
     numbers = np.array(
@@ -185,15 +185,15 @@ def getHaltonDraws(
                [0.7037037 , 0.14814815, 0.48148148, 0.81481481, 0.25925926,
                 0.59259259, 0.92592593, 0.07407407, 0.40740741, 0.74074074]])
 
-    :raise biogemeError: if the number of draws is not positive.
+    :raise BiogemeError: if the number of draws is not positive.
 
-    :raise biogemeError: if the sample size is not positive.
+    :raise BiogemeError: if the sample size is not positive.
     """
     if numberOfDraws <= 0:
-        raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
+        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if sampleSize <= 0:
-        raise excep.biogemeError(
+        raise excep.BiogemeError(
             f'Invalid sample size: {sampleSize} when generating draws.'
         )
     length = numberOfDraws * sampleSize
@@ -208,13 +208,13 @@ def getHaltonDraws(
         i = 1
         while i < base and numbers_idx < req_length:
             max_numbers = min(req_length - numbers_idx, numbers_size)
-            numbers[numbers_idx : numbers_idx + max_numbers] = (
+            numbers[numbers_idx: numbers_idx + max_numbers] = (
                 numbers[:max_numbers] + d * i
             )
             numbers_idx += max_numbers
             i += 1
         t += 1
-    numbers = numbers[skip + 1 : length + skip + 1]
+    numbers = numbers[skip + 1: length + skip + 1]
 
     if shuffled:
         np.random.shuffle(numbers)
@@ -308,13 +308,13 @@ def getNormalWichuraDraws(
               -0.28615154,  2.10635541,  0.0436191 , -0.25417774,  0.01026933]]
         )
 
-    :raise biogemeError: if the number of draws is not positive.
+    :raise BiogemeError: if the number of draws is not positive.
 
-    :raise biogemeError: if the sample size is not positive.
+    :raise BiogemeError: if the sample size is not positive.
 
     """
     if numberOfDraws <= 0:
-        raise excep.biogemeError(f'Invalid number of draws: {numberOfDraws}.')
+        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
 
     if antithetic:
         if 2 * int(numberOfDraws / 2) != numberOfDraws:
@@ -323,11 +323,11 @@ def getNormalWichuraDraws(
                 f'antithetic draws. Requested number of '
                 f'{numberOfDraws}.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
         numberOfDraws = int(numberOfDraws / 2)
 
     if sampleSize <= 0:
-        raise excep.biogemeError(
+        raise excep.BiogemeError(
             f'Invalid sample size: {sampleSize} when generating draws.'
         )
     totalSize = numberOfDraws * sampleSize
@@ -388,7 +388,7 @@ def getNormalWichuraDraws(
             f'A total of {totalSize} uniform draws must be '
             f'provided, and not {uniformNumbers.size}.'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
     uniformNumbers.shape = (totalSize,)
 
     q = uniformNumbers - 0.5

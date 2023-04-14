@@ -44,7 +44,7 @@ const bioDerivatives* bioExprElem::getValueAndDerivatives(std::vector<bioUInt> l
   theDerivatives.resize(literalIds.size()) ;
 
   const bioDerivatives* the_key = key->getValueAndDerivatives(literalIds, false,false) ;
-  bioUInt k = bioUInt(the_key->f) ;
+  bioInt k = bioInt(the_key->f) ;
  
   std::map<bioUInt, bioExpression*>::const_iterator found = dictOfExpressions.find(k) ;
   if (found == dictOfExpressions.end()) {

@@ -11,6 +11,7 @@ import random
 from biogeme import vns, biogeme, tools
 import biogeme.exceptions as excep
 from biogeme.vns import ParetoClass
+from biogeme.pareto import Pareto
 from biogeme.configuration import Configuration
 from biogeme.specification import Specification
 
@@ -173,6 +174,123 @@ def generate_operator(name, the_function):
     return the_operator
 
 
+class ParetoPostProcessing:
+    """Class to process an existing Pareto set."""
+
+    def __init__(
+        self,
+        biogeme_object,
+        pareto_file_name,
+    ):
+        """Ctor
+
+        :param biogeme_object: object containnig the loglikelihood and the database
+        :type biogeme_object: biogeme.biogeme.BIOGEME
+
+        :param pareto_file_name: file where to read and write the Pareto solutions
+        :type pareto_file_name: str
+
+        """
+        self.biogeme_object = biogeme_object
+        Specification.generic_name = biogeme_object.modelName
+        self.pareto = Pareto(filename=pareto_file_name)
+        self.expression = biogeme_object.loglike
+        if self.expression is None:
+            error_msg = 'No log likelihood function is defined'
+            raise excep.BiogemeError(error_msg)
+        self.database = biogeme_object.database
+        Specification.expression = self.expression
+        Specification.database = self.database
+        self.model_names = None
+
+    def reestimate(self, recycle):
+        """The assisted specification uses quickEstimate to estimate
+        the models. A complete estimation is necessary to obtain the
+        full estimation results.
+
+        """
+        if self.model_names is None:
+            self.model_names = tools.ModelNames(prefix=self.biogeme_object.modelName)
+
+        new_results = {}
+        for element in self.pareto.pareto:
+            config_id = element.element_id
+            logger.debug(f'REESTIMATE {config_id}')
+            config = Configuration.from_string(config_id)
+            self.expression.configure_catalogs(config)
+            self.expression.locked = True
+            userNotes = config.get_html()
+            b = biogeme.BIOGEME(self.database, self.expression, userNotes=userNotes)
+            b.modelName = self.model_names(config_id)
+            the_result = b.estimate(recycle=recycle)
+            new_results[config_id] = the_result
+            self.expression.locked = False
+        return new_results
+
+    def log_statistics(self):
+        """Report some statistics about the process in the logger"""
+        for msg in self.statistics():
+            logger.info(msg)
+
+    def statistics(self):
+        """Report some statistics about the process
+
+        :return: tuple of messages, possibly empty.
+        :rtype: tuple(str)
+        """
+        if self.pareto is None:
+            return tuple()
+        msg = (
+            f'Initial Pareto: {self.pareto.size_init_pareto} ',
+            f'Initial considered: {self.pareto.size_init_considered} ',
+            f'Final Pareto: {len(self.pareto.pareto)} ',
+            f'Condidered: {len(self.pareto.considered)} ',
+            f'Removed: {len(self.pareto.removed)}',
+        )
+        return msg
+
+    def plot(
+        self,
+        objective_x=0,
+        objective_y=1,
+        label_x=None,
+        label_y=None,
+        margin_x=5,
+        margin_y=5,
+        ax=None,
+    ):
+        """Plot the members of the set according to two
+            objective functions.  They  determine the x- and
+            y-coordinate of the plot.
+
+        :param objective_x: index of the objective function to use for the x-coordinate.
+        :param objective_x: int
+
+        :param objective_y: index of the objective function to use for the y-coordinate.
+        :param objective_y: int
+
+        :param label_x: label for the x_axis
+        :type label_x: str
+
+        :param label_y: label for the y_axis
+        :type label_y: str
+
+        :param margin_x: margin for the x axis
+        :type margin_x: int
+
+        :param margin_y: margin for the y axis
+        :type margin_y: int
+
+        :param ax: matplotlib axis for the plot
+        :type ax: matplotlib.Axes
+
+        """
+
+        return self.pareto.plot(
+            objective_x, objective_y, label_x, label_y, margin_x, margin_y, ax
+        )
+
+
 class AssistedSpecification(vns.ProblemClass):
     """Class defining assisted specification problem for the VNS algorithm."""
 
@@ -199,6 +317,10 @@ class AssistedSpecification(vns.ProblemClass):
         :type max_neighborhood: int
 
         """
+        self.pareto_post_processing = ParetoPostProcessing(
+            biogeme_object=biogeme_object,
+            pareto_file_name=pareto_file_name,
+        )
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
         Specification.generic_name = biogeme_object.modelName
@@ -209,7 +331,7 @@ class AssistedSpecification(vns.ProblemClass):
         self.expression = biogeme_object.loglike
         if self.expression is None:
             error_msg = 'No log likelihood function is defined'
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         self.database = biogeme_object.database
         Specification.expression = self.expression
         Specification.database = self.database
@@ -228,7 +350,6 @@ class AssistedSpecification(vns.ProblemClass):
         self.operators['Increment several catalogs'] = increment_several_catalogs
         self.operators['Decrement several catalogs'] = decrement_several_catalogs
 
-        self.model_names = None
         logger.debug('Ctor assisted specification: Done')
         super().__init__(self.operators)
         logger.debug('Ctor assisted specification: Done')
@@ -250,23 +371,7 @@ class AssistedSpecification(vns.ProblemClass):
         full estimation results.
 
         """
-        if self.model_names is None:
-            self.model_names = tools.ModelNames(prefix=self.biogeme_object.modelName)
-            
-        new_results = {}
-        for element in self.pareto.pareto:
-            config_id = element.element_id
-            logger.debug(f'REESTIMATE {config_id}')
-            config = Configuration.from_string(config_id)
-            self.expression.configure_catalogs(config)
-            self.expression.locked = True
-            userNotes = config.get_html()
-            b = biogeme.BIOGEME(self.database, self.expression, userNotes=userNotes)
-            b.modelName = self.model_names(config_id)
-            the_result = b.estimate(recycle=recycle)
-            new_results[config_id] = the_result
-            self.expression.locked = False
-        return new_results
+        return self.pareto_post_processing.reestimate(recycle)
 
     def run(self, number_of_neighbors=20):
         """Runs the VNS algorithm
@@ -340,8 +445,7 @@ class AssistedSpecification(vns.ProblemClass):
 
     def log_statistics(self):
         """Report some statistics about the process in the logger"""
-        for msg in self.statistics():
-            logger.info(msg)
+        self.pareto_post_processing.log_statistics()
 
     def statistics(self):
         """Report some statistics about the process
@@ -349,16 +453,7 @@ class AssistedSpecification(vns.ProblemClass):
         :return: tuple of messages, possibly empty.
         :rtype: tuple(str)
         """
-        if self.pareto is None:
-            return tuple()
-        msg = (
-            f'Initial Pareto: {self.pareto.size_init_pareto} ',
-            f'Initial considered: {self.pareto.size_init_considered} ',
-            f'Final Pareto: {len(self.pareto.pareto)} ',
-            f'Condidered: {len(self.pareto.considered)} ',
-            f'Removed: {len(self.pareto.removed)}',
-        )
-        return msg
+        return self.pareto_post_processing.statistics()
 
     def plot(
         self,
@@ -397,6 +492,12 @@ class AssistedSpecification(vns.ProblemClass):
 
         """
 
-        return self.pareto.plot(
-            objective_x, objective_y, label_x, label_y, margin_x, margin_y, ax
+        return self.pareto_post_processing.plot(
+            objective_x,
+            objective_y,
+            label_x,
+            label_y,
+            margin_x,
+            margin_y,
+            ax,
         )

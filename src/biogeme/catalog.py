@@ -34,13 +34,13 @@ class Catalog(MultipleExpression):
             each containing a name and an expression.
         :type list_of_named_expressions: list(NamedExpression)
 
-        :raise biogemeError: if list_of_named_expressions is empty
+        :raise BiogemeError: if list_of_named_expressions is empty
 
         """
         super().__init__(name)
 
         if not list_of_named_expressions:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'{name}: cannot create a catalog from an empty list.'
             )
 
@@ -58,7 +58,7 @@ class Catalog(MultipleExpression):
                 error_msg = (
                     f'Catalog {self.name} cannot contain itself. Use different names'
                 )
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
 
         self.current_index = 0
         self.dict_of_index = {
@@ -101,14 +101,14 @@ class Catalog(MultipleExpression):
         :param index: value of the index
         :type index: int
 
-        :raises biogemeError: if index is out of range
+        :raises BiogemeError: if index is out of range
 
         """
         if index >= self.catalog_size():
             error_msg = (
                 f'Wrong index {index}. ' f'Must be in [0, {self.catalog_size()}]'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         self.current_index = index
         for sync_catalog in self.synchronized_catalogs:
             sync_catalog.current_index = index
@@ -277,7 +277,7 @@ class SynchronizedCatalog(Catalog):
                 f'The controller of a synchronized catalog must be of type '
                 f'Catalog, and not {type(controller)}'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         self.controller = controller
         if self.catalog_size() != controller.catalog_size():
             error_msg = (
@@ -286,7 +286,7 @@ class SynchronizedCatalog(Catalog):
                 f'({controller.catalog_size()}) as its controller '
                 f'({controller.name})'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         self.controller.synchronized_catalogs.append(self)
 
     @classmethod
@@ -332,7 +332,7 @@ class SynchronizedCatalog(Catalog):
         :param index: value of the index
         :type index: int
 
-        :raises biogemeError: the index of the catalog cannot be
+        :raises BiogemeError: the index of the catalog cannot be
             changed directly. It must be changed by its controller
 
         """
@@ -340,7 +340,7 @@ class SynchronizedCatalog(Catalog):
             f'The index of catalog {self.name} cannot be changed directly. '
             f'It must be changed by its controller {self.controller.name}'
         )
-        excep.biogemeError(error_msg)
+        excep.BiogemeError(error_msg)
 
     def current_configuration(self, includes_controlled_catalogs=False):
         """Obtain the current configuration of an expression with Catalog
@@ -376,14 +376,14 @@ class SynchronizedCatalog(Catalog):
         :param index: index of the expression in the group
         :type index: int
 
-        :raise biogemeError: if the group_name is a synchronized group.
+        :raise BiogemeError: if the group_name is a synchronized group.
         """
         if self.name == group_name:
             error_msg = (
                 f'Group {self.name} is controlled by group {self.controller}. '
                 f'It is not possible to select its expression independently. '
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         total = 0
         for _, expression in self.list_of_named_expressions:
             total += expression.select_expression(group_name, index)

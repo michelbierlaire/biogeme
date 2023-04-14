@@ -34,14 +34,26 @@ class Parameters:
         self.sections = {p.section for p in self.default_parameters}
 
     def get_param_tuple(self, name, section=None):
-        """Obtain a tuple containing the name, section and value of the parameter"""
+        """Obtain a tuple describing the parameter
+
+        :param name: name of the parameter
+        :type name: str
+
+        :param section: section where the parameter is relevant
+        :type section: str
+
+        :return: tuple containing the name, section and value of the
+            parameter, or None if not found
+        :rtype: biogeme.default_parameters.ParameterTuple
+
+        """
         tuple_set = self.all_parameters_dict.get(name)
         if tuple_set is None:
             if section is None:
                 error_msg = f'Unknown parameter {name}'
             else:
                 error_msg = f'Unknown parameter {name} in section {section} '
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
 
         if len(tuple_set) == 1:
             # The name is sufficient to identify the parameter
@@ -51,7 +63,7 @@ class Parameters:
                     f'Parameter {name} is in section {the_tuple.section} '
                     f'and not in section {section}'
                 )
-                raise excep.biogemeError(error_msg)
+                raise excep.BiogemeError(error_msg)
             return the_tuple
         # The section is necessary to identify the parameter.
         if section is None:
@@ -60,10 +72,11 @@ class Parameters:
                 f'sections: {(p.section for p in tuple_set)}'
                 f' The section must be mentioned explicitly.'
             )
-            raise excep.biogemeError(error_msg)
+            raise excep.BiogemeError(error_msg)
         for the_tuple in tuple_set:
             if the_tuple.section == section:
                 return the_tuple
+        return None
 
     @staticmethod
     def check_parameter_value(the_tuple, value):
@@ -95,7 +108,7 @@ class Parameters:
         """Set a value of a parameter."""
         ok, messages = self.check_parameter_value(the_tuple, value)
         if not ok:
-            raise excep.biogemeError(messages)
+            raise excep.BiogemeError(messages)
         self.values[the_tuple] = value
 
     def set_value(self, name, value, section=None):

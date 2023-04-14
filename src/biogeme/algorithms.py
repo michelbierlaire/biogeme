@@ -126,7 +126,7 @@ class bioBounds:
 
         :type b: list(tuple)
 
-        :raises biogeme.exceptions.biogemeError: if the bounds are incompatible
+        :raises biogeme.exceptions.BiogemeError: if the bounds are incompatible
 
         """
 
@@ -164,7 +164,7 @@ class bioBounds:
                 f'{np.nonzero(wrongBounds)[0]}: '
                 f'{[b[i] for i in np.nonzero(wrongBounds)[0]]}'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
 
     def __str__(self):
         return self.bounds.__str__()
@@ -182,12 +182,12 @@ class bioBounds:
         :return: projected point
         :rtype: numpy.array
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
                 are inconsistent
         """
 
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
 
         y = x
         for i in range(self.n):
@@ -207,12 +207,12 @@ class bioBounds:
         :return:  bound object, intersection of the two.
         :rtype: class bioBounds
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
               are inconsistent
         """
 
         if otherBounds.n != self.n:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'Incompatible size: {otherBounds.n} ' f'and {self.n}'
             )
 
@@ -243,11 +243,11 @@ class bioBounds:
         :return: intersection between the feasible region and the trus region
         :rtype: class bioBounds
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
                 are inconsistent
         """
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
 
         trustRegion = bioBounds([(xk - delta, xk + delta) for xk in x])
         return self.intersect(trustRegion)
@@ -262,11 +262,11 @@ class bioBounds:
         :return: bound object
         :rtype: class bioBounds
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
                 are inconsistent
         """
         if len(selectedVariables) != self.n:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'Incompatible size: ' f'{len(selectedVariables)} and {self.n}'
             )
 
@@ -281,11 +281,11 @@ class bioBounds:
         :return: True if x is feasible, False otherwise.
         :rtype: bool
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
                  are inconsistent
         """
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: ' f'{len(x)} and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: ' f'{len(x)} and {self.n}')
         for i in range(self.n):
             if (
                 self.lowerBounds[i] is not None
@@ -313,12 +313,12 @@ class bioBounds:
                  and the list of indices achieving this value.
         :rtype: float, int
 
-        :raises biogeme.exceptions.biogemeError: if the point is infeasible
+        :raises biogeme.exceptions.BiogemeError: if the point is infeasible
 
         """
 
         if not self.feasible(x):
-            raise excep.biogemeError(f'Infeasible point: {x}')
+            raise excep.BiogemeError(f'Infeasible point: {x}')
 
         alpha = np.array(
             [
@@ -352,17 +352,17 @@ class bioBounds:
 
         :rtype: numpy.array
 
-        :raises biogeme.exceptions.biogemeError: if the vector x is
+        :raises biogeme.exceptions.BiogemeError: if the vector x is
                     not feasible
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
                     of x and bounds do not match.
 
         """
         if len(x) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: {len(x)}' f' and {self.n}')
         if not self.feasible(x):
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'{x} is not feasible for the ' f'bounds {self.bounds}'
             )
 
@@ -391,14 +391,14 @@ class bioBounds:
                  breakpoint.
         :rtype: list(tuple(int,float))
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions
+        :raises biogeme.exceptions.BiogemeError: if the dimensions
                 are inconsistent
 
-        :raises biogeme.exceptions.biogemeError: if x is infeasible
+        :raises biogeme.exceptions.BiogemeError: if x is infeasible
 
         """
         if len(d) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {self.n}' f' and {len(d)}')
+            raise excep.BiogemeError(f'Incompatible size: {self.n}' f' and {len(d)}')
         bp = [
             (self.upperBounds[i] - x[i]) / d[i]
             if d[i] > np.finfo(float).eps
@@ -409,7 +409,7 @@ class bioBounds:
         ]
 
         if any(b < 0 for b in bp):
-            raise excep.biogemeError('Infeasible point')
+            raise excep.BiogemeError('Infeasible point')
 
         return sorted(enumerate(bp), key=lambda x: x[1])
 
@@ -439,20 +439,20 @@ class bioBounds:
         :return: generalized Cauchy point based on inexact line search.
         :rtype: numpy.array. Dimension n.
 
-        :raises biogeme.exceptions.biogemeError: if the dimensions are
+        :raises biogeme.exceptions.BiogemeError: if the dimensions are
                inconsistent
-        :raises biogeme.exceptions.biogemeError: if xk is infeasible
+        :raises biogeme.exceptions.BiogemeError: if xk is infeasible
         """
 
         if len(xk) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(xk)}' f' and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: {len(xk)}' f' and {self.n}')
         if len(gk) != self.n:
-            raise excep.biogemeError(f'Incompatible size: {len(gk)}' f' and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: {len(gk)}' f' and {self.n}')
         if H.shape[0] != self.n or H.shape[1] != self.n:
-            raise excep.biogemeError(f'Incompatible size: {H.shape}' f' and {self.n}')
+            raise excep.BiogemeError(f'Incompatible size: {H.shape}' f' and {self.n}')
 
         if not self.feasible(xk):
-            raise excep.biogemeError('Infeasible iterate')
+            raise excep.BiogemeError('Infeasible iterate')
 
         x = xk
         g = gk - H @ xk
@@ -542,16 +542,16 @@ def schnabelEskow(
                     where :math:`A + E = PLL^TP^T`.
     :rtype: numpy.array, numpy.array, numpy.array
 
-    :raises biogeme.exceptions.biogemeError: if the matrix A is not square.
-    :raises biogeme.exceptions.biogemeError: if the matrix A is not symmetric.
+    :raises biogeme.exceptions.BiogemeError: if the matrix A is not square.
+    :raises biogeme.exceptions.BiogemeError: if the matrix A is not symmetric.
     """
 
     def pivot(j):
         A[j, j] = np.sqrt(A[j, j])
         for i in range(j + 1, dim):
             A[j, i] = A[i, j] = A[i, j] / A[j, j]
-            A[i, j + 1 : i + 1] -= A[i, j] * A[j + 1 : i + 1, j]
-            A[j + 1 : i + 1, i] = A[i, j + 1 : i + 1]
+            A[i, j + 1: i + 1] -= A[i, j] * A[j + 1: i + 1, j]
+            A[j + 1: i + 1, i] = A[i, j + 1: i + 1]
 
     def permute(i, j):
         A[[i, j]] = A[[j, i]]
@@ -562,10 +562,10 @@ def schnabelEskow(
     A = A.astype(np.float64)
     dim = A.shape[0]
     if A.shape[1] != dim:
-        raise excep.biogemeError('The matrix must be square')
+        raise excep.BiogemeError('The matrix must be square')
 
     if not np.all(np.abs(A - A.T) < np.sqrt(np.finfo(np.float64).eps)):
-        raise excep.biogemeError('The matrix must be symmetric')
+        raise excep.BiogemeError('The matrix must be symmetric')
 
     E = np.zeros(dim, dtype=np.float64)
     P = np.identity(dim)
@@ -585,7 +585,7 @@ def schnabelEskow(
             # Switch rows and columns of i and j of A
             permute(i, j)
         if j < dim - 1 and (
-            (A.diagonal()[j + 1 :] - A[j + 1 :, j] ** 2 / A.diagonal()[j]).min()
+            (A.diagonal()[j + 1:] - A[j + 1:, j] ** 2 / A.diagonal()[j]).min()
             < -mu * gamma
         ):
             phaseOne = False  # go to phase two
@@ -609,7 +609,7 @@ def schnabelEskow(
             # Calculate lower Gerschgorin bounds of A[k+1]
             for i in range(k + 1, dim):
                 g[i] = (
-                    A[i, i] - abs(A[i, k + 1 : i]).sum() - abs(A[i + 1 : dim, i]).sum()
+                    A[i, i] - abs(A[i, k + 1: i]).sum() - abs(A[i + 1: dim, i]).sum()
                 )
             # Modified Cholesky Decomposition
             for j in range(k + 1, dim - 2):
@@ -619,7 +619,7 @@ def schnabelEskow(
                     # Switch rows and columns of i and j of A
                     permute(i, j)
                 # Calculate E[j, j] and add to diagonal
-                norm_j = abs(A[j + 1 : dim, j]).sum()
+                norm_j = abs(A[j + 1: dim, j]).sum()
                 E[j] = delta = max(0, -A[j, j] + max(norm_j, taubar * gamma), deltaPrev)
                 if delta > 0:
                     A[j, j] += delta
@@ -627,7 +627,7 @@ def schnabelEskow(
                 # Update Gerschgorin bound estimates
                 if A[j, j] != norm_j:
                     temp = 1.0 - norm_j / A[j, j]
-                    g[j + 1 :] += abs(A[j + 1 :, j]) * temp
+                    g[j + 1:] += abs(A[j + 1:, j]) * temp
                 # perform jth iteration of factorization
                 pivot(j)
 
@@ -687,30 +687,30 @@ def lineSearch(fct, x, f, g, d, alpha0=1.0, beta1=1.0e-4, beta2=0.99, lbd=2.0):
     :return: a step verifing both Wolfe conditions
     :rtype: float
 
-    :raises biogeme.exceptions.biogemeError: if ``lbd`` :math:`\\leq` 1
-    :raises biogeme.exceptions.biogemeError: if ``alpha0`` :math:`\\leq` 0
-    :raises biogeme.exceptions.biogemeError: if ``beta1`` :math:`\\geq` beta2
-    :raises biogeme.exceptions.biogemeError: if ``d`` is not a descent
+    :raises biogeme.exceptions.BiogemeError: if ``lbd`` :math:`\\leq` 1
+    :raises biogeme.exceptions.BiogemeError: if ``alpha0`` :math:`\\leq` 0
+    :raises biogeme.exceptions.BiogemeError: if ``beta1`` :math:`\\geq` beta2
+    :raises biogeme.exceptions.BiogemeError: if ``d`` is not a descent
                                              direction
 
     """
     if lbd <= 1:
-        raise excep.biogemeError(f'lambda is {lbd} and must be > 1')
+        raise excep.BiogemeError(f'lambda is {lbd} and must be > 1')
     if alpha0 <= 0:
-        raise excep.biogemeError(f'alpha0 is {alpha0} and must be > 0')
+        raise excep.BiogemeError(f'alpha0 is {alpha0} and must be > 0')
     if beta1 >= beta2:
         errorMsg = (
             f'Incompatible Wolfe cond. parameters: '
             f'beta1= {beta1} is greater than '
             f'beta2={beta2}'
         )
-        raise excep.biogemeError(errorMsg)
+        raise excep.BiogemeError(errorMsg)
 
     nfev = 1
     deriv = np.inner(g, d)
 
     if deriv >= 0:
-        raise excep.biogemeError(f'd is not a descent direction: {deriv} >= 0')
+        raise excep.BiogemeError(f'd is not a descent direction: {deriv} >= 0')
 
     alpha = alpha0
     alphal = 0
@@ -931,7 +931,7 @@ def cauchyNewtonDogleg(g, H):
     :return: tuple with Cauchy point, Newton point, Dogleg point
     :rtype: numpy.array, numpy.array, numpy.array
 
-    :raises biogeme.exceptions.biogemeError: if the quadratic model is
+    :raises biogeme.exceptions.BiogemeError: if the quadratic model is
         not convex.
 
     """
@@ -942,8 +942,8 @@ def cauchyNewtonDogleg(g, H):
     negativeEigenvalue = E < 0
     if np.any(negativeEigenvalue):
         print(E)
-        raise excep.biogemeError(
-            'The dogleg method requires a ' 'convex optimization problem.'
+        raise excep.BiogemeError(
+            'The dogleg method requires a convex optimization problem.'
         )
 
     y3 = -P.T @ g
@@ -1351,7 +1351,7 @@ def bfgsLineSearch(
 
     :rtype: numpy.array, dict(str:object)
 
-    :raises biogeme.exceptions.biogemeError: if the dimensions of the
+    :raises biogeme.exceptions.BiogemeError: if the dimensions of the
              matrix initBfgs do not match the length of x0.
 
     """
@@ -1371,7 +1371,7 @@ def bfgsLineSearch(
                 f'matrix and not a {initBfgs.shape[0]}'
                 'x{initBfgs.shape[1]} matrix.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
         Hinv = initBfgs
     typx = np.ones(np.asarray(xk).shape)
     typf = max(np.abs(f), 1.0)
@@ -1478,7 +1478,7 @@ def bfgsTrustRegion(
 
     :rtype: numpy.array, dict(str:object)
 
-    :raises biogeme.exceptions.biogemeError: if the dimensions of the
+    :raises biogeme.exceptions.BiogemeError: if the dimensions of the
               matrix initBfgs do not match the length of x0.
 
     """
@@ -1498,7 +1498,7 @@ def bfgsTrustRegion(
                 f'matrix and not a {initBfgs.shape[0]}'
                 f'x{initBfgs.shape[1]} matrix.'
             )
-            raise excep.biogemeError(errorMsg)
+            raise excep.BiogemeError(errorMsg)
         H = initBfgs
     typx = np.ones(np.asarray(xk).shape)
     typf = max(np.abs(f), 1.0)
@@ -1640,18 +1640,18 @@ def truncatedConjugateGradientSubspace(
 
     :rtype: numpy.array, int
 
-    :raises biogeme.exceptions.biogemeError: if the dimensions are inconsistent
+    :raises biogeme.exceptions.BiogemeError: if the dimensions are inconsistent
 
     """
 
     if np.isnan(xk).any():
-        raise excep.biogemeError(f'Invalid xk: {xk}')
+        raise excep.BiogemeError(f'Invalid xk: {xk}')
 
     if np.isnan(gk).any():
-        raise excep.biogemeError(f'Invalid gk: {gk}')
+        raise excep.BiogemeError(f'Invalid gk: {gk}')
 
     if np.isnan(Hk).any():
-        raise excep.biogemeError(f'Invalid Hk: {Hk}')
+        raise excep.BiogemeError(f'Invalid Hk: {Hk}')
 
     # First, we calculate the intersection between the trust region on
     # the bounds. The trust region is also a bound constraint (based
@@ -1815,13 +1815,13 @@ def simpleBoundsNewtonAlgorithm(
 
     :rtype: numpay.array, dict(str:object)
 
-    :raises biogeme.exceptions.biogemeError: if the dimensions of the
+    :raises biogeme.exceptions.BiogemeError: if the dimensions of the
              matrix initBfgs do not match the length of x0.
 
     """
 
     if len(x0) != bounds.n:
-        raise excep.biogemeError(f'Incompatible size:' f' {len(x0)} and {len(bounds)}')
+        raise excep.BiogemeError(f'Incompatible size:' f' {len(x0)} and {len(bounds)}')
 
     if not bounds.feasible(x0):
         logger.warning(
@@ -1919,8 +1919,7 @@ def simpleBoundsNewtonAlgorithm(
                 denom = -np.inner(step, g) - 0.5 * np.inner(step, H @ step)
                 rho = num / denom
                 failed = rho < eta1
-            except RuntimeError as e:
-                raise e
+            except RuntimeError:
                 failed = True
 
             if failed:
@@ -1953,7 +1952,7 @@ def simpleBoundsNewtonAlgorithm(
                             y = gc - g
                             Hc = bfgs(H, step, y)
                         fghCalculated = True
-                    except excep.biogemeError:
+                    except excep.BiogemeError:
                         # Failure: reduce the trust region
                         delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
                         status = '-'
@@ -1967,7 +1966,7 @@ def simpleBoundsNewtonAlgorithm(
                         Hc = bfgs(H, step, y)
                         numberOfMatrices += 1
                         fghCalculated = True
-                    except excep.biogemeError:
+                    except excep.BiogemeError:
                         # Failure: reduce the trust region
                         delta = min(delta / 2.0, la.norm(step, np.inf) / 2.0)
                         status = '-'

@@ -40,16 +40,16 @@ class smoothing:
             if self.n is None:
                 self.n = len(g)
             elif len(g) != self.n:
-                raise excep.biogemeError(
+                raise excep.BiogemeError(
                     f'Incompatible dimensions {len(g)} and {self.n}'
                 )
         if h is not None:
             if h.shape != (self.n, self.n):
-                raise excep.biogemeError(
+                raise excep.BiogemeError(
                     f'Incompatible dimensions {h.shape} ' f'and ({self.n},{self.n})'
                 )
         if batch <= 0.0 or batch > 1.0:
-            raise excep.biogemeError(f'Batch size must be between 0 and 1: {batch}')
+            raise excep.BiogemeError(f'Batch size must be between 0 and 1: {batch}')
         self.f += [f]
         self.g += [g]
         self.h += [h]
@@ -199,7 +199,7 @@ def hamabs(fct, initBetas, fixedBetas, betaIds, bounds, parameters=None):
 
     for ell, u in bounds:
         if ell is not None or u is not None:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 'This algorithm does not handle bound constraints. Remove the '
                 'bounds, or select another algorithm.'
             )

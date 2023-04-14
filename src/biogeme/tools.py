@@ -171,13 +171,13 @@ def getPrimeNumbers(n):
     :return: array with prime numbers
     :rtype: list(int)
 
-    :raise biogemeError: if the requested number is non positive or a float
+    :raise BiogemeError: if the requested number is non positive or a float
 
     """
     total = 0
     upperBound = 100
     if n <= 0:
-        raise excep.biogemeError(f'Incorrect number: {n}')
+        raise excep.BiogemeError(f'Incorrect number: {n}')
 
     while total < n:
         upperBound *= 10
@@ -186,7 +186,7 @@ def getPrimeNumbers(n):
     try:
         return primes[0:n]
     except TypeError as e:
-        raise excep.biogemeError(f'Incorrect number: {n}') from e
+        raise excep.BiogemeError(f'Incorrect number: {n}') from e
 
 
 def calculatePrimeNumbers(upperBound):
@@ -198,7 +198,7 @@ def calculatePrimeNumbers(upperBound):
     :return: array with prime numbers
     :rtype: list(int)
 
-    :raise biogemeError: if the upperBound is incorrectly defined
+    :raise BiogemeError: if the upperBound is incorrectly defined
         (negative number, e.g.)
 
     >>> tools.calculatePrimeNumbers(10)
@@ -206,16 +206,16 @@ def calculatePrimeNumbers(upperBound):
 
     """
     if upperBound < 0:
-        raise excep.biogemeError(f'Incorrect value: {upperBound}')
+        raise excep.BiogemeError(f'Incorrect value: {upperBound}')
     try:
         mywork = list(range(0, upperBound + 1))
     except TypeError as e:
-        raise excep.biogemeError(f'Incorrect value: {upperBound}') from e
+        raise excep.BiogemeError(f'Incorrect value: {upperBound}') from e
 
     try:
         largest = int(np.ceil(np.sqrt(float(upperBound))))
     except ValueError as e:
-        raise excep.biogemeError(f'Incorrect value: {upperBound}') from e
+        raise excep.BiogemeError(f'Incorrect value: {upperBound}') from e
 
     # Remove all multiples
     for i in range(2, largest + 1):
@@ -284,7 +284,7 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
 
     :rtype: LRTuple(str, float, float)
 
-    :raise biogemeError: if the unrestricted model has a lower log
+    :raise BiogemeError: if the unrestricted model has a lower log
         likelihood than the restricted model.
 
     """
@@ -293,7 +293,7 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
     loglike_m2, df_m2 = model2
     if loglike_m1 > loglike_m2:
         if df_m1 < df_m2:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'The unrestricted model {model2} has a '
                 f'lower log likelihood than the restricted one {model1}'
             )
@@ -303,7 +303,7 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
         df_r = df_m2
     else:
         if df_m1 >= df_m2:
-            raise excep.biogemeError(
+            raise excep.BiogemeError(
                 f'The unrestricted model {model1} has a '
                 f'lower log likelihood than the restricted one {model2}'
             )
@@ -431,20 +431,20 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
         :return: the same data organized in one row, with proper column names
         :rtype: pandas.DataFrame
 
-        :raise biogemeError:  if there are duplicates in the name of
+        :raise BiogemeError:  if there are duplicates in the name of
         the row. Indeed, in that case, they cannot be used to name the
         new columns.
         """
         if not are_values_identical(x[merge_id]):
             err_msg = f'Group has different IDs: {x[merge_id]}. ' f'Rows id: {x.index}'
-            raise excep.biogemeError(err_msg)
+            raise excep.BiogemeError(err_msg)
         if row_name is not None and not x[row_name].is_unique:
             err_msg = (
                 f'Entries in column [{row_name}] are not unique. '
                 f'This column cannot be used to name the new '
                 f'columns:\n{x[[row_name, merge_id]]}. '
             )
-            raise excep.biogemeError(err_msg)
+            raise excep.BiogemeError(err_msg)
 
         the_columns = set(x.columns) - {merge_id}
         if row_name is not None:
