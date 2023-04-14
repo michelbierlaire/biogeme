@@ -40,6 +40,7 @@ archive/tools/prepareData/biosampledata
 **/.libs
 
 videos/
+sphinx/
 
 # Other files
 autom4te.cache/
