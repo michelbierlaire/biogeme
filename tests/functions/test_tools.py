@@ -82,13 +82,13 @@ class TestTools(unittest.TestCase):
         result = tools.getPrimeNumbers(7)
         self.assertListEqual(result, [2, 3, 5, 7, 11, 13, 17])
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = tools.getPrimeNumbers(0)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = tools.getPrimeNumbers(-1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = tools.getPrimeNumbers(0.3)
 
     def test_calculatePrimeNumbers(self):
@@ -97,10 +97,10 @@ class TestTools(unittest.TestCase):
         result = tools.calculatePrimeNumbers(0)
         self.assertListEqual(result, [])
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = tools.calculatePrimeNumbers(-1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = tools.calculatePrimeNumbers(0.3)
 
     def test_countNumberOfGroups(self):
@@ -145,7 +145,7 @@ class TestTools(unittest.TestCase):
                 4.605170185988092,
             ),
         )
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             model1 = (-1340.8, 7)
             model2 = (-1338.49, 5)
             tools.likelihood_ratio_test(model1, model2)

@@ -28,7 +28,7 @@ class TestVns(unittest.TestCase):
     def test_vns_errors(self):
         # Empty set
         the_pareto = vns.ParetoClass(max_neighborhood=2, pareto_file=None)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             the_pareto = vns.vns(
                 self.the_knapsack,
                 [],

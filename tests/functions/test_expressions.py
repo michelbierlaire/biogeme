@@ -52,10 +52,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(result, expected_result)
 
     def test_errors(self):
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = ex.Numeric(1) / 'ert'
 
-    #        with self.assertRaises(excep.biogemeError):
+    #        with self.assertRaises(excep.BiogemeError):
     #            _ = 'ert' / Numeric(1)
 
     def assertDataframeEqual(self, a, b, msg):
@@ -88,10 +88,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` + Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self + self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 + self
 
     def test_sub(self):
@@ -108,10 +108,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` - Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self - self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 - self
 
     def test_mul(self):
@@ -128,10 +128,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` * Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self * self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 * self
 
     def test_div(self):
@@ -148,10 +148,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` / Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self / self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 / self
 
     def test_neg(self):
@@ -173,10 +173,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` ** Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self**self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1**self
 
     def test_and(self):
@@ -193,10 +193,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` and Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self & self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 & self
 
     def test_or(self):
@@ -213,10 +213,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(`1.0` or Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self | self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 | self
 
     def test_eq(self):
@@ -233,10 +233,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(Variable1 == `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self == self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 == self
 
     def test_neq(self):
@@ -253,10 +253,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(Variable1 != `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self != self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 != self
 
     def test_le(self):
@@ -273,10 +273,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(Variable1 >= `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self <= self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 <= self
 
     def test_ge(self):
@@ -293,10 +293,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(Variable1 <= `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self >= self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 >= self
 
     def test_lt(self):
@@ -313,10 +313,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(Variable1 > `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self < self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 < self
 
     def test_gt(self):
@@ -333,10 +333,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(str(result), '(Variable1 < `1.0`)')
         self.assertTrue(result.children[0] is self.Variable1)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self > self.Variable1
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             result = self.Variable1 > self
 
     def test_getValue_c(self):
@@ -539,9 +539,9 @@ class test_expressions(unittest.TestCase):
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             expr2.getValue()
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             expr2.getValue_c()
         res = list(expr2.getValue_c(database=self.myData, prepareIds=True))
         self.assertListEqual(res, [4.0, 8.0, 12.0, 16.0, 20.0])
@@ -694,7 +694,7 @@ class test_expressions(unittest.TestCase):
     def test_expr3(self):
         myDraws = ex.bioDraws('myDraws', 'UNIFORM')
         expr3 = ex.MonteCarlo(myDraws * myDraws)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             res = expr3.getValue_c(numberOfDraws=100000)
         res = expr3.getValue_c(
             database=self.myData, numberOfDraws=100000, prepareIds=True

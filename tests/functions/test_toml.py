@@ -70,7 +70,7 @@ class TestToml(unittest.TestCase):
             print(FILE_CONTENT, file=f)
         the_toml = toml.Toml(parameter_file=test_file)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = the_toml.parameters.get_value('a_param', section='Estimation')
 
         check_int = the_toml.parameters.get_value('missing_data')
@@ -91,7 +91,7 @@ class TestToml(unittest.TestCase):
         test_file = path.join(test_dir, 'any_file_name.toml')
         the_toml = toml.Toml(parameter_file=test_file)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = the_toml.parameters.get_value('a_param', section='Estimation')
 
         check_int = the_toml.parameters.get_value('missing_data')

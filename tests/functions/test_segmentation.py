@@ -21,7 +21,7 @@ class test_segmentation(unittest.TestCase):
         second_tuple = seg.DiscreteSegmentationTuple(
             variable=x, mapping=mapping, reference='3rd'
         )
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             third_tuple = seg.DiscreteSegmentationTuple(
                 variable=x, mapping=mapping, reference='anything'
             )

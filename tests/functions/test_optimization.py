@@ -40,7 +40,7 @@ class rosenbrock(algo.functionToMinimize):
 
     def f(self, batch=None):
         if batch is not None:
-            raise excep.biogemeError('This function is not data driven.')
+            raise excep.BiogemeError('This function is not data driven.')
         n = len(self.x)
         f = sum(
             100.0 * (self.x[i + 1] - self.x[i] ** 2) ** 2 + (1.0 - self.x[i]) ** 2
@@ -72,16 +72,16 @@ class rosenbrock(algo.functionToMinimize):
 
     def f_g(self, batch=None):
         if batch is not None:
-            raise excep.biogemeError('This function is not data driven.')
+            raise excep.BiogemeError('This function is not data driven.')
         return self.f(), self.g()
 
     def f_g_h(self, batch=None):
         if batch is not None:
-            raise excep.biogemeError('This function is not data driven.')
+            raise excep.BiogemeError('This function is not data driven.')
         return self.f(), self.g(), self.h()
 
     def f_g_bhhh(self, batch=None):
-        raise excep.biogemeError('This function is not data driven.')
+        raise excep.BiogemeError('This function is not data driven.')
 
 
 class test_optimization(unittest.TestCase):

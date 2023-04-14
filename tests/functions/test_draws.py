@@ -40,9 +40,9 @@ class test_draws(unittest.TestCase):
         self.assertTrue(np.max(draws) <= 1)
 
     def test_getUniform_exception(self):
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getUniform(sampleSize=5, numberOfDraws=-10, symmetric=True)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getUniform(sampleSize=-5, numberOfDraws=10, symmetric=True)
 
     def test_getLatinHypercubeDraws(self):
@@ -64,13 +64,13 @@ class test_draws(unittest.TestCase):
         self.assertTrue(np.max(draws) <= 1)
 
     def test_getLatinHypercubeDraws_exception(self):
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getLatinHypercubeDraws(sampleSize=-5, numberOfDraws=10)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getLatinHypercubeDraws(sampleSize=5, numberOfDraws=-10)
 
         uniform_numbers = np.random.uniform(size=2)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getLatinHypercubeDraws(
                 sampleSize=5, numberOfDraws=10, uniformNumbers=uniform_numbers
             )
@@ -228,9 +228,9 @@ class test_draws(unittest.TestCase):
         self.assertEqual(halton.size, 100)
 
     def test_halton_exception(self):
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             halton = dr.getHaltonDraws(sampleSize=1, numberOfDraws=-100, base=3)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             halton = dr.getHaltonDraws(sampleSize=-1, numberOfDraws=100, base=3)
 
     def test_antithetic(self):
@@ -249,19 +249,19 @@ class test_draws(unittest.TestCase):
         self.assertAlmostEqual(mean, 0, 5)
 
     def test_normal_exception(self):
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getNormalWichuraDraws(sampleSize=3, numberOfDraws=-10)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getNormalWichuraDraws(
                 sampleSize=3, numberOfDraws=9, antithetic=True
             )
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getNormalWichuraDraws(sampleSize=-3, numberOfDraws=10)
 
         uniform_numbers = np.random.uniform(size=2)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             draws = dr.getNormalWichuraDraws(
                 sampleSize=3, numberOfDraws=10, uniformNumbers=uniform_numbers
             )

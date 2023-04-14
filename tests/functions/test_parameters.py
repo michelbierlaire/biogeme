@@ -204,15 +204,15 @@ class TestParameters(unittest.TestCase):
         """Test the error if the parameter does not appear in the
         mentioned section
         """
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = self.the_parameters.get_param_tuple(
                 name='missing_data', section='Estimation'
             )
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = self.the_parameters.get_param_tuple(name='unknown_parameter')
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = self.the_parameters.get_param_tuple(
                 name='unknown_parameter', section='Estimation'
             )
@@ -221,7 +221,7 @@ class TestParameters(unittest.TestCase):
         """Test the error if the parameter does appears in two
         sections, and the section is not specified.
         """
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = self.the_parameters.get_param_tuple(
                 name='a_param',
             )
@@ -273,7 +273,7 @@ class TestParameters(unittest.TestCase):
         )
         self.the_parameters.set_value_from_tuple(a_tuple, 1)
         self.assertEqual(self.the_parameters.values[a_tuple], 1)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             self.the_parameters.set_value_from_tuple(a_tuple, 2)
 
     def test_set_get_value(self):

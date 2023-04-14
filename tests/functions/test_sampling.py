@@ -64,7 +64,7 @@ class TestSampling(unittest.TestCase):
             sam.StratumTuple(subset=set1, sample_size=3),
             sam.StratumTuple(subset=set2, sample_size=3),
         )
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             the_sample = sam.sampling_of_alternatives(
                 partition=partition,
                 individuals=self.individuals,
@@ -81,7 +81,7 @@ class TestSampling(unittest.TestCase):
             sam.StratumTuple(subset=set1, sample_size=3),
             sam.StratumTuple(subset=set2, sample_size=3),
         )
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             the_sample = sam.sampling_of_alternatives(
                 partition=partition,
                 individuals=self.individuals,
@@ -98,7 +98,7 @@ class TestSampling(unittest.TestCase):
             sam.StratumTuple(subset=set1, sample_size=3),
             sam.StratumTuple(subset=set2, sample_size=3),
         )
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             the_sample = sam.sampling_of_alternatives(
                 partition=partition,
                 individuals=self.individuals,

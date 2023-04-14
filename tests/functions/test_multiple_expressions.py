@@ -88,20 +88,20 @@ class TestMultipleExpressions(unittest.TestCase):
         
     def test_ctor(self):
         empty_tuple = tuple()
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = cat.Catalog('the_name', empty_tuple)
 
         incorrect = cat.NamedExpression(
             name='incorrect', expression='not_an_expression'
         )
         wrong_tuple = (incorrect,)
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = cat.Catalog('the_name', wrong_tuple)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = cat.Catalog(f'the_name{SEPARATOR}', self.g1_tuple)
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = cat.Catalog(f'the_name{SELECTION_SEPARATOR}', self.g1_tuple)
             
 
@@ -112,7 +112,7 @@ class TestMultipleExpressions(unittest.TestCase):
         self.assertListEqual(result, correct_result)
 
     def test_set_index(self):
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             self.catalog_1.set_index(99999)
 
         self.catalog_1.set_index(1)
@@ -226,7 +226,7 @@ class TestMultipleExpressions(unittest.TestCase):
     def test_iterator(self):
         expression = self.catalog_1 + self.catalog_2
         expression.maximum_number_of_configurations = 2
-        with self.assertRaises(excep.valueOutOfRange):
+        with self.assertRaises(excep.ValueOutOfRange):
             for e in expression:
                 pass
         expression.maximum_number_of_configurations = 100

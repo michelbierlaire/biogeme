@@ -56,7 +56,7 @@ class TestPareto(unittest.TestCase):
         self.assertSetEqual(pareto.considered, {self.e1, self.e2, self.e3, self.e4})
         self.assertSetEqual(pareto.removed, {self.e1})
 
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             pareto.add(self.wrong_e1)
 
     def test_dump_load(self):

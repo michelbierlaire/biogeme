@@ -15,7 +15,7 @@ class TestConfiguration(unittest.TestCase):
         s12 = conf.SelectionTuple(catalog='catalog1', selection='item2')
         s21 = conf.SelectionTuple(catalog='catalog2', selection='choice1')
         s22 = conf.SelectionTuple(catalog='catalog2', selection='choice2')
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             _ = conf.Configuration([s11, s12])
         the_conf = conf.Configuration([s11, s22])
         the_id = the_conf.get_string_id()
@@ -23,7 +23,7 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(the_id, the_correct_id)
 
         the_empty_conf = conf.Configuration()
-        with self.assertRaises(excep.biogemeError):
+        with self.assertRaises(excep.BiogemeError):
             the_empty_conf.selections = [s11, s12]
         the_empty_conf.selections = [s11, s21]
         the_id = the_empty_conf.get_string_id()
