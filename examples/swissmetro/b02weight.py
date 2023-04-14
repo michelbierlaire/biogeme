@@ -71,7 +71,8 @@ the_biogeme.modelName = 'b02weight'
 the_biogeme.generate_html = True
 the_biogeme.generate_pickle = False
 results = the_biogeme.estimate()
+print(results.shortSummary())
 
 # Get the results in a pandas table
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)

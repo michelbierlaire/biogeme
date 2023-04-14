@@ -56,7 +56,8 @@ the_biogeme.calculateNullLoglikelihood(av)
 
 # Estimate the parameters
 results = the_biogeme.estimate()
+print(results.shortSummary())
 
 # Get the results in a pandas table
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)

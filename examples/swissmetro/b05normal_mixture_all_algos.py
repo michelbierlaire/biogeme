@@ -124,7 +124,7 @@ for name, algo in algos.items():
             f'\t{results[name].data.optimizationMessages["Cause of termination"]}'
             f'\n'
         )
-    except excep.biogemeError as e:
+    except excep.BiogemeError as e:
         print(e)
         results[name] = None
         msg += f'{name}\tFailed to estimate the model'

@@ -86,9 +86,8 @@ ASC_SM_RND = [
 ]
 
 # Class memebership probability
-PROB_class0 = (
-    exp(Beta('PROB_class0', 0.5, 0, 1, 0)) /
-    (1 + exp(Beta('PROB_class0', 0, None, None, 0)))
+PROB_class0 = exp(Beta('PROB_class0', 0.5, 0, 1, 0)) / (
+    1 + exp(Beta('PROB_class0', 0, None, None, 0))
 )
 PROB_class1 = 1 - PROB_class0
 
@@ -132,5 +131,6 @@ the_biogeme.modelName = 'b15panel_discrete_bis'
 
 # Estimate the parameters.
 results = the_biogeme.estimate()
+print(results.shortSummary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

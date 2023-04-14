@@ -1,23 +1,17 @@
-"""File 22multipleModels.py
+"""File b22multiple_models_spec.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Mar 20 19:53:55 2023
+:date: Wed Apr 12 17:28:17 2023
 
- Example of the estimation of several versions of the model. In this
-case, the number fo specifications exceed the maximum limit, so a heuristic is applied.
-It may actually end up enumerating all possiblities. 
+Specification of the Catalog of expressions for the assisted specification algorihm.
 
 """
-import biogeme.logging as blog
-
-import biogeme.biogeme as bio
 from biogeme import models
+import biogeme.biogeme as bio
 from biogeme.expressions import Beta, logzero
-from biogeme.results import compileEstimationResults, AIC_BIC_dimension
 from biogeme.catalog import Catalog, SynchronizedCatalog
-from biogeme.assisted import AssistedSpecification
 from biogeme.segmentation import DiscreteSegmentationTuple, Segmentation
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -35,8 +29,6 @@ from swissmetro import (
     LUGGAGE,
     GA,
 )
-
-screen_logger = blog.get_screen_logger(blog.INFO)
 
 
 # Parameters to be estimated
@@ -205,31 +197,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # observation to the log likelihood function.
 logprob = models.loglogit(V, av, CHOICE)
 
-# We now consider a model with the log travel time instead of the cost
-
-PARETO_FILE_NAME = 'b22multipleModels.pareto'
-
 the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b22multiple_models'
 
-nbr = logprob.number_of_multiple_expressions()
-print(f'There a {nbr} possible specifications')
-assisted_specification = AssistedSpecification(
-    biogeme_object=the_biogeme,
-    multi_objectives=AIC_BIC_dimension,
-    pareto_file_name=PARETO_FILE_NAME,
-    max_neighborhood=30,
-)
-print(assisted_specification.statistics())
-non_dominated_models = assisted_specification.run(
-    number_of_neighbors=30,
-)
-
-summary, description = compileEstimationResults(
-    non_dominated_models, use_short_names=True
-)
-print(summary)
-for k, v in description.items():
-    if k != v:
-        print(f'{k}: {v}')
-
-assisted_specification.plot()
+PARETO_FILE_NAME = 'b22multiple_models.pareto'

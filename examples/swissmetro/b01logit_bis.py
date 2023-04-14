@@ -110,8 +110,8 @@ results = the_biogeme.estimate(bootstrap=100)
 # Get the results in a pandas table
 print('Parameters')
 print('----------')
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)
 
 # Get general statistics
 print('General statistics')

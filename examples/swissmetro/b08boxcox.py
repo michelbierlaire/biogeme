@@ -60,5 +60,6 @@ the_biogeme.checkDerivatives(beta=[0, 0, 0, 0, 0], verbose=True)
 
 # Estimate the parameters
 results = the_biogeme.estimate()
+print(results.shortSummary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

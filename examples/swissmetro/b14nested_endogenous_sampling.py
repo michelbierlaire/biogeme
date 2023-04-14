@@ -81,5 +81,6 @@ the_biogeme.modelName = 'b14nested_endogenous_eampling'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
+print(results.shortSummary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

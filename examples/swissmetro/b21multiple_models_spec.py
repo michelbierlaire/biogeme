@@ -1,22 +1,19 @@
-"""File 21multipleModels.py
+"""File b21multiple_models_spec.py
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Mar 20 08:59:33 2023
+:date: Wed Apr 12 16:58:49 2023
 
  Example of the estimation of several versions of the model using
- assisted specification algorithm Three alternatives: Train, Car and
+ assisted specification algorithm. Specification of the catalogs.
 
 """
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, logzero
-from biogeme.results import compileEstimationResults, loglikelihood_dimension
 from biogeme.catalog import Catalog, SynchronizedCatalog, segmentation_catalog
 from biogeme.segmentation import DiscreteSegmentationTuple
-from biogeme.assisted import AssistedSpecification
-from biogeme.logging import get_screen_logger, INFO
 
-from swissmetro import (
+from swissmetro_data import (
     database,
     CHOICE,
     SM_AV,
@@ -32,9 +29,6 @@ from swissmetro import (
     INCOME,
     GA,
 )
-
-logger = get_screen_logger(INFO)
-logger.info('Example b21multipleModels')
 
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -140,22 +134,7 @@ print(
     f'{logprob.number_of_multiple_expressions()}'
 )
 
-biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b21multiple_models'
 
-assisted_specification = AssistedSpecification(
-    biogeme_object=biogeme,
-    multi_objectives=loglikelihood_dimension,
-    pareto_file_name='b21multipleModels.pareto',
-)
-print('Algorithm info: ')
-for m in assisted_specification.statistics():
-    print(m)
-non_dominated_models = assisted_specification.run()
-
-summary, description = compileEstimationResults(
-    non_dominated_models, use_short_names=True
-)
-print(summary)
-for k, v in description.items():
-    if k != v:
-        print(f'{k}: {v}')
+PARETO_FILE_NAME = 'b21multiple_models.pareto'

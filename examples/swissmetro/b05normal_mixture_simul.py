@@ -11,7 +11,7 @@ import numpy as np
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.results as res
-from biogeme.exceptions import biogemeError
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioDraws, MonteCarlo
 
 from swissmetro_data import (
@@ -65,7 +65,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # The estimation results are read from the pickle file
 try:
     results = res.bioResults(pickleFile='05normalMixture.pickle')
-except biogemeError:
+except BiogemeError:
     print(
         'Run first the script 05normalMixture.py in order to generate the '
         'file 05normalMixture.pickle.'

@@ -92,7 +92,7 @@ logprob = log(MonteCarlo(condprobIndiv))
 # Estimate the parameters.
 try:
     results = res.bioResults(pickleFile='b12panel.pickle')
-except excep.biogemeError:
+except excep.BiogemeError:
     sys.exit(
         'Run first the script b12panel.py '
         'in order to generate the '
