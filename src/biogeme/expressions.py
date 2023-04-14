@@ -3,18 +3,7 @@
 :author: Michel Bierlaire
 
 :date: Tue Mar 26 16:47:49 2019
-
 """
-
-# Too constraining
-# pylint: disable=invalid-name
-
-# Too constraining
-# pylint: disable=invalid-name, too-many-locals, too-many-arguments
-# pylint: disable=too-many-instance-attributes, too-many-lines
-
-# flake8: noqa: E501
-
 
 import logging
 from itertools import chain, product

@@ -1,9 +1,9 @@
-"""
-Implementation of the main Biogeme class that combines the database
-and the model specification.
+"""Implementation of the main Biogeme class
 
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:45:15 2019
+
+It combines the database and the model specification.
 """
 
 import logging
@@ -29,7 +29,6 @@ from biogeme.idmanager import IdManager
 from biogeme.negative_likelihood import NegativeLikelihood
 from biogeme import toml
 
-# import yep
 
 DEFAULT_MODEL_NAME = 'biogemeModelDefaultName'
 logger = logging.getLogger(__name__)

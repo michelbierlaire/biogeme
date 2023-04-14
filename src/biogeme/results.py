@@ -2039,7 +2039,7 @@ def calculate_correlation(nests, results, mu=None, alternative_names=None):
 
     :type nests: tuple(tuple(biogeme.expressions.Expression, list(int))), or
                  tuple(tuple(biogeme.Expression,
-                             dict(int:biogeme.expressions.Expression)))
+                 dict(int:biogeme.expressions.Expression)))
 
     :param results: estimation results
     :type results: biogeme.results.bioResults

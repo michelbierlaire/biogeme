@@ -480,10 +480,11 @@ class TemporaryFile:
     """Class generating a temporary file, so that the user does not
     bother about its location, or even its name
 
-    Usage:
-    with TemporaryFile() as filename:
-        with open(filename, 'w') as f:
-            print('stuff', file=f)
+    Example::
+    
+        with TemporaryFile() as filename:
+            with open(filename, 'w') as f:
+                print('stuff', file=f)
     """
 
     def __enter__(self, name=None):
