@@ -66,7 +66,6 @@ def estimate(the_database, the_model_name):
     log_gi = mev_cnl_sampling(V, None, log_probability, nests)
     logprob = models.logmev(V, log_gi, None, 0)
 
-
     # Create the Biogeme object
     biogeme = bio.BIOGEME(the_database, logprob)
     biogeme.modelName = the_model_name
@@ -93,8 +92,7 @@ for p in partitions:
                 log(
                     (
                         (Variable('user_lat') - Variable(f'rest_lat_{i}')) ** 2
-                        + (Variable('user_lon') - Variable(f'rest_lon_{i}'))
-                        ** 2
+                        + (Variable('user_lon') - Variable(f'rest_lon_{i}')) ** 2
                     )
                     ** 0.5
                 ),

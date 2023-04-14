@@ -84,8 +84,7 @@ for p in partitions:
                 log(
                     (
                         (Variable('user_lat') - Variable(f'rest_lat_{i}')) ** 2
-                        + (Variable('user_lon') - Variable(f'rest_lon_{i}'))
-                        ** 2
+                        + (Variable('user_lon') - Variable(f'rest_lon_{i}')) ** 2
                     )
                     ** 0.5
                 ),

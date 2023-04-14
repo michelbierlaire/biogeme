@@ -38,8 +38,6 @@ def estimate(the_database, the_model_name):
     beta_ethiopian = Beta('beta_ethiopian', 0, None, None, 0)
     beta_log_dist = Beta('beta_log_dist', 0, None, None, 0)
 
-    mu_nested = Beta('mu_nested', 1, 1, None, 0)
-
     # Correction for sampling of alternatives
     log_probability = {i: Variable(f'_log_proba_{i}') for i in range(N_ALT)}
 
@@ -66,7 +64,6 @@ def estimate(the_database, the_model_name):
 
     log_gi = mev_cnl_sampling(V, None, log_probability, nests)
     logprob = models.logmev(V, log_gi, None, 0)
-
 
     # Create the Biogeme object
     biogeme = bio.BIOGEME(the_database, logprob)
@@ -95,8 +92,7 @@ for p in partitions:
                 log(
                     (
                         (Variable('user_lat') - Variable(f'rest_lat_{i}')) ** 2
-                        + (Variable('user_lon') - Variable(f'rest_lon_{i}'))
-                        ** 2
+                        + (Variable('user_lon') - Variable(f'rest_lon_{i}')) ** 2
                     )
                     ** 0.5
                 ),
@@ -104,22 +100,19 @@ for p in partitions:
             # Check if alternatives are alone in their own nest
             database.DefineVariable(
                 f'alone_{i}',
-                ((Variable(f'Asian_{i}') != 0) + (Variable(f'downtown_{i}') != 0)) == 0
+                ((Variable(f'Asian_{i}') != 0) + (Variable(f'downtown_{i}') != 0)) == 0,
             )
             # Calculate the alpha of the CNL
             mask_asian = database.data[f'Asian_{i}'] != 0
-            database.data.loc[~mask_asian, f'alpha_asian_{i}']= 0
-            database.data.loc[mask_asian, f'alpha_asian_{i}'] = (
-                database.data[f'Asian_{i}'] /
-                (database.data[f'Asian_{i}'] + database.data[f'downtown_{i}'])
-            )
+            database.data.loc[~mask_asian, f'alpha_asian_{i}'] = 0
+            database.data.loc[mask_asian, f'alpha_asian_{i}'] = database.data[
+                f'Asian_{i}'
+            ] / (database.data[f'Asian_{i}'] + database.data[f'downtown_{i}'])
 
             mask_downtown = database.data[f'downtown_{i}'] != 0
-            database.data.loc[~mask_downtown, f'alpha_downtown_{i}']= 0
-            database.data.loc[mask_downtown, f'alpha_downtown_{i}'] = (
-                database.data[f'downtown_{i}'] /
-                (database.data[f'Asian_{i}'] + database.data[f'downtown_{i}'])
-            )
-
+            database.data.loc[~mask_downtown, f'alpha_downtown_{i}'] = 0
+            database.data.loc[mask_downtown, f'alpha_downtown_{i}'] = database.data[
+                f'downtown_{i}'
+            ] / (database.data[f'Asian_{i}'] + database.data[f'downtown_{i}'])
 
         estimate(database, model_name)

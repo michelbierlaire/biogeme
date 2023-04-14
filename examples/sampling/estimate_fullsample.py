@@ -71,9 +71,7 @@ the_nest = ((mu_nested, asian_ids),)
 other_nests = tuple((1.0, [i]) for i in others)
 all_nests_nested = (the_nest) + other_nests
 
-logprob_nested = models.lognested(
-    V, None, all_nests_nested, Variable('choice_nested')
-)
+logprob_nested = models.lognested(V, None, all_nests_nested, Variable('choice_nested'))
 biogeme_nested = bio.BIOGEME(database, logprob_nested)
 biogeme_nested.modelName = 'restaurant_nested'
 biogeme_nested.calculateNullLoglikelihood({i: 1 for i in range(N_ALT)})
