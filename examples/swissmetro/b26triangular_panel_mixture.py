@@ -1,4 +1,4 @@
-"""File 26triangularPanelMixture.py
+"""File b26triangular_panel_mixture.py
 
 :author: Michel Bierlaire, EPFL
 :date: Tue Dec  6 18:30:44 2022
@@ -6,17 +6,12 @@
  Example of a mixture of logit models, using Monte-Carlo integration.
  THe micing distribution is user-defined (triangular, here).
  The datafile is organized as panel data.
- Three alternatives: Train, Car and Swissmetro
- SP data
 """
 import numpy as np
-import pandas as pd
-import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.messaging as msg
+import biogeme.logging as blog
 from biogeme.expressions import (
-    Variable,
     Beta,
     bioDraws,
     MonteCarlo,
@@ -24,40 +19,22 @@ from biogeme.expressions import (
     log,
 )
 
-# Read the data
-df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
+from swissmetro_panel import (
+    database,
+    CHOICE,
+    CAR_AV_SP,
+    TRAIN_AV_SP,
+    TRAIN_TT_SCALED,
+    TRAIN_COST_SCALED,
+    SM_TT_SCALED,
+    SM_COST_SCALED,
+    CAR_TT_SCALED,
+    CAR_CO_SCALED,
+    SM_AV,
+)
 
-# They are organized as panel data. The variable ID identifies each individual.
-database.panel("ID")
-
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
-
-# Removing some observations can be done directly using pandas.
-# remove = (((database.data.PURPOSE != 1) &
-#           (database.data.PURPOSE != 3)) |
-#          (database.data.CHOICE == 0))
-# database.data.drop(database.data[remove].index,inplace=True)
-
-PURPOSE = Variable('PURPOSE')
-CHOICE = Variable('CHOICE')
-GA = Variable('GA')
-TRAIN_CO = Variable('TRAIN_CO')
-CAR_AV = Variable('CAR_AV')
-SP = Variable('SP')
-TRAIN_AV = Variable('TRAIN_AV')
-TRAIN_TT = Variable('TRAIN_TT')
-SM_TT = Variable('SM_TT')
-CAR_TT = Variable('CAR_TT')
-CAR_CO = Variable('CAR_CO')
-SM_CO = Variable('SM_CO')
-SM_AV = Variable('SM_AV')
-
-# Here we use the "biogeme" way for backward compatibility
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
-database.remove(exclude)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b26triangular_panel_mixture.py')
 
 
 def the_triangular_generator(sample_size, number_of_draws):
@@ -100,20 +77,6 @@ ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
 ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'TRIANGULAR')
 
-# Definition of new variables
-SM_COST = SM_CO * (GA == 0)
-TRAIN_COST = TRAIN_CO * (GA == 0)
-
-# Definition of new variables: adding columns to the database
-CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
-TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
-TRAIN_COST_SCALED = database.DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100)
-SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
-SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
-CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
-CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
-
 # Definition of the utility functions
 V1 = ASC_TRAIN_RND + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 V2 = ASC_SM_RND + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
@@ -137,19 +100,12 @@ condprobIndiv = PanelLikelihoodTrajectory(obsprob)
 # We integrate over the random parameters using Monte-Carlo
 logprob = log(MonteCarlo(condprobIndiv))
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-# logger.setGeneral()
-logger.setDetailed()
-# logger.setDebug()
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, logprob)
-biogeme.modelName = '26triangularPanelMixture'
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'b26triangular_panel_mixture'
 
 # Estimate the parameters.
-results = biogeme.estimate()
-pandasResults = results.getEstimatedParameters()
-print(pandasResults)
+results = the_biogeme.estimate()
+print(results.shortSummary())
+pandas_results = results.getEstimatedParameters()
+print(pandas_results)
