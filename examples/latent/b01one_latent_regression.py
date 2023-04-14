@@ -1,51 +1,40 @@
-"""File 01oneLatentRegression.py
+"""File b01one_latent_regression.py
 
 Measurement equation where the indicators are assumed continuous.
 Linear regression.
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Sep  9 16:30:04 2019
+:date: Thu Apr 13 16:42:02 2023
 
 """
 
-import pandas as pd
-import biogeme.database as db
+import biogeme.logging as blog
 import biogeme.biogeme as bio
-from biogeme import models
 import biogeme.loglikelihood as ll
 import biogeme.messaging as msg
 from biogeme.expressions import Beta, Elem, bioMultSum
-
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-# Piecewise linear definition of income
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-
-thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(
-    ScaledIncome, thresholds, [0.0, 0.0, 0.0, 0.0, 0.0]
+from optima import (
+    database,
+    age_65_more,
+    formulaIncome,
+    moreThanOneCar,
+    moreThanOneBike,
+    individualHouse,
+    male,
+    haveChildren,
+    haveGA,
+    highEducation,
+    Envir01,
+    Envir02,
+    Envir03,
+    Mobil11,
+    Mobil14,
+    Mobil16,
+    Mobil17,
 )
 
-# Definition of other variables
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
-)
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b01one_latent_regression.py')
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
@@ -58,7 +47,8 @@ coef_male = Beta('coef_male', 0.0, None, None, 0)
 coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
-### Latent variable: structural equation
+
+# Latent variable: structural equation
 
 CARLOVERS = (
     coef_intercept
@@ -74,7 +64,7 @@ CARLOVERS = (
 )
 
 
-### Measurement equations
+# Measurement equations
 INTER_Envir01 = Beta('INTER_Envir01', 0, None, None, 1)
 INTER_Envir02 = Beta('INTER_Envir02', 0, None, None, 0)
 INTER_Envir03 = Beta('INTER_Envir03', 0, None, None, 0)
@@ -113,63 +103,49 @@ F = {}
 F['Envir01'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Envir01, MODEL_Envir01, SIGMA_STAR_Envir01
-        ),
+        1: ll.loglikelihoodregression(Envir01, MODEL_Envir01, SIGMA_STAR_Envir01),
     },
     (Envir01 > 0) * (Envir01 < 6),
 )
 F['Envir02'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Envir02, MODEL_Envir02, SIGMA_STAR_Envir02
-        ),
+        1: ll.loglikelihoodregression(Envir02, MODEL_Envir02, SIGMA_STAR_Envir02),
     },
     (Envir02 > 0) * (Envir02 < 6),
 )
 F['Envir03'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Envir03, MODEL_Envir03, SIGMA_STAR_Envir03
-        ),
+        1: ll.loglikelihoodregression(Envir03, MODEL_Envir03, SIGMA_STAR_Envir03),
     },
     (Envir03 > 0) * (Envir03 < 6),
 )
 F['Mobil11'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Mobil11, MODEL_Mobil11, SIGMA_STAR_Mobil11
-        ),
+        1: ll.loglikelihoodregression(Mobil11, MODEL_Mobil11, SIGMA_STAR_Mobil11),
     },
     (Mobil11 > 0) * (Mobil11 < 6),
 )
 F['Mobil14'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Mobil14, MODEL_Mobil14, SIGMA_STAR_Mobil14
-        ),
+        1: ll.loglikelihoodregression(Mobil14, MODEL_Mobil14, SIGMA_STAR_Mobil14),
     },
     (Mobil14 > 0) * (Mobil14 < 6),
 )
 F['Mobil16'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Mobil16, MODEL_Mobil16, SIGMA_STAR_Mobil16
-        ),
+        1: ll.loglikelihoodregression(Mobil16, MODEL_Mobil16, SIGMA_STAR_Mobil16),
     },
     (Mobil16 > 0) * (Mobil16 < 6),
 )
 F['Mobil17'] = Elem(
     {
         0: 0,
-        1: ll.loglikelihoodregression(
-            Mobil17, MODEL_Mobil17, SIGMA_STAR_Mobil17
-        ),
+        1: ll.loglikelihoodregression(Mobil17, MODEL_Mobil17, SIGMA_STAR_Mobil17),
     },
     (Mobil17 > 0) * (Mobil17 < 6),
 )
@@ -177,19 +153,12 @@ F['Mobil17'] = Elem(
 # The log likelihood is the sum of the elements of the above dict
 loglike = bioMultSum(F)
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-logger.setGeneral()
-# logger.setDetailed()
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike)
-biogeme.modelName = '01oneLatentRegression'
+the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme.modelName = 'b01one_latent_regression'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'final log likelihood: {results.data.logLike:.3f}')

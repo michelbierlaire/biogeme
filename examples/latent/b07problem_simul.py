@@ -1,58 +1,40 @@
-"""File 07problem.py
+"""File b07problem_simul.py
 
- This file is the same as 02oneLatentOrdered.py, where The starting
- values for the sigma have been changed in order to illustrate a common
- issue with the estimation of such models.
-
- We set the starting value of a scale parameter (SIGMA_STAR_Envir02)
- to a small value: 0.01. The resulting likelihood is so close to zero
- that taking the log generates a numerical issue.
-
- Make sure to set large initial values for scale parameters.
+ This file is an updated version of 07problem.py, where
+ the probabilities are simulated in order to
+ investigate the numerical issue.
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Dec  6 18:32:20 2022
+:date: Thu Apr 13 18:21:15 2023
 
 """
 
-import pandas as pd
-import biogeme.database as db
 import biogeme.biogeme as bio
-import biogeme.optimization as opt
-from biogeme import models
-import biogeme.messaging as msg
-from biogeme.expressions import Beta, log, Elem, bioNormalCdf
+import biogeme.logging as blog
+from biogeme.expressions import Beta, Elem, bioNormalCdf
 
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-# Piecewise linear definition of income
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-
-thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(
-    ScaledIncome, thresholds, [0.0, 0.0, 0.0, 0.0, 0.0]
+from optima import (
+    database,
+    age_65_more,
+    formulaIncome,
+    moreThanOneCar,
+    moreThanOneBike,
+    individualHouse,
+    male,
+    haveChildren,
+    haveGA,
+    highEducation,
+    Envir01,
+    Envir02,
+    Envir03,
+    Mobil11,
+    Mobil14,
+    Mobil16,
+    Mobil17,
 )
 
-# Definition of other variables
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
-)
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b07problem_simul.py')
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
@@ -65,7 +47,7 @@ coef_male = Beta('coef_male', 0.0, None, None, 0)
 coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
-### Latent variable: structural equation
+# Latent variable: structural equation
 
 CARLOVERS = (
     coef_intercept
@@ -80,7 +62,7 @@ CARLOVERS = (
     + coef_highEducation * highEducation
 )
 
-### Measurement equations
+# Measurement equations
 
 INTER_Envir01 = Beta('INTER_Envir01', 0, None, None, 1)
 INTER_Envir02 = Beta('INTER_Envir02', 0, None, None, 0)
@@ -241,34 +223,28 @@ IndMobil17 = {
 
 P_Mobil17 = Elem(IndMobil17, Mobil17)
 
+simulate = {
+    'P_Envir01': P_Envir01,
+    'P_Envir02': P_Envir02,
+    'P_Envir03': P_Envir03,
+    'P_Mobil11': P_Mobil11,
+    'P_Mobil14': P_Mobil14,
+    'P_Mobil16': P_Mobil16,
+    'P_Mobil17': P_Mobil17,
+}
 
-loglike = (
-    log(P_Envir01)
-    + log(P_Envir02)
-    + log(P_Envir03)
-    + log(P_Mobil11)
-    + log(P_Mobil14)
-    + log(P_Mobil16)
-    + log(P_Mobil17)
+beta_values = {}
+for expr in simulate.values():
+    beta_values = beta_values | expr.get_beta_values()
+
+biosim = bio.BIOGEME(database, simulate)
+biosim.modelName = '07problem_simul'
+
+simulatedValues = biosim.simulate(theBetaValues=beta_values)
+print(
+    'We identify the entries for which the likelihood is zero, '
+    'so that the log likelihood cannot be computed'
 )
-
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-logger.setGeneral()
-# logger.setDetailed()
-
-
-# Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike)
-biogeme.modelName = '07problem'
-
-# Estimate the parameters
-results = biogeme.estimate()
-
-print(f'Estimated betas: {len(results.data.betaValues)}')
-print(f'final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
-results.writeLaTeX()
-print(f'LaTeX file: {results.data.latexFileName}')
+zero_values = simulatedValues.where(simulatedValues == 0, other='')
+print(zero_values)
+print('The problematic model is Envir02')

@@ -1,9 +1,9 @@
-"""File 00factorAnalysis.py
+"""File b00factor_analysis.py
 
 Preliminary analysis of the indicators using factor analysis.
 
 :author: Michel Bierlaire, EPFL
-:date: Mon Sep  9 16:04:57 2019
+:date: Thu Apr 13 16:39:54 2023
 
 """
 

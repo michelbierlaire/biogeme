@@ -1,48 +1,47 @@
-"""File 02oneLatentOrdered.py
+"""File b07problem.py
 
-Measurement equation where the indicators are discrete.
-Ordered probit.
+ This file is the same as b02one_latent_ordered.py, where the starting
+ values for the sigma have been changed in order to illustrate a common
+ issue with the estimation of such models.
+
+ We set the starting value of a scale parameter (SIGMA_STAR_Envir02)
+ to a small value: 0.01. The resulting likelihood is so close to zero
+ that taking the log generates a numerical issue.
+
+ Make sure to set large initial values for scale parameters.
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Dec  6 18:33:18 2022
+:date: Thu Apr 13 18:19:27 2023
 
 """
 
-import pandas as pd
-import biogeme.database as db
+import biogeme.logging as blog
 import biogeme.biogeme as bio
-from biogeme import models
-import biogeme.messaging as msg
 from biogeme.expressions import Beta, log, Elem, bioNormalCdf
 
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-# Piecewise linear definition of income
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-
-thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(ScaledIncome, thresholds)
-
-# Definition of other variables
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
+from optima import (
+    database,
+    age_65_more,
+    formulaIncome,
+    moreThanOneCar,
+    moreThanOneBike,
+    individualHouse,
+    male,
+    haveChildren,
+    haveGA,
+    highEducation,
+    Envir01,
+    Envir02,
+    Envir03,
+    Mobil11,
+    Mobil14,
+    Mobil16,
+    Mobil17,
 )
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b07problem.py')
+
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
@@ -55,7 +54,7 @@ coef_male = Beta('coef_male', 0.0, None, None, 0)
 coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
-### Latent variable: structural equation
+# Latent variable: structural equation
 
 CARLOVERS = (
     coef_intercept
@@ -70,7 +69,7 @@ CARLOVERS = (
     + coef_highEducation * highEducation
 )
 
-### Measurement equations
+# Measurement equations
 
 INTER_Envir01 = Beta('INTER_Envir01', 0, None, None, 1)
 INTER_Envir02 = Beta('INTER_Envir02', 0, None, None, 0)
@@ -96,13 +95,13 @@ MODEL_Mobil14 = INTER_Mobil14 + B_Mobil14_F1 * CARLOVERS
 MODEL_Mobil16 = INTER_Mobil16 + B_Mobil16_F1 * CARLOVERS
 MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
-SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, 1.0e-5, None, 1)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 0.01, 1.0e-5, None, 0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 100, 1.0e-5, None, 0)
 
 
 delta_1 = Beta('delta_1', 0.1, 1.0e-5, None, 0)
@@ -242,20 +241,13 @@ loglike = (
     + log(P_Mobil17)
 )
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-logger.setGeneral()
-# logger.setDetailed()
-
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike)
-biogeme.modelName = '02oneLatentOrdered'
+the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme.modelName = '07problem'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'final log likelihood: {results.data.logLike:.3f}')

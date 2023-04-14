@@ -1,4 +1,4 @@
-"""File 04latentChoiceSeq_mc.py
+"""File b04latent_choice_seq_mc.py
 
 Choice model with the latent variable.
 Mixture of logit, with Monte-Carlo integration
@@ -6,14 +6,14 @@ Measurement equation for the indicators.
 Sequential estimation.
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Dec  6 18:33:58 2022
+:date: Thu Apr 13 18:00:05 2023
 
 """
 
 import sys
-import pandas as pd
-import biogeme.database as db
+import biogeme.logging as blog
 import biogeme.biogeme as bio
+import biogeme.exceptions as excep
 from biogeme import models
 import biogeme.results as res
 import biogeme.messaging as msg
@@ -25,56 +25,45 @@ from biogeme.expressions import (
     log,
 )
 
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
+from optima import (
+    database,
+    age_65_more,
+    formulaIncome,
+    moreThanOneCar,
+    moreThanOneBike,
+    individualHouse,
+    male,
+    haveChildren,
+    haveGA,
+    highEducation,
+    TimePT,
+    MarginalCostPT,
+    TimeCar,
+    CostCarCHF,
+    distance_km,
+    TripPurpose,
+    WaitingTimePT,
+    Choice,
+)
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b04latent_choice_seq_mc.py')
 
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
 
 # Read the estimates from the structural equation estimation
+FILENAME = 'b02one_latent_ordered'
 try:
-    structResults = res.bioResults(pickleFile='02oneLatentOrdered.pickle')
-except FileNotFoundError:
+    structResults = res.bioResults(pickleFile=f'{FILENAME}.pickle')
+except excep.BiogemeError:
     print(
-        'Run first the script 02oneLatentOrdered.py in order to generate the '
-        'file 02oneLatentOrdered.pickle.'
+        f'Run first the script {FILENAME}.py in order to generate the '
+        f'file {FILENAME}.pickle.'
     )
     sys.exit()
 structBetas = structResults.getBetaValues()
 
-### Variables
 
-# Piecewise linear definition of income
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-thresholds = [None, 4, 6, 8, 10, None]
-piecewiseVariables = models.piecewiseVariables(ScaledIncome, thresholds)
-formulaIncome = (
-    structBetas['beta_ScaledIncome_minus_inf_4'] * piecewiseVariables[0]
-    + structBetas['beta_ScaledIncome_4_6'] * piecewiseVariables[1]
-    + structBetas['beta_ScaledIncome_6_8'] * piecewiseVariables[2]
-    + structBetas['beta_ScaledIncome_8_10'] * piecewiseVariables[3]
-    + structBetas['beta_ScaledIncome_10_inf'] * piecewiseVariables[4]
-)
-
-
-# Definition of other variables
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
-)
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
-
-### Coefficients
+# Coefficients
 
 coef_intercept = structBetas['coef_intercept']
 coef_age_65_more = structBetas['coef_age_65_more']
@@ -86,7 +75,7 @@ coef_male = structBetas['coef_male']
 coef_haveChildren = structBetas['coef_haveChildren']
 coef_highEducation = structBetas['coef_highEducation']
 
-### Latent variable: structural equation
+# Latent variable: structural equation
 
 # Define a random parameter, normally distributed, designed to be used
 # for numerical integration
@@ -129,16 +118,12 @@ TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
 MarginalCostPT_scaled = database.DefineVariable(
     'MarginalCostPT_scaled', MarginalCostPT / 10
 )
-CostCarCHF_scaled = database.DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10
-)
-distance_km_scaled = database.DefineVariable(
-    'distance_km_scaled', distance_km / 5
-)
+CostCarCHF_scaled = database.DefineVariable('CostCarCHF_scaled', CostCarCHF / 10)
+distance_km_scaled = database.DefineVariable('distance_km_scaled', distance_km / 5)
 PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
 PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 
-### Definition of utility functions:
+# Definition of utility functions:
 
 BETA_TIME_PT = BETA_TIME_PT_REF * exp(BETA_TIME_PT_CL * CARLOVERS)
 
@@ -177,11 +162,11 @@ logger.setGeneral()
 # logger.setDetailed()
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, parameter_file='draws.toml')
-biogeme.modelName = '04latentChoiceSeq_mc'
+the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme.modelName = 'b04latent_choice_seq_mc'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')

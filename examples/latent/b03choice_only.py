@@ -1,61 +1,50 @@
-"""File 03choiceOnly_mc.py
+"""File b03choice_only.py
 
 Choice model with the latent variable.
-Mixture of logit, using Monte-Carlo integration
+Mixture of logit.
 No measurement equation for the indicators.
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Dec  6 18:33:40 2022
+:date: Thu Apr 13 16:58:21 2023
 
 """
 
-import pandas as pd
-import biogeme.database as db
+import biogeme.logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.optimization as opt
-import biogeme.messaging as msg
+import biogeme.distributions as dist
 from biogeme.expressions import (
     Beta,
-    bioDraws,
-    MonteCarlo,
+    RandomVariable,
+    Integrate,
     exp,
     log,
 )
 
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-### Variables
-
-# Piecewise linear definition of income
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-
-thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(
-    ScaledIncome, thresholds, [0.0, 0.0, 0.0, 0.0, 0.0]
+from optima import (
+    database,
+    age_65_more,
+    formulaIncome,
+    moreThanOneCar,
+    moreThanOneBike,
+    individualHouse,
+    male,
+    haveChildren,
+    haveGA,
+    highEducation,
+    TimePT,
+    MarginalCostPT,
+    TimeCar,
+    CostCarCHF,
+    distance_km,
+    TripPurpose,
+    WaitingTimePT,
+    Choice,
 )
 
-# Definition of other variables
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
-)
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b03choice_only.py')
+
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 1)
@@ -68,8 +57,13 @@ coef_male = Beta('coef_male', 0.0, None, None, 0)
 coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
-### Latent variable: structural equation
+# Latent variable: structural equation
 
+# Define a random parameter, normally distributed)
+# designed to be used
+# for numerical integration
+omega = RandomVariable('omega')
+density = dist.normalpdf(omega)
 sigma_s = Beta('sigma_s', 1, None, None, 0)
 
 CARLOVERS = (
@@ -83,7 +77,7 @@ CARLOVERS = (
     + coef_haveChildren * haveChildren
     + coef_haveGA * haveGA
     + coef_highEducation * highEducation
-    + sigma_s * bioDraws('EC', 'NORMAL_MLHS')
+    + sigma_s * omega
 )
 
 # Choice model
@@ -105,16 +99,12 @@ TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
 MarginalCostPT_scaled = database.DefineVariable(
     'MarginalCostPT_scaled', MarginalCostPT / 10
 )
-CostCarCHF_scaled = database.DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10
-)
-distance_km_scaled = database.DefineVariable(
-    'distance_km_scaled', distance_km / 5
-)
+CostCarCHF_scaled = database.DefineVariable('CostCarCHF_scaled', CostCarCHF / 10)
+distance_km_scaled = database.DefineVariable('distance_km_scaled', distance_km / 5)
 PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
 PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 
-### Definition of utility functions:
+# Definition of utility functions:
 
 BETA_TIME_PT = BETA_TIME_PT_REF * exp(BETA_TIME_PT_CL * CARLOVERS)
 
@@ -143,21 +133,14 @@ V = {0: V0, 1: V1, 2: V2}
 # Conditional to omega, we have a logit model (called the kernel)
 condprob = models.logit(V, None, Choice)
 # We integrate over omega using numerical integration
-loglike = log(MonteCarlo(condprob))
-
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-logger.setGeneral()
-# logger.setDetailed()
+loglike = log(Integrate(condprob * density, 'omega'))
 
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike, parameter_file='draws.toml')
-biogeme.modelName = '03choiceOnly_mc'
+the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme.modelName = 'b03choice_only'
 
 # Estimate the parameters
-results = biogeme.estimate(algorithm=opt.bioNewton)
+results = the_biogeme.estimate()
 
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')

@@ -1,50 +1,40 @@
-"""File 07problem_simul.py
+"""File b02one_latent_ordered.py
 
- This file is an updated version of 07problem.py, where
- the probabilities are simulated in order to
- investigate the numerical issue.
+Measurement equation where the indicators are discrete.
+Ordered probit.
 
 :author: Michel Bierlaire, EPFL
-:date: Wed Sep 11 15:40:43 2019
+:date: Thu Apr 13 16:48:55 2023
 
 """
 
-import pandas as pd
-import biogeme.database as db
+import biogeme.logging as blog
 import biogeme.biogeme as bio
-from biogeme import models
-from biogeme.expressions import Beta, Elem, bioNormalCdf
+from biogeme.expressions import Beta, log, Elem, bioNormalCdf
 
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-# The following statement allows you to use the names of the variable
-# as Python variable.
-globals().update(database.variables)
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-# Piecewise linear definition of income
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-
-thresholds = [None, 4, 6, 8, 10, None]
-formulaIncome = models.piecewiseFormula(
-    ScaledIncome, thresholds, [0.0, 0.0, 0.0, 0.0, 0.0]
+from optima import (
+    database,
+    age_65_more,
+    formulaIncome,
+    moreThanOneCar,
+    moreThanOneBike,
+    individualHouse,
+    male,
+    haveChildren,
+    haveGA,
+    highEducation,
+    Envir01,
+    Envir02,
+    Envir03,
+    Mobil11,
+    Mobil14,
+    Mobil16,
+    Mobil17,
 )
 
-# Definition of other variables
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
-)
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b02one_latent_ordered.py')
+
 
 # Parameters to be estimated
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
@@ -57,7 +47,7 @@ coef_male = Beta('coef_male', 0.0, None, None, 0)
 coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
-### Latent variable: structural equation
+# Latent variable: structural equation
 
 CARLOVERS = (
     coef_intercept
@@ -72,7 +62,7 @@ CARLOVERS = (
     + coef_highEducation * highEducation
 )
 
-### Measurement equations
+# Measurement equations
 
 INTER_Envir01 = Beta('INTER_Envir01', 0, None, None, 1)
 INTER_Envir02 = Beta('INTER_Envir02', 0, None, None, 0)
@@ -98,13 +88,13 @@ MODEL_Mobil14 = INTER_Mobil14 + B_Mobil14_F1 * CARLOVERS
 MODEL_Mobil16 = INTER_Mobil16 + B_Mobil16_F1 * CARLOVERS
 MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
-SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 0.01, 1.0e-5, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 100, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 100, 1.0e-5, None, 0)
+SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, 1.0e-5, None, 1)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, 1.0e-5, None, 0)
 
 
 delta_1 = Beta('delta_1', 0.1, 1.0e-5, None, 0)
@@ -233,25 +223,27 @@ IndMobil17 = {
 
 P_Mobil17 = Elem(IndMobil17, Mobil17)
 
-simulate = {
-    'P_Envir01': P_Envir01,
-    'P_Envir02': P_Envir02,
-    'P_Envir03': P_Envir03,
-    'P_Mobil11': P_Mobil11,
-    'P_Mobil14': P_Mobil14,
-    'P_Mobil16': P_Mobil16,
-    'P_Mobil17': P_Mobil17,
-}
 
-
-biogeme = bio.BIOGEME(database, simulate)
-biogeme.modelName = '07problem_simul'
-
-simulatedValues = biogeme.simulate()
-print(
-    'We identify the entries for which the likelihood is zero, '
-    'so that the log likelihood cannot be computed'
+loglike = (
+    log(P_Envir01)
+    + log(P_Envir02)
+    + log(P_Envir03)
+    + log(P_Mobil11)
+    + log(P_Mobil14)
+    + log(P_Mobil16)
+    + log(P_Mobil17)
 )
-zeroValues = simulatedValues.where(simulatedValues == 0, other='')
-print(zeroValues)
-print('The problematic model is Envir02')
+
+
+# Create the Biogeme object
+the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme.modelName = 'b02one_latent_ordered'
+
+# Estimate the parameters
+results = the_biogeme.estimate()
+
+print(f'Estimated betas: {len(results.data.betaValues)}')
+print(f'final log likelihood: {results.data.logLike:.3f}')
+print(f'Output file: {results.data.htmlFileName}')
+results.writeLaTeX()
+print(f'LaTeX file: {results.data.latexFileName}')
