@@ -4,16 +4,14 @@ Measurement equation where the indicators are discrete.
 Ordered probit.
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Jul  6 15:47:26 2021
+:date: Fri Apr 14 09:39:10 2023
 
 """
-import pandas as pd
-import biogeme.database as db
-import biogeme.biogeme as bio
 
+import biogeme.logging as blog
+import biogeme.biogeme as bio
 from biogeme.expressions import (
     Beta,
-    Variable,
     log,
     Elem,
     bioNormalCdf,
@@ -21,39 +19,19 @@ from biogeme.expressions import (
     bioMultSum,
 )
 
-
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
-
-# Extract the variables fromm the data file
-Choice = Variable('Choice')
-Gender = Variable('Gender')
-FamilSitu = Variable('FamilSitu')
-Education = Variable('Education')
-ResidChild = Variable('ResidChild')
-SocioProfCat = Variable('SocioProfCat')
-age = Variable('age')
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
-
-# Definition of other variables
-male = database.DefineVariable('male', Gender == 1)
-
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
+from optima import (
+    database,
+    male,
+    age,
+    haveChildren,
+    highEducation,
+    childCenter,
+    childSuburb,
+    SocioProfCat,
 )
 
-highEducation = database.DefineVariable('highEducation', Education >= 6)
-
-childCenter = database.DefineVariable(
-    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
-)
-
-childSuburb = database.DefineVariable(
-    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
-)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example m01_latent_variable.py')
 
 # Parameters for the structural equation
 coef_intercept = Beta('coef_intercept', 0.0, None, None, 0)
@@ -79,7 +57,7 @@ ACTIVELIFE = (
     + coef_haveChildren * haveChildren
 )
 
-### Measurement equations
+# Measurement equations
 
 indicators = [
     'ResidCh01',
@@ -102,12 +80,8 @@ B[indicators[0]] = Beta(f'B_{indicators[0]}', 1, None, None, 1)
 MODEL = {k: INTER[k] + B[k] * ACTIVELIFE for k in indicators}
 
 # We define the scale parameters of the error terms.
-SIGMA_STAR = {
-    k: Beta(f'SIGMA_STAR_{k}', 1, 1.0e-5, None, 0) for k in indicators[1:]
-}
-SIGMA_STAR[indicators[0]] = Beta(
-    f'SIGMA_STAR_{indicators[0]}', 1, None, None, 1
-)
+SIGMA_STAR = {k: Beta(f'SIGMA_STAR_{k}', 1, 1.0e-5, None, 0) for k in indicators[1:]}
+SIGMA_STAR[indicators[0]] = Beta(f'SIGMA_STAR_{indicators[0]}', 1, None, None, 1)
 
 delta_1 = Beta('delta_1', 0.1, 1.0e-5, None, 0)
 delta_2 = Beta('delta_2', 0.2, 1.0e-5, None, 0)

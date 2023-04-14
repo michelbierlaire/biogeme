@@ -6,97 +6,72 @@ Measurement equation for the indicators.
 Sequential estimation.
 
 :author: Michel Bierlaire, EPFL
-:date: Tue Jul  6 18:04:50 2021
+:date: Fri Apr 14 09:47:53 2023
 
 """
 
 import sys
-import pandas as pd
-import biogeme.database as db
+import biogeme.logging as blog
+import biogeme.exceptions as excep
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
 import biogeme.results as res
-import biogeme.messaging as msg
 from biogeme import models
 from biogeme.expressions import (
     Beta,
-    Variable,
     RandomVariable,
     exp,
     log,
     Integrate,
 )
 
-# Read the data
-df = pd.read_csv('optima.dat', sep='\t')
-database = db.Database('optima', df)
+from optima import (
+    database,
+    male,
+    age,
+    haveChildren,
+    highEducation,
+    childCenter,
+    childSuburb,
+    SocioProfCat,
+    TimePT,
+    TimeCar,
+    MarginalCostPT,
+    CostCarCHF,
+    distance_km,
+    TripPurpose,
+    WaitingTimePT,
+    Choice,
+)
 
-# The following statement allows you to use the names of the variable
-# as Python variable.
-Choice = Variable('Choice')
-Gender = Variable('Gender')
-FamilSitu = Variable('FamilSitu')
-Education = Variable('Education')
-ResidChild = Variable('ResidChild')
-SocioProfCat = Variable('SocioProfCat')
-age = Variable('age')
-TimePT = Variable('TimePT')
-TimeCar = Variable('TimeCar')
-MarginalCostPT = Variable('MarginalCostPT')
-CostCarCHF = Variable('CostCarCHF')
-distance_km = Variable('distance_km')
-TripPurpose = Variable('TripPurpose')
-WaitingTimePT = Variable('WaitingTimePT')
-Choice = Variable('Choice')
-
-# Exclude observations such that the chosen alternative is -1
-database.remove(Choice == -1.0)
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example m02_sequential_estimation.py')
 
 # Read the estimates from the structural equation estimation
 NAME = 'm01_latent_variable'
 try:
     structResults = res.bioResults(pickleFile=f'{NAME}.pickle')
-except FileNotFoundError:
+except excep.BiogemeError:
     print(
         f'Run first the script {NAME}.py in order to generate the file '
         f'{NAME}.pickle.'
     )
     sys.exit()
-structBetas = structResults.getBetaValues()
+struct_betas = structResults.getBetaValues()
 
-### Variables
+# Coefficients
 
-# Definition of other variables
-male = database.DefineVariable('male', Gender == 1)
+coef_intercept = struct_betas['coef_intercept']
+coef_age_30_less = struct_betas['coef_age_30_less']
+coef_male = struct_betas['coef_male']
+coef_haveChildren = struct_betas['coef_haveChildren']
+coef_highEducation = struct_betas['coef_highEducation']
+coef_artisans = struct_betas['coef_artisans']
+coef_employees = struct_betas['coef_employees']
+coef_child_center = struct_betas['coef_child_center']
+coef_child_suburb = struct_betas['coef_child_suburb']
 
-haveChildren = database.DefineVariable(
-    'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
-)
-
-highEducation = database.DefineVariable('highEducation', Education >= 6)
-
-childCenter = database.DefineVariable(
-    'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
-)
-
-childSuburb = database.DefineVariable(
-    'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
-)
-
-
-### Coefficients
-
-coef_intercept = structBetas['coef_intercept']
-coef_age_30_less = structBetas['coef_age_30_less']
-coef_male = structBetas['coef_male']
-coef_haveChildren = structBetas['coef_haveChildren']
-coef_highEducation = structBetas['coef_highEducation']
-coef_artisans = structBetas['coef_artisans']
-coef_employees = structBetas['coef_employees']
-coef_child_center = structBetas['coef_child_center']
-coef_child_suburb = structBetas['coef_child_suburb']
-
-### Latent variable: structural equation
+# Latent variable: structural equation
 
 # Note that the expression must be on a single line. In order to
 # write it across several lines, each line must terminate with
@@ -144,16 +119,12 @@ TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
 MarginalCostPT_scaled = database.DefineVariable(
     'MarginalCostPT_scaled', MarginalCostPT / 10
 )
-CostCarCHF_scaled = database.DefineVariable(
-    'CostCarCHF_scaled', CostCarCHF / 10
-)
-distance_km_scaled = database.DefineVariable(
-    'distance_km_scaled', distance_km / 5
-)
+CostCarCHF_scaled = database.DefineVariable('CostCarCHF_scaled', CostCarCHF / 10)
+distance_km_scaled = database.DefineVariable('distance_km_scaled', distance_km / 5)
 PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
 PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
 
-### Definition of utility functions:
+# Definition of utility functions:
 
 BETA_TIME_PT = BETA_TIME_PT_REF * exp(BETA_TIME_PT_AL * ACTIVELIFE)
 
@@ -184,19 +155,13 @@ condprob = models.logit(V, None, Choice)
 # We integrate over omega using numerical integration
 loglike = log(Integrate(condprob * density, 'omega'))
 
-# Define level of verbosity
-logger = msg.bioMessage()
-# logger.setSilent()
-# logger.setWarning()
-logger.setGeneral()
-# logger.setDetailed()
-
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike)
-biogeme.modelName = 'm02_sequential_estimation'
+the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme.modelName = 'm02_sequential_estimation'
 
 # Estimate the parameters
-results = biogeme.estimate()
+results = the_biogeme.estimate()
+print(results.shortSummary())
 print(results.getEstimatedParameters())
 
 print(f'Final log likelihood: {results.data.logLike:.3f}')
