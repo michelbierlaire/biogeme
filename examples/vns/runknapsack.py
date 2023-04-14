@@ -1,43 +1,54 @@
-import sys
+"""File runknapsack.py
+
+:author: Michel Bierlaire
+:date: Fri Apr 14 14:33:18 2023
+
+Example of how to run the VNS multi-objective optimization algorithm
+on the knapsack problem.  The two objectives are: minimizing weight
+and maximizing utility.
+
+"""
+
 from itertools import product
 from biogeme import vns
-import biogeme.messaging as msg
+import biogeme.logging as blog
 from knapsack import Knapsack, Sack
 
-logger = msg.bioMessage()
-logger.setDebug()
-# Run one instance
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example runknapsack.py')
 
-utility = [80, 31, 48, 17, 27, 84, 34, 39, 46, 58, 23, 67]
-weight = [84, 27, 47, 22, 21, 96, 42, 46, 54, 53, 32, 78]
+UTILITY = [80, 31, 48, 17, 27, 84, 34, 39, 46, 58, 23, 67]
+WEIGHT = [84, 27, 47, 22, 21, 96, 42, 46, 54, 53, 32, 78]
 CAPACITY = 300
-Sack.utility_data = utility
-Sack.weight_data = weight
+FILE_NAME = 'knapsack.pareto'
+Sack.utility_data = UTILITY
+Sack.weight_data = WEIGHT
 
-the_knapsack = Knapsack(utility, weight, CAPACITY)
+the_pareto = vns.ParetoClass(max_neighborhood=5, pareto_file=FILE_NAME)
 
-all_combinations = product([0, 1], repeat=len(utility))
+the_knapsack = Knapsack(UTILITY, WEIGHT, CAPACITY)
+
+all_combinations = product([0, 1], repeat=len(UTILITY))
 
 total = 0
 valid = 0
 for decision in all_combinations:
     total += 1
     the_sack = Sack.from_decisions(decision)
-    is_valid, why =  the_knapsack.is_valid(the_sack.get_element())
+    is_valid, why = the_knapsack.is_valid(the_sack.get_element())
     if is_valid:
         valid += 1
 
 print(f'Total number of sacks: {total}')
 print(f'Total number of valid sacks: {valid}')
 
-empty_sack = Sack.empty_sack(size=len(utility))
+empty_sack = Sack.empty_sack(size=len(UTILITY))
 
 the_pareto = vns.vns(
-    the_knapsack,
-    [empty_sack.get_element()],
-    max_neighborhood=12,
-    number_of_neighbors=10,
-    pareto_file_name='knapsack.pareto',
+    problem=the_knapsack,
+    first_solutions=[empty_sack.get_element()],
+    pareto=the_pareto,
+    number_of_neighbors=5,
 )
 
 print(f'Number of pareto solutions: {len(the_pareto.pareto)}')

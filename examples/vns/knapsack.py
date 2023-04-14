@@ -11,20 +11,11 @@ and minimize weight. The weight cannot go beyond capacity.
 import random
 import numpy as np
 from biogeme import vns
-import biogeme.messaging as msg
-import biogeme.exceptions as excep
 from biogeme.pareto import SetElement
-
-logger = msg.bioMessage()
-# logger.setDetailed()
-logger.setDebug()
-
-# pylint: disable=invalid-name
 
 
 class Sack:
-    """Implements a solution. Here, a sack configuration.
-    """
+    """Implements a solution. Here, a sack configuration."""
 
     SEPARATOR = '-'
     utility_data = None
@@ -32,25 +23,19 @@ class Sack:
 
     def __init__(self, string_representation):
         """Creates a sack from a string representation"""
-        self.decisions = [
-            int(i)
-            for i in string_representation.split(self.SEPARATOR)
-        ]
-        self.utility = sum(
-            x * u
-            for x, u in zip(self.decisions, self.utility_data)
-        )
-        self.weight = sum(
-            x * u
-            for x, u in zip(self.decisions, self.weight_data)
-        )
+        self.decisions = [int(i) for i in string_representation.split(self.SEPARATOR)]
+        self.utility = sum(x * u for x, u in zip(self.decisions, self.utility_data))
+        self.weight = sum(x * u for x, u in zip(self.decisions, self.weight_data))
 
     @classmethod
     def from_decisions(cls, decisions):
         """Creates a sack from the actual decisions"""
         the_string = cls.code_decisions(decisions)
         return cls(the_string)
-    
+
+    def __eq__(self, other):
+        return self.decisions == other.decisions
+
     def __str__(self):
         return self.describe()
 
@@ -68,8 +53,6 @@ class Sack:
 
     def get_element(self):
         """Implementation of abstract method"""
-        if self.utility is None or self.weight is None:
-            self.evaluate()
         return SetElement(self.code_id(), [-self.utility, self.weight])
 
     def describe(self):
@@ -81,13 +64,13 @@ class Sack:
         return f'{self.code_id()}: U={self.utility} W={self.weight}'
 
     def code_id(self):
-        """Provide a string ID for the sack 
+        """Provide a string ID for the sack
 
         :return: identifier of the solution. Used to organize the Pareto set.
         :rtype: str
         """
         return self.code_decisions(self.decisions)
-    
+
     @classmethod
     def code_decisions(cls, decisions):
         """Provide a string ID for the sack given the decisions
@@ -190,8 +173,7 @@ class Knapsack(vns.ProblemClass):
             'Remove items': remove_items,
             'Change decision for items': change_decisions,
         }
-        self.currentSolution = None
-        self.lastOperator = None
+        self.last_operator = None
         super().__init__(self.operators)
 
     def is_valid(self, element):
