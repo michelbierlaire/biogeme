@@ -1,7 +1,7 @@
-"""File: 02simpleIntegral.py
+"""File: b02simple_integral.py
 
  Author: Michel Bierlaire, EPFL
- Date: Tue Dec  6 18:57:27 2022
+ Date: Thu Apr 13 20:46:01 2023
 
 Calculation of a simple integral using numerical integration and
 Monte-Carlo integration with various types of draws, including Halton
@@ -10,7 +10,6 @@ available in Biogeme.
 
 """
 
-# pylint: disable=invalid-name, undefined-variable
 
 import pandas as pd
 import biogeme.database as db
@@ -26,12 +25,12 @@ pandas['FakeColumn'] = [1.0]
 database = db.Database('fakeDatabase', pandas)
 
 
-def halton13(sampleSize, numberOfDraws):
+def halton13(sample_size, number_of_draws):
     """
     The user can define new draws. For example, Halton draws
     with base 13, skipping the first 10 draws.
     """
-    return draws.getHaltonDraws(sampleSize, numberOfDraws, base=13, skip=10)
+    return draws.getHaltonDraws(sample_size, number_of_draws, base=13, skip=10)
 
 
 mydraws = {'HALTON13': (halton13, 'Halton draws, base 13, skipping 10')}
@@ -72,8 +71,7 @@ stderr_halton13 = (sampleVariance_halton13 / R) ** 0.5
 error_halton13 = simulatedI_halton13 - trueI
 
 sampleVariance_mlhs = (
-    MonteCarlo(integrand_mlhs * integrand_mlhs)
-    - simulatedI_mlhs * simulatedI_mlhs
+    MonteCarlo(integrand_mlhs * integrand_mlhs) - simulatedI_mlhs * simulatedI_mlhs
 )
 stderr_mlhs = (sampleVariance_mlhs / R) ** 0.5
 error_mlhs = simulatedI_mlhs - trueI
@@ -99,9 +97,9 @@ simulate = {
     'Error (MLHS)             ': error_mlhs,
 }
 
-biogeme = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
-biogeme.modelName = '02simpleIntegral'
-results = biogeme.simulate()
+biosim = bio.BIOGEME(database, simulate)
+biosim.modelName = 'b02simple_integral'
+results = biosim.simulate(theBetaValues={})
 print(f'Analytical integral:{results.iloc[0]["Analytical Integral"]:.6g}')
 print('\t\tUniform\t\tHalton\t\tHalton13\tMLHS')
 print(

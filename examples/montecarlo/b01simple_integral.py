@@ -1,12 +1,11 @@
-"""File: 01simpleIntegral.py
- Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 16:20:24 2019
+"""File: b01simple_integral.py
+
+:author: Michel Bierlaire, EPFL
+:date: Thu Apr 13 20:42:24 2023
 
 Calculation of a simple integral using Monte-Carlo integration.
 
 """
-
-# pylint: disable=invalid-name, undefined-variable
 
 import pandas as pd
 import biogeme.database as db
@@ -26,6 +25,7 @@ simulatedI = MonteCarlo(integrand)
 trueI = exp(1.0) - 1.0
 
 R = 200
+MULTIPLIER = 100000
 
 # Create a parameter file to set the number of draws
 with TemporaryFile() as filename:
@@ -45,27 +45,24 @@ with TemporaryFile() as filename:
         'Error             ': error,
     }
 
-    biogeme = bio.BIOGEME(database, simulate, parameter_file=filename)
-    R = biogeme.number_of_draws
-    biogeme.modelName = f'01simpleIntegral_{R}'
-    results = biogeme.simulate()
+    biosim = bio.BIOGEME(database, simulate, parameter_file=filename)
+    R = biosim.number_of_draws
+    biosim.modelName = f'01simpleIntegral_{R}'
+    results = biosim.simulate(theBetaValues={})
     print(f'Number of draws: {R}')
     for c in results.columns:
         print(f'{c}: {results.loc[0,c]}')
 
-multiplier = 100000
-        
+
 # Create a parameter file to set the umber of draws
 with TemporaryFile() as filename:
     with open(filename, 'w', encoding='utf-8') as f:
         print('[MonteCarlo]', file=f)
-        print(f'number_of_draws = {multiplier * R}', file=f)
+        print(f'number_of_draws = {MULTIPLIER * R}', file=f)
 
-
-    # With 10 times more draws
     biogeme2 = bio.BIOGEME(database, simulate, parameter_file=filename)
     biogeme2.modelName = '01simpleIntegral_{multiplier*R}'
-    results2 = biogeme2.simulate()
-    print(f'Number of draws: {multiplier * R}')
+    results2 = biogeme2.simulate(theBetaValues={})
+    print(f'Number of draws: {MULTIPLIER * R}')
     for c in results2.columns:
         print(f'{c}: {results2.loc[0, c]}')

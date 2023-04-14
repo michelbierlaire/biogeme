@@ -1,13 +1,13 @@
-"""File: 03antitheticExplicit.py
+"""File: b03antithetic.py
 
  Author: Michel Bierlaire, EPFL
- Date: Wed Dec 11 17:04:40 2019
+ Date: Thu Apr 13 20:48:02 2023
 
 Calculation of a simple integral using Monte-Carlo integration. It
-illustrates how to use antothetic draws, explicitly generared.
+illustrates how to use antithetic draws.
 """
-# pylint: disable=invalid-name, undefined-variable
 
+import numpy as np
 import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
@@ -19,35 +19,40 @@ from biogeme.expressions import exp, bioDraws, MonteCarlo
 # the draws
 pandas = pd.DataFrame()
 pandas['FakeColumn'] = [1.0]
-database = db.Database('fakeDatabase', pandas)
+database = db.Database('fake_database', pandas)
 
 
-def halton13(sampleSize, numberOfDraws):
+def halton13_anti(sample_size, number_of_draws):
     """The user can define new draws. For example, Halton draws with base
     13, skipping the first 10 draws.
 
     """
-    return draws.getHaltonDraws(sampleSize, numberOfDraws, base=13, skip=10)
+    the_draws = draws.getHaltonDraws(
+        sample_size, int(number_of_draws / 2), base=13, skip=10
+    )
+    return np.concatenate((the_draws, 1 - the_draws), axis=1)
 
 
-mydraws = {'HALTON13': (halton13, 'Halton draws, base 13, skipping 10')}
+mydraws = {
+    'HALTON13_ANTI': (
+        halton13_anti,
+        'Antithetic Halton draws, base 13, skipping 10',
+    )
+}
 database.setRandomNumberGenerators(mydraws)
 
-U = bioDraws('U', 'UNIFORM')
-integrand = exp(U) + exp(1 - U)
-simulatedI = MonteCarlo(integrand) / 2.0
+integrand = exp(bioDraws('U', 'UNIFORM_ANTI'))
+simulatedI = MonteCarlo(integrand)
 
-U_halton13 = bioDraws('U_halton13', 'HALTON13')
-integrand_halton13 = exp(U_halton13) + exp(1 - U_halton13)
-simulatedI_halton13 = MonteCarlo(integrand_halton13) / 2.0
+integrand_halton13 = exp(bioDraws('U_halton13', 'HALTON13_ANTI'))
+simulatedI_halton13 = MonteCarlo(integrand_halton13)
 
-U_mlhs = bioDraws('U_mlhs', 'UNIFORM_MLHS')
-integrand_mlhs = exp(U_mlhs) + exp(1 - U_mlhs)
-simulatedI_mlhs = MonteCarlo(integrand_mlhs) / 2.0
+integrand_mlhs = exp(bioDraws('U_mlhs', 'UNIFORM_MLHS_ANTI'))
+simulatedI_mlhs = MonteCarlo(integrand_mlhs)
 
 trueI = exp(1.0) - 1.0
 
-R = 10000
+R = 20000
 
 error = simulatedI - trueI
 
@@ -65,9 +70,10 @@ simulate = {
     'Error (MLHS)             ': error_mlhs,
 }
 
-biogeme = bio.BIOGEME(database, simulate, parameter_file='draws.toml')
-biogeme.modelName = '03antitheticExplicit'
-results = biogeme.simulate()
+
+biosim = bio.BIOGEME(database, simulate)
+biosim.modelName = 'b03antithetic'
+results = biosim.simulate(theBetaValues={})
 print(f"Analytical integral:{results.iloc[0]['Analytical Integral']:.6f}")
 print("\t\tUniform (Anti)\t\tHalton13 (Anti)\t\tMLHS (Anti)")
 print(
