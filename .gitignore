@@ -39,8 +39,6 @@ archive/tools/prepareData/biosampledata
 **/*.la
 **/.libs
 
-videos/
-sphinx/
 
 # Other files
 autom4te.cache/
@@ -75,6 +73,9 @@ examples/workingNotToDistribute
 examples/sampling_experiment
 examples/latent/diagnostics
 examples/latent/*.tex
+videos
+sphinx
+
 src/cbiogeme.cpp
 src/cythonbiogeme.cpp
 biogeme.egg-info
