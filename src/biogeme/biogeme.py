@@ -1,4 +1,5 @@
-"""Implementation of the main Biogeme class
+"""
+Implementation of the main Biogeme class
 
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:45:15 2019
