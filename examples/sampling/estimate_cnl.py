@@ -1,118 +1,42 @@
 """ Estimate the parameters of the cross-nested logit models with the generated samples
 
 :author: Michel Bierlaire
-:date: Tue Jan 10 11:25:34 2023
+:date: Sat Apr 15 16:59:43 2023
 """
 
-import pandas as pd
-import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta, Variable, log
+from biogeme.expressions import Beta
 from biogeme.sampling import mev_cnl_sampling
 
-from constants import N_ALT, INSTANCES, partitions
+from sample import SAMPLE_SIZE as N_ALT
+from choice_data import database
 
-MODEL = 'cnl'
+from model import V, log_probability
 
+mu_asian = Beta('mu_asian', 1, 1, None, 0)
+mu_downtown = Beta('mu_downtown', 1, 1, None, 0)
 
-def estimate(the_database, the_model_name):
-    """Estimate the parameters for a given database
+# The nests definition is done through the variables in the file. For
+# each nest m and each alternative i, there must be a variable m_i
+# that is the level of membership of alternative i to nest m (usually
+# called the "alpha" membership parameters).
 
-    :param the_database: database to be used for estimation
-    :type the_database: biogeme.database.Database
+# In this example, we define two nests, one for Asian restaurants, and
+# one for restaurants in Downtown. Note that their overlap, so that we
+# indeed have a cross-nested logit model.
+nests = {'Asian': mu_asian, 'downtown': mu_downtown}
 
-    :param the_model_name: name to be used for the output file
-    :type the_model_name: str
-    """
+log_gi = mev_cnl_sampling(V, None, log_probability, nests)
+logprob = models.logmev(V, log_gi, None, 0)
 
-    beta_rating = Beta('beta_rating', 0, None, None, 0)
-    beta_price = Beta('beta_price', 0, None, None, 0)
-    beta_chinese = Beta('beta_chinese', 0, None, None, 0)
-    beta_japanese = Beta('beta_japanese', 0, None, None, 0)
-    beta_korean = Beta('beta_korean', 0, None, None, 0)
-    beta_indian = Beta('beta_indian', 0, None, None, 0)
-    beta_french = Beta('beta_french', 0, None, None, 0)
-    beta_mexican = Beta('beta_mexican', 0, None, None, 0)
-    beta_lebanese = Beta('beta_lebanese', 0, None, None, 0)
-    beta_ethiopian = Beta('beta_ethiopian', 0, None, None, 0)
-    beta_log_dist = Beta('beta_log_dist', 0, None, None, 0)
+# Create the Biogeme object
+the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme.modelName = 'cnl'
 
-    # Correction for sampling of alternatives
-    log_probability = {i: Variable(f'_log_proba_{i}') for i in range(N_ALT)}
+# Calculate the null log likelihood for reporting.
+the_biogeme.calculateNullLoglikelihood({i: 1 for i in range(N_ALT)})
 
-    V = {
-        i: (
-            beta_rating * Variable(f'rating_{i}')
-            + beta_price * Variable(f'price_{i}')
-            + beta_chinese * Variable(f'category_Chinese_{i}')
-            + beta_japanese * Variable(f'category_Japanese_{i}')
-            + beta_korean * Variable(f'category_Korean_{i}')
-            + beta_indian * Variable(f'category_Indian_{i}')
-            + beta_french * Variable(f'category_French_{i}')
-            + beta_mexican * Variable(f'category_Mexican_{i}')
-            + beta_lebanese * Variable(f'category_Lebanese_{i}')
-            + beta_ethiopian * Variable(f'category_Ethiopian_{i}')
-            + beta_log_dist * Variable(f'log_dist_{i}')
-        )
-        for i in range(N_ALT)
-    }
-
-    mu_asian = Beta('mu_asian', 1, 1, None, 0)
-    mu_downtown = Beta('mu_downtown', 1, 1, None, 0)
-    nests = {'Asian': mu_asian, 'downtown': mu_downtown}
-
-    log_gi = mev_cnl_sampling(V, None, log_probability, nests)
-    logprob = models.logmev(V, log_gi, None, 0)
-
-    # Create the Biogeme object
-    biogeme = bio.BIOGEME(the_database, logprob)
-    biogeme.modelName = the_model_name
-
-    # Calculate the null log likelihood for reporting.
-    biogeme.calculateNullLoglikelihood({i: 1 for i in range(N_ALT)})
-
-    # Estimate the parameters
-    results = biogeme.estimate(recycle=True)
-    return results
-
-
-for p in partitions:
-    for n in range(INSTANCES):
-        # Read the data
-        filename = f'samples/sample_{p}_{MODEL}_{N_ALT}_{n}.dat'
-        model_name = f'restaurants_{p}_{MODEL}_{N_ALT}_{n}'
-        df = pd.read_csv(filename)
-        database = db.Database(f'restaurant_{p}_{n}', df)
-        for i in range(N_ALT):
-            # Calculate distances
-
-            database.DefineVariable(
-                f'log_dist_{i}',
-                log(
-                    (
-                        (Variable('user_lat') - Variable(f'rest_lat_{i}')) ** 2
-                        + (Variable('user_lon') - Variable(f'rest_lon_{i}')) ** 2
-                    )
-                    ** 0.5
-                ),
-            )
-            # Check if alternatives are alone in their own nest
-            database.DefineVariable(
-                f'alone_{i}',
-                ((Variable(f'Asian_{i}') != 0) + (Variable(f'downtown_{i}') != 0)) == 0,
-            )
-            # Calculate the alpha of the CNL
-            mask_asian = database.data[f'Asian_{i}'] != 0
-            database.data.loc[~mask_asian, f'alpha_asian_{i}'] = 0
-            database.data.loc[mask_asian, f'alpha_asian_{i}'] = database.data[
-                f'Asian_{i}'
-            ] / (database.data[f'Asian_{i}'] + database.data[f'downtown_{i}'])
-
-            mask_downtown = database.data[f'downtown_{i}'] != 0
-            database.data.loc[~mask_downtown, f'alpha_downtown_{i}'] = 0
-            database.data.loc[mask_downtown, f'alpha_downtown_{i}'] = database.data[
-                f'downtown_{i}'
-            ] / (database.data[f'Asian_{i}'] + database.data[f'downtown_{i}'])
-
-        estimate(database, model_name)
+# Estimate the parameters
+results = the_biogeme.estimate(recycle=True)
+print(results.shortSummary())

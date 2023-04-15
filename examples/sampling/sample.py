@@ -1,65 +1,53 @@
-""" Sample alternatives
+"""Sample alternatives
 
 :author: Michel Bierlaire
-:date: Sun Jan  8 10:28:03 2023
+:date: Sat Apr 15 16:01:41 2023
+
+Generate a file with with choice data using:
+
+    - a file containing the description of all alternatives,
+          associated with an ID,
+    - a file containing observations of individuals, associated with
+          socio-economic characteristics, and an observed choice.
+
+The choice must be a valid ID in the file of alternatives.  In the
+choice data, a set of unchosen alternatives is sampled for each
+individual observation using importance sampling. The correction term
+for the model estimation is calculated and introduced in the file as
+well.
+
+In the generated choice data, alternative 0 is always the chosen one.
+The name of the attributes of the alternatives are the names from the
+original file containnig all alternatives, appended with the ID of the
+alternative in the sample.
+
+For instance, if there are 3 alternatives sampled per individual, and
+the original fime contains the attributed "price", the choice data
+will contain the columns "price_0", "price_1" and "price_2".
+
 """
 
-import os
 import numpy as np
 import pandas as pd
 from biogeme.sampling import StratumTuple, sampling_of_alternatives
 
 SAMPLE_SIZE = 10
-
-models = ('logit', 'nested', 'cnl')
+FILE_NAME = 'sampled_alternatives.dat'
 
 alternatives = pd.read_csv('restaurants.dat')
-obs = pd.read_csv('obs_choice.dat')
+ID_COLUMN = 'ID'
 
-
-def generate_samples(name, partition, instances=10):
-    """Generates samples for each model based on the partition
-
-    :param name: name of the partition
-    :type name: str
-
-    :param partition: definition of the partition
-    :type partition: StratumTuple
-
-    :param instances: number of instances of the same sample to be generated
-    :type instances: int
-    """
-    os.makedirs('samples', exist_ok=True)
-
-    for n in range(instances):
-        for model in models:
-            filename = f'samples/sample_{name}_{model}_{SAMPLE_SIZE}_{n}.dat'
-            if os.path.exists(filename):
-                print(f'{filename} already exists')
-            else:
-                print(f'Generate {filename}')
-                sample = sampling_of_alternatives(
-                    partition=partition,
-                    individuals=obs,
-                    choice_column=f'choice_{model}',
-                    alternatives=alternatives,
-                    id_column='ID',
-                    always_include_chosen=True,
-                )
-                sample.to_csv(
-                    filename,
-                    index=False,
-                )
-
+observations = pd.read_csv('obs_choice.dat')
+CHOICE_COLUMN = 'choice'
 
 # Set of Asian restaurants
-asian = set(alternatives[alternatives['Asian'] == 1]['ID'])
+asian = set(alternatives[alternatives['Asian'] == 1][ID_COLUMN])
 
 # Set of restaurants located in downtown
-downtown = set(alternatives[alternatives['downtown'] == 1]['ID'])
+downtown = set(alternatives[alternatives['downtown'] == 1][ID_COLUMN])
 
 # Set with all restaurants
-all_alternatives = set(list(alternatives['ID']))
+all_alternatives = set(list(alternatives[ID_COLUMN]))
 
 # Set of Asian restaurants in downtown
 asian_and_downtown = asian & downtown
@@ -79,25 +67,11 @@ others = all_alternatives - asian_or_downtown
 half = int(np.floor(SAMPLE_SIZE / 2))
 quarter = int(np.floor(SAMPLE_SIZE / 4))
 
-
-partition_pure = (StratumTuple(subset=all_alternatives, sample_size=SAMPLE_SIZE),)
-
-generate_samples(name='pure', partition=partition_pure)
-
-partition_asian = (
-    StratumTuple(subset=asian, sample_size=half),
-    StratumTuple(subset=all_alternatives - asian, sample_size=SAMPLE_SIZE - half),
-)
-
-generate_samples(name='asian', partition=partition_asian)
-
-partition_downtown = (
-    StratumTuple(subset=downtown, sample_size=half),
-    StratumTuple(subset=all_alternatives - downtown, sample_size=SAMPLE_SIZE - half),
-)
-
-generate_samples(name='downtown', partition=partition_downtown)
-
+# Importance sample.
+# About 25% of the sample are Asian restaurants in downtown
+# About 25% of the sample are Asian restaurants not in downtown
+# About 25% of the sample are non Asian restaurants in downtown
+# About 25% of the sample are meither Asian not in downtown
 partition_asian_downtown = (
     StratumTuple(subset=asian_and_downtown, sample_size=quarter),
     StratumTuple(subset=only_asian, sample_size=quarter),
@@ -105,4 +79,22 @@ partition_asian_downtown = (
     StratumTuple(subset=others, sample_size=SAMPLE_SIZE - 3 * quarter),
 )
 
-generate_samples(name='both', partition=partition_asian_downtown)
+# If the script is executed, the alternatives are actually sampled. If
+# it is imported into another script, nothing is actually done.
+
+if __name__ == '__main__':
+    sample = sampling_of_alternatives(
+        partition=partition_asian_downtown,
+        individuals=observations,
+        choice_column=CHOICE_COLUMN,
+        alternatives=alternatives,
+        id_column=ID_COLUMN,
+        always_include_chosen=True,
+    )
+
+    sample.to_csv(
+        FILE_NAME,
+        index=False,
+    )
+
+    print(f'File {FILE_NAME} has been generated')
