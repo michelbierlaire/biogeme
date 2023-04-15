@@ -198,17 +198,10 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
     """Generate the expression of the CNL G_i function in the context
     of sampling of alternatives.
 
-    It is assumed that the following variables are available in the data:
-
-    - for each nest m and each alternative i, a variable m_i that is
-      the level of membership of alternative i to nest m,
-    - for each alternative i, a variable alone_i that is 1 if the alternative
-      is alone in a nest.
-
-    For each observation, the sum of the levels of membership across
-    nests must equal to 1, if the value of alone is 0, and must be
-    equal to 0, if the value of alone is 1.
-
+    It is assumed that the following variables are available in the
+        data: for each nest m and each alternative i, a variable m_i
+        that is the level of membership of alternative i to nest m.
+    
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
     :type V: dict(int:biogeme.expressions.expr.Expression)
@@ -231,6 +224,7 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
     :param nests: a dictionary where the keys are the names of the
         nests, and the values are the nest parameters.
     :type nests: dict(str: biogeme.expressions.Beta)
+
     """
 
     Gi_terms = defaultdict(list)
