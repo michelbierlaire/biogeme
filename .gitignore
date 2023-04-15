@@ -72,7 +72,7 @@ archive/pybiogeme/pybiogeme
 .idea
 examples/notebooks/.ipynb_checkpoints/*
 examples/workingNotToDistribute
-examples/sampling/samples
+examples/sampling_experiment
 examples/latent/diagnostics
 examples/latent/*.tex
 src/cbiogeme.cpp
