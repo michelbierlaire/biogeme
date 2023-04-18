@@ -6,86 +6,15 @@
 """
 
 import logging
-from itertools import chain, product
-import numpy as np
-import cythonbiogeme.cythonbiogeme as ee
-import biogeme.exceptions as excep
 from biogeme.idmanager import IdManager
 from biogeme.elementary_expressions import TypeOfElementaryExpression
-from biogeme.configuration import Configuration
 
 logger = logging.getLogger(__name__)
-
-
-def isNumeric(obj):
-    """Checks if an object is numeric
-    :param obj: obj to be checked
-    :type obj: Object
-
-    """
-    return isinstance(obj, (int, float, bool))
-
-
-def process_numeric(expression):
-    """Transforms a numeric value into an Expression object
-
-    :param expression: expression to process
-    :type expression: Expression or numeric
-
-    :raise BiogemeError: if expression is not of type expression
-    """
-
-    if isinstance(expression, (int, float, bool)):
-        return Numeric(expression)
-    if not isinstance(expression, Expression):
-        raise excep.BiogemeError(f'This is not a valid expression: {expression}')
-    return expression
-
-
-class SelectedExpressionsIterator:
-    """A multiple expression is an expression that contains
-    Catalog. This iterator loops on pre-specified configurations
-    """
-
-    def __init__(self, the_expression, configurations):
-        """Ctor.
-
-        :param the_expression: expression containing Catalogs
-        :type the_expression: Expression
-
-        :param configurations: set of configurations
-        :type configurations: set(biogeme.configuration.Configuration))
-        """
-        self.the_expression = the_expression
-        self.configurations = configurations
-        self.set_iterator = iter(configurations)
-        current_configuration = next(self.set_iterator)
-        self.the_expression.configure_catalogs(current_configuration)
-        self.first = True
-        self.number = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self.number += 1
-        if self.first:
-            self.first = False
-            return self.the_expression
-
-        current_configuration = next(self.set_iterator)
-        self.the_expression.configure_catalogs(current_configuration)
-        return self.the_expression
 
 
 class Expression:
     """This is the general arithmetic expression in biogeme.
     It serves as a base class for concrete expressions.
-    """
-
-    maximum_number_of_configurations = 100
-    """For multiple expressions (Catalogs), maximum number of
-           configurations allowed for full enumeration.
     """
 
     def __init__(self):
@@ -108,8 +37,6 @@ class Expression:
         """Row of the database where the values of the variables are found
         """
 
-        self.cpp = ee.pyEvaluateOneExpression()
-        """ Interface to the C++ implementation
         """
 
         self.missingData = 99999

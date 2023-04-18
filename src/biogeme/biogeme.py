@@ -18,8 +18,9 @@ import pandas as pd
 import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
+import cythonbiogeme.cythonbiogeme as cb
+
 import biogeme.database as db
-import biogeme.cythonbiogeme as cb
 import biogeme.expressions as eb
 import biogeme.results as res
 import biogeme.exceptions as excep
