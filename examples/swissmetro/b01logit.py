@@ -33,9 +33,21 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 
 
 # Definition of the utility functions
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+V1 = (
+    ASC_TRAIN +
+    B_TIME * TRAIN_TT_SCALED +
+    B_COST * TRAIN_COST_SCALED
+)
+V2 = (
+    ASC_SM +
+    B_TIME * SM_TT_SCALED +
+    B_COST * SM_COST_SCALED
+)
+V3 = (
+    ASC_CAR +
+    B_TIME * CAR_TT_SCALED +
+    B_COST * CAR_CO_SCALED
+)
 
 # Associate utility functions with the numbering of alternatives
 V = {1: V1, 2: V2, 3: V3}
