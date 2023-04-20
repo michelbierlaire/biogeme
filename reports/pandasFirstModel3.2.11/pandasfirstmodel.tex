@@ -31,7 +31,7 @@
 \vspace{2cm}
 
 \begin{center}
-\small Report TRANSP-OR 230619 \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+\small Report TRANSP-OR 230620 \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
 \begin{center}
 \textsc{Series on Biogeme}
 \end{center}
@@ -481,7 +481,7 @@ function, as illustrated in this example.
 
 
 We now write the specification of the
-utility functions. No the use of parentheses to split the specification on several lines, improving readability. 
+utility functions. Note the use of parentheses to split the specification on several lines, improving readability. 
 
 \begin{lstlisting}[style=nonumbers]
 V1 = (
@@ -501,7 +501,7 @@ V3 = (
 )
 \end{lstlisting}
 
-We need to associate each utility function with the number, the identifier, of the
+We need to associate each utility function with the identifier, of the
 alternative, using the same numbering convention as in the data file. In this
 example, the convention is described in Table~\ref{tab:choice}.
 
@@ -559,7 +559,9 @@ statement:
 \begin{lstlisting}
 the_biogeme.modelName = 'b01logit'
 \end{lstlisting}
-It is custom to calculate the likelihood of the model where all coefficients are zero. This can be done using the following syntax:
+This name will be used to name the output files, generated once the model is estimated. In particular, a file named \lstinline+b01logit.html+ is generated, that can be opened in any browser.
+
+It is custom to calculate the likelihood of the model where all coefficients are zero. This requires the knowledge of the choice set of each individual. Therefore, it relies on the availability conditions. This can be done using the following syntax:
 
 \begin{lstlisting}
 the_biogeme.calculateNullLoglikelihood(av)
@@ -621,7 +623,7 @@ The estimation report follows, including
       \item \texttt{Init log likelihood} is the log likelihood
         $\mathcal{L}^i$ of
         the sample for the model defined with the default values of
-        the parameters. 
+        the parameters. Note that, if the default values of the parameters are all zero, it coincides with the null loglikelihood.
       \item \texttt{Final log likelihood} is the log likelihood
         $\mathcal{L}^*$ of the sample for the estimated model. 
       \item \texttt{Likelihood ratio test for the null model} is 
@@ -637,7 +639,7 @@ The estimation report follows, including
          \end{equation}
         \item \texttt{Rho-square-bar for the null model} is
          \begin{equation}
-            \rho^2 = 1 - \frac{\mathcal{L}^* - K}{\mathcal{L}^0}.
+            \bar{\rho}^2 = 1 - \frac{\mathcal{L}^* - K}{\mathcal{L}^0}.
          \end{equation}
          where $K$ is the number of estimated parameters.
       \item \texttt{Likelihood ratio test for the init. model} is 
@@ -653,7 +655,7 @@ The estimation report follows, including
          \end{equation}
         \item \texttt{Rho-square-bar for the init. model} is
          \begin{equation}
-            \rho^2 = 1 - \frac{\mathcal{L}^* - K}{\mathcal{L}^i}.
+            \bar{\rho}^2 = 1 - \frac{\mathcal{L}^* - K}{\mathcal{L}^i}.
          \end{equation}
          where $K$ is the number of estimated parameters.
        \item \texttt{Akaike Information Criterion} is:
@@ -748,7 +750,7 @@ univariate standard normal distribution,
 \end{itemize}
 The final lines report the value of the smallest and the largest
 eigenvalues, as well as the ratio between the two, called the
-``condition number''.   If smallest eigenvalue is close to zero, it is a sign of
+``condition number''.   If the smallest eigenvalue is close to zero, it is a sign of
 singularity, that may be due to a lack of variation in the data or
 an unidentified model.
 
