@@ -156,7 +156,7 @@ def change_decisions(element, size=1):
     return neighbor.get_element(), n
 
 
-class Knapsack(vns.ProblemClass):
+class Knapsack(vns.problemClass):
     """Class defining the knapsack problem. Note the inheritance from the
     abstract class used by the VNS algorithm. It guarantees the
     compliance with the requirements of the algorithm.
