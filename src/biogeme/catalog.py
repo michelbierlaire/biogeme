@@ -179,7 +179,7 @@ class Catalog(MultipleExpression):
 
     def configure_catalogs(self, configuration):
         """Select the items in each catalog corresponding to the
-            requested configuration
+        requested configuration
 
         :param configuration: description of the configuration
         :type configuration: biogeme.configuration.Configuration
