@@ -84,11 +84,11 @@ to <a href="https://groups.google.com/d/forum/biogeme"
 target="_blank">Biogeme users group</a>, and </li>
 <li>to mention explicitly the use of the package when
 publishing results, using the following reference:
-<p><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier20.pdf"
-target="_blank">Bierlaire, M. (2020). A
+<p><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf"
+target="_blank">Bierlaire, M. (2023). A
 short introduction to
-PandasBiogeme. Technical report TRANSP-OR
-200605. Transport and Mobility Laboratory,
+Biogeme. Technical report TRANSP-OR
+230620. Transport and Mobility Laboratory,
 ENAC, EPFL.</a>
 """,
 )
@@ -239,7 +239,7 @@ installed).
 """
 On Windows, here is one possibility.
 <ol>
-<li> Install <samp>mingw64</samp> from winlibs.com. Download the zip file, and unzip it into c:\mingw64.</li>
+<li> Install <samp>mingw64</samp> from <a href="https://winlibs.com">winlibs.com</a>. Download the zip file, and unzip it into c:\mingw64.</li>
 <li>Add c:\mingw64\\bin in the Windows PATH. </li>
 <li>Edit the file <samp>setup.cfg</samp> and uncomment the lines dedicated to Windows:
 <p>
@@ -255,7 +255,7 @@ extra_compile_args = -std=c++11 -DMS_WIN64
 extra_link_args = -static -std=c++11 -static-libstdc++ -static-libgcc -Bstatic -lpthread -mms-bitfields -mwindows -Wl,-Bstatic,--whole-archive -Wl,--no-whole-archive
 </pre>
 </p>
-<li> compilation The requires the static version of the libraries <samp>vcruntime140.dll</samp> and <samp>python3x.dll</samp>, where <samp>3x</samp> corresponds to your version of Python. To generate them, the following "hack" must be performed:
+<li> The compilation  requires the static version of the libraries <samp>vcruntime140.dll</samp> and <samp>python3x.dll</samp>, where <samp>3x</samp> corresponds to your version of Python. To generate them, the following "hack" must be performed:
 <ul>
 <li>Locate the DLL files in your current environment. They may be located in <samp>AppData\Local\Programs\Python\Python3x\</samp>
 <li>The stalic versions of the libraries can be created using the following commands. Make sure to replace "3x" by your version of Python ("311", "310", "39", etc.):
@@ -295,7 +295,7 @@ that must be executed in the directory containing the
 files setup.cfg and setup.py.
 """,
 """
-Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment where Python is properly installed.installed).
+Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment where Python and CythonBiogeme are properly installed.
 """,
 )
 
@@ -351,8 +351,8 @@ get familiar with the software.
 """,
 """
 <ul>
-<li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier20.pdf"
-target="_blank">A short introduction to PandasBiogeme</a>.</li>
+<li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf"
+target="_blank">A short introduction to Biogeme</a>.</li>
 <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf" target="_blank">Calculating indicators with PandasBiogeme.</a></li>
 <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf"
 target="_blank">Monte-Carlo integration with PandasBiogeme.</a></li>
@@ -463,7 +463,9 @@ Cambridge, Ma (USA)
 
 resources['University of Sydney'] = (
 """
-<a href="https://www.sydney.edu.au/business/our-research/institute-of-transport-and-logistics-studies/courses/discrete-choice-analysis.html"></a>
+<a href="https://www.sydney.edu.au/business/our-research/institute-of-transport-and-logistics-studies/courses/discrete-choice-analysis.html">
+Click here for information about the course
+</a>
 """,
 """
 The University of Sydney Business School offers a course taught by Prof. David Hensher, Prof. Michiel Bliemer, Prof. John Rose and Dr. Andrew Collins.
