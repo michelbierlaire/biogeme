@@ -36,80 +36,40 @@ target="_blank">old webpage</a>.
 """
 )
 
-about['What\'s new in Biogeme 3.2.10?'] = (
+about['What\'s new in Biogeme 3.2.11?'] = (
 """
-<strong>Note</strong>: versions 3.2.9 and 3.2.10 are
-identical. Therefore, version 3.2.9 has been removed from
-	  the official distribution platform.
-""",
-"""    
 <dl>
-<dt>New syntax for <samp>DefineVariable</samp></dt>
-<dd>
-<p><samp>DefineVariable</samp> actually defines a new column in the
-database. The old syntax was:
-<pre>
-myvar = DefineVariable('myvar', x * y + 2, database)
-</pre>
-The new syntax is:
-<pre>
-myvar = database.DefineVariable('myvar', x * y + 2)
-</pre>
+
+<dt>Sampling of alternatives</dt>
+<dd>It is now possible to estimate logit, nested logit and cross-nested logit models using only a sample of alternatives. </dd>
+
+<dt>Assisted specification</dt>
+<dd>The assisted specification algorithm has been completely redesigned. The concept of <a href="sphinx/catalog.html#biogeme.catalog.Catalog"><samp>Catalog</samp></a> has been introduced to allow the modeler to suggest several versions of the model specification. The possible versions can either be fully enumerated (if their number allows for it) or can be algorithmically investigated. </dd>
+
+<dt>Pareto optimality</dt>
+<dd>It is possible to extract the Pareto optimal models from a list of estimation results.</dd>
+
+
+<dt>TOML file for the definition of the parameters</dt>
+<dd>A commented parameter file is now available to modify the various parameters of Biogeme. A  version of the file with default values of the parameters is created the first time Biogeme is executed in a directory. Note that parameters can still be defined directly from the Python script. It particularly simplifies the definitions of the parameters controlling the optimization algorithms. </dd>
+
+
+<dt>Explicit definition of the Beta parameters for simulation</dt>
+<dd>The <samp>simulate</samp> function now requires an explicit definition for the value of the parameters. The initial values can be retrieved from the <samp>get_beta_values</samp> function of a Biogeme expression. The estimated values can be retrieved from the <samp>getBetaValues</samp> function of the <samp>bioResult</samp> object.</dd>
+
+<dt>Use of the standard Python logging system</dt>
+<dd>The <samp>messaging</samp> module used to control the verbosity of Biogeme is now obsolete. Biogeme implements the standard Python logging system. If you do not know what it is, Biogeme includes a simple <a href="sphinx/logging.html"><samp>logging</samp></a> module, that provides simple access to the logging system.
 </dd>
-<dt>Likelihood ratio test</dt>
-<dd>It is now possible to perform a likelihood ratio test
-directly from the estimation results. <a href="sphinx/results.html#biogeme.results.bioResults.likelihood_ratio_test">See
-documentation here. </a> It relies on a function that can
-be used in more general context. <a href="sphinx/tools.html#biogeme.tools.likelihood_ratio_test"> See
-documentation here.<a></dd>
-<dt>Comparing several models</dt>
-<dd>It is now possible to compile the estimation results
-from several models into a single data frame. <a href="sphinx/results.html#biogeme.results.compileEstimationResults">See
-documentation here. </a> </dd>
-<dt>Automatic segmentation</dt>
-<dd>It is now possible to define a parameter such that it
-has a different value for each segment in the
-population. See the example <a href="examples/swissmetro/01logitBis.py"><samp>01logitBis.py</samp></a>.</dd>
-<dt>Simulation of panel data</dt>
-<dd>It is now possible to use Biogeme in simulation mode
-for panel data. See the following
-example: <a href="examples/swissmetro/13panel_simul.py"><samp>13panel_simul.py</samp></a>.</dd>
-<dt>Flattening panel data</dt>
-<dd>This new feature transforms a database organized in
-panel mode (that is, one row per observation) into a
-database organized in normal mode (that is, one row per
-individual, and the observations of each individual
-across columns). See documentation
-<a href="sphinx/database.html#biogeme.database.Database.generateFlatPanelDataframe">here</a> and <a href="sphinx/tools.html#biogeme.tools.flatten_database">here</a></dd>
-<dt>Covariance and correlation matrix of the nested and
-the cross-nested logit
-models</dt>
-<dd>These new functions calculate the covariance and the correlation matrix
-of the error terms of a cross-nested logit model from the
-estimated parameters. See
-documentation <a href="sphinx/tools.html#biogeme.tools.calculate_correlation">here</a>,
-<a href="sphinx/tools.html#biogeme.tools.correlation_nested">here</a>, <a href="sphinx/tools.html#biogeme.tools.covariance_cross_nested">here</a> and <a href="sphinx/tools.html#biogeme.tools.correlation_cross_nested">here</a>.</dd>
-<dt>Recycling estimation results</dt>
-<dd>It is now possible to skip estimation and read the
-estimation results from the pickle file by setting the
-parameter <samp>recycle=True</samp>. See the online
-documentation [<a href="sphinx/biogeme.html#biogeme.biogeme.BIOGEME.estimate">here</a>].</dd>
-<dt>The feature removing unused variables has been
-canceled.</dt>
-<dd>The parameters <samp>removeUnusedVariables</samp>
-and <samp>displayUsedVariables</samp> in the BIOGEME
-constructor have been removed.</dd>
-<dt>More functionalities for the mathematical expressions.</dt>
-<dd>The expressions have now been designed to also be
-available outside of the BIOGEME class. A detailed
-illustration of the functionalities is available
-[<a href="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.expressions.ipynb">Click
-here</a>].</dd>
-<dt>New syntax for the assisted specification algorithm</dt>
-<dd>The new syntax involves <samp>NamedTuple</samp> to make the code
-more readable. Refer to the examples, such as
-<a href="examples/assisted/optima.py"
-target="_blank"><samp>optima.py</samp></a>.</dd>
+
+<dt>Naming conventions</dt>
+<dd>Some object/functions/variables have been renamed to comply better with the common Python practice. For example, the exception <samp>biogemeError</samp>, defined in the <samp>exceptions</samp> module is now called <samp>BiogemeError</samp>. </dd>
+
+<dt>Removed functions from the <samp>database</samp> module</dt>
+<dd>The functions <samp>sumFromDatabase</samp> and <samp>sampleWithoutReplacement</samp> are no longer available.</dd>
+<dt>New expression: <samp>logzero</samp></dt>
+<dd><samp>logzero(x)</samp> returns the logarithm of x if x is not zero, and zero otherwise.</dd>
+
+
 
 </dl>
 """,
@@ -208,6 +168,7 @@ with version 3.
 
 install['Installing PandasBiogeme on MaxOSX'] = (
 """
+<p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version, but the overall procedure is similar. A new video is under preparation.</p>
 <p class='text-center'>
 <object width="425" height="344"><param name="movie" value="http://www.youtube.com/v/Swg1FUK-QaU&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/Swg1FUK-QaU&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></embed></object></p>
 """,
@@ -215,6 +176,7 @@ install['Installing PandasBiogeme on MaxOSX'] = (
 
 install['Installing PandasBiogeme on Windows'] = (
 """
+<p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version, but the overall procedure is similar. A new video is under preparation.</p>
 <p class=text-center>
 <object width="425" height="344"><param name="movie" value="http://www.youtube.com/v/1TlNrhS2rFo&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/1TlNrhS2rFo&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></embed></object>
 </p>
@@ -238,20 +200,80 @@ The command to install is simply
 pip install biogeme
 </pre>
 """,
+)
+
+install['CythonBiogeme on Github'] = (
 """
-Depending on your OS and the version of
-Python, pip will either directly install
-the executable (it is called a "wheel"), or attempt to compile the package from
-sources.
-""",
-"""
-In the latter case, it requires a proper
+A significant part of Biogeme is coded in C++ for the sake of computational efficiciency. Since version 3.2.11, this part of the code has been isolated in a separate package called <samp>cythonbiogeme</samp>. Binaries for Mac OSX and Windowns are available for versions of Python ranging from 3.7 to 3.11. If, for some reasons, the binary distribution for your system is not available, pip will attempt to compile the package from sources.
+In that case, it requires a proper
 environment to compile C++ code. In general, it is readily available on Linux, and
 MacOSX (if <a href="https://developer.apple.com/xcode/"
 target="_blank">Xcode</a> has been installed). It may be more
 complicated on Windows.
+""",
+"""
+The source code of CythonBiogeme is available on
+<a href="https://github.com/michelbierlaire/cythonbiogeme" target="_blank">GitHub</a>.
+There are several tutorials available on the internet
+such
+as <a href="https://guides.github.com/activities/hello-world/"
+target="_blank">this one</a> or
+<a href="https://youtu.be/HkdAHXoRtos"
+target="_blank">this one</a>.
+""",
+"""
+The command to install CythonBiogeme from source is
+<pre>pip install -ve .</pre>
+""",
+"""
+that must be executed in the directory containing the
+files setup.cfg and setup.py.
+""",
+"""
+Note that it requires a proper
+environment to compile C++ code. In general, it is readily available on Linux, and
+MacOSX (if <a href="https://developer.apple.com/xcode/"
+target="_blank">Xcode</a> has been
+installed).
+""",
+"""
+On Windows, here is one possibility.
+<ol>
+<li> Install <samp>mingw64</samp> from winlibs.com. Download the zip file, and unzip it into c:\mingw64.</li>
+<li>Add c:\mingw64\\bin in the Windows PATH. </li>
+<li>Edit the file <samp>setup.cfg</samp> and uncomment the lines dedicated to Windows:
+<p>
+<pre>
+[build]
+compiler=mingw32
+</pre>
+</p>
+and
+<p>
+<pre>
+extra_compile_args = -std=c++11 -DMS_WIN64
+extra_link_args = -static -std=c++11 -static-libstdc++ -static-libgcc -Bstatic -lpthread -mms-bitfields -mwindows -Wl,-Bstatic,--whole-archive -Wl,--no-whole-archive
+</pre>
+</p>
+<li> compilation The requires the static version of the libraries <samp>vcruntime140.dll</samp> and <samp>python3x.dll</samp>, where <samp>3x</samp> corresponds to your version of Python. To generate them, the following "hack" must be performed:
+<ul>
+<li>Locate the DLL files in your current environment. They may be located in <samp>AppData\Local\Programs\Python\Python3x\</samp>
+<li>The stalic versions of the libraries can be created using the following commands. Make sure to replace "3x" by your version of Python ("311", "310", "39", etc.):
+<p>
+<pre>
+gendef python3x.dll
+dlltool -D python3x.dll -d python3x.def -l libpython3x.a
+gendef vcruntime140.dll
+dlltool -D vcruntime140.dll -d vcruntime140.def -l libvcruntime140.a
+</pre>
+</p>
+</ul>
+</li>
+<li>Install using the following command:
+<p><pre>pip install -ve .</pre></p></li>
 """
 )
+
 
 install['Biogeme on Github'] = (
 """
@@ -270,23 +292,11 @@ The command to install Biogeme from source is
 """,
 """
 that must be executed in the directory containing the
-file setup.py.
+files setup.cfg and setup.py.
 """,
 """
-Note that it requires a proper
-environment to compile C++ code. In general, it is readily available on Linux, and
-MacOSX (if <a href="https://developer.apple.com/xcode/"
-target="_blank">Xcode</a> has been
-installed).
+Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment where Python is properly installed.installed).
 """,
-"""
-On Windows,
-<ol>
-<li>Install <a href="https://www.msys2.org">MSYS2</a>.</li>
-<li>Add c:\\msys64\\mingw64\\bin in the Windows PATH.</li>
-<li>Install using the following command:
-<pre>pip install --global-option build_ext --global-option --compiler=mingw32</pre></p></li>
-"""
 )
 
 install['Check the installation'] = (
@@ -304,8 +314,7 @@ Python 3.10.4 (main, Mar 31 2022, 03:38:35) [Clang 12.0.0 ] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import biogeme.version as ver
 >>> print(ver.getText())
-biogeme 3.2.9 [2022-08-19]
-Version entirely written in Python
+biogeme 3.2.11 [2023-04-19]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
@@ -315,6 +324,9 @@ Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédér
 
 documentation['My first choice model with PandasBiogeme'] = (
 """
+<p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version. A new video is under preparation.</p>
+<p class='text-center'>
+
 <p class='text-center'>
 <object width="425" height="344">
 <param name="movie" value="https://youtu.be/vS-Sg0htQP4"></param>
@@ -449,6 +461,14 @@ Cambridge, Ma (USA)
 """
 )
 
+resources['University of Sydney'] = (
+"""
+<a href="https://www.sydney.edu.au/business/our-research/institute-of-transport-and-logistics-studies/courses/discrete-choice-analysis.html"></a>
+""",
+"""
+The University of Sydney Business School offers a course taught by Prof. David Hensher, Prof. Michiel Bliemer, Prof. John Rose and Dr. Andrew Collins.
+"""
+    )
 resources['Other software packages'] = (
 """
 <dl>
@@ -485,6 +505,8 @@ Package Index</a> repository.
 """
 Previous webpages:
 <ul>
+<li><a href="https://transp-or.epfl.ch/biogeme-3.2.10/"
+target="blank">Webpage for Pandasbiogeme 3.2.10</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.8/"
 target="blank">Webpage for Pandasbiogeme 3.2.8</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.6/"
