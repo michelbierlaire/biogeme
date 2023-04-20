@@ -1,4 +1,4 @@
-"""Class that provides the function to the optimization allgorithm
+"""Class that provides the function to the optimization algorithm
 
 :author: Michel Bierlaire
 :date: Wed Nov 30 10:17:26 2022
