@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Index &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -40,20 +42,33 @@
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="catalog.html">Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="check_parameters.html">Check parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cnl.html">Cross-nested logit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration of a specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="default_parameters.html">Default parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="distributions.html">Distributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elementary_expressions.html">Elementary expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Welcome to Biogeme’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
-<li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="multiple_expressions.html">Multiple expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="negative_likelihood.html">Negative likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pareto.html">Pareto</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampling.html">Sampling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="specification.html">Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="toml.html">TOML parameter file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
@@ -72,8 +87,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Index</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -110,6 +125,7 @@
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  | <a href="#X"><strong>X</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
 <h2 id="_">_</h2>
@@ -121,12 +137,14 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.__div__">__div__() (biogeme.expressions.Expression method)</a>
 </li>
-      <li><a href="expressions.html#biogeme.expressions.Expression.__eq__">__eq__() (biogeme.expressions.Expression method)</a>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.__eq__">__eq__() (biogeme.configuration.Configuration method)</a>
 
       <ul>
+        <li><a href="expressions.html#biogeme.expressions.Expression.__eq__">(biogeme.expressions.Expression method)</a>
+</li>
         <li><a href="idmanager.html#biogeme.idmanager.IdManager.__eq__">(biogeme.idmanager.IdManager method)</a>
 </li>
-        <li><a href="vns.html#biogeme.vns.solutionClass.__eq__">(biogeme.vns.solutionClass method)</a>
+        <li><a href="pareto.html#biogeme.pareto.SetElement.__eq__">(biogeme.pareto.SetElement method)</a>
 </li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Expression.__ge__">__ge__() (biogeme.expressions.Expression method)</a>
@@ -136,25 +154,17 @@
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.__init__">__init__() (biogeme.algorithms.bioBounds method)</a>
 
       <ul>
-        <li><a href="assisted.html#biogeme.assisted.groupOfVariables.__init__">(biogeme.assisted.groupOfVariables method)</a>
+        <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.__init__">(biogeme.assisted.AssistedSpecification method)</a>
 </li>
-        <li><a href="assisted.html#biogeme.assisted.segmentation.__init__">(biogeme.assisted.segmentation method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.socioEconomic.__init__">(biogeme.assisted.socioEconomic method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.solution.__init__">(biogeme.assisted.solution method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.specificationProblem.__init__">(biogeme.assisted.specificationProblem method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.term.__init__">(biogeme.assisted.term method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.utility.__init__">(biogeme.assisted.utility method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.variable.__init__">(biogeme.assisted.variable method)</a>
+        <li><a href="assisted.html#biogeme.assisted.ParetoPostProcessing.__init__">(biogeme.assisted.ParetoPostProcessing method)</a>
 </li>
         <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.__init__">(biogeme.biogeme.BIOGEME method)</a>
 </li>
-        <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.__init__">(biogeme.biogeme.negLikelihood method)</a>
+        <li><a href="catalog.html#biogeme.catalog.Catalog.__init__">(biogeme.catalog.Catalog method)</a>
+</li>
+        <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog.__init__">(biogeme.catalog.SynchronizedCatalog method)</a>
+</li>
+        <li><a href="configuration.html#biogeme.configuration.Configuration.__init__">(biogeme.configuration.Configuration method)</a>
 </li>
         <li><a href="database.html#biogeme.database.Database.__init__">(biogeme.database.Database method)</a>
 </li>
@@ -208,6 +218,8 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.LogLogit.__init__">(biogeme.expressions.LogLogit method)</a>
 </li>
+        <li><a href="expressions.html#biogeme.expressions.logzero.__init__">(biogeme.expressions.logzero method)</a>
+</li>
         <li><a href="expressions.html#biogeme.expressions.Minus.__init__">(biogeme.expressions.Minus method)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.MonteCarlo.__init__">(biogeme.expressions.MonteCarlo method)</a>
@@ -226,6 +238,8 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.RandomVariable.__init__">(biogeme.expressions.RandomVariable method)</a>
 </li>
+        <li><a href="expressions.html#biogeme.expressions.SelectedExpressionsIterator.__init__">(biogeme.expressions.SelectedExpressionsIterator method)</a>
+</li>
         <li><a href="expressions.html#biogeme.expressions.Times.__init__">(biogeme.expressions.Times method)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.UnaryMinus.__init__">(biogeme.expressions.UnaryMinus method)</a>
@@ -236,7 +250,15 @@
 </li>
         <li><a href="idmanager.html#biogeme.idmanager.IdManager.__init__">(biogeme.idmanager.IdManager method)</a>
 </li>
-        <li><a href="messaging.html#biogeme.messaging.bioMessage.__init__">(biogeme.messaging.bioMessage method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.__init__">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+        <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.__init__">(biogeme.negative_likelihood.NegativeLikelihood method)</a>
+</li>
+        <li><a href="parameters.html#biogeme.parameters.Parameters.__init__">(biogeme.parameters.Parameters method)</a>
+</li>
+        <li><a href="pareto.html#biogeme.pareto.Pareto.__init__">(biogeme.pareto.Pareto method)</a>
+</li>
+        <li><a href="pareto.html#biogeme.pareto.SetElement.__init__">(biogeme.pareto.SetElement method)</a>
 </li>
         <li><a href="results.html#biogeme.results.beta.__init__">(biogeme.results.beta method)</a>
 </li>
@@ -244,11 +266,23 @@
 </li>
         <li><a href="results.html#biogeme.results.rawResults.__init__">(biogeme.results.rawResults method)</a>
 </li>
-        <li><a href="vns.html#biogeme.vns.operatorsManagement.__init__">(biogeme.vns.operatorsManagement method)</a>
+        <li><a href="segmentation.html#biogeme.segmentation.DiscreteSegmentationTuple.__init__">(biogeme.segmentation.DiscreteSegmentationTuple method)</a>
 </li>
-        <li><a href="vns.html#biogeme.vns.paretoClass.__init__">(biogeme.vns.paretoClass method)</a>
+        <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation.__init__">(biogeme.segmentation.OneSegmentation method)</a>
 </li>
-        <li><a href="vns.html#biogeme.vns.solutionClass.__init__">(biogeme.vns.solutionClass method)</a>
+        <li><a href="segmentation.html#biogeme.segmentation.Segmentation.__init__">(biogeme.segmentation.Segmentation method)</a>
+</li>
+        <li><a href="specification.html#biogeme.specification.Specification.__init__">(biogeme.specification.Specification method)</a>
+</li>
+        <li><a href="toml.html#biogeme.toml.Toml.__init__">(biogeme.toml.Toml method)</a>
+</li>
+        <li><a href="tools.html#biogeme.tools.ModelNames.__init__">(biogeme.tools.ModelNames method)</a>
+</li>
+        <li><a href="vns.html#biogeme.vns.OperatorsManagement.__init__">(biogeme.vns.OperatorsManagement method)</a>
+</li>
+        <li><a href="vns.html#biogeme.vns.ParetoClass.__init__">(biogeme.vns.ParetoClass method)</a>
+</li>
+        <li><a href="vns.html#biogeme.vns.ProblemClass.__init__">(biogeme.vns.ProblemClass method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -289,46 +323,30 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.activate">activate() (biogeme.assisted.groupOfVariables method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.active">active (biogeme.assisted.groupOfVariables attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.socioEconomic.active">(biogeme.assisted.socioEconomic attribute)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.variable.active">(biogeme.assisted.variable attribute)</a>
-</li>
-      </ul></li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.activity">activity() (biogeme.algorithms.bioBounds method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.add">add() (biogeme.vns.paretoClass method)</a>
-</li>
-      <li><a href="database.html#biogeme.database.Database.addColumn">addColumn() (biogeme.database.Database method)</a>
-</li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.addMessage">addMessage() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.algoParameters">algoParameters (biogeme.biogeme.BIOGEME attribute)</a>
-</li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.algorithm">algorithm (biogeme.biogeme.BIOGEME attribute)</a>
-</li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.allMessages">allMessages() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.alwaysActive">alwaysActive (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.add">add() (biogeme.pareto.Pareto method)</a>
 
       <ul>
-        <li><a href="assisted.html#biogeme.assisted.segmentation.alwaysActive">(biogeme.assisted.segmentation attribute)</a>
+        <li><a href="vns.html#biogeme.vns.ParetoClass.add">(biogeme.vns.ParetoClass method)</a>
 </li>
       </ul></li>
+      <li><a href="database.html#biogeme.database.Database.addColumn">addColumn() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="results.html#biogeme.results.AIC_BIC_dimension">AIC_BIC_dimension() (in module biogeme.results)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.algorithm_name">algorithm_name (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="specification.html#biogeme.specification.Specification.all_results">all_results (biogeme.specification.Specification attribute)</a>
+</li>
       <li><a href="expressions.html#biogeme.expressions.And">And (class in biogeme.expressions)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.argument_warning">argument_warning() (biogeme.biogeme.BIOGEME method)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification">AssistedSpecification (class in biogeme.assisted)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.applyOperator">applyOperator() (biogeme.assisted.specificationProblem method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.archive">archive (biogeme.assisted.specificationProblem attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.TermTuple.attribute">attribute (biogeme.assisted.TermTuple attribute)</a>
-</li>
       <li><a href="expressions.html#biogeme.expressions.ComparisonOperator.audit">audit() (biogeme.expressions.ComparisonOperator method)</a>
 
       <ul>
@@ -349,9 +367,7 @@
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.LogLogit.av">av (biogeme.expressions.LogLogit attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.availability">availability (biogeme.assisted.specificationProblem attribute)</a>
-</li>
-      <li><a href="vns.html#biogeme.vns.operatorsManagement.available">available (biogeme.vns.operatorsManagement attribute)</a>
+      <li><a href="vns.html#biogeme.vns.OperatorsManagement.available">available (biogeme.vns.OperatorsManagement attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -359,13 +375,27 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.batch">batch (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.batch">batch (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.bestIteration">bestIteration (biogeme.biogeme.BIOGEME attribute)</a>
+</li>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression.BETA">BETA (biogeme.elementary_expressions.TypeOfElementaryExpression attribute)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Beta">Beta (class in biogeme.expressions)</a>
 </li>
       <li><a href="results.html#biogeme.results.beta">beta (class in biogeme.results)</a>
+</li>
+      <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation.beta_code">beta_code() (biogeme.segmentation.OneSegmentation method)</a>
+
+      <ul>
+        <li><a href="segmentation.html#biogeme.segmentation.Segmentation.beta_code">(biogeme.segmentation.Segmentation method)</a>
+</li>
+      </ul></li>
+      <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation.beta_expression">beta_expression() (biogeme.segmentation.OneSegmentation method)</a>
+</li>
+      <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation.beta_name">beta_name() (biogeme.segmentation.OneSegmentation method)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.beta_values_dict_to_list">beta_values_dict_to_list() (biogeme.biogeme.BIOGEME method)</a>
 </li>
       <li><a href="results.html#biogeme.results.rawResults.betaNames">betaNames (biogeme.results.rawResults attribute)</a>
 </li>
@@ -389,7 +419,7 @@
 </li>
       <li><a href="results.html#biogeme.results.rawResults.bhhh">bhhh (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.bhhhv">bhhhv (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.bhhhv">bhhhv (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.BinaryOperator">BinaryOperator (class in biogeme.expressions)</a>
 </li>
@@ -423,10 +453,45 @@
 </li>
       </ul></li>
       <li>
+    biogeme.catalog
+
+      <ul>
+        <li><a href="catalog.html#module-biogeme.catalog">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.check_parameters
+
+      <ul>
+        <li><a href="check_parameters.html#module-biogeme.check_parameters">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.cnl
+
+      <ul>
+        <li><a href="cnl.html#module-biogeme.cnl">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.configuration
+
+      <ul>
+        <li><a href="configuration.html#module-biogeme.configuration">module</a>
+</li>
+      </ul></li>
+      <li>
     biogeme.database
 
       <ul>
         <li><a href="database.html#module-biogeme.database">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.default_parameters
+
+      <ul>
+        <li><a href="default_parameters.html#module-biogeme.default_parameters">module</a>
 </li>
       </ul></li>
       <li>
@@ -444,6 +509,13 @@
 </li>
       </ul></li>
       <li>
+    biogeme.elementary_expressions
+
+      <ul>
+        <li><a href="elementary_expressions.html#module-biogeme.elementary_expressions">module</a>
+</li>
+      </ul></li>
+      <li>
     biogeme.exceptions
 
       <ul>
@@ -457,6 +529,8 @@
         <li><a href="expressions.html#module-biogeme.expressions">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     biogeme.filenames
 
@@ -472,19 +546,17 @@
 </li>
       </ul></li>
       <li>
+    biogeme.logging
+
+      <ul>
+        <li><a href="logging.html#module-biogeme.logging">module</a>
+</li>
+      </ul></li>
+      <li>
     biogeme.loglikelihood
 
       <ul>
         <li><a href="loglikelihood.html#module-biogeme.loglikelihood">module</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    biogeme.messaging
-
-      <ul>
-        <li><a href="messaging.html#module-biogeme.messaging">module</a>
 </li>
       </ul></li>
       <li>
@@ -495,10 +567,38 @@
 </li>
       </ul></li>
       <li>
+    biogeme.multiple_expressions
+
+      <ul>
+        <li><a href="multiple_expressions.html#module-biogeme.multiple_expressions">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.negative_likelihood
+
+      <ul>
+        <li><a href="negative_likelihood.html#module-biogeme.negative_likelihood">module</a>
+</li>
+      </ul></li>
+      <li>
     biogeme.optimization
 
       <ul>
         <li><a href="optimization.html#module-biogeme.optimization">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.parameters
+
+      <ul>
+        <li><a href="parameters.html#module-biogeme.parameters">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.pareto
+
+      <ul>
+        <li><a href="pareto.html#module-biogeme.pareto">module</a>
 </li>
       </ul></li>
       <li>
@@ -509,6 +609,13 @@
 </li>
       </ul></li>
       <li>
+    biogeme.sampling
+
+      <ul>
+        <li><a href="sampling.html#module-biogeme.sampling">module</a>
+</li>
+      </ul></li>
+      <li>
     biogeme.segmentation
 
       <ul>
@@ -516,10 +623,17 @@
 </li>
       </ul></li>
       <li>
-    biogeme.singleton
+    biogeme.specification
 
       <ul>
-        <li><a href="singleton.html#module-biogeme.singleton">module</a>
+        <li><a href="specification.html#module-biogeme.specification">module</a>
+</li>
+      </ul></li>
+      <li>
+    biogeme.toml
+
+      <ul>
+        <li><a href="toml.html#module-biogeme.toml">module</a>
 </li>
       </ul></li>
       <li>
@@ -543,13 +657,11 @@
         <li><a href="vns.html#module-biogeme.vns">module</a>
 </li>
       </ul></li>
-      <li><a href="exceptions.html#biogeme.exceptions.biogemeError">biogemeError</a>
+      <li><a href="exceptions.html#biogeme.exceptions.BiogemeError">BiogemeError</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.bioLinearUtility">bioLinearUtility (class in biogeme.expressions)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.bioMax">bioMax (class in biogeme.expressions)</a>
-</li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage">bioMessage (class in biogeme.messaging)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.bioMin">bioMin (class in biogeme.expressions)</a>
 </li>
@@ -578,13 +690,7 @@
       <li><a href="results.html#biogeme.results.beta.bootstrap_tTest">bootstrap_tTest (biogeme.results.beta attribute)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.bounds">bounds (biogeme.algorithms.bioBounds attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.term.bounds">(biogeme.assisted.term attribute)</a>
 </li>
-        <li><a href="assisted.html#biogeme.assisted.TermTuple.bounds">(biogeme.assisted.TermTuple attribute)</a>
-</li>
-      </ul></li>
       <li><a href="models.html#biogeme.models.boxcox">boxcox() (in module biogeme.models)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.breakpoints">breakpoints() (biogeme.algorithms.bioBounds method)</a>
@@ -599,7 +705,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="results.html#biogeme.results.calcPValue">calcPValue() (in module biogeme.results)</a>
 </li>
-      <li><a href="tools.html#biogeme.tools.calculate_correlation">calculate_correlation() (in module biogeme.tools)</a>
+      <li><a href="results.html#biogeme.results.calculate_correlation">calculate_correlation() (in module biogeme.results)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.calculateInitLikelihood">calculateInitLikelihood() (biogeme.biogeme.BIOGEME method)</a>
 </li>
@@ -611,11 +717,19 @@
 </li>
       <li><a href="tools.html#biogeme.tools.calculatePrimeNumbers">calculatePrimeNumbers() (in module biogeme.tools)</a>
 </li>
+      <li><a href="configuration.html#biogeme.configuration.SelectionTuple.catalog">catalog (biogeme.configuration.SelectionTuple attribute)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog">Catalog (class in biogeme.catalog)</a>
+</li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.CatalogItem.catalog_name">catalog_name (biogeme.multiple_expressions.CatalogItem attribute)</a>
+</li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.catalog_size">catalog_size() (biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.CatalogItem">CatalogItem (class in biogeme.multiple_expressions)</a>
+</li>
       <li><a href="algorithms.html#biogeme.algorithms.cauchyNewtonDogleg">cauchyNewtonDogleg() (in module biogeme.algorithms)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.solution.causeInvalidity">causeInvalidity (biogeme.assisted.solution attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeGeneric">changeGeneric() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="vns.html#biogeme.vns.ParetoClass.change_neighborhood">change_neighborhood() (biogeme.vns.ParetoClass method)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.changeInitValues">changeInitValues() (biogeme.biogeme.BIOGEME method)</a>
 
@@ -626,18 +740,12 @@
 </li>
         <li><a href="idmanager.html#biogeme.idmanager.IdManager.changeInitValues">(biogeme.idmanager.IdManager method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.changeInitValues">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
       </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeLinearity">changeLinearity() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple.check">check (biogeme.default_parameters.ParameterTuple attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeModel">changeModel() (biogeme.assisted.specificationProblem method)</a>
-</li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.changeNeighborhood">changeNeighborhood() (biogeme.vns.paretoClass method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeNonlinearity">changeNonlinearity() (biogeme.assisted.specificationProblem method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeSegmentation">changeSegmentation() (biogeme.assisted.specificationProblem method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.changeVariables">changeVariables() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="check_parameters.html#biogeme.check_parameters.check_algo_name">check_algo_name() (in module biogeme.check_parameters)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.bioDraws.check_draws">check_draws() (biogeme.expressions.bioDraws method)</a>
 
@@ -645,6 +753,8 @@
         <li><a href="expressions.html#biogeme.expressions.Expression.check_draws">(biogeme.expressions.Expression method)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.MonteCarlo.check_draws">(biogeme.expressions.MonteCarlo method)</a>
+</li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.check_draws">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Expression.check_panel_trajectory">check_panel_trajectory() (biogeme.expressions.Expression method)</a>
@@ -654,7 +764,11 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.Variable.check_panel_trajectory">(biogeme.expressions.Variable method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.check_panel_trajectory">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
       </ul></li>
+      <li><a href="parameters.html#biogeme.parameters.Parameters.check_parameter_value">check_parameter_value() (biogeme.parameters.Parameters static method)</a>
+</li>
       <li><a href="expressions.html#biogeme.expressions.Expression.check_rv">check_rv() (biogeme.expressions.Expression method)</a>
 
       <ul>
@@ -662,9 +776,9 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.RandomVariable.check_rv">(biogeme.expressions.RandomVariable method)</a>
 </li>
-      </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.checkAvailability">checkAvailability() (biogeme.assisted.specificationProblem method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.check_rv">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
+      </ul></li>
       <li><a href="database.html#biogeme.database.Database.checkAvailabilityOfChosenAlt">checkAvailabilityOfChosenAlt() (biogeme.database.Database method)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.checkDerivatives">checkDerivatives() (biogeme.biogeme.BIOGEME method)</a>
@@ -673,61 +787,59 @@
         <li><a href="tools.html#biogeme.tools.checkDerivatives">(in module biogeme.tools)</a>
 </li>
       </ul></li>
-      <li><a href="models.html#biogeme.models.checkValidityCNL">checkValidityCNL() (in module biogeme.models)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#biogeme.models.checkValidityCNL">checkValidityCNL() (in module biogeme.models)</a>
+</li>
       <li><a href="models.html#biogeme.models.checkValidityNestedLogit">checkValidityNestedLogit() (in module biogeme.models)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.UnaryOperator.child">child (biogeme.expressions.UnaryOperator attribute)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.children">children (biogeme.expressions.Expression attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.choice">choice (biogeme.assisted.specificationProblem attribute)</a>
-
-      <ul>
-        <li><a href="expressions.html#biogeme.expressions.LogLogit.choice">(biogeme.expressions.LogLogit attribute)</a>
+      <li><a href="expressions.html#biogeme.expressions.LogLogit.choice">choice (biogeme.expressions.LogLogit attribute)</a>
 </li>
-      </ul></li>
       <li><a href="database.html#biogeme.database.Database.choiceAvailabilityStatistics">choiceAvailabilityStatistics() (biogeme.database.Database method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.clone">clone() (biogeme.assisted.specificationProblem method)</a>
 </li>
       <li><a href="models.html#biogeme.models.cnl">cnl() (in module biogeme.models)</a>
 </li>
       <li><a href="models.html#biogeme.models.cnl_avail">cnl_avail() (in module biogeme.models)</a>
 </li>
+      <li><a href="cnl.html#biogeme.cnl.cnl_CDF">cnl_CDF() (in module biogeme.cnl)</a>
+</li>
+      <li><a href="cnl.html#biogeme.cnl.cnl_G">cnl_G() (in module biogeme.cnl)</a>
+</li>
       <li><a href="models.html#biogeme.models.cnlmu">cnlmu() (in module biogeme.models)</a>
 </li>
-      <li><a href="segmentation.html#biogeme.segmentation.code_to_combine_segmented_expressions">code_to_combine_segmented_expressions() (in module biogeme.segmentation)</a>
-</li>
-      <li><a href="segmentation.html#biogeme.segmentation.code_to_segment_parameter">code_to_segment_parameter() (in module biogeme.segmentation)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.term.coef_names">coef_names (biogeme.assisted.term attribute)</a>
-</li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.columnForBatchSamplingWeights">columnForBatchSamplingWeights (biogeme.biogeme.BIOGEME attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.combinatorial">combinatorial (biogeme.assisted.segmentation attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.SegmentedParameterTuple.combinatorial">(biogeme.assisted.SegmentedParameterTuple attribute)</a>
-</li>
-      </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.socioEconomic.combine">combine() (biogeme.assisted.socioEconomic method)</a>
-</li>
-      <li><a href="segmentation.html#biogeme.segmentation.combine_segmented_expressions">combine_segmented_expressions() (in module biogeme.segmentation)</a>
-</li>
       <li><a href="expressions.html#biogeme.expressions.ComparisonOperator">ComparisonOperator (class in biogeme.expressions)</a>
+</li>
+      <li><a href="results.html#biogeme.results.compile_results_in_directory">compile_results_in_directory() (in module biogeme.results)</a>
 </li>
       <li><a href="results.html#biogeme.results.compileEstimationResults">compileEstimationResults() (in module biogeme.results)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.confidenceIntervals">confidenceIntervals() (biogeme.biogeme.BIOGEME method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.considered">considered (biogeme.vns.paretoClass attribute)</a>
+      <li><a href="specification.html#biogeme.specification.Specification.config_id">config_id (biogeme.specification.Specification property)</a>
 </li>
-      <li><a href="tools.html#biogeme.tools.correlation_cross_nested">correlation_cross_nested() (in module biogeme.tools)</a>
+      <li><a href="configuration.html#biogeme.configuration.Configuration">Configuration (class in biogeme.configuration)</a>
 </li>
-      <li><a href="tools.html#biogeme.tools.correlation_nested">correlation_nested() (in module biogeme.tools)</a>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.configure_catalogs">configure_catalogs() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="expressions.html#biogeme.expressions.Expression.configure_catalogs">(biogeme.expressions.Expression method)</a>
+</li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.configure_catalogs">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
+      <li><a href="specification.html#biogeme.specification.Specification.configure_expression">configure_expression() (biogeme.specification.Specification method)</a>
+</li>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.considered">considered (biogeme.pareto.Pareto attribute)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.Expression.contains_catalog">contains_catalog() (biogeme.expressions.Expression method)</a>
+</li>
+      <li><a href="results.html#biogeme.results.correlation_cross_nested">correlation_cross_nested() (in module biogeme.results)</a>
+</li>
+      <li><a href="results.html#biogeme.results.correlation_nested">correlation_nested() (in module biogeme.results)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.count">count() (biogeme.database.Database method)</a>
 </li>
@@ -738,19 +850,25 @@
       <ul>
         <li><a href="expressions.html#biogeme.expressions.PanelLikelihoodTrajectory.countPanelTrajectoryExpressions">(biogeme.expressions.PanelLikelihoodTrajectory method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.countPanelTrajectoryExpressions">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
       </ul></li>
-      <li><a href="tools.html#biogeme.tools.covariance_cross_nested">covariance_cross_nested() (in module biogeme.tools)</a>
+      <li><a href="results.html#biogeme.results.covariance_cross_nested">covariance_cross_nested() (in module biogeme.results)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.cpp">cpp (biogeme.expressions.Expression attribute)</a>
 </li>
-      <li><a href="segmentation.html#biogeme.segmentation.create_segmented_parameter">create_segmented_parameter() (in module biogeme.segmentation)</a>
-</li>
       <li><a href="expressions.html#biogeme.expressions.Expression.createFunction">createFunction() (biogeme.expressions.Expression method)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.createLog">createLog() (biogeme.messaging.bioMessage method)</a>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.current_configuration">current_configuration() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog.current_configuration">(biogeme.catalog.SynchronizedCatalog method)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.createLogFile">createLogFile() (biogeme.biogeme.BIOGEME method)</a>
+        <li><a href="expressions.html#biogeme.expressions.Expression.current_configuration">(biogeme.expressions.Expression method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.current_configuration">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -763,27 +881,25 @@
         <li><a href="results.html#biogeme.results.bioResults.data">(biogeme.results.bioResults attribute)</a>
 </li>
       </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.database">database (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.database">database (biogeme.biogeme.BIOGEME attribute)</a>
 
       <ul>
-        <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.database">(biogeme.biogeme.BIOGEME attribute)</a>
+        <li><a href="specification.html#biogeme.specification.Specification.database">(biogeme.specification.Specification attribute)</a>
 </li>
       </ul></li>
       <li><a href="database.html#biogeme.database.Database">Database (class in biogeme.database)</a>
 </li>
       <li><a href="results.html#biogeme.results.rawResults.dataname">dataname (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.debug">debug() (biogeme.messaging.bioMessage method)</a>
+      <li><a href="assisted.html#biogeme.assisted.decrease_configuration">decrease_configuration() (in module biogeme.assisted)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.solution.decisions">decisions (biogeme.assisted.solution attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.specificationProblem.decisions">(biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="vns.html#biogeme.vns.OperatorsManagement.decrease_score_last_operator">decrease_score_last_operator() (biogeme.vns.OperatorsManagement method)</a>
 </li>
-      </ul></li>
-      <li><a href="vns.html#biogeme.vns.operatorsManagement.decreaseScore">decreaseScore() (biogeme.vns.operatorsManagement method)</a>
+      <li><a href="assisted.html#biogeme.assisted.decrement_several_catalogs">decrement_several_catalogs() (in module biogeme.assisted)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.decreaseSegmentation">decreaseSegmentation() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple.default">default (biogeme.default_parameters.ParameterTuple attribute)</a>
+</li>
+      <li><a href="specification.html#biogeme.specification.Specification.default_specification">default_specification() (biogeme.specification.Specification class method)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.DefineVariable">DefineVariable (class in biogeme.expressions)</a>
 </li>
@@ -791,73 +907,49 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.Derive">Derive (class in biogeme.expressions)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.describe">describe() (biogeme.assisted.segmentation method)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.specificationProblem.describe">(biogeme.assisted.specificationProblem method)</a>
+      <li><a href="specification.html#biogeme.specification.Specification.describe">describe() (biogeme.specification.Specification method)</a>
 </li>
-        <li><a href="assisted.html#biogeme.assisted.term.describe">(biogeme.assisted.term method)</a>
-</li>
-        <li><a href="vns.html#biogeme.vns.problemClass.describe">(biogeme.vns.problemClass method)</a>
-</li>
-      </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.describeCurrentModel">describeCurrentModel() (biogeme.assisted.specificationProblem method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.describeHtml">describeHtml() (biogeme.assisted.specificationProblem method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.solution.description">description (biogeme.assisted.solution attribute)</a>
+      <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple.description">description (biogeme.default_parameters.ParameterTuple attribute)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.descriptionOfNativeDraws">descriptionOfNativeDraws() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.detailed">detailed() (biogeme.messaging.bioMessage method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.SegmentedParameterTuple.dict">dict (biogeme.assisted.SegmentedParameterTuple attribute)</a>
-</li>
-      <li><a href="expressions.html#biogeme.expressions.Beta.dictOfBetas">dictOfBetas() (biogeme.expressions.Beta method)</a>
+      <li><a href="expressions.html#biogeme.expressions.Expression.dict_of_catalogs">dict_of_catalogs() (biogeme.expressions.Expression method)</a>
 
       <ul>
-        <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.dictOfBetas">(biogeme.expressions.bioLinearUtility method)</a>
-</li>
-        <li><a href="expressions.html#biogeme.expressions.Expression.dictOfBetas">(biogeme.expressions.Expression method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.dict_of_catalogs">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
-      <li><a href="expressions.html#biogeme.expressions.bioDraws.dictOfDraws">dictOfDraws() (biogeme.expressions.bioDraws method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="expressions.html#biogeme.expressions.Beta.dict_of_elementary_expression">dict_of_elementary_expression() (biogeme.expressions.Beta method)</a>
 
       <ul>
-        <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.dictOfDraws">(biogeme.expressions.bioLinearUtility method)</a>
+        <li><a href="expressions.html#biogeme.expressions.bioDraws.dict_of_elementary_expression">(biogeme.expressions.bioDraws method)</a>
 </li>
-        <li><a href="expressions.html#biogeme.expressions.Expression.dictOfDraws">(biogeme.expressions.Expression method)</a>
+        <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.dict_of_elementary_expression">(biogeme.expressions.bioLinearUtility method)</a>
+</li>
+        <li><a href="expressions.html#biogeme.expressions.Expression.dict_of_elementary_expression">(biogeme.expressions.Expression method)</a>
+</li>
+        <li><a href="expressions.html#biogeme.expressions.RandomVariable.dict_of_elementary_expression">(biogeme.expressions.RandomVariable method)</a>
+</li>
+        <li><a href="expressions.html#biogeme.expressions.Variable.dict_of_elementary_expression">(biogeme.expressions.Variable method)</a>
+</li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.dict_of_elementary_expression">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Elem.dictOfExpressions">dictOfExpressions (biogeme.expressions.Elem attribute)</a>
 </li>
-      <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.dictOfRandomVariables">dictOfRandomVariables() (biogeme.expressions.bioLinearUtility method)</a>
-
-      <ul>
-        <li><a href="expressions.html#biogeme.expressions.Expression.dictOfRandomVariables">(biogeme.expressions.Expression method)</a>
-</li>
-        <li><a href="expressions.html#biogeme.expressions.RandomVariable.dictOfRandomVariables">(biogeme.expressions.RandomVariable method)</a>
-</li>
-      </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.dictOfSocioEco">dictOfSocioEco (biogeme.assisted.segmentation attribute)</a>
-</li>
-      <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.dictOfVariables">dictOfVariables() (biogeme.expressions.bioLinearUtility method)</a>
-
-      <ul>
-        <li><a href="expressions.html#biogeme.expressions.Expression.dictOfVariables">(biogeme.expressions.Expression method)</a>
-</li>
-        <li><a href="expressions.html#biogeme.expressions.Variable.dictOfVariables">(biogeme.expressions.Variable method)</a>
-</li>
-      </ul></li>
       <li><a href="segmentation.html#biogeme.segmentation.DiscreteSegmentationTuple">DiscreteSegmentationTuple (class in biogeme.segmentation)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Divide">Divide (class in biogeme.expressions)</a>
 </li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.dogleg">dogleg (biogeme.biogeme.BIOGEME property)</a>
+</li>
       <li><a href="algorithms.html#biogeme.algorithms.dogleg">dogleg() (in module biogeme.algorithms)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.solutionClass.dominates">dominates() (biogeme.vns.solutionClass method)</a>
+      <li><a href="pareto.html#biogeme.pareto.SetElement.dominates">dominates() (biogeme.pareto.SetElement method)</a>
+</li>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression.DRAWS">DRAWS (biogeme.elementary_expressions.TypeOfElementaryExpression attribute)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.drawsProcessingTime">drawsProcessingTime (biogeme.biogeme.BIOGEME attribute)</a>
 
@@ -865,9 +957,13 @@
         <li><a href="results.html#biogeme.results.rawResults.drawsProcessingTime">(biogeme.results.rawResults attribute)</a>
 </li>
       </ul></li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.dump">dump() (biogeme.vns.paretoClass method)</a>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.dump">dump() (biogeme.pareto.Pareto method)</a>
+</li>
+      <li><a href="toml.html#biogeme.toml.Toml.dump_file">dump_file() (biogeme.toml.Toml method)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.dumpOnFile">dumpOnFile() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="exceptions.html#biogeme.exceptions.DuplicateError">DuplicateError</a>
 </li>
   </ul></td>
 </tr></table>
@@ -884,23 +980,29 @@
       <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple">ElementsTuple (class in biogeme.idmanager)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.embedExpression">embedExpression() (biogeme.expressions.Expression method)</a>
+
+      <ul>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.embedExpression">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.enlarging_factor">enlarging_factor (biogeme.biogeme.BIOGEME property)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Equal">Equal (class in biogeme.expressions)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.estimate">estimate() (biogeme.biogeme.BIOGEME method)</a>
+
+      <ul>
+        <li><a href="specification.html#biogeme.specification.Specification.estimate">(biogeme.specification.Specification method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.estimate_catalog">estimate_catalog() (biogeme.biogeme.BIOGEME method)</a>
 </li>
       <li><a href="database.html#biogeme.database.EstimationValidation.estimation">estimation (biogeme.database.EstimationValidation attribute)</a>
 </li>
       <li><a href="database.html#biogeme.database.EstimationValidation">EstimationValidation (class in biogeme.database)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.evaluate">evaluate() (biogeme.assisted.specificationProblem method)</a>
-
-      <ul>
-        <li><a href="vns.html#biogeme.vns.problemClass.evaluate">(biogeme.vns.problemClass method)</a>
-</li>
-      </ul></li>
       <li><a href="database.html#biogeme.database.Database.excludedData">excludedData (biogeme.database.Database attribute)</a>
 
       <ul>
@@ -909,10 +1011,10 @@
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.exp">exp (class in biogeme.expressions)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.socioEconomic.expression">expression (biogeme.assisted.socioEconomic attribute)</a>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.NamedExpression.expression">expression (biogeme.multiple_expressions.NamedExpression attribute)</a>
 
       <ul>
-        <li><a href="assisted.html#biogeme.assisted.variable.expression">(biogeme.assisted.variable attribute)</a>
+        <li><a href="specification.html#biogeme.specification.Specification.expression">(biogeme.specification.Specification attribute)</a>
 </li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Expression">Expression (class in biogeme.expressions)</a>
@@ -930,7 +1032,7 @@
       <li><a href="algorithms.html#biogeme.algorithms.functionToMinimize.f">f() (biogeme.algorithms.functionToMinimize method)</a>
 
       <ul>
-        <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.f">(biogeme.biogeme.negLikelihood method)</a>
+        <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.f">(biogeme.negative_likelihood.NegativeLikelihood method)</a>
 </li>
       </ul></li>
       <li><a href="results.html#biogeme.results.rawResults.F12FileName">F12FileName (biogeme.results.rawResults attribute)</a>
@@ -938,19 +1040,19 @@
       <li><a href="algorithms.html#biogeme.algorithms.functionToMinimize.f_g">f_g() (biogeme.algorithms.functionToMinimize method)</a>
 
       <ul>
-        <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.f_g">(biogeme.biogeme.negLikelihood method)</a>
+        <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.f_g">(biogeme.negative_likelihood.NegativeLikelihood method)</a>
 </li>
       </ul></li>
       <li><a href="algorithms.html#biogeme.algorithms.functionToMinimize.f_g_bhhh">f_g_bhhh() (biogeme.algorithms.functionToMinimize method)</a>
 
       <ul>
-        <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.f_g_bhhh">(biogeme.biogeme.negLikelihood method)</a>
+        <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.f_g_bhhh">(biogeme.negative_likelihood.NegativeLikelihood method)</a>
 </li>
       </ul></li>
       <li><a href="algorithms.html#biogeme.algorithms.functionToMinimize.f_g_h">f_g_h() (biogeme.algorithms.functionToMinimize method)</a>
 
       <ul>
-        <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.f_g_h">(biogeme.biogeme.negLikelihood method)</a>
+        <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.f_g_h">(biogeme.negative_likelihood.NegativeLikelihood method)</a>
 </li>
       </ul></li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.feasible">feasible() (biogeme.algorithms.bioBounds method)</a>
@@ -961,27 +1063,45 @@
 </li>
       <li><a href="tools.html#biogeme.tools.findiff_H">findiff_H() (in module biogeme.tools)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="expressions.html#biogeme.expressions.Beta.fix_betas">fix_betas() (biogeme.expressions.Beta method)</a>
 
       <ul>
         <li><a href="expressions.html#biogeme.expressions.Expression.fix_betas">(biogeme.expressions.Expression method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.fix_betas">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
       </ul></li>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression.FIXED_BETA">FIXED_BETA (biogeme.elementary_expressions.TypeOfElementaryExpression attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="expressions.html#biogeme.expressions.Expression.fixedBetaValues">fixedBetaValues (biogeme.expressions.Expression attribute)</a>
 </li>
       <li><a href="tools.html#biogeme.tools.flatten_database">flatten_database() (in module biogeme.tools)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.forbidGeneric">forbidGeneric() (biogeme.assisted.groupOfVariables method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.forceActive">forceActive() (biogeme.assisted.groupOfVariables method)</a>
-</li>
       <li><a href="results.html#biogeme.results.GeneralStatistic.format">format (biogeme.results.GeneralStatistic attribute)</a>
+</li>
+      <li><a href="toml.html#biogeme.toml.format_comment">format_comment() (in module biogeme.toml)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.formulas">formulas (biogeme.biogeme.BIOGEME attribute)</a>
 </li>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression.FREE_BETA">FREE_BETA (biogeme.elementary_expressions.TypeOfElementaryExpression attribute)</a>
+</li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.freeBetaNames">freeBetaNames() (biogeme.biogeme.BIOGEME method)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.from_dict">from_dict() (biogeme.catalog.Catalog class method)</a>
+
+      <ul>
+        <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog.from_dict">(biogeme.catalog.SynchronizedCatalog class method)</a>
+</li>
+        <li><a href="configuration.html#biogeme.configuration.Configuration.from_dict">(biogeme.configuration.Configuration class method)</a>
+</li>
+      </ul></li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.from_string">from_string() (biogeme.configuration.Configuration class method)</a>
+</li>
+      <li><a href="specification.html#biogeme.specification.Specification.from_string_id">from_string_id() (biogeme.specification.Specification class method)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.from_tuple_of_configurations">from_tuple_of_configurations() (biogeme.configuration.Configuration class method)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.fullData">fullData (biogeme.database.Database attribute)</a>
 </li>
@@ -989,7 +1109,7 @@
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.functionToMinimize">functionToMinimize (class in biogeme.algorithms)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.fv">fv (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.fv">fv (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -999,49 +1119,79 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="results.html#biogeme.results.rawResults.g">g (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.general">general() (biogeme.messaging.bioMessage method)</a>
-</li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.generalizedCauchyPoint">generalizedCauchyPoint() (biogeme.algorithms.bioBounds method)</a>
 </li>
       <li><a href="results.html#biogeme.results.GeneralStatistic">GeneralStatistic (class in biogeme.results)</a>
+</li>
+      <li><a href="toml.html#biogeme.toml.Toml.generate_document">generate_document() (biogeme.toml.Toml method)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.generate_html">generate_html (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="vns.html#biogeme.vns.ProblemClass.generate_neighbor">generate_neighbor() (biogeme.vns.ProblemClass method)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.generate_operator">generate_operator() (in module biogeme.assisted)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.generate_pickle">generate_pickle (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="tools.html#biogeme.tools.generate_unique_ids">generate_unique_ids() (in module biogeme.tools)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.generateDraws">generateDraws() (biogeme.database.Database method)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.generateFlatPanelDataframe">generateFlatPanelDataframe() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.generateHtml">generateHtml (biogeme.biogeme.BIOGEME attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.generateHtml">generateHtml (biogeme.biogeme.BIOGEME property)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.generateNeighbor">generateNeighbor() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.generatePickle">generatePickle (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="specification.html#biogeme.specification.Specification.generic_name">generic_name (biogeme.specification.Specification attribute)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.Expression.get_beta_values">get_beta_values() (biogeme.expressions.Expression method)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.Expression.get_children">get_children() (biogeme.expressions.Expression method)</a>
 
       <ul>
-        <li><a href="vns.html#biogeme.vns.problemClass.generateNeighbor">(biogeme.vns.problemClass method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.get_children">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.generatePickle">generatePickle (biogeme.biogeme.BIOGEME attribute)</a>
+      <li><a href="default_parameters.html#biogeme.default_parameters.get_default_value">get_default_value() (in module biogeme.default_parameters)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.generateSolution">generateSolution() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="specification.html#biogeme.specification.Specification.get_element">get_element() (biogeme.specification.Specification method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.generic">generic (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.get_element_from_id">get_element_from_id() (biogeme.pareto.Pareto method)</a>
+</li>
+      <li><a href="logging.html#biogeme.logging.get_file_logger">get_file_logger() (in module biogeme.logging)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.get_html">get_html() (biogeme.configuration.Configuration method)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.Expression.get_id">get_id() (biogeme.expressions.Expression method)</a>
 
       <ul>
-        <li><a href="assisted.html#biogeme.assisted.variable.generic">(biogeme.assisted.variable attribute)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.get_id">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.genericForbiden">genericForbiden (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.get_iterator">get_iterator() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.get_iterator">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.variable.genericName">genericName (biogeme.assisted.variable attribute)</a>
+      </ul></li>
+      <li><a href="parameters.html#biogeme.parameters.Parameters.get_param_tuple">get_param_tuple() (biogeme.parameters.Parameters method)</a>
+</li>
+      <li><a href="specification.html#biogeme.specification.Specification.get_pareto_ids">get_pareto_ids() (biogeme.specification.Specification class method)</a>
+</li>
+      <li><a href="logging.html#biogeme.logging.get_screen_logger">get_screen_logger() (in module biogeme.logging)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.get_selection">get_selection() (biogeme.configuration.Configuration method)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.get_string_id">get_string_id() (biogeme.configuration.Configuration method)</a>
+</li>
+      <li><a href="parameters.html#biogeme.parameters.Parameters.get_value">get_value() (biogeme.parameters.Parameters method)</a>
 </li>
       <li><a href="draws.html#biogeme.draws.getAntithetic">getAntithetic() (in module biogeme.draws)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.term.getBeta">getBeta() (biogeme.assisted.term method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.getBetaNames">getBetaNames() (biogeme.assisted.segmentation method)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.getBetasForSensitivityAnalysis">getBetasForSensitivityAnalysis() (biogeme.results.bioResults method)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.getBetaValues">getBetaValues() (biogeme.results.bioResults method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.getBiogemeModel">getBiogemeModel() (biogeme.assisted.specificationProblem method)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.getBootstrapVarCovar">getBootstrapVarCovar() (biogeme.results.bioResults method)</a>
 </li>
@@ -1051,34 +1201,16 @@
 </li>
       <li><a href="results.html#biogeme.results.bioResults.getCorrelationResults">getCorrelationResults() (biogeme.results.bioResults method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.getDecisions">getDecisions() (biogeme.assisted.groupOfVariables method)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.segmentation.getDecisions">(biogeme.assisted.segmentation method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.specificationProblem.getDecisions">(biogeme.assisted.specificationProblem method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.term.getDecisions">(biogeme.assisted.term method)</a>
-</li>
-      </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Elementary.getElementaryExpression">getElementaryExpression() (biogeme.expressions.Elementary method)</a>
 
       <ul>
         <li><a href="expressions.html#biogeme.expressions.Expression.getElementaryExpression">(biogeme.expressions.Expression method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.getElementaryExpression">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
       </ul></li>
       <li><a href="results.html#biogeme.results.bioResults.getEstimatedParameters">getEstimatedParameters() (biogeme.results.bioResults method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.getExpression">getExpression() (biogeme.assisted.segmentation method)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.term.getExpression">(biogeme.assisted.term method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.utility.getExpression">(biogeme.assisted.utility method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.variable.getExpression">(biogeme.assisted.variable method)</a>
-</li>
-      </ul></li>
       <li><a href="results.html#biogeme.results.bioResults.getF12">getF12() (biogeme.results.bioResults method)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.getGeneralStatistics">getGeneralStatistics() (biogeme.results.bioResults method)</a>
@@ -1109,14 +1241,14 @@
 </li>
       <li><a href="models.html#biogeme.models.getMevGeneratingForNested">getMevGeneratingForNested() (in module biogeme.models)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="filenames.html#biogeme.filenames.getNewFileName">getNewFileName() (in module biogeme.filenames)</a>
 </li>
       <li><a href="draws.html#biogeme.draws.getNormalWichuraDraws">getNormalWichuraDraws() (in module biogeme.draws)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.getNumberOfObservations">getNumberOfObservations() (biogeme.database.Database method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tools.html#biogeme.tools.getPrimeNumbers">getPrimeNumbers() (in module biogeme.tools)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.getRobustVarCovar">getRobustVarCovar() (biogeme.results.bioResults method)</a>
@@ -1146,13 +1278,15 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.Variable.getSignature">(biogeme.expressions.Variable method)</a>
 </li>
-      </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.getSolution">getSolution() (biogeme.assisted.specificationProblem method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.getSignature">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
+      </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Elementary.getStatusIdManager">getStatusIdManager() (biogeme.expressions.Elementary method)</a>
 
       <ul>
         <li><a href="expressions.html#biogeme.expressions.Expression.getStatusIdManager">(biogeme.expressions.Expression method)</a>
+</li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.getStatusIdManager">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
       <li><a href="version.html#biogeme.version.getText">getText() (in module biogeme.version)</a>
@@ -1190,6 +1324,8 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.LogLogit.getValue">(biogeme.expressions.LogLogit method)</a>
 </li>
+        <li><a href="expressions.html#biogeme.expressions.logzero.getValue">(biogeme.expressions.logzero method)</a>
+</li>
         <li><a href="expressions.html#biogeme.expressions.Minus.getValue">(biogeme.expressions.Minus method)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.NotEqual.getValue">(biogeme.expressions.NotEqual method)</a>
@@ -1208,6 +1344,8 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.Variable.getValue">(biogeme.expressions.Variable method)</a>
 </li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.getValue">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Expression.getValue_c">getValue_c() (biogeme.expressions.Expression method)</a>
 </li>
@@ -1223,9 +1361,7 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.GreaterOrEqual">GreaterOrEqual (class in biogeme.expressions)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables">groupOfVariables (class in biogeme.assisted)</a>
-</li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.gv">gv (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.gv">gv (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1235,11 +1371,17 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="results.html#biogeme.results.rawResults.H">H (biogeme.results.rawResults attribute)</a>
 </li>
+      <li><a href="database.html#biogeme.database.Database.halton2">halton2() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.halton3">halton3() (biogeme.database.Database method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="database.html#biogeme.database.Database.halton5">halton5() (biogeme.database.Database method)</a>
+</li>
       <li><a href="results.html#biogeme.results.rawResults.htmlFileName">htmlFileName (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.hv">hv (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.hv">hv (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1247,19 +1389,25 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.utility.id">id (biogeme.assisted.utility attribute)</a>
-</li>
       <li><a href="expressions.html#biogeme.expressions.Expression.id_manager">id_manager (biogeme.expressions.Expression attribute)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.identification_threshold">identification_threshold (biogeme.biogeme.BIOGEME property)</a>
 </li>
       <li><a href="idmanager.html#biogeme.idmanager.IdManager">IdManager (class in biogeme.idmanager)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.operatorsManagement.increaseScore">increaseScore() (biogeme.vns.operatorsManagement method)</a>
+      <li><a href="assisted.html#biogeme.assisted.increase_configuration">increase_configuration() (in module biogeme.assisted)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.increaseSegmentation">increaseSegmentation() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="vns.html#biogeme.vns.OperatorsManagement.increase_score_last_operator">increase_score_last_operator() (biogeme.vns.OperatorsManagement method)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.increment_several_catalogs">increment_several_catalogs() (in module biogeme.assisted)</a>
 </li>
       <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple.indices">indices (biogeme.idmanager.ElementsTuple attribute)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.individualMap">individualMap (biogeme.database.Database attribute)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.infeasible_cg">infeasible_cg (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.initial_radius">initial_radius (biogeme.biogeme.BIOGEME property)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.initLogLike">initLogLike (biogeme.biogeme.BIOGEME attribute)</a>
 
@@ -1269,30 +1417,40 @@
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Integrate">Integrate (class in biogeme.expressions)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.intersect">intersect() (biogeme.algorithms.bioBounds method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.intersectionWithTrustRegion">intersectionWithTrustRegion() (biogeme.algorithms.bioBounds method)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.inverseBfgs">inverseBfgs() (in module biogeme.algorithms)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.isActive">isActive() (biogeme.assisted.segmentation method)</a>
+      <li><a href="check_parameters.html#biogeme.check_parameters.is_boolean">is_boolean() (in module biogeme.check_parameters)</a>
 </li>
+      <li><a href="check_parameters.html#biogeme.check_parameters.is_integer">is_integer() (in module biogeme.check_parameters)</a>
+</li>
+      <li><a href="check_parameters.html#biogeme.check_parameters.is_non_negative">is_non_negative() (in module biogeme.check_parameters)</a>
+</li>
+      <li><a href="check_parameters.html#biogeme.check_parameters.is_number">is_number() (in module biogeme.check_parameters)</a>
+</li>
+      <li><a href="check_parameters.html#biogeme.check_parameters.is_positive">is_positive() (in module biogeme.check_parameters)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.is_valid">is_valid() (biogeme.assisted.AssistedSpecification method)</a>
+
+      <ul>
+        <li><a href="vns.html#biogeme.vns.ProblemClass.is_valid">(biogeme.vns.ProblemClass method)</a>
+</li>
+      </ul></li>
       <li><a href="results.html#biogeme.results.beta.isBoundActive">isBoundActive() (biogeme.results.beta method)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.isNumeric">isNumeric() (in module biogeme.expressions)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.isPanel">isPanel() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.isValid">isValid() (biogeme.assisted.specificationProblem method)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.term.isValid">(biogeme.assisted.term method)</a>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.CatalogItem.item_index">item_index (biogeme.multiple_expressions.CatalogItem attribute)</a>
 </li>
-        <li><a href="vns.html#biogeme.vns.problemClass.isValid">(biogeme.vns.problemClass method)</a>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.CatalogItem.item_name">item_name (biogeme.multiple_expressions.CatalogItem attribute)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1311,9 +1469,9 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.lastLevel">lastLevel (biogeme.messaging.bioMessage attribute)</a>
+      <li><a href="vns.html#biogeme.vns.ProblemClass.last_neighbor_accepted">last_neighbor_accepted() (biogeme.vns.ProblemClass method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.lastOperator">lastOperator (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="vns.html#biogeme.vns.ProblemClass.last_neighbor_rejected">last_neighbor_rejected() (biogeme.vns.ProblemClass method)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.lastSample">lastSample (biogeme.biogeme.BIOGEME attribute)</a>
 </li>
@@ -1323,15 +1481,17 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.BinaryOperator.left">left (biogeme.expressions.BinaryOperator attribute)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.length">length() (biogeme.vns.paretoClass method)</a>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.length">length() (biogeme.pareto.Pareto method)</a>
+</li>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.length_of_all_sets">length_of_all_sets() (biogeme.pareto.Pareto method)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Less">Less (class in biogeme.expressions)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.LessOrEqual">LessOrEqual (class in biogeme.expressions)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.like">like (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.like">like (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.like_deriv">like_deriv (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.like_deriv">like_deriv (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.likelihood_ratio_test">likelihood_ratio_test() (biogeme.results.bioResults method)</a>
 
@@ -1343,30 +1503,34 @@
 </li>
       <li><a href="loglikelihood.html#biogeme.loglikelihood.likelihoodregression">likelihoodregression() (in module biogeme.loglikelihood)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.linear">linear (biogeme.assisted.groupOfVariables attribute)</a>
-</li>
       <li><a href="algorithms.html#biogeme.algorithms.lineSearch">lineSearch() (in module biogeme.algorithms)</a>
+</li>
+      <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation.list_of_code">list_of_code() (biogeme.segmentation.OneSegmentation method)</a>
+</li>
+      <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation.list_of_expressions">list_of_expressions() (biogeme.segmentation.OneSegmentation method)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.listOfTerms">listOfTerms (biogeme.expressions.bioLinearUtility attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.listOfVariables">listOfVariables (biogeme.assisted.segmentation attribute)</a>
+      <li><a href="expressions.html#biogeme.expressions.Expression.locked">locked (biogeme.expressions.Expression attribute)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.log">log (class in biogeme.expressions)</a>
 </li>
-      <li><a href="models.html#biogeme.models.logcnl">logcnl() (in module biogeme.models)</a>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.log_statistics">log_statistics() (biogeme.assisted.AssistedSpecification method)</a>
+
+      <ul>
+        <li><a href="assisted.html#biogeme.assisted.ParetoPostProcessing.log_statistics">(biogeme.assisted.ParetoPostProcessing method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#biogeme.models.logcnl">logcnl() (in module biogeme.models)</a>
+</li>
       <li><a href="models.html#biogeme.models.logcnl_avail">logcnl_avail() (in module biogeme.models)</a>
 </li>
       <li><a href="models.html#biogeme.models.logcnlmu">logcnlmu() (in module biogeme.models)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.logger">logger (in module biogeme.biogeme)</a>
-
-      <ul>
-        <li><a href="database.html#biogeme.database.logger">(in module biogeme.database)</a>
+      <li><a href="database.html#biogeme.database.logger">logger (in module biogeme.database)</a>
 </li>
-      </ul></li>
       <li><a href="distributions.html#biogeme.distributions.logisticcdf">logisticcdf() (in module biogeme.distributions)</a>
 </li>
       <li><a href="models.html#biogeme.models.logit">logit() (in module biogeme.models)</a>
@@ -1376,6 +1540,8 @@
       <li><a href="results.html#biogeme.results.rawResults.logLike">logLike (biogeme.results.rawResults attribute)</a>
 </li>
       <li><a href="loglikelihood.html#biogeme.loglikelihood.loglikelihood">loglikelihood() (in module biogeme.loglikelihood)</a>
+</li>
+      <li><a href="results.html#biogeme.results.loglikelihood_dimension">loglikelihood_dimension() (in module biogeme.results)</a>
 </li>
       <li><a href="loglikelihood.html#biogeme.loglikelihood.loglikelihoodregression">loglikelihoodregression() (in module biogeme.loglikelihood)</a>
 </li>
@@ -1387,6 +1553,8 @@
 </li>
       <li><a href="models.html#biogeme.models.loglogit">loglogit() (in module biogeme.models)</a>
 </li>
+      <li><a href="models.html#biogeme.models.loglogit_sampling">loglogit_sampling() (in module biogeme.models)</a>
+</li>
       <li><a href="models.html#biogeme.models.logmev">logmev() (in module biogeme.models)</a>
 </li>
       <li><a href="models.html#biogeme.models.logmev_endogenousSampling">logmev_endogenousSampling() (in module biogeme.models)</a>
@@ -1396,6 +1564,8 @@
       <li><a href="models.html#biogeme.models.lognestedMevMu">lognestedMevMu() (in module biogeme.models)</a>
 </li>
       <li><a href="distributions.html#biogeme.distributions.lognormalpdf">lognormalpdf() (in module biogeme.distributions)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.logzero">logzero (class in biogeme.expressions)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.lowerBounds">lowerBounds (biogeme.algorithms.bioBounds attribute)</a>
 </li>
@@ -1407,29 +1577,29 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.makeGeneric">makeGeneric() (biogeme.assisted.groupOfVariables method)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.variable.makeGeneric">(biogeme.assisted.variable method)</a>
+      <li><a href="vns.html#biogeme.vns.ParetoClass.max_neighborhood">max_neighborhood (biogeme.vns.ParetoClass attribute)</a>
 </li>
-      </ul></li>
-      <li><a href="segmentation.html#biogeme.segmentation.DiscreteSegmentationTuple.mapping">mapping (biogeme.segmentation.DiscreteSegmentationTuple attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.maximum_number_catalog_expressions">maximum_number_catalog_expressions (biogeme.biogeme.BIOGEME property)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.maximumNumberOfParameters">maximumNumberOfParameters (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="expressions.html#biogeme.expressions.Expression.maximum_number_of_configurations">maximum_number_of_configurations (biogeme.expressions.Expression attribute)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.maximumStep">maximumStep() (biogeme.algorithms.bioBounds method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.maxNeighborhood">maxNeighborhood (biogeme.vns.paretoClass attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.maxiter">maxiter (biogeme.biogeme.BIOGEME property)</a>
 </li>
       <li><a href="tools.html#biogeme.tools.LRTuple.message">message (biogeme.tools.LRTuple attribute)</a>
 </li>
       <li><a href="models.html#biogeme.models.mev">mev() (in module biogeme.models)</a>
 </li>
+      <li><a href="sampling.html#biogeme.sampling.mev_cnl_sampling">mev_cnl_sampling() (in module biogeme.sampling)</a>
+</li>
       <li><a href="models.html#biogeme.models.mev_endogenousSampling">mev_endogenousSampling() (in module biogeme.models)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Minus">Minus (class in biogeme.expressions)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.missingData">missingData (biogeme.biogeme.BIOGEME attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.missing_data">missing_data (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.missingData">missingData (biogeme.biogeme.BIOGEME property)</a>
 
       <ul>
         <li><a href="expressions.html#biogeme.expressions.Expression.missingData">(biogeme.expressions.Expression attribute)</a>
@@ -1437,13 +1607,27 @@
       </ul></li>
       <li><a href="loglikelihood.html#biogeme.loglikelihood.mixedloglikelihood">mixedloglikelihood() (in module biogeme.loglikelihood)</a>
 </li>
+      <li><a href="database.html#biogeme.database.Database.MLHS_anti">MLHS_anti() (biogeme.database.Database method)</a>
+</li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.modelName">modelName (biogeme.biogeme.BIOGEME attribute)</a>
 
       <ul>
         <li><a href="results.html#biogeme.results.rawResults.modelName">(biogeme.results.rawResults attribute)</a>
 </li>
       </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.models">models (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="tools.html#biogeme.tools.ModelNames">ModelNames (class in biogeme.tools)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.modify_catalogs">modify_catalogs() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="expressions.html#biogeme.expressions.Expression.modify_catalogs">(biogeme.expressions.Expression method)</a>
+</li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.modify_catalogs">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
+      <li><a href="assisted.html#biogeme.assisted.modify_random_catalogs">modify_random_catalogs() (in module biogeme.assisted)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.modify_several_catalogs">modify_several_catalogs() (in module biogeme.assisted)</a>
 </li>
       <li>
     module
@@ -1455,11 +1639,23 @@
 </li>
         <li><a href="biogeme.html#module-biogeme.biogeme">biogeme.biogeme</a>
 </li>
+        <li><a href="catalog.html#module-biogeme.catalog">biogeme.catalog</a>
+</li>
+        <li><a href="check_parameters.html#module-biogeme.check_parameters">biogeme.check_parameters</a>
+</li>
+        <li><a href="cnl.html#module-biogeme.cnl">biogeme.cnl</a>
+</li>
+        <li><a href="configuration.html#module-biogeme.configuration">biogeme.configuration</a>
+</li>
         <li><a href="database.html#module-biogeme.database">biogeme.database</a>
+</li>
+        <li><a href="default_parameters.html#module-biogeme.default_parameters">biogeme.default_parameters</a>
 </li>
         <li><a href="distributions.html#module-biogeme.distributions">biogeme.distributions</a>
 </li>
         <li><a href="draws.html#module-biogeme.draws">biogeme.draws</a>
+</li>
+        <li><a href="elementary_expressions.html#module-biogeme.elementary_expressions">biogeme.elementary_expressions</a>
 </li>
         <li><a href="exceptions.html#module-biogeme.exceptions">biogeme.exceptions</a>
 </li>
@@ -1469,19 +1665,31 @@
 </li>
         <li><a href="idmanager.html#module-biogeme.idmanager">biogeme.idmanager</a>
 </li>
-        <li><a href="loglikelihood.html#module-biogeme.loglikelihood">biogeme.loglikelihood</a>
+        <li><a href="logging.html#module-biogeme.logging">biogeme.logging</a>
 </li>
-        <li><a href="messaging.html#module-biogeme.messaging">biogeme.messaging</a>
+        <li><a href="loglikelihood.html#module-biogeme.loglikelihood">biogeme.loglikelihood</a>
 </li>
         <li><a href="models.html#module-biogeme.models">biogeme.models</a>
 </li>
+        <li><a href="multiple_expressions.html#module-biogeme.multiple_expressions">biogeme.multiple_expressions</a>
+</li>
+        <li><a href="negative_likelihood.html#module-biogeme.negative_likelihood">biogeme.negative_likelihood</a>
+</li>
         <li><a href="optimization.html#module-biogeme.optimization">biogeme.optimization</a>
+</li>
+        <li><a href="parameters.html#module-biogeme.parameters">biogeme.parameters</a>
+</li>
+        <li><a href="pareto.html#module-biogeme.pareto">biogeme.pareto</a>
 </li>
         <li><a href="results.html#module-biogeme.results">biogeme.results</a>
 </li>
+        <li><a href="sampling.html#module-biogeme.sampling">biogeme.sampling</a>
+</li>
         <li><a href="segmentation.html#module-biogeme.segmentation">biogeme.segmentation</a>
 </li>
-        <li><a href="singleton.html#module-biogeme.singleton">biogeme.singleton</a>
+        <li><a href="specification.html#module-biogeme.specification">biogeme.specification</a>
+</li>
+        <li><a href="toml.html#module-biogeme.toml">biogeme.toml</a>
 </li>
         <li><a href="tools.html#module-biogeme.tools">biogeme.tools</a>
 </li>
@@ -1500,6 +1708,10 @@
       </ul></li>
       <li><a href="expressions.html#biogeme.expressions.MonteCarlo">MonteCarlo (class in biogeme.expressions)</a>
 </li>
+      <li><a href="specification.html#biogeme.specification.Specification.multi_objectives">multi_objectives (biogeme.specification.Specification attribute)</a>
+</li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression">MultipleExpression (class in biogeme.multiple_expressions)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1508,52 +1720,38 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.n">n (biogeme.algorithms.bioBounds attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.name">name (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="database.html#biogeme.database.Database.name">name (biogeme.database.Database attribute)</a>
 
       <ul>
-        <li><a href="assisted.html#biogeme.assisted.segmentation.name">(biogeme.assisted.segmentation attribute)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.socioEconomic.name">(biogeme.assisted.socioEconomic attribute)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.specificationProblem.name">(biogeme.assisted.specificationProblem attribute)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.utility.name">(biogeme.assisted.utility attribute)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.variable.name">(biogeme.assisted.variable attribute)</a>
-</li>
-        <li><a href="database.html#biogeme.database.Database.name">(biogeme.database.Database attribute)</a>
+        <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple.name">(biogeme.default_parameters.ParameterTuple attribute)</a>
 </li>
         <li><a href="expressions.html#biogeme.expressions.Elementary.name">(biogeme.expressions.Elementary attribute)</a>
+</li>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.NamedExpression.name">(biogeme.multiple_expressions.NamedExpression attribute)</a>
 </li>
         <li><a href="results.html#biogeme.results.beta.name">(biogeme.results.beta attribute)</a>
 </li>
       </ul></li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.NamedExpression">NamedExpression (class in biogeme.multiple_expressions)</a>
+</li>
       <li><a href="idmanager.html#biogeme.idmanager.ElementsTuple.names">names (biogeme.idmanager.ElementsTuple attribute)</a>
 
       <ul>
-        <li><a href="vns.html#biogeme.vns.operatorsManagement.names">(biogeme.vns.operatorsManagement attribute)</a>
+        <li><a href="vns.html#biogeme.vns.OperatorsManagement.names">(biogeme.vns.OperatorsManagement attribute)</a>
 </li>
       </ul></li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood">negLikelihood (class in biogeme.biogeme)</a>
+      <li><a href="database.html#biogeme.database.Database.nativeRandomNumberGenerators">nativeRandomNumberGenerators (biogeme.database.Database attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.neighborAccepted">neighborAccepted() (biogeme.assisted.specificationProblem method)</a>
-
-      <ul>
-        <li><a href="vns.html#biogeme.vns.problemClass.neighborAccepted">(biogeme.vns.problemClass method)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood">NegativeLikelihood (class in biogeme.negative_likelihood)</a>
 </li>
-      </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.neighborRejected">neighborRejected() (biogeme.assisted.specificationProblem method)</a>
-
-      <ul>
-        <li><a href="vns.html#biogeme.vns.problemClass.neighborRejected">(biogeme.vns.problemClass method)</a>
+      <li><a href="vns.html#biogeme.vns.ParetoClass.neighborhood_size">neighborhood_size (biogeme.vns.ParetoClass attribute)</a>
 </li>
-      </ul></li>
       <li><a href="models.html#biogeme.models.nested">nested() (in module biogeme.models)</a>
 </li>
       <li><a href="models.html#biogeme.models.nestedMevMu">nestedMevMu() (in module biogeme.models)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="biogeme.html#biogeme.biogeme.OldNewParamTuple.new">new (biogeme.biogeme.OldNewParamTuple attribute)</a>
+</li>
       <li><a href="algorithms.html#biogeme.algorithms.newtonLineSearch">newtonLineSearch() (in module biogeme.algorithms)</a>
 </li>
       <li><a href="optimization.html#biogeme.optimization.newtonLineSearchForBiogeme">newtonLineSearchForBiogeme() (in module biogeme.optimization)</a>
@@ -1562,9 +1760,19 @@
 </li>
       <li><a href="optimization.html#biogeme.optimization.newtonTrustRegionForBiogeme">newtonTrustRegionForBiogeme() (in module biogeme.optimization)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.variable.nonlinearSpec">nonlinearSpec (biogeme.assisted.variable attribute)</a>
+      <li><a href="database.html#biogeme.database.Database.normal_antithetic">normal_antithetic() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.nonlinearSpecs">nonlinearSpecs (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="database.html#biogeme.database.Database.normal_halton2">normal_halton2() (biogeme.database.Database method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="database.html#biogeme.database.Database.normal_halton3">normal_halton3() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.normal_halton5">normal_halton5() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.normal_MLHS">normal_MLHS() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.normal_MLHS_anti">normal_MLHS_anti() (biogeme.database.Database method)</a>
 </li>
       <li><a href="distributions.html#biogeme.distributions.normalpdf">normalpdf() (in module biogeme.distributions)</a>
 </li>
@@ -1578,7 +1786,17 @@
         <li><a href="results.html#biogeme.results.rawResults.nullLogLike">(biogeme.results.rawResults attribute)</a>
 </li>
       </ul></li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.numberOfDraws">numberOfDraws (biogeme.biogeme.BIOGEME attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.number_of_draws">number_of_draws (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.Elementary.number_of_multiple_expressions">number_of_multiple_expressions() (biogeme.expressions.Elementary method)</a>
+
+      <ul>
+        <li><a href="expressions.html#biogeme.expressions.Expression.number_of_multiple_expressions">(biogeme.expressions.Expression method)</a>
+</li>
+      </ul></li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.number_of_threads">number_of_threads (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.numberOfDraws">numberOfDraws (biogeme.biogeme.BIOGEME property)</a>
 
       <ul>
         <li><a href="database.html#biogeme.database.Database.numberOfDraws">(biogeme.database.Database attribute)</a>
@@ -1592,7 +1810,7 @@
 </li>
       <li><a href="results.html#biogeme.results.rawResults.numberOfObservations">numberOfObservations (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.numberOfThreads">numberOfThreads (biogeme.biogeme.BIOGEME attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.numberOfThreads">numberOfThreads (biogeme.biogeme.BIOGEME property)</a>
 
       <ul>
         <li><a href="results.html#biogeme.results.rawResults.numberOfThreads">(biogeme.results.rawResults attribute)</a>
@@ -1606,20 +1824,18 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.solution.objectives">objectives (biogeme.assisted.solution attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.OldNewParamTuple.old">old (biogeme.biogeme.OldNewParamTuple attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.solution.objectivesNames">objectivesNames (biogeme.assisted.solution attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.OldNewParamTuple">OldNewParamTuple (class in biogeme.biogeme)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.operators">operators (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="segmentation.html#biogeme.segmentation.OneSegmentation">OneSegmentation (class in biogeme.segmentation)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.operatorsManagement">operatorsManagement (biogeme.assisted.specificationProblem attribute)</a>
-
-      <ul>
-        <li><a href="vns.html#biogeme.vns.operatorsManagement">(class in biogeme.vns)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.only_robust_stats">only_robust_stats (biogeme.biogeme.BIOGEME property)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="vns.html#biogeme.vns.OperatorsManagement">OperatorsManagement (class in biogeme.vns)</a>
+</li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.optimizationMessages">optimizationMessages (biogeme.biogeme.BIOGEME attribute)</a>
 
       <ul>
@@ -1642,22 +1858,44 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.PanelLikelihoodTrajectory">PanelLikelihoodTrajectory (class in biogeme.expressions)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.pareto">pareto (biogeme.vns.paretoClass attribute)</a>
+      <li><a href="parameters.html#biogeme.parameters.Parameters">Parameters (class in biogeme.parameters)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass">paretoClass (class in biogeme.vns)</a>
+      <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple">ParameterTuple (class in biogeme.default_parameters)</a>
+</li>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.pareto">pareto (biogeme.pareto.Pareto attribute)</a>
+
+      <ul>
+        <li><a href="specification.html#biogeme.specification.Specification.pareto">(biogeme.specification.Specification attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="pareto.html#biogeme.pareto.Pareto">Pareto (class in biogeme.pareto)</a>
+</li>
+      <li><a href="results.html#biogeme.results.pareto_optimal">pareto_optimal() (in module biogeme.results)</a>
+</li>
+      <li><a href="vns.html#biogeme.vns.ParetoClass">ParetoClass (class in biogeme.vns)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.ParetoPostProcessing">ParetoPostProcessing (class in biogeme.assisted)</a>
 </li>
       <li><a href="results.html#biogeme.results.rawResults.pickleFileName">pickleFileName (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="models.html#biogeme.models.piecewise">piecewise() (in module biogeme.models)</a>
+      <li><a href="models.html#biogeme.models.piecewise_as_variable">piecewise_as_variable() (in module biogeme.models)</a>
 </li>
       <li><a href="models.html#biogeme.models.piecewiseFormula">piecewiseFormula() (in module biogeme.models)</a>
 </li>
-      <li><a href="models.html#biogeme.models.piecewiseFunction">piecewiseFunction() (in module biogeme.models)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="models.html#biogeme.models.piecewiseFunction">piecewiseFunction() (in module biogeme.models)</a>
+</li>
       <li><a href="models.html#biogeme.models.piecewiseVariables">piecewiseVariables() (in module biogeme.models)</a>
 </li>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.plot">plot() (biogeme.assisted.AssistedSpecification method)</a>
+
+      <ul>
+        <li><a href="assisted.html#biogeme.assisted.ParetoPostProcessing.plot">(biogeme.assisted.ParetoPostProcessing method)</a>
+</li>
+        <li><a href="pareto.html#biogeme.pareto.Pareto.plot">(biogeme.pareto.Pareto method)</a>
+</li>
+      </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Plus">Plus (class in biogeme.expressions)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Power">Power (class in biogeme.expressions)</a>
@@ -1670,7 +1908,9 @@
       </ul></li>
       <li><a href="results.html#biogeme.results.bioResults.printGeneralStatistics">printGeneralStatistics() (biogeme.results.bioResults method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.problemClass">problemClass (class in biogeme.vns)</a>
+      <li><a href="vns.html#biogeme.vns.ProblemClass">ProblemClass (class in biogeme.vns)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.process_numeric">process_numeric() (in module biogeme.expressions)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.project">project() (biogeme.algorithms.bioBounds method)</a>
 </li>
@@ -1690,41 +1930,61 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression.RANDOM_VARIABLE">RANDOM_VARIABLE (biogeme.elementary_expressions.TypeOfElementaryExpression attribute)</a>
+</li>
       <li><a href="expressions.html#biogeme.expressions.RandomVariable">RandomVariable (class in biogeme.expressions)</a>
 </li>
       <li><a href="results.html#biogeme.results.rawResults">rawResults (class in biogeme.results)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.recalculate">recalculate (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="toml.html#biogeme.toml.Toml.read_file">read_file() (biogeme.toml.Toml method)</a>
 </li>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.recalculate">recalculate (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
+</li>
+      <li><a href="toml.html#biogeme.toml.Toml.record_values">record_values() (biogeme.toml.Toml method)</a>
+</li>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.reestimate">reestimate() (biogeme.assisted.AssistedSpecification method)</a>
+
+      <ul>
+        <li><a href="assisted.html#biogeme.assisted.ParetoPostProcessing.reestimate">(biogeme.assisted.ParetoPostProcessing method)</a>
+</li>
+      </ul></li>
       <li><a href="algorithms.html#biogeme.algorithms.relativeChange">relativeChange() (in module biogeme.algorithms)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.relativeGradient">relativeGradient() (in module biogeme.algorithms)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.remove">remove() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.removed">removed (biogeme.vns.paretoClass attribute)</a>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.removed">removed (biogeme.pareto.Pareto attribute)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Elementary.rename_elementary">rename_elementary() (biogeme.expressions.Elementary method)</a>
 
       <ul>
         <li><a href="expressions.html#biogeme.expressions.Expression.rename_elementary">(biogeme.expressions.Expression method)</a>
 </li>
-      </ul></li>
-      <li><a href="expressions.html#biogeme.expressions.Expression.requiresDraws">requiresDraws() (biogeme.expressions.Expression method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.rename_elementary">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.reset">reset() (biogeme.assisted.specificationProblem method)</a>
+      <li><a href="expressions.html#biogeme.expressions.Expression.requiresDraws">requiresDraws() (biogeme.expressions.Expression method)</a>
 </li>
+      <li><a href="expressions.html#biogeme.expressions.Expression.reset_expression_selection">reset_expression_selection() (biogeme.expressions.Expression method)</a>
+
+      <ul>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.reset_expression_selection">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.reset_id_manager">reset_id_manager() (biogeme.biogeme.BIOGEME method)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.resetMessages">resetMessages() (biogeme.messaging.bioMessage method)</a>
+      <li><a href="vns.html#biogeme.vns.ParetoClass.reset_neighborhood">reset_neighborhood() (biogeme.vns.ParetoClass method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.resetNeighborhood">resetNeighborhood() (biogeme.vns.paretoClass method)</a>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.reset_this_expression_selection">reset_this_expression_selection() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.reset_this_expression_selection">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.restore">restore() (biogeme.vns.paretoClass method)</a>
-</li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.resume">resume() (biogeme.messaging.bioMessage method)</a>
+      </ul></li>
+      <li><a href="pareto.html#biogeme.pareto.Pareto.restore">restore() (biogeme.pareto.Pareto method)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.BinaryOperator.right">right (biogeme.expressions.BinaryOperator attribute)</a>
 </li>
@@ -1734,55 +1994,119 @@
 </li>
       <li><a href="results.html#biogeme.results.beta.robust_tTest">robust_tTest (biogeme.results.beta attribute)</a>
 </li>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.run">run() (biogeme.assisted.AssistedSpecification method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sampling.html#biogeme.sampling.sample_alternatives">sample_alternatives() (in module biogeme.sampling)</a>
+</li>
+      <li><a href="sampling.html#biogeme.sampling.StratumTuple.sample_size">sample_size (biogeme.sampling.StratumTuple attribute)</a>
+</li>
       <li><a href="database.html#biogeme.database.Database.sampleIndividualMapWithReplacement">sampleIndividualMapWithReplacement() (biogeme.database.Database method)</a>
 </li>
       <li><a href="results.html#biogeme.results.rawResults.sampleSize">sampleSize (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="database.html#biogeme.database.Database.sampleWithoutReplacement">sampleWithoutReplacement() (biogeme.database.Database method)</a>
-</li>
       <li><a href="database.html#biogeme.database.Database.sampleWithReplacement">sampleWithReplacement() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.saveIterations">saveIterations (biogeme.biogeme.BIOGEME attribute)</a>
+      <li><a href="sampling.html#biogeme.sampling.sampling_of_alternatives">sampling_of_alternatives() (in module biogeme.sampling)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.save_iterations">save_iterations (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.saveIterations">saveIterations (biogeme.biogeme.BIOGEME property)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.scaleColumn">scaleColumn() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.scaled">scaled (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.scaled">scaled (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.schnabelEskow">schnabelEskow() (in module biogeme.algorithms)</a>
 </li>
       <li><a href="optimization.html#biogeme.optimization.scipy">scipy() (in module biogeme.optimization)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.operatorsManagement.scores">scores (biogeme.vns.operatorsManagement attribute)</a>
+      <li><a href="vns.html#biogeme.vns.OperatorsManagement.scores">scores (biogeme.vns.OperatorsManagement attribute)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.screenLevel">screenLevel (biogeme.messaging.bioMessage attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.second_derivatives">second_derivatives (biogeme.biogeme.BIOGEME property)</a>
 </li>
       <li><a href="results.html#biogeme.results.rawResults.secondOrderTable">secondOrderTable (biogeme.results.rawResults attribute)</a>
 </li>
-      <li><a href="segmentation.html#biogeme.segmentation.segment_parameter">segment_parameter() (in module biogeme.segmentation)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.term.segmentation">segmentation (biogeme.assisted.term attribute)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.OldNewParamTuple.section">section (biogeme.biogeme.OldNewParamTuple attribute)</a>
 
       <ul>
-        <li><a href="assisted.html#biogeme.assisted.TermTuple.segmentation">(biogeme.assisted.TermTuple attribute)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.segmentation">(class in biogeme.assisted)</a>
+        <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple.section">(biogeme.default_parameters.ParameterTuple attribute)</a>
 </li>
       </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.SegmentedParameterTuple">SegmentedParameterTuple (class in biogeme.assisted)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.seed_param">seed_param (biogeme.biogeme.BIOGEME property)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.paretoClass.select">select() (biogeme.vns.paretoClass method)</a>
+      <li><a href="segmentation.html#biogeme.segmentation.Segmentation">Segmentation (class in biogeme.segmentation)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.selectedModel">selectedModel (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="catalog.html#biogeme.catalog.segmentation_catalog">segmentation_catalog() (in module biogeme.catalog)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.selection">selection (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="segmentation.html#biogeme.segmentation.Segmentation.segmented_beta">segmented_beta() (biogeme.segmentation.Segmentation method)</a>
 </li>
-      <li><a href="vns.html#biogeme.vns.operatorsManagement.selectOperator">selectOperator() (biogeme.vns.operatorsManagement method)</a>
+      <li><a href="segmentation.html#biogeme.segmentation.Segmentation.segmented_code">segmented_code() (biogeme.segmentation.Segmentation method)</a>
+</li>
+      <li><a href="vns.html#biogeme.vns.ParetoClass.select">select() (biogeme.vns.ParetoClass method)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.select_expression">select_expression() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog.select_expression">(biogeme.catalog.SynchronizedCatalog method)</a>
+</li>
+        <li><a href="expressions.html#biogeme.expressions.Expression.select_expression">(biogeme.expressions.Expression method)</a>
+</li>
+      </ul></li>
+      <li><a href="vns.html#biogeme.vns.OperatorsManagement.select_operator">select_operator() (biogeme.vns.OperatorsManagement method)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.selected">selected() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.selected">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.selected_expression">selected_expression() (biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.selected_name">selected_name() (biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      <li><a href="expressions.html#biogeme.expressions.SelectedExpressionsIterator">SelectedExpressionsIterator (class in biogeme.expressions)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.SelectionTuple.selection">selection (biogeme.configuration.SelectionTuple attribute)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.selections">selections (biogeme.configuration.Configuration property)</a>
+</li>
+      <li><a href="configuration.html#biogeme.configuration.SelectionTuple">SelectionTuple (class in biogeme.configuration)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.set_index">set_index() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog.set_index">(biogeme.catalog.SynchronizedCatalog method)</a>
+</li>
+      </ul></li>
+      <li><a href="configuration.html#biogeme.configuration.Configuration.set_of_catalogs">set_of_catalogs() (biogeme.configuration.Configuration method)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.Catalog.set_of_configurations">set_of_configurations() (biogeme.catalog.Catalog method)</a>
+
+      <ul>
+        <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog.set_of_configurations">(biogeme.catalog.SynchronizedCatalog method)</a>
+</li>
+        <li><a href="expressions.html#biogeme.expressions.Expression.set_of_configurations">(biogeme.expressions.Expression method)</a>
+</li>
+      </ul></li>
+      <li><a href="expressions.html#biogeme.expressions.Expression.set_of_elementary_expression">set_of_elementary_expression() (biogeme.expressions.Expression method)</a>
+
+      <ul>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.set_of_elementary_expression">(biogeme.multiple_expressions.MultipleExpression method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="expressions.html#biogeme.expressions.Expression.set_of_multiple_expressions">set_of_multiple_expressions() (biogeme.expressions.Expression method)</a>
+</li>
+      <li><a href="parameters.html#biogeme.parameters.Parameters.set_value">set_value() (biogeme.parameters.Parameters method)</a>
+</li>
+      <li><a href="parameters.html#biogeme.parameters.Parameters.set_value_from_tuple">set_value_from_tuple() (biogeme.parameters.Parameters method)</a>
 </li>
       <li><a href="results.html#biogeme.results.beta.setBootstrapStdErr">setBootstrapStdErr() (biogeme.results.beta method)</a>
 </li>
@@ -1790,21 +2114,7 @@
 </li>
       <li><a href="idmanager.html#biogeme.idmanager.IdManager.setDataMap">setDataMap() (biogeme.idmanager.IdManager method)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.setDebug">setDebug() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.setDecisions">setDecisions() (biogeme.assisted.groupOfVariables method)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.segmentation.setDecisions">(biogeme.assisted.segmentation method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.specificationProblem.setDecisions">(biogeme.assisted.specificationProblem method)</a>
-</li>
-        <li><a href="assisted.html#biogeme.assisted.term.setDecisions">(biogeme.assisted.term method)</a>
-</li>
-      </ul></li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.setDetailed">setDetailed() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.setGeneral">setGeneral() (biogeme.messaging.bioMessage method)</a>
+      <li><a href="pareto.html#biogeme.pareto.SetElement">SetElement (class in biogeme.pareto)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Beta.setIdManager">setIdManager() (biogeme.expressions.Beta method)</a>
 
@@ -1817,21 +2127,9 @@
 </li>
         <li><a href="expressions.html#biogeme.expressions.Variable.setIdManager">(biogeme.expressions.Variable method)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.setLinear">setLinear() (biogeme.assisted.groupOfVariables method)</a>
-</li>
-      <li><a href="expressions.html#biogeme.expressions.Beta.setOfBetas">setOfBetas() (biogeme.expressions.Beta method)</a>
-
-      <ul>
-        <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.setOfBetas">(biogeme.expressions.bioLinearUtility method)</a>
-</li>
-        <li><a href="expressions.html#biogeme.expressions.Expression.setOfBetas">(biogeme.expressions.Expression method)</a>
+        <li><a href="multiple_expressions.html#biogeme.multiple_expressions.MultipleExpression.setIdManager">(biogeme.multiple_expressions.MultipleExpression method)</a>
 </li>
       </ul></li>
-      <li><a href="expressions.html#biogeme.expressions.Expression.setOfVariables">setOfVariables() (biogeme.expressions.Expression method)</a>
-</li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.setRandomInitValues">setRandomInitValues() (biogeme.biogeme.BIOGEME method)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.setRandomNumberGenerators">setRandomNumberGenerators() (biogeme.database.Database method)</a>
@@ -1840,23 +2138,15 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.Expression.setRow">setRow() (biogeme.expressions.Expression method)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.setScreenLevel">setScreenLevel() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.setSelection">setSelection() (biogeme.assisted.groupOfVariables method)</a>
-</li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.setSilent">setSilent() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.setSolution">setSolution() (biogeme.assisted.specificationProblem method)</a>
-</li>
       <li><a href="results.html#biogeme.results.beta.setStdErr">setStdErr() (biogeme.results.beta method)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.functionToMinimize.setVariables">setVariables() (biogeme.algorithms.functionToMinimize method)</a>
 
       <ul>
-        <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.setVariables">(biogeme.biogeme.negLikelihood method)</a>
+        <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.setVariables">(biogeme.negative_likelihood.NegativeLikelihood method)</a>
 </li>
       </ul></li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.setWarning">setWarning() (biogeme.messaging.bioMessage method)</a>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.short_names">short_names (biogeme.biogeme.BIOGEME attribute)</a>
 </li>
       <li><a href="results.html#biogeme.results.bioResults.shortSummary">shortSummary() (biogeme.results.bioResults method)</a>
 </li>
@@ -1866,33 +2156,45 @@
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.simulate">simulate() (biogeme.biogeme.BIOGEME method)</a>
 </li>
-      <li><a href="singleton.html#biogeme.singleton.Singleton">Singleton (class in biogeme.singleton)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.socioEconomic">socioEconomic (class in biogeme.assisted)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.solution">solution (class in biogeme.assisted)</a>
-</li>
-      <li><a href="vns.html#biogeme.vns.solutionClass">solutionClass (class in biogeme.vns)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem">specificationProblem (class in biogeme.assisted)</a>
+      <li><a href="specification.html#biogeme.specification.Specification">Specification (class in biogeme.specification)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.split">split() (biogeme.database.Database method)</a>
 </li>
       <li><a href="tools.html#biogeme.tools.LRTuple.statistic">statistic (biogeme.tools.LRTuple attribute)</a>
 </li>
+      <li><a href="assisted.html#biogeme.assisted.AssistedSpecification.statistics">statistics() (biogeme.assisted.AssistedSpecification method)</a>
+
+      <ul>
+        <li><a href="assisted.html#biogeme.assisted.ParetoPostProcessing.statistics">(biogeme.assisted.ParetoPostProcessing method)</a>
+</li>
+      </ul></li>
       <li><a href="results.html#biogeme.results.beta.stdErr">stdErr (biogeme.results.beta attribute)</a>
+</li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.steptol">steptol (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="sampling.html#biogeme.sampling.StratumTuple">StratumTuple (class in biogeme.sampling)</a>
+</li>
+      <li><a href="sampling.html#biogeme.sampling.StratumTuple.subset">subset (biogeme.sampling.StratumTuple attribute)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.bioBounds.subspace">subspace() (biogeme.algorithms.bioBounds method)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.suggestScaling">suggestScaling() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="database.html#biogeme.database.Database.sumFromDatabase">sumFromDatabase() (biogeme.database.Database method)</a>
+      <li><a href="database.html#biogeme.database.Database.symm_halton2">symm_halton2() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.swapActivate">swapActivate() (biogeme.assisted.groupOfVariables method)</a>
+      <li><a href="database.html#biogeme.database.Database.symm_halton3">symm_halton3() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.swapGeneric">swapGeneric() (biogeme.assisted.groupOfVariables method)</a>
+      <li><a href="database.html#biogeme.database.Database.symm_halton5">symm_halton5() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.swapLinear">swapLinear() (biogeme.assisted.groupOfVariables method)</a>
+      <li><a href="database.html#biogeme.database.Database.symm_MLHS">symm_MLHS() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.symm_MLHS_anti">symm_MLHS_anti() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.symm_uniform">symm_uniform() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="database.html#biogeme.database.Database.symm_uniform_antithetic">symm_uniform_antithetic() (biogeme.database.Database method)</a>
+</li>
+      <li><a href="catalog.html#biogeme.catalog.SynchronizedCatalog">SynchronizedCatalog (class in biogeme.catalog)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1900,32 +2202,22 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.temporarySilence">temporarySilence() (biogeme.messaging.bioMessage method)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.term">term (class in biogeme.assisted)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.utility.terms">terms (biogeme.assisted.utility attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.TermTuple">TermTuple (class in biogeme.assisted)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.theAlternatives">theAlternatives (biogeme.assisted.specificationProblem attribute)</a>
+      <li><a href="tools.html#biogeme.tools.TemporaryFile">TemporaryFile (class in biogeme.tools)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.theDraws">theDraws (biogeme.database.Database attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.theGroups">theGroups (biogeme.assisted.specificationProblem attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.theSegmentations">theSegmentations (biogeme.assisted.specificationProblem attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.theVariables">theVariables (biogeme.assisted.specificationProblem attribute)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="tools.html#biogeme.tools.LRTuple.threshold">threshold (biogeme.tools.LRTuple attribute)</a>
 </li>
       <li><a href="expressions.html#biogeme.expressions.Times">Times (class in biogeme.expressions)</a>
 </li>
+      <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.tolerance">tolerance (biogeme.biogeme.BIOGEME property)</a>
+</li>
+      <li><a href="toml.html#biogeme.toml.Toml">Toml (class in biogeme.toml)</a>
+</li>
       <li><a href="distributions.html#biogeme.distributions.triangularpdf">triangularpdf() (in module biogeme.distributions)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="algorithms.html#biogeme.algorithms.truncatedConjugateGradient">truncatedConjugateGradient() (in module biogeme.algorithms)</a>
 </li>
       <li><a href="algorithms.html#biogeme.algorithms.truncatedConjugateGradientSubspace">truncatedConjugateGradientSubspace() (in module biogeme.algorithms)</a>
@@ -1934,7 +2226,9 @@
 </li>
       <li><a href="results.html#biogeme.results.beta.tTest">tTest (biogeme.results.beta attribute)</a>
 </li>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.types">types (biogeme.messaging.bioMessage attribute)</a>
+      <li><a href="default_parameters.html#biogeme.default_parameters.ParameterTuple.type">type (biogeme.default_parameters.ParameterTuple attribute)</a>
+</li>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression">TypeOfElementaryExpression (class in biogeme.elementary_expressions)</a>
 </li>
       <li><a href="database.html#biogeme.database.Database.typesOfDraws">typesOfDraws (biogeme.database.Database attribute)</a>
 
@@ -1954,19 +2248,13 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.UnaryOperator">UnaryOperator (class in biogeme.expressions)</a>
 </li>
+      <li><a href="database.html#biogeme.database.Database.uniform_antithetic">uniform_antithetic() (biogeme.database.Database method)</a>
+</li>
       <li><a href="distributions.html#biogeme.distributions.uniformpdf">uniformpdf() (in module biogeme.distributions)</a>
 </li>
-      <li><a href="algorithms.html#biogeme.algorithms.bioBounds.upperBounds">upperBounds (biogeme.algorithms.bioBounds attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.segmentation.used">used (biogeme.assisted.segmentation attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.variable.used">(biogeme.assisted.variable attribute)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="database.html#biogeme.database.Database.useFullSample">useFullSample() (biogeme.database.Database method)</a>
+      <li><a href="algorithms.html#biogeme.algorithms.bioBounds.upperBounds">upperBounds (biogeme.algorithms.bioBounds attribute)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.userNotes">userNotes (biogeme.biogeme.BIOGEME attribute)</a>
 
@@ -1978,28 +2266,16 @@
 </li>
       <li><a href="expressions.html#biogeme.expressions.LogLogit.util">util (biogeme.expressions.LogLogit attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.specificationProblem.utilities">utilities (biogeme.assisted.specificationProblem attribute)</a>
-</li>
-      <li><a href="assisted.html#biogeme.assisted.utility">utility (class in biogeme.assisted)</a>
-</li>
   </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="assisted.html#biogeme.assisted.solution.valid">valid (biogeme.assisted.solution attribute)</a>
-</li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.validate">validate() (biogeme.biogeme.BIOGEME method)</a>
 </li>
       <li><a href="database.html#biogeme.database.EstimationValidation.validation">validation (biogeme.database.EstimationValidation attribute)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.term.validity">validity (biogeme.assisted.term attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.TermTuple.validity">(biogeme.assisted.TermTuple attribute)</a>
-</li>
-      </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Numeric.value">value (biogeme.expressions.Numeric attribute)</a>
 
       <ul>
@@ -2008,30 +2284,24 @@
         <li><a href="results.html#biogeme.results.GeneralStatistic.value">(biogeme.results.GeneralStatistic attribute)</a>
 </li>
       </ul></li>
-      <li><a href="assisted.html#biogeme.assisted.socioEconomic.values">values (biogeme.assisted.socioEconomic attribute)</a>
+      <li><a href="exceptions.html#biogeme.exceptions.ValueOutOfRange">ValueOutOfRange</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="database.html#biogeme.database.Database.valuesFromDatabase">valuesFromDatabase() (biogeme.database.Database method)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.term.var">var (biogeme.assisted.term attribute)</a>
+      <li><a href="elementary_expressions.html#biogeme.elementary_expressions.TypeOfElementaryExpression.VARIABLE">VARIABLE (biogeme.elementary_expressions.TypeOfElementaryExpression attribute)</a>
 </li>
-      <li><a href="segmentation.html#biogeme.segmentation.DiscreteSegmentationTuple.variable">variable (biogeme.segmentation.DiscreteSegmentationTuple attribute)</a>
-
-      <ul>
-        <li><a href="assisted.html#biogeme.assisted.variable">(class in biogeme.assisted)</a>
-</li>
-      </ul></li>
       <li><a href="expressions.html#biogeme.expressions.Variable">Variable (class in biogeme.expressions)</a>
 </li>
-      <li><a href="assisted.html#biogeme.assisted.groupOfVariables.variables">variables (biogeme.assisted.groupOfVariables attribute)</a>
+      <li><a href="database.html#biogeme.database.Database.variables">variables (biogeme.database.Database attribute)</a>
 
       <ul>
-        <li><a href="database.html#biogeme.database.Database.variables">(biogeme.database.Database attribute)</a>
-</li>
         <li><a href="expressions.html#biogeme.expressions.bioLinearUtility.variables">(biogeme.expressions.bioLinearUtility attribute)</a>
 </li>
       </ul></li>
+      <li><a href="results.html#biogeme.results.bioResults.variance_covariance_missing">variance_covariance_missing() (biogeme.results.bioResults method)</a>
+</li>
       <li><a href="vns.html#biogeme.vns.vns">vns() (in module biogeme.vns)</a>
 </li>
   </ul></td>
@@ -2040,8 +2310,6 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="messaging.html#biogeme.messaging.bioMessage.warning">warning() (biogeme.messaging.bioMessage method)</a>
-</li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.weight">weight (biogeme.biogeme.BIOGEME attribute)</a>
 </li>
       <li><a href="biogeme.html#biogeme.biogeme.BIOGEME.weightName">weightName (biogeme.biogeme.BIOGEME attribute)</a>
@@ -2064,7 +2332,15 @@
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="biogeme.html#biogeme.biogeme.negLikelihood.x">x (biogeme.biogeme.negLikelihood attribute)</a>
+      <li><a href="negative_likelihood.html#biogeme.negative_likelihood.NegativeLikelihood.x">x (biogeme.negative_likelihood.NegativeLikelihood attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="check_parameters.html#biogeme.check_parameters.zero_one">zero_one() (in module biogeme.check_parameters)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -2078,7 +2354,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

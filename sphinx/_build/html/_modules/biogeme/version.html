@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.version &mdash; Biogeme 3.2.9 documentation</title>
+  <title>biogeme.version &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -72,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>biogeme.version</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">biogeme.version</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -99,12 +101,6 @@
 
 <span class="c1"># Release date</span>
 <span class="n">versionDate</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
-<span class="c1"># Major version number</span>
-<span class="n">versionMajor</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="c1"># Minor version number</span>
-<span class="n">versionMinor</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="c1"># Release name</span>
-<span class="n">versionRelease</span> <span class="o">=</span> <span class="s1">&#39;9&#39;</span>
 <span class="n">author</span> <span class="o">=</span> <span class="s1">&#39;Michel Bierlaire&#39;</span>
 <span class="n">urlAuthor</span> <span class="o">=</span> <span class="s1">&#39;http://people.epfl.ch/michel.bierlaire&#39;</span>
 <span class="n">department</span> <span class="o">=</span> <span class="s1">&#39;Transport and Mobility Laboratory&#39;</span>
@@ -114,23 +110,21 @@
 <span class="n">urlBiogeme</span> <span class="o">=</span> <span class="s1">&#39;http://biogeme.epfl.ch&#39;</span>
 <span class="n">urlForum</span> <span class="o">=</span> <span class="s1">&#39;https://groups.google.com/d/forum/biogeme&#39;</span>
 
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;3.2.11&#39;</span>
+
 
 <div class="viewcode-block" id="getVersion"><a class="viewcode-back" href="../../version.html#biogeme.version.getVersion">[docs]</a><span class="k">def</span> <span class="nf">getVersion</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">     Version of the software</span>
 
 <span class="sd">    :return:  version number, and the release.</span>
 <span class="sd">    :rtype: string</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">v</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">versionMajor</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">versionMinor</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">versionRelease</span><span class="si">}</span><span class="s1">&#39;</span>
-    <span class="k">return</span> <span class="n">v</span></div>
-
-
-<span class="n">__version__</span> <span class="o">=</span> <span class="n">getVersion</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">__version__</span></div>
 
 
 <div class="viewcode-block" id="getHtml"><a class="viewcode-back" href="../../version.html#biogeme.version.getHtml">[docs]</a><span class="k">def</span> <span class="nf">getHtml</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Package information in HTML format</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Package information in HTML format</span>
 
 <span class="sd">    :return: HTML code.</span>
 <span class="sd">    :rtype: string</span>
@@ -164,14 +158,13 @@
 
 
 <div class="viewcode-block" id="getText"><a class="viewcode-back" href="../../version.html#biogeme.version.getText">[docs]</a><span class="k">def</span> <span class="nf">getText</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Package information in text format</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Package information in text format</span>
 
 <span class="sd">    :return: package information</span>
 <span class="sd">    :rtype: string</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">h</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;biogeme </span><span class="si">{</span><span class="n">getVersion</span><span class="p">()</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">versionDate</span><span class="si">}</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span>
-    <span class="n">h</span> <span class="o">+=</span> <span class="s1">&#39;Version entirely written in Python</span><span class="se">\n</span><span class="s1">&#39;</span>
     <span class="n">h</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;Home page: </span><span class="si">{</span><span class="n">urlBiogeme</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
     <span class="n">h</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;Submit questions to </span><span class="si">{</span><span class="n">urlForum</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
     <span class="n">h</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">author</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">department</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">university</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
@@ -179,7 +172,7 @@
 
 
 <div class="viewcode-block" id="getLaTeX"><a class="viewcode-back" href="../../version.html#biogeme.version.getLaTeX">[docs]</a><span class="k">def</span> <span class="nf">getLaTeX</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Package information in LaTeX format</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Package information in LaTeX format</span>
 
 <span class="sd">    :return: LaTeX comments</span>
 <span class="sd">    :rtype: string</span>
@@ -199,7 +192,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

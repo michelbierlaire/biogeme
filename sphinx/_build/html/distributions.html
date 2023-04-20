@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Distributions &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Distributions &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -29,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -46,7 +48,14 @@
 <li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
 <li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Distributions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.distributions">biogeme.distributions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.distributions">biogeme.distributions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.distributions.logisticcdf"><code class="docutils literal notranslate"><span class="pre">logisticcdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.distributions.lognormalpdf"><code class="docutils literal notranslate"><span class="pre">lognormalpdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.distributions.normalpdf"><code class="docutils literal notranslate"><span class="pre">normalpdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.distributions.triangularpdf"><code class="docutils literal notranslate"><span class="pre">triangularpdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.distributions.uniformpdf"><code class="docutils literal notranslate"><span class="pre">uniformpdf()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="draws.html">Draws</a></li>
@@ -79,8 +88,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Distributions</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Distributions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/distributions.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,10 +106,10 @@
 <span id="biogeme-distributions-module"></span><h2>biogeme.distributions module<a class="headerlink" href="#module-biogeme.distributions" title="Permalink to this heading"></a></h2>
 <p>Implementation of the pdf and CDF of common distributions</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
+<dt class="field-even">date<span class="colon">:</span></dt>
 <dd class="field-even"><p>Thu Apr 23 12:01:49 2015</p>
 </dd>
 </dl>
@@ -113,7 +122,7 @@
 \[f(x;\mu, \sigma) = \frac{1}
 {1+\exp\left(-\frac{x-\mu}{\sigma} \right)}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – value at which the CDF is evaluated.</p></li>
 <li><p><strong>mu</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – location parameter <span class="math notranslate nohighlight">\(\mu\)</span> of the logistic distribution.
@@ -122,14 +131,14 @@ Default: 0.</p></li>
 Default: 1.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>It is assumed that <span class="math notranslate nohighlight">\(\sigma &gt; 0\)</span>, but it is
 not verified by the code.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value of the logistic CDF.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float or biogeme.expression</p>
 </dd>
 </dl>
@@ -145,7 +154,7 @@ not verified by the code.</p>
 \frac{1}{x\sigma \sqrt{2\pi}}
 \exp{-\frac{(\ln x-\mu)^2}{2\sigma^2}}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – value at which the pdf is evaluated.</p></li>
 <li><p><strong>mu</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – location parameter <span class="math notranslate nohighlight">\(\mu\)</span> of the lognormal distribution.
@@ -154,14 +163,14 @@ Default: 0.</p></li>
 Default: 1.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>It is assumed that <span class="math notranslate nohighlight">\(\sigma &gt; 0\)</span>, but it is not
 verified by the code.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value of the lognormal pdf.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float or biogeme.expression</p>
 </dd>
 </dl>
@@ -176,7 +185,7 @@ verified by the code.</p>
 \[f(x;\mu, \sigma) =
 \frac{1}{\sigma \sqrt{2\pi}} \exp{-\frac{(x-\mu)^2}{2\sigma^2}}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – value at which the pdf is evaluated.</p></li>
 <li><p><strong>mu</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – location parameter <span class="math notranslate nohighlight">\(\mu\)</span> of the Normal distribution.
@@ -185,14 +194,14 @@ Default: 0.</p></li>
 Default: 1.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>It is assumed that <span class="math notranslate nohighlight">\(\sigma &gt; 0\)</span>, but it is not
 verified by the code.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value of the Normal pdf.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float or biogeme.expression</p>
 </dd>
 </dl>
@@ -210,7 +219,7 @@ verified by the code.</p>
 \text{if } c \leq x &lt; b \\0 &amp; \text{if } x \geq b.
 \end{array} \right.\end{split}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – argument of the pdf</p></li>
 <li><p><strong>a</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – lower bound <span class="math notranslate nohighlight">\(a\)</span> of the distribution. Default: -1.</p></li>
@@ -218,14 +227,14 @@ verified by the code.</p>
 <li><p><strong>c</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – mode <span class="math notranslate nohighlight">\(c\)</span> of the distribution. Default: 0.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>It is assumed that <span class="math notranslate nohighlight">\(a &lt;  c &lt; b\)</span>, but it is
 not verified by the code.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value of the triangular pdf.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float or biogeme.expression</p>
 </dd>
 </dl>
@@ -241,21 +250,21 @@ not verified by the code.</p>
 \frac{1}{b-a} &amp; \text{for } x \in [a, b] \\
 0 &amp; \text{otherwise}\end{array} \right.\end{split}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – argument of the pdf</p></li>
 <li><p><strong>a</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – lower bound <span class="math notranslate nohighlight">\(a\)</span> of the distribution. Default: -1.</p></li>
 <li><p><strong>b</strong> (<em>float</em><em> or </em><em>biogeme.expression</em>) – upper bound <span class="math notranslate nohighlight">\(b\)</span> of the distribution. Default: 1.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Note</dt>
+<dt class="field-even">Note<span class="colon">:</span></dt>
 <dd class="field-even"><p>It is assumed that <span class="math notranslate nohighlight">\(a &lt; b\)</span>, but it is
 not verified by the code.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value of the uniform pdf.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float or biogeme.expression</p>
 </dd>
 </dl>
@@ -275,7 +284,7 @@ not verified by the code.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

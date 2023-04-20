@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Log likelihood &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Log likelihood &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -29,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -52,7 +54,13 @@
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Log likelihood</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.loglikelihood">biogeme.loglikelihood module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.loglikelihood">biogeme.loglikelihood module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.loglikelihood.likelihoodregression"><code class="docutils literal notranslate"><span class="pre">likelihoodregression()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.loglikelihood.loglikelihood"><code class="docutils literal notranslate"><span class="pre">loglikelihood()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.loglikelihood.loglikelihoodregression"><code class="docutils literal notranslate"><span class="pre">loglikelihoodregression()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.loglikelihood.mixedloglikelihood"><code class="docutils literal notranslate"><span class="pre">mixedloglikelihood()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
@@ -79,8 +87,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Log likelihood</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Log likelihood</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/loglikelihood.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,10 +105,10 @@
 <span id="biogeme-loglikelihood-module"></span><h2>biogeme.loglikelihood module<a class="headerlink" href="#module-biogeme.loglikelihood" title="Permalink to this heading"></a></h2>
 <p>Functions to calculate the log likelihood</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
+<dt class="field-even">date<span class="colon">:</span></dt>
 <dd class="field-even"><p>Fri Mar 29 17:11:44 2019</p>
 </dd>
 </dl>
@@ -109,7 +117,7 @@
 <span class="sig-prename descclassname"><span class="pre">biogeme.loglikelihood.</span></span><span class="sig-name descname"><span class="pre">likelihoodregression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/loglikelihood.html#likelihoodregression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.loglikelihood.likelihoodregression" title="Permalink to this definition"></a></dt>
 <dd><p>Computes likelihood function of a regression model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>meas</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – An expression providing the value <span class="math notranslate nohighlight">\(y\)</span> of the measure
 for the current observation.</p></li>
@@ -119,7 +127,7 @@ for the current observation.</p></li>
 standard error <span class="math notranslate nohighlight">\(\sigma\)</span> of the error term.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>The likelihood of the regression, assuming a normal distribution,
 that is</p>
 <div class="math notranslate nohighlight">
@@ -127,7 +135,7 @@ that is</p>
 <p>where <span class="math notranslate nohighlight">\(\phi(\cdot)\)</span> is the pdf of the normal distribution.</p>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
 </dd>
 </dl>
@@ -138,13 +146,13 @@ that is</p>
 <span class="sig-prename descclassname"><span class="pre">biogeme.loglikelihood.</span></span><span class="sig-name descname"><span class="pre">loglikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/loglikelihood.html#loglikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.loglikelihood.loglikelihood" title="Permalink to this definition"></a></dt>
 <dd><p>Simply computes the log of the probability</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>prob</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – An expression providing the value of the probability.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the logarithm of the probability.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
 </dd>
 </dl>
@@ -155,7 +163,7 @@ that is</p>
 <span class="sig-prename descclassname"><span class="pre">biogeme.loglikelihood.</span></span><span class="sig-name descname"><span class="pre">loglikelihoodregression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/loglikelihood.html#loglikelihoodregression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.loglikelihood.loglikelihoodregression" title="Permalink to this definition"></a></dt>
 <dd><p>Computes log likelihood function of a regression model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>meas</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – An expression providing the value <span class="math notranslate nohighlight">\(y\)</span> of the
 measure for the current observation.</p></li>
@@ -165,7 +173,7 @@ model for the current observation.</p></li>
 the standard error <span class="math notranslate nohighlight">\(\sigma\)</span> of the error term.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the likelihood of the regression, assuming a normal distribution,
 that is</p>
 </dd>
@@ -174,7 +182,7 @@ that is</p>
 \[-\left( \frac{(y-m)^2}{2\sigma^2} \right) -
 \frac{1}{2}\log(\sigma^2) - \frac{1}{2}\log(2\pi)\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
 </dd>
 </dl>
@@ -185,7 +193,7 @@ that is</p>
 <span class="sig-prename descclassname"><span class="pre">biogeme.loglikelihood.</span></span><span class="sig-name descname"><span class="pre">mixedloglikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/loglikelihood.html#mixedloglikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.loglikelihood.mixedloglikelihood" title="Permalink to this definition"></a></dt>
 <dd><p>Compute a simulated loglikelihood function</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>prob</strong> – An expression providing the value of the
 probability. Although it is not formally necessary,
 the expression should contain one or more random
@@ -196,7 +204,7 @@ is defined as</p>
 <div class="math notranslate nohighlight">
 \[P(i|\xi_1,\ldots,\xi_L)\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><p>the simulated loglikelihood, given by</p>
 <div class="math notranslate nohighlight">
 \[\ln\left(\sum_{r=1}^R
@@ -205,7 +213,7 @@ P(i|\xi^r_1,\ldots,\xi^r_L) \right)\]</div>
 is the rth draw of the random variable <span class="math notranslate nohighlight">\(\xi_j\)</span>.</p>
 </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
 </dd>
 </dl>
@@ -225,7 +233,7 @@ is the rth draw of the random variable <span class="math notranslate nohighlight
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

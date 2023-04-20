@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.algorithms &mdash; Biogeme 3.2.9 documentation</title>
+  <title>biogeme.algorithms &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -72,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>biogeme.algorithms</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">biogeme.algorithms</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -102,27 +104,25 @@
 <span class="c1"># pylint: disable=too-many-statements, too-many-return-statements</span>
 <span class="c1"># pylint: disable=bare-except</span>
 
-
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.linalg</span> <span class="k">as</span> <span class="nn">la</span>
 <span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
-<span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
 
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="functionToMinimize"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.functionToMinimize">[docs]</a><span class="k">class</span> <span class="nc">functionToMinimize</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;This is an abstract class. The actual function to minimize</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This is an abstract class. The actual function to minimize</span>
 <span class="sd">    must be implemented in a concrete class deriving from this one.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="functionToMinimize.setVariables"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.functionToMinimize.setVariables">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">setVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;Set the values of the variables for which the function</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the values of the variables for which the function</span>
 <span class="sd">        has to be calculated.</span>
 
 <span class="sd">        :param x: values</span>
@@ -131,7 +131,7 @@
 
 <div class="viewcode-block" id="functionToMinimize.f"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.functionToMinimize.f">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the value of the function</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the value of the function</span>
 
 <span class="sd">        :param batch: for data driven functions (such as a log</span>
 <span class="sd">                      likelikood function), it is possible to</span>
@@ -149,7 +149,7 @@
 
 <div class="viewcode-block" id="functionToMinimize.f_g"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.functionToMinimize.f_g">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">f_g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the value of the function and the gradient</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the value of the function and the gradient</span>
 
 <span class="sd">        :param batch: for data driven functions (such as a log</span>
 <span class="sd">                      likelikood function), it is possible to</span>
@@ -167,7 +167,7 @@
 
 <div class="viewcode-block" id="functionToMinimize.f_g_h"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.functionToMinimize.f_g_h">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">f_g_h</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the value of the function, the gradient and the Hessian</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the value of the function, the gradient and the Hessian</span>
 
 <span class="sd">        :param batch: for data driven functions (such as a log</span>
 <span class="sd">                      likelikood function), it is possible to</span>
@@ -185,7 +185,7 @@
 
 <div class="viewcode-block" id="functionToMinimize.f_g_bhhh"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.functionToMinimize.f_g_bhhh">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">f_g_bhhh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the value of the function, the gradient and</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the value of the function, the gradient and</span>
 <span class="sd">        the BHHH matrix</span>
 
 <span class="sd">        :param batch: for data driven functions (such as a log</span>
@@ -204,17 +204,17 @@
 
 
 <div class="viewcode-block" id="bioBounds"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds">[docs]</a><span class="k">class</span> <span class="nc">bioBounds</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;This class is designed for the management of simple bound constraints&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class is designed for the management of simple bound constraints&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="bioBounds.__init__"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param b: list of tuples (ell,u) containing the lower and</span>
 <span class="sd">                  upper bounds for each free parameter.</span>
 
 <span class="sd">        :type b: list(tuple)</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the bounds are incompatible</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the bounds are incompatible</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -231,32 +231,28 @@
             <span class="k">return</span> <span class="n">x</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">b</span>
-        <span class="sd">&quot;&quot;&quot;list of tuples (ell,u) containing the lower and upper bounds for</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list of tuples (ell,u) containing the lower and upper bounds for</span>
 <span class="sd">        each free parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>  <span class="c1">#: number of optimization variables</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">lowerBounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">noneToMinusInfinity</span><span class="p">(</span><span class="n">bb</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">b</span><span class="p">]</span>
-        <span class="sd">&quot;&quot;&quot; List of lower bounds &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; List of lower bounds &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">upperBounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">noneToPlusInfinity</span><span class="p">(</span><span class="n">bb</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">b</span><span class="p">]</span>
-        <span class="sd">&quot;&quot;&quot; List of upper bounds &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; List of upper bounds &quot;&quot;&quot;</span>
 
         <span class="n">wrongBounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">bb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">bb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">b</span>
-                <span class="k">if</span> <span class="n">bb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="p">]</span>
+            <span class="p">[</span><span class="n">bb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">bb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">bb</span> <span class="ow">in</span> <span class="n">b</span> <span class="k">if</span> <span class="n">bb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">wrongBounds</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Incompatible bounds for indice(s) &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">wrongBounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">: &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">wrongBounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="p">[</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">wrongBounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
@@ -265,8 +261,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="bioBounds.project"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.project">[docs]</a>    <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;Project a point onto the feasible domain defined by the bounds.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Project a point onto the feasible domain defined by the bounds.</span>
 
 <span class="sd">        :param x: point to project</span>
 <span class="sd">        :type x: numpy.array</span>
@@ -275,14 +270,12 @@
 <span class="sd">        :return: projected point</span>
 <span class="sd">        :rtype: numpy.array</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">                are inconsistent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
@@ -293,7 +286,7 @@
         <span class="k">return</span> <span class="n">y</span></div>
 
 <div class="viewcode-block" id="bioBounds.intersect"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.intersect">[docs]</a>    <span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">otherBounds</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a bounds object representing the intersection of two regions.</span>
 
 <span class="sd">        :param otherBounds: other bound object that must be intersected.</span>
@@ -302,12 +295,12 @@
 <span class="sd">        :return:  bound object, intersection of the two.</span>
 <span class="sd">        :rtype: class bioBounds</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">              are inconsistent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">otherBounds</span><span class="o">.</span><span class="n">n</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="n">otherBounds</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1"> &#39;</span> <span class="sa">f</span><span class="s1">&#39;and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
 
@@ -326,7 +319,7 @@
         <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="bioBounds.intersectionWithTrustRegion"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.intersectionWithTrustRegion">[docs]</a>    <span class="k">def</span> <span class="nf">intersectionWithTrustRegion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a bioBounds object representing the intersection</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a bioBounds object representing the intersection</span>
 <span class="sd">        between the feasible domain and the trust region.</span>
 
 <span class="sd">        :param x: center of the trust region</span>
@@ -338,19 +331,17 @@
 <span class="sd">        :return: intersection between the feasible region and the trus region</span>
 <span class="sd">        :rtype: class bioBounds</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">                are inconsistent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">trustRegion</span> <span class="o">=</span> <span class="n">bioBounds</span><span class="p">([(</span><span class="n">xk</span> <span class="o">-</span> <span class="n">delta</span><span class="p">,</span> <span class="n">xk</span> <span class="o">+</span> <span class="n">delta</span><span class="p">)</span> <span class="k">for</span> <span class="n">xk</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">trustRegion</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="bioBounds.subspace"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.subspace">[docs]</a>    <span class="k">def</span> <span class="nf">subspace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selectedVariables</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generate a bioBounds object for selected variables</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a bioBounds object for selected variables</span>
 
 <span class="sd">        :param selectedVariables: boolean vector. If an entry is True,</span>
 <span class="sd">                   the corresponding variables is considered.</span>
@@ -359,20 +350,18 @@
 <span class="sd">        :return: bound object</span>
 <span class="sd">        :rtype: class bioBounds</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">                are inconsistent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selectedVariables</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Incompatible size: &#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">selectedVariables</span><span class="p">)</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">bioBounds</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">selectedVariables</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span><span class="p">]</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">bioBounds</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="n">selectedVariables</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="bioBounds.feasible"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.feasible">[docs]</a>    <span class="k">def</span> <span class="nf">feasible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Check if point verifies the bound constraints</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if point verifies the bound constraints</span>
 
 <span class="sd">        :param x: point to project</span>
 <span class="sd">        :type x: numpy.array</span>
@@ -380,13 +369,11 @@
 <span class="sd">        :return: True if x is feasible, False otherwise.</span>
 <span class="sd">        :rtype: bool</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">                 are inconsistent</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: &#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: &#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">lowerBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -401,7 +388,7 @@
         <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="bioBounds.maximumStep"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.maximumStep">[docs]</a>    <span class="k">def</span> <span class="nf">maximumStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the maximum step that can be performed</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the maximum step that can be performed</span>
 <span class="sd">        along a direction while staying feasible.</span>
 
 <span class="sd">        :param x: reference point</span>
@@ -414,12 +401,12 @@
 <span class="sd">                 and the list of indices achieving this value.</span>
 <span class="sd">        :rtype: float, int</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the point is infeasible</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the point is infeasible</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">feasible</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Infeasible point: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Infeasible point: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span>
@@ -435,8 +422,7 @@
         <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">alpha</span> <span class="o">==</span> <span class="n">m</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="bioBounds.activity"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.activity">[docs]</a>    <span class="k">def</span> <span class="nf">activity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;Determines the activity status of each variable.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines the activity status of each variable.</span>
 
 <span class="sd">        :param x: point for which the activity must be determined.</span>
 <span class="sd">        :type x: numpy.array</span>
@@ -454,38 +440,32 @@
 
 <span class="sd">        :rtype: numpy.array</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the vector x is</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the vector x is</span>
 <span class="sd">                    not feasible</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">                    of x and bounds do not match.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">feasible</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is not feasible for the &#39;</span> <span class="sa">f</span><span class="s1">&#39;bounds </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
 
         <span class="n">activity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lowerBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-                <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">epsilon</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowerBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">epsilon</span><span class="p">:</span>
                 <span class="n">activity</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">elif</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">upperBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">epsilon</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">upperBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">upperBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">epsilon</span>
             <span class="p">):</span>
                 <span class="n">activity</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">activity</span></div>
 
 <div class="viewcode-block" id="bioBounds.breakpoints"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.breakpoints">[docs]</a>    <span class="k">def</span> <span class="nf">breakpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Projects the direction d, starting from x,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Projects the direction d, starting from x,</span>
 <span class="sd">        on the intersection of the bound constraints</span>
 
 <span class="sd">        :param x: current point</span>
@@ -499,16 +479,14 @@
 <span class="sd">                 breakpoint.</span>
 <span class="sd">        :rtype: list(tuple(int,float))</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions</span>
 <span class="sd">                are inconsistent</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if x is infeasible</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if x is infeasible</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">bp</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upperBounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
@@ -519,12 +497,12 @@
         <span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">b</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bp</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;Infeasible point&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="s1">&#39;Infeasible point&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">bp</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="bioBounds.generalizedCauchyPoint"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bioBounds.generalizedCauchyPoint">[docs]</a>    <span class="k">def</span> <span class="nf">generalizedCauchyPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xk</span><span class="p">,</span> <span class="n">gk</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">direction</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Implementation of Step 2 of the Specific Algorithm by</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Implementation of Step 2 of the Specific Algorithm by</span>
 <span class="sd">        `Conn et al. (1988)`_.</span>
 
 <span class="sd">        .. _`Conn et al. (1988)`: https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf</span>
@@ -549,26 +527,20 @@
 <span class="sd">        :return: generalized Cauchy point based on inexact line search.</span>
 <span class="sd">        :rtype: numpy.array. Dimension n.</span>
 
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if the dimensions are</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if the dimensions are</span>
 <span class="sd">               inconsistent</span>
-<span class="sd">        :raises biogeme.exceptions.biogemeError: if xk is infeasible</span>
+<span class="sd">        :raises biogeme.exceptions.BiogemeError: if xk is infeasible</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xk</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">xk</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">xk</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gk</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">gk</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">gk</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="ow">or</span> <span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size: </span><span class="si">{</span><span class="n">H</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">feasible</span><span class="p">(</span><span class="n">xk</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;Infeasible iterate&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="s1">&#39;Infeasible iterate&#39;</span><span class="p">)</span>
 
         <span class="n">x</span> <span class="o">=</span> <span class="n">xk</span>
         <span class="n">g</span> <span class="o">=</span> <span class="n">gk</span> <span class="o">-</span> <span class="n">H</span> <span class="o">@</span> <span class="n">xk</span>
@@ -583,8 +555,7 @@
         <span class="k">if</span> <span class="n">fprime</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;GCP: direction </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1"> is not a descent &#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39;direction at </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">.&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;GCP: direction </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s1"> is not a descent &#39;</span> <span class="sa">f</span><span class="s1">&#39;direction at </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">.&#39;</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;GCP: not a descent direction.&#39;</span><span class="p">)</span>
@@ -630,8 +601,7 @@
     <span class="n">taubar</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.6666</span><span class="p">,</span>
     <span class="n">mu</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
 <span class="p">):</span>
-
-    <span class="sd">&quot;&quot;&quot;Modified Cholesky factorization by `Schnabel and Eskow (1999)`_.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modified Cholesky factorization by `Schnabel and Eskow (1999)`_.</span>
 
 <span class="sd">    .. _`Schnabel and Eskow (1999)`: https://doi.org/10.1137/s105262349833266x</span>
 
@@ -660,16 +630,16 @@
 <span class="sd">                    where :math:`A + E = PLL^TP^T`.</span>
 <span class="sd">    :rtype: numpy.array, numpy.array, numpy.array</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the matrix A is not square.</span>
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the matrix A is not symmetric.</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the matrix A is not square.</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the matrix A is not symmetric.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">pivot</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
         <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
             <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">/</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
-            <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
-            <span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">permute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
         <span class="n">A</span><span class="p">[[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]]</span>
@@ -680,10 +650,10 @@
     <span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="n">dim</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dim</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The matrix must be square&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="s1">&#39;The matrix must be square&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">A</span> <span class="o">-</span> <span class="n">A</span><span class="o">.</span><span class="n">T</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)):</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="s1">&#39;The matrix must be symmetric&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="s1">&#39;The matrix must be symmetric&#39;</span><span class="p">)</span>
 
     <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
     <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span>
@@ -703,9 +673,7 @@
             <span class="c1"># Switch rows and columns of i and j of A</span>
             <span class="n">permute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">dim</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="p">(</span>
-                <span class="n">A</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">A</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()[</span><span class="n">j</span><span class="p">]</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">A</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()[</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
             <span class="o">&lt;</span> <span class="o">-</span><span class="n">mu</span> <span class="o">*</span> <span class="n">gamma</span>
         <span class="p">):</span>
             <span class="n">phaseOne</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># go to phase two</span>
@@ -729,9 +697,7 @@
             <span class="c1"># Calculate lower Gerschgorin bounds of A[k+1]</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
                 <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
-                    <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                    <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">dim</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                    <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">dim</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                 <span class="p">)</span>
             <span class="c1"># Modified Cholesky Decomposition</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
@@ -741,17 +707,15 @@
                     <span class="c1"># Switch rows and columns of i and j of A</span>
                     <span class="n">permute</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
                 <span class="c1"># Calculate E[j, j] and add to diagonal</span>
-                <span class="n">norm_j</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">dim</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                <span class="n">E</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
-                    <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="n">norm_j</span><span class="p">,</span> <span class="n">taubar</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">),</span> <span class="n">deltaPrev</span>
-                <span class="p">)</span>
+                <span class="n">norm_j</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">dim</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">E</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">delta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="n">norm_j</span><span class="p">,</span> <span class="n">taubar</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">),</span> <span class="n">deltaPrev</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">delta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">delta</span>
                     <span class="n">deltaPrev</span> <span class="o">=</span> <span class="n">delta</span>  <span class="c1"># deltaPrev will contain E_inf</span>
                 <span class="c1"># Update Gerschgorin bound estimates</span>
                 <span class="k">if</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="n">norm_j</span><span class="p">:</span>
                     <span class="n">temp</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">norm_j</span> <span class="o">/</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
-                    <span class="n">g</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:,</span> <span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">temp</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="n">temp</span>
                 <span class="c1"># perform jth iteration of factorization</span>
                 <span class="n">pivot</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
 
@@ -777,7 +741,7 @@
 
 
 <div class="viewcode-block" id="lineSearch"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.lineSearch">[docs]</a><span class="k">def</span> <span class="nf">lineSearch</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">alpha0</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">beta1</span><span class="o">=</span><span class="mf">1.0e-4</span><span class="p">,</span> <span class="n">beta2</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span> <span class="n">lbd</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Calculate a step along a direction that satisfies both Wolfe conditions</span>
 
 
@@ -811,30 +775,30 @@
 <span class="sd">    :return: a step verifing both Wolfe conditions</span>
 <span class="sd">    :rtype: float</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if ``lbd`` :math:`\\leq` 1</span>
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if ``alpha0`` :math:`\\leq` 0</span>
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if ``beta1`` :math:`\\geq` beta2</span>
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if ``d`` is not a descent</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if ``lbd`` :math:`\\leq` 1</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if ``alpha0`` :math:`\\leq` 0</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if ``beta1`` :math:`\\geq` beta2</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if ``d`` is not a descent</span>
 <span class="sd">                                             direction</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">lbd</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;lambda is </span><span class="si">{</span><span class="n">lbd</span><span class="si">}</span><span class="s1"> and must be &gt; 1&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;lambda is </span><span class="si">{</span><span class="n">lbd</span><span class="si">}</span><span class="s1"> and must be &gt; 1&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">alpha0</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;alpha0 is </span><span class="si">{</span><span class="n">alpha0</span><span class="si">}</span><span class="s1"> and must be &gt; 0&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;alpha0 is </span><span class="si">{</span><span class="n">alpha0</span><span class="si">}</span><span class="s1"> and must be &gt; 0&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">beta1</span> <span class="o">&gt;=</span> <span class="n">beta2</span><span class="p">:</span>
         <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Incompatible Wolfe cond. parameters: &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;beta1= </span><span class="si">{</span><span class="n">beta1</span><span class="si">}</span><span class="s1"> is greater than &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;beta2=</span><span class="si">{</span><span class="n">beta2</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="p">)</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">nfev</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">deriv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">deriv</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;d is not a descent direction: </span><span class="si">{</span><span class="n">deriv</span><span class="si">}</span><span class="s1"> &gt;= 0&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;d is not a descent direction: </span><span class="si">{</span><span class="n">deriv</span><span class="si">}</span><span class="s1"> &gt;= 0&#39;</span><span class="p">)</span>
 
     <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha0</span>
     <span class="n">alphal</span> <span class="o">=</span> <span class="mi">0</span>
@@ -862,7 +826,7 @@
 
 
 <div class="viewcode-block" id="relativeGradient"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.relativeGradient">[docs]</a><span class="k">def</span> <span class="nf">relativeGradient</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">typx</span><span class="p">,</span> <span class="n">typf</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates the relative gradients.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the relative gradients.</span>
 
 <span class="sd">    It is typically used as stopping criterion.</span>
 
@@ -886,10 +850,7 @@
 <span class="sd">    :rtype: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">relgrad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">typx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">typf</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-        <span class="p">]</span>
+        <span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">typx</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">typf</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))]</span>
     <span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">relgrad</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
@@ -898,10 +859,8 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">max</span></div>
 
 
-<div class="viewcode-block" id="newtonLineSearch"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.newtonLineSearch">[docs]</a><span class="k">def</span> <span class="nf">newtonLineSearch</span><span class="p">(</span>
-    <span class="n">fct</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="newtonLineSearch"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.newtonLineSearch">[docs]</a><span class="k">def</span> <span class="nf">newtonLineSearch</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Newton method with inexact line search (Wolfe conditions)</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
@@ -975,9 +934,7 @@
         <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">maxiter</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Maximum number of iterations reached: </span><span class="si">{</span><span class="n">maxiter</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> relgrad=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; alpha=</span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> relgrad=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; alpha=</span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">messages</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;Algorithm&#39;</span><span class="p">:</span> <span class="s1">&#39;Unconstrained Newton with line search&#39;</span><span class="p">,</span>
@@ -993,7 +950,7 @@
 
 
 <div class="viewcode-block" id="trustRegionIntersection"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.trustRegionIntersection">[docs]</a><span class="k">def</span> <span class="nf">trustRegionIntersection</span><span class="p">(</span><span class="n">dc</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates the intersection with the boundary of the trust region.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the intersection with the boundary of the trust region.</span>
 
 <span class="sd">    Consider a trust region of radius :math:`\\delta`, centered at</span>
 <span class="sd">    :math:`\\hat{x}`. Let :math:`x_c` be in the trust region, and</span>
@@ -1025,7 +982,7 @@
 
 
 <div class="viewcode-block" id="cauchyNewtonDogleg"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.cauchyNewtonDogleg">[docs]</a><span class="k">def</span> <span class="nf">cauchyNewtonDogleg</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">H</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the Cauchy, the Newton and the dogleg points.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Cauchy, the Newton and the dogleg points.</span>
 
 <span class="sd">    The Cauchy point is defined as</span>
 
@@ -1062,7 +1019,7 @@
 <span class="sd">    :return: tuple with Cauchy point, Newton point, Dogleg point</span>
 <span class="sd">    :rtype: numpy.array, numpy.array, numpy.array</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the quadratic model is</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the quadratic model is</span>
 <span class="sd">        not convex.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1073,8 +1030,8 @@
     <span class="n">negativeEigenvalue</span> <span class="o">=</span> <span class="n">E</span> <span class="o">&lt;</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">negativeEigenvalue</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">E</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-            <span class="s1">&#39;The dogleg method requires a &#39;</span> <span class="s1">&#39;convex optimization problem.&#39;</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
+            <span class="s1">&#39;The dogleg method requires a convex optimization problem.&#39;</span>
         <span class="p">)</span>
 
     <span class="n">y3</span> <span class="o">=</span> <span class="o">-</span><span class="n">P</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">g</span>
@@ -1086,7 +1043,7 @@
 
 
 <div class="viewcode-block" id="dogleg"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.dogleg">[docs]</a><span class="k">def</span> <span class="nf">dogleg</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Find an approximation of the trust region subproblem using</span>
 <span class="sd">    the dogleg method</span>
 
@@ -1168,7 +1125,7 @@
 
 
 <div class="viewcode-block" id="truncatedConjugateGradient"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.truncatedConjugateGradient">[docs]</a><span class="k">def</span> <span class="nf">truncatedConjugateGradient</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">H</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Find an approximation of the trust region subproblem using the</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find an approximation of the trust region subproblem using the</span>
 <span class="sd">    truncated conjugate gradient method</span>
 
 <span class="sd">    :param g: gradient of the quadratic model.</span>
@@ -1252,7 +1209,7 @@
     <span class="n">eta1</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">eta2</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Newton method with trust region</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Newton method with trust region</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: optimization.functionToMinimize</span>
@@ -1365,7 +1322,7 @@
         <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">maxiter</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Maximum number of iterations reached: </span><span class="si">{</span><span class="n">maxiter</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> relgrad=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;delta=</span><span class="si">{</span><span class="n">delta</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;rho=</span><span class="si">{</span><span class="n">rho</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -1385,7 +1342,7 @@
 
 
 <div class="viewcode-block" id="bfgs"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.bfgs">[docs]</a><span class="k">def</span> <span class="nf">bfgs</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Update the BFGS matrix. Formula (13.12) of `Bierlaire (2015)`_</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update the BFGS matrix. Formula (13.12) of `Bierlaire (2015)`_</span>
 <span class="sd">    where the method proposed by `Powell (1977)`_ is applied</span>
 
 <span class="sd">    .. _`Bierlaire (2015)`: http://optimizationprinciplesalgorithms.com/</span>
@@ -1417,7 +1374,7 @@
 
 
 <div class="viewcode-block" id="inverseBfgs"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.inverseBfgs">[docs]</a><span class="k">def</span> <span class="nf">inverseBfgs</span><span class="p">(</span><span class="n">Hinv</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Update the inverse BFGS matrix. Formula (13.13) of `Bierlaire (2015)`_</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Update the inverse BFGS matrix. Formula (13.13) of `Bierlaire (2015)`_</span>
 
 <span class="sd">    .. _`Bierlaire (2015)`: http://optimizationprinciplesalgorithms.com/</span>
 
@@ -1453,7 +1410,7 @@
     <span class="n">eps</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span><span class="p">,</span>
     <span class="n">maxiter</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;BFGS method with inexact line search (Wolfe conditions)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BFGS method with inexact line search (Wolfe conditions)</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: optimization.functionToMinimize</span>
@@ -1482,7 +1439,7 @@
 
 <span class="sd">    :rtype: numpy.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the dimensions of the</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the dimensions of the</span>
 <span class="sd">             matrix initBfgs do not match the length of x0.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1502,7 +1459,7 @@
                 <span class="sa">f</span><span class="s1">&#39;matrix and not a </span><span class="si">{</span><span class="n">initBfgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="s1">&#39;x</span><span class="si">{initBfgs.shape[1]}</span><span class="s1"> matrix.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
         <span class="n">Hinv</span> <span class="o">=</span> <span class="n">initBfgs</span>
     <span class="n">typx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">xk</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">typf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -1542,9 +1499,7 @@
         <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">maxiter</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Maximum number of iterations reached: </span><span class="si">{</span><span class="n">maxiter</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> relgrad=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; alpha=</span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> relgrad=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; alpha=</span><span class="si">{</span><span class="n">alpha</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">messages</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;Algorithm&#39;</span><span class="p">:</span> <span class="s1">&#39;Inverse BFGS with line search&#39;</span><span class="p">,</span>
         <span class="s1">&#39;Relative gradient&#39;</span><span class="p">:</span> <span class="n">relgrad</span><span class="p">,</span>
@@ -1568,7 +1523,7 @@
     <span class="n">eta1</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">eta2</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;BFGS method with trust region</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BFGS method with trust region</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: optimization.functionToMinimize</span>
@@ -1611,7 +1566,7 @@
 
 <span class="sd">    :rtype: numpy.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the dimensions of the</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the dimensions of the</span>
 <span class="sd">              matrix initBfgs do not match the length of x0.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1631,7 +1586,7 @@
                 <span class="sa">f</span><span class="s1">&#39;matrix and not a </span><span class="si">{</span><span class="n">initBfgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;x</span><span class="si">{</span><span class="n">initBfgs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1"> matrix.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
         <span class="n">H</span> <span class="o">=</span> <span class="n">initBfgs</span>
     <span class="n">typx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">xk</span><span class="p">)</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="n">typf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -1701,7 +1656,7 @@
         <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">maxiter</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Maximum number of iterations reached: </span><span class="si">{</span><span class="n">maxiter</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> relgrad=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="sa">f</span><span class="s1">&#39; delta=</span><span class="si">{</span><span class="n">delta</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;rho=</span><span class="si">{</span><span class="n">rho</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -1728,7 +1683,7 @@
     <span class="n">infeasibleIterate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">tol</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Find an approximation of the solution of the trust region</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find an approximation of the solution of the trust region</span>
 <span class="sd">    subproblem using the truncated conjugate gradient method within</span>
 <span class="sd">    the subspace of free variables. Free variables are those</span>
 <span class="sd">    corresponding to inactive constraints at the generalized Cauchy</span>
@@ -1773,18 +1728,18 @@
 
 <span class="sd">    :rtype: numpy.array, int</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the dimensions are inconsistent</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the dimensions are inconsistent</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">xk</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid xk: </span><span class="si">{</span><span class="n">xk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid xk: </span><span class="si">{</span><span class="n">xk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">gk</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid gk: </span><span class="si">{</span><span class="n">gk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid gk: </span><span class="si">{</span><span class="n">gk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">Hk</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid Hk: </span><span class="si">{</span><span class="n">Hk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid Hk: </span><span class="si">{</span><span class="n">Hk</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="c1"># First, we calculate the intersection between the trust region on</span>
     <span class="c1"># the bounds. The trust region is also a bound constraint (based</span>
@@ -1876,7 +1831,7 @@
     <span class="n">eta2</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
     <span class="n">enlargingFactor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Trust region algorithm for problems with simple bounds</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trust region algorithm for problems with simple bounds</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: optimization.functionToMinimize</span>
@@ -1948,15 +1903,13 @@
 
 <span class="sd">    :rtype: numpay.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if the dimensions of the</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if the dimensions of the</span>
 <span class="sd">             matrix initBfgs do not match the length of x0.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Incompatible size:&#39;</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incompatible size:&#39;</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">bounds</span><span class="o">.</span><span class="n">feasible</span><span class="p">(</span><span class="n">x0</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -2054,9 +2007,7 @@
                 <span class="n">denom</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">H</span> <span class="o">@</span> <span class="n">step</span><span class="p">)</span>
                 <span class="n">rho</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="n">denom</span>
                 <span class="n">failed</span> <span class="o">=</span> <span class="n">rho</span> <span class="o">&lt;</span> <span class="n">eta1</span>
-            <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">e</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">xc</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
                 <span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
 
             <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
@@ -2070,7 +2021,6 @@
                     <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">numberOfTrueHessian</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">numberOfMatrices</span><span class="p">)</span>
                     <span class="o">&lt;=</span> <span class="n">proportionTrueHessian</span>
                 <span class="p">):</span>
-
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">fc</span><span class="p">,</span> <span class="n">gc</span><span class="p">,</span> <span class="n">Hc</span> <span class="o">=</span> <span class="n">fct</span><span class="o">.</span><span class="n">f_g_h</span><span class="p">()</span>
                         <span class="n">nfev</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -2090,7 +2040,7 @@
                             <span class="n">y</span> <span class="o">=</span> <span class="n">gc</span> <span class="o">-</span> <span class="n">g</span>
                             <span class="n">Hc</span> <span class="o">=</span> <span class="n">bfgs</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
                         <span class="n">fghCalculated</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">except</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">:</span>
+                    <span class="k">except</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">:</span>
                         <span class="c1"># Failure: reduce the trust region</span>
                         <span class="n">delta</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">delta</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">la</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
                         <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
@@ -2104,7 +2054,7 @@
                         <span class="n">Hc</span> <span class="o">=</span> <span class="n">bfgs</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
                         <span class="n">numberOfMatrices</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="n">fghCalculated</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">except</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">:</span>
+                    <span class="k">except</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">:</span>
                         <span class="c1"># Failure: reduce the trust region</span>
                         <span class="n">delta</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">delta</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">la</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
                         <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
@@ -2124,19 +2074,14 @@
                         <span class="n">status</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
 
                     <span class="n">projectedGradient</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">xk</span> <span class="o">-</span> <span class="n">g</span><span class="p">)</span> <span class="o">-</span> <span class="n">xk</span>
-                    <span class="n">relgrad</span> <span class="o">=</span> <span class="n">relativeGradient</span><span class="p">(</span>
-                        <span class="n">xk</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">projectedGradient</span><span class="p">,</span> <span class="n">typx</span><span class="p">,</span> <span class="n">typf</span>
-                    <span class="p">)</span>
+                    <span class="n">relgrad</span> <span class="o">=</span> <span class="n">relativeGradient</span><span class="p">(</span><span class="n">xk</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">projectedGradient</span><span class="p">,</span> <span class="n">typx</span><span class="p">,</span> <span class="n">typf</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">relgrad</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">:</span>
-                        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;Relative gradient = </span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1"> &lt;= </span><span class="si">{</span><span class="n">tol</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1">&#39;</span>
-                        <span class="p">)</span>
+                        <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Relative gradient = </span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1"> &lt;= </span><span class="si">{</span><span class="n">tol</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1">&#39;</span>
                         <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">relchange</span> <span class="o">=</span> <span class="n">relativeChange</span><span class="p">(</span><span class="n">xk</span><span class="p">,</span> <span class="n">xpred</span><span class="p">,</span> <span class="n">typx</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">relchange</span> <span class="o">&lt;=</span> <span class="n">steptol</span><span class="p">:</span>
                         <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="sa">f</span><span class="s1">&#39;Relative change = &#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">relchange</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1"> &lt;= </span><span class="si">{</span><span class="n">steptol</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1">&#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;Relative change = &#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">relchange</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1"> &lt;= </span><span class="si">{</span><span class="n">steptol</span><span class="si">:</span><span class="s1">.2g</span><span class="si">}</span><span class="s1">&#39;</span>
                         <span class="p">)</span>
                         <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">delta</span> <span class="o">&lt;=</span> <span class="n">minDelta</span><span class="p">:</span>
@@ -2146,13 +2091,13 @@
                 <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Maximum number of iterations reached: </span><span class="si">{</span><span class="n">maxiter</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="n">cont</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">relchange</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> projected &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;rel. grad.=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;delta=</span><span class="si">{</span><span class="n">delta</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> rho=</span><span class="si">{</span><span class="n">rho</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> f=</span><span class="si">{</span><span class="n">f</span><span class="si">:</span><span class="s1">10.7g</span><span class="si">}</span><span class="s1"> projected &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;rel. grad.=</span><span class="si">{</span><span class="n">relgrad</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;rel. change=</span><span class="si">{</span><span class="n">relchange</span><span class="si">:</span><span class="s1">6.2g</span><span class="si">}</span><span class="s1"> &#39;</span>
@@ -2163,7 +2108,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">actualProp</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">m</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Proportion of Hessian calculation: &#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">actualProp</span><span class="si">}</span><span class="s1">%&#39;</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 
     <span class="n">messages</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;Algorithm&#39;</span><span class="p">:</span> <span class="n">algo</span><span class="p">,</span>
@@ -2181,7 +2126,7 @@
 
 
 <div class="viewcode-block" id="relativeChange"><a class="viewcode-back" href="../../algorithms.html#biogeme.algorithms.relativeChange">[docs]</a><span class="k">def</span> <span class="nf">relativeChange</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xpred</span><span class="p">,</span> <span class="n">typx</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates the relative change.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the relative change.</span>
 
 <span class="sd">    It is typically used as stopping criterion.</span>
 
@@ -2220,7 +2165,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

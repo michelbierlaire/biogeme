@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biogeme &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Biogeme &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -43,7 +45,85 @@
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Biogeme</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.biogeme">biogeme.biogeme module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.biogeme">biogeme.biogeme module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.biogeme.BIOGEME"><code class="docutils literal notranslate"><span class="pre">BIOGEME</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.__init__"><code class="docutils literal notranslate"><span class="pre">BIOGEME.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.algorithm_name"><code class="docutils literal notranslate"><span class="pre">BIOGEME.algorithm_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.argument_warning"><code class="docutils literal notranslate"><span class="pre">BIOGEME.argument_warning()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.bestIteration"><code class="docutils literal notranslate"><span class="pre">BIOGEME.bestIteration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.beta_values_dict_to_list"><code class="docutils literal notranslate"><span class="pre">BIOGEME.beta_values_dict_to_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.bootstrap_results"><code class="docutils literal notranslate"><span class="pre">BIOGEME.bootstrap_results</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.bootstrap_time"><code class="docutils literal notranslate"><span class="pre">BIOGEME.bootstrap_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.calculateInitLikelihood"><code class="docutils literal notranslate"><span class="pre">BIOGEME.calculateInitLikelihood()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.calculateLikelihood"><code class="docutils literal notranslate"><span class="pre">BIOGEME.calculateLikelihood()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives"><code class="docutils literal notranslate"><span class="pre">BIOGEME.calculateLikelihoodAndDerivatives()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.calculateNullLoglikelihood"><code class="docutils literal notranslate"><span class="pre">BIOGEME.calculateNullLoglikelihood()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.changeInitValues"><code class="docutils literal notranslate"><span class="pre">BIOGEME.changeInitValues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.checkDerivatives"><code class="docutils literal notranslate"><span class="pre">BIOGEME.checkDerivatives()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.confidenceIntervals"><code class="docutils literal notranslate"><span class="pre">BIOGEME.confidenceIntervals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.database"><code class="docutils literal notranslate"><span class="pre">BIOGEME.database</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.dogleg"><code class="docutils literal notranslate"><span class="pre">BIOGEME.dogleg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.drawsProcessingTime"><code class="docutils literal notranslate"><span class="pre">BIOGEME.drawsProcessingTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.enlarging_factor"><code class="docutils literal notranslate"><span class="pre">BIOGEME.enlarging_factor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.estimate"><code class="docutils literal notranslate"><span class="pre">BIOGEME.estimate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.estimate_catalog"><code class="docutils literal notranslate"><span class="pre">BIOGEME.estimate_catalog()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.files_of_type"><code class="docutils literal notranslate"><span class="pre">BIOGEME.files_of_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.formulas"><code class="docutils literal notranslate"><span class="pre">BIOGEME.formulas</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.freeBetaNames"><code class="docutils literal notranslate"><span class="pre">BIOGEME.freeBetaNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.generateHtml"><code class="docutils literal notranslate"><span class="pre">BIOGEME.generateHtml</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.generatePickle"><code class="docutils literal notranslate"><span class="pre">BIOGEME.generatePickle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.generate_html"><code class="docutils literal notranslate"><span class="pre">BIOGEME.generate_html</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.generate_pickle"><code class="docutils literal notranslate"><span class="pre">BIOGEME.generate_pickle</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.getBoundsOnBeta"><code class="docutils literal notranslate"><span class="pre">BIOGEME.getBoundsOnBeta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.identification_threshold"><code class="docutils literal notranslate"><span class="pre">BIOGEME.identification_threshold</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.infeasible_cg"><code class="docutils literal notranslate"><span class="pre">BIOGEME.infeasible_cg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.initLogLike"><code class="docutils literal notranslate"><span class="pre">BIOGEME.initLogLike</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.initial_radius"><code class="docutils literal notranslate"><span class="pre">BIOGEME.initial_radius</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.lastSample"><code class="docutils literal notranslate"><span class="pre">BIOGEME.lastSample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.likelihoodFiniteDifferenceHessian"><code class="docutils literal notranslate"><span class="pre">BIOGEME.likelihoodFiniteDifferenceHessian()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.loglike"><code class="docutils literal notranslate"><span class="pre">BIOGEME.loglike</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.loglikeName"><code class="docutils literal notranslate"><span class="pre">BIOGEME.loglikeName</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.loglikeSignatures"><code class="docutils literal notranslate"><span class="pre">BIOGEME.loglikeSignatures</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.maximum_number_catalog_expressions"><code class="docutils literal notranslate"><span class="pre">BIOGEME.maximum_number_catalog_expressions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.maxiter"><code class="docutils literal notranslate"><span class="pre">BIOGEME.maxiter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.missingData"><code class="docutils literal notranslate"><span class="pre">BIOGEME.missingData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.missing_data"><code class="docutils literal notranslate"><span class="pre">BIOGEME.missing_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.modelName"><code class="docutils literal notranslate"><span class="pre">BIOGEME.modelName</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.monteCarlo"><code class="docutils literal notranslate"><span class="pre">BIOGEME.monteCarlo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.nullLogLike"><code class="docutils literal notranslate"><span class="pre">BIOGEME.nullLogLike</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.numberOfDraws"><code class="docutils literal notranslate"><span class="pre">BIOGEME.numberOfDraws</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.numberOfThreads"><code class="docutils literal notranslate"><span class="pre">BIOGEME.numberOfThreads</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.number_of_draws"><code class="docutils literal notranslate"><span class="pre">BIOGEME.number_of_draws</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.number_of_threads"><code class="docutils literal notranslate"><span class="pre">BIOGEME.number_of_threads</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.only_robust_stats"><code class="docutils literal notranslate"><span class="pre">BIOGEME.only_robust_stats</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.optimizationMessages"><code class="docutils literal notranslate"><span class="pre">BIOGEME.optimizationMessages</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.optimize"><code class="docutils literal notranslate"><span class="pre">BIOGEME.optimize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.quickEstimate"><code class="docutils literal notranslate"><span class="pre">BIOGEME.quickEstimate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.reset_id_manager"><code class="docutils literal notranslate"><span class="pre">BIOGEME.reset_id_manager()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.saveIterations"><code class="docutils literal notranslate"><span class="pre">BIOGEME.saveIterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.save_iterations"><code class="docutils literal notranslate"><span class="pre">BIOGEME.save_iterations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.second_derivatives"><code class="docutils literal notranslate"><span class="pre">BIOGEME.second_derivatives</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.seed_param"><code class="docutils literal notranslate"><span class="pre">BIOGEME.seed_param</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.setRandomInitValues"><code class="docutils literal notranslate"><span class="pre">BIOGEME.setRandomInitValues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.short_names"><code class="docutils literal notranslate"><span class="pre">BIOGEME.short_names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.simulate"><code class="docutils literal notranslate"><span class="pre">BIOGEME.simulate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.steptol"><code class="docutils literal notranslate"><span class="pre">BIOGEME.steptol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.tolerance"><code class="docutils literal notranslate"><span class="pre">BIOGEME.tolerance</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.userNotes"><code class="docutils literal notranslate"><span class="pre">BIOGEME.userNotes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.validate"><code class="docutils literal notranslate"><span class="pre">BIOGEME.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.weight"><code class="docutils literal notranslate"><span class="pre">BIOGEME.weight</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.weightName"><code class="docutils literal notranslate"><span class="pre">BIOGEME.weightName</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.BIOGEME.weightSignatures"><code class="docutils literal notranslate"><span class="pre">BIOGEME.weightSignatures</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.biogeme.OldNewParamTuple"><code class="docutils literal notranslate"><span class="pre">OldNewParamTuple</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.OldNewParamTuple.new"><code class="docutils literal notranslate"><span class="pre">OldNewParamTuple.new</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.OldNewParamTuple.old"><code class="docutils literal notranslate"><span class="pre">OldNewParamTuple.old</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.biogeme.OldNewParamTuple.section"><code class="docutils literal notranslate"><span class="pre">OldNewParamTuple.section</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="database.html">Database</a></li>
@@ -54,12 +134,10 @@
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="idmanager.html">ID manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
-<li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
@@ -78,8 +156,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Biogeme</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Biogeme</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/biogeme.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -94,28 +172,31 @@
 <p>The core routines of Biogeme.</p>
 <section id="module-biogeme.biogeme">
 <span id="biogeme-biogeme-module"></span><h2>biogeme.biogeme module<a class="headerlink" href="#module-biogeme.biogeme" title="Permalink to this heading"></a></h2>
-<p>Implementation of the main Biogeme class that combines the database
-and the model specification.</p>
+<p>Implementation of the main Biogeme class</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
+<dt class="field-even">date<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tue Mar 26 16:45:15 2019</p>
 </dd>
 </dl>
+<p>It combines the database and the model specification.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.biogeme.</span></span><span class="sig-name descname"><span class="pre">BIOGEME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formulas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userNotes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfThreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipAudit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggestScales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missingData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99999</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.biogeme.</span></span><span class="sig-name descname"><span class="pre">BIOGEME</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formulas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userNotes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Main class that combines the database and the model specification.</p>
+<dl class="simple">
+<dt>Main class that combines the database and the model</dt><dd><p>specification.</p>
+</dd>
+</dl>
 <p>It works in two modes: estimation and simulation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formulas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userNotes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfThreads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipAudit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggestScales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missingData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99999</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formulas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">userNotes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Constructor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>database</strong> (<a class="reference internal" href="database.html#biogeme.database.Database" title="biogeme.database.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.database.Database</span></code></a>) – choice data.</p></li>
 <li><p><strong>formulas</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a>, or
@@ -131,52 +212,55 @@ of each piece of data is supposed to be 1.0. In the
 simulation mode, the labels of each formula are used as
 labels of the resulting database.</p></li>
 <li><p><strong>userNotes</strong> (<em>str</em>) – these notes will be included in the report file.</p></li>
-<li><p><strong>numberOfThreads</strong> (<em>int</em>) – multi-threading can be used for
-estimation. This parameter defines the number of threads
-to be used. If the parameter is set to None, the number of
-available threads is calculated using
-cpu_count(). Ignored in simulation mode. Defaults: None.</p></li>
-<li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws used for Monte-Carlo
-integration. Default: 1000.</p></li>
-<li><p><strong>seed</strong> (<em>int</em>) – seed used for the pseudo-random number
-generation. It is useful only when each run should
-generate the exact same result. If None, a new seed is
-used at each run. Default: None.</p></li>
-<li><p><strong>skipAudit</strong> (<em>bool</em>) – if True, does not check the validity of the
-formulas. It may save significant amount of time for large
-models and large data sets. Default: False.</p></li>
-<li><p><strong>suggestScales</strong> (<em>bool.</em>) – if True, Biogeme suggests the scaling of
-the variables in the database. Default: True.
-See also <a class="reference internal" href="database.html#biogeme.database.Database.suggestScaling" title="biogeme.database.Database.suggestScaling"><code class="xref py py-func docutils literal notranslate"><span class="pre">biogeme.database.Database.suggestScaling()</span></code></a></p></li>
-<li><p><strong>missingData</strong> (<em>float</em>) – if one variable has this value, it is
-assumed that a data is missing and an exception will be
-triggered. Default: 99999.</p></li>
+<li><p><strong>parameter_file</strong> (<em>str</em>) – name of the .toml file where the parameters are read</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – an audit of the formulas is performed.
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – an audit of the formulas is performed.
 If a formula has issues, an error is detected and an
 exception is raised.</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.algoParameters">
-<span class="sig-name descname"><span class="pre">algoParameters</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.algoParameters" title="Permalink to this definition"></a></dt>
-<dd><p>Parameters to be transferred to the optimization algorithm</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.algorithm_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">algorithm_name</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.algorithm_name" title="Permalink to this definition"></a></dt>
+<dd><p>Name of the optimization algorithm</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.algorithm">
-<span class="sig-name descname"><span class="pre">algorithm</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.algorithm" title="Permalink to this definition"></a></dt>
-<dd><p>Optimization algorithm</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.argument_warning">
+<span class="sig-name descname"><span class="pre">argument_warning</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.argument_warning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.argument_warning" title="Permalink to this definition"></a></dt>
+<dd><p>Displays a deprecation warning when parameters are provided
+as arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.bestIteration">
 <span class="sig-name descname"><span class="pre">bestIteration</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.bestIteration" title="Permalink to this definition"></a></dt>
 <dd><p>Store the best iteration found so far.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.beta_values_dict_to_list">
+<span class="sig-name descname"><span class="pre">beta_values_dict_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.beta_values_dict_to_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.beta_values_dict_to_list" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Transforms a dict with the names of the betas associated</dt><dd><p>with their values, into a list consistent with the
+numbering of the ids.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>beta_dict</strong> (<em>dict</em><em>(</em><em>str: float</em><em>)</em>) – dict with the values of  the parameters</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the parameter is not a dict</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if a parameter is missing in the dict</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -197,10 +281,10 @@ exception is raised.</p>
 <dd><p>Calculate the value of the log likelihood function</p>
 <p>The default values of the parameters are used.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>value of the log likelihood.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>float.</p>
 </dd>
 </dl>
@@ -211,7 +295,7 @@ exception is raised.</p>
 <span class="sig-name descname"><span class="pre">calculateLikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.calculateLikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.calculateLikelihood" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the value of the log likelihood function</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – vector of values for the parameters.</p></li>
 <li><p><strong>scaled</strong> (<em>bool</em>) – if True, the value is divided by the number of
@@ -225,14 +309,17 @@ represents the share of the data that will be
 used. Default: None</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the calculated value of the log likelihood</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float.</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ValueError</strong> – if the length of the list x is incorrect.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if the length of the list x is incorrect.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if calculatation with batch is requested</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -243,7 +330,7 @@ used. Default: None</p></li>
 <dd><p>Calculate the value of the log likelihood function
 and its derivatives.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>x</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – vector of values for the parameters.</p></li>
 <li><p><strong>scaled</strong> (<em>bool</em>) – if True, the results are devided by the number of
@@ -257,7 +344,7 @@ represents the share of the data that will be
 used. Default: None</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>f, g, h, bh where</p>
 <ul class="simple">
 <li><p>f is the value of the function (float)</p></li>
@@ -267,14 +354,15 @@ used. Default: None</p></li>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple  float, numpy.array, numpy.array, numpy.array</p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>ValueError</strong> – if the length of the list x is incorrect</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the norm of the gradient is not finite, an
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the norm of the gradient is not finite, an
 error is raised.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if calculatation with batch is requested</p></li>
 </ul>
 </dd>
 </dl>
@@ -286,15 +374,15 @@ error is raised.</p></li>
 <dd><p>Calculate the log likelihood of the null model that predicts equal
 probability for each alternative</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>avail</strong> (list of <a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a>) – list of expressions to evaluate the availability
 conditions for each alternative. If None, all
 alternatives are always available.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>value of the log likelihood</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
@@ -305,7 +393,7 @@ alternatives are always available.</p>
 <span class="sig-name descname"><span class="pre">changeInitValues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">betas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.changeInitValues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.changeInitValues" title="Permalink to this definition"></a></dt>
 <dd><p>Modifies the initial values of the pameters in all formula</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>betas</strong> (<em>dict</em><em>(</em><em>string:float</em><em>)</em>) – dictionary where the keys are the names of the
 parameters, and the values are the new value for
 the parameters.</p>
@@ -315,18 +403,21 @@ the parameters.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.checkDerivatives">
-<span class="sig-name descname"><span class="pre">checkDerivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.checkDerivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.checkDerivatives" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkDerivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.checkDerivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.checkDerivatives" title="Permalink to this definition"></a></dt>
 <dd><p>Verifies the implementation of the derivatives.</p>
 <p>It compares the analytical version with the finite differences
 approximation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>verbose</strong> (<em>bool</em>) – if True, the comparisons are reported. Default: False.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – vector of values for the parameters.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – if True, the comparisons are reported. Default: False.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>tuple.</p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><p>f, g, h, gdiff, hdiff where</p>
 <ul class="simple">
 <li><p>f is the value of the function,</p></li>
@@ -342,19 +433,12 @@ finite differences hessian,</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.columnForBatchSamplingWeights">
-<span class="sig-name descname"><span class="pre">columnForBatchSamplingWeights</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.columnForBatchSamplingWeights" title="Permalink to this definition"></a></dt>
-<dd><p>Name of the column defining weights for batch sampling in
-stochastic optimization.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.confidenceIntervals">
 <span class="sig-name descname"><span class="pre">confidenceIntervals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">betaValues</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">intervalSize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.confidenceIntervals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.confidenceIntervals" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate confidence intervals on the simulated quantities</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>betaValues</strong> (<em>list</em><em>(</em><em>dict</em><em>(</em><em>str: float</em><em>)</em><em>)</em>) – array of parameters values to be used in
 the calculations. Typically, it is a sample drawn from
@@ -366,7 +450,7 @@ is calculated for the quantiles (1-s)/2 and
 quantiles for the confidence interval [0.05, 0.95].</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>two pandas data frames ‘left’ and ‘right’ with the
 same dimensions. Each row corresponds to a row in the
 database, and each column to a formula. ‘left’ contains the
@@ -391,29 +475,8 @@ value</p>
 </div>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple of two Pandas dataframes.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.createLogFile">
-<span class="sig-name descname"><span class="pre">createLogFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbosity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.createLogFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.createLogFile" title="Permalink to this definition"></a></dt>
-<dd><p>Creates a log file with the messages produced by Biogeme.</p>
-<p>The name of the file is the name of the model with an extension .log</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>verbosity</strong> (<em>int</em>) – <p>types of messages to be captured</p>
-<ul class="simple">
-<li><p>0: no output</p></li>
-<li><p>1: warnings</p></li>
-<li><p>2: only general information</p></li>
-<li><p>3: more verbose</p></li>
-<li><p>4: debug messages</p></li>
-</ul>
-<p>Default: 3.</p>
-</p>
 </dd>
 </dl>
 </dd></dl>
@@ -424,18 +487,30 @@ value</p>
 <dd><p><a class="reference internal" href="database.html#biogeme.database.Database" title="biogeme.database.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.database.Database</span></code></a> object</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.dogleg">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dogleg</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.dogleg" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.drawsProcessingTime">
 <span class="sig-name descname"><span class="pre">drawsProcessingTime</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.drawsProcessingTime" title="Permalink to this definition"></a></dt>
 <dd><p>Time needed to generate the draws.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.enlarging_factor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enlarging_factor</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.enlarging_factor" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recycle=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algorithm=&lt;function</span> <span class="pre">simpleBoundsNewtonAlgorithmForBiogeme&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algoParameters=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.estimate" title="Permalink to this definition"></a></dt>
-<dd><p>Estimate the parameters of the model.</p>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.estimate" title="Permalink to this definition"></a></dt>
+<dd><p>Estimate the parameters of the model(s).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>recycle</strong> (<em>bool</em>) – if True, the results are read from the pickle
 file, if it exists. If False, the estimation is performed.</p></li>
@@ -443,17 +518,12 @@ file, if it exists. If False, the estimation is performed.</p></li>
 calculate the variance-covariance matrix using
 bootstrapping. If the number is 0, bootstrapping is not
 applied. Default: 0.</p></li>
-<li><p><strong>algorithm</strong> (<em>function</em>) – optimization algorithm to use for the
-maximum likelihood estimation. Default: Biogeme’s
-Newton’s algorithm with simple bounds.</p></li>
-<li><p><strong>algoParameters</strong> (<em>dict</em>) – parameters to transfer to the optimization
-algorithm</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>object containing the estimation results.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>biogeme.bioResults</p>
 </dd>
 </dl>
@@ -469,9 +539,44 @@ algorithm</p></li>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if no expression has been provided for the
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if no expression has been provided for the
 likelihood</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.estimate_catalog">
+<span class="sig-name descname"><span class="pre">estimate_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_configurations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quick_estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recycle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstrap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.estimate_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.estimate_catalog" title="Permalink to this definition"></a></dt>
+<dd><p>Estimate all or selected versions of a model with Catalog’s,
+corresponding to multiple specifications.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>selected_configurations</strong> – set of configurations. If</p>
+</dd>
+</dl>
+<p>None, all configurations are considered.
+:type selected_configurations: set(biogeme.pareto.SetElement)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quick_estimate</strong> (<em>bool</em>) – if True, the final statistics are not calculated.</p></li>
+<li><p><strong>recycle</strong> (<em>bool</em>) – if True, the results are read from the pickle
+file, if it exists. If False, the estimation is performed.</p></li>
+<li><p><strong>bootstrap</strong> (<em>int</em>) – number of bootstrap resampling used to
+calculate the variance-covariance matrix using
+bootstrapping. If the number is 0, bootstrapping is not
+applied. Default: 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>object containing the estimation results associated
+with the name of each specification, as well as a
+description of each configuration</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict(str: bioResults)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -482,7 +587,7 @@ likelihood</p>
 <dd><p>Identify the list of files with a given extension in the
 local directory</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>extension</strong> (<em>str</em>) – extension of the requested files (without
 the dot): ‘pickle’, or ‘html’</p></li>
@@ -492,10 +597,10 @@ True, all files with the requested extension are
 identified.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of files with the requested extension.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list(str)</p>
 </dd>
 </dl>
@@ -514,26 +619,40 @@ The keys are the names of the formulas.</p>
 <span class="sig-name descname"><span class="pre">freeBetaNames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.freeBetaNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.freeBetaNames" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the names of the parameters that must be estimated</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list of names of the parameters</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>list(str)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.generateHtml">
-<span class="sig-name descname"><span class="pre">generateHtml</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.generateHtml" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generateHtml</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.generateHtml" title="Permalink to this definition"></a></dt>
 <dd><p>Boolean variable, True if the HTML file with the results must
 be generated.</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.generatePickle">
-<span class="sig-name descname"><span class="pre">generatePickle</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.generatePickle" title="Permalink to this definition"></a></dt>
-<dd><p>Boolean variable, True if the pickle file with the results must
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generatePickle</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.generatePickle" title="Permalink to this definition"></a></dt>
+<dd><p>Boolean variable, True if the PICKLE file with the results must
+be generated.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.generate_html">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_html</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.generate_html" title="Permalink to this definition"></a></dt>
+<dd><p>Boolean variable, True if the HTML file with the results must
+be generated.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.generate_pickle">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_pickle</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.generate_pickle" title="Permalink to this definition"></a></dt>
+<dd><p>Boolean variable, True if the PICKLE file with the results must
 be generated.</p>
 </dd></dl>
 
@@ -542,25 +661,43 @@ be generated.</p>
 <span class="sig-name descname"><span class="pre">getBoundsOnBeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">betaName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.getBoundsOnBeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.getBoundsOnBeta" title="Permalink to this definition"></a></dt>
 <dd><p>Returns the bounds on the parameter as defined by the user.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>betaName</strong> (<em>string</em>) – name of the parameter</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>lower bound, upper bound</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the name of the parameter is not found.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the name of the parameter is not found.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.identification_threshold">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">identification_threshold</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.identification_threshold" title="Permalink to this definition"></a></dt>
+<dd><p>Threshold for the eigenvalue to trigger an identification warning</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.infeasible_cg">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">infeasible_cg</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.infeasible_cg" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.initLogLike">
 <span class="sig-name descname"><span class="pre">initLogLike</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.initLogLike" title="Permalink to this definition"></a></dt>
 <dd><p>Init value of the likelihood function</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.initial_radius">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initial_radius</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.initial_radius" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -577,16 +714,16 @@ stochastic gradient / hessian</p>
 differences.</p>
 <p>May be useful when the analytical hessian has numerical issues.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>x</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – vector of values for the parameters.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>finite differences approximation of the hessian.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – if the length of the list x is incorrect</p>
 </dd>
 </dl>
@@ -609,13 +746,32 @@ Default: ‘loglike’</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.loglikeSignatures">
 <span class="sig-name descname"><span class="pre">loglikeSignatures</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.loglikeSignatures" title="Permalink to this definition"></a></dt>
-<dd><p>Internal signature of the formula for the loglikelihood.</p>
+<dd><p>Internal signature of the formula for the
+loglikelihood.</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.maximum_number_catalog_expressions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maximum_number_catalog_expressions</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.maximum_number_catalog_expressions" title="Permalink to this definition"></a></dt>
+<dd><p>Maximum number of multiple expressions when Catalog’s are used.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.maxiter">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maxiter</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.maxiter" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.missingData">
-<span class="sig-name descname"><span class="pre">missingData</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.missingData" title="Permalink to this definition"></a></dt>
-<dd><p>code for missing data</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">missingData</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.missingData" title="Permalink to this definition"></a></dt>
+<dd><p>Code for missing data</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.missing_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">missing_data</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.missing_data" title="Permalink to this definition"></a></dt>
+<dd><p>Code for missing data</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -637,17 +793,37 @@ Monte-Carlo integration.</p>
 <dd><p>Log likelihood of the null model</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.numberOfDraws">
-<span class="sig-name descname"><span class="pre">numberOfDraws</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.numberOfDraws" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">numberOfDraws</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.numberOfDraws" title="Permalink to this definition"></a></dt>
 <dd><p>Number of draws for Monte-Carlo integration.</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.numberOfThreads">
-<span class="sig-name descname"><span class="pre">numberOfThreads</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.numberOfThreads" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">numberOfThreads</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.numberOfThreads" title="Permalink to this definition"></a></dt>
 <dd><p>Number of threads used for parallel computing. Default: the number
 of available CPU.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.number_of_draws">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_draws</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.number_of_draws" title="Permalink to this definition"></a></dt>
+<dd><p>Number of draws for Monte-Carlo integration.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.number_of_threads">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_threads</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.number_of_threads" title="Permalink to this definition"></a></dt>
+<dd><p>Number of threads used for parallel computing. Default: the number
+of available CPU.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.only_robust_stats">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">only_robust_stats</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.only_robust_stats" title="Permalink to this definition"></a></dt>
+<dd><p>True if only the robust statistics need to be reported. If
+False, the statistics from the Rao-Cramer bound are also reported.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -663,10 +839,10 @@ after completion.</p>
 <dd><p>Calls the optimization algorithm. The function self.algorithm
 is called.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>startingValues</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – starting point for the algorithm</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>x, messages</p>
 <ul class="simple">
 <li><p>x is the solution generated by the algorithm,</p></li>
@@ -675,38 +851,29 @@ algorithm</p></li>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpay.array, dict(str:object)</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – an error is raised if no algorithm is specified.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – an error is raised if no algorithm is specified.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.quickEstimate">
-<span class="sig-name descname"><span class="pre">quickEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">algorithm=&lt;function</span> <span class="pre">simpleBoundsNewtonAlgorithmForBiogeme&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">algoParameters=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.quickEstimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.quickEstimate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">quickEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.quickEstimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.quickEstimate" title="Permalink to this definition"></a></dt>
 <dd><div class="line-block">
 <div class="line">Estimate the parameters of the model. Same as estimate, where any
 extra calculation is skipped (init loglikelihood,
 t-statistics, etc.)</div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>algorithm</strong> (<em>function</em>) – optimization algorithm to use for the
-maximum likelihood estimation.Default: Biogeme’s
-Newton’s algorithm with simple bounds.</p></li>
-<li><p><strong>algoParameters</strong> (<em>dict</em>) – parameters to transfer to the optimization
-algorithm</p></li>
-</ul>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object containing the estimation results.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object containing the estimation results.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults">biogeme.results.bioResults</a></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults">biogeme.results.bioResults</a></p>
 </dd>
 </dl>
 <p>Example:</p>
@@ -721,8 +888,8 @@ algorithm</p></li>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if no expression has been provided for the
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if no expression has been provided for the
 likelihood</p>
 </dd>
 </dl>
@@ -734,14 +901,32 @@ likelihood</p>
 <dd><p>Reset all the ids of the elementary expression in the formulas</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py property">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.saveIterations">
-<span class="sig-name descname"><span class="pre">saveIterations</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.saveIterations" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">saveIterations</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.saveIterations" title="Permalink to this definition"></a></dt>
 <dd><p>If True, the current iterate is saved after each iteration, in a
 file named <code class="docutils literal notranslate"><span class="pre">__[modelName].iter</span></code>, where <code class="docutils literal notranslate"><span class="pre">[modelName]</span></code> is the
 name given to the model. If such a file exists, the starting
 values for the estimation are replaced by the values saved in
 the file.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.save_iterations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">save_iterations</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.save_iterations" title="Permalink to this definition"></a></dt>
+<dd><p>Same as saveIterations, with another syntax</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.second_derivatives">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">second_derivatives</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.second_derivatives" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.seed_param">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seed_param</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.seed_param" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
 </dd></dl>
 
 <dl class="py method">
@@ -752,7 +937,7 @@ using randomly generated values. The value is drawn from a
 uniform distribution on the interval defined by the
 bounds.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>defaultBound</strong> (<em>float</em>) – If the upper bound is missing, it is
 replaced by this value. If the lower bound is missing, it is
 replaced by the opposite of this value. Default: 100.</p>
@@ -760,22 +945,30 @@ replaced by the opposite of this value. Default: 100.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.short_names">
+<span class="sig-name descname"><span class="pre">short_names</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.short_names" title="Permalink to this definition"></a></dt>
+<dd><blockquote>
+<div><p><a class="reference internal" href="tools.html#biogeme.tools.ModelNames" title="biogeme.tools.ModelNames"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.tools.ModelNames</span></code></a></p>
+</div></blockquote>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.simulate">
-<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theBetaValues</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.simulate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theBetaValues</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#BIOGEME.simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.BIOGEME.simulate" title="Permalink to this definition"></a></dt>
 <dd><p>Applies the formulas to each row of the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>theBetaValues</strong> (<em>dict</em><em>(</em><em>str</em><em>, </em><em>float</em><em>)</em>) – values of the parameters to be used in
 the calculations. If None, the default values are
 used. Default: None.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a pandas data frame with the simulated value. Each
 row corresponds to a row in the database, and each
 column to a formula.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Pandas data frame</p>
 </dd>
 </dl>
@@ -787,10 +980,25 @@ column to a formula.</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of parameters is incorrect</p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the number of parameters is incorrect</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if theBetaValues is None.</p></li>
+</ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.steptol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">steptol</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.steptol" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="biogeme.biogeme.BIOGEME.tolerance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tolerance</span></span><a class="headerlink" href="#biogeme.biogeme.BIOGEME.tolerance" title="Permalink to this definition"></a></dt>
+<dd><p>getter for the parameter</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -814,22 +1022,22 @@ and an estimation set (the rest of the data),</p></li>
 </ul>
 </div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>estimationResults</strong> (<a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults"><em>biogeme.results.bioResults</em></a>) – results of the model estimation based on the
 full data.</p></li>
 <li><p><strong>validationData</strong> (<em>list</em><em>(</em><em>tuple</em><em>(</em><em>pandas.DataFrame</em><em>, </em><em>pandas.DataFrame</em><em>)</em><em>)</em>) – list of estimation and validation data sets</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a list containing as many items as slices. Each item
 is the result of the simulation on the validation set.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list(pandas.DataFrame)</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – An error is raised if the database is structured
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – An error is raised if the database is structured
 as panel data.</p>
 </dd>
 </dl>
@@ -857,197 +1065,26 @@ sample.</p>
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="biogeme.biogeme.logger">
-<span class="sig-prename descclassname"><span class="pre">biogeme.biogeme.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;biogeme.messaging.bioMessage</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#biogeme.biogeme.logger" title="Permalink to this definition"></a></dt>
-<dd><p>Logger that controls the output of
-messages to the screen and log file.
-Type: class <a class="reference internal" href="messaging.html#biogeme.messaging.bioMessage" title="biogeme.messaging.bioMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.messaging.bioMessage</span></code></a>.</p>
-</dd></dl>
-
 <dl class="py class">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.biogeme.</span></span><span class="sig-name descname"><span class="pre">negLikelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">like_deriv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="algorithms.html#biogeme.algorithms.functionToMinimize" title="biogeme.algorithms.functionToMinimize"><code class="xref py py-class docutils literal notranslate"><span class="pre">functionToMinimize</span></code></a></p>
-<p>Provides the value of the function to be minimized, as well as its
-derivatives. To be used by the opimization package.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">like</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">like_deriv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaled</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Constructor</p>
+<dt class="sig sig-object py" id="biogeme.biogeme.OldNewParamTuple">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.biogeme.</span></span><span class="sig-name descname"><span class="pre">OldNewParamTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#biogeme.biogeme.OldNewParamTuple" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.biogeme.OldNewParamTuple.new">
+<span class="sig-name descname"><span class="pre">new</span></span><a class="headerlink" href="#biogeme.biogeme.OldNewParamTuple.new" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.batch">
-<span class="sig-name descname"><span class="pre">batch</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.batch" title="Permalink to this definition"></a></dt>
-<dd><p>Value betwen 0 and 1 defining the size of the batch, that is the
-percentage of the data that should be used to approximate the
-log likelihood.</p>
+<dt class="sig sig-object py" id="biogeme.biogeme.OldNewParamTuple.old">
+<span class="sig-name descname"><span class="pre">old</span></span><a class="headerlink" href="#biogeme.biogeme.OldNewParamTuple.old" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 0</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.bhhhv">
-<span class="sig-name descname"><span class="pre">bhhhv</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.bhhhv" title="Permalink to this definition"></a></dt>
-<dd><p>BHHH matrix</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.f">
-<span class="sig-name descname"><span class="pre">f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood.f"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood.f" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the value of the function</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>batch</strong> (<em>float</em>) – for data driven functions (such as a log
-likelikood function), it is possible to
-approximate the value of the function using a
-sample of the data called a batch. This argument
-is a value between 0 and 1 representing the
-percentage of the data that should be used for
-thre random batch. If None, the full data set is
-used. Default: None pass</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>value of the function</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.f_g">
-<span class="sig-name descname"><span class="pre">f_g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood.f_g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood.f_g" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the value of the function and the gradient</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>batch</strong> (<em>float</em>) – for data driven functions (such as a log
-likelikood function), it is possible to
-approximate the value of the function using a
-sample of the data called a batch. This argument
-is a value between 0 and 1 representing the
-percentage of the data that should be used for
-the random batch. If None, the full data set is
-used. Default: None pass</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>value of the function and the gradient</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple float, numpy.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.f_g_bhhh">
-<span class="sig-name descname"><span class="pre">f_g_bhhh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood.f_g_bhhh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood.f_g_bhhh" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the value of the function, the gradient and
-the BHHH matrix</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>batch</strong> (<em>float</em>) – for data driven functions (such as a log
-likelikood function), it is possible to
-approximate the value of the function using a
-sample of the data called a batch. This argument
-is a value between 0 and 1 representing the
-percentage of the data that should be used for
-the random batch. If None, the full data set is
-used. Default: None pass</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>value of the function, the gradient and the BHHH</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple float, numpy.array, numpy.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.f_g_h">
-<span class="sig-name descname"><span class="pre">f_g_h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood.f_g_h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood.f_g_h" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the value of the function, the gradient and the Hessian</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>batch</strong> (<em>float</em>) – for data driven functions (such as a log
-likelikood function), it is possible to
-approximate the value of the function using a
-sample of the data called a batch. This argument
-is a value between 0 and 1 representing the
-percentage of the data that should be used for
-the random batch. If None, the full data set is
-used. Default: None pass</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>value of the function, the gradient and the Hessian</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple float, numpy.array, numpy.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.fv">
-<span class="sig-name descname"><span class="pre">fv</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.fv" title="Permalink to this definition"></a></dt>
-<dd><p>value of the function</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.gv">
-<span class="sig-name descname"><span class="pre">gv</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.gv" title="Permalink to this definition"></a></dt>
-<dd><p>vector with the gradient</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.hv">
-<span class="sig-name descname"><span class="pre">hv</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.hv" title="Permalink to this definition"></a></dt>
-<dd><p>second derivatives matrix</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.like">
-<span class="sig-name descname"><span class="pre">like</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.like" title="Permalink to this definition"></a></dt>
-<dd><p>function calculating the log likelihood</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.like_deriv">
-<span class="sig-name descname"><span class="pre">like_deriv</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.like_deriv" title="Permalink to this definition"></a></dt>
-<dd><p>function calculating the log likelihood and its derivatives.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.recalculate">
-<span class="sig-name descname"><span class="pre">recalculate</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.recalculate" title="Permalink to this definition"></a></dt>
-<dd><p>True if the log likelihood must be recalculated</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.scaled">
-<span class="sig-name descname"><span class="pre">scaled</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.scaled" title="Permalink to this definition"></a></dt>
-<dd><p>if True, the value of the log likelihood is divided by the number
-of observations used to calculate it. In this case, the values
-with different sample sizes are comparable.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.setVariables">
-<span class="sig-name descname"><span class="pre">setVariables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/biogeme.html#negLikelihood.setVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.biogeme.negLikelihood.setVariables" title="Permalink to this definition"></a></dt>
-<dd><p>Set the values of the variables for which the function
-has to be calculated.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> (<em>numpy.array</em>) – values</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.biogeme.negLikelihood.x">
-<span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#biogeme.biogeme.negLikelihood.x" title="Permalink to this definition"></a></dt>
-<dd><p>Vector of unknown parameters values</p>
+<dt class="sig sig-object py" id="biogeme.biogeme.OldNewParamTuple.section">
+<span class="sig-name descname"><span class="pre">section</span></span><a class="headerlink" href="#biogeme.biogeme.OldNewParamTuple.section" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for field number 2</p>
 </dd></dl>
 
 </dd></dl>
@@ -1066,7 +1103,7 @@ has to be calculated.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

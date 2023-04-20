@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ID manager &mdash; Biogeme 3.2.9 documentation</title>
+  <title>ID manager &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -50,16 +52,33 @@
 <li class="toctree-l1"><a class="reference internal" href="expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filenames.html">Filenames</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ID manager</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.idmanager">biogeme.idmanager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.idmanager">biogeme.idmanager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.idmanager.ElementsTuple"><code class="docutils literal notranslate"><span class="pre">ElementsTuple</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.ElementsTuple.expressions"><code class="docutils literal notranslate"><span class="pre">ElementsTuple.expressions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.ElementsTuple.indices"><code class="docutils literal notranslate"><span class="pre">ElementsTuple.indices</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.ElementsTuple.names"><code class="docutils literal notranslate"><span class="pre">ElementsTuple.names</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.idmanager.IdManager"><code class="docutils literal notranslate"><span class="pre">IdManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.__eq__"><code class="docutils literal notranslate"><span class="pre">IdManager.__eq__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.__init__"><code class="docutils literal notranslate"><span class="pre">IdManager.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.audit"><code class="docutils literal notranslate"><span class="pre">IdManager.audit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.changeInitValues"><code class="docutils literal notranslate"><span class="pre">IdManager.changeInitValues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.expressions_names_indices"><code class="docutils literal notranslate"><span class="pre">IdManager.expressions_names_indices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.prepare"><code class="docutils literal notranslate"><span class="pre">IdManager.prepare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.setData"><code class="docutils literal notranslate"><span class="pre">IdManager.setData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.idmanager.IdManager.setDataMap"><code class="docutils literal notranslate"><span class="pre">IdManager.setDataMap()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="loglikelihood.html">Log likelihood</a></li>
-<li class="toctree-l1"><a class="reference internal" href="messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
 <li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vns.html">Variable Neighborhood Search</a></li>
@@ -78,8 +97,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>ID manager</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ID manager</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/idmanager.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -96,10 +115,10 @@
 <span id="biogeme-idmanager-module"></span><h2>biogeme.idmanager module<a class="headerlink" href="#module-biogeme.idmanager" title="Permalink to this heading"></a></h2>
 <p>Combine several arithmetic expressions and a database to obtain formulas</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
+<dt class="field-even">date<span class="colon">:</span></dt>
 <dd class="field-even"><p>Sat Jul 30 12:36:40 2022</p>
 </dd>
 </dl>
@@ -129,7 +148,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="biogeme.idmanager.IdManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.idmanager.</span></span><span class="sig-name descname"><span class="pre">IdManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_draws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_new_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.idmanager.</span></span><span class="sig-name descname"><span class="pre">IdManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_draws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class combining managing the ids of an arithmetic expression.</p>
 <dl class="py method">
@@ -140,22 +159,18 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="biogeme.idmanager.IdManager.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_draws</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_new_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_draws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Ctor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expressions</strong> (<em>list</em><em>(</em><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a><em>)</em>) – list of expressions</p></li>
 <li><p><strong>database</strong> (<a class="reference internal" href="database.html#biogeme.database.Database" title="biogeme.database.Database"><em>biogeme.database.Database</em></a>) – database with the variables as column names</p></li>
 <li><p><strong>number_of_draws</strong> (<em>int</em>) – number of draws for Monte-Carlo integration</p></li>
-<li><p><strong>force_new_ids</strong> (<em>bool</em>) – if True, new ids are calculated for all
-expressions, even if they have already an ID. If False,
-and some expressions already have an ID, an error is
-raised.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if an expression contains a variable and
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if an expression contains a variable and
 no database is provided.</p>
 </dd>
 </dl>
@@ -166,10 +181,10 @@ no database is provided.</p>
 <span class="sig-name descname"><span class="pre">audit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.audit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.audit" title="Permalink to this definition"></a></dt>
 <dd><p>Performs various checks on the expressions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>tuple listOfErrors, listOfWarnings</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>list(string), list(string)</p>
 </dd>
 </dl>
@@ -180,7 +195,7 @@ no database is provided.</p>
 <span class="sig-name descname"><span class="pre">changeInitValues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">betas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.changeInitValues"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.changeInitValues" title="Permalink to this definition"></a></dt>
 <dd><p>Modifies the values of the pameters</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>betas</strong> (<em>dict</em><em>(</em><em>string:float</em><em>)</em>) – dictionary where the keys are the names of the
 parameters, and the values are the new value for
 the parameters.</p>
@@ -193,15 +208,15 @@ the parameters.</p>
 <span class="sig-name descname"><span class="pre">expressions_names_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_of_elements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.expressions_names_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.expressions_names_indices" title="Permalink to this definition"></a></dt>
 <dd><p>Assigns consecutive indices to expressions</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dict_of_elements</strong> (<em>dict</em><em>(</em><em>str: biogeme.expressions.Expression</em><em>)</em>) – dictionary of expressions. The keys
 are the names.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a tuple with the original dictionary, the indices,
 and the sorted names.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#biogeme.idmanager.ElementsTuple" title="biogeme.idmanager.ElementsTuple">ElementsTuple</a></p>
 </dd>
 </dl>
@@ -230,7 +245,7 @@ expressions will have the same index.</p>
 <span class="sig-name descname"><span class="pre">setData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.setData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.setData" title="Permalink to this definition"></a></dt>
 <dd><p>Specify the sample</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>sample</strong> (<em>pandas.DataFrame</em>) – map of the panel data (see
 <a class="reference internal" href="database.html#biogeme.database.Database.buildPanelMap" title="biogeme.database.Database.buildPanelMap"><code class="xref py py-func docutils literal notranslate"><span class="pre">biogeme.database.Database.buildPanelMap()</span></code></a>)</p>
 </dd>
@@ -242,7 +257,7 @@ expressions will have the same index.</p>
 <span class="sig-name descname"><span class="pre">setDataMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/idmanager.html#IdManager.setDataMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.idmanager.IdManager.setDataMap" title="Permalink to this definition"></a></dt>
 <dd><p>Specify the map of the panel data in the expressions</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>sample</strong> (<em>pandas.DataFrame</em>) – map of the panel data (see
 <a class="reference internal" href="database.html#biogeme.database.Database.buildPanelMap" title="biogeme.database.Database.buildPanelMap"><code class="xref py py-func docutils literal notranslate"><span class="pre">biogeme.database.Database.buildPanelMap()</span></code></a>)</p>
 </dd>
@@ -265,7 +280,7 @@ expressions will have the same index.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

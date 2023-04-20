@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.draws &mdash; Biogeme 3.2.9 documentation</title>
+  <title>biogeme.draws &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -72,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>biogeme.draws</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">biogeme.draws</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -99,7 +101,7 @@
 
 
 <div class="viewcode-block" id="getUniform"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getUniform">[docs]</a><span class="k">def</span> <span class="nf">getUniform</span><span class="p">(</span><span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Uniform [0, 1] or [-1, 1] numbers</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uniform [0, 1] or [-1, 1] numbers</span>
 
 <span class="sd">    :param sampleSize: number of observations for which draws must be</span>
 <span class="sd">                       generated. If None, a one dimensional array</span>
@@ -136,15 +138,15 @@
 <span class="sd">               0.40114744, -0.61327161,  0.08900539, -0.20985417,  0.67542226]]</span>
 <span class="sd">        )</span>
 
-<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the number of draws is not positive.</span>
 
-<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the sample size is not positive.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
         <span class="p">)</span>
     <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
@@ -160,7 +162,7 @@
 <div class="viewcode-block" id="getLatinHypercubeDraws"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getLatinHypercubeDraws">[docs]</a><span class="k">def</span> <span class="nf">getLatinHypercubeDraws</span><span class="p">(</span>
     <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">uniformNumbers</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Implementation of the Modified Latin Hypercube Sampling proposed</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of the Modified Latin Hypercube Sampling proposed</span>
 <span class="sd">    by `Hess et al., (2006)`_.</span>
 
 <span class="sd">    .. _`Hess et al., (2006)`:</span>
@@ -194,17 +196,17 @@
 <span class="sd">               [0.49676864, 0.67073483, 0.9788854 , 0.5726069 , 0.11894558,</span>
 <span class="sd">                0.05515471, 0.2640275 , 0.82093696, 0.92034628, 0.64866597]])</span>
 
-<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the number of draws is not positive.</span>
 
-<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the sample size is not positive.</span>
 
-<span class="sd">    :raise biogemeError: if the number of uniform draws is inconsistent.</span>
+<span class="sd">    :raise BiogemeError: if the number of uniform draws is inconsistent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
         <span class="p">)</span>
     <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
@@ -217,14 +219,11 @@
                 <span class="sa">f</span><span class="s1">&#39;A total of </span><span class="si">{</span><span class="n">totalSize</span><span class="si">}</span><span class="s1"> uniform draws &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;must be provided, and not </span><span class="si">{</span><span class="n">uniformNumbers</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">totalSize</span><span class="p">,)</span>
     <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">uniformNumbers</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)</span>
-        <span class="p">]</span>
+        <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">uniformNumbers</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">totalSize</span><span class="p">)]</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
         <span class="n">numbers</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">numbers</span> <span class="o">-</span> <span class="mf">1.0</span>
@@ -237,7 +236,7 @@
 <div class="viewcode-block" id="getHaltonDraws"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getHaltonDraws">[docs]</a><span class="k">def</span> <span class="nf">getHaltonDraws</span><span class="p">(</span>
     <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">shuffled</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Generate Halton draws.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate Halton draws.</span>
 <span class="sd">    Implementation by Cristian Arteaga, University of Nevada Las Vegas,</span>
 
 <span class="sd">    :param sampleSize: number of observations for which draws must be</span>
@@ -274,15 +273,15 @@
 <span class="sd">               [0.7037037 , 0.14814815, 0.48148148, 0.81481481, 0.25925926,</span>
 <span class="sd">                0.59259259, 0.92592593, 0.07407407, 0.40740741, 0.74074074]])</span>
 
-<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the number of draws is not positive.</span>
 
-<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the sample size is not positive.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
         <span class="p">)</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
@@ -297,13 +296,13 @@
         <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">base</span> <span class="ow">and</span> <span class="n">numbers_idx</span> <span class="o">&lt;</span> <span class="n">req_length</span><span class="p">:</span>
             <span class="n">max_numbers</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">req_length</span> <span class="o">-</span> <span class="n">numbers_idx</span><span class="p">,</span> <span class="n">numbers_size</span><span class="p">)</span>
-            <span class="n">numbers</span><span class="p">[</span><span class="n">numbers_idx</span> <span class="p">:</span> <span class="n">numbers_idx</span> <span class="o">+</span> <span class="n">max_numbers</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">numbers</span><span class="p">[</span><span class="n">numbers_idx</span><span class="p">:</span> <span class="n">numbers_idx</span> <span class="o">+</span> <span class="n">max_numbers</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">numbers</span><span class="p">[:</span><span class="n">max_numbers</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span> <span class="o">*</span> <span class="n">i</span>
             <span class="p">)</span>
             <span class="n">numbers_idx</span> <span class="o">+=</span> <span class="n">max_numbers</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">t</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">numbers</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="n">skip</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">length</span> <span class="o">+</span> <span class="n">skip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="n">skip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">length</span> <span class="o">+</span> <span class="n">skip</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">shuffled</span><span class="p">:</span>
         <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
@@ -316,7 +315,7 @@
 
 
 <div class="viewcode-block" id="getAntithetic"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getAntithetic">[docs]</a><span class="k">def</span> <span class="nf">getAntithetic</span><span class="p">(</span><span class="n">unif</span><span class="p">,</span> <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns antithetic uniform draws</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns antithetic uniform draws</span>
 
 <span class="sd">    :param unif: function taking two arguments (sampleSize, numberOfDraws)</span>
 <span class="sd">                 and returning U[0, 1] draws</span>
@@ -356,7 +355,7 @@
 <div class="viewcode-block" id="getNormalWichuraDraws"><a class="viewcode-back" href="../../draws.html#biogeme.draws.getNormalWichuraDraws">[docs]</a><span class="k">def</span> <span class="nf">getNormalWichuraDraws</span><span class="p">(</span>
     <span class="n">sampleSize</span><span class="p">,</span> <span class="n">numberOfDraws</span><span class="p">,</span> <span class="n">uniformNumbers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">antithetic</span><span class="o">=</span><span class="kc">False</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Generate pseudo-random numbers from a normal distribution N(0, 1)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate pseudo-random numbers from a normal distribution N(0, 1)</span>
 
 <span class="sd">    It uses the Algorithm AS241 by `Wichura (1988)`_</span>
 <span class="sd">    which produces the normal deviate z corresponding to a given lower</span>
@@ -397,13 +396,13 @@
 <span class="sd">              -0.28615154,  2.10635541,  0.0436191 , -0.25417774,  0.01026933]]</span>
 <span class="sd">        )</span>
 
-<span class="sd">    :raise biogemeError: if the number of draws is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the number of draws is not positive.</span>
 
-<span class="sd">    :raise biogemeError: if the sample size is not positive.</span>
+<span class="sd">    :raise BiogemeError: if the sample size is not positive.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">numberOfDraws</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid number of draws: </span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">antithetic</span><span class="p">:</span>
         <span class="k">if</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="n">numberOfDraws</span><span class="p">:</span>
@@ -412,11 +411,11 @@
                 <span class="sa">f</span><span class="s1">&#39;antithetic draws. Requested number of &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">numberOfDraws</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
         <span class="n">numberOfDraws</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numberOfDraws</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">sampleSize</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid sample size: </span><span class="si">{</span><span class="n">sampleSize</span><span class="si">}</span><span class="s1"> when generating draws.&#39;</span>
         <span class="p">)</span>
     <span class="n">totalSize</span> <span class="o">=</span> <span class="n">numberOfDraws</span> <span class="o">*</span> <span class="n">sampleSize</span>
@@ -477,7 +476,7 @@
             <span class="sa">f</span><span class="s1">&#39;A total of </span><span class="si">{</span><span class="n">totalSize</span><span class="si">}</span><span class="s1"> uniform draws must be &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;provided, and not </span><span class="si">{</span><span class="n">uniformNumbers</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s1">.&#39;</span>
         <span class="p">)</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
     <span class="n">uniformNumbers</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">totalSize</span><span class="p">,)</span>
 
     <span class="n">q</span> <span class="o">=</span> <span class="n">uniformNumbers</span> <span class="o">-</span> <span class="mf">0.5</span>
@@ -491,10 +490,7 @@
             <span class="p">(</span>
                 <span class="p">(</span>
                     <span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="p">((</span><span class="n">a7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
-                            <span class="o">+</span> <span class="n">a4</span>
-                        <span class="p">)</span>
+                        <span class="p">(((</span><span class="n">a7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a4</span><span class="p">)</span>
                         <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
                         <span class="o">+</span> <span class="n">a3</span>
                     <span class="p">)</span>
@@ -511,10 +507,7 @@
             <span class="p">(</span>
                 <span class="p">(</span>
                     <span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="p">((</span><span class="n">b7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
-                            <span class="o">+</span> <span class="n">b4</span>
-                        <span class="p">)</span>
+                        <span class="p">(((</span><span class="n">b7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span> <span class="o">+</span> <span class="n">b4</span><span class="p">)</span>
                         <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond1</span><span class="p">]</span>
                         <span class="o">+</span> <span class="n">b3</span>
                     <span class="p">)</span>
@@ -544,11 +537,7 @@
         <span class="p">(</span>
             <span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="p">((</span><span class="n">c7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c5</span><span class="p">)</span>
-                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
-                        <span class="o">+</span> <span class="n">c4</span>
-                    <span class="p">)</span>
+                    <span class="p">(((</span><span class="n">c7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">c4</span><span class="p">)</span>
                     <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
                     <span class="o">+</span> <span class="n">c3</span>
                 <span class="p">)</span>
@@ -564,11 +553,7 @@
         <span class="p">(</span>
             <span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="p">((</span><span class="n">d7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d5</span><span class="p">)</span>
-                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
-                        <span class="o">+</span> <span class="n">d4</span>
-                    <span class="p">)</span>
+                    <span class="p">(((</span><span class="n">d7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span> <span class="o">+</span> <span class="n">d4</span><span class="p">)</span>
                     <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_a</span><span class="p">]</span>
                     <span class="o">+</span> <span class="n">d3</span>
                 <span class="p">)</span>
@@ -586,11 +571,7 @@
         <span class="p">(</span>
             <span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="p">((</span><span class="n">e7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e5</span><span class="p">)</span>
-                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
-                        <span class="o">+</span> <span class="n">e4</span>
-                    <span class="p">)</span>
+                    <span class="p">(((</span><span class="n">e7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">e4</span><span class="p">)</span>
                     <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
                     <span class="o">+</span> <span class="n">e3</span>
                 <span class="p">)</span>
@@ -606,11 +587,7 @@
         <span class="p">(</span>
             <span class="p">(</span>
                 <span class="p">(</span>
-                    <span class="p">(</span>
-                        <span class="p">((</span><span class="n">f7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f5</span><span class="p">)</span>
-                        <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
-                        <span class="o">+</span> <span class="n">f4</span>
-                    <span class="p">)</span>
+                    <span class="p">(((</span><span class="n">f7</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f6</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f5</span><span class="p">)</span> <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span> <span class="o">+</span> <span class="n">f4</span><span class="p">)</span>
                     <span class="o">*</span> <span class="n">r</span><span class="p">[</span><span class="n">cond2d_b</span><span class="p">]</span>
                     <span class="o">+</span> <span class="n">f3</span>
                 <span class="p">)</span>
@@ -640,7 +617,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

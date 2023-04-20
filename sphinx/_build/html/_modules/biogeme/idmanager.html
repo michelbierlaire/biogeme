@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.idmanager &mdash; Biogeme 3.2.9 documentation</title>
+  <title>biogeme.idmanager &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -72,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>biogeme.idmanager</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">biogeme.idmanager</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -89,23 +91,22 @@
 <span class="sd">:author: Michel Bierlaire</span>
 <span class="sd">:date: Sat Jul 30 12:36:40 2022</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
-<span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
+
+<span class="kn">from</span> <span class="nn">biogeme.elementary_expressions</span> <span class="kn">import</span> <span class="n">TypeOfElementaryExpression</span>
 
 <span class="n">ElementsTuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ElementsTuple&#39;</span><span class="p">,</span> <span class="s1">&#39;expressions indices names&#39;</span><span class="p">)</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="IdManager"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager">[docs]</a><span class="k">class</span> <span class="nc">IdManager</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Class combining managing the ids of an arithmetic expression.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class combining managing the ids of an arithmetic expression.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="IdManager.__init__"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">expressions</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">number_of_draws</span><span class="p">,</span> <span class="n">force_new_ids</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Ctor</span>
+<div class="viewcode-block" id="IdManager.__init__"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expressions</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">number_of_draws</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ctor</span>
 
 <span class="sd">        :param expressions: list of expressions</span>
 <span class="sd">        :type expressions: list(biogeme.expressions.Expression)</span>
@@ -116,13 +117,7 @@
 <span class="sd">        :param number_of_draws: number of draws for Monte-Carlo integration</span>
 <span class="sd">        :type number_of_draws: int</span>
 
-<span class="sd">        :param force_new_ids: if True, new ids are calculated for all</span>
-<span class="sd">            expressions, even if they have already an ID. If False,</span>
-<span class="sd">            and some expressions already have an ID, an error is</span>
-<span class="sd">            raised.</span>
-<span class="sd">        :type force_new_ids: bool</span>
-
-<span class="sd">        :raises biogemeError: if an expression contains a variable and</span>
+<span class="sd">        :raises BiogemeError: if an expression contains a variable and</span>
 <span class="sd">            no database is provided.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -141,15 +136,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">requires_draws</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="p">:</span>
-            <span class="n">the_variables</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">setOfVariables</span><span class="p">()</span>
+            <span class="n">the_variables</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">set_of_elementary_expression</span><span class="p">(</span>
+                <span class="n">the_type</span><span class="o">=</span><span class="n">TypeOfElementaryExpression</span><span class="o">.</span><span class="n">VARIABLE</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">the_variables</span> <span class="ow">and</span> <span class="n">database</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+                <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;No database is provided and an expression &#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;contains variables: </span><span class="si">{</span><span class="n">the_variables</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
-            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">embedExpression</span><span class="p">(</span><span class="s1">&#39;MonteCarlo&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">embedExpression</span><span class="p">(</span>
-                <span class="s1">&#39;bioDraws&#39;</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">embedExpression</span><span class="p">(</span><span class="s1">&#39;MonteCarlo&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">embedExpression</span><span class="p">(</span><span class="s1">&#39;bioDraws&#39;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">requires_draws</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">prepare</span><span class="p">()</span></div>
@@ -164,7 +159,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elementary_expressions</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">elementary_expressions</span></div>
 
 <div class="viewcode-block" id="IdManager.audit"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.audit">[docs]</a>    <span class="k">def</span> <span class="nf">audit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Performs various checks on the expressions.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Performs various checks on the expressions.</span>
 
 <span class="sd">        :return: tuple listOfErrors, listOfWarnings</span>
 <span class="sd">        :rtype: list(string), list(string)</span>
@@ -172,9 +167,7 @@
         <span class="n">listOfErrors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">listOfWarnings</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">isPanel</span><span class="p">():</span>
-            <span class="n">dict_of_variables</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="o">.</span><span class="n">dictOfVariablesOutsidePanelTrajectory</span><span class="p">()</span>
-            <span class="p">)</span>
+            <span class="n">dict_of_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="o">.</span><span class="n">dictOfVariablesOutsidePanelTrajectory</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">dict_of_variables</span><span class="p">:</span>
                 <span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Error in the loglikelihood function. &#39;</span>
@@ -193,7 +186,7 @@
         <span class="k">return</span> <span class="n">listOfErrors</span><span class="p">,</span> <span class="n">listOfWarnings</span></div>
 
 <div class="viewcode-block" id="IdManager.changeInitValues"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.changeInitValues">[docs]</a>    <span class="k">def</span> <span class="nf">changeInitValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">betas</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Modifies the values of the pameters</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Modifies the values of the pameters</span>
 
 <span class="sd">        :param betas: dictionary where the keys are the names of the</span>
 <span class="sd">                      parameters, and the values are the new value for</span>
@@ -210,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">free_betas_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_value</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_betas</span><span class="o">.</span><span class="n">names</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="IdManager.expressions_names_indices"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.expressions_names_indices">[docs]</a>    <span class="k">def</span> <span class="nf">expressions_names_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_of_elements</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Assigns consecutive indices to expressions</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assigns consecutive indices to expressions</span>
 
 <span class="sd">        :param dict_of_elements: dictionary of expressions. The keys</span>
 <span class="sd">            are the names.</span>
@@ -226,12 +219,10 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
             <span class="n">indices</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
 
-        <span class="k">return</span> <span class="n">ElementsTuple</span><span class="p">(</span>
-            <span class="n">expressions</span><span class="o">=</span><span class="n">dict_of_elements</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">ElementsTuple</span><span class="p">(</span><span class="n">expressions</span><span class="o">=</span><span class="n">dict_of_elements</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IdManager.prepare"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.prepare">[docs]</a>    <span class="k">def</span> <span class="nf">prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Extract from the formulas the literals (parameters,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract from the formulas the literals (parameters,</span>
 <span class="sd">        variables, random variables) and decide a numbering convention.</span>
 
 <span class="sd">        The numbering is done in the following order:</span>
@@ -249,10 +240,12 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Free parameters (to be estimated), sortedby alphabetical order</span>
+        <span class="c1"># Free parameters (to be estimated), sorted by alphabetical order</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dictOfBetas</span><span class="p">(</span><span class="n">free</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dict_of_elementary_expression</span><span class="p">(</span>
+                <span class="n">the_type</span><span class="o">=</span><span class="n">TypeOfElementaryExpression</span><span class="o">.</span><span class="n">FREE_BETA</span>
+            <span class="p">)</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">free_betas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions_names_indices</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
@@ -268,21 +261,27 @@
         <span class="c1"># Fixed parameters (not to be estimated), sorted by alphatical order.</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dictOfBetas</span><span class="p">(</span><span class="n">free</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dict_of_elementary_expression</span><span class="p">(</span>
+                <span class="n">the_type</span><span class="o">=</span><span class="n">TypeOfElementaryExpression</span><span class="o">.</span><span class="n">FIXED_BETA</span>
+            <span class="p">)</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fixed_betas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions_names_indices</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
 
         <span class="c1"># Random variables for numerical integration</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dictOfRandomVariables</span><span class="p">()</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dict_of_elementary_expression</span><span class="p">(</span>
+                <span class="n">the_type</span><span class="o">=</span><span class="n">TypeOfElementaryExpression</span><span class="o">.</span><span class="n">RANDOM_VARIABLE</span>
+            <span class="p">)</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions_names_indices</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
 
         <span class="c1"># Draws</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dictOfDraws</span><span class="p">()</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dict_of_elementary_expression</span><span class="p">(</span>
+                <span class="n">the_type</span><span class="o">=</span><span class="n">TypeOfElementaryExpression</span><span class="o">.</span><span class="n">DRAWS</span>
+            <span class="p">)</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressions_names_indices</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
 
@@ -300,9 +299,7 @@
                 <span class="n">names</span><span class="o">=</span><span class="n">variables_names</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">ElementsTuple</span><span class="p">(</span>
-                <span class="n">expressions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[]</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">ElementsTuple</span><span class="p">(</span><span class="n">expressions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[])</span>
 
         <span class="c1"># Merge all the names</span>
         <span class="n">elementary_expressions_names</span> <span class="o">=</span> <span class="p">(</span>
@@ -313,9 +310,7 @@
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">names</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elementary_expressions_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
-            <span class="nb">set</span><span class="p">(</span><span class="n">elementary_expressions_names</span><span class="p">)</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elementary_expressions_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">elementary_expressions_names</span><span class="p">)):</span>
             <span class="n">duplicates</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">x</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">elementary_expressions_names</span>
@@ -325,7 +320,7 @@
                 <span class="sa">f</span><span class="s1">&#39;The following elementary expressions are defined &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;more than once: </span><span class="si">{</span><span class="n">duplicates</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span>
 
         <span class="n">elementary_expressions_indices</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">v</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elementary_expressions_names</span><span class="p">)</span>
@@ -338,12 +333,10 @@
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">free_betas_values</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">free_betas</span><span class="o">.</span><span class="n">expressions</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">initValue</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_betas</span><span class="o">.</span><span class="n">names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">free_betas</span><span class="o">.</span><span class="n">expressions</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">initValue</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">free_betas</span><span class="o">.</span><span class="n">names</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fixed_betas_values</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fixed_betas</span><span class="o">.</span><span class="n">expressions</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">initValue</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_betas</span><span class="o">.</span><span class="n">names</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fixed_betas</span><span class="o">.</span><span class="n">expressions</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">initValue</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_betas</span><span class="o">.</span><span class="n">names</span>
         <span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">requires_draws</span><span class="p">:</span>
@@ -352,7 +345,7 @@
             <span class="p">)</span></div>
 
 <div class="viewcode-block" id="IdManager.setDataMap"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.setDataMap">[docs]</a>    <span class="k">def</span> <span class="nf">setDataMap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Specify the map of the panel data in the expressions</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specify the map of the panel data in the expressions</span>
 
 <span class="sd">        :param sample: map of the panel data (see</span>
 <span class="sd">            :func:`biogeme.database.Database.buildPanelMap`)</span>
@@ -362,7 +355,7 @@
             <span class="n">f</span><span class="o">.</span><span class="n">cpp</span><span class="o">.</span><span class="n">setDataMap</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IdManager.setData"><a class="viewcode-back" href="../../idmanager.html#biogeme.idmanager.IdManager.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Specify the sample</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specify the sample</span>
 
 <span class="sd">        :param sample: map of the panel data (see</span>
 <span class="sd">            :func:`biogeme.database.Database.buildPanelMap`)</span>
@@ -380,7 +373,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

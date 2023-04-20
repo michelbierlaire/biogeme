@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Segmentation &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Segmentation &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,11 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -29,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -57,7 +58,29 @@
 <li class="toctree-l1"><a class="reference internal" href="optimization.html">Optimization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="results.html">Results</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Segmentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.segmentation">biogeme.segmentation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.segmentation">biogeme.segmentation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.segmentation.DiscreteSegmentationTuple"><code class="docutils literal notranslate"><span class="pre">DiscreteSegmentationTuple</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.DiscreteSegmentationTuple.__init__"><code class="docutils literal notranslate"><span class="pre">DiscreteSegmentationTuple.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation"><code class="docutils literal notranslate"><span class="pre">OneSegmentation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation.__init__"><code class="docutils literal notranslate"><span class="pre">OneSegmentation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation.beta_code"><code class="docutils literal notranslate"><span class="pre">OneSegmentation.beta_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation.beta_expression"><code class="docutils literal notranslate"><span class="pre">OneSegmentation.beta_expression()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation.beta_name"><code class="docutils literal notranslate"><span class="pre">OneSegmentation.beta_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation.list_of_code"><code class="docutils literal notranslate"><span class="pre">OneSegmentation.list_of_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.OneSegmentation.list_of_expressions"><code class="docutils literal notranslate"><span class="pre">OneSegmentation.list_of_expressions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.segmentation.Segmentation"><code class="docutils literal notranslate"><span class="pre">Segmentation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.Segmentation.__init__"><code class="docutils literal notranslate"><span class="pre">Segmentation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.Segmentation.beta_code"><code class="docutils literal notranslate"><span class="pre">Segmentation.beta_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.Segmentation.segmented_beta"><code class="docutils literal notranslate"><span class="pre">Segmentation.segmented_beta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.segmentation.Segmentation.segmented_code"><code class="docutils literal notranslate"><span class="pre">Segmentation.segmented_code()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
@@ -79,8 +102,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Segmentation</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Segmentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/segmentation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,149 +120,219 @@
 <span id="biogeme-segmentation-module"></span><h2>biogeme.segmentation module<a class="headerlink" href="#module-biogeme.segmentation" title="Permalink to this heading"></a></h2>
 <p>Class that provides some automatic specification for segmented parameters</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
-<dd class="field-even"><p>Fri Dec 31 10:41:33 2021</p>
+<dt class="field-even">date<span class="colon">:</span></dt>
+<dd class="field-even"><p>Thu Feb  2 09:42:36 2023</p>
 </dd>
 </dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="biogeme.segmentation.DiscreteSegmentationTuple">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">DiscreteSegmentationTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#biogeme.segmentation.DiscreteSegmentationTuple" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.segmentation.DiscreteSegmentationTuple.mapping">
-<span class="sig-name descname"><span class="pre">mapping</span></span><a class="headerlink" href="#biogeme.segmentation.DiscreteSegmentationTuple.mapping" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.segmentation.DiscreteSegmentationTuple.variable">
-<span class="sig-name descname"><span class="pre">variable</span></span><a class="headerlink" href="#biogeme.segmentation.DiscreteSegmentationTuple.variable" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.segmentation.code_to_combine_segmented_expressions">
-<span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">code_to_combine_segmented_expressions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping_of_expressions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#code_to_combine_segmented_expressions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.code_to_combine_segmented_expressions" title="Permalink to this definition"></a></dt>
-<dd><p>Create the Python code for an expressions that combines all the segments</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">DiscreteSegmentationTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#DiscreteSegmentationTuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.DiscreteSegmentationTuple" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Characterization of a segmentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.DiscreteSegmentationTuple.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#DiscreteSegmentationTuple.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.DiscreteSegmentationTuple.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Ctor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>variable</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Variable" title="biogeme.expressions.Variable"><em>biogeme.expressions.Variable</em></a>) – variable that characterizes the segmentation</p></li>
-<li><p><strong>mapping_of_expressions</strong> (<em>dict</em><em>(</em><em>int: biogeme.expressions.Expression</em><em>)</em>) – dictionary that maps each value of
-the variable with the Python code of the expression for the
-corresponding segment.</p></li>
-<li><p><strong>prefix</strong> (<em>str</em>) – name of the current expression, used as prefix</p></li>
+<li><p><strong>variable</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Variable" title="biogeme.expressions.Variable"><em>biogeme.expressions.Variable</em></a>) – socio-economic variable used for the segmentation</p></li>
+<li><p><strong>mapping</strong> (<em>dict</em><em>(</em><em>int: str</em><em>)</em>) – maps the values of the variable with the name of a category</p></li>
+<li><p><strong>reference</strong> (<em>str</em>) – name of the reference category. If None, an
+arbitrary category is selected as reference.  :type:</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>code for the combined expression</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the name of the reference category
+does not appear in the list.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">OneSegmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Single segmentation of a parameter</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Ctor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter to be segmented</p></li>
+<li><p><strong>segmentation_tuple</strong> (<a class="reference internal" href="#biogeme.segmentation.DiscreteSegmentationTuple" title="biogeme.segmentation.DiscreteSegmentationTuple"><em>DiscreteSegmentationTuple</em></a>) – characterization of the segmentation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation.beta_code">
+<span class="sig-name descname"><span class="pre">beta_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assignment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation.beta_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation.beta_code" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Constructs the Python code for the expression of the</dt><dd><p>parameter associated with a specific category</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>category</strong> (<em>str</em>) – name of the category</p></li>
+<li><p><strong>assignment</strong> (<em>bool</em>) – if True, the code includes the assigbnment to a variable.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the Python code</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.segmentation.code_to_segment_parameter">
-<span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">code_to_segment_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_discrete_segmentations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#code_to_segment_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.code_to_segment_parameter" title="Permalink to this definition"></a></dt>
-<dd><p>Generate the Python code to segment a parameter along several
-dimensions of segmentation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation.beta_expression">
+<span class="sig-name descname"><span class="pre">beta_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation.beta_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation.beta_expression" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Constructs the expression for the parameter associated with</dt><dd><p>a specific category</p>
+</dd>
+</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parameter</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter to segment</p></li>
-<li><p><strong>list_of_discrete_segmentations</strong> – each element of the list is a tuple
-with the variable characterizing the segmentation, and a
-dictionary mapping the values with the names of the segments.</p></li>
-<li><p><strong>prefix</strong> (<em>str</em>) – name of the current expression, used as prefix</p></li>
-</ul>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>category</strong> (<em>str</em>) – name of the category</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>code for the segmentation</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>expression of the parameter for the category</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta">biogeme.expressions.Beta</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.segmentation.combine_segmented_expressions">
-<span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">combine_segmented_expressions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping_of_expressions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#combine_segmented_expressions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.combine_segmented_expressions" title="Permalink to this definition"></a></dt>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation.beta_name">
+<span class="sig-name descname"><span class="pre">beta_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation.beta_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation.beta_name" title="Permalink to this definition"></a></dt>
+<dd><p>Construct the name of the parameter associated with a specific category</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>category</strong> (<em>str</em>) – name of the category</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>name of parameter for the category</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the category is not listed in the
+mapping of the segmentation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation.list_of_code">
+<span class="sig-name descname"><span class="pre">list_of_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation.list_of_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation.list_of_code" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Create a list of Python codes for the expressions involved</dt><dd><p>in the segmentation of the parameter</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of codes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list(str)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.OneSegmentation.list_of_expressions">
+<span class="sig-name descname"><span class="pre">list_of_expressions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#OneSegmentation.list_of_expressions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.OneSegmentation.list_of_expressions" title="Permalink to this definition"></a></dt>
+<dd><p>Create a list of expressions involved in the segmentation of the parameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of expressions</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list(<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="biogeme.segmentation.Segmentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">Segmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_tuples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'segmented'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#Segmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.Segmentation" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Segmentation of a parameter, possibly with multiple socio-economic variables</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.Segmentation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation_tuples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'segmented'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#Segmentation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.Segmentation.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Ctor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>beta</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter to be segmented</p></li>
+<li><p><strong>segmentation_tuples</strong> (<em>list</em><em>(</em><a class="reference internal" href="#biogeme.segmentation.DiscreteSegmentationTuple" title="biogeme.segmentation.DiscreteSegmentationTuple"><em>DiscreteSegmentationTuple</em></a><em>)</em>) – characterization of the segmentations</p></li>
+<li><p><strong>prefix</strong> (<em>str</em>) – prefix to be used to generated the name of the
+segmented parameter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.Segmentation.beta_code">
+<span class="sig-name descname"><span class="pre">beta_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#Segmentation.beta_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.Segmentation.beta_code" title="Permalink to this definition"></a></dt>
+<dd><p>Constructs the Python code for the parameter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Python code</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.Segmentation.segmented_beta">
+<span class="sig-name descname"><span class="pre">segmented_beta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#Segmentation.segmented_beta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.Segmentation.segmented_beta" title="Permalink to this definition"></a></dt>
 <dd><p>Create an expressions that combines all the segments</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>variable</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Variable" title="biogeme.expressions.Variable"><em>biogeme.expressions.Variable</em></a>) – variable that characterizes the segmentation</p></li>
-<li><p><strong>mapping_of_expressions</strong> (<em>dict</em><em>(</em><em>int: biogeme.expressions.Expression</em><em>)</em>) – dictionary that maps each value of
-the variable with the expression for the corresponding
-segment.</p></li>
-</ul>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>combined expression</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>combined expression</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.bioMultSum" title="biogeme.expressions.bioMultSum">biogeme.expressions.bioMultSum</a></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.segmentation.create_segmented_parameter">
-<span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">create_segmented_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#create_segmented_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.create_segmented_parameter" title="Permalink to this definition"></a></dt>
-<dd><p>Create a version of the parameter for each segment</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.segmentation.Segmentation.segmented_code">
+<span class="sig-name descname"><span class="pre">segmented_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#Segmentation.segmented_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.Segmentation.segmented_code" title="Permalink to this definition"></a></dt>
+<dd><p>Create the Python code for an expressions that combines all the segments</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parameter</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter</p></li>
-<li><p><strong>mapping</strong> (<em>dict</em><em>(</em><em>int: str</em><em>)</em>) – dictionary that maps each segment id with the name
-of the segment.</p></li>
-</ul>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Python code for the combined expression</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a dictionary that maps each segment id with the created parameters</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict(int: biogeme.expressions.Beta)</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.segmentation.segment_parameter">
-<span class="sig-prename descclassname"><span class="pre">biogeme.segmentation.</span></span><span class="sig-name descname"><span class="pre">segment_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_of_discrete_segmentations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combinatorial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/segmentation.html#segment_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.segmentation.segment_parameter" title="Permalink to this definition"></a></dt>
-<dd><p>Segment a parameter expression along several dimensions of segmentation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>parameter</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Beta" title="biogeme.expressions.Beta"><em>biogeme.expressions.Beta</em></a>) – parameter to segment</p></li>
-<li><p><strong>list_of_discrete_segmentations</strong> – each element of the list is a tuple
-with the variable characterizing the segmentation, and a
-dictionary mapping the values with the names of the segments.</p></li>
-<li><p><strong>combinatorial</strong> – if True, a parameter is associated with each
-combination of values for the discrete segmentations. If
-<span class="math notranslate nohighlight">\(N_s\)</span> is the number of values for segmentation s, the
-total numper of parameters is <span class="math notranslate nohighlight">\(\prod_s N_s\)</span>.  If False,
-for each segmentation in the list, a parameter is associated
-with each value of this segmentation.  If <cite>:math:`N_s</cite> is the
-number of values for segmentation s, the total number of
-parameters is <span class="math notranslate nohighlight">\(\sum_s N_s\)</span>.  :type combinatorial: bool</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>expression involving all the segments</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression">biogeme.expressions.Expression</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>
@@ -256,7 +349,7 @@ parameters is <span class="math notranslate nohighlight">\(\sum_s N_s\)</span>. 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

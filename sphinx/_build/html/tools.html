@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tools &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Tools &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -29,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -59,7 +61,29 @@
 <li class="toctree-l1"><a class="reference internal" href="segmentation.html">Segmentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="singleton.html">Singleton</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tools</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.tools">biogeme.tools module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.tools">biogeme.tools module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.LRTuple"><code class="docutils literal notranslate"><span class="pre">LRTuple</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.tools.LRTuple.message"><code class="docutils literal notranslate"><span class="pre">LRTuple.message</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.tools.LRTuple.statistic"><code class="docutils literal notranslate"><span class="pre">LRTuple.statistic</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.tools.LRTuple.threshold"><code class="docutils literal notranslate"><span class="pre">LRTuple.threshold</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.ModelNames"><code class="docutils literal notranslate"><span class="pre">ModelNames</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.tools.ModelNames.__init__"><code class="docutils literal notranslate"><span class="pre">ModelNames.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.TemporaryFile"><code class="docutils literal notranslate"><span class="pre">TemporaryFile</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.calculatePrimeNumbers"><code class="docutils literal notranslate"><span class="pre">calculatePrimeNumbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.checkDerivatives"><code class="docutils literal notranslate"><span class="pre">checkDerivatives()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.countNumberOfGroups"><code class="docutils literal notranslate"><span class="pre">countNumberOfGroups()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.findiff_H"><code class="docutils literal notranslate"><span class="pre">findiff_H()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.findiff_g"><code class="docutils literal notranslate"><span class="pre">findiff_g()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.flatten_database"><code class="docutils literal notranslate"><span class="pre">flatten_database()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.generate_unique_ids"><code class="docutils literal notranslate"><span class="pre">generate_unique_ids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.getPrimeNumbers"><code class="docutils literal notranslate"><span class="pre">getPrimeNumbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.tools.likelihood_ratio_test"><code class="docutils literal notranslate"><span class="pre">likelihood_ratio_test()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="version.html">Version</a></li>
@@ -79,8 +103,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Tools</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tools</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/tools.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -97,10 +121,10 @@
 <span id="biogeme-tools-module"></span><h2>biogeme.tools module<a class="headerlink" href="#module-biogeme.tools" title="Permalink to this heading"></a></h2>
 <p>Implements some useful functions</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
+<dt class="field-even">date<span class="colon">:</span></dt>
 <dd class="field-even"><p>Sun Apr 14 10:46:10 2019</p>
 </dd>
 </dl>
@@ -128,22 +152,48 @@
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="biogeme.tools.ModelNames">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">ModelNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Model'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#ModelNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.ModelNames" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class generating model names from unique configuration string</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.tools.ModelNames.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Model'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#ModelNames.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.ModelNames.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="biogeme.tools.TemporaryFile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">TemporaryFile</span></span><a class="reference internal" href="_modules/biogeme/tools.html#TemporaryFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.TemporaryFile" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class generating a temporary file, so that the user does not
+bother about its location, or even its name</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TemporaryFile</span><span class="p">()</span> <span class="k">as</span> <span class="n">filename</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;stuff&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="biogeme.tools.calculatePrimeNumbers">
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">calculatePrimeNumbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">upperBound</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#calculatePrimeNumbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.calculatePrimeNumbers" title="Permalink to this definition"></a></dt>
 <dd><p>Calculate prime numbers</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>upperBound</strong> (<em>int</em>) – prime numbers up to this value will be computed</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>array with prime numbers</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list(int)</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the upperBound is incorrectly defined
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the upperBound is incorrectly defined
 (negative number, e.g.)</p>
 </dd>
 </dl>
@@ -154,66 +204,12 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="biogeme.tools.calculate_correlation">
-<span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">calculate_correlation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#calculate_correlation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.calculate_correlation" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the correlation matrix of a nested or cross-nested
-logit model.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nests</strong> (<em>tuple</em><em>(</em><em>tuple</em><em>(</em><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a><em>, </em><em>list</em><em>(</em><em>int</em><em>)</em><em>)</em><em>)</em><em>, or
-</em><em>tuple</em><em>(</em><em>tuple</em><em>(</em><em>biogeme.Expression</em><em>, </em><em>dict</em><em>(</em><em>int:biogeme.expressions.Expression</em><em>)</em><em>)</em><em>)</em>) – <p>A tuple containing as many items as nests.</p>
-<p>Each item is also a tuple containing two items:</p>
-<ul>
-<li><p>an object of type biogeme.expressions. expr.Expression
-representing the nest parameter,</p></li>
-<li><p>for the nested logit model, a list containing the list of
-identifiers of the alternatives belonging to the nest.</p></li>
-<li><p>for the cross-nested logit model, a dictionary mapping the
-alternative ids with the cross-nested parameters for the
-corresponding nest. If an alternative is missing in the
-dictionary, the corresponding alpha is set to zero.</p></li>
-</ul>
-<dl class="simple">
-<dt>Example for the nested logit::</dt><dd><p>nesta = MUA ,[1, 2, 3]
-nestb = MUB ,[4, 5, 6]
-nests = nesta, nestb</p>
-</dd>
-</dl>
-<p>Example for the cross-nested logit:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alphaA</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1a</span><span class="p">,</span>
-          <span class="mi">2</span><span class="p">:</span> <span class="n">alpha2a</span><span class="p">,</span>
-          <span class="mi">3</span><span class="p">:</span> <span class="n">alpha3a</span><span class="p">,</span>
-          <span class="mi">4</span><span class="p">:</span> <span class="n">alpha4a</span><span class="p">,</span>
-          <span class="mi">5</span><span class="p">:</span> <span class="n">alpha5a</span><span class="p">,</span>
-          <span class="mi">6</span><span class="p">:</span> <span class="n">alpha6a</span><span class="p">}</span>
-<span class="n">alphaB</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1b</span><span class="p">,</span>
-          <span class="mi">2</span><span class="p">:</span> <span class="n">alpha2b</span><span class="p">,</span>
-          <span class="mi">3</span><span class="p">:</span> <span class="n">alpha3b</span><span class="p">,</span>
-          <span class="mi">4</span><span class="p">:</span> <span class="n">alpha4b</span><span class="p">,</span>
-          <span class="mi">5</span><span class="p">:</span> <span class="n">alpha5b</span><span class="p">,</span>
-          <span class="mi">6</span><span class="p">:</span> <span class="n">alpha6b</span><span class="p">}</span>
-<span class="n">nesta</span> <span class="o">=</span> <span class="n">MUA</span><span class="p">,</span> <span class="n">alphaA</span>
-<span class="n">nestb</span> <span class="o">=</span> <span class="n">MUB</span><span class="p">,</span> <span class="n">alphaB</span>
-<span class="n">nests</span> <span class="o">=</span> <span class="n">nesta</span><span class="p">,</span> <span class="n">nestb</span>
-</pre></div>
-</div>
-</p></li>
-<li><p><strong>results</strong> (<a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults"><em>biogeme.results.bioResults</em></a>) – estimation results</p></li>
-<li><p><strong>alternative_names</strong> (<em>dict</em><em>(</em><em>int: str</em><em>)</em>) – a dictionary mapping the alternative IDs
-with their name. If None, the IDs are used as names.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="biogeme.tools.checkDerivatives">
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">checkDerivatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#checkDerivatives"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.checkDerivatives" title="Permalink to this definition"></a></dt>
 <dd><p>Verifies the analytical derivatives of a function by comparing
 them with finite difference approximations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theFunction</strong> (<em>function</em>) – <p>A function object that takes a vector as an argument,
 and returns a tuple:</p>
@@ -229,7 +225,7 @@ function <span class="math notranslate nohighlight">\(f\)</span>,</p></li>
 <li><p><strong>logg</strong> (<em>bool</em>) – if True, messages will be displayed.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>tuple f, g, h, gdiff, hdiff where</p>
 <ul class="simple">
 <li><p>f is the value of the function at x,</p></li>
@@ -242,97 +238,8 @@ and the finite difference approximation</p></li>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>float, numpy.array,numpy.array,  numpy.array,numpy.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.tools.correlation_cross_nested">
-<span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">correlation_cross_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#correlation_cross_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.correlation_cross_nested" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the correlation matrix of the error terms of all
-alternatives of a cross-nested logit model. It is assumed that
-the homogeneity parameter mu of the model has been normalized
-to one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
-Each item is also a tuple containing two items:</p>
-<ul class="simple">
-<li><p>an object of type biogeme.expressions. expr.Expression
-representing the nest parameter,</p></li>
-<li><p>a dictionary mapping the alternative ids with the cross-nested
-parameters for the corresponding nest. If an alternative is
-missing in the dictionary, the corresponding alpha is set to zero.</p></li>
-</ul>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alphaA</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1a</span><span class="p">,</span>
-          <span class="mi">2</span><span class="p">:</span> <span class="n">alpha2a</span><span class="p">,</span>
-          <span class="mi">3</span><span class="p">:</span> <span class="n">alpha3a</span><span class="p">,</span>
-          <span class="mi">4</span><span class="p">:</span> <span class="n">alpha4a</span><span class="p">,</span>
-          <span class="mi">5</span><span class="p">:</span> <span class="n">alpha5a</span><span class="p">,</span>
-          <span class="mi">6</span><span class="p">:</span> <span class="n">alpha6a</span><span class="p">}</span>
-<span class="n">alphaB</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1b</span><span class="p">,</span>
-          <span class="mi">2</span><span class="p">:</span> <span class="n">alpha2b</span><span class="p">,</span>
-          <span class="mi">3</span><span class="p">:</span> <span class="n">alpha3b</span><span class="p">,</span>
-          <span class="mi">4</span><span class="p">:</span> <span class="n">alpha4b</span><span class="p">,</span>
-          <span class="mi">5</span><span class="p">:</span> <span class="n">alpha5b</span><span class="p">,</span>
-          <span class="mi">6</span><span class="p">:</span> <span class="n">alpha6b</span><span class="p">}</span>
-<span class="n">nesta</span> <span class="o">=</span> <span class="n">MUA</span><span class="p">,</span> <span class="n">alphaA</span>
-<span class="n">nestb</span> <span class="o">=</span> <span class="n">MUB</span><span class="p">,</span> <span class="n">alphaB</span>
-<span class="n">nests</span> <span class="o">=</span> <span class="n">nesta</span><span class="p">,</span> <span class="n">nestb</span>
-</pre></div>
-</div>
-</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>value of the correlation</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the requested number is non positive or a float</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>correlation matrix</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>pd.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="biogeme.tools.correlation_nested">
-<span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">correlation_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#correlation_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.correlation_nested" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the correlation matrix of the error terms of all
-alternatives of a nested logit model. It is assumed that the
-homogeneity parameter mu of the model has been normalized to one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>nests</strong> (<em>tuple</em>) – <p>A tuple containing as many items as nests.
-Each item is also a tuple containing two items:</p>
-<ul class="simple">
-<li><p>an object of type biogeme.expressions.expr.Expression representing
-the nest parameter,</p></li>
-<li><p>a list containing the list of identifiers of the alternatives
-belonging to the nest.</p></li>
-</ul>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nesta</span> <span class="o">=</span> <span class="n">MUA</span> <span class="p">,[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
-<span class="n">nestb</span> <span class="o">=</span> <span class="n">MUB</span> <span class="p">,[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
-<span class="n">nests</span> <span class="o">=</span> <span class="n">nesta</span><span class="p">,</span> <span class="n">nestb</span>
-</pre></div>
-</div>
-</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>correlation matrix</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -362,65 +269,11 @@ For instance: 1,2,2,3,3,3,4,1,1  would give 5.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="biogeme.tools.covariance_cross_nested">
-<span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">covariance_cross_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nests</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#covariance_cross_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.covariance_cross_nested" title="Permalink to this definition"></a></dt>
-<dd><p>Calculate the covariance between the error terms of two
-alternatives of a cross-nested logit model. It is assumed that
-the homogeneity parameter mu of the model has been normalized
-to one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>i</strong> (<em>int</em>) – first alternative</p></li>
-<li><p><strong>j</strong> (<em>int</em>) – first alternative</p></li>
-<li><p><strong>nests</strong> (<em>tuple</em>) – <p>a tuple containing as many items as nests.
-Each item is also a tuple containing two items:</p>
-<ul>
-<li><p>an object of type biogeme.expressions. expr.Expression
-representing the nest parameter,</p></li>
-<li><p>a dictionary mapping the alternative ids with the cross-nested
-parameters for the corresponding nest. If an alternative is
-missing in the dictionary, the corresponding alpha is set to zero.</p></li>
-</ul>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alphaA</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1a</span><span class="p">,</span>
-          <span class="mi">2</span><span class="p">:</span> <span class="n">alpha2a</span><span class="p">,</span>
-          <span class="mi">3</span><span class="p">:</span> <span class="n">alpha3a</span><span class="p">,</span>
-          <span class="mi">4</span><span class="p">:</span> <span class="n">alpha4a</span><span class="p">,</span>
-          <span class="mi">5</span><span class="p">:</span> <span class="n">alpha5a</span><span class="p">,</span>
-          <span class="mi">6</span><span class="p">:</span> <span class="n">alpha6a</span><span class="p">}</span>
-<span class="n">alphaB</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">alpha1b</span><span class="p">,</span>
-          <span class="mi">2</span><span class="p">:</span> <span class="n">alpha2b</span><span class="p">,</span>
-          <span class="mi">3</span><span class="p">:</span> <span class="n">alpha3b</span><span class="p">,</span>
-          <span class="mi">4</span><span class="p">:</span> <span class="n">alpha4b</span><span class="p">,</span>
-          <span class="mi">5</span><span class="p">:</span> <span class="n">alpha5b</span><span class="p">,</span>
-          <span class="mi">6</span><span class="p">:</span> <span class="n">alpha6b</span><span class="p">}</span>
-<span class="n">nesta</span> <span class="o">=</span> <span class="n">MUA</span><span class="p">,</span> <span class="n">alphaA</span>
-<span class="n">nestb</span> <span class="o">=</span> <span class="n">MUB</span><span class="p">,</span> <span class="n">alphaB</span>
-<span class="n">nests</span> <span class="o">=</span> <span class="n">nesta</span><span class="p">,</span> <span class="n">nestb</span>
-</pre></div>
-</div>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>value of the correlation</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the requested number is non positive or a float</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="biogeme.tools.findiff_H">
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">findiff_H</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#findiff_H"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.findiff_H" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the hessian of a function <span class="math notranslate nohighlight">\(f\)</span> using finite differences</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theFunction</strong> (<em>function</em>) – A function object that takes a vector as an
 argument, and returns a tuple. The first
@@ -431,11 +284,11 @@ are not used.</p></li>
 <li><p><strong>x</strong> (<em>numpy.array</em>) – argument of the function</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy matrix containing the hessian calculated by
 finite differences.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
@@ -446,7 +299,7 @@ finite differences.</p>
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">findiff_g</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theFunction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#findiff_g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.findiff_g" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the gradient of a function <span class="math notranslate nohighlight">\(f\)</span> using finite differences</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theFunction</strong> (<em>function</em>) – A function object that takes a vector as an
 argument, and returns a tuple. The first
@@ -456,11 +309,11 @@ used.</p></li>
 <li><p><strong>x</strong> (<em>numpy.array</em>) – argument of the function</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy vector, same dimension as x, containing the gradient
 calculated by finite differences.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
@@ -496,7 +349,7 @@ following format:</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – initial data frame</p></li>
 <li><p><strong>merge_id</strong> (<em>str</em>) – name of the column that identifies rows that
@@ -510,11 +363,26 @@ above: [‘Age’]. If None, these columns are automatically
 detected. On large database, there may be a performance issue.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>reformatted database</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.tools.generate_unique_ids">
+<span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">generate_unique_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_of_ids</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#generate_unique_ids"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.generate_unique_ids" title="Permalink to this definition"></a></dt>
+<dd><p>If there are duplicates in the list, a new list is generated
+where there are renamed to obtain a list with unique IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>list_of_ids</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – list of ids</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dict that maps the uniue names with the original name</p>
 </dd>
 </dl>
 </dd></dl>
@@ -524,17 +392,17 @@ detected. On large database, there may be a performance issue.</p></li>
 <span class="sig-prename descclassname"><span class="pre">biogeme.tools.</span></span><span class="sig-name descname"><span class="pre">getPrimeNumbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/tools.html#getPrimeNumbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.tools.getPrimeNumbers" title="Permalink to this definition"></a></dt>
 <dd><p>Get a given number of prime numbers</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>n</strong> (<em>int</em>) – number of primes that are requested</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>array with prime numbers</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list(int)</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the requested number is non positive or a float</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the requested number is non positive or a float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -545,7 +413,7 @@ detected. On large database, there may be a performance issue.</p></li>
 <dd><p>This function performs a likelihood ratio test between a
 restricted and an unrestricted model.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model1</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>int</em><em>)</em>) – the final loglikelihood of one model, and the number of
 estimated parameters.</p></li>
@@ -554,7 +422,7 @@ the number of estimated parameters.</p></li>
 <li><p><strong>significance_level</strong> (<em>float</em>) – level of significance of the test. Default: 0.05</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>a tuple containing:</p>
 <ul class="simple">
 <li><p>a message with the outcome of the test</p></li>
@@ -564,11 +432,11 @@ between the loglikelihood  of the two models</p></li>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#biogeme.tools.LRTuple" title="biogeme.tools.LRTuple">LRTuple</a>(str, float, float)</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the unrestricted model has a lower log
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the unrestricted model has a lower log
 likelihood than the restricted model.</p>
 </dd>
 </dl>
@@ -588,7 +456,7 @@ likelihood than the restricted model.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

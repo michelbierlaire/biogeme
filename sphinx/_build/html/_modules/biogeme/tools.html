@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.tools &mdash; Biogeme 3.2.9 documentation</title>
+  <title>biogeme.tools &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -72,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>biogeme.tools</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">biogeme.tools</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -95,23 +97,24 @@
 <span class="c1"># Too constraining</span>
 <span class="c1"># pylint: disable=invalid-name, too-many-locals</span>
 
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span><span class="p">,</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">chi2</span>
-<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">dblquad</span>
-<span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
 <span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
-<span class="kn">from</span> <span class="nn">biogeme.expressions</span> <span class="kn">import</span> <span class="n">Expression</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
 
 <span class="n">LRTuple</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;LRTuple&#39;</span><span class="p">,</span> <span class="s1">&#39;message statistic threshold&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="findiff_g"><a class="viewcode-back" href="../../tools.html#biogeme.tools.findiff_g">[docs]</a><span class="k">def</span> <span class="nf">findiff_g</span><span class="p">(</span><span class="n">theFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates the gradient of a function :math:`f` using finite differences</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the gradient of a function :math:`f` using finite differences</span>
 
 <span class="sd">    :param theFunction: A function object that takes a vector as an</span>
 <span class="sd">                        argument, and returns a tuple. The first</span>
@@ -149,7 +152,7 @@
 
 
 <div class="viewcode-block" id="findiff_H"><a class="viewcode-back" href="../../tools.html#biogeme.tools.findiff_H">[docs]</a><span class="k">def</span> <span class="nf">findiff_H</span><span class="p">(</span><span class="n">theFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates the hessian of a function :math:`f` using finite differences</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the hessian of a function :math:`f` using finite differences</span>
 
 <span class="sd">    :param theFunction: A function object that takes a vector as an</span>
 <span class="sd">                        argument, and returns a tuple. The first</span>
@@ -188,7 +191,7 @@
 
 
 <div class="viewcode-block" id="checkDerivatives"><a class="viewcode-back" href="../../tools.html#biogeme.tools.checkDerivatives">[docs]</a><span class="k">def</span> <span class="nf">checkDerivatives</span><span class="p">(</span><span class="n">theFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">logg</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Verifies the analytical derivatives of a function by comparing</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Verifies the analytical derivatives of a function by comparing</span>
 <span class="sd">    them with finite difference approximations.</span>
 
 <span class="sd">    :param theFunction: A function object that takes a vector as an argument,</span>
@@ -230,17 +233,17 @@
     <span class="k">if</span> <span class="n">logg</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;x[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))]</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="s1">&#39;x</span><span class="se">\t\t</span><span class="s1">Gradient</span><span class="se">\t</span><span class="s1">FinDiff</span><span class="se">\t\t</span><span class="s1">Difference&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;x</span><span class="se">\t\t</span><span class="s1">Gradient</span><span class="se">\t</span><span class="s1">FinDiff</span><span class="se">\t\t</span><span class="s1">Difference&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gdiff</span><span class="p">):</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">:</span><span class="s1">15</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">g</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">g_num</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">:</span><span class="s1">15</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">g</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">g_num</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">h_num</span> <span class="o">=</span> <span class="n">findiff_H</span><span class="p">(</span><span class="n">theFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
     <span class="n">hdiff</span> <span class="o">=</span> <span class="n">h</span> <span class="o">-</span> <span class="n">h_num</span>
     <span class="k">if</span> <span class="n">logg</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="s1">&#39;Row</span><span class="se">\t\t</span><span class="s1">Col</span><span class="se">\t\t</span><span class="s1">Hessian</span><span class="se">\t</span><span class="s1">FinDiff</span><span class="se">\t\t</span><span class="s1">Difference&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Row</span><span class="se">\t\t</span><span class="s1">Col</span><span class="se">\t\t</span><span class="s1">Hessian</span><span class="se">\t</span><span class="s1">FinDiff</span><span class="se">\t\t</span><span class="s1">Difference&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hdiff</span><span class="p">)):</span>
             <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hdiff</span><span class="p">)):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="si">:</span><span class="s1">15</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="si">:</span><span class="s1">15</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">h</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="se">\t</span><span class="s1">&#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">h_num</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">hdiff</span><span class="p">[</span><span class="n">row</span><span class="p">,</span><span class="n">col</span><span class="p">]</span><span class="si">:</span><span class="s1">+E</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
@@ -248,7 +251,7 @@
 
 
 <div class="viewcode-block" id="getPrimeNumbers"><a class="viewcode-back" href="../../tools.html#biogeme.tools.getPrimeNumbers">[docs]</a><span class="k">def</span> <span class="nf">getPrimeNumbers</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get a given number of prime numbers</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a given number of prime numbers</span>
 
 <span class="sd">    :param n: number of primes that are requested</span>
 <span class="sd">    :type n: int</span>
@@ -256,13 +259,13 @@
 <span class="sd">    :return: array with prime numbers</span>
 <span class="sd">    :rtype: list(int)</span>
 
-<span class="sd">    :raise biogemeError: if the requested number is non positive or a float</span>
+<span class="sd">    :raise BiogemeError: if the requested number is non positive or a float</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">upperBound</span> <span class="o">=</span> <span class="mi">100</span>
     <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect number: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect number: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="k">while</span> <span class="n">total</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="n">upperBound</span> <span class="o">*=</span> <span class="mi">10</span>
@@ -271,11 +274,11 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">primes</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect number: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect number: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
 
 
 <div class="viewcode-block" id="calculatePrimeNumbers"><a class="viewcode-back" href="../../tools.html#biogeme.tools.calculatePrimeNumbers">[docs]</a><span class="k">def</span> <span class="nf">calculatePrimeNumbers</span><span class="p">(</span><span class="n">upperBound</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate prime numbers</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate prime numbers</span>
 
 <span class="sd">    :param upperBound: prime numbers up to this value will be computed</span>
 <span class="sd">    :type upperBound: int</span>
@@ -283,7 +286,7 @@
 <span class="sd">    :return: array with prime numbers</span>
 <span class="sd">    :rtype: list(int)</span>
 
-<span class="sd">    :raise biogemeError: if the upperBound is incorrectly defined</span>
+<span class="sd">    :raise BiogemeError: if the upperBound is incorrectly defined</span>
 <span class="sd">        (negative number, e.g.)</span>
 
 <span class="sd">    &gt;&gt;&gt; tools.calculatePrimeNumbers(10)</span>
@@ -291,16 +294,16 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">upperBound</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect value: </span><span class="si">{</span><span class="n">upperBound</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect value: </span><span class="si">{</span><span class="n">upperBound</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">mywork</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">upperBound</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect value: </span><span class="si">{</span><span class="n">upperBound</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect value: </span><span class="si">{</span><span class="n">upperBound</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">largest</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">upperBound</span><span class="p">))))</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect value: </span><span class="si">{</span><span class="n">upperBound</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Incorrect value: </span><span class="si">{</span><span class="n">upperBound</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
 
     <span class="c1"># Remove all multiples</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">largest</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -317,7 +320,7 @@
 
 
 <div class="viewcode-block" id="countNumberOfGroups"><a class="viewcode-back" href="../../tools.html#biogeme.tools.countNumberOfGroups">[docs]</a><span class="k">def</span> <span class="nf">countNumberOfGroups</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function counts the number of groups of same value in a column.</span>
 <span class="sd">    For instance: 1,2,2,3,3,3,4,1,1  would give 5.</span>
 
@@ -346,7 +349,7 @@
 
 
 <div class="viewcode-block" id="likelihood_ratio_test"><a class="viewcode-back" href="../../tools.html#biogeme.tools.likelihood_ratio_test">[docs]</a><span class="k">def</span> <span class="nf">likelihood_ratio_test</span><span class="p">(</span><span class="n">model1</span><span class="p">,</span> <span class="n">model2</span><span class="p">,</span> <span class="n">significance_level</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;This function performs a likelihood ratio test between a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function performs a likelihood ratio test between a</span>
 <span class="sd">    restricted and an unrestricted model.</span>
 
 <span class="sd">    :param model1: the final loglikelihood of one model, and the number of</span>
@@ -369,7 +372,7 @@
 
 <span class="sd">    :rtype: LRTuple(str, float, float)</span>
 
-<span class="sd">    :raise biogemeError: if the unrestricted model has a lower log</span>
+<span class="sd">    :raise BiogemeError: if the unrestricted model has a lower log</span>
 <span class="sd">        likelihood than the restricted model.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -378,7 +381,7 @@
     <span class="n">loglike_m2</span><span class="p">,</span> <span class="n">df_m2</span> <span class="o">=</span> <span class="n">model2</span>
     <span class="k">if</span> <span class="n">loglike_m1</span> <span class="o">&gt;</span> <span class="n">loglike_m2</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">df_m1</span> <span class="o">&lt;</span> <span class="n">df_m2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;The unrestricted model </span><span class="si">{</span><span class="n">model2</span><span class="si">}</span><span class="s1"> has a &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;lower log likelihood than the restricted one </span><span class="si">{</span><span class="n">model1</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
@@ -388,7 +391,7 @@
         <span class="n">df_r</span> <span class="o">=</span> <span class="n">df_m2</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">df_m1</span> <span class="o">&gt;=</span> <span class="n">df_m2</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;The unrestricted model </span><span class="si">{</span><span class="n">model1</span><span class="si">}</span><span class="s1"> has a &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;lower log likelihood than the restricted one </span><span class="si">{</span><span class="n">model2</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="p">)</span>
@@ -401,18 +404,14 @@
     <span class="n">chi_df</span> <span class="o">=</span> <span class="n">df_ur</span> <span class="o">-</span> <span class="n">df_r</span>
     <span class="n">threshold</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">significance_level</span><span class="p">,</span> <span class="n">chi_df</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">stat</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
-        <span class="n">final_msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;H0 cannot be rejected at level </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">significance_level</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">%&#39;</span>
-        <span class="p">)</span>
+        <span class="n">final_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;H0 cannot be rejected at level </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">significance_level</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">%&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">final_msg</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;H0 can be rejected at level </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">significance_level</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">%&#39;</span>
-        <span class="p">)</span>
+        <span class="n">final_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;H0 can be rejected at level </span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">significance_level</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">%&#39;</span>
     <span class="k">return</span> <span class="n">LRTuple</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="n">final_msg</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="n">stat</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="flatten_database"><a class="viewcode-back" href="../../tools.html#biogeme.tools.flatten_database">[docs]</a><span class="k">def</span> <span class="nf">flatten_database</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">merge_id</span><span class="p">,</span> <span class="n">row_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">identical_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Combine several rows of a Pandas database into one.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine several rows of a Pandas database into one.</span>
 <span class="sd">    For instance, consider the following database::</span>
 
 <span class="sd">           ID  Age  Cost   Name</span>
@@ -467,7 +466,7 @@
     <span class="n">all_columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">are_values_identical</span><span class="p">(</span><span class="n">col</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;This function checks if all the values in a column</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function checks if all the values in a column</span>
 <span class="sd">        are identical</span>
 
 <span class="sd">        :param col: the column</span>
@@ -480,7 +479,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_varying_cols</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;This functions returns the name of all columns</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This functions returns the name of all columns</span>
 <span class="sd">        that have constant values within each group of data.</span>
 
 <span class="sd">        :param g: group of data</span>
@@ -490,11 +489,7 @@
 <span class="sd">            within each group of data.</span>
 <span class="sd">        :rtype: set(str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="n">colname</span>
-            <span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">are_values_identical</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-        <span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">colname</span> <span class="k">for</span> <span class="n">colname</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">are_values_identical</span><span class="p">(</span><span class="n">col</span><span class="p">)}</span>
 
     <span class="k">if</span> <span class="n">identical_columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">all_varying_cols</span> <span class="o">=</span> <span class="n">grouped</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">get_varying_cols</span><span class="p">)</span>
@@ -513,12 +508,10 @@
         <span class="p">)</span>
         <span class="n">common_data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">common_data</span><span class="p">[</span><span class="n">merge_id</span><span class="p">]</span>
     <span class="c1"># Treat the other columns</span>
-    <span class="n">grouped_varying</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">merge_id</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">varying_columns</span><span class="p">)]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
-        <span class="n">by</span><span class="o">=</span><span class="n">merge_id</span>
-    <span class="p">)</span>
+    <span class="n">grouped_varying</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">merge_id</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">varying_columns</span><span class="p">)]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">merge_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">treat</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Treat a group of data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Treat a group of data.</span>
 
 <span class="sd">        :param x: group of data</span>
 <span class="sd">        :type x: pandas.DataFrame</span>
@@ -526,23 +519,20 @@
 <span class="sd">        :return: the same data organized in one row, with proper column names</span>
 <span class="sd">        :rtype: pandas.DataFrame</span>
 
-<span class="sd">        :raise biogemeError:  if there are duplicates in the name of</span>
+<span class="sd">        :raise BiogemeError:  if there are duplicates in the name of</span>
 <span class="sd">        the row. Indeed, in that case, they cannot be used to name the</span>
 <span class="sd">        new columns.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">are_values_identical</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">merge_id</span><span class="p">]):</span>
-            <span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Group has different IDs: </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="n">merge_id</span><span class="p">]</span><span class="si">}</span><span class="s1">. &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;Rows id: </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Group has different IDs: </span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="n">merge_id</span><span class="p">]</span><span class="si">}</span><span class="s1">. &#39;</span> <span class="sa">f</span><span class="s1">&#39;Rows id: </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">row_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">x</span><span class="p">[</span><span class="n">row_name</span><span class="p">]</span><span class="o">.</span><span class="n">is_unique</span><span class="p">:</span>
             <span class="n">err_msg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Entries in column [</span><span class="si">{</span><span class="n">row_name</span><span class="si">}</span><span class="s1">] are not unique. &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;This column cannot be used to name the new &#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;columns:</span><span class="se">\n</span><span class="si">{</span><span class="n">x</span><span class="p">[[</span><span class="n">row_name</span><span class="p">,</span> <span class="n">merge_id</span><span class="p">]]</span><span class="si">}</span><span class="s1">. &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;columns:</span><span class="se">\n</span><span class="si">{</span><span class="n">x</span><span class="p">[[</span><span class="n">row_name</span><span class="p">,</span><span class="w"> </span><span class="n">merge_id</span><span class="p">]]</span><span class="si">}</span><span class="s1">. &#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
 
         <span class="n">the_columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="n">merge_id</span><span class="p">}</span>
         <span class="k">if</span> <span class="n">row_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -574,333 +564,71 @@
     <span class="k">return</span> <span class="n">flat_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">merge_id</span><span class="p">])</span></div>
 
 
-<div class="viewcode-block" id="covariance_cross_nested"><a class="viewcode-back" href="../../tools.html#biogeme.tools.covariance_cross_nested">[docs]</a><span class="k">def</span> <span class="nf">covariance_cross_nested</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">nests</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the covariance between the error terms of two</span>
-<span class="sd">    alternatives of a cross-nested logit model. It is assumed that</span>
-<span class="sd">    the homogeneity parameter mu of the model has been normalized</span>
-<span class="sd">    to one.</span>
+<div class="viewcode-block" id="TemporaryFile"><a class="viewcode-back" href="../../tools.html#biogeme.tools.TemporaryFile">[docs]</a><span class="k">class</span> <span class="nc">TemporaryFile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class generating a temporary file, so that the user does not</span>
+<span class="sd">    bother about its location, or even its name</span>
 
-<span class="sd">    :param i: first alternative</span>
-<span class="sd">    :type i: int</span>
-
-<span class="sd">    :param j: first alternative</span>
-<span class="sd">    :type j: int</span>
-
-<span class="sd">    :param nests: a tuple containing as many items as nests.</span>
-<span class="sd">        Each item is also a tuple containing two items:</span>
-
-<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
-<span class="sd">          representing the nest parameter,</span>
-<span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
-<span class="sd">          parameters for the corresponding nest. If an alternative is</span>
-<span class="sd">          missing in the dictionary, the corresponding alpha is set to zero.</span>
-
-<span class="sd">        Example::</span>
-
-<span class="sd">            alphaA = {1: alpha1a,</span>
-<span class="sd">                      2: alpha2a,</span>
-<span class="sd">                      3: alpha3a,</span>
-<span class="sd">                      4: alpha4a,</span>
-<span class="sd">                      5: alpha5a,</span>
-<span class="sd">                      6: alpha6a}</span>
-<span class="sd">            alphaB = {1: alpha1b,</span>
-<span class="sd">                      2: alpha2b,</span>
-<span class="sd">                      3: alpha3b,</span>
-<span class="sd">                      4: alpha4b,</span>
-<span class="sd">                      5: alpha5b,</span>
-<span class="sd">                      6: alpha6b}</span>
-<span class="sd">            nesta = MUA, alphaA</span>
-<span class="sd">            nestb = MUB, alphaB</span>
-<span class="sd">            nests = nesta, nestb</span>
-
-<span class="sd">    :type nests: tuple</span>
-
-<span class="sd">    :return: value of the correlation</span>
-<span class="sd">    :rtype: float</span>
-
-<span class="sd">    :raise biogemeError: if the requested number is non positive or a float</span>
-
+<span class="sd">    Example::</span>
+<span class="sd">    </span>
+<span class="sd">        with TemporaryFile() as filename:</span>
+<span class="sd">            with open(filename, &#39;w&#39;) as f:</span>
+<span class="sd">                print(&#39;stuff&#39;, file=f)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">set_of_alternatives</span> <span class="o">=</span> <span class="p">{</span><span class="n">alt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span> <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span>
 
-    <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">set_of_alternatives</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown alternative: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">set_of_alternatives</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown alternative: </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">6.0</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destroys the temporary directory&quot;&quot;&quot;</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">integrand</span><span class="p">(</span><span class="n">z_i</span><span class="p">,</span> <span class="n">z_j</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Function to be integrated to calculate the correlation between</span>
-<span class="sd">        alternative i and alternative j.</span>
 
-<span class="sd">        :param z_i: argument corresponding to alternative i</span>
-<span class="sd">        :type z_i: float</span>
+<div class="viewcode-block" id="ModelNames"><a class="viewcode-back" href="../../tools.html#biogeme.tools.ModelNames">[docs]</a><span class="k">class</span> <span class="nc">ModelNames</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class generating model names from unique configuration string&quot;&quot;&quot;</span>
 
-<span class="sd">        :param z_j: argument corresponding to alternative j</span>
-<span class="sd">        :type z_j: float</span>
+<div class="viewcode-block" id="ModelNames.__init__"><a class="viewcode-back" href="../../tools.html#biogeme.tools.ModelNames.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;Model&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_names</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_number</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">the_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a short model name from a unique ID</span>
+
+<span class="sd">        :param the_id: Id of the model</span>
+<span class="sd">        :type the_id: str (or anything that can be used as a key for a dict)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">y_i</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z_i</span><span class="p">)</span>
-        <span class="n">y_j</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">z_j</span><span class="p">)</span>
-        <span class="n">xi_i</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_i</span><span class="p">)</span>
-        <span class="n">xi_j</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">y_j</span><span class="p">)</span>
-        <span class="n">dy_i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">z_i</span>
-        <span class="n">dy_j</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">z_j</span>
-        <span class="n">dxi_i</span> <span class="o">=</span> <span class="o">-</span><span class="n">dy_i</span> <span class="o">/</span> <span class="n">y_i</span>
-        <span class="n">dxi_j</span> <span class="o">=</span> <span class="o">-</span><span class="n">dy_j</span> <span class="o">/</span> <span class="n">y_j</span>
-
-        <span class="n">G_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">Gi_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">Gj_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">Gij_sum</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
-            <span class="n">mu_m</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">alphas</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">alpha_i</span> <span class="o">=</span> <span class="n">alphas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">alpha_i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">term_i</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha_i</span> <span class="o">*</span> <span class="n">y_i</span><span class="p">)</span> <span class="o">**</span> <span class="n">mu_m</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">term_i</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">alpha_j</span> <span class="o">=</span> <span class="n">alphas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">alpha_j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">term_j</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha_j</span> <span class="o">*</span> <span class="n">y_j</span><span class="p">)</span> <span class="o">**</span> <span class="n">mu_m</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">term_j</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">the_sum</span> <span class="o">=</span> <span class="n">term_i</span> <span class="o">+</span> <span class="n">term_j</span>
-            <span class="n">p1</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">mu_m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">p2</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">mu_m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
-            <span class="n">G_sum</span> <span class="o">+=</span> <span class="n">the_sum</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">mu_m</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">alpha_i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">Gi_sum</span> <span class="o">+=</span> <span class="n">alpha_i</span><span class="o">**</span><span class="n">mu_m</span> <span class="o">*</span> <span class="n">y_i</span> <span class="o">**</span> <span class="p">(</span><span class="n">mu_m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">the_sum</span><span class="o">**</span><span class="n">p1</span>
-            <span class="k">if</span> <span class="n">alpha_j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">Gj_sum</span> <span class="o">+=</span> <span class="n">alpha_j</span><span class="o">**</span><span class="n">mu_m</span> <span class="o">*</span> <span class="n">y_j</span> <span class="o">**</span> <span class="p">(</span><span class="n">mu_m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">the_sum</span><span class="o">**</span><span class="n">p1</span>
-            <span class="k">if</span> <span class="n">mu_m</span> <span class="o">!=</span> <span class="mf">1.0</span> <span class="ow">and</span> <span class="n">alpha_i</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha_j</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">Gij_sum</span> <span class="o">+=</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mu_m</span><span class="p">)</span>
-                    <span class="o">*</span> <span class="n">the_sum</span><span class="o">**</span><span class="n">p2</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">alpha_i</span> <span class="o">*</span> <span class="n">alpha_j</span><span class="p">)</span> <span class="o">**</span> <span class="n">mu_m</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">y_i</span> <span class="o">*</span> <span class="n">y_j</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">mu_m</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="p">)</span>
-
-        <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">G_sum</span><span class="p">)</span>
-        <span class="n">F_second</span> <span class="o">=</span> <span class="n">F</span> <span class="o">*</span> <span class="n">y_i</span> <span class="o">*</span> <span class="n">y_j</span> <span class="o">*</span> <span class="p">(</span><span class="n">Gi_sum</span> <span class="o">*</span> <span class="n">Gj_sum</span> <span class="o">-</span> <span class="n">Gij_sum</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">xi_i</span> <span class="o">*</span> <span class="n">xi_j</span> <span class="o">*</span> <span class="n">F_second</span> <span class="o">*</span> <span class="n">dxi_i</span> <span class="o">*</span> <span class="n">dxi_j</span>
-
-    <span class="n">integral</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">dblquad</span><span class="p">(</span><span class="n">integrand</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">integral</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">euler_gamma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">euler_gamma</span></div>
+        <span class="n">the_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_names</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">the_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">the_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">the_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number</span><span class="si">:</span><span class="s1">06d</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_number</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_names</span><span class="p">[</span><span class="n">the_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">the_name</span>
+        <span class="k">return</span> <span class="n">the_name</span></div>
 
 
-<div class="viewcode-block" id="correlation_nested"><a class="viewcode-back" href="../../tools.html#biogeme.tools.correlation_nested">[docs]</a><span class="k">def</span> <span class="nf">correlation_nested</span><span class="p">(</span><span class="n">nests</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the correlation matrix of the error terms of all</span>
-<span class="sd">    alternatives of a nested logit model. It is assumed that the</span>
-<span class="sd">    homogeneity parameter mu of the model has been normalized to one.</span>
+<div class="viewcode-block" id="generate_unique_ids"><a class="viewcode-back" href="../../tools.html#biogeme.tools.generate_unique_ids">[docs]</a><span class="k">def</span> <span class="nf">generate_unique_ids</span><span class="p">(</span><span class="n">list_of_ids</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;If there are duplicates in the list, a new list is generated</span>
+<span class="sd">    where there are renamed to obtain a list with unique IDs.</span>
 
-<span class="sd">    :param nests: A tuple containing as many items as nests.</span>
-<span class="sd">        Each item is also a tuple containing two items:</span>
+<span class="sd">    :param list_of_ids: list of ids</span>
+<span class="sd">    :type list_of_ids: list[str]</span>
 
-<span class="sd">        - an object of type biogeme.expressions.expr.Expression representing</span>
-<span class="sd">          the nest parameter,</span>
-<span class="sd">        - a list containing the list of identifiers of the alternatives</span>
-<span class="sd">          belonging to the nest.</span>
-
-<span class="sd">        Example::</span>
-
-<span class="sd">            nesta = MUA ,[1, 2, 3]</span>
-<span class="sd">            nestb = MUB ,[4, 5, 6]</span>
-<span class="sd">            nests = nesta, nestb</span>
-
-<span class="sd">    :type nests: tuple</span>
-
-<span class="sd">    :return: correlation matrix</span>
-<span class="sd">    :rtype: pd.DataFrame</span>
-
+<span class="sd">    :return: a dict that maps the uniue names with the original name</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">set_of_alternatives</span> <span class="o">=</span> <span class="p">{</span><span class="n">alt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span> <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span>
-    <span class="n">list_of_alternatives</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">set_of_alternatives</span><span class="p">)</span>
-    <span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">alt</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">alt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_of_alternatives</span><span class="p">)}</span>
-    <span class="n">J</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_alternatives</span><span class="p">)</span>
-    <span class="n">correlation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">:</span>
-        <span class="n">mu_m</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">alt_m</span> <span class="o">=</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">alt_m</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
-            <span class="n">correlation</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">index</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">=</span> <span class="n">correlation</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span>
-                <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">mu_m</span> <span class="o">*</span> <span class="n">mu_m</span><span class="p">)</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">the_id</span> <span class="ow">in</span> <span class="n">list_of_ids</span><span class="p">:</span>
+        <span class="n">counts</span><span class="p">[</span><span class="n">the_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="n">correlation</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">list_of_alternatives</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">list_of_alternatives</span>
-    <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="correlation_cross_nested"><a class="viewcode-back" href="../../tools.html#biogeme.tools.correlation_cross_nested">[docs]</a><span class="k">def</span> <span class="nf">correlation_cross_nested</span><span class="p">(</span><span class="n">nests</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the correlation matrix of the error terms of all</span>
-<span class="sd">    alternatives of a cross-nested logit model. It is assumed that</span>
-<span class="sd">    the homogeneity parameter mu of the model has been normalized</span>
-<span class="sd">    to one.</span>
-
-
-<span class="sd">    :param nests: a tuple containing as many items as nests.</span>
-<span class="sd">        Each item is also a tuple containing two items:</span>
-
-<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
-<span class="sd">          representing the nest parameter,</span>
-<span class="sd">        - a dictionary mapping the alternative ids with the cross-nested</span>
-<span class="sd">          parameters for the corresponding nest. If an alternative is</span>
-<span class="sd">          missing in the dictionary, the corresponding alpha is set to zero.</span>
-
-<span class="sd">        Example::</span>
-
-<span class="sd">            alphaA = {1: alpha1a,</span>
-<span class="sd">                      2: alpha2a,</span>
-<span class="sd">                      3: alpha3a,</span>
-<span class="sd">                      4: alpha4a,</span>
-<span class="sd">                      5: alpha5a,</span>
-<span class="sd">                      6: alpha6a}</span>
-<span class="sd">            alphaB = {1: alpha1b,</span>
-<span class="sd">                      2: alpha2b,</span>
-<span class="sd">                      3: alpha3b,</span>
-<span class="sd">                      4: alpha4b,</span>
-<span class="sd">                      5: alpha5b,</span>
-<span class="sd">                      6: alpha6b}</span>
-<span class="sd">            nesta = MUA, alphaA</span>
-<span class="sd">            nestb = MUB, alphaB</span>
-<span class="sd">            nests = nesta, nestb</span>
-
-<span class="sd">    :type nests: tuple</span>
-
-<span class="sd">    :return: value of the correlation</span>
-<span class="sd">    :rtype: float</span>
-
-<span class="sd">    :raise biogemeError: if the requested number is non positive or a float</span>
-
-<span class="sd">    :return: correlation matrix</span>
-<span class="sd">    :rtype: pd.DataFrame</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">set_of_alternatives</span> <span class="o">=</span> <span class="p">{</span><span class="n">alt</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span> <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]}</span>
-    <span class="n">list_of_alternatives</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">set_of_alternatives</span><span class="p">)</span>
-    <span class="n">J</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_alternatives</span><span class="p">)</span>
-
-    <span class="n">covar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">J</span><span class="p">,</span> <span class="n">J</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">alt_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_of_alternatives</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">alt_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_of_alternatives</span><span class="p">):</span>
-            <span class="n">covar</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">covariance_cross_nested</span><span class="p">(</span><span class="n">alt_i</span><span class="p">,</span> <span class="n">alt_j</span><span class="p">,</span> <span class="n">nests</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">covar</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">covar</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
-
-    <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">covar</span><span class="p">))</span>
-    <span class="n">outer_v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-    <span class="n">correlation</span> <span class="o">=</span> <span class="n">covar</span> <span class="o">/</span> <span class="n">outer_v</span>
-    <span class="n">correlation</span><span class="p">[</span><span class="n">covar</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="n">correlation</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">list_of_alternatives</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">list_of_alternatives</span>
-    <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="calculate_correlation"><a class="viewcode-back" href="../../tools.html#biogeme.tools.calculate_correlation">[docs]</a><span class="k">def</span> <span class="nf">calculate_correlation</span><span class="p">(</span><span class="n">nests</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">alternative_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the correlation matrix of a nested or cross-nested</span>
-<span class="sd">    logit model.</span>
-
-<span class="sd">    :param nests:  A tuple containing as many items as nests.</span>
-
-<span class="sd">        Each item is also a tuple containing two items:</span>
-
-<span class="sd">        - an object of type biogeme.expressions. expr.Expression</span>
-<span class="sd">          representing the nest parameter,</span>
-
-<span class="sd">        - for the nested logit model, a list containing the list of</span>
-<span class="sd">          identifiers of the alternatives belonging to the nest.</span>
-
-<span class="sd">        - for the cross-nested logit model, a dictionary mapping the</span>
-<span class="sd">          alternative ids with the cross-nested parameters for the</span>
-<span class="sd">          corresponding nest. If an alternative is missing in the</span>
-<span class="sd">          dictionary, the corresponding alpha is set to zero.</span>
-
-
-<span class="sd">        Example for the nested logit::</span>
-<span class="sd">            nesta = MUA ,[1, 2, 3]</span>
-<span class="sd">            nestb = MUB ,[4, 5, 6]</span>
-<span class="sd">            nests = nesta, nestb</span>
-
-<span class="sd">        Example for the cross-nested logit::</span>
-
-<span class="sd">            alphaA = {1: alpha1a,</span>
-<span class="sd">                      2: alpha2a,</span>
-<span class="sd">                      3: alpha3a,</span>
-<span class="sd">                      4: alpha4a,</span>
-<span class="sd">                      5: alpha5a,</span>
-<span class="sd">                      6: alpha6a}</span>
-<span class="sd">            alphaB = {1: alpha1b,</span>
-<span class="sd">                      2: alpha2b,</span>
-<span class="sd">                      3: alpha3b,</span>
-<span class="sd">                      4: alpha4b,</span>
-<span class="sd">                      5: alpha5b,</span>
-<span class="sd">                      6: alpha6b}</span>
-<span class="sd">            nesta = MUA, alphaA</span>
-<span class="sd">            nestb = MUB, alphaB</span>
-<span class="sd">            nests = nesta, nestb</span>
-
-<span class="sd">    :type nests: tuple(tuple(biogeme.expressions.Expression, list(int))), or</span>
-<span class="sd">                 tuple(tuple(biogeme.Expression, dict(int:biogeme.expressions.Expression)))</span>
-
-<span class="sd">    :param results: estimation results</span>
-<span class="sd">    :type results: biogeme.results.bioResults</span>
-
-<span class="sd">    :param alternative_names: a dictionary mapping the alternative IDs</span>
-<span class="sd">        with their name. If None, the IDs are used as names.</span>
-<span class="sd">    :type alternative_names: dict(int: str)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">betas</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">getBetaValues</span><span class="p">()</span>
-
-    <span class="n">cnl</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nests</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">get_estimated_expression</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the estimated value of the nest parameter.</span>
-
-<span class="sd">        :param expr: expression to calculate</span>
-<span class="sd">        :type expr: biogeme.expressions.Expression or float.</span>
-
-<span class="sd">        :return: calculated value</span>
-<span class="sd">        :rtype: float</span>
-
-<span class="sd">        :raise biogemeError: if the input value is not an expression</span>
-<span class="sd">            or a float.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">Expression</span><span class="p">):</span>
-            <span class="n">expr</span><span class="o">.</span><span class="n">changeInitValues</span><span class="p">(</span><span class="n">betas</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">getValue_c</span><span class="p">(</span><span class="n">prepareIds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
-            <span class="k">return</span> <span class="n">expr</span>
-        <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">numerical_tuple</span><span class="p">(</span><span class="n">the_tuple</span><span class="p">):</span>
-        <span class="n">mu_m</span> <span class="o">=</span> <span class="n">get_estimated_expression</span><span class="p">(</span><span class="n">the_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">alpha_m</span> <span class="o">=</span> <span class="n">the_tuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alpha_m</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="c1"># Cross-nested logit</span>
-            <span class="n">estimated_alpha_m</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">alt</span>
-                <span class="k">if</span> <span class="n">alternative_names</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">alternative_names</span><span class="p">[</span><span class="n">alt</span><span class="p">]:</span> <span class="n">get_estimated_expression</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">alt</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">alpha_m</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="p">}</span>
-            <span class="k">return</span> <span class="n">mu_m</span><span class="p">,</span> <span class="n">estimated_alpha_m</span>
-        <span class="k">return</span> <span class="n">mu_m</span><span class="p">,</span> <span class="p">[</span>
-            <span class="n">alt</span> <span class="k">if</span> <span class="n">alternative_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">alternative_names</span><span class="p">[</span><span class="n">alt</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">alt</span> <span class="ow">in</span> <span class="n">alpha_m</span>
-        <span class="p">]</span>
-
-    <span class="n">estimated_nests</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">numerical_tuple</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">nests</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">cnl</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">correlation_cross_nested</span><span class="p">(</span><span class="n">estimated_nests</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">correlation_nested</span><span class="p">(</span><span class="n">estimated_nests</span><span class="p">)</span></div>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">substitutes</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">new_name</span> <span class="ow">in</span> <span class="n">substitutes</span><span class="p">:</span>
+                <span class="n">results</span><span class="p">[</span><span class="n">new_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">return</span> <span class="n">results</span></div>
 </pre></div>
 
            </div>
@@ -910,7 +638,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

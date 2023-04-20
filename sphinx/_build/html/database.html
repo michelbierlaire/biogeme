@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Database &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Database &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -29,11 +27,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -45,7 +47,72 @@
 <li class="toctree-l1"><a class="reference internal" href="assisted.html">Assisted specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Database</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.database">biogeme.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.database">biogeme.database module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.database.Database"><code class="docutils literal notranslate"><span class="pre">Database</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.DefineVariable"><code class="docutils literal notranslate"><span class="pre">Database.DefineVariable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.MLHS_anti"><code class="docutils literal notranslate"><span class="pre">Database.MLHS_anti()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.__init__"><code class="docutils literal notranslate"><span class="pre">Database.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.addColumn"><code class="docutils literal notranslate"><span class="pre">Database.addColumn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.buildPanelMap"><code class="docutils literal notranslate"><span class="pre">Database.buildPanelMap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.checkAvailabilityOfChosenAlt"><code class="docutils literal notranslate"><span class="pre">Database.checkAvailabilityOfChosenAlt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.choiceAvailabilityStatistics"><code class="docutils literal notranslate"><span class="pre">Database.choiceAvailabilityStatistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.count"><code class="docutils literal notranslate"><span class="pre">Database.count()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.data"><code class="docutils literal notranslate"><span class="pre">Database.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.descriptionOfNativeDraws"><code class="docutils literal notranslate"><span class="pre">Database.descriptionOfNativeDraws()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.dumpOnFile"><code class="docutils literal notranslate"><span class="pre">Database.dumpOnFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.excludedData"><code class="docutils literal notranslate"><span class="pre">Database.excludedData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.fullData"><code class="docutils literal notranslate"><span class="pre">Database.fullData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.fullIndividualMap"><code class="docutils literal notranslate"><span class="pre">Database.fullIndividualMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.generateDraws"><code class="docutils literal notranslate"><span class="pre">Database.generateDraws()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.generateFlatPanelDataframe"><code class="docutils literal notranslate"><span class="pre">Database.generateFlatPanelDataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.getNumberOfObservations"><code class="docutils literal notranslate"><span class="pre">Database.getNumberOfObservations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.getSampleSize"><code class="docutils literal notranslate"><span class="pre">Database.getSampleSize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.halton2"><code class="docutils literal notranslate"><span class="pre">Database.halton2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.halton3"><code class="docutils literal notranslate"><span class="pre">Database.halton3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.halton5"><code class="docutils literal notranslate"><span class="pre">Database.halton5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.individualMap"><code class="docutils literal notranslate"><span class="pre">Database.individualMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.isPanel"><code class="docutils literal notranslate"><span class="pre">Database.isPanel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.name"><code class="docutils literal notranslate"><span class="pre">Database.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.nativeRandomNumberGenerators"><code class="docutils literal notranslate"><span class="pre">Database.nativeRandomNumberGenerators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.normal_MLHS"><code class="docutils literal notranslate"><span class="pre">Database.normal_MLHS()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.normal_MLHS_anti"><code class="docutils literal notranslate"><span class="pre">Database.normal_MLHS_anti()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.normal_antithetic"><code class="docutils literal notranslate"><span class="pre">Database.normal_antithetic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.normal_halton2"><code class="docutils literal notranslate"><span class="pre">Database.normal_halton2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.normal_halton3"><code class="docutils literal notranslate"><span class="pre">Database.normal_halton3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.normal_halton5"><code class="docutils literal notranslate"><span class="pre">Database.normal_halton5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.numberOfDraws"><code class="docutils literal notranslate"><span class="pre">Database.numberOfDraws</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.panel"><code class="docutils literal notranslate"><span class="pre">Database.panel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.panelColumn"><code class="docutils literal notranslate"><span class="pre">Database.panelColumn</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.remove"><code class="docutils literal notranslate"><span class="pre">Database.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.sampleIndividualMapWithReplacement"><code class="docutils literal notranslate"><span class="pre">Database.sampleIndividualMapWithReplacement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.sampleWithReplacement"><code class="docutils literal notranslate"><span class="pre">Database.sampleWithReplacement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.scaleColumn"><code class="docutils literal notranslate"><span class="pre">Database.scaleColumn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.setRandomNumberGenerators"><code class="docutils literal notranslate"><span class="pre">Database.setRandomNumberGenerators()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.split"><code class="docutils literal notranslate"><span class="pre">Database.split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.suggestScaling"><code class="docutils literal notranslate"><span class="pre">Database.suggestScaling()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_MLHS"><code class="docutils literal notranslate"><span class="pre">Database.symm_MLHS()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_MLHS_anti"><code class="docutils literal notranslate"><span class="pre">Database.symm_MLHS_anti()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_halton2"><code class="docutils literal notranslate"><span class="pre">Database.symm_halton2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_halton3"><code class="docutils literal notranslate"><span class="pre">Database.symm_halton3()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_halton5"><code class="docutils literal notranslate"><span class="pre">Database.symm_halton5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_uniform"><code class="docutils literal notranslate"><span class="pre">Database.symm_uniform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.symm_uniform_antithetic"><code class="docutils literal notranslate"><span class="pre">Database.symm_uniform_antithetic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.theDraws"><code class="docutils literal notranslate"><span class="pre">Database.theDraws</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.typesOfDraws"><code class="docutils literal notranslate"><span class="pre">Database.typesOfDraws</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.uniform_antithetic"><code class="docutils literal notranslate"><span class="pre">Database.uniform_antithetic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.userRandomNumberGenerators"><code class="docutils literal notranslate"><span class="pre">Database.userRandomNumberGenerators</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.valuesFromDatabase"><code class="docutils literal notranslate"><span class="pre">Database.valuesFromDatabase()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.Database.variables"><code class="docutils literal notranslate"><span class="pre">Database.variables</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.database.EstimationValidation"><code class="docutils literal notranslate"><span class="pre">EstimationValidation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.EstimationValidation.estimation"><code class="docutils literal notranslate"><span class="pre">EstimationValidation.estimation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.database.EstimationValidation.validation"><code class="docutils literal notranslate"><span class="pre">EstimationValidation.validation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.database.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="distributions.html">Distributions</a></li>
@@ -79,8 +146,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Database</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Database</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/database.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -98,10 +165,10 @@
 <p>Implementation of the class Database, wrapping a pandas dataframe
 for specific services to Biogeme</p>
 <dl class="field-list simple">
-<dt class="field-odd">author</dt>
+<dt class="field-odd">author<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Michel Bierlaire</p>
 </dd>
-<dt class="field-even">date</dt>
+<dt class="field-even">date<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tue Mar 26 16:42:54 2019</p>
 </dd>
 </dl>
@@ -117,18 +184,26 @@ for specific services to Biogeme</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.MLHS_anti">
+<span class="sig-name descname"><span class="pre">MLHS_anti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.MLHS_anti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.MLHS_anti" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="biogeme.database.Database.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pandasDatabase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Constructor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>string</em>) – name of the database.</p></li>
 <li><p><strong>pandasDatabase</strong> (<em>pandas.DataFrame</em>) – data stored in a pandas data frame.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the audit function detects errors.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the audit function detects errors.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database is empty.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -138,20 +213,23 @@ for specific services to Biogeme</p>
 <span class="sig-name descname"><span class="pre">addColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.addColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.addColumn" title="Permalink to this definition"></a></dt>
 <dd><p>Add a new column in the database, calculated from an expression.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>expression</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression to evaluate</p></li>
 <li><p><strong>column</strong> (<em>string</em>) – name of the column to add</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the added column</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.Series</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>ValueError</strong> – if the column name already exists.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if the column name already exists.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database is empty.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -162,6 +240,11 @@ for specific services to Biogeme</p>
 <dd><p>Sorts the data so that the observations for each individuals are
 contiguous, and builds a map that identifies the range of indices of
 the observations of each individuals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample</strong> (<em>bool</em>) – if True, the data is a sample of the full data set</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -170,24 +253,27 @@ the observations of each individuals.</p>
 <dd><p>Check if the chosen alternative is available for each entry
 in the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>avail</strong> (<em>list of biogeme.expressions.Expression</em>) – list of expressions to evaluate the
+<li><p><strong>avail</strong> (<em>list</em><em> of </em><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – list of expressions to evaluate the
 availability conditions for each alternative.</p></li>
 <li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression for the chosen alternative.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy series of bool, long as the number of entries
 in the database, containing True is the chosen alternative is
 available, False otherwise.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.Series</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the chosen alternative does not appear
-in the availability dict</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the chosen alternative does not appear
+in the availability dict</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database is empty.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -197,19 +283,22 @@ in the availability dict</p>
 <span class="sig-name descname"><span class="pre">choiceAvailabilityStatistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">avail</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.choiceAvailabilityStatistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.choiceAvailabilityStatistics" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the number of time an alternative is chosen and available</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>avail</strong> (<em>list of biogeme.expressions.Expression</em>) – list of expressions to evaluate the
+<li><p><strong>avail</strong> (<em>list</em><em> of </em><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – list of expressions to evaluate the
 availability conditions for each alternative.</p></li>
 <li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression for the chosen alternative.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>for each alternative, a tuple containing the number of time
 it is chosen, and the number of time it is available.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict(int: (int, int))</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database is empty.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -220,16 +309,16 @@ it is chosen, and the number of time it is available.</p>
 <dd><p>Counts the number of observations that have a specific value in a
 given column.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>columnName</strong> (<em>string</em>) – name of the column.</p></li>
 <li><p><strong>value</strong> (<em>float</em>) – value that is seeked.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of times that the value appears in the column.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>int</p>
 </dd>
 </dl>
@@ -246,7 +335,7 @@ given column.</p>
 <span class="sig-name descname"><span class="pre">descriptionOfNativeDraws</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.descriptionOfNativeDraws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.descriptionOfNativeDraws" title="Permalink to this definition"></a></dt>
 <dd><p>Describe the draws available draws with Biogeme</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict, where the keys are the names of the draws,
 and the value their description</p>
 </dd>
@@ -258,7 +347,7 @@ and the value their description</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
@@ -269,10 +358,10 @@ and the value their description</p>
 <span class="sig-name descname"><span class="pre">dumpOnFile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.dumpOnFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.dumpOnFile" title="Permalink to this definition"></a></dt>
 <dd><p>Dumps the database in a CSV formatted file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>name of the file</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>string</p>
 </dd>
 </dl>
@@ -306,7 +395,7 @@ approximate the log likelihood function.</p>
 <span class="sig-name descname"><span class="pre">generateDraws</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.generateDraws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.generateDraws" title="Permalink to this definition"></a></dt>
 <dd><p>Generate draws for each variable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>types</strong> (<em>dict</em>) – <p>A dict indexed by the names of the variables,
 describing the types of draws. Each of them can
@@ -354,12 +443,12 @@ from Modified Latin Hypercube Sampling]</p></li>
 <p>For an updated description of the native types, call the function
 <a class="reference internal" href="#biogeme.database.Database.descriptionOfNativeDraws" title="biogeme.database.Database.descriptionOfNativeDraws"><code class="xref py py-func docutils literal notranslate"><span class="pre">descriptionOfNativeDraws()</span></code></a>.</p>
 </p></li>
-<li><p><strong>names</strong> (<em>list of strings</em>) – the list of names of the variables that require draws
+<li><p><strong>names</strong> (<em>list</em><em> of </em><em>strings</em>) – the list of names of the variables that require draws
 to be generated.</p></li>
 <li><p><strong>numberOfDraws</strong> (<em>int</em>) – number of draws to generate.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>a 3-dimensional table with draws. The 3 dimensions are</p>
 <ol class="arabic simple">
 <li><p>number of individuals</p></li>
@@ -368,7 +457,7 @@ to be generated.</p></li>
 </ol>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.array</p>
 </dd>
 </dl>
@@ -381,10 +470,10 @@ to be generated.</p></li>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a type of draw is unknown.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the output of the draw generator does not
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if a type of draw is unknown.</p></li>
+<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the output of the draw generator does not
 have the requested dimensions.</p></li>
 </ul>
 </dd>
@@ -396,23 +485,22 @@ have the requested dimensions.</p></li>
 <span class="sig-name descname"><span class="pre">generateFlatPanelDataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">saveOnFile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identical_columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.generateFlatPanelDataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.generateFlatPanelDataframe" title="Permalink to this definition"></a></dt>
 <dd><p>Generate a flat version of the panel data</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>saveOnFile</strong> (<em>bool</em>) – if True, the flat database is saved on file.</p></li>
 <li><p><strong>identical_columns</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – list of columns that contain the
-same values for all observations of the same individual. If
-None, these columns are automatically detected. Default: empty
-list.</p></li>
+same values for all observations of the same
+individual. Default: empty list.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the flatten database, in Pandas format</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pandas.DataFrame</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the database in not panel</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database in not panel</p>
 </dd>
 </dl>
 </dd></dl>
@@ -424,10 +512,10 @@ list.</p></li>
 <p>Note that it returns the same value, irrespectively
 if the database contains panel data or not.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Number of observations.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
@@ -442,15 +530,30 @@ if the database contains panel data or not.</p>
 observations in the database. If the data is panel, it is the
 number of individuals.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Sample size.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
 </dd>
 </dl>
 <p>See also: getNumberOfObservations()</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.halton2">
+<span class="sig-name descname"><span class="pre">halton2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.halton2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.halton2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.halton3">
+<span class="sig-name descname"><span class="pre">halton3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.halton3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.halton3" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.halton5">
+<span class="sig-name descname"><span class="pre">halton5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.halton5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.halton5" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.database.Database.individualMap">
@@ -464,10 +567,10 @@ panel data context. None if data is not panel.</p>
 <span class="sig-name descname"><span class="pre">isPanel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.isPanel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.isPanel" title="Permalink to this definition"></a></dt>
 <dd><p>Tells if the data is panel or not.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>True if the data is panel.</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
@@ -481,6 +584,41 @@ dumping data.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="biogeme.database.Database.nativeRandomNumberGenerators">
+<span class="sig-name descname"><span class="pre">nativeRandomNumberGenerators</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'NORMAL':</span> <span class="pre">(&lt;function</span> <span class="pre">getNormalWichuraDraws&gt;,</span> <span class="pre">'Normal</span> <span class="pre">N(0,</span> <span class="pre">1)</span> <span class="pre">draws'),</span> <span class="pre">'NORMAL_ANTI':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.normal_antithetic&gt;,</span> <span class="pre">'Antithetic</span> <span class="pre">normal</span> <span class="pre">draws'),</span> <span class="pre">'NORMAL_HALTON2':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.normal_halton2&gt;,</span> <span class="pre">'Normal</span> <span class="pre">draws</span> <span class="pre">from</span> <span class="pre">Halton</span> <span class="pre">base</span> <span class="pre">2</span> <span class="pre">sequence'),</span> <span class="pre">'NORMAL_HALTON3':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.normal_halton3&gt;,</span> <span class="pre">'Normal</span> <span class="pre">draws</span> <span class="pre">from</span> <span class="pre">Halton</span> <span class="pre">base</span> <span class="pre">3</span> <span class="pre">sequence'),</span> <span class="pre">'NORMAL_HALTON5':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.normal_halton5&gt;,</span> <span class="pre">'Normal</span> <span class="pre">draws</span> <span class="pre">from</span> <span class="pre">Halton</span> <span class="pre">base</span> <span class="pre">5</span> <span class="pre">sequence'),</span> <span class="pre">'NORMAL_MLHS':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.normal_MLHS&gt;,</span> <span class="pre">'Normal</span> <span class="pre">draws</span> <span class="pre">from</span> <span class="pre">Modified</span> <span class="pre">Latin</span> <span class="pre">Hypercube</span> <span class="pre">Sampling'),</span> <span class="pre">'NORMAL_MLHS_ANTI':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.normal_MLHS_anti&gt;,</span> <span class="pre">'Antithetic</span> <span class="pre">normal</span> <span class="pre">draws</span> <span class="pre">from</span> <span class="pre">Modified</span> <span class="pre">Latin</span> <span class="pre">Hypercube</span> <span class="pre">Sampling'),</span> <span class="pre">'UNIFORM':</span> <span class="pre">(&lt;function</span> <span class="pre">getUniform&gt;,</span> <span class="pre">'Uniform</span> <span class="pre">U[0,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORMSYM':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_uniform&gt;,</span> <span class="pre">'Uniform</span> <span class="pre">U[-1,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORMSYM_ANTI':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_uniform_antithetic&gt;,</span> <span class="pre">'Antithetic</span> <span class="pre">uniform</span> <span class="pre">U[-1,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORMSYM_HALTON2':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_halton2&gt;,</span> <span class="pre">'Halton</span> <span class="pre">draws</span> <span class="pre">on</span> <span class="pre">[-1,</span> <span class="pre">1]</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">2,</span> <span class="pre">skipping</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">10'),</span> <span class="pre">'UNIFORMSYM_HALTON3':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_halton3&gt;,</span> <span class="pre">'Halton</span> <span class="pre">draws</span> <span class="pre">on</span> <span class="pre">[-1,</span> <span class="pre">1]</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">3,</span> <span class="pre">skipping</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">10'),</span> <span class="pre">'UNIFORMSYM_HALTON5':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_halton5&gt;,</span> <span class="pre">'Halton</span> <span class="pre">draws</span> <span class="pre">on</span> <span class="pre">[-1,</span> <span class="pre">1]</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">5,</span> <span class="pre">skipping</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">10'),</span> <span class="pre">'UNIFORMSYM_MLHS':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_MLHS&gt;,</span> <span class="pre">'Modified</span> <span class="pre">Latin</span> <span class="pre">Hypercube</span> <span class="pre">Sampling</span> <span class="pre">on</span> <span class="pre">[-1,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORMSYM_MLHS_ANTI':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.symm_MLHS_anti&gt;,</span> <span class="pre">'Antithetic</span> <span class="pre">Modified</span> <span class="pre">Latin</span> <span class="pre">Hypercube</span> <span class="pre">Sampling</span> <span class="pre">on</span> <span class="pre">[-1,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORM_ANTI':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.uniform_antithetic&gt;,</span> <span class="pre">'Antithetic</span> <span class="pre">uniform</span> <span class="pre">U[0,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORM_HALTON2':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.halton2&gt;,</span> <span class="pre">'Halton</span> <span class="pre">draws</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">2,</span> <span class="pre">skipping</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">10'),</span> <span class="pre">'UNIFORM_HALTON3':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.halton3&gt;,</span> <span class="pre">'Halton</span> <span class="pre">draws</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">3,</span> <span class="pre">skipping</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">10'),</span> <span class="pre">'UNIFORM_HALTON5':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.halton5&gt;,</span> <span class="pre">'Halton</span> <span class="pre">draws</span> <span class="pre">with</span> <span class="pre">base</span> <span class="pre">5,</span> <span class="pre">skipping</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">10'),</span> <span class="pre">'UNIFORM_MLHS':</span> <span class="pre">(&lt;function</span> <span class="pre">getLatinHypercubeDraws&gt;,</span> <span class="pre">'Modified</span> <span class="pre">Latin</span> <span class="pre">Hypercube</span> <span class="pre">Sampling</span> <span class="pre">on</span> <span class="pre">[0,</span> <span class="pre">1]'),</span> <span class="pre">'UNIFORM_MLHS_ANTI':</span> <span class="pre">(&lt;function</span> <span class="pre">Database.MLHS_anti&gt;,</span> <span class="pre">'Antithetic</span> <span class="pre">Modified</span> <span class="pre">Latin</span> <span class="pre">Hypercube</span> <span class="pre">Sampling</span> <span class="pre">on</span> <span class="pre">[0,</span> <span class="pre">1]')}</span></em><a class="headerlink" href="#biogeme.database.Database.nativeRandomNumberGenerators" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.normal_MLHS">
+<span class="sig-name descname"><span class="pre">normal_MLHS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.normal_MLHS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.normal_MLHS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.normal_MLHS_anti">
+<span class="sig-name descname"><span class="pre">normal_MLHS_anti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.normal_MLHS_anti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.normal_MLHS_anti" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.normal_antithetic">
+<span class="sig-name descname"><span class="pre">normal_antithetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.normal_antithetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.normal_antithetic" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.normal_halton2">
+<span class="sig-name descname"><span class="pre">normal_halton2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.normal_halton2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.normal_halton2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.normal_halton3">
+<span class="sig-name descname"><span class="pre">normal_halton3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.normal_halton3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.normal_halton3" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.normal_halton5">
+<span class="sig-name descname"><span class="pre">normal_halton5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.normal_halton5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.normal_halton5" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.database.Database.numberOfDraws">
 <span class="sig-name descname"><span class="pre">numberOfDraws</span></span><a class="headerlink" href="#biogeme.database.Database.numberOfDraws" title="Permalink to this definition"></a></dt>
 <dd><p>Number of draws generated by the function Database.generateDraws.
@@ -492,11 +630,11 @@ Value 0 if this function is not called.</p>
 <span class="sig-name descname"><span class="pre">panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">columnName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.panel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.panel" title="Permalink to this definition"></a></dt>
 <dd><p>Defines the data as panel data</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>columnName</strong> (<em>string</em>) – name of the columns that identifies individuals.</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the data are not sorted properly, that
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the data are not sorted properly, that
 is if the data for the one individuals are not consecutive.</p>
 </dd>
 </dl>
@@ -515,7 +653,7 @@ data context. None if data is not panel.</p>
 <dd><p>Removes from the database all entries such that the value
 of the expression is not 0.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>expression</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression to evaluate</p>
 </dd>
 </dl>
@@ -528,19 +666,19 @@ of the expression is not 0.</p>
 from a panel data database, with replacement.</p>
 <p>Useful for bootstrapping.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – size of the sample. If None, a sample of
 the same size as the database will be generated.
 Default: None.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>pandas dataframe with the sample.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pandas.DataFrame</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the database in not in panel mode.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database in not in panel mode.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -551,35 +689,16 @@ Default: None.</p>
 <dd><p>Extract a random sample from the database, with replacement.</p>
 <p>Useful for bootstrapping.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – size of the sample. If None, a sample of
 the same size as the database will be generated.
 Default: None.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>pandas dataframe with the sample.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pandas.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.database.Database.sampleWithoutReplacement">
-<span class="sig-name descname"><span class="pre">sampleWithoutReplacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">samplingRate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnWithSamplingWeights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.sampleWithoutReplacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.sampleWithoutReplacement" title="Permalink to this definition"></a></dt>
-<dd><p>Replace the data set by a sample for stochastic algorithms</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>samplingRate</strong> (<em>float</em>) – the proportion of data to include in the sample.</p></li>
-<li><p><strong>columnWithSamplingWeights</strong> (<em>string</em>) – name of the column with
-the sampling weights. If None, each row has equal probability.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the structure of the database has been modified
-since last sample.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -589,7 +708,7 @@ since last sample.</p>
 <span class="sig-name descname"><span class="pre">scaleColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.scaleColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.scaleColumn" title="Permalink to this definition"></a></dt>
 <dd><p>Multiply an entire column by a scale value</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>column</strong> (<em>string</em>) – name of the column</p></li>
 <li><p><strong>scale</strong> (<em>float</em>) – value of the scale. All values of the column will
@@ -604,7 +723,7 @@ be multiplied by that scale.</p></li>
 <span class="sig-name descname"><span class="pre">setRandomNumberGenerators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.setRandomNumberGenerators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.setRandomNumberGenerators" title="Permalink to this definition"></a></dt>
 <dd><p>Defines user-defined random numbers generators.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>rng</strong> (<em>dict</em>) – a dictionary of generators. The keys of the dictionary
 characterize the name of the generators, and must be
 different from the pre-defined generators in Biogeme
@@ -631,7 +750,7 @@ database), and the number of draws per series.</p>
 </pre></div>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ValueError</strong> – if a reserved keyword is used for a
 user-defined draws.</p>
 </dd>
@@ -643,7 +762,7 @@ user-defined draws.</p>
 <span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.split" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare estimation and validation sets for validation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>slices</strong> (<em>int</em>) – number of slices</p></li>
 <li><p><strong>groups</strong> (<em>str</em>) – name of the column that defines the ID of the
@@ -651,14 +770,14 @@ groups. Data belonging to the same groups will be maintained
 together.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>list of estimation and validation data sets</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>list(tuple(pandas.DataFrame, pandas.DataFrame))</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the number of slices is less than two</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the number of slices is less than two</p>
 </dd>
 </dl>
 </dd></dl>
@@ -675,7 +794,7 @@ power of 10. The suggested scale is the inverse of this value.</p>
 \[s = \frac{1}{10^{|\log_{10} \delta|}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(|x|\)</span> is the integer closest to <span class="math notranslate nohighlight">\(x\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>columns</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – list of columns to be considered.
 If None, all of them will be considered.</p></li>
@@ -683,41 +802,54 @@ If None, all of them will be considered.</p></li>
 scale is 1, 0.1 or 10</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A Pandas dataframe where each row contains the name
 of the variable and the suggested scale s. Ideally,
 the column should be multiplied by s.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pandas.DataFrame</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a variable in <code class="docutils literal notranslate"><span class="pre">columns</span></code> is unknown.</p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if a variable in <code class="docutils literal notranslate"><span class="pre">columns</span></code> is unknown.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.database.Database.sumFromDatabase">
-<span class="sig-name descname"><span class="pre">sumFromDatabase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.sumFromDatabase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.sumFromDatabase" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates the value of an expression for each entry
-in the database, and returns the sum.</p>
-<p>Obsolete since 3.2.9.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>expression</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><em>biogeme.expressions.Expression</em></a>) – expression to evaluate</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>sum of the expressions over the database.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if called.</p>
-</dd>
-</dl>
-</dd></dl>
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_MLHS">
+<span class="sig-name descname"><span class="pre">symm_MLHS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_MLHS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_MLHS" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_MLHS_anti">
+<span class="sig-name descname"><span class="pre">symm_MLHS_anti</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_MLHS_anti"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_MLHS_anti" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_halton2">
+<span class="sig-name descname"><span class="pre">symm_halton2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_halton2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_halton2" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_halton3">
+<span class="sig-name descname"><span class="pre">symm_halton3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_halton3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_halton3" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_halton5">
+<span class="sig-name descname"><span class="pre">symm_halton5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_halton5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_halton5" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_uniform">
+<span class="sig-name descname"><span class="pre">symm_uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_uniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_uniform" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.database.Database.symm_uniform_antithetic">
+<span class="sig-name descname"><span class="pre">symm_uniform_antithetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.symm_uniform_antithetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.symm_uniform_antithetic" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.database.Database.theDraws">
@@ -732,10 +864,9 @@ in the database, and returns the sum.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.database.Database.useFullSample">
-<span class="sig-name descname"><span class="pre">useFullSample</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.useFullSample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.useFullSample" title="Permalink to this definition"></a></dt>
-<dd><p>Re-establish the full sample for calculation of the likelihood</p>
-</dd></dl>
+<dt class="sig sig-object py" id="biogeme.database.Database.uniform_antithetic">
+<span class="sig-name descname"><span class="pre">uniform_antithetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberOfDraws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.uniform_antithetic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.uniform_antithetic" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="biogeme.database.Database.userRandomNumberGenerators">
@@ -753,15 +884,18 @@ draws, and (1) a string describing the type of draws</p>
 <span class="sig-name descname"><span class="pre">valuesFromDatabase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/database.html#Database.valuesFromDatabase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.database.Database.valuesFromDatabase" title="Permalink to this definition"></a></dt>
 <dd><p>Evaluates an expression for each entry of the database.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>expression</strong> (<em>biogeme.expressions.Expression.</em>) – expression to evaluate</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy series, long as the number of entries
 in the database, containing the calculated quantities.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.Series</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.BiogemeError" title="biogeme.exceptions.BiogemeError"><strong>BiogemeError</strong></a> – if the database is empty.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -796,10 +930,9 @@ by _generateHeaders()</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="biogeme.database.logger">
-<span class="sig-prename descclassname"><span class="pre">biogeme.database.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;biogeme.messaging.bioMessage</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#biogeme.database.logger" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">biogeme.database.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;RootLogger</span> <span class="pre">root</span> <span class="pre">(WARNING)&gt;</span></em><a class="headerlink" href="#biogeme.database.logger" title="Permalink to this definition"></a></dt>
 <dd><p>Logger that controls the output of
-messages to the screen and log file.
-Type: class <a class="reference internal" href="messaging.html#biogeme.messaging.bioMessage" title="biogeme.messaging.bioMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.messaging.bioMessage</span></code></a>.</p>
+messages to the screen and log file.</p>
 </dd></dl>
 
 </section>
@@ -816,7 +949,7 @@ Type: class <a class="reference internal" href="messaging.html#biogeme.messaging
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

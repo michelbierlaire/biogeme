@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Assisted specification &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Assisted specification &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -12,10 +12,8 @@
   <![endif]-->
   
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -28,11 +26,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -42,7 +44,34 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="algorithms.html">Algorithms</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Assisted specification</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.assisted">biogeme.assisted module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-biogeme.assisted">biogeme.assisted module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.__init__"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.is_valid"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.is_valid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.log_statistics"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.log_statistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.plot"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.reestimate"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.reestimate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.run"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.AssistedSpecification.statistics"><code class="docutils literal notranslate"><span class="pre">AssistedSpecification.statistics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.ParetoPostProcessing"><code class="docutils literal notranslate"><span class="pre">ParetoPostProcessing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.ParetoPostProcessing.__init__"><code class="docutils literal notranslate"><span class="pre">ParetoPostProcessing.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.ParetoPostProcessing.log_statistics"><code class="docutils literal notranslate"><span class="pre">ParetoPostProcessing.log_statistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.ParetoPostProcessing.plot"><code class="docutils literal notranslate"><span class="pre">ParetoPostProcessing.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.ParetoPostProcessing.reestimate"><code class="docutils literal notranslate"><span class="pre">ParetoPostProcessing.reestimate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#biogeme.assisted.ParetoPostProcessing.statistics"><code class="docutils literal notranslate"><span class="pre">ParetoPostProcessing.statistics()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.decrease_configuration"><code class="docutils literal notranslate"><span class="pre">decrease_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.decrement_several_catalogs"><code class="docutils literal notranslate"><span class="pre">decrement_several_catalogs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.generate_operator"><code class="docutils literal notranslate"><span class="pre">generate_operator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.increase_configuration"><code class="docutils literal notranslate"><span class="pre">increase_configuration()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.increment_several_catalogs"><code class="docutils literal notranslate"><span class="pre">increment_several_catalogs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.modify_random_catalogs"><code class="docutils literal notranslate"><span class="pre">modify_random_catalogs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#biogeme.assisted.modify_several_catalogs"><code class="docutils literal notranslate"><span class="pre">modify_several_catalogs()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="biogeme.html">Biogeme</a></li>
@@ -78,8 +107,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Assisted specification</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Assisted specification</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/assisted.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -94,1476 +123,354 @@
 <p>Assisted specification algorithm</p>
 <section id="module-biogeme.assisted">
 <span id="biogeme-assisted-module"></span><h2>biogeme.assisted module<a class="headerlink" href="#module-biogeme.assisted" title="Permalink to this heading"></a></h2>
-<p>File assisted.py
-:author: Michel Bierlaire, EPFL
-:date: Thu Sep 17 16:21:01 2020</p>
-<p>Assisted specification for choice models</p>
+<p>File assisted.py</p>
+<dl class="field-list simple">
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Michel Bierlaire</p>
+</dd>
+<dt class="field-even">date<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sun Mar 19 17:06:29 2023</p>
+</dd>
+</dl>
+<p>New version of the assisted specification using Catalogs</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.SegmentedParameterTuple">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">SegmentedParameterTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combinatorial</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#biogeme.assisted.SegmentedParameterTuple" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.SegmentedParameterTuple.combinatorial">
-<span class="sig-name descname"><span class="pre">combinatorial</span></span><a class="headerlink" href="#biogeme.assisted.SegmentedParameterTuple.combinatorial" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.SegmentedParameterTuple.dict">
-<span class="sig-name descname"><span class="pre">dict</span></span><a class="headerlink" href="#biogeme.assisted.SegmentedParameterTuple.dict" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.TermTuple">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">TermTuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#biogeme.assisted.TermTuple" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.TermTuple.attribute">
-<span class="sig-name descname"><span class="pre">attribute</span></span><a class="headerlink" href="#biogeme.assisted.TermTuple.attribute" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.TermTuple.bounds">
-<span class="sig-name descname"><span class="pre">bounds</span></span><a class="headerlink" href="#biogeme.assisted.TermTuple.bounds" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.TermTuple.segmentation">
-<span class="sig-name descname"><span class="pre">segmentation</span></span><a class="headerlink" href="#biogeme.assisted.TermTuple.segmentation" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.TermTuple.validity">
-<span class="sig-name descname"><span class="pre">validity</span></span><a class="headerlink" href="#biogeme.assisted.TermTuple.validity" title="Permalink to this definition"></a></dt>
-<dd><p>Alias for field number 3</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">groupOfVariables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonlinearSpecs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing groups of variables. All variables in the group
-will have the same nonlinear spec. They can also share the same
-coefficient.</p>
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">AssistedSpecification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">biogeme_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_objectives</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pareto_file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_neighborhood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="vns.html#biogeme.vns.ProblemClass" title="biogeme.vns.ProblemClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProblemClass</span></code></a></p>
+<p>Class defining assisted specification problem for the VNS algorithm.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonlinearSpecs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.__init__" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">biogeme_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_objectives</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pareto_file_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_neighborhood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.__init__" title="Permalink to this definition"></a></dt>
 <dd><p>Ctor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name of the group of variables</p></li>
-<li><p><strong>variables</strong> – list of variables in the group</p></li>
-<li><p><strong>nonlinearSpecs</strong> (<em>list</em><em>(</em><em>function</em><em>)</em>) – list of possible nonlinear specifications</p></li>
+<li><p><strong>biogeme_object</strong> (<a class="reference internal" href="biogeme.html#biogeme.biogeme.BIOGEME" title="biogeme.biogeme.BIOGEME"><em>biogeme.biogeme.BIOGEME</em></a>) – object containnig the loglikelihood and the database</p></li>
+<li><p><strong>multi_objectives</strong> (<em>fct</em><em>(</em><a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults"><em>biogeme.results.bioResults</em></a><em>) </em><em>--&gt; list</em><em>[</em><em>float</em><em>]</em>) – function calculating the objectives to minimize</p></li>
+<li><p><strong>pareto_file_name</strong> (<em>str</em>) – file where to read and write the Pareto solutions</p></li>
+<li><p><strong>max_neighborhood</strong> (<em>int</em>) – maximum number of neighborhood
+investigated by the algorithm</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.activate">
-<span class="sig-name descname"><span class="pre">activate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.activate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.activate" title="Permalink to this definition"></a></dt>
-<dd><p>A group of variables can have two status: activated or not. This
-function changes the status.</p>
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.is_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.is_valid" title="Permalink to this definition"></a></dt>
+<dd><p>In this implementation, we condider all models to be valid.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>yes</strong> (<em>bool</em>) – if True, activates the group. If False,
-desactivate the group.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> (<em>class SetElement</em>) – representation of the specification</p>
 </dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.active">
-<span class="sig-name descname"><span class="pre">active</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.active" title="Permalink to this definition"></a></dt>
-<dd><p>True if the group is active.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.alwaysActive">
-<span class="sig-name descname"><span class="pre">alwaysActive</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.alwaysActive" title="Permalink to this definition"></a></dt>
-<dd><p>True if the group is always active.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.forbidGeneric">
-<span class="sig-name descname"><span class="pre">forbidGeneric</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.forbidGeneric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.forbidGeneric" title="Permalink to this definition"></a></dt>
-<dd><p>Forbid the generic specification in the group</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.forceActive">
-<span class="sig-name descname"><span class="pre">forceActive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.forceActive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.forceActive" title="Permalink to this definition"></a></dt>
-<dd><p>Force the variables in the group to be active.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.generic">
-<span class="sig-name descname"><span class="pre">generic</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.generic" title="Permalink to this definition"></a></dt>
-<dd><p>True if the group is generic.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.genericForbiden">
-<span class="sig-name descname"><span class="pre">genericForbiden</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.genericForbiden" title="Permalink to this definition"></a></dt>
-<dd><p>True of the group cannot be made generic</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.getDecisions">
-<span class="sig-name descname"><span class="pre">getDecisions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.getDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.getDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>The decision is an integer representing the decisions with
-respect to the group of variables:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>decision with respect to the group of variables</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the model is valid</p>
 </dd>
-</dl>
-<ul class="simple">
-<li><p>-3 if it is inactive</p></li>
-<li><p>-2 if it is active, generic and linear</p></li>
-<li><p>-1 if it is active, alt. specific and linear</p></li>
-<li><p>index of the nonlinear specification if active, generic
-and nonlinear.</p></li>
-<li><p>100 plus the index of the nonlinear specification if active,
-alt. specific and nonlinear.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.linear">
-<span class="sig-name descname"><span class="pre">linear</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.linear" title="Permalink to this definition"></a></dt>
-<dd><p>True if linear specification.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.makeGeneric">
-<span class="sig-name descname"><span class="pre">makeGeneric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.makeGeneric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.makeGeneric" title="Permalink to this definition"></a></dt>
-<dd><p>A group of variables can be generic or alternative specific.
-This function changes the status.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>yes</strong> (<em>bool</em>) – if True, status is set to “generic”.
-If False, status is set to “alt. specific”.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the variable cannot be made generic.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.name" title="Permalink to this definition"></a></dt>
-<dd><p>name of the group of variables.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.nonlinearSpecs">
-<span class="sig-name descname"><span class="pre">nonlinearSpecs</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.nonlinearSpecs" title="Permalink to this definition"></a></dt>
-<dd><p>list of possible nonlinear specifications</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.selection">
-<span class="sig-name descname"><span class="pre">selection</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.selection" title="Permalink to this definition"></a></dt>
-<dd><p>Index of the selected non linear specification.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.setDecisions">
-<span class="sig-name descname"><span class="pre">setDecisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decision</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.setDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.setDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>Implement the decision, after verifying its validity</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>decision</strong> – </p>
-</dd>
-</dl>
-<ul class="simple">
-<li><p>-3 if it is inactive</p></li>
-<li><p>-2 if it is active, generic and linear</p></li>
-<li><p>-1 if it is active, alt. specific and linear</p></li>
-<li><p>index of the nonlinear specification if active, generic
-and nonlinear.</p></li>
-<li><p>100 plus the index of the nonlinear specification if active,
-alt. specific and nonlinear.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the decision is to deactive, while
-the group should always be active.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.setLinear">
-<span class="sig-name descname"><span class="pre">setLinear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.setLinear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.setLinear" title="Permalink to this definition"></a></dt>
-<dd><p>A group of variables can be linear or not. This function changes
-the status.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>yes</strong> (<em>bool</em>) – if True, status is set to “linear”.
-If False, status is set to “nonlinear”.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.setSelection">
-<span class="sig-name descname"><span class="pre">setSelection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sel</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.setSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.setSelection" title="Permalink to this definition"></a></dt>
-<dd><p>Set the selection of the nonlinear specification.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>sel</strong> (<em>int</em>) – index of list self.nonlinearSpecs corresponding to
-the nonlinear spec.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the index is out of range.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.swapActivate">
-<span class="sig-name descname"><span class="pre">swapActivate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.swapActivate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.swapActivate" title="Permalink to this definition"></a></dt>
-<dd><p>Change the activation status</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.swapGeneric">
-<span class="sig-name descname"><span class="pre">swapGeneric</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.swapGeneric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.swapGeneric" title="Permalink to this definition"></a></dt>
-<dd><p>Change the generic/alt. specific status</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.swapLinear">
-<span class="sig-name descname"><span class="pre">swapLinear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#groupOfVariables.swapLinear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.groupOfVariables.swapLinear" title="Permalink to this definition"></a></dt>
-<dd><p>Change the linearity status.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.groupOfVariables.variables">
-<span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#biogeme.assisted.groupOfVariables.variables" title="Permalink to this definition"></a></dt>
-<dd><p>list of variables in the group.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">segmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictOfSocioEco</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combinatorial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing the possible segmentations</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictOfSocioEco</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combinatorial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Ctor</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.alwaysActive">
-<span class="sig-name descname"><span class="pre">alwaysActive</span></span><a class="headerlink" href="#biogeme.assisted.segmentation.alwaysActive" title="Permalink to this definition"></a></dt>
-<dd><p>True if it must always be active</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.combinatorial">
-<span class="sig-name descname"><span class="pre">combinatorial</span></span><a class="headerlink" href="#biogeme.assisted.segmentation.combinatorial" title="Permalink to this definition"></a></dt>
-<dd><p>True if all combinations are considered</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.describe">
-<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.describe" title="Permalink to this definition"></a></dt>
-<dd><p>Description of the segmentation</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>description</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.dictOfSocioEco">
-<span class="sig-name descname"><span class="pre">dictOfSocioEco</span></span><a class="headerlink" href="#biogeme.assisted.segmentation.dictOfSocioEco" title="Permalink to this definition"></a></dt>
-<dd><p>dict of object of class socioEconomic characterizing the
-segmentation.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.getBetaNames">
-<span class="sig-name descname"><span class="pre">getBetaNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coef_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.getBetaNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.getBetaNames" title="Permalink to this definition"></a></dt>
-<dd><p>Get the name of the parameters for all combinations.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.getDecisions">
-<span class="sig-name descname"><span class="pre">getDecisions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.getDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.getDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>The decision is a dict, where the keys are the name of the
-socioeconomic variables, and the value are a boolean mentioning
-if it is active or not.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>decision of activation of the socio-eco variables for
-the segmentation.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict(str: bool)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.getExpression">
-<span class="sig-name descname"><span class="pre">getExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coef_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.getExpression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.getExpression" title="Permalink to this definition"></a></dt>
-<dd><p>Obtain the Biogeme expression.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>coef_name</strong> (<em>str</em>) – name of the coefficient</p></li>
-<li><p><strong>bounds</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – bounds on the coefficient</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>biogeme  expression for the segmentation</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.bioMultSum" title="biogeme.expressions.bioMultSum"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.bioMultSum</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.isActive">
-<span class="sig-name descname"><span class="pre">isActive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.isActive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.isActive" title="Permalink to this definition"></a></dt>
-<dd><p>Check if there are active variables for this segmentation.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.listOfVariables">
-<span class="sig-name descname"><span class="pre">listOfVariables</span></span><a class="headerlink" href="#biogeme.assisted.segmentation.listOfVariables" title="Permalink to this definition"></a></dt>
-<dd><p>list of variables involved</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#biogeme.assisted.segmentation.name" title="Permalink to this definition"></a></dt>
-<dd><p>name of the segmentation</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.setDecisions">
-<span class="sig-name descname"><span class="pre">setDecisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#segmentation.setDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.segmentation.setDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>Implement the specification decisions, represented as a dict,
-where the keys are the name of the socioeconomic variables,
-and the value are a boolean mentioning if it is active or not.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>decisions</strong> (<em>dict</em><em>(</em><em>str: bool</em><em>)</em>) – decision of activation of the socio-eco variables for
-the segmentation.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the name of a segmentation is unknown</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.segmentation.used">
-<span class="sig-name descname"><span class="pre">used</span></span><a class="headerlink" href="#biogeme.assisted.segmentation.used" title="Permalink to this definition"></a></dt>
-<dd><p>True if used.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">socioEconomic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#socioEconomic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.socioEconomic" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing  socio-economic characteristic</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#socioEconomic.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.socioEconomic.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Ctor</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name of the segmentation variable</p></li>
-<li><p><strong>expression</strong> (meth:<cite>biogeme.expressions.Expression</cite>) – Biogeme expression of the variable</p></li>
-<li><p><strong>values</strong> (<em>dict</em><em>(</em><em>int: str</em><em>)</em>) – dict with values that it can take as keys, and a name
-describing them as values.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic.active">
-<span class="sig-name descname"><span class="pre">active</span></span><a class="headerlink" href="#biogeme.assisted.socioEconomic.active" title="Permalink to this definition"></a></dt>
-<dd><p>True if the segmentation variable is active.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic.combine">
-<span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existingValues</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#socioEconomic.combine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.socioEconomic.combine" title="Permalink to this definition"></a></dt>
-<dd><p>Generates the possible combinations of values,
-corresponding to segments.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic.expression">
-<span class="sig-name descname"><span class="pre">expression</span></span><a class="headerlink" href="#biogeme.assisted.socioEconomic.expression" title="Permalink to this definition"></a></dt>
-<dd><p>Biogeme expression of the variable</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#biogeme.assisted.socioEconomic.name" title="Permalink to this definition"></a></dt>
-<dd><p>name of the segmentation variable</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.socioEconomic.values">
-<span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#biogeme.assisted.socioEconomic.values" title="Permalink to this definition"></a></dt>
-<dd><p>dict with values that it can take as keys, and a name
-describing them as values.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.solution">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">solution</span></span><a class="reference internal" href="_modules/biogeme/assisted.html#solution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.solution" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="vns.html#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">solutionClass</span></code></a></p>
-<p>Class representing one solution, that is, one model specification.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#solution.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.solution.__init__" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.causeInvalidity">
-<span class="sig-name descname"><span class="pre">causeInvalidity</span></span><a class="headerlink" href="#biogeme.assisted.solution.causeInvalidity" title="Permalink to this definition"></a></dt>
-<dd><p>If the solution is invalid, contains the cause of the invalidity</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.decisions">
-<span class="sig-name descname"><span class="pre">decisions</span></span><a class="headerlink" href="#biogeme.assisted.solution.decisions" title="Permalink to this definition"></a></dt>
-<dd><p>The decisions consist of:</p>
-<ul class="simple">
-<li><p>a dict of decisions for each group of variables.</p></li>
-<li><p>for each utility, a list of decisions for each term.</p></li>
-<li><p>the selected model</p></li>
-</ul>
-<p>Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.description">
-<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#biogeme.assisted.solution.description" title="Permalink to this definition"></a></dt>
-<dd><p>description of the solution</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.objectives">
-<span class="sig-name descname"><span class="pre">objectives</span></span><a class="headerlink" href="#biogeme.assisted.solution.objectives" title="Permalink to this definition"></a></dt>
-<dd><p>values of the objectives</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.objectivesNames">
-<span class="sig-name descname"><span class="pre">objectivesNames</span></span><a class="headerlink" href="#biogeme.assisted.solution.objectivesNames" title="Permalink to this definition"></a></dt>
-<dd><p>Names of the objective functions</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.solution.valid">
-<span class="sig-name descname"><span class="pre">valid</span></span><a class="headerlink" href="#biogeme.assisted.solution.valid" title="Permalink to this definition"></a></dt>
-<dd><p>True if the solution is valid</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">specificationProblem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theGroups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genericForbiden</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forceActive</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theNonlinearSpecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theSegmentations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">utilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availabilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="vns.html#biogeme.vns.problemClass" title="biogeme.vns.problemClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">problemClass</span></code></a></p>
-<p>Class defining the choice model specification problem</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">database</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theVariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theGroups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">genericForbiden</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forceActive</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theNonlinearSpecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theSegmentations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">utilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">availabilities</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">models</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Ctor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name of the problem.</p></li>
-<li><p><strong>database</strong> (<a class="reference internal" href="database.html#biogeme.database.Database" title="biogeme.database.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.database.Database</span></code></a>) – data for the estimation</p></li>
-<li><p><strong>theVariables</strong> (dict(str: <a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a>)) – variables involved in the model and their names</p></li>
-<li><p><strong>theGroups</strong> (<em>dict</em><em>(</em><em>str: list</em><em>(</em><em>str</em><em>)</em><em>)</em>) – variables in the same groups share the same
-transforms and activation status. Each group is characterized
-by its name, and is associated to a list of variables,
-identified by their name.</p></li>
-<li><p><strong>genericForbiden</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – groups of variables that must be
-alternative specific.</p></li>
-<li><p><strong>forceActive</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – groups of variables that must be in the model.</p></li>
-<li><p><strong>theNonlinearSpecs</strong> (<em>dict</em><em>(</em><em>str: list</em><em>( </em><em>fct</em><em>(</em><em>) </em><em>)</em><em>)</em>) – <p>associates a group of variables or a
-variable with a list of possible nonlinear
-transformations. Each transformation is a function that takes
-one argument (the variable), and return a tuple with</p>
-<ul>
-<li><p>the name of the nonlinear transform</p></li>
-<li><p>the expression of the transform.</p></li>
-</ul>
-<blockquote>
-<div><p>Examples of such a function:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">**</span><span class="mf">0.5</span>
-
-<span class="k">def</span> <span class="nf">boxcox</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="n">ell</span> <span class="o">=</span> <span class="n">Beta</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;lambda&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s1">&#39;Box-Cox&#39;</span><span class="p">,</span> <span class="n">models</span><span class="o">.</span><span class="n">boxcox</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">ell</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-</p></li>
-<li><p><strong>theSegmentations</strong> (<em>dict</em><em>(</em><em>str</em><em>, </em><em>tuple</em><em>(</em><em>biogeme.expression.Expression</em><em>,
-</em><em>dict</em><em>(</em><em>int</em><em>, </em><em>str</em><em>)</em><em>)</em><em>)</em>) – <p>a dictionary, with keys being names
-and values beeing tuples (var, segments), where</p>
-<ul>
-<li><p>var is the name of the variable</p></li>
-<li><p>segments is a dict with keys being the value of the variable
-characterizing a segment, and the value being the name of
-the segment.</p></li>
-</ul>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;Income&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Income</span><span class="p">,</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;&lt;2500&#39;</span><span class="p">,</span>
-                     <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;2051_4000&#39;</span><span class="p">,</span>
-                     <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;4001_6000&#39;</span><span class="p">,</span>
-                     <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;6001_8000&#39;</span><span class="p">,</span>
-                     <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;8001_10000&#39;</span><span class="p">,</span>
-                     <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;&gt;10000&#39;</span><span class="p">,</span>
-                     <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">}),</span>
- <span class="s1">&#39;Gender&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">Gender</span><span class="p">,</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;male&#39;</span><span class="p">,</span>
-                     <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;female&#39;</span><span class="p">,</span>
-                    <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;unkown&#39;</span><span class="p">}),</span>
-</pre></div>
-</div>
-</p></li>
-<li><p><strong>utilities</strong> (<em>dict</em><em>(</em><em>int</em><em>, </em><em>tuple</em><em>(</em><em>str</em><em>,
-</em><em>list</em><em>(</em><em>tuple</em><em>(</em><em>str</em><em>, </em><em>str</em><em>, </em><em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>,</em><em>function</em><em>)</em><em>)</em><em>)</em><em>)</em>) – <p>specification of the utility functions. It
-is a dict where</p>
-<ul>
-<li><p>the keys are the ID of the alternatives.</p></li>
-<li><p>the values are a tuple containing the name of the
-alternative and the specification.</p></li>
-</ul>
-<p>The specification is a list of terms. A term is a tuple with
-the name of the variable, the name of the segmentation, the
-bounds on the coeffcient, and a function checking the validity
-of the corresponding parameter (typically, check its
-sign). All can be None. If they are all None, it corresponds
-to the alternative specification constant, without any
-segmentation and any assumption on the sign.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">utility_pt</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;PT cte&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg. cte&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
-  <span class="p">(</span><span class="s1">&#39;PT travel time&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg. time&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
-  <span class="p">(</span><span class="s1">&#39;PT travel cost&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg. PT cost&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">isNegative</span><span class="p">),</span>
-  <span class="p">(</span><span class="s1">&#39;PT Waiting time&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg. wait&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">None</span><span class="p">)]</span>
-
-
-<span class="n">utility_car</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Car cte&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg. cte&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
-  <span class="p">(</span><span class="s1">&#39;Car travel time&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg. time&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="kc">None</span><span class="p">),</span>
-  <span class="p">(</span>
-   <span class="s1">&#39;Car travel cost&#39;</span><span class="p">,</span>
-   <span class="s1">&#39;Seg. car cost&#39;</span><span class="p">,</span>
-   <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-   <span class="n">isNegative</span>
-  <span class="p">),</span>
-  <span class="p">(</span><span class="s1">&#39;Nbr of cars&#39;</span><span class="p">,</span> <span class="s1">&#39;Seg nbr cars&#39;</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="kc">None</span><span class="p">)]</span>
-
-<span class="n">utility_sm</span> <span class="o">=</span> <span class="p">[(</span>
-               <span class="s1">&#39;Distance&#39;</span><span class="p">,</span>
-               <span class="s1">&#39;Seg. dist&#39;</span><span class="p">,</span>
-               <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-               <span class="n">isNegative</span>
-              <span class="p">)]</span>
-
-<span class="n">choiceModel</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pt&#39;</span><span class="p">,</span> <span class="n">utility_pt</span><span class="p">),</span>
-               <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;car&#39;</span><span class="p">,</span> <span class="n">utility_car</span><span class="p">),</span>
-               <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;sm&#39;</span><span class="p">,</span> <span class="n">utility_sm</span><span class="p">)}</span>
-</pre></div>
-</div>
-</p></li>
-<li><p><strong>availabilities</strong> (dict(int, <a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a>)) – dict describing the availability of the
-alternatives.</p></li>
-<li><p><strong>choice</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a>) – expression for the observed choice</p></li>
-<li><p><strong>models</strong> (<em>dict</em><em>(</em><em>str</em><em>, </em><em>fct</em><em>)</em>) – dict of possible models. A model is a function
-that takes the utilities and the availabilities, and return
-the loglikelihood expression.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a variable is found in two different groups.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the list of groups forbiden to be
-active contains an unknown group.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the list of groups forced to be active
-contains an unknown group.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if some variables are not in any group.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a segmentation in a utility function is
-unknown.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a variable in a utility function is unknown.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if some variables are not used.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.applyOperator">
-<span class="sig-name descname"><span class="pre">applyOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.applyOperator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.applyOperator" title="Permalink to this definition"></a></dt>
-<dd><p>Apply an operator.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name of the operator to apply</p></li>
-<li><p><strong>size</strong> (<em>int</em>) – size of the neighborhood</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>total number of changes actually made on the solution</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the name of the operator is unknown.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.archive">
-<span class="sig-name descname"><span class="pre">archive</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.archive" title="Permalink to this definition"></a></dt>
-<dd><p>Dictionary, where the keys are solutions (objects of type
-<a class="reference internal" href="vns.html#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.solutionClass</span></code></a>) and the values are the
-estimation results (objects of type
-<a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.results.bioResults</span></code></a>).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.availability">
-<span class="sig-name descname"><span class="pre">availability</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.availability" title="Permalink to this definition"></a></dt>
-<dd><p>dict describing the availability of the alternatives.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.changeGeneric">
-<span class="sig-name descname"><span class="pre">changeGeneric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.changeGeneric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.changeGeneric" title="Permalink to this definition"></a></dt>
-<dd><p>Change generic vs alternative specific status</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.changeLinearity">
-<span class="sig-name descname"><span class="pre">changeLinearity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.changeLinearity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.changeLinearity" title="Permalink to this definition"></a></dt>
-<dd><p>Make linear if non linear, and the other way around.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.changeModel">
-<span class="sig-name descname"><span class="pre">changeModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.changeModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.changeModel" title="Permalink to this definition"></a></dt>
-<dd><p>Select randomly another model from the list</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>size</strong> (<em>int</em>) – not used here. Must be there for compliance with the
-call of operators.</p></li>
-<li><p><strong>audit</strong> (<em>bool</em>) – if True, returns the number of changes without
-actually implementing them.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 if no other model could be found. 1 otherwise.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.changeNonlinearity">
-<span class="sig-name descname"><span class="pre">changeNonlinearity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.changeNonlinearity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.changeNonlinearity" title="Permalink to this definition"></a></dt>
-<dd><p>Change the nature of the nonlinear specification</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.changeSegmentation">
-<span class="sig-name descname"><span class="pre">changeSegmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.changeSegmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.changeSegmentation" title="Permalink to this definition"></a></dt>
-<dd><p>Change the interaction, while keeping the number of them</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.changeVariables">
-<span class="sig-name descname"><span class="pre">changeVariables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.changeVariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.changeVariables" title="Permalink to this definition"></a></dt>
-<dd><p>Activate groups of variables</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.checkAvailability">
-<span class="sig-name descname"><span class="pre">checkAvailability</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.checkAvailability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.checkAvailability" title="Permalink to this definition"></a></dt>
-<dd><p>Check the availability of each operator.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a dictionary with the availability status of each operator</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict(str: bool)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.choice">
-<span class="sig-name descname"><span class="pre">choice</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.choice" title="Permalink to this definition"></a></dt>
-<dd><p>expression for the observed choice</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.clone">
-<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.clone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.clone" title="Permalink to this definition"></a></dt>
-<dd><p>Clone the model, in order to generate neighbors</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a clone</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#biogeme.assisted.specificationProblem" title="biogeme.assisted.specificationProblem">specificationProblem</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.database">
-<span class="sig-name descname"><span class="pre">database</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.database" title="Permalink to this definition"></a></dt>
-<dd><p>object of type <a class="reference internal" href="database.html#biogeme.database.Database" title="biogeme.database.Database"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.database.Database</span></code></a>, containing the
-data.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.decisions">
-<span class="sig-name descname"><span class="pre">decisions</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.decisions" title="Permalink to this definition"></a></dt>
-<dd><p>The decisions consist of:</p>
-<ul class="simple">
-<li><p>a dict of decisions for each group of variables.</p></li>
-<li><p>for each utility, a list of decisions for each term.</p></li>
-<li><p>the selected model</p></li>
-</ul>
-<p>Type: tuple(dict(str: int), dict(str: list(dict(str: bool))), int)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.decreaseSegmentation">
-<span class="sig-name descname"><span class="pre">decreaseSegmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.decreaseSegmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.decreaseSegmentation" title="Permalink to this definition"></a></dt>
-<dd><p>Remove a level of segmentation.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.describe">
-<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.describe" title="Permalink to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Generates (if necessary) and returns a short description of</dt><dd><p>the solution</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<em>class solution</em>) – solution that must be described.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>description of the solution</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.describeCurrentModel">
-<span class="sig-name descname"><span class="pre">describeCurrentModel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.describeCurrentModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.describeCurrentModel" title="Permalink to this definition"></a></dt>
-<dd><p>Generates a description of the current model</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>model description.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.describeHtml">
-<span class="sig-name descname"><span class="pre">describeHtml</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.describeHtml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.describeHtml" title="Permalink to this definition"></a></dt>
-<dd><p>Generates a description of the model in HTML format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>description of the model in HTML format.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.evaluate">
-<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.evaluate" title="Permalink to this definition"></a></dt>
-<dd><p>Evaluate the objectives functions of the solution and store them in
-the solution object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<a class="reference internal" href="vns.html#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution to be evaluated</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>results of the estimation</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>class <a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.results.bioResults</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.generateNeighbor">
-<span class="sig-name descname"><span class="pre">generateNeighbor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighborhoodSize</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.generateNeighbor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.generateNeighbor" title="Permalink to this definition"></a></dt>
-<dd><p>Generates a neighbor of the solution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>aSolution</strong> (<em>class solution</em>) – solution to be modified</p></li>
-<li><p><strong>neighborhoodSize</strong> (<em>int</em>) – size of the neighborhood to be applied</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a neighbor solution, and the number of changes that have been
-actually applied.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple(class solution, int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.generateSolution">
-<span class="sig-name descname"><span class="pre">generateSolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nonlinearSpecs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmentations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.generateSolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.generateSolution" title="Permalink to this definition"></a></dt>
-<dd><p>Generate a solution for the VNS algorithm</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nonlinearSpecs</strong> (<em>dict</em><em>(</em><em>str: tuple</em><em>(</em><em>int</em><em>, </em><em>bool</em><em>)</em><em>)</em>) – <p>nonlinear specifications. It is a dictionary
-where</p>
-<ul>
-<li><p>the keys correspond to groups of variables,</p></li>
-<li><p>the values are tuple with two entries:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>index in the list self.nonlinearSpecs corresponding to
-the nonlinear spec, or None if linear,</p></li>
-<li><p>a boolean that is True if the coefficient is generic,
-False otherwise.</p></li>
-</ul>
-</div></blockquote>
-</li>
-</ul>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nl</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Travel time&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
-      <span class="s1">&#39;Travel cost&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
-      <span class="s1">&#39;Headway&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">)}</span>
-</pre></div>
-</div>
-</p></li>
-<li><p><strong>segmentations</strong> (<em>dict</em><em>(</em><em>str: list</em><em>(</em><em>str</em><em>)</em><em>)</em>) – <p>dictionary where the keys are the name
-of the segmentations, and the values are lists of
-socio-economic characteristics that must be activated.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sg</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Seg. cte&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;GA&#39;</span><span class="p">],</span>
-      <span class="s1">&#39;Seg. cost&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">,</span> <span class="s1">&#39;who&#39;</span><span class="p">],</span>
-      <span class="s1">&#39;Seg. time&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;gender&#39;</span><span class="p">],</span>
-      <span class="s1">&#39;Seg. headway&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]}</span>
-</pre></div>
-</div>
-</p></li>
-<li><p><strong>model</strong> (<em>str</em>) – selected model</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the solution that has been generated</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>class solution</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a variable is set ot generic. Only groups of
-variables can be made generic.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a group of variables is unknown</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if an error occurs in setting the segmentation
-decisions</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the model is unknown.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.getBiogemeModel">
-<span class="sig-name descname"><span class="pre">getBiogemeModel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.getBiogemeModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.getBiogemeModel" title="Permalink to this definition"></a></dt>
-<dd><p>Build the Biogeme expressions of a given specification</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.getDecisions">
-<span class="sig-name descname"><span class="pre">getDecisions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.getDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.getDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>The decisions consist of:</p>
-<ul class="simple">
-<li><p>a dict of decisions for each group of variables.</p></li>
-<li><p>for each utility, a list of decisions for each term.</p></li>
-<li><p>the selected model</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>all decisions</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tuple(dict(str: int), dict(str: list(dict(str: bool))), int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.getSolution">
-<span class="sig-name descname"><span class="pre">getSolution</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.getSolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.getSolution" title="Permalink to this definition"></a></dt>
-<dd><p>Generate an object of the class <code class="docutils literal notranslate"><span class="pre">solution</span></code></p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the solution that has been generated</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>class solution</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.increaseSegmentation">
-<span class="sig-name descname"><span class="pre">increaseSegmentation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">audit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.increaseSegmentation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.increaseSegmentation" title="Permalink to this definition"></a></dt>
-<dd><p>Add a level of segmentation.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.isValid">
-<span class="sig-name descname"><span class="pre">isValid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.isValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.isValid" title="Permalink to this definition"></a></dt>
-<dd><p>Evaluate  the validity of the solution.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<em>class solution</em>) – solution to be checked</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>valid, why where valid is True if the solution is
-valid, and False otherwise. <code class="docutils literal notranslate"><span class="pre">why</span></code> contains an explanation why it
-is invalid.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple(bool, str)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.lastOperator">
-<span class="sig-name descname"><span class="pre">lastOperator</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.lastOperator" title="Permalink to this definition"></a></dt>
-<dd><p>Last operator used</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.maximumNumberOfParameters">
-<span class="sig-name descname"><span class="pre">maximumNumberOfParameters</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.maximumNumberOfParameters" title="Permalink to this definition"></a></dt>
-<dd><p>maximum number of parameters allowed in a specification. If the
-current model has more parameters, it is declared invalid and
-rejected by the algorithm.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.models">
-<span class="sig-name descname"><span class="pre">models</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.models" title="Permalink to this definition"></a></dt>
-<dd><p>List tuple (name, model).  A model is a function
-that takes the utilities and the availabilities, and return
-the loglikelihood expression.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.name" title="Permalink to this definition"></a></dt>
-<dd><p>name of the problem.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.neighborAccepted">
-<span class="sig-name descname"><span class="pre">neighborAccepted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aNeighbor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.neighborAccepted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.neighborAccepted" title="Permalink to this definition"></a></dt>
-<dd><p>Notify that a neighbor has been accepted by the
-algorithm. Used to update the statistics on the operators.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>aSolution</strong> (<a class="reference internal" href="vns.html#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – solution modified. Not used in this implementation.</p></li>
-<li><p><strong>aNeighbor</strong> (<a class="reference internal" href="vns.html#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – neighbor</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if no operator has been used yet.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.neighborRejected">
-<span class="sig-name descname"><span class="pre">neighborRejected</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aNeighbor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.neighborRejected"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.neighborRejected" title="Permalink to this definition"></a></dt>
-<dd><p>Notify that a neighbor has been rejected by the
-algorithm. Used to update the statistics on the operators.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>aSolution</strong> (<em>class solution</em>) – solution modified. Not used in this implementation.</p></li>
-<li><p><strong>aNeighbor</strong> (<a class="reference internal" href="vns.html#biogeme.vns.solutionClass" title="biogeme.vns.solutionClass"><em>solutionClass</em></a>) – neighbor</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if no operator has been used yet.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.operators">
-<span class="sig-name descname"><span class="pre">operators</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.operators" title="Permalink to this definition"></a></dt>
-<dd><p>Dict of operators, where the keys are the names, and the values are
-the function imple,enting the operators.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.operatorsManagement">
-<span class="sig-name descname"><span class="pre">operatorsManagement</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.operatorsManagement" title="Permalink to this definition"></a></dt>
-<dd><p>Object of type <a class="reference internal" href="vns.html#biogeme.vns.operatorsManagement" title="biogeme.vns.operatorsManagement"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.vns.operatorsManagement</span></code></a></p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.reset" title="Permalink to this definition"></a></dt>
-<dd><p>Deasactivate variables from the model, that can be deactivated.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.selectedModel">
-<span class="sig-name descname"><span class="pre">selectedModel</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.selectedModel" title="Permalink to this definition"></a></dt>
-<dd><p>index of the selected model</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.setDecisions">
-<span class="sig-name descname"><span class="pre">setDecisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.setDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.setDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>Implement the specification decisions</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>decisions</strong> (<em>tuple</em><em>(</em><em>dict</em><em>(</em><em>str: int</em><em>)</em><em>,
-</em><em>dict</em><em>(</em><em>str: list</em><em>(</em><em>dict</em><em>(</em><em>str: bool</em><em>)</em><em>)</em><em>)</em><em>,
-</em><em>int</em><em>)</em>) – specification decisions</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if a group of variables is unknown.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if an alternative is unknown.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the length of decisions is
-inconsistent with the number of terms in the utility function.</p></li>
-<li><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the njumber of the model is out of range.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.setSolution">
-<span class="sig-name descname"><span class="pre">setSolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">aSolution</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#specificationProblem.setSolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.specificationProblem.setSolution" title="Permalink to this definition"></a></dt>
-<dd><p>Import a solution defined as an object of class <code class="docutils literal notranslate"><span class="pre">solution</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>aSolution</strong> (<em>class solution</em>) – solution to be imported.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the object has the wrong type.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.theAlternatives">
-<span class="sig-name descname"><span class="pre">theAlternatives</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.theAlternatives" title="Permalink to this definition"></a></dt>
-<dd><p>Dict of utility functions, where the keys are the id of the
-alternatives, and the values are objects of type
-<a class="reference internal" href="#biogeme.assisted.utility" title="biogeme.assisted.utility"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.assisted.utility</span></code></a></p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.theGroups">
-<span class="sig-name descname"><span class="pre">theGroups</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.theGroups" title="Permalink to this definition"></a></dt>
-<dd><p>dict of groups of variables, where the keys are the names, and the
-values are objects of class <code class="docutils literal notranslate"><span class="pre">groupOfVariables</span></code></p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.theSegmentations">
-<span class="sig-name descname"><span class="pre">theSegmentations</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.theSegmentations" title="Permalink to this definition"></a></dt>
-<dd><p>dict of segmentations, where the keys are the names, and the
-values are objects of class <code class="docutils literal notranslate"><span class="pre">segmentation</span></code></p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.theVariables">
-<span class="sig-name descname"><span class="pre">theVariables</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.theVariables" title="Permalink to this definition"></a></dt>
-<dd><p>dict of variables, where the keys are the names, and the values are
-objects of class <code class="docutils literal notranslate"><span class="pre">variable</span></code></p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.specificationProblem.utilities">
-<span class="sig-name descname"><span class="pre">utilities</span></span><a class="headerlink" href="#biogeme.assisted.specificationProblem.utilities" title="Permalink to this definition"></a></dt>
-<dd><p>specification of the utility functions. See
-<a class="reference internal" href="#biogeme.assisted.specificationProblem.__init__" title="biogeme.assisted.specificationProblem.__init__"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.assisted.specificationProblem.__init__</span></code></a></p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.term">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aSegmentation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing the possible specifications of one term of the
-utility function</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aSegmentation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validity</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Ctor</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>var</strong> (<a class="reference internal" href="#biogeme.assisted.variable" title="biogeme.assisted.variable"><em>variable</em></a>) – variable of the term.</p></li>
-<li><p><strong>aSegmentation</strong> (<a class="reference internal" href="#biogeme.assisted.segmentation" title="biogeme.assisted.segmentation"><em>segmentation</em></a>) – discrete segmentation for the parameter</p></li>
-<li><p><strong>bounds</strong> (<em>tuple</em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em>) – bounds on the coefficient</p></li>
-<li><p><strong>validity</strong> (<em>bool f</em><em>(</em><em>float</em><em>)</em>) – function checking the validity of the coefficient.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.term.bounds">
-<span class="sig-name descname"><span class="pre">bounds</span></span><a class="headerlink" href="#biogeme.assisted.term.bounds" title="Permalink to this definition"></a></dt>
-<dd><p>bounds on the coefficient</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.term.coef_names">
-<span class="sig-name descname"><span class="pre">coef_names</span></span><a class="headerlink" href="#biogeme.assisted.term.coef_names" title="Permalink to this definition"></a></dt>
-<dd><p>names of the Beta parameters involved in the specification of the
-term.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.describe">
-<span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.describe" title="Permalink to this definition"></a></dt>
-<dd><p>Provides a short description of the term.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>short description.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.getBeta">
-<span class="sig-name descname"><span class="pre">getBeta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">altname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.getBeta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.getBeta" title="Permalink to this definition"></a></dt>
-<dd><p>Obtain the name of the coefficient of the term</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>altname</strong> (<em>str</em>) – name of the alternative</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>name of the coefficient</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.getDecisions">
-<span class="sig-name descname"><span class="pre">getDecisions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.getDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.getDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>The decision is a dict, where the keys are the name of the
-socioeconomic variables, and the value are a boolean mentioning if
-it is active or not.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>decision of activation of the socio-eco variables for
-the segmentation.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict(str: bool)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.getExpression">
-<span class="sig-name descname"><span class="pre">getExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">altname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.getExpression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.getExpression" title="Permalink to this definition"></a></dt>
-<dd><p>Build the Biogeme expression for the term</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>altname</strong> (<em>str</em>) – name of the alternative</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>eypression for the term</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.isValid">
-<span class="sig-name descname"><span class="pre">isValid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">altname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimationResults</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.isValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.isValid" title="Permalink to this definition"></a></dt>
-<dd><p>Check the validity of the estimated coefficient</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>altname</strong> (<em>str</em>) – name of the laternative</p></li>
-<li><p><strong>estimationResults</strong> (<a class="reference internal" href="results.html#biogeme.results.bioResults" title="biogeme.results.bioResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.results.bioResults</span></code></a>) – results of the estimation with Biogeme</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>True if the valus is valid, False otherwise.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="exceptions.html#biogeme.exceptions.biogemeError" title="biogeme.exceptions.biogemeError"><strong>biogemeError</strong></a> – if the parameter has not be estimated.</p>
-</dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.term.segmentation">
-<span class="sig-name descname"><span class="pre">segmentation</span></span><a class="headerlink" href="#biogeme.assisted.term.segmentation" title="Permalink to this definition"></a></dt>
-<dd><p>discrete segmentation of the parameter</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.term.setDecisions">
-<span class="sig-name descname"><span class="pre">setDecisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#term.setDecisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.term.setDecisions" title="Permalink to this definition"></a></dt>
-<dd><p>Implement the specification decisions, represented as a dict,
-where the keys are the name of the socioeconomic variables,
-and the value are a boolean mentioning if it is active or not.</p>
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.log_statistics">
+<span class="sig-name descname"><span class="pre">log_statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.log_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.log_statistics" title="Permalink to this definition"></a></dt>
+<dd><p>Report some statistics about the process in the logger</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.plot" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Plot the members of the set according to two</dt><dd><p>objective functions.  They  determine the x- and
+y-coordinate of the plot.</p>
+</dd>
+</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>decisions</strong> (<em>dict</em><em>(</em><em>str: bool</em><em>)</em>) – decision of activation of the socio-eco variables for
-the segmentation.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>objective_x</strong> – index of the objective function to use for the x-coordinate.</p></li>
+<li><p><strong>objective_x</strong> – int</p></li>
+<li><p><strong>objective_y</strong> – index of the objective function to use for the y-coordinate.</p></li>
+<li><p><strong>objective_y</strong> – int</p></li>
+<li><p><strong>label_x</strong> (<em>str</em>) – label for the x_axis</p></li>
+<li><p><strong>label_y</strong> (<em>str</em>) – label for the y_axis</p></li>
+<li><p><strong>margin_x</strong> (<em>int</em>) – margin for the x axis</p></li>
+<li><p><strong>margin_y</strong> (<em>int</em>) – margin for the y axis</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.Axes</em>) – matplotlib axis for the plot</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.term.validity">
-<span class="sig-name descname"><span class="pre">validity</span></span><a class="headerlink" href="#biogeme.assisted.term.validity" title="Permalink to this definition"></a></dt>
-<dd><p>function checking the validity of the coefficient.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.reestimate">
+<span class="sig-name descname"><span class="pre">reestimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recycle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.reestimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.reestimate" title="Permalink to this definition"></a></dt>
+<dd><p>The assisted specification uses quickEstimate to estimate
+the models. A complete estimation is necessary to obtain the
+full estimation results.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.term.var">
-<span class="sig-name descname"><span class="pre">var</span></span><a class="headerlink" href="#biogeme.assisted.term.var" title="Permalink to this definition"></a></dt>
-<dd><p>variable of the term</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs the VNS algorithm</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object containing the estimation results associated
+with the  description of each configuration</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict(str: bioResults)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.assisted.AssistedSpecification.statistics">
+<span class="sig-name descname"><span class="pre">statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#AssistedSpecification.statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.AssistedSpecification.statistics" title="Permalink to this definition"></a></dt>
+<dd><p>Report some statistics about the process</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple of messages, possibly empty.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple(str)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.utility">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">utility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alternativeId</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#utility"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.utility" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="biogeme.assisted.ParetoPostProcessing">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">ParetoPostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">biogeme_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pareto_file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#ParetoPostProcessing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.ParetoPostProcessing" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing the possible specifications of a utility function</p>
+<p>Class to process an existing Pareto set.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.utility.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alternativeId</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">terms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#utility.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.utility.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Ctor.</p>
+<dt class="sig sig-object py" id="biogeme.assisted.ParetoPostProcessing.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">biogeme_object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pareto_file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#ParetoPostProcessing.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.ParetoPostProcessing.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Ctor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>alternativeId</strong> (<em>int</em>) – id of the alternative.</p></li>
-<li><p><strong>name</strong> (<em>str</em>) – name of the alternative</p></li>
-<li><p><strong>terms</strong> (<em>list</em><em>(</em><a class="reference internal" href="#biogeme.assisted.term" title="biogeme.assisted.term"><em>term</em></a><em>)</em>) – terms of the utility function.</p></li>
+<li><p><strong>biogeme_object</strong> (<a class="reference internal" href="biogeme.html#biogeme.biogeme.BIOGEME" title="biogeme.biogeme.BIOGEME"><em>biogeme.biogeme.BIOGEME</em></a>) – object containnig the loglikelihood and the database</p></li>
+<li><p><strong>pareto_file_name</strong> (<em>str</em>) – file where to read and write the Pareto solutions</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.utility.getExpression">
-<span class="sig-name descname"><span class="pre">getExpression</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#utility.getExpression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.utility.getExpression" title="Permalink to this definition"></a></dt>
-<dd><p>Obtain the Biogeme expression for the utility function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Biogeme expression</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a></p>
+<dt class="sig sig-object py" id="biogeme.assisted.ParetoPostProcessing.log_statistics">
+<span class="sig-name descname"><span class="pre">log_statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#ParetoPostProcessing.log_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.ParetoPostProcessing.log_statistics" title="Permalink to this definition"></a></dt>
+<dd><p>Report some statistics about the process in the logger</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.assisted.ParetoPostProcessing.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objective_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objective_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#ParetoPostProcessing.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.ParetoPostProcessing.plot" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Plot the members of the set according to two</dt><dd><p>objective functions.  They  determine the x- and
+y-coordinate of the plot.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.utility.id">
-<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#biogeme.assisted.utility.id" title="Permalink to this definition"></a></dt>
-<dd><p>id of the alternative</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.utility.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#biogeme.assisted.utility.name" title="Permalink to this definition"></a></dt>
-<dd><p>name of the alternative</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.utility.terms">
-<span class="sig-name descname"><span class="pre">terms</span></span><a class="headerlink" href="#biogeme.assisted.utility.terms" title="Permalink to this definition"></a></dt>
-<dd><p>list of terms in the utility function</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="biogeme.assisted.variable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.variable" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Class representing the possible specifications of a variable</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#variable.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.variable.__init__" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – name of the variable</p></li>
-<li><p><strong>expression</strong> (<a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a>) – Biogeme expression of the variable.</p></li>
+<li><p><strong>objective_x</strong> – index of the objective function to use for the x-coordinate.</p></li>
+<li><p><strong>objective_x</strong> – int</p></li>
+<li><p><strong>objective_y</strong> – index of the objective function to use for the y-coordinate.</p></li>
+<li><p><strong>objective_y</strong> – int</p></li>
+<li><p><strong>label_x</strong> (<em>str</em>) – label for the x_axis</p></li>
+<li><p><strong>label_y</strong> (<em>str</em>) – label for the y_axis</p></li>
+<li><p><strong>margin_x</strong> (<em>int</em>) – margin for the x axis</p></li>
+<li><p><strong>margin_y</strong> (<em>int</em>) – margin for the y axis</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.Axes</em>) – matplotlib axis for the plot</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.active">
-<span class="sig-name descname"><span class="pre">active</span></span><a class="headerlink" href="#biogeme.assisted.variable.active" title="Permalink to this definition"></a></dt>
-<dd><p>True if variable is active</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.expression">
-<span class="sig-name descname"><span class="pre">expression</span></span><a class="headerlink" href="#biogeme.assisted.variable.expression" title="Permalink to this definition"></a></dt>
-<dd><p>Biogeme expression for the variable</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.generic">
-<span class="sig-name descname"><span class="pre">generic</span></span><a class="headerlink" href="#biogeme.assisted.variable.generic" title="Permalink to this definition"></a></dt>
-<dd><p>True if the variable is generic.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.genericName">
-<span class="sig-name descname"><span class="pre">genericName</span></span><a class="headerlink" href="#biogeme.assisted.variable.genericName" title="Permalink to this definition"></a></dt>
-<dd><p>Name of the generic variable</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="biogeme.assisted.ParetoPostProcessing.reestimate">
+<span class="sig-name descname"><span class="pre">reestimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recycle</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#ParetoPostProcessing.reestimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.ParetoPostProcessing.reestimate" title="Permalink to this definition"></a></dt>
+<dd><p>The assisted specification uses quickEstimate to estimate
+the models. A complete estimation is necessary to obtain the
+full estimation results.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.getExpression">
-<span class="sig-name descname"><span class="pre">getExpression</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#variable.getExpression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.variable.getExpression" title="Permalink to this definition"></a></dt>
-<dd><p>Returns the biogeme expression of the specification of the variable.</p>
+<dt class="sig sig-object py" id="biogeme.assisted.ParetoPostProcessing.statistics">
+<span class="sig-name descname"><span class="pre">statistics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#ParetoPostProcessing.statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.ParetoPostProcessing.statistics" title="Permalink to this definition"></a></dt>
+<dd><p>Report some statistics about the process</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>expression accozunting for the status and the
-nonlinear specification.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple of messages, possibly empty.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="expressions.html#biogeme.expressions.Expression" title="biogeme.expressions.Expression"><code class="xref py py-class docutils literal notranslate"><span class="pre">biogeme.expressions.Expression</span></code></a></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple(str)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.makeGeneric">
-<span class="sig-name descname"><span class="pre">makeGeneric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#variable.makeGeneric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.variable.makeGeneric" title="Permalink to this definition"></a></dt>
-<dd><p>A variable can have two status: generic or alternative
-specific. This function changes the status</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.decrease_configuration">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">decrease_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catalog_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#decrease_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.decrease_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Change the configuration of a catalog</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>yes</strong> (<em>bool</em>) – if True, status is set to “generic”.
-If False, status is set to “alt. specific”.</p></li>
-<li><p><strong>name</strong> (<em>str</em>) – name of the generic version of the variable</p></li>
+<li><p><strong>catalog_name</strong> (<em>str</em>) – name of the catalog to modify</p></li>
+<li><p><strong>element</strong> (<em>class SetElement</em>) – ID of the current specification</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of increments to apply</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Representation of the new specification, and number of
+changes actually made</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(class SetElement, int)</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.name">
-<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#biogeme.assisted.variable.name" title="Permalink to this definition"></a></dt>
-<dd><p>name of the variable</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.decrement_several_catalogs">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">decrement_several_catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#decrement_several_catalogs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.decrement_several_catalogs" title="Permalink to this definition"></a></dt>
+<dd><p>Increment several catalogs in the specification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>class SetElement</em>) – ID of the current specification</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of catalofs to modify</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Id of the neighbor, and actual number of modifications</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(SetElement, int)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.nonlinearSpec">
-<span class="sig-name descname"><span class="pre">nonlinearSpec</span></span><a class="headerlink" href="#biogeme.assisted.variable.nonlinearSpec" title="Permalink to this definition"></a></dt>
-<dd><p>Function with the nonlinear specifications.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.generate_operator">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">generate_operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">the_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#generate_operator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.generate_operator" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Generate the operator function that complies with the</dt><dd><p>requirements, from a function that takes the name of the catalog
+as an argument.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – name of the catalog</p></li>
+<li><p><strong>the_function</strong> (<em>function</em><em>(</em><em>str</em><em>, </em><em>SetElement</em><em>, </em><em>int</em><em>)</em>) – a function that takes the catalog name, the
+current element and the size ar argument, and that returns a
+neighbor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a function that takes the current element and the size ar
+argument, and that returns a neighbor. It can be used as an
+operator for the VNS algorithm.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function(SetElement, int)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="biogeme.assisted.variable.used">
-<span class="sig-name descname"><span class="pre">used</span></span><a class="headerlink" href="#biogeme.assisted.variable.used" title="Permalink to this definition"></a></dt>
-<dd><p>True if variable used in the model.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.increase_configuration">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">increase_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">catalog_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#increase_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.increase_configuration" title="Permalink to this definition"></a></dt>
+<dd><p>Change the configuration of a catalog</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>catalog_name</strong> (<em>str</em>) – name of the catalog to modify</p></li>
+<li><p><strong>element</strong> (<em>class SetElement</em>) – ID of the current specification</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of increments to apply</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Representation of the new specification, and number of
+changes actually made</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(class SetElement, int)</p>
+</dd>
+</dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.increment_several_catalogs">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">increment_several_catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#increment_several_catalogs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.increment_several_catalogs" title="Permalink to this definition"></a></dt>
+<dd><p>Increment several catalogs in the specification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>class SetElement</em>) – ID of the current specification</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of catalofs to modify</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Id of the neighbor, and actual number of modifications</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(SetElement, int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.modify_random_catalogs">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">modify_random_catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#modify_random_catalogs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.modify_random_catalogs" title="Permalink to this definition"></a></dt>
+<dd><p>Modify several catalogs in the specification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>element</strong> (<em>class SetElement</em>) – ID of the current specification</p></li>
+<li><p><strong>step</strong> (<em>int</em>) – shift to apply to each catalog</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of catalofs to modify</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Id of the neighbor, and actual number of modifications</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(SetElement, int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="biogeme.assisted.modify_several_catalogs">
+<span class="sig-prename descclassname"><span class="pre">biogeme.assisted.</span></span><span class="sig-name descname"><span class="pre">modify_several_catalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selected_catalogs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/biogeme/assisted.html#modify_several_catalogs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#biogeme.assisted.modify_several_catalogs" title="Permalink to this definition"></a></dt>
+<dd><p>Modify several catalogs in the specification</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>selected_catalogs</strong> (<em>set</em><em>(</em><em>str</em><em>)</em>) – names of the catalogs to be modified. If
+a name does not appear in the current configuration, it is
+ignored.</p></li>
+<li><p><strong>element</strong> (<em>class SetElement</em>) – ID of the current specification</p></li>
+<li><p><strong>step</strong> (<em>int</em>) – shift to apply to each catalog</p></li>
+<li><p><strong>size</strong> (<em>int</em>) – number of catalofs to modify</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Id of the neighbor, and actual number of modifications</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple(SetElement, int)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -1580,7 +487,7 @@ If False, status is set to “alt. specific”.</p></li>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

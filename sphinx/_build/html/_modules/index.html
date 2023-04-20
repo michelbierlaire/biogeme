@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview: module code &mdash; Biogeme 3.2.9 documentation</title>
+  <title>Overview: module code &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -40,20 +42,33 @@
 <li class="toctree-l1"><a class="reference internal" href="../algorithms.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../assisted.html">Assisted specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../biogeme.html">Biogeme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../catalog.html">Catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../check_parameters.html">Check parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cnl.html">Cross-nested logit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration.html">Configuration of a specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../database.html">Database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../default_parameters.html">Default parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../distributions.html">Distributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../draws.html">Draws</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../elementary_expressions.html">Elementary expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../expressions.html">Expressions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../filenames.html">Filenames</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../idmanager.html">ID manager</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to Biogeme’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../loglikelihood.html">Log likelihood</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../messaging.html">Messaging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../multiple_expressions.html">Multiple expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../negative_likelihood.html">Negative likelihood</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../optimization.html">Optimization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pareto.html">Pareto</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../results.html">Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sampling.html">Sampling</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../segmentation.html">Segmentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../singleton.html">Singleton</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../specification.html">Specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../toml.html">TOML parameter file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tools.html">Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../version.html">Version</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vns.html">Variable Neighborhood Search</a></li>
@@ -72,8 +87,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Overview: module code</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Overview: module code</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -86,20 +101,32 @@
 <ul><li><a href="biogeme/algorithms.html">biogeme.algorithms</a></li>
 <li><a href="biogeme/assisted.html">biogeme.assisted</a></li>
 <li><a href="biogeme/biogeme.html">biogeme.biogeme</a></li>
+<li><a href="biogeme/catalog.html">biogeme.catalog</a></li>
+<li><a href="biogeme/check_parameters.html">biogeme.check_parameters</a></li>
+<li><a href="biogeme/cnl.html">biogeme.cnl</a></li>
+<li><a href="biogeme/configuration.html">biogeme.configuration</a></li>
 <li><a href="biogeme/database.html">biogeme.database</a></li>
+<li><a href="biogeme/default_parameters.html">biogeme.default_parameters</a></li>
 <li><a href="biogeme/distributions.html">biogeme.distributions</a></li>
 <li><a href="biogeme/draws.html">biogeme.draws</a></li>
+<li><a href="biogeme/elementary_expressions.html">biogeme.elementary_expressions</a></li>
 <li><a href="biogeme/exceptions.html">biogeme.exceptions</a></li>
 <li><a href="biogeme/expressions.html">biogeme.expressions</a></li>
 <li><a href="biogeme/filenames.html">biogeme.filenames</a></li>
 <li><a href="biogeme/idmanager.html">biogeme.idmanager</a></li>
+<li><a href="biogeme/logging.html">biogeme.logging</a></li>
 <li><a href="biogeme/loglikelihood.html">biogeme.loglikelihood</a></li>
-<li><a href="biogeme/messaging.html">biogeme.messaging</a></li>
 <li><a href="biogeme/models.html">biogeme.models</a></li>
+<li><a href="biogeme/multiple_expressions.html">biogeme.multiple_expressions</a></li>
+<li><a href="biogeme/negative_likelihood.html">biogeme.negative_likelihood</a></li>
 <li><a href="biogeme/optimization.html">biogeme.optimization</a></li>
+<li><a href="biogeme/parameters.html">biogeme.parameters</a></li>
+<li><a href="biogeme/pareto.html">biogeme.pareto</a></li>
 <li><a href="biogeme/results.html">biogeme.results</a></li>
+<li><a href="biogeme/sampling.html">biogeme.sampling</a></li>
 <li><a href="biogeme/segmentation.html">biogeme.segmentation</a></li>
-<li><a href="biogeme/singleton.html">biogeme.singleton</a></li>
+<li><a href="biogeme/specification.html">biogeme.specification</a></li>
+<li><a href="biogeme/toml.html">biogeme.toml</a></li>
 <li><a href="biogeme/tools.html">biogeme.tools</a></li>
 <li><a href="biogeme/version.html">biogeme.version</a></li>
 <li><a href="biogeme/vns.html">biogeme.vns</a></li>
@@ -112,7 +139,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>biogeme.optimization &mdash; Biogeme 3.2.9 documentation</title>
+  <title>biogeme.optimization &mdash; Biogeme 3.2.11 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -11,10 +11,8 @@
   <![endif]-->
   
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -25,11 +23,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> Biogeme
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Biogeme
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -72,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>biogeme.optimization</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">biogeme.optimization</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -103,19 +105,18 @@
 <span class="c1"># pylint: disable=bare-except</span>
 
 
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.optimize</span> <span class="k">as</span> <span class="nn">sc</span>
 <span class="kn">import</span> <span class="nn">biogeme.algorithms</span> <span class="k">as</span> <span class="nn">alg</span>
 <span class="kn">import</span> <span class="nn">biogeme.exceptions</span> <span class="k">as</span> <span class="nn">excep</span>
-<span class="kn">import</span> <span class="nn">biogeme.messaging</span> <span class="k">as</span> <span class="nn">msg</span>
 
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">bioMessage</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="scipy"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.scipy">[docs]</a><span class="k">def</span> <span class="nf">scipy</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on the scipy</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on the scipy</span>
 <span class="sd">    minimize function.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
@@ -148,6 +149,7 @@
         <span class="n">f</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">fct</span><span class="o">.</span><span class="n">f_g</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">g</span>
 
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimization algorithm: scipy&#39;</span><span class="p">)</span>
     <span class="c1"># Absolute tolerance</span>
     <span class="n">absgtol</span> <span class="o">=</span> <span class="mf">1.0e-7</span>
     <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ftol&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">,</span> <span class="s1">&#39;gtol&#39;</span><span class="p">:</span> <span class="n">absgtol</span><span class="p">}</span>
@@ -155,11 +157,9 @@
         <span class="n">opts</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">opts</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="s1">&#39;gtol&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">general</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimize with tol </span><span class="si">{</span><span class="n">opts</span><span class="p">[</span><span class="s2">&quot;gtol&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Minimize with tol </span><span class="si">{</span><span class="n">opts</span><span class="p">[</span><span class="s2">&quot;gtol&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span>
-        <span class="n">f_and_grad</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span>
-    <span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">f_and_grad</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">opts</span><span class="p">)</span>
 
     <span class="n">messages</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;Algorithm&#39;</span><span class="p">:</span> <span class="s1">&#39;scipy.optimize&#39;</span><span class="p">,</span>
@@ -172,7 +172,7 @@
 
 
 <div class="viewcode-block" id="newtonLineSearchForBiogeme"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.newtonLineSearchForBiogeme">[docs]</a><span class="k">def</span> <span class="nf">newtonLineSearchForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton method.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton method.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: algorithms.functionToMinimize</span>
@@ -205,17 +205,19 @@
 
 <span class="sd">    :rtype: numpy.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if bounds are imposed on</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on</span>
 <span class="sd">                the variables.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimization algorithm: Newton with line search [LS-newton]&#39;</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">ell</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s1">&#39;This algorithm does not handle bound constraints. &#39;</span>
                 <span class="s1">&#39;Remove the bounds, or select another algorithm.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span>
     <span class="n">maxiter</span> <span class="o">=</span> <span class="mi">100</span>
@@ -225,12 +227,12 @@
         <span class="k">if</span> <span class="s1">&#39;maxiter&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="n">maxiter</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;maxiter&#39;</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="s1">&#39;** Optimization: Newton with linesearch&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;** Optimization: Newton with linesearch&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">alg</span><span class="o">.</span><span class="n">newtonLineSearch</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="n">maxiter</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="newtonTrustRegionForBiogeme"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.newtonTrustRegionForBiogeme">[docs]</a><span class="k">def</span> <span class="nf">newtonTrustRegionForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton method with TR.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton method with TR.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: algorithms.functionToMinimize</span>
@@ -266,17 +268,19 @@
 
 <span class="sd">    :rtype: numpy.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if bounds are imposed on</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on</span>
 <span class="sd">          the variables.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimization algorithm: Newton with trust region [TR-newton]&#39;</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">ell</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s1">&#39;This algorithm does not handle bound constraints. &#39;</span>
                 <span class="s1">&#39;Remove the bounds, or select another algorithm.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span>
     <span class="n">maxiter</span> <span class="o">=</span> <span class="mi">100</span>
@@ -292,7 +296,7 @@
         <span class="k">if</span> <span class="s1">&#39;radius&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="n">radius</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;radius&#39;</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="s1">&#39;** Optimization: Newton with trust region&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;** Optimization: Newton with trust region&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">alg</span><span class="o">.</span><span class="n">newtonTrustRegion</span><span class="p">(</span>
         <span class="n">fct</span><span class="p">,</span>
         <span class="n">x0</span><span class="o">=</span><span class="n">initBetas</span><span class="p">,</span>
@@ -304,7 +308,7 @@
 
 
 <div class="viewcode-block" id="bfgsLineSearchForBiogeme"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.bfgsLineSearchForBiogeme">[docs]</a><span class="k">def</span> <span class="nf">bfgsLineSearchForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on BFGS</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on BFGS</span>
 <span class="sd">    quasi-Newton method with LS.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
@@ -347,17 +351,19 @@
 
 <span class="sd">    :rtype: numpy.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if bounds are imposed on</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on</span>
 <span class="sd">                                             the variables.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimization algorithm: BFGS with line search [LS-BFGS]&#39;</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">ell</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s1">&#39;This algorithm does not handle bound constraints. &#39;</span>
                 <span class="s1">&#39;Remove the bounds, or select another algorithm.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span>
     <span class="n">maxiter</span> <span class="o">=</span> <span class="mi">100</span>
@@ -370,14 +376,14 @@
             <span class="k">if</span> <span class="s1">&#39;initBfgs&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
                 <span class="n">initBfgs</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;initBfgs&#39;</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="s1">&#39;** Optimization: BFGS with line search&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;** Optimization: BFGS with line search&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">alg</span><span class="o">.</span><span class="n">bfgsLineSearch</span><span class="p">(</span>
         <span class="n">fct</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">initBetas</span><span class="p">,</span> <span class="n">initBfgs</span><span class="o">=</span><span class="n">initBfgs</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="n">maxiter</span>
     <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="bfgsTrustRegionForBiogeme"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.bfgsTrustRegionForBiogeme">[docs]</a><span class="k">def</span> <span class="nf">bfgsTrustRegionForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton method with TR.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton method with TR.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
 <span class="sd">    :type fct: algorithms.functionToMinimize</span>
@@ -420,17 +426,18 @@
 <span class="sd">              related to the run of the algorithm.</span>
 <span class="sd">    :rtype: numpy.array, dict(str:object)</span>
 
-<span class="sd">    :raises biogeme.exceptions.biogemeError: if bounds are imposed on</span>
+<span class="sd">    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on</span>
 <span class="sd">            the variables.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimization algorithm: BFGS with trust region [TR-BFGS]&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ell</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">ell</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">errorMsg</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s1">&#39;This algorithm does not handle bound constraints. &#39;</span>
                 <span class="s1">&#39;Remove the bounds, or select another algorithm.&#39;</span>
             <span class="p">)</span>
-            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">biogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">excep</span><span class="o">.</span><span class="n">BiogemeError</span><span class="p">(</span><span class="n">errorMsg</span><span class="p">)</span>
 
     <span class="n">tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span>
     <span class="n">maxiter</span> <span class="o">=</span> <span class="mi">100</span>
@@ -449,7 +456,7 @@
         <span class="k">if</span> <span class="s1">&#39;initBfgs&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="n">initBfgs</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;initBfgs&#39;</span><span class="p">]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span><span class="s1">&#39;** Optimization: BFGS with trust region&#39;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;** Optimization: BFGS with trust region&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">alg</span><span class="o">.</span><span class="n">bfgsTrustRegion</span><span class="p">(</span>
         <span class="n">fct</span><span class="p">,</span>
         <span class="n">x0</span><span class="o">=</span><span class="n">initBetas</span><span class="p">,</span>
@@ -461,10 +468,8 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="simpleBoundsNewtonAlgorithmForBiogeme"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.simpleBoundsNewtonAlgorithmForBiogeme">[docs]</a><span class="k">def</span> <span class="nf">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">(</span>
-    <span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on variants of Newton</span>
+<div class="viewcode-block" id="simpleBoundsNewtonAlgorithmForBiogeme"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.simpleBoundsNewtonAlgorithmForBiogeme">[docs]</a><span class="k">def</span> <span class="nf">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on variants of Newton</span>
 <span class="sd">    method with simple bounds.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
@@ -495,11 +500,11 @@
 <span class="sd">          convergence (default:  :math:`\\varepsilon^{\\frac{1}{3}}`);</span>
 <span class="sd">        - proportionAnalyticalHessian: proportion (between 0 and 1) of</span>
 <span class="sd">          iterations when the analytical Hessian is calculated (default: 1).</span>
-<span class="sd">        - infeasibleConjugateGradient: if True, the conjugate</span>
-<span class="sd">          gradient algorithm may generate until termination.  The</span>
-<span class="sd">          result will then be projected on the feasible domain.  If</span>
-<span class="sd">          False, the algorithm stops as soon as an infeasible iterate</span>
-<span class="sd">          is generated (default: False).</span>
+<span class="sd">        - infeasibleConjugateGradient: if True, the conjugate gradient</span>
+<span class="sd">          algorithm may generate infeasible solutiona until</span>
+<span class="sd">          termination.  The result will then be projected on the</span>
+<span class="sd">          feasible domain.  If False, the algorithm stops as soon as</span>
+<span class="sd">          an infeasible iterate is generated (default: False).</span>
 <span class="sd">        - maxiter: the maximum number of iterations (default: 1000).</span>
 <span class="sd">        - radius: the initial radius of the trust region (default: 1.0).</span>
 <span class="sd">        - eta1: threshold for failed iterations (default: 0.01).</span>
@@ -517,6 +522,10 @@
 <span class="sd">    :rtype: numpay.array, dict(str:object)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;Optimization algorithm: hybrid Newton/BFGS with simple bounds [simple_bounds]&#39;</span>
+    <span class="p">)</span>
+
     <span class="n">tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span>
     <span class="n">steptol</span> <span class="o">=</span> <span class="mf">1.0e-5</span>
     <span class="n">cgtol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">**</span> <span class="mf">0.3333</span>
@@ -549,20 +558,14 @@
         <span class="k">if</span> <span class="s1">&#39;proportionAnalyticalHessian&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="n">proportionTrueHessian</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;proportionAnalyticalHessian&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="s1">&#39;infeasibleConjugateGradient&#39;</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-            <span class="n">infeasibleConjugateGradient</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span>
-                <span class="s1">&#39;infeasibleConjugateGradient&#39;</span>
-            <span class="p">]</span>
+            <span class="n">infeasibleConjugateGradient</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;infeasibleConjugateGradient&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">proportionTrueHessian</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
-            <span class="s1">&#39;** Optimization: Newton with trust region for simple bounds&#39;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;** Optimization: Newton with trust region for simple bounds&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">proportionTrueHessian</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
-            <span class="s1">&#39;** Optimization: BFGS with trust region for simple bounds&#39;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;** Optimization: BFGS with trust region for simple bounds&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">detailed</span><span class="p">(</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;** Optimization: Hybrid Newton &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="mi">100</span><span class="o">*</span><span class="n">proportionTrueHessian</span><span class="si">}</span><span class="s1">%/BFGS &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;with trust region for simple bounds&#39;</span>
@@ -585,7 +588,7 @@
 
 
 <div class="viewcode-block" id="bioNewton"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.bioNewton">[docs]</a><span class="k">def</span> <span class="nf">bioNewton</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton&#39;s method with simple</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on Newton&#39;s method with simple</span>
 <span class="sd">    bounds.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
@@ -636,17 +639,19 @@
 <span class="sd">    :rtype: numpay.array, dict(str:object)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;Optimization algorithm: Newton with simple bounds [simple_bounds_newton].&#39;</span>
+    <span class="p">)</span>
+
     <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;proportionAnalyticalHessian&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;proportionAnalyticalHessian&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">(</span>
-        <span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="bioBfgs"><a class="viewcode-back" href="../../optimization.html#biogeme.optimization.bioBfgs">[docs]</a><span class="k">def</span> <span class="nf">bioBfgs</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on BFGS quasi-Newton</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimization interface for Biogeme, based on BFGS quasi-Newton</span>
 <span class="sd">    method with simple bounds.</span>
 
 <span class="sd">    :param fct: object to calculate the objective function and its derivatives.</span>
@@ -692,18 +697,30 @@
 <span class="sd">    :return: x, messages</span>
 
 <span class="sd">        - x is the solution generated by the algorithm,</span>
-<span class="sd">        - messages is a dictionary describing information about the lagorithm</span>
+<span class="sd">        - messages is a dictionary describing information about the algorithm</span>
 
 <span class="sd">    :rtype: numpay.array, dict(str:object)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimization algorithm: BFGS with simple bounds [simple_bounds_BFGS].&#39;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;proportionAnalyticalHessian&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;proportionAnalyticalHessian&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">(</span>
-        <span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">(</span><span class="n">fct</span><span class="p">,</span> <span class="n">initBetas</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span></div>
+
+
+<span class="n">algorithms</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;scipy&#39;</span><span class="p">:</span> <span class="n">scipy</span><span class="p">,</span>
+    <span class="s1">&#39;LS-newton&#39;</span><span class="p">:</span> <span class="n">newtonLineSearchForBiogeme</span><span class="p">,</span>
+    <span class="s1">&#39;TR-newton&#39;</span><span class="p">:</span> <span class="n">newtonTrustRegionForBiogeme</span><span class="p">,</span>
+    <span class="s1">&#39;LS-BFGS&#39;</span><span class="p">:</span> <span class="n">bfgsLineSearchForBiogeme</span><span class="p">,</span>
+    <span class="s1">&#39;TR-BFGS&#39;</span><span class="p">:</span> <span class="n">bfgsTrustRegionForBiogeme</span><span class="p">,</span>
+    <span class="s1">&#39;simple_bounds&#39;</span><span class="p">:</span> <span class="n">simpleBoundsNewtonAlgorithmForBiogeme</span><span class="p">,</span>
+    <span class="s1">&#39;simple_bounds_newton&#39;</span><span class="p">:</span> <span class="n">bioNewton</span><span class="p">,</span>
+    <span class="s1">&#39;simple_bounds_BFGS&#39;</span><span class="p">:</span> <span class="n">bioBfgs</span><span class="p">,</span>
+<span class="p">}</span>
 </pre></div>
 
            </div>
@@ -713,7 +730,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Michel Bierlaire.</p>
+    <p>&#169; Copyright 2023, Michel Bierlaire.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
