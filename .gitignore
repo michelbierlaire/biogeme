@@ -385,3 +385,4 @@ src/.DS_Store
 dist/biogeme-3.2.11-py3.11-macosx-10.9-universal2.egg
 dist/biogeme-3.2.11.tar.gz
 examples/sampling/fullsample/obs_fullsample.dat
+examples/swissmetro/biogeme.toml
