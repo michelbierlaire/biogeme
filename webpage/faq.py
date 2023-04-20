@@ -1,5 +1,42 @@
 faq = {}
 
+faq['What was new in Biogeme 3.2.11?'] = """
+<dl>
+
+<dt>Sampling of alternatives</dt>
+<dd>It is now possible to estimate logit, nested logit and cross-nested logit models using only a sample of alternatives. </dd>
+
+<dt>Assisted specification</dt>
+<dd>The assisted specification algorithm has been completely redesigned. The concept of <a href="sphinx/catalog.html#biogeme.catalog.Catalog"><samp>Catalog</samp></a> has been introduced to allow the modeler to suggest several versions of the model specification. The possible versions can either be fully enumerated (if their number allows for it) or can be algorithmically investigated. </dd>
+
+<dt>Pareto optimality</dt>
+<dd>It is possible to extract the Pareto optimal models from a list of estimation results.</dd>
+
+
+<dt>TOML file for the definition of the parameters</dt>
+<dd>A commented parameter file is now available to modify the various parameters of Biogeme. A  version of the file with default values of the parameters is created the first time Biogeme is executed in a directory. Note that parameters can still be defined directly from the Python script. It particularly simplifies the definitions of the parameters controlling the optimization algorithms. </dd>
+
+
+<dt>Explicit definition of the Beta parameters for simulation</dt>
+<dd>The <samp>simulate</samp> function now requires an explicit definition for the value of the parameters. The initial values can be retrieved from the <samp>get_beta_values</samp> function of a Biogeme expression. The estimated values can be retrieved from the <samp>getBetaValues</samp> function of the <samp>bioResult</samp> object.</dd>
+
+<dt>Use of the standard Python logging system</dt>
+<dd>The <samp>messaging</samp> module used to control the verbosity of Biogeme is now obsolete. Biogeme implements the standard Python logging system. If you do not know what it is, Biogeme includes a simple <a href="sphinx/logging.html"><samp>logging</samp></a> module, that provides simple access to the logging system.
+</dd>
+
+<dt>Naming conventions</dt>
+<dd>Some object/functions/variables have been renamed to comply better with the common Python practice. For example, the exception <samp>biogemeError</samp>, defined in the <samp>exceptions</samp> module is now called <samp>BiogemeError</samp>. </dd>
+
+<dt>Removed functions from the <samp>database</samp> module</dt>
+<dd>The functions <samp>sumFromDatabase</samp> and <samp>sampleWithoutReplacement</samp> are no longer available.</dd>
+<dt>New expression: <samp>logzero</samp></dt>
+<dd><samp>logzero(x)</samp> returns the logarithm of x if x is not zero, and zero otherwise.</dd>
+
+
+
+</dl>
+"""
+
 faq['What was new in Biogeme 3.2.10?'] = """
   <p><strong>Note</strong>: versions 3.2.9 and 3.2.10 are
 	  identical. Therefore, version 3.2.9 has been removed from
@@ -190,7 +227,7 @@ faq['What was new in Biogeme 3.2.6?'] = """
 	      out-of-sample
 	      validation. See <a href="sphinx/biogeme.html?highlight=split#biogeme.database.Database.split">documentation</a>. It
 	      is used by the new function <code>validate</code> in the
-	      <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/04validation.py">example</a>.</dd>
+	      <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/b04validation.py">example</a>.</dd>
 	    <dt>Messages</dt>
 	    <dd>A new function allows to extract all the messages
 	      generated during a
@@ -311,7 +348,7 @@ faq[
 ] = """
 <p>
 Yes.  See
-example <code><a href="https://github.com/michelbierlaire/biogeme/blob/master/examples/swissmetro/04validation.py">04validation.py</a> on Github.
+example <code><a href="https://github.com/michelbierlaire/biogeme/blob/master/examples/swissmetro/b04validation.py">b04validation.py</a> on Github.
 """
 
 faq[
