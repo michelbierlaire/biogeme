@@ -9,27 +9,40 @@ Welcome to Biogeme's documentation!
 .. toctree::
   :maxdepth: 2
   :caption: Contents:
-	     
+
   algorithms.rst
   assisted.rst
   biogeme.rst
+  catalog.rst
+  check_parameters.rst
+  cnl.rst
+  configuration.rst
   database.rst
+  default_parameters.rst
   distributions.rst
   draws.rst
+  elementary_expressions.rst
   exceptions.rst
   expressions.rst
   filenames.rst
   idmanager.rst
+  index.rst
+  logging.rst
   loglikelihood.rst
-  messaging.rst
   models.rst
+  multiple_expressions.rst
+  negative_likelihood.rst
   optimization.rst
+  parameters.rst
+  pareto.rst
   results.rst
+  sampling.rst
   segmentation.rst
-  singleton.rst
+  specification.rst
+  toml.rst
   tools.rst
   version.rst
-  vns.rst
+  vns.rst	    
 
 Indices and tables
 ==================
