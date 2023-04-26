@@ -324,7 +324,8 @@ class Expression:
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             error_msg = (
-                f'Invalid expression during multiplication ' f'to {self}: [{other}]'
+                f'Invalid expression during multiplication '
+                f'to {self}: [{other}]'
             )
             raise excep.BiogemeError(error_msg)
         return Times(self, other)
