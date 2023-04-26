@@ -22,7 +22,7 @@ urlUniversity = 'http://www.epfl.ch'
 urlBiogeme = 'http://biogeme.epfl.ch'
 urlForum = 'https://groups.google.com/d/forum/biogeme'
 
-__version__ = '3.2.11'
+__version__ = '3.2.12a0'
 
 
 def getVersion():
