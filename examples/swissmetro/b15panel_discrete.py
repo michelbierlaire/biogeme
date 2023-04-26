@@ -84,9 +84,11 @@ ASC_SM_RND = [
     for i in range(NUMBER_OF_CLASSES)
 ]
 
-# Class memebership probability
-PROB_class0 = exp(Beta('PROB_class0', 0.5, 0, 1, 0)) / (
-    1 + exp(Beta('PROB_class0', 0, None, None, 0))
+# Class membership probability
+
+the_beta = Beta('class0', 0, None, None, 0)
+PROB_class0 = exp(the_beta) / (
+    1 + exp(the_beta)
 )
 PROB_class1 = 1 - PROB_class0
 
