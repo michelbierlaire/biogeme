@@ -174,11 +174,10 @@ install['Installing PandasBiogeme on MaxOSX'] = (
 """,
 )
 
-install['Installing PandasBiogeme on Windows'] = (
+install['Installing Biogeme on Windows'] = (
 """
-<p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version, but the overall procedure is similar. A new video is under preparation.</p>
 <p class=text-center>
-<object width="425" height="344"><param name="movie" value="http://www.youtube.com/v/1TlNrhS2rFo&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/1TlNrhS2rFo&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></embed></object>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/-P6zXrcodGs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </p>
 """,
 )
@@ -366,6 +365,11 @@ variables with PandasBiogeme.</a></li>
 
 
 resources['Videos'] = (
+"""
+<a href="https://youtu.be/-P6zXrcodGs" target="_blank">
+Installing Biogeme 3.2.11 on Windows
+</a>
+""",
 """
 <a href="https://youtu.be/vS-Sg0htQP4" target="_blank">
 My first choice model with PandasBiogeme
