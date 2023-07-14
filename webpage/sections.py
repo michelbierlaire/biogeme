@@ -168,9 +168,9 @@ with version 3.
 
 install['Installing PandasBiogeme on MaxOSX'] = (
 """
-<p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version, but the overall procedure is similar. A new video is under preparation.</p>
 <p class='text-center'>
-<object width="425" height="344"><param name="movie" value="http://www.youtube.com/v/Swg1FUK-QaU&hl=en&fs=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/Swg1FUK-QaU&hl=en&fs=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></embed></object></p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Z1hkeWP0k9A" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</p>
 """,
 )
 
@@ -321,6 +321,16 @@ Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédér
 """,
 )
 
+documentation['Preparing data for Biogeme'] = (
+"""
+<p class='text-center'>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/lhbpra2dILA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</p>
+
+""",
+)
+
+
 documentation['My first choice model with PandasBiogeme'] = (
 """
 <p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version. A new video is under preparation.</p>
@@ -365,6 +375,11 @@ variables with PandasBiogeme.</a></li>
 
 
 resources['Videos'] = (
+"""
+<a href="https://youtu.be/Z1hkeWP0k9A" target="_blank">
+Installing Biogeme 3.2.11 on Mac OSX
+</a>
+""",
 """
 <a href="https://youtu.be/-P6zXrcodGs" target="_blank">
 Installing Biogeme 3.2.11 on Windows
