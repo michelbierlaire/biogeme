@@ -4,11 +4,11 @@
 :date: Wed Nov 30 10:17:26 2022
 
 """
+from biogeme_optimization.function import FunctionToMinimize, FunctionData
 import biogeme.exceptions as excep
-from biogeme.algorithms import functionToMinimize
 
 
-class NegativeLikelihood(functionToMinimize):
+class NegativeLikelihood(FunctionToMinimize):
     """Provides the value of the function to be minimized, as well as its
     derivatives. To be used by the opimization package.
 
@@ -16,27 +16,20 @@ class NegativeLikelihood(functionToMinimize):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, like, like_deriv, scaled):
+    def __init__(self, dimension, like, like_deriv, parameters=None):
         """Constructor"""
-        self.recalculate = True
-        """True if the log likelihood must be recalculated
-        """
 
-        self.x = None  #: Vector of unknown parameters values
+        tolerance = None
+        steptol = None
+        if parameters is not None:
+            if 'tolerance' in parameters:
+                tolerance = parameters['tolerance']
+            if 'steptol' in parameters:
+                steptol = parameters['steptol']
 
-        self.batch = None
-        """Value betwen 0 and 1 defining the size of the batch, that is the
-        percentage of the data that should be used to approximate the
-        log likelihood.
-        """
+        super().__init__(epsilon=tolerance, steptol=steptol)
 
-        self.fv = None  #: value of the function
-
-        self.gv = None  #: vector with the gradient
-
-        self.hv = None  #: second derivatives matrix
-
-        self.bhhhv = None  #: BHHH matrix
+        self.the_dimension = dimension  #: number of parameters to estimate
 
         self.like = like  #: function calculating the log likelihood
 
@@ -44,93 +37,39 @@ class NegativeLikelihood(functionToMinimize):
         """function calculating the log likelihood and its derivatives.
         """
 
-        self.scaled = scaled
-        """if True, the value of the log likelihood is divided by the number
-        of observations used to calculate it. In this case, the values
-        with different sample sizes are comparable.
-        """
+    def dimension(self):
+        """Provides the number of variables of the problem"""
+        return self.the_dimension
 
-    def setVariables(self, x):
-        self.recalculate = True
-        self.x = x
-        self.fv = None
-        self.gv = None
-        self.hv = None
-        self.bhhhv = None
-
-    def f(self, batch=None):
+    def _f(self):
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
 
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
+        return -self.like(self.x, scaled=False, batch=None)
 
-        if self.fv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-            self.fv = self.like(self.x, self.scaled, self.batch)
-            self.gv = None
-            self.hv = None
-            self.bhhhv = None
-
-        return -self.fv
-
-    def f_g(self, batch=None):
+    def _f_g(self):
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
 
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
+        f, g, *_ = self.like_deriv(
+            self.x, scaled=False, hessian=False, bhhh=False, batch=None
+        )
 
-        if self.fv is None or self.gv is None:
-            self.recalculate = True
+        return FunctionData(
+            function=-f,
+            gradient=-g,
+            hessian=None,
+        )
 
-        if self.recalculate:
-            self.fv, self.gv, *_ = self.like_deriv(
-                self.x, self.scaled, hessian=False, bhhh=False, batch=batch
-            )
-            self.hv = None
-            self.bhhhv = None
-
-        return -self.fv, -self.gv
-
-    def f_g_h(self, batch=None):
+    def _f_g_h(self):
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
 
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
-
-        if self.fv is None or self.gv is None or self.hv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-            self.fv, self.gv, self.hv, _ = self.like_deriv(
-                self.x, self.scaled, hessian=True, bhhh=False, batch=batch
-            )
-            self.bhhhv = None
-
-        return -self.fv, -self.gv, -self.hv
-
-    def f_g_bhhh(self, batch=None):
-        if batch is not None or self.batch is not None:
-            self.batch = batch
-            self.recalculate = True
-
-        if self.x is None:
-            raise excep.BiogemeError('The variables must be set first.')
-
-        if self.fv is None or self.gv is None or self.bhhhv is None:
-            self.recalculate = True
-
-        if self.recalculate:
-            self.fv, self.gv, _, self.bhhhv = self.like_deriv(
-                self.x, self.scaled, hessian=False, bhhh=True, batch=batch
-            )
-            self.hv = None
-
-        return (-self.fv, -self.gv, -self.bhhhv)
+        f, g, h, _ = self.like_deriv(
+            self.x, scaled=False, hessian=True, bhhh=False, batch=None
+        )
+        return FunctionData(
+            function=-f,
+            gradient=-g,
+            hessian=-h,
+        )
