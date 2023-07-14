@@ -201,7 +201,7 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
     It is assumed that the following variables are available in the
         data: for each nest m and each alternative i, a variable m_i
         that is the level of membership of alternative i to nest m.
-    
+
     :param V: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
     :type V: dict(int:biogeme.expressions.expr.Expression)
@@ -233,7 +233,7 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
         if availability is None:
             biosum = expr.bioMultSum(
                 [
-                    expr.exp(-sampling_log_probability[i])
+                    expr.exp(sampling_log_probability[i])
                     * expr.Variable(f'{nest}_{i}') ** mu
                     * expr.exp(mu * util)
                     for i, util in V.items()
@@ -242,7 +242,7 @@ def mev_cnl_sampling(V, availability, sampling_log_probability, nests):
         else:
             biosum = expr.bioMultSum(
                 [
-                    expr.exp(-sampling_log_probability[i])
+                    expr.exp(sampling_log_probability[i])
                     * availability[i]
                     * expr.Variable(f'{nest}_{i}') ** mu
                     * expr.exp(mu * util)
