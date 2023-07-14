@@ -12,16 +12,16 @@ import numpy as np
 import biogeme.exceptions as excep
 
 
-def getUniform(sampleSize, numberOfDraws, symmetric=False):
+def getUniform(sample_size, number_of_draws, symmetric=False):
     """Uniform [0, 1] or [-1, 1] numbers
 
-    :param sampleSize: number of observations for which draws must be
+    :param sample_size: number of observations for which draws must be
                        generated. If None, a one dimensional array
                        will be generated. If it has a values k, then k
                        series of draws will be generated
-    :type sampleSize: int
-    :param numberOfDraws: number of draws to generate.
-    :type numberOfDraws: int
+    :type sample_size: int
+    :param number_of_draws: number of draws to generate.
+    :type number_of_draws: int
     :param symmetric: if True, draws from [-1: 1] are generated.
         If False, draws from [0: 1] are generated.  Default: False
     :type symmetric: bool
@@ -30,7 +30,7 @@ def getUniform(sampleSize, numberOfDraws, symmetric=False):
 
     Example::
 
-        draws = dr.getUniform(sampleSize=3, numberOfDraws=10, symmetric=False)
+        draws = dr.getUniform(sample_size=3, number_of_draws=10, symmetric=False)
         array(
             [[0.13053817, 0.63892308, 0.55031567, 0.26347854, 0.16730932,
               0.77745367, 0.48283887, 0.84247501, 0.20550219, 0.02373537],
@@ -40,7 +40,7 @@ def getUniform(sampleSize, numberOfDraws, symmetric=False):
               0.40107731, 0.22554722, 0.47693135, 0.14058265, 0.17397031]]
         )
 
-        draws = dr.getUniform(sampleSize=3, numberOfDraws=10, symmetric=True)
+        draws = dr.getUniform(sample_size=3, number_of_draws=10, symmetric=True)
         array(
             [[ 0.74403237, -0.27995692,  0.33997421, -0.89405035, -0.129761  ,
                0.86593325,  0.30657422,  0.82435619,  0.498482  ,  0.24561616],
@@ -54,25 +54,25 @@ def getUniform(sampleSize, numberOfDraws, symmetric=False):
 
     :raise BiogemeError: if the sample size is not positive.
     """
-    if numberOfDraws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
+    if number_of_draws <= 0:
+        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
 
-    if sampleSize <= 0:
+    if sample_size <= 0:
         raise excep.BiogemeError(
-            f'Invalid sample size: {sampleSize} when generating draws.'
+            f'Invalid sample size: {sample_size} when generating draws.'
         )
-    totalSize = numberOfDraws * sampleSize
+    totalSize = number_of_draws * sample_size
 
     uniformNumbers = np.random.uniform(size=totalSize)
     if symmetric:
         uniformNumbers = 2.0 * uniformNumbers - 1.0
 
-    uniformNumbers.shape = (sampleSize, numberOfDraws)
+    uniformNumbers.shape = (sample_size, number_of_draws)
     return uniformNumbers
 
 
 def getLatinHypercubeDraws(
-    sampleSize, numberOfDraws, symmetric=False, uniformNumbers=None
+    sample_size, number_of_draws, symmetric=False, uniformNumbers=None
 ):
     """Implementation of the Modified Latin Hypercube Sampling proposed
     by `Hess et al., (2006)`_.
@@ -80,13 +80,13 @@ def getLatinHypercubeDraws(
     .. _`Hess et al., (2006)`:
        https://doi.org/10.1016/j.trb.2004.10.005
 
-    :param sampleSize: number of observations for which draws must be
+    :param sample_size: number of observations for which draws must be
                        generated. If None, a one dimensional array
                        will be generated. If it has a values k, then k
                        series of draws will be generated
-    :type sampleSize: int
-    :param numberOfDraws: number of draws to generate.
-    :type numberOfDraws: int
+    :type sample_size: int
+    :param number_of_draws: number of draws to generate.
+    :type number_of_draws: int
     :param symmetric: if True, draws from [-1: 1] are generated.
        If False, draws from [0: 1] are generated.  Default: False
     :type symmetric: bool
@@ -99,8 +99,8 @@ def getLatinHypercubeDraws(
 
     Example::
 
-        latinHypercube = dr.getLatinHypercubeDraws(sampleSize=3,
-                                                   numberOfDraws=10)
+        latinHypercube = dr.getLatinHypercubeDraws(sample_size=3,
+                                                   number_of_draws=10)
         array([[0.43362897, 0.5275741 , 0.09215663, 0.94056236, 0.34376868,
                 0.87195551, 0.41495219, 0.71736691, 0.23198736, 0.145561  ],
                [0.30520544, 0.78082964, 0.83591146, 0.2733167 , 0.53890906,
@@ -114,14 +114,14 @@ def getLatinHypercubeDraws(
 
     :raise BiogemeError: if the number of uniform draws is inconsistent.
     """
-    if numberOfDraws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
+    if number_of_draws <= 0:
+        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
 
-    if sampleSize <= 0:
+    if sample_size <= 0:
         raise excep.BiogemeError(
-            f'Invalid sample size: {sampleSize} when generating draws.'
+            f'Invalid sample size: {sample_size} when generating draws.'
         )
-    totalSize = numberOfDraws * sampleSize
+    totalSize = number_of_draws * sample_size
 
     if uniformNumbers is None:
         uniformNumbers = np.random.uniform(size=totalSize)
@@ -141,24 +141,24 @@ def getLatinHypercubeDraws(
         numbers = 2.0 * numbers - 1.0
 
     np.random.shuffle(numbers)
-    numbers.shape = (sampleSize, numberOfDraws)
+    numbers.shape = (sample_size, number_of_draws)
     return numbers
 
 
 def getHaltonDraws(
-    sampleSize, numberOfDraws, symmetric=False, base=2, skip=0, shuffled=False
+    sample_size, number_of_draws, symmetric=False, base=2, skip=0, shuffled=False
 ):
     """Generate Halton draws.
     Implementation by Cristian Arteaga, University of Nevada Las Vegas,
 
-    :param sampleSize: number of observations for which draws must be
+    :param sample_size: number of observations for which draws must be
                        generated. If None, a one dimensional array
                        will be generated. If it has a values k, then k
                        series of draws will be generated
-    :type sampleSize: int
+    :type sample_size: int
 
-    :param numberOfDraws: number of draws to generate.
-    :type numberOfDraws: int
+    :param number_of_draws: number of draws to generate.
+    :type number_of_draws: int
 
     :param symmetric: if True, draws from [-1: 1] are generated.
            If False, draws from [0: 1] are generated.  Default: False
@@ -179,7 +179,7 @@ def getHaltonDraws(
 
     Example::
 
-        halton = dr.getHaltonDraws(sampleSize=2, numberOfDraws=10, base=3)
+        halton = dr.getHaltonDraws(sample_size=2, number_of_draws=10, base=3)
         array([[0.33333333, 0.66666667, 0.11111111, 0.44444444, 0.77777778,
                 0.22222222, 0.55555556, 0.88888889, 0.03703704, 0.37037037],
                [0.7037037 , 0.14814815, 0.48148148, 0.81481481, 0.25925926,
@@ -189,14 +189,14 @@ def getHaltonDraws(
 
     :raise BiogemeError: if the sample size is not positive.
     """
-    if numberOfDraws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
+    if number_of_draws <= 0:
+        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
 
-    if sampleSize <= 0:
+    if sample_size <= 0:
         raise excep.BiogemeError(
-            f'Invalid sample size: {sampleSize} when generating draws.'
+            f'Invalid sample size: {sample_size} when generating draws.'
         )
-    length = numberOfDraws * sampleSize
+    length = number_of_draws * sample_size
     req_length = length + skip + 1
     numbers = np.empty(req_length)
     numbers[0] = 0
@@ -208,13 +208,13 @@ def getHaltonDraws(
         i = 1
         while i < base and numbers_idx < req_length:
             max_numbers = min(req_length - numbers_idx, numbers_size)
-            numbers[numbers_idx: numbers_idx + max_numbers] = (
+            numbers[numbers_idx : numbers_idx + max_numbers] = (
                 numbers[:max_numbers] + d * i
             )
             numbers_idx += max_numbers
             i += 1
         t += 1
-    numbers = numbers[skip + 1: length + skip + 1]
+    numbers = numbers[skip + 1 : length + skip + 1]
 
     if shuffled:
         np.random.shuffle(numbers)
@@ -222,25 +222,25 @@ def getHaltonDraws(
     if symmetric:
         numbers = 2.0 * numbers - 1.0
 
-    numbers.shape = (sampleSize, numberOfDraws)
+    numbers.shape = (sample_size, number_of_draws)
     return numbers
 
 
-def getAntithetic(unif, sampleSize, numberOfDraws):
+def getAntithetic(unif, sample_size, number_of_draws):
     """Returns antithetic uniform draws
 
-    :param unif: function taking two arguments (sampleSize, numberOfDraws)
+    :param unif: function taking two arguments (sample_size, number_of_draws)
                  and returning U[0, 1] draws
     :type unif: function
 
-    :param sampleSize: number of observations for which draws must be
+    :param sample_size: number of observations for which draws must be
                        generated. If None, a one dimensional array
                        will be generated. If it has a values k, then k
                        series of draws will be generated
-    :type sampleSize: int
+    :type sample_size: int
 
-    :param numberOfDraws: number of draws to generate.
-    :type numberOfDraws: int
+    :param number_of_draws: number of draws to generate.
+    :type number_of_draws: int
 
     :return: numpy array with the antithetic draws
     :rtype: numpy.array
@@ -248,8 +248,8 @@ def getAntithetic(unif, sampleSize, numberOfDraws):
     Example::
 
           draws = dr.getAntithetic(dr.getUniform,
-                                   sampleSize=3,
-                                   numberOfDraws=10)
+                                   sample_size=3,
+                                   number_of_draws=10)
 
           array([[0.48592363, 0.13648133, 0.35925946, 0.32431338, 0.32997936,
                   0.51407637, 0.86351867, 0.64074054, 0.67568662, 0.67002064],
@@ -259,13 +259,13 @@ def getAntithetic(unif, sampleSize, numberOfDraws):
                   0.18904413, 0.03828636, 0.59015183, 0.27822742, 0.83518904]])
 
     """
-    R = int(numberOfDraws / 2)
-    draws = unif(sampleSize, R)
+    R = int(number_of_draws / 2)
+    draws = unif(sample_size, R)
     return np.concatenate((draws, 1 - draws), axis=1)
 
 
 def getNormalWichuraDraws(
-    sampleSize, numberOfDraws, uniformNumbers=None, antithetic=False
+    sample_size, number_of_draws, uniformNumbers=None, antithetic=False
 ):
     """Generate pseudo-random numbers from a normal distribution N(0, 1)
 
@@ -276,14 +276,14 @@ def getNormalWichuraDraws(
     .. _`Wichura (1988)`:
        http://www.jstor.org/stable/2347330
 
-    :param sampleSize: number of observations for which draws must be
+    :param sample_size: number of observations for which draws must be
                        generated. If None, a one dimensional array
                        will be generated. If it has a values k, then k
                        series of draws will be generated
-    :type sampleSize: int
+    :type sample_size: int
 
-    :param numberOfDraws: number of draws to generate.
-    :type numberOfDraws: int
+    :param number_of_draws: number of draws to generate.
+    :type number_of_draws: int
 
     :param uniformNumbers: numpy with uniformly distributed numbers.
                If None, the numpy uniform number generator is used.
@@ -298,7 +298,7 @@ def getNormalWichuraDraws(
 
     Example::
 
-        draws = dr.getNormalWichuraDraws(sampleSize=3, numberOfDraws=10)
+        draws = dr.getNormalWichuraDraws(sample_size=3, number_of_draws=10)
         array(
             [[ 0.52418458, -1.04344204, -2.11642482,  0.48257162, -2.67188279,
               -1.89993283,  0.28251041, -0.38424425,  1.53182226,  0.30651874],
@@ -313,24 +313,24 @@ def getNormalWichuraDraws(
     :raise BiogemeError: if the sample size is not positive.
 
     """
-    if numberOfDraws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {numberOfDraws}.')
+    if number_of_draws <= 0:
+        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
 
     if antithetic:
-        if 2 * int(numberOfDraws / 2) != numberOfDraws:
+        if 2 * int(number_of_draws / 2) != number_of_draws:
             errorMsg = (
                 f'Please specify an even number of draws for '
                 f'antithetic draws. Requested number of '
-                f'{numberOfDraws}.'
+                f'{number_of_draws}.'
             )
             raise excep.BiogemeError(errorMsg)
-        numberOfDraws = int(numberOfDraws / 2)
+        number_of_draws = int(number_of_draws / 2)
 
-    if sampleSize <= 0:
+    if sample_size <= 0:
         raise excep.BiogemeError(
-            f'Invalid sample size: {sampleSize} when generating draws.'
+            f'Invalid sample size: {sample_size} when generating draws.'
         )
-    totalSize = numberOfDraws * sampleSize
+    totalSize = number_of_draws * sample_size
 
     split2 = 5.0e00
     const1 = 0.180625e00
@@ -514,7 +514,7 @@ def getNormalWichuraDraws(
     )
     draws[cond2a] = -draws[cond2a]
 
-    draws.shape = (sampleSize, numberOfDraws)
+    draws.shape = (sample_size, number_of_draws)
 
     if antithetic:
         draws = np.concatenate((draws, -draws), axis=1)
