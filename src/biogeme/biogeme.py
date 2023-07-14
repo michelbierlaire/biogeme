@@ -124,7 +124,8 @@ class BIOGEME:
                 logger.warning(warning_msg)
 
         self._algorithm = opt.algorithms.get(self.algorithm_name)
-        self.algoParameters = None
+        self.algo_parameters = None
+        self.function_parameters = None
 
         if not self.skip_audit:
             database.data = database.data.replace({True: 1, False: 0})
@@ -275,7 +276,7 @@ class BIOGEME:
 
         self.bestIteration = None  #: Store the best iteration found so far.
 
-    # @static_method
+    @staticmethod
     def argument_warning(old_new_tuple):
         """Displays a deprecation warning when parameters are provided
         as arguments."""
@@ -283,11 +284,42 @@ class BIOGEME:
             f'The use of argument {old_new_tuple.old} in the constructor of the '
             f'BIOGEME object is deprecated and will be removed in future '
             f'versions of Biogeme. Instead, define parameter {old_new_tuple.new} '
-            f'in section {old_new_tuple.section}'
+            f'in section {old_new_tuple.section} '
             f'of the .toml parameter file. The default file name is '
             f'{toml.DEFAULT_FILE_NAME}'
         )
         logger.warning(warning_msg)
+
+    @property
+    def bootstrap_samples(self):
+        """Number of re-estimation for bootstrap samples"""
+        return self.toml.parameters.get_value(
+            name='bootstrap_samples', section='Estimation'
+        )
+
+    @bootstrap_samples.setter
+    def bootstrap_samples(self, value):
+        self.toml.parameters.set_value(
+            name='bootstrap_samples',
+            value=value,
+            section='Estimation',
+        )
+
+    @property
+    def max_number_parameters_to_report(self):
+        """Maximum number of parameters to report."""
+        return self.toml.parameters.get_value(
+            name='max_number_parameters_to_report', section='Estimation'
+        )
+
+    @max_number_parameters_to_report.setter
+    def max_number_parameters_to_report(self, value):
+        self.toml.parameters.set_value(
+            name='max_number_parameters_to_report',
+            value=value,
+            section='Estimation',
+        )
+        eb.Expression.max_number_parameters_to_report = value
 
     @property
     def maximum_number_catalog_expressions(self):
@@ -634,44 +666,45 @@ class BIOGEME:
         for f in self.formulas.values():
             f.setIdManager(id_manager=self.id_manager)
 
+    def _set_function_parameters(self):
+        """Prepare the parameters for the function"""
+        self.function_parameters = {
+            'tolerance': self.tolerance,
+            'steptol': self.steptol,
+        }
+
     def _set_algorithm_parameters(self):
         """Prepare the parameters for the algorithms"""
         if self.algorithm_name == 'simple_bounds':
-            self.algoParameters = {
+            self.algo_parameters = {
                 'proportionAnalyticalHessian': self.second_derivatives,
                 'infeasibleConjugateGradient': self.infeasible_cg,
                 'radius': self.initial_radius,
                 'enlargingFactor': self.enlarging_factor,
-                'steptol': self.steptol,
-                'tolerance': self.tolerance,
                 'maxiter': self.maxiter,
             }
             return
         if self.algorithm_name in ['simple_bounds_newton', 'simple_bounds_BFGS']:
-            self.algoParameters = {
+            self.algo_parameters = {
                 'infeasibleConjugateGradient': self.infeasible_cg,
                 'radius': self.initial_radius,
                 'enlargingFactor': self.enlarging_factor,
-                'steptol': self.steptol,
-                'tolerance': self.tolerance,
                 'maxiter': self.maxiter,
             }
             return
         if self.algorithm_name in ['TR-newton', 'TR-BFGS']:
-            self.algoParameters = {
+            self.algo_parameters = {
                 'dogleg': self.dogleg,
                 'radius': self.initial_radius,
-                'tolerance': self.tolerance,
                 'maxiter': self.maxiter,
             }
             return
         if self.algorithm_name in ['LS-newton', 'LS-BFGS']:
-            self.algoParameters = {
-                'tolerance': self.tolerance,
+            self.algo_parameters = {
                 'maxiter': self.maxiter,
             }
             return
-        self.algoParameters = None
+        self.algo_parameters = None
 
     def _saveIterationsFileName(self):
         """
@@ -752,6 +785,14 @@ class BIOGEME:
             self.database.buildPanelMap()
 
     def freeBetaNames(self):
+        """Deprecated"""
+        logger.warning(
+            'The syntax "freeBetaNames" is deprecated and is replaced by '
+            'the syntax "free_beta_names".'
+        )
+        return self.free_beta_names()
+
+    def free_beta_names(self):
         """Returns the names of the parameters that must be estimated
 
         :return: list of names of the parameters
@@ -857,6 +898,31 @@ class BIOGEME:
 
         return f
 
+    def report_array(self, array, with_names=True):
+        """Reports the entries of the array up to the maximum number
+
+        :param array: array to report
+        :type array: numpy.array
+
+        :param with_names: if True, the names of the parameters are included
+        :type with_names: bool
+
+        :return: string reporting the values
+        :rtype: str
+        """
+        length = min(array.size, self.max_number_parameters_to_report)
+        if with_names:
+            names = self.free_beta_names()
+            report = ', '.join(
+                [
+                    f'{name}={value:.2g}'
+                    for name, value in zip(names[:length], array[:length])
+                ]
+            )
+            return report
+        report = ', '.join([f'{value:.2g}' for value in array[:length]])
+        return report
+
     def calculateLikelihoodAndDerivatives(
         self, x, scaled, hessian=False, bhhh=False, batch=None
     ):
@@ -939,7 +1005,11 @@ class BIOGEME:
         )
 
         if not np.isfinite(gradnorm):
-            error_msg = f'The norm of the gradient is {gradnorm}: g={g}'
+            report_x = self.report_array(x)
+            report_g = self.report_array(g, with_names=False)
+            error_msg = (
+                f'The norm of the gradient at {report_x} is {gradnorm}: g={report_g}'
+            )
             raise excep.BiogemeError(error_msg)
 
         if self.saveIterations:
@@ -1096,7 +1166,7 @@ class BIOGEME:
         selected_configurations=None,
         quick_estimate=False,
         recycle=False,
-        bootstrap=0,
+        run_bootstrap=False,
     ):
         """Estimate all or selected versions of a model with Catalog's,
         corresponding to multiple specifications.
@@ -1112,11 +1182,8 @@ class BIOGEME:
             file, if it exists. If False, the estimation is performed.
         :type recycle: bool
 
-        :param bootstrap: number of bootstrap resampling used to
-               calculate the variance-covariance matrix using
-               bootstrapping. If the number is 0, bootstrapping is not
-               applied. Default: 0.
-        :type bootstrap: int
+        :param run_bootstrap: if True, bootstrapping is applied.
+        :type run_bootstrap: bool
 
         :return: object containing the estimation results associated
             with the name of each specification, as well as a
@@ -1137,16 +1204,19 @@ class BIOGEME:
             #            logger.debug(f'{number_of_specifications=}')
             # logger.info(f'{self.maximum_number_catalog_expressions=}')
 
-            if number_of_specifications > self.maximum_number_catalog_expressions:
+            if (
+                number_of_specifications is None
+                or number_of_specifications > self.maximum_number_catalog_expressions
+            ):
                 error_msg = (
-                    f'There are about {number_of_specifications} different '
+                    f'There are too many different '
                     f'specifications for the log likelihood function. This is '
                     f'above the maximum number: '
                     f'{self.maximum_number_catalog_expressions}. Either simplify '
                     f'the specification, or change the value of the parameter '
                     f'maximum_number_catalog_expressions.'
                 )
-                raise excep.valueOutOfRange(error_msg)
+                raise excep.ValueOutOfRange(error_msg)
 
             the_iterator = iter(self.loglike)
         else:
@@ -1162,10 +1232,12 @@ class BIOGEME:
                 user_notes = config.get_html()
                 b = BIOGEME(self.database, expression, userNotes=user_notes)
                 b.modelName = self.short_names(config_id)
+                b.generate_html = self.generate_html
+                b.generate_pickle = self.generate_pickle
                 if quick_estimate:
-                    results = b.quickEstimate(recycle=recycle, bootstrap=bootstrap)
+                    results = b.quickEstimate(recycle=recycle)
                 else:
-                    results = b.estimate(recycle=recycle, bootstrap=bootstrap)
+                    results = b.estimate(recycle=recycle, run_bootstrap=run_bootstrap)
 
                 configurations[config_id] = results
                 expression.locked = False
@@ -1175,7 +1247,7 @@ class BIOGEME:
     def estimate(
         self,
         recycle=False,
-        bootstrap=0,
+        run_bootstrap=False,
         **kwargs,
     ):
         """Estimate the parameters of the model(s).
@@ -1184,11 +1256,8 @@ class BIOGEME:
             file, if it exists. If False, the estimation is performed.
         :type recycle: bool
 
-        :param bootstrap: number of bootstrap resampling used to
-               calculate the variance-covariance matrix using
-               bootstrapping. If the number is 0, bootstrapping is not
-               applied. Default: 0.
-        :type bootstrap: int
+        :param bootstrap: if True, bootstrapping is applied.
+        :type bootstrap: bool
 
         :return: object containing the estimation results.
         :rtype: biogeme.bioResults
@@ -1208,11 +1277,27 @@ class BIOGEME:
             likelihood
 
         """
-
+        if kwargs.get('bootstrap') is not None:
+            error_msg = (
+                'Parameter "bootstrap" is deprecated. In order to perform '
+                'bootstrapping, set parameter run_bootstrap=True in the estimate '
+                'function, and specify the number of bootstrap draws in the '
+                'biogeme.toml file [e.g. bootstrap_samples=100].'
+            )
+            raise excep.BiogemeError(error_msg)
         if kwargs.get('algorithm') is not None:
             error_msg = (
                 'The parameter "algorithm" is deprecated. Instead, define the '
                 'parameter "optimization_algorithm" in section "[Estimation]" '
+                'of the TOML parameter file'
+            )
+            raise excep.BiogemeError(error_msg)
+
+        if kwargs.get('algo_parameters') is not None:
+            error_msg = (
+                'The parameter "algo_parameters" is deprecated. Instead, define the '
+                'parameters "max_iterations" and "tolerance" in section '
+                '"[SimpleBounds]" '
                 'of the TOML parameter file'
             )
             raise excep.BiogemeError(error_msg)
@@ -1282,7 +1367,7 @@ class BIOGEME:
 
         #        yep.stop()
 
-        output = self.optimize(self.id_manager.free_betas_values)
+        output = self.optimize(np.array(self.id_manager.free_betas_values))
         xstar, optimizationMessages = output
         # Running time of the optimization algorithm
         optimizationMessages['Optimization time'] = datetime.now() - start_time
@@ -1312,14 +1397,19 @@ class BIOGEME:
         #        - B is the number of bootstrap iterations
         #        - K is the number pf parameters to estimate
         self.bootstrap_results = None
-        if bootstrap > 0:
+        if run_bootstrap:
+            # Temporarily stop reporting log messages
             start_time = datetime.now()
 
-            logger.info(f'Re-estimate the model {bootstrap} times for bootstrapping')
-            self.bootstrap_results = np.empty(shape=[bootstrap, len(xstar)])
+            logger.info(
+                f'Re-estimate the model {self.bootstrap_samples} times for bootstrapping'
+            )
+            self.bootstrap_results = np.empty(
+                shape=[self.bootstrap_samples, len(xstar)]
+            )
             current_logger_level = logger.level
             logger.setLevel(logging.WARNING)
-            for b in tqdm.tqdm(range(bootstrap), disable=False):
+            for b in tqdm.tqdm(range(self.bootstrap_samples), disable=False):
                 if self.database.isPanel():
                     sample = self.database.sampleIndividualMapWithReplacement()
                     self.theC.setDataMap(sample)
@@ -1374,6 +1464,15 @@ class BIOGEME:
             )
             raise excep.BiogemeError(error_msg)
 
+        if kwargs.get('algo_parameters') is not None:
+            error_msg = (
+                'The parameter "algo_parameters" is deprecated. Instead, define the '
+                'parameters "max_iterations" and "tolerance" in section '
+                '"[SimpleBounds]" '
+                'of the TOML parameter file'
+            )
+            raise excep.BiogemeError(error_msg)
+
         if kwargs.get('algoParameters') is not None:
             error_msg = (
                 'The parameter "algoParameters" is deprecated. Instead, define the '
@@ -1397,7 +1496,7 @@ class BIOGEME:
 
         #        yep.stop()
 
-        output = self.optimize(self.id_manager.free_betas_values)
+        output = self.optimize(np.array(self.id_manager.free_betas_values))
         xstar, optimizationMessages = output
         # Running time of the optimization algorithm
         optimizationMessages['Optimization time'] = datetime.now() - start_time
@@ -1407,14 +1506,14 @@ class BIOGEME:
         f = self.calculateLikelihood(xstar, scaled=False)
 
         fgHb = f, None, None, None
-        rawResults = res.rawResults(
+        raw_results = res.rawResults(
             self,
             xstar,
             fgHb,
             bootstrap=self.bootstrap_results,
         )
         r = res.bioResults(
-            rawResults,
+            raw_results,
             identification_threshold=self.identification_threshold,
         )
         return r
@@ -1478,12 +1577,12 @@ class BIOGEME:
 
         return allSimulationResults
 
-    def optimize(self, startingValues=None):
+    def optimize(self, starting_values=None):
         """Calls the optimization algorithm. The function self.algorithm
         is called.
 
-        :param startingValues: starting point for the algorithm
-        :type startingValues: list(float)
+        :param starting_values: starting point for the algorithm
+        :type starting_values: list(float)
 
         :return: x, messages
 
@@ -1497,13 +1596,14 @@ class BIOGEME:
         :raises BiogemeError: an error is raised if no algorithm is specified.
         """
         theFunction = NegativeLikelihood(
+            dimension=self.id_manager.number_of_free_betas,
             like=self.calculateLikelihood,
             like_deriv=self.calculateLikelihoodAndDerivatives,
-            scaled=True,
+            parameters=self.function_parameters,
         )
 
-        if startingValues is None:
-            startingValues = self.id_manager.free_betas_values
+        if starting_values is None:
+            starting_values = np.array(self.id_manager.free_betas_values)
 
         if self._algorithm is None:
             err = (
@@ -1514,11 +1614,18 @@ class BIOGEME:
 
         logger.debug(f'Run {self.algorithm_name}')
         # logger.debug(''.join(traceback.format_stack()))
+        variable_names = (
+            self.free_beta_names()
+            if len(starting_values) <= self.max_number_parameters_to_report
+            else None
+        )
+
         results = self._algorithm(
             fct=theFunction,
-            initBetas=startingValues,
+            initBetas=starting_values,
             bounds=self.id_manager.bounds,
-            parameters=self.algoParameters,
+            variable_names=variable_names,
+            parameters=self.algo_parameters,
         )
 
         return results
