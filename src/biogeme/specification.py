@@ -10,7 +10,6 @@ import biogeme.biogeme as bio
 from biogeme import tools
 from biogeme.configuration import Configuration
 import biogeme.exceptions as excep
-from biogeme.pareto import SetElement
 
 logger = logging.getLogger(__name__)
 
@@ -19,15 +18,17 @@ class Specification:
     """Implements a specification"""
 
     database = None  #: :class:`biogeme.database.Database` object
-    pareto = None  #: :class:`biogeme.paretoPareto` object
     all_results = {}  #: dict(str: `biogeme.results.bioResults`)
     expression = None  #: :class:`biogeme.expressions.Expression` object
-    multi_objectives = None
-    generic_name = 'default_name'  #: short name for file names
     """
         function that generates all the objectives:
         fct(bioResults) -> list[floatNone]
     """
+    validity = None
+    """
+    function that checks the validity of the results
+    """
+    generic_name = 'default_name'  #: short name for file names
 
     def __init__(self, configuration):
         """Creates a specification from a  configuration
@@ -38,28 +39,14 @@ class Specification:
         if not isinstance(configuration, Configuration):
             error_msg = 'Ctor needs an object of type Configuration'
             raise excep.BiogemeError(error_msg)
-        if self.pareto is None:
-            raise excep.BiogemeError('Pareto set has not been initialized.')
         self.configuration = configuration
         self.model_names = None
-        self.element = self.pareto.get_element_from_id(self.config_id)
-        if self.element is None:
-            self.estimate()
+        self._estimate()
 
     @classmethod
     def from_string_id(cls, configuration_id):
         """Constructor using a configuration"""
         return cls(Configuration.from_string(configuration_id))
-
-    @classmethod
-    def get_pareto_ids(cls):
-        """Returns a list with the Pareto optimal models
-
-        :return: list with the Pareto optimal models
-        :rtype: list[str]
-
-        """
-        return [element.element_id for element in cls.pareto.pareto]
 
     def configure_expression(self):
         """Configure the expression to the current configuration"""
@@ -81,36 +68,42 @@ class Specification:
     def config_id(self, value):
         self.configuration = Configuration.from_string(value)
 
+    def get_results(self):
+        """Obtain the estimation results of the specification"""
+        the_results = self.all_results.get(self.config_id)
+        if the_results is None:
+            error_msg = f'No result is available for specification {self.config_id}'
+            raise excep.BiogemeError(error_msg)
+        return the_results
+
     def __repr__(self):
         return str(self.config_id)
 
-    def get_element(self):
-        """Implementation of abstract method"""
-        return self.element
-
-    def estimate(self):
-        """Estimate the parameter of the current specification"""
+    def _estimate(self):
+        """Estimate the parameter of the current specification, if not already done"""
+        if self.expression is None:
+            error_msg = f'No expression has been provided for the model.'
+            raise excep.BiogemeError(error_msg)
+        if self.database is None:
+            error_msg = f'No database has been provided for the estimation.'
+            raise excep.BiogemeError(error_msg)
         if self.model_names is None:
             self.model_names = tools.ModelNames(prefix=self.generic_name)
 
+        if self.config_id in self.all_results:
+            return
+
         the_config = self.expression.current_configuration()
         self.configure_expression()
-        logger.debug(f'Estimate {self.config_id}')
+        logger.debug(f'****** Estimate {self.config_id}')
         user_notes = the_config.get_html()
-        b = bio.BIOGEME(self.database, self.expression, userNotes=user_notes)
-        b.modelName = self.model_names(self.config_id)
-        b.generate_html = False
-        b.generate_pickle = False
-        logger.info(f'*** Estimate {b.modelName}')
-        results = b.quickEstimate()
-        self.all_results[b.modelName] = results
-        if self.multi_objectives is None:
-            error_msg = (
-                'No function has been provided to calculate the objectives to minimize'
-            )
-            raise excep.BiogemeError(error_msg)
-        self.element = SetElement(self.config_id, self.multi_objectives(results))
-        self.pareto.add(self.element)
+        the_biogeme = bio.BIOGEME(self.database, self.expression, userNotes=user_notes)
+        the_biogeme.modelName = self.model_names(self.config_id)
+        the_biogeme.generate_html = False
+        the_biogeme.generate_pickle = False
+        logger.info(f'*** Estimate {the_biogeme.modelName}')
+        results = the_biogeme.quickEstimate()
+        self.all_results[self.config_id] = results
 
     def describe(self):
         """Short description of the solution. Used for reporting.
@@ -118,4 +111,5 @@ class Specification:
         :return: short description of the solution.
         :rtype: str
         """
-        return f'{self.get_element()}'
+        the_results = self.get_results()
+        return f'{the_results.short_summary()}'
