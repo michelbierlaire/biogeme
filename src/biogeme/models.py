@@ -196,8 +196,7 @@ def piecewiseVariables(variable, thresholds):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -300,8 +299,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -397,8 +395,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -468,8 +465,7 @@ def piecewiseFunction(x, thresholds, betas):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification '
-            'are set to None.'
+            'All thresholds for the piecewise linear specification ' 'are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
