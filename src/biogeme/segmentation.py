@@ -5,7 +5,7 @@
 
 """
 
-from biogeme.expressions import Beta, bioMultSum
+from biogeme.expressions import Beta, bioMultSum, Variable, Numeric
 import biogeme.exceptions as excep
 
 
@@ -15,8 +15,8 @@ class DiscreteSegmentationTuple:
     def __init__(self, variable, mapping, reference=None):
         """Ctor
 
-        :param variable: socio-economic variable used for the segmentation
-        :type variable: biogeme.expressions.Variable
+        :param variable: socio-economic variable used for the segmentation, or its name
+        :type variable: biogeme.expressions.Variable or str
 
         :param mapping: maps the values of the variable with the name of a category
         :type mapping: dict(int: str)
@@ -29,7 +29,10 @@ class DiscreteSegmentationTuple:
             does not appear in the list.
 
         """
-        self.variable = variable
+
+        self.variable = (
+            variable if isinstance(variable, Variable) else Variable(variable)
+        )
         self.mapping = mapping
         if reference is None:
             self.reference = next(iter(mapping.values()))
@@ -158,7 +161,7 @@ class OneSegmentation:
 
         """
         terms = [
-            self.beta_expression(category) * (self.variable == value)
+            self.beta_expression(category) * (self.variable == Numeric(value))
             for value, category in self.mapping.items()
         ]
         return terms
