@@ -6,10 +6,9 @@
 
 """
 
-# Too constraining
-# pylint: disable=invalid-name, too-many-locals
-
+import sys
 import logging
+from itertools import product
 from os import path
 import shutil
 from collections import namedtuple, defaultdict
@@ -481,7 +480,7 @@ class TemporaryFile:
     bother about its location, or even its name
 
     Example::
-    
+
         with TemporaryFile() as filename:
             with open(filename, 'w') as f:
                 print('stuff', file=f)
@@ -541,3 +540,39 @@ def generate_unique_ids(list_of_ids):
             for new_name in substitutes:
                 results[new_name] = name
     return results
+
+
+import resource
+from itertools import product
+
+
+def unique_product(*iterables, max_memory_mb=1024):
+    """
+    Generate the Cartesian product of multiple iterables, keeping only the unique entries.
+    Raises a MemoryError if memory usage exceeds the specified threshold.
+
+    :param iterables: Variable number of iterables to compute the Cartesian product from.
+    :type iterables: Iterable
+    :param max_memory_mb: Maximum memory usage in megabytes (default: 1024MB).
+    :type max_memory_mb: int
+
+    :return: Yields unique entries from the Cartesian product.
+    :rtype: Iterator[tuple]
+    """
+
+    MB_TO_BYTES = 1024 * 1014
+    max_memory_bytes = max_memory_mb * MB_TO_BYTES  # Convert MB to bytes
+    seen = set()  # Set to store seen entries
+    total_memory = 0  # Track memory usage
+
+    for items in product(*iterables):
+        if items not in seen:
+            seen.add(items)
+            item_size = sum(sys.getsizeof(item) for item in items)
+            total_memory += item_size
+            if total_memory > max_memory_bytes:
+                raise MemoryError(
+                    f'Memory usage exceeded the specified threshold: '
+                    f'{total_memory/MB_TO_BYTES:.1f} MB > {max_memory_bytes/MB_TO_BYTES} MB.'
+                )
+            yield items
