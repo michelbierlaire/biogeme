@@ -7,21 +7,12 @@ for specific services to Biogeme
 
 """
 
-# There seems to be a bug in PyLint.
-# pylint: disable=invalid-unary-operand-type, too-many-function-args
-
-# Too constraining
-
-# pylint: disable=invalid-name, too-many-arguments, too-many-locals,
-# pylint: disable=too-many-statements, too-many-branches,
-# pylint: disable=too-many-instance-attributes, too-many-lines,
-# pylint: disable=too-many-public-methods
-
 import logging
 from collections import namedtuple
 import numpy as np
 import pandas as pd
 
+from biogeme.segmentation import DiscreteSegmentationTuple
 import biogeme.exceptions as excep
 import biogeme.filenames as bf
 from biogeme import tools
@@ -31,7 +22,7 @@ from biogeme.expressions import Variable, isNumeric, Numeric
 
 EstimationValidation = namedtuple('EstimationValidation', 'estimation validation')
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 """Logger that controls the output of
         messages to the screen and log file.
         """
@@ -41,118 +32,120 @@ class Database:
     """Class that contains and prepare the database."""
 
     # @staticmethod
-    def uniform_antithetic(sampleSize, numberOfDraws):
-        return draws.getAntithetic(draws.getUniform, sampleSize, numberOfDraws)
+    def uniform_antithetic(sample_size, number_of_draws):
+        return draws.getAntithetic(draws.getUniform, sample_size, number_of_draws)
 
     # @staticmethod
-    def halton2(sampleSize, numberOfDraws):
-        return draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
+    def halton2(sample_size, number_of_draws):
+        return draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
 
     # @staticmethod
-    def halton3(sampleSize, numberOfDraws):
-        return draws.getHaltonDraws(sampleSize, numberOfDraws, base=3, skip=10)
+    def halton3(sample_size, number_of_draws):
+        return draws.getHaltonDraws(sample_size, number_of_draws, base=3, skip=10)
 
     # @staticmethod
-    def halton5(sampleSize, numberOfDraws):
-        return draws.getHaltonDraws(sampleSize, numberOfDraws, base=5, skip=10)
+    def halton5(sample_size, number_of_draws):
+        return draws.getHaltonDraws(sample_size, number_of_draws, base=5, skip=10)
 
     # @staticmethod
-    def MLHS_anti(sampleSize, numberOfDraws):
+    def MLHS_anti(sample_size, number_of_draws):
         return draws.getAntithetic(
-            draws.getLatinHypercubeDraws, sampleSize, numberOfDraws
+            draws.getLatinHypercubeDraws, sample_size, number_of_draws
         )
 
     # @staticmethod
-    def symm_uniform(sampleSize, numberOfDraws):
-        return draws.getUniform(sampleSize, numberOfDraws, symmetric=True)
+    def symm_uniform(sample_size, number_of_draws):
+        return draws.getUniform(sample_size, number_of_draws, symmetric=True)
 
     # @staticmethod
-    def symm_uniform_antithetic(sampleSize, numberOfDraws):
-        R = int(numberOfDraws / 2)
-        localDraws = Database.symm_uniform(sampleSize, R)
+    def symm_uniform_antithetic(sample_size, number_of_draws):
+        R = int(number_of_draws / 2)
+        localDraws = Database.symm_uniform(sample_size, R)
         return np.concatenate((localDraws, -localDraws), axis=1)
 
     # @staticmethod
-    def symm_halton2(sampleSize, numberOfDraws):
+    def symm_halton2(sample_size, number_of_draws):
         return draws.getHaltonDraws(
-            sampleSize, numberOfDraws, symmetric=True, base=2, skip=10
+            sample_size, number_of_draws, symmetric=True, base=2, skip=10
         )
 
     # @staticmethod
-    def symm_halton3(sampleSize, numberOfDraws):
+    def symm_halton3(sample_size, number_of_draws):
         return draws.getHaltonDraws(
-            sampleSize, numberOfDraws, symmetric=True, base=3, skip=10
+            sample_size, number_of_draws, symmetric=True, base=3, skip=10
         )
 
     # @staticmethod
-    def symm_halton5(sampleSize, numberOfDraws):
+    def symm_halton5(sample_size, number_of_draws):
         return draws.getHaltonDraws(
-            sampleSize, numberOfDraws, symmetric=True, base=5, skip=10
+            sample_size, number_of_draws, symmetric=True, base=5, skip=10
         )
 
     # @staticmethod
-    def symm_MLHS(sampleSize, numberOfDraws):
-        return draws.getLatinHypercubeDraws(sampleSize, numberOfDraws, symmetric=True)
+    def symm_MLHS(sample_size, number_of_draws):
+        return draws.getLatinHypercubeDraws(
+            sample_size, number_of_draws, symmetric=True
+        )
 
     # @staticmethod
-    def symm_MLHS_anti(sampleSize, numberOfDraws):
-        R = int(numberOfDraws / 2)
-        localDraws = Database.symm_MLHS(sampleSize, R)
+    def symm_MLHS_anti(sample_size, number_of_draws):
+        R = int(number_of_draws / 2)
+        localDraws = Database.symm_MLHS(sample_size, R)
         return np.concatenate((localDraws, -localDraws), axis=1)
 
     # @staticmethod
-    def normal_antithetic(sampleSize, numberOfDraws):
+    def normal_antithetic(sample_size, number_of_draws):
         return draws.getNormalWichuraDraws(
-            sampleSize=sampleSize,
-            numberOfDraws=numberOfDraws,
+            sample_size=sample_size,
+            number_of_draws=number_of_draws,
             antithetic=True,
         )
 
     # @staticmethod
-    def normal_halton2(sampleSize, numberOfDraws):
-        unif = draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
+    def normal_halton2(sample_size, number_of_draws):
+        unif = draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
         return draws.getNormalWichuraDraws(
-            sampleSize,
-            numberOfDraws,
+            sample_size,
+            number_of_draws,
             uniformNumbers=unif,
             antithetic=False,
         )
 
     # @staticmethod
-    def normal_halton3(sampleSize, numberOfDraws):
-        unif = draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
+    def normal_halton3(sample_size, number_of_draws):
+        unif = draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
         return draws.getNormalWichuraDraws(
-            sampleSize,
-            numberOfDraws,
+            sample_size,
+            number_of_draws,
             uniformNumbers=unif,
             antithetic=False,
         )
 
     # @staticmethod
-    def normal_halton5(sampleSize, numberOfDraws):
-        unif = draws.getHaltonDraws(sampleSize, numberOfDraws, base=2, skip=10)
+    def normal_halton5(sample_size, number_of_draws):
+        unif = draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
         return draws.getNormalWichuraDraws(
-            sampleSize,
-            numberOfDraws,
+            sample_size,
+            number_of_draws,
             uniformNumbers=unif,
             antithetic=False,
         )
 
     # @staticmethod
-    def normal_MLHS(sampleSize, numberOfDraws):
-        unif = draws.getLatinHypercubeDraws(sampleSize, numberOfDraws)
+    def normal_MLHS(sample_size, number_of_draws):
+        unif = draws.getLatinHypercubeDraws(sample_size, number_of_draws)
         return draws.getNormalWichuraDraws(
-            sampleSize,
-            numberOfDraws,
+            sample_size,
+            number_of_draws,
             uniformNumbers=unif,
             antithetic=False,
         )
 
     # @staticmethod
-    def normal_MLHS_anti(sampleSize, numberOfDraws):
-        unif = draws.getLatinHypercubeDraws(sampleSize, int(numberOfDraws / 2))
+    def normal_MLHS_anti(sample_size, number_of_draws):
+        unif = draws.getLatinHypercubeDraws(sample_size, int(number_of_draws / 2))
         return draws.getNormalWichuraDraws(
-            sampleSize, numberOfDraws, uniformNumbers=unif, antithetic=True
+            sample_size, number_of_draws, uniformNumbers=unif, antithetic=True
         )
 
     # Dictionary containing native random number generators. Class attribute
@@ -224,10 +217,7 @@ class Database:
         ),
         'NORMAL_MLHS_ANTI': (
             normal_MLHS_anti,
-            (
-                'Antithetic normal draws from '
-                'Modified Latin Hypercube Sampling'
-            ),
+            ('Antithetic normal draws from ' 'Modified Latin Hypercube Sampling'),
         ),
     }
 
@@ -321,7 +311,7 @@ class Database:
         draws, and (1) a string describing the type of draws
         """
 
-        self.numberOfDraws = 0
+        self.number_of_draws = 0
         """Number of draws generated by the function Database.generateDraws.
         Value 0 if this function is not called.
         """
@@ -741,6 +731,38 @@ class Database:
         self.data.drop(self.data[self.data[columnName] != 0].index, inplace=True)
         self.data.drop(columns=[columnName], inplace=True)
 
+    def check_segmentation(self, segmentation_tuple):
+        """Check that the segmentation covers the complete database
+
+        :param segmentation_tuple: object describing the segmentation
+        :type segmentation_tuple: biogeme.segmentation.DiscreteSegmentationTuple
+
+        :return: number of observations per segment.
+        :rtype: dict(str: int)
+        """
+
+        all_values = self.data[segmentation_tuple.variable.name].value_counts()
+        # Check if all values in the segmentation are in the database
+        for value, name in segmentation_tuple.mapping.items():
+            if value not in all_values:
+                error_msg = (
+                    f'Variable {segmentation_tuple.variable.name} does not '
+                    f'take the value {value} representing segment "{name}"'
+                )
+                raise excep.BiogemeError(error_msg)
+        for value, count in all_values.items():
+            if value not in segmentation_tuple.mapping:
+                error_msg = (
+                    f'Variable {segmentation_tuple.variable.name} '
+                    f'takes the value {value} [{count} times], and it does not define any segment.'
+                )
+                raise excep.BiogemeError(error_msg)
+
+        named_values = {}
+        for value, name in segmentation_tuple.mapping.items():
+            named_values[name] = all_values[value]
+        return named_values
+
     def dumpOnFile(self):
         """Dumps the database in a CSV formatted file.
 
@@ -768,11 +790,11 @@ class Database:
 
         Example::
 
-            def logNormalDraws(sampleSize, numberOfDraws):
-                return np.exp(np.random.randn(sampleSize, numberOfDraws))
+            def logNormalDraws(sample_size, number_of_draws):
+                return np.exp(np.random.randn(sample_size, number_of_draws))
 
-            def exponentialDraws(sampleSize, numberOfDraws):
-                return -1.0 * np.log(np.random.rand(sampleSize, numberOfDraws))
+            def exponentialDraws(sample_size, number_of_draws):
+                return -1.0 * np.log(np.random.rand(sample_size, number_of_draws))
 
             # We associate these functions with a name
             dict = {'LOGNORMAL':(logNormalDraws,
@@ -796,7 +818,7 @@ class Database:
 
         self.userRandomNumberGenerators = rng
 
-    def generateDraws(self, types, names, numberOfDraws):
+    def generateDraws(self, types, names, number_of_draws):
         """Generate draws for each variable.
 
 
@@ -855,8 +877,8 @@ class Database:
             to be generated.
         :type names: list of strings
 
-        :param numberOfDraws: number of draws to generate.
-        :type numberOfDraws: int
+        :param number_of_draws: number of draws to generate.
+        :type number_of_draws: int
 
         :return: a 3-dimensional table with draws. The 3 dimensions are
 
@@ -880,7 +902,7 @@ class Database:
         :raise BiogemeError: if the output of the draw generator does not
             have the requested dimensions.
         """
-        self.numberOfDraws = numberOfDraws
+        self.number_of_draws = number_of_draws
         # Dimensions of the draw table:
         # 1. number of variables
         # 2. number of individuals
@@ -903,12 +925,12 @@ class Database:
                         f'User defined: {user}'
                     )
                     raise excep.BiogemeError(errorMsg)
-            listOfDraws[i] = theGenerator[0](self.getSampleSize(), numberOfDraws)
-            if listOfDraws[i].shape != (self.getSampleSize(), numberOfDraws):
+            listOfDraws[i] = theGenerator[0](self.getSampleSize(), number_of_draws)
+            if listOfDraws[i].shape != (self.getSampleSize(), number_of_draws):
                 errorMsg = (
                     f'The draw generator for {name} must'
                     f' generate a numpy array of dimensions'
-                    f' ({self.getSampleSize()}, {numberOfDraws})'
+                    f' ({self.getSampleSize()}, {number_of_draws})'
                     f' instead of {listOfDraws[i].shape}'
                 )
                 raise excep.BiogemeError(errorMsg)
@@ -1003,7 +1025,7 @@ class Database:
         estimationSets = []
         validationSets = []
         for i, v in enumerate(theSlices):
-            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1:]))
+            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
             validationSets.append(v)
         return [
             EstimationValidation(estimation=e, validation=v)
@@ -1082,17 +1104,17 @@ class Database:
         """
         return self.data[self.data[columnName] == value].count()[columnName]
 
-    def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=[]):
+    def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=tuple()):
         """Generate a flat version of the panel data
 
         :param saveOnFile: if True, the flat database is saved on file.
         :type saveOnFile: bool
-    
-        :param identical_columns: list of columns that contain the
+
+        :param identical_columns: tuple of columns that contain the
             same values for all observations of the same
             individual. Default: empty list.
-        
-        :type identical_columns: list(str)
+
+        :type identical_columns: tuple(str)
 
         :return: the flatten database, in Pandas format
         :rtype: pandas.DataFrame
@@ -1118,3 +1140,118 @@ class Database:
         if self.isPanel():
             result += f'\nPanel data\n{self.individualMap}'
         return result
+
+    def verify_segmentation(self, segmentation):
+        """Verifies if the definition of the segmentation is consistent with the data
+
+        :param segmentation: definition of the segmentation
+        :type segmentation: DiscreteSegmentationTuple
+
+        :raise BiogemeError: if the segmentation is not consistent with the data.
+        """
+
+        variable = (
+            segmentation.variable
+            if isinstance(segmentation.variable, Variable)
+            else Variable(segmentation.variable)
+        )
+
+        # Check if the variable is in the database.
+        if variable.name not in self.data.columns:
+            error_msg = f'Unknown variable {variable.name}'
+            raise excep.BiogemeError(error_msg)
+
+        # Extract all unique values from the data base.
+        unique_values = set(self.data[variable.name].unique())
+        segmentation_values = set(segmentation.mapping.keys())
+
+        in_data_not_in_segmentation = unique_values - segmentation_values
+        in_segmentation_not_in_data = segmentation_values - unique_values
+
+        error_msg_1 = (
+            (
+                f'The following entries are missing in the segmentation: '
+                f'{in_data_not_in_segmentation}.'
+            )
+            if in_data_not_in_segmentation
+            else ''
+        )
+
+        error_msg_2 = (
+            (
+                f'Segmentation entries do not exist in the data: '
+                f'{in_segmentation_not_in_data}.'
+            )
+            if in_segmentation_not_in_data
+            else ''
+        )
+
+        if error_msg_1 or error_msg_2:
+            raise excep.BiogemeError(f'{error_msg_1} {error_msg_2}')
+
+    def generate_segmentation(self, variable, mapping=None, reference=None):
+        """Generate a segmentation tuple for a variable.
+
+        :param variable: Variable object or name of the variable
+        :type variable: biogeme.expressions.Variable or string
+
+        :param mapping: mapping associating values of the variable to
+            names. If incomplete, default names are provided.
+        :type mapping: dict(int: str)
+
+        :param reference: name of the reference category. If None, an
+            arbitrary category is selected as reference.  :type:
+        :type reference: str
+
+
+        """
+
+        the_variable = (
+            variable if isinstance(variable, Variable) else Variable(variable)
+        )
+
+        # Check if the variable is in the database.
+        if the_variable.name not in self.data.columns:
+            error_msg = f'Unknown the_variable {the_variable.name}'
+            raise excep.BiogemeError(error_msg)
+
+        # Extract all unique values from the data base.
+        unique_values = set(self.data[the_variable.name].unique())
+
+        if len(unique_values) >= 10:
+            warning_msg = (
+                f'Variable {the_variable.name} takes a total of '
+                f'{len(unique_values)} different values in the database. It is '
+                f'likely to be too large for a discrete segmentation.'
+            )
+            logger.warning(warning_msg)
+
+        # Check that the provided mapping is consistent with the data
+        values_not_in_data = [
+            value for value in mapping.keys() if value not in unique_values
+        ]
+
+        if values_not_in_data:
+            error_msg = (
+                f'The following values in the mapping do not exist in the data for '
+                f'variable {the_variable.name}: {values_not_in_data}'
+            )
+            raise excep.BiogemeError(error_msg)
+
+        the_mapping = {value: f'{the_variable.name}_{value}' for value in unique_values}
+
+        if mapping is not None:
+            the_mapping.update(mapping)
+
+        if reference is not None and reference not in mapping.values():
+            error_msg = (
+                f'Level {reference} of variable {the_variable.name} does not '
+                'appear in the mapping: {mapping.values()}'
+            )
+            raise excep.BiogemeError(error_msg)
+
+        return DiscreteSegmentationTuple(
+            variable=the_variable,
+            mapping=the_mapping,
+            reference=reference,
+        )
