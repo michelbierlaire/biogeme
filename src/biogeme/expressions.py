@@ -9,6 +9,7 @@ import logging
 from itertools import chain, product
 import numpy as np
 import cythonbiogeme.cythonbiogeme as ee
+from biogeme import tools
 import biogeme.exceptions as excep
 from biogeme.idmanager import IdManager
 from biogeme.elementary_expressions import TypeOfElementaryExpression
@@ -324,8 +325,7 @@ class Expression:
         """
         if not (isNumeric(other) or isinstance(other, Expression)):
             error_msg = (
-                f'Invalid expression during multiplication '
-                f'to {self}: [{other}]'
+                f'Invalid expression during multiplication ' f'to {self}: [{other}]'
             )
             raise excep.BiogemeError(error_msg)
         return Times(self, other)
@@ -1273,21 +1273,14 @@ class Expression:
         """
         if not self.children:
             return set()
-        each_config = [
-            e.set_of_configurations()
-            for e in self.children
-            if e.set_of_configurations()
-        ]
+        each_config = [e.set_of_configurations() for e in self.children]
         if None in each_config:
             return None
-        total = 1
-        for conf in each_config:
-            total *= len(conf)
-            if total > self.maximum_number_of_configurations:
-                return None
+        # Remove the empty sets
+        each_config = [e for e in each_config if e]
         if not each_config:
             return set()
-        all_combinations = product(*each_config)
+        all_combinations = tools.unique_product(*each_config)
         final_set = set(
             Configuration.from_tuple_of_configurations(the_tuple)
             for the_tuple in all_combinations
