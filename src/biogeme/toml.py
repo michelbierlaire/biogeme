@@ -5,7 +5,7 @@
 
 """
 import logging
-from datetime import date
+from datetime import datetime
 import tomlkit as tk
 import biogeme.parameters as param
 import biogeme.exceptions as excep
@@ -69,8 +69,7 @@ class Toml:
         self.record_values()
 
     def read_file(self):
-        """Read TOML file
-        """
+        """Read TOML file"""
         try:
             with open(self.parameter_file, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -81,16 +80,14 @@ class Toml:
             self.dump_file()
 
     def dump_file(self):
-        """Dump the values of the parameters in the TOML file
-        """
+        """Dump the values of the parameters in the TOML file"""
         self.document = self.generate_document()
         with open(self.parameter_file, 'w', encoding='utf-8') as f:
             print(tk.dumps(self.document), file=f)
         logger.warning(f'File {self.parameter_file} has been created')
 
     def record_values(self):
-        """Record the values of the parameters in the TOML document
-        """
+        """Record the values of the parameters in the TOML document"""
         for the_param in self.parameters.default_parameters:
             the_table = self.document.get(the_param.section)
             new_table = False
@@ -119,10 +116,12 @@ class Toml:
 
     def generate_document(self):
         """Generate the  TOML document"""
+        current_datetime = datetime.now()
+        formatted_datetime = current_datetime.strftime("%B %d, %Y. %H:%M:%S")
         doc = tk.document()
 
         doc.add(tk.comment(f'Default parameter file for Biogeme {getVersion()}'))
-        doc.add(tk.comment(f'Automatically created on {date.today()}'))
+        doc.add(tk.comment(f'Automatically created on {formatted_datetime}'))
 
         tables = {section: tk.table() for section in self.parameters.sections}
 
