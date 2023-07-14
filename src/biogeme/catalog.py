@@ -6,6 +6,7 @@
 """
 import logging
 from itertools import product
+from biogeme.expressions import Beta
 from biogeme.multiple_expressions import MultipleExpression, NamedExpression
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
@@ -45,20 +46,22 @@ class Catalog(MultipleExpression):
             )
 
         # Transform numeric values into Biogeme expressions
-        self.list_of_named_expressions = list(
+        self.list_of_named_expressions = [
             NamedExpression(
                 name=named.name, expression=ex.process_numeric(named.expression)
             )
             for named in list_of_named_expressions
-        )
+        ]
 
         # Check if the name of the catalog was not already used.
-        for named_expression in self.list_of_named_expressions:
-            if named_expression.expression.contains_catalog(self.name):
-                error_msg = (
-                    f'Catalog {self.name} cannot contain itself. Use different names'
-                )
-                raise excep.BiogemeError(error_msg)
+        if any(
+            named.expression.contains_catalog(self.name)
+            for named in self.list_of_named_expressions
+        ):
+            error_msg = (
+                f'Catalog {self.name} cannot contain itself. Use different names'
+            )
+            raise excep.BiogemeError(error_msg)
 
         self.current_index = 0
         self.dict_of_index = {
@@ -84,11 +87,11 @@ class Catalog(MultipleExpression):
         :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
 
         """
-        the_list = list(
+        list_of_named_expressions = list(
             NamedExpression(name=name, expression=expression)
             for name, expression in dict_of_expressions.items()
         )
-        return cls(catalog_name, the_list)
+        return cls(catalog_name, list_of_named_expressions)
 
     def get_iterator(self):
         """Obtain an iterator on the named expressions"""
@@ -153,6 +156,14 @@ class Catalog(MultipleExpression):
         :rtype: NamedExpression
         """
         return self.list_of_named_expressions[self.current_index]
+
+    def selected_name(self):
+        """Return the name of the selected expression
+
+        :return: the name of the selected expression
+        :rtype: str
+        """
+        return self.list_of_named_expressions[self.current_index].name
 
     def current_configuration(self, includes_controlled_catalogs=False):
         """Obtain the current configuration of an expression with Catalog
@@ -340,7 +351,7 @@ class SynchronizedCatalog(Catalog):
             f'The index of catalog {self.name} cannot be changed directly. '
             f'It must be changed by its controller {self.controller.name}'
         )
-        excep.BiogemeError(error_msg)
+        raise excep.BiogemeError(error_msg)
 
     def current_configuration(self, includes_controlled_catalogs=False):
         """Obtain the current configuration of an expression with Catalog
@@ -391,9 +402,13 @@ class SynchronizedCatalog(Catalog):
 
 
 def segmentation_catalog(
-    beta_parameter, potential_segmentations, maximum_number, synchronized_with=None
+    beta_parameter,
+    potential_segmentations,
+    maximum_number,
+    synchronized_with=None
 ):
-    """Generate a catalog (possibly synchronized) for potential segmentations of a parameter
+    """Generate a catalog (possibly synchronized) for potential
+        segmentations of a parameter
 
     :param beta_parameter: parameter to be segmented
     :type beta_parameter: biogeme.expressions.Beta
@@ -432,20 +447,123 @@ def segmentation_catalog(
         the_segmentation = seg.Segmentation(beta_parameter, selected_expressions)
         return the_segmentation.segmented_beta()
 
-    list_of_possiblities = [
-        p
-        for p in product([False, True], repeat=len(potential_segmentations))
-        if sum(p) <= maximum_number
+    list_of_possibilities = [
+        combination
+        for combination in product([False, True], repeat=len(potential_segmentations))
+        if sum(combination) <= maximum_number
     ]
     the_tuple_of_named_expressions = (
         NamedExpression(
             name=get_name_from_combination(combination),
             expression=get_expression_from_combination(combination),
         )
-        for combination in list_of_possiblities
+        for combination in list_of_possibilities
     )
     name = f'segmented_{beta_parameter.name}'
     if synchronized_with is None:
         return Catalog(name, the_tuple_of_named_expressions)
 
     return SynchronizedCatalog(name, the_tuple_of_named_expressions, synchronized_with)
+
+
+def generic_alt_specific_catalog(
+    coefficient,
+    alternatives,
+    potential_segmentations=None,
+    maximum_number=5,
+):
+    """Generate catalogs selecting generic or alternative specific coefficients
+
+    :param coefficient: coefficient of interest
+    :type coefficient: biogeme.expressions.Beta
+
+    :param alternatives: names of the alternatives
+    :type alternatives: tuple(str)
+
+    :param potential_segmentations: tuple of potential segmentations, or None
+    :type potential_segmentations: tuple(biogeme.segmentation.DiscreteSegmentationTuple)
+
+    :param maximum_number: maximum number of segmentations to consider
+    :type maximum_number: int
+
+    :return: a catalog for each alternative
+    :rtype: dict(str: biogeme.catalog.Catalog)
+    """
+    if not isinstance(coefficient, Beta):
+        error_msg = 'This function must be called with a Beta object'
+        raise excep.BiogemeError(error_msg)
+
+    if len(alternatives) < 2:
+        error_msg = (
+            f'An alternative specific specification requires at least 2 '
+            f'alternatives, and not {len(alternatives)}'
+        )
+        raise excep.BiogemeError(error_msg)
+
+    generic_coeff = (
+        coefficient
+        if potential_segmentations is None
+        else segmentation_catalog(
+            beta_parameter=coefficient,
+            potential_segmentations=potential_segmentations,
+            maximum_number=maximum_number,
+            synchronized_with=None,
+        )
+    )
+
+    altspec_coeffs = {}
+    controller = None
+    for alternative in alternatives:
+        the_beta = Beta(
+            name=f'{coefficient.name}_{alternative}',
+            value=coefficient.initValue,
+            lowerbound=coefficient.lb,
+            upperbound=coefficient.ub,
+            status=coefficient.status,
+        )
+        if controller is None:
+            the_coeff = (
+                the_beta
+                if potential_segmentations is None
+                else segmentation_catalog(
+                        beta_parameter=the_beta,
+                        potential_segmentations=potential_segmentations,
+                        maximum_number=maximum_number,
+                )
+            )
+            controller = the_coeff
+        else:
+            the_coeff = (
+                the_beta
+                if potential_segmentations is None
+                else segmentation_catalog(
+                        beta_parameter=the_beta,
+                        potential_segmentations=potential_segmentations,
+                        maximum_number=maximum_number,
+                        synchronized_with=controller,
+                )
+            )
+        altspec_coeffs[alternative] = the_coeff
+
+    results = {}
+    controller = None
+    for alternative in alternatives:
+        catalog_name = f'_{coefficient.name}_{alternative}_gen_alt_spec'
+        expressions = {
+            'generic': coefficient,
+            'altspec': altspec_coeffs[alternative],
+        }
+        if controller is None:
+            results[alternative] = Catalog.from_dict(
+                catalog_name=catalog_name,
+                dict_of_expressions=expressions,
+            )
+            controller = results[alternative]
+        else:
+            results[alternative] = SynchronizedCatalog.from_dict(
+                catalog_name=catalog_name,
+                dict_of_expressions=expressions,
+                controller=controller,
+            )
+
+    return results
