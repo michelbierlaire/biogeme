@@ -20,14 +20,16 @@ Optimization algorithms for Biogeme
 import logging
 import numpy as np
 import scipy.optimize as sc
-import biogeme.algorithms as alg
+from biogeme_optimization.bounds import Bounds
+from biogeme_optimization.linesearch import newton_linesearch, bfgs_linesearch
+from biogeme_optimization.trust_region import newton_trust_region, bfgs_trust_region
+from biogeme_optimization.simple_bounds import simple_bounds_newton_algorithm
 import biogeme.exceptions as excep
-
 
 logger = logging.getLogger(__name__)
 
 
-def scipy(fct, initBetas, bounds, parameters=None):
+def scipy(fct, initBetas, bounds, variable_names, parameters=None):
     """Optimization interface for Biogeme, based on the scipy
     minimize function.
 
@@ -36,9 +38,15 @@ def scipy(fct, initBetas, bounds, parameters=None):
 
     :param initBetas: initial value of the beta parameters
     :type initBetas: numpy.array
+
     :param bounds: list of tuples (ell,u) containing the lower and upper bounds
           for each free parameter
     :type bounds: list(tuple)
+
+    :param variable_names: names of the variables. Ignored
+        here. Included to comply with the syntax.
+    :type variable_names: list(str)
+
     :param parameters: dict of parameters to be transmitted to the
          optimization routine. See the `scipy`_ documentation.
 
@@ -57,9 +65,9 @@ def scipy(fct, initBetas, bounds, parameters=None):
     """
 
     def f_and_grad(x):
-        fct.setVariables(x)
-        f, g = fct.f_g()
-        return f, g
+        fct.set_variables(x)
+        function_data = fct.f_g()
+        return function_data.function, function_data.gradient
 
     logger.info('Optimization algorithm: scipy')
     # Absolute tolerance
@@ -83,7 +91,9 @@ def scipy(fct, initBetas, bounds, parameters=None):
     return results.x, messages
 
 
-def newtonLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
+def newton_linesearch_for_biogeme(
+    fct, initBetas, bounds, variable_names, parameters=None
+):
     """Optimization interface for Biogeme, based on Newton method.
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -98,6 +108,9 @@ def newtonLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
                    Therefore, all the bounds must be None.
 
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
         optimization routine:
@@ -131,19 +144,20 @@ def newtonLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
             )
             raise excep.BiogemeError(errorMsg)
 
-    tol = np.finfo(np.float64).eps ** 0.3333
     maxiter = 100
     if parameters is not None:
-        if 'tolerance' in parameters:
-            tol = parameters['tolerance']
         if 'maxiter' in parameters:
             maxiter = parameters['maxiter']
 
     logger.info('** Optimization: Newton with linesearch')
-    return alg.newtonLineSearch(fct, initBetas, eps=tol, maxiter=maxiter)
+    return newton_linesearch(
+        the_function=fct, starting_point=initBetas, maxiter=maxiter
+    )
 
 
-def newtonTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
+def newton_trust_region_for_biogeme(
+    fct, initBetas, bounds, variable_names, parameters=None
+):
     """Optimization interface for Biogeme, based on Newton method with TR.
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -157,6 +171,9 @@ def newtonTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
                    this algorithm does not support bound constraints.
                    Therefore, all the bounds must be None.
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
         optimization routine:
@@ -194,32 +211,30 @@ def newtonTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
             )
             raise excep.BiogemeError(errorMsg)
 
-    tol = np.finfo(np.float64).eps ** 0.3333
     maxiter = 100
-    applyDogleg = False
+    apply_dogleg = False
     radius = 1.0
     if parameters is not None:
-        if 'tolerance' in parameters:
-            tol = parameters['tolerance']
         if 'maxiter' in parameters:
             maxiter = parameters['maxiter']
         if 'dogleg' in parameters:
-            applyDogleg = parameters['dogleg']
+            apply_dogleg = parameters['dogleg']
         if 'radius' in parameters:
             radius = parameters['radius']
 
     logger.info('** Optimization: Newton with trust region')
-    return alg.newtonTrustRegion(
-        fct,
-        x0=initBetas,
-        delta0=radius,
-        eps=tol,
-        dl=applyDogleg,
+    return newton_trust_region(
+        the_function=fct,
+        starting_point=initBetas,
+        use_dogleg=apply_dogleg,
         maxiter=maxiter,
+        initial_radius=radius,
     )
 
 
-def bfgsLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
+def bfgs_linesearch_for_biogeme(
+    fct, initBetas, bounds, variable_names, parameters=None
+):
     """Optimization interface for Biogeme, based on BFGS
     quasi-Newton method with LS.
 
@@ -237,6 +252,9 @@ def bfgsLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
                    Therefore, all the bounds must be None.
 
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
         optimization routine:
@@ -277,24 +295,23 @@ def bfgsLineSearchForBiogeme(fct, initBetas, bounds, parameters=None):
             )
             raise excep.BiogemeError(errorMsg)
 
-    tol = np.finfo(np.float64).eps ** 0.3333
     maxiter = 100
-    initBfgs = None
+    init_bfgs = None
     if parameters is not None:
-        if 'tolerance' in parameters:
-            tol = parameters['tolerance']
-            if 'maxiter' in parameters:
-                maxiter = parameters['maxiter']
-            if 'initBfgs' in parameters:
-                initBfgs = parameters['initBfgs']
+        if 'maxiter' in parameters:
+            maxiter = parameters['maxiter']
+        if 'initBfgs' in parameters:
+            init_bfgs = parameters['initBfgs']
 
     logger.info('** Optimization: BFGS with line search')
-    return alg.bfgsLineSearch(
-        fct, x0=initBetas, initBfgs=initBfgs, eps=tol, maxiter=maxiter
+    return bfgs_linesearch(
+        the_function=fct, starting_point=initBetas, init_bfgs=init_bfgs, maxiter=maxiter
     )
 
 
-def bfgsTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
+def bfgs_trust_region_for_biogeme(
+    fct, initBetas, bounds, variable_names, parameters=None
+):
     """Optimization interface for Biogeme, based on Newton method with TR.
 
     :param fct: object to calculate the objective function and its derivatives.
@@ -308,6 +325,9 @@ def bfgsTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
                    this algorithm does not support bound constraints.
                    Therefore, all the bounds must be None.
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
          optimization routine:
@@ -351,36 +371,34 @@ def bfgsTrustRegionForBiogeme(fct, initBetas, bounds, parameters=None):
             )
             raise excep.BiogemeError(errorMsg)
 
-    tol = np.finfo(np.float64).eps ** 0.3333
     maxiter = 100
-    applyDogleg = False
+    apply_dogleg = False
     radius = 1.0
-    initBfgs = None
+    init_bfgs = None
     if parameters is not None:
-        if 'tolerance' in parameters:
-            tol = parameters['tolerance']
         if 'maxiter' in parameters:
             maxiter = parameters['maxiter']
         if 'dogleg' in parameters:
-            applyDogleg = parameters['dogleg']
+            apply_dogleg = parameters['dogleg']
         if 'radius' in parameters:
             radius = parameters['radius']
         if 'initBfgs' in parameters:
-            initBfgs = parameters['initBfgs']
+            init_bfgs = parameters['initBfgs']
 
     logger.info('** Optimization: BFGS with trust region')
-    return alg.bfgsTrustRegion(
-        fct,
-        x0=initBetas,
-        initBfgs=initBfgs,
-        delta0=radius,
-        eps=tol,
-        dl=applyDogleg,
+    return bfgs_trust_region(
+        the_function=fct,
+        starting_point=initBetas,
+        init_bfgs=init_bfgs,
+        use_dogleg=apply_dogleg,
         maxiter=maxiter,
+        initial_radius=radius,
     )
 
 
-def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=None):
+def simple_bounds_newton_algorithm_for_biogeme(
+    fct, initBetas, bounds, variable_names, parameters=None
+):
     """Optimization interface for Biogeme, based on variants of Newton
     method with simple bounds.
 
@@ -396,6 +414,9 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=Non
                    constraints.
                    Therefore, all the bounds must be None.
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
         optimization routine:
@@ -438,8 +459,6 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=Non
         'Optimization algorithm: hybrid Newton/BFGS with simple bounds [simple_bounds]'
     )
 
-    tol = np.finfo(np.float64).eps ** 0.3333
-    steptol = 1.0e-5
     cgtol = np.finfo(np.float64).eps ** 0.3333
     maxiter = 1000
     radius = 1.0
@@ -447,14 +466,9 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=Non
     eta2 = 0.9
     proportionTrueHessian = 1.0
     enlargingFactor = 2
-    infeasibleConjugateGradient = False
 
     # We replace the default value by user defined value, if any.
     if parameters is not None:
-        if 'tolerance' in parameters:
-            tol = parameters['tolerance']
-        if 'steptol' in parameters:
-            steptol = parameters['steptol']
         if 'cgtolerance' in parameters:
             cgtol = parameters['cgtolerance']
         if 'maxiter' in parameters:
@@ -469,8 +483,6 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=Non
             enlargingFactor = parameters['enlargingFactor']
         if 'proportionAnalyticalHessian' in parameters:
             proportionTrueHessian = parameters['proportionAnalyticalHessian']
-        if 'infeasibleConjugateGradient' in parameters:
-            infeasibleConjugateGradient = parameters['infeasibleConjugateGradient']
 
     if proportionTrueHessian == 1.0:
         logger.info('** Optimization: Newton with trust region for simple bounds')
@@ -482,24 +494,22 @@ def simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters=Non
             f'{100*proportionTrueHessian}%/BFGS '
             f'with trust region for simple bounds'
         )
-    return alg.simpleBoundsNewtonAlgorithm(
-        fct,
-        bounds=alg.bioBounds(bounds),
-        x0=initBetas,
-        proportionTrueHessian=proportionTrueHessian,
-        infeasibleConjugateGradient=infeasibleConjugateGradient,
-        delta0=radius,
-        tol=tol,
-        steptol=steptol,
+    return simple_bounds_newton_algorithm(
+        the_function=fct,
+        bounds=Bounds(bounds),
+        starting_point=initBetas,
+        variable_names=variable_names,
+        proportion_analytical_hessian=proportionTrueHessian,
+        first_radius=radius,
         cgtol=cgtol,
         maxiter=maxiter,
         eta1=eta1,
         eta2=eta2,
-        enlargingFactor=enlargingFactor,
+        enlarging_factor=enlargingFactor,
     )
 
 
-def bioNewton(fct, initBetas, bounds, parameters=None):
+def bio_newton(fct, initBetas, bounds, variable_names, parameters=None):
     """Optimization interface for Biogeme, based on Newton's method with simple
     bounds.
 
@@ -515,6 +525,9 @@ def bioNewton(fct, initBetas, bounds, parameters=None):
                    constraints.
                    Therefore, all the bounds must be None.
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
         optimization routine:
@@ -559,10 +572,12 @@ def bioNewton(fct, initBetas, bounds, parameters=None):
         parameters = {'proportionAnalyticalHessian': 1}
     else:
         parameters['proportionAnalyticalHessian'] = 1
-    return simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters)
+    return simple_bounds_newton_algorithm_for_biogeme(
+        fct, initBetas, bounds, variable_names, parameters
+    )
 
 
-def bioBfgs(fct, initBetas, bounds, parameters=None):
+def bio_bfgs(fct, initBetas, bounds, variable_names, parameters=None):
     """Optimization interface for Biogeme, based on BFGS quasi-Newton
     method with simple bounds.
 
@@ -578,6 +593,9 @@ def bioBfgs(fct, initBetas, bounds, parameters=None):
                    constraints.
                    Therefore, all the bounds must be None.
     :type bounds: list(tuples)
+
+    :param variable_names: names of the variables.
+    :type variable_names: list(str)
 
     :param parameters: dict of parameters to be transmitted to the
         optimization routine:
@@ -620,16 +638,18 @@ def bioBfgs(fct, initBetas, bounds, parameters=None):
         parameters = {'proportionAnalyticalHessian': 0}
     else:
         parameters['proportionAnalyticalHessian'] = 0
-    return simpleBoundsNewtonAlgorithmForBiogeme(fct, initBetas, bounds, parameters)
+    return simple_bounds_newton_algorithm_for_biogeme(
+        fct, initBetas, bounds, variable_names, parameters
+    )
 
 
 algorithms = {
     'scipy': scipy,
-    'LS-newton': newtonLineSearchForBiogeme,
-    'TR-newton': newtonTrustRegionForBiogeme,
-    'LS-BFGS': bfgsLineSearchForBiogeme,
-    'TR-BFGS': bfgsTrustRegionForBiogeme,
-    'simple_bounds': simpleBoundsNewtonAlgorithmForBiogeme,
-    'simple_bounds_newton': bioNewton,
-    'simple_bounds_BFGS': bioBfgs,
+    'LS-newton': newton_linesearch_for_biogeme,
+    'TR-newton': newton_trust_region_for_biogeme,
+    'LS-BFGS': bfgs_linesearch_for_biogeme,
+    'TR-BFGS': bfgs_trust_region_for_biogeme,
+    'simple_bounds': simple_bounds_newton_algorithm_for_biogeme,
+    'simple_bounds_newton': bio_newton,
+    'simple_bounds_BFGS': bio_bfgs,
 }
