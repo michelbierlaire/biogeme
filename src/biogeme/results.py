@@ -28,11 +28,11 @@ import numpy as np
 from scipy import linalg
 from scipy import stats
 from scipy.integrate import dblquad
+from biogeme_optimization import pareto
 import biogeme.version as bv
 import biogeme.filenames as bf
 import biogeme.exceptions as excep
 from biogeme.expressions import Expression
-from biogeme import pareto
 from biogeme import tools
 from biogeme.default_parameters import get_default_value
 
@@ -598,6 +598,14 @@ class bioResults:
             )
 
     def shortSummary(self):
+        """Provides a short summary of the estimation results. Old syntax"""
+        logger.warning(
+            'The syntax "shortSummary" is deprecated and is replaced by '
+            'the syntax "short_summary".'
+        )
+        return self.short_summary()
+
+    def short_summary(self):
         """Provides a short summary of the estimation results"""
         r = ''
         r += f'Results for model {self.data.modelName}\n'
@@ -1542,6 +1550,38 @@ class bioResults:
 
 
 def compileEstimationResults(
+    dict_of_results,
+    statistics=(
+        'Number of estimated parameters',
+        'Sample size',
+        'Final log likelihood',
+        'Akaike Information Criterion',
+        'Bayesian Information Criterion',
+    ),
+    include_parameter_estimates=True,
+    include_robust_stderr=False,
+    include_robust_ttest=True,
+    formatted=True,
+    use_short_names=False,
+):
+    """Compile estimation results into a common table. Old syntax."""
+
+    logger.warning(
+        'The syntax "compileEstimationResults" is deprecated and is replaced by '
+        'the syntax "compile_estimation_results".'
+    )
+    return compile_estimation_results(
+        dict_of_results,
+        statistics,
+        include_parameter_estimates,
+        include_robust_stderr,
+        include_robust_ttest,
+        formatted,
+        use_short_names,
+    )
+
+
+def compile_estimation_results(
     dict_of_results,
     statistics=(
         'Number of estimated parameters',
