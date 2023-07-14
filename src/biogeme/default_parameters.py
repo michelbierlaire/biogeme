@@ -110,6 +110,24 @@ all_parameters_tuple = (
         check=(cp.is_integer, cp.is_non_negative),
     ),
     ParameterTuple(
+        name='bootstrap_samples',
+        default=100,
+        type=int,
+        section='Estimation',
+        description=('int: number of re-estimations for bootstrap sampling.'),
+        check=(cp.is_integer, cp.is_non_negative),
+    ),
+    ParameterTuple(
+        name='max_number_parameters_to_report',
+        default=15,
+        type=int,
+        section='Estimation',
+        description=(
+            'int: maximum number of parameters to report during the estimation.'
+        ),
+        check=(cp.is_integer, cp.is_non_negative),
+    ),
+    ParameterTuple(
         name='save_iterations',
         default='True',
         type=bool,
@@ -233,6 +251,40 @@ all_parameters_tuple = (
             'True: dogleg. False: truncated conjugate gradient.'
         ),
         check=(cp.is_boolean,),
+    ),
+    ParameterTuple(
+        name='number_of_neighbors',
+        default=20,
+        type=int,
+        section='AssistedSpecification',
+        description=(
+            'int: maximum number of neighbors that are visited by the VNS algorithm.'
+        ),
+        check=(cp.is_integer, cp.is_non_negative),
+    ),
+    ParameterTuple(
+        name='largest_neighborhood',
+        default=20,
+        type=int,
+        section='AssistedSpecification',
+        description=(
+            'int: size of the largest neighborhood copnsidered by the Variable '
+            'Neighborhood Search (VNS) algorithm.'
+        ),
+        check=(cp.is_integer, cp.is_non_negative),
+    ),
+    ParameterTuple(
+        name='maximum_attempts',
+        default=100,
+        type=int,
+        section='AssistedSpecification',
+        description=(
+            'int: an attempts consists in selecting a solution in the Pareto '
+            'set, and trying to improve it. The parameter imposes an upper bound '
+            'on the total number of attempts, irrespectively if they are '
+            'successful or not.'
+        ),
+        check=(cp.is_integer, cp.is_non_negative),
     ),
 )
 
