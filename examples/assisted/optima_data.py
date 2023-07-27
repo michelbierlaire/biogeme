@@ -49,6 +49,7 @@ subscription = Variable('subscription')
 CarAvail = Variable('CarAvail')
 Education = Variable('Education')
 NbTransf = Variable('NbTransf')
+age = Variable('age')
 
 exclude = ((Choice == -1) + (CostCarCHF < 0) + (CarAvail == 3) * (Choice == 1)) > 0
 database.remove(exclude)
@@ -64,8 +65,8 @@ subscription = database.DefineVariable(
     'subscription', (GenAbST == 1) * 1 + (GenAbST != 1) * otherSubscription * 2
 )
 
-TimePT_scaled = TimePT / 200
-TimeCar_scaled = TimeCar / 200
+TimePT_scaled = database.DefineVariable('TimePT_scaled', TimePT / 200)
+TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
 MarginalCostPT_scaled = MarginalCostPT / 10
 CostCarCHF_scaled = CostCarCHF / 10
 distance_km_scaled = distance_km / 5

@@ -20,6 +20,19 @@ df = pd.read_csv('airline.dat', sep='\t')
 df.loc[df['q17_Gender'] == 99, 'q17_Gender'] = -1
 df.loc[df['q20_Education'] == 99, 'q20_Education'] = -1
 
+# High education
+df.loc[df['q20_Education'] <= 10, 'education'] = 1
+# Medium education
+df.loc[df['q20_Education'] <= 5, 'education'] = 2
+# Low education
+df.loc[df['q20_Education'] <= 2, 'education'] = 3
+df.loc[df['q20_Education'] == 99, 'education'] = -1
+df.loc[df['q20_Education'] == -1, 'education'] = -1
+
+df.loc[
+    df['q11_DepartureOrArrivalIsImportant'] == -1, 'q11_DepartureOrArrivalIsImportant'
+] = 0
+
 database = db.Database('airline', df)
 
 ArrivalTimeHours_1 = Variable('ArrivalTimeHours_1')
@@ -49,6 +62,7 @@ q02_TripPurpose = Variable('q02_TripPurpose')
 q03_WhoPays = Variable('q03_WhoPays')
 q17_Gender = Variable('q17_Gender')
 q20_Education = Variable('q20_Education')
+education = Variable('education')
 
 
 exclude = ArrivalTimeHours_1 == -1

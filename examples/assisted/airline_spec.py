@@ -9,8 +9,11 @@ Specification for the assisted specification algorithm. Airline case study
 
 from biogeme import models
 import biogeme.biogeme as bio
-from biogeme.catalog import Catalog, SynchronizedCatalog, segmentation_catalog
-from biogeme.segmentation import DiscreteSegmentationTuple
+from biogeme.catalog import (
+    Catalog,
+    segmentation_catalogs,
+    generic_alt_specific_catalogs,
+)
 from biogeme.expressions import (
     Beta,
     log,
@@ -40,12 +43,12 @@ from airline_data import (
     q03_WhoPays,
     q17_Gender,
     q11_DepartureOrArrivalIsImportant,
-    q20_Education,
+    education,
 )
 
 # Define the catalog for the time variable
 
-ell_fare = Beta('lambda_fare', 1, None, None, 0)
+ell_fare = Beta('lambda_fare', 1, None, 10, 0)
 
 fare_direct_catalog = Catalog.from_dict(
     catalog_name='fare_direct_catalog',
@@ -62,7 +65,7 @@ fare_direct_catalog = Catalog.from_dict(
     },
 )
 
-fare_same_catalog = SynchronizedCatalog.from_dict(
+fare_same_catalog = Catalog.from_dict(
     catalog_name='fare_same_catalog',
     dict_of_expressions={
         'linear': Fare_2,
@@ -75,10 +78,10 @@ fare_same_catalog = SynchronizedCatalog.from_dict(
         'square': Fare_2 * Fare_2,
         'boxcox': models.boxcox(Fare_2, ell_fare),
     },
-    controller=fare_direct_catalog,
+    controlled_by=fare_direct_catalog.controlled_by,
 )
 
-fare_multiple_catalog = SynchronizedCatalog.from_dict(
+fare_multiple_catalog = Catalog.from_dict(
     catalog_name='fare_multiple_catalog',
     dict_of_expressions={
         'linear': Fare_3,
@@ -91,7 +94,7 @@ fare_multiple_catalog = SynchronizedCatalog.from_dict(
         'square': Fare_3 * Fare_3,
         'boxcox': models.boxcox(Fare_3, ell_fare),
     },
-    controller=fare_direct_catalog,
+    controlled_by=fare_direct_catalog.controlled_by,
 )
 
 legroom_direct_catalog = Catalog.from_dict(
@@ -104,7 +107,7 @@ legroom_direct_catalog = Catalog.from_dict(
     },
 )
 
-legroom_same_catalog = SynchronizedCatalog.from_dict(
+legroom_same_catalog = Catalog.from_dict(
     catalog_name='legroom_same_catalog',
     dict_of_expressions={
         'linear': Legroom_2,
@@ -112,10 +115,10 @@ legroom_same_catalog = SynchronizedCatalog.from_dict(
         'sqrt': Legroom_2**0.5,
         'square': Legroom_2 * Legroom_2,
     },
-    controller=legroom_direct_catalog,
+    controlled_by=legroom_direct_catalog.controlled_by,
 )
 
-legroom_multiple_catalog = SynchronizedCatalog.from_dict(
+legroom_multiple_catalog = Catalog.from_dict(
     catalog_name='legroom_multiple_catalog',
     dict_of_expressions={
         'linear': Legroom_3,
@@ -123,10 +126,10 @@ legroom_multiple_catalog = SynchronizedCatalog.from_dict(
         'sqrt': Legroom_3**0.5,
         'square': Legroom_3 * Legroom_3,
     },
-    controller=legroom_direct_catalog,
+    controlled_by=legroom_direct_catalog.controlled_by,
 )
 
-ell_time = Beta('lambda_time', 1, None, None, 0)
+ell_time = Beta('lambda_time', 1, None, 10, 0)
 
 time_direct_catalog = Catalog.from_dict(
     catalog_name='time_direct_catalog',
@@ -143,7 +146,7 @@ time_direct_catalog = Catalog.from_dict(
     },
 )
 
-time_same_catalog = SynchronizedCatalog.from_dict(
+time_same_catalog = Catalog.from_dict(
     catalog_name='time_same_catalog',
     dict_of_expressions={
         'linear': TripTimeHours_2,
@@ -156,10 +159,10 @@ time_same_catalog = SynchronizedCatalog.from_dict(
         ),
         'piecewise_2': models.piecewise_as_variable(TripTimeHours_2, [0, 2, 8, None]),
     },
-    controller=time_direct_catalog,
+    controlled_by=time_direct_catalog.controlled_by,
 )
 
-time_multiple_catalog = SynchronizedCatalog.from_dict(
+time_multiple_catalog = Catalog.from_dict(
     catalog_name='time_multiple_catalog',
     dict_of_expressions={
         'linear': TripTimeHours_3,
@@ -172,7 +175,7 @@ time_multiple_catalog = SynchronizedCatalog.from_dict(
         ),
         'piecewise_2': models.piecewise_as_variable(TripTimeHours_3, [0, 2, 8, None]),
     },
-    controller=time_direct_catalog,
+    controlled_by=time_direct_catalog.controlled_by,
 )
 
 early_direct_catalog = Catalog.from_dict(
@@ -185,7 +188,7 @@ early_direct_catalog = Catalog.from_dict(
     },
 )
 
-early_same_catalog = SynchronizedCatalog.from_dict(
+early_same_catalog = Catalog.from_dict(
     catalog_name='early_same_catalog',
     dict_of_expressions={
         'linear': Opt2_SchedDelayEarly,
@@ -193,10 +196,10 @@ early_same_catalog = SynchronizedCatalog.from_dict(
         'sqrt': Opt2_SchedDelayEarly**0.5,
         'square': Opt2_SchedDelayEarly * Opt2_SchedDelayEarly,
     },
-    controller=early_direct_catalog,
+    controlled_by=early_direct_catalog.controlled_by,
 )
 
-early_multiple_catalog = SynchronizedCatalog.from_dict(
+early_multiple_catalog = Catalog.from_dict(
     catalog_name='early_multiple_catalog',
     dict_of_expressions={
         'linear': Opt3_SchedDelayEarly,
@@ -204,7 +207,7 @@ early_multiple_catalog = SynchronizedCatalog.from_dict(
         'sqrt': Opt3_SchedDelayEarly**0.5,
         'square': Opt3_SchedDelayEarly * Opt3_SchedDelayEarly,
     },
-    controller=early_direct_catalog,
+    controlled_by=early_direct_catalog.controlled_by,
 )
 
 late_direct_catalog = Catalog.from_dict(
@@ -215,9 +218,10 @@ late_direct_catalog = Catalog.from_dict(
         'sqrt': Opt1_SchedDelayLate**0.5,
         'square': Opt1_SchedDelayLate * Opt1_SchedDelayLate,
     },
+    controlled_by=early_direct_catalog.controlled_by,
 )
 
-late_same_catalog = SynchronizedCatalog.from_dict(
+late_same_catalog = Catalog.from_dict(
     catalog_name='late_same_catalog',
     dict_of_expressions={
         'linear': Opt2_SchedDelayLate,
@@ -225,10 +229,10 @@ late_same_catalog = SynchronizedCatalog.from_dict(
         'sqrt': Opt2_SchedDelayLate**0.5,
         'square': Opt2_SchedDelayLate * Opt2_SchedDelayLate,
     },
-    controller=late_direct_catalog,
+    controlled_by=early_direct_catalog.controlled_by,
 )
 
-late_multiple_catalog = SynchronizedCatalog.from_dict(
+late_multiple_catalog = Catalog.from_dict(
     catalog_name='late_multiple_catalog',
     dict_of_expressions={
         'linear': Opt3_SchedDelayLate,
@@ -236,12 +240,12 @@ late_multiple_catalog = SynchronizedCatalog.from_dict(
         'sqrt': Opt3_SchedDelayLate**0.5,
         'square': Opt3_SchedDelayLate * Opt3_SchedDelayLate,
     },
-    controller=late_direct_catalog,
+    controlled_by=early_direct_catalog.controlled_by,
 )
 
 # Define the potential segmentations
 all_segmentations = {
-    'TripPurpose': DiscreteSegmentationTuple(
+    'TripPurpose': database.generate_segmentation(
         variable=q02_TripPurpose,
         mapping={
             1: 'business',
@@ -251,30 +255,24 @@ all_segmentations = {
             0: 'unknown',
         },
     ),
-    'Gender': DiscreteSegmentationTuple(
+    'Gender': database.generate_segmentation(
         variable=q17_Gender,
         mapping={1: 'male', 2: 'female', -1: 'unknown'},
     ),
-    'Education': DiscreteSegmentationTuple(
-        variable=q20_Education,
+    'Education': database.generate_segmentation(
+        variable=education,
         mapping={
-            1: 'less than high school',
-            2: 'high school',
-            3: 'some college',
-            4: 'associate occ.',
-            5: 'associate acad.',
-            6: 'bachelor',
-            7: 'master',
-            8: 'professional',
-            9: 'doctorate',
+            1: 'high_edu',
+            2: 'medium_edu',
+            3: 'low_edu',
             -1: 'unknown',
         },
     ),
-    'Importance': DiscreteSegmentationTuple(
+    'Importance': database.generate_segmentation(
         variable=q11_DepartureOrArrivalIsImportant,
-        mapping={1: 'departure', 2: 'arrival', 3: 'not important'},
+        mapping={1: 'departure', 2: 'arrival', 0: 'not important'},
     ),
-    'Who pays': DiscreteSegmentationTuple(
+    'Who pays': database.generate_segmentation(
         variable=q03_WhoPays,
         mapping={1: 'traveler', 2: 'employer', 3: 'third party', 0: 'unknown'},
     ),
@@ -284,105 +282,79 @@ tuple_of_segmentations = tuple(all_segmentations.values())
 
 
 cte_same = Beta('cte_same', 0, None, None, 0)
-cte_same_catalog = segmentation_catalog(
-    beta_parameter=cte_same,
-    potential_segmentations=tuple_of_segmentations,
-    maximum_number=3,
-)
 cte_multiple = Beta('cte_multiple', 0, None, None, 0)
-cte_multiple_catalog = segmentation_catalog(
-    beta_parameter=cte_multiple,
+cte_same_catalog, cte_multiple_catalog = segmentation_catalogs(
+    generic_name='cte',
+    beta_parameters=[cte_same, cte_multiple],
     potential_segmentations=tuple_of_segmentations,
     maximum_number=3,
-    synchronized_with=cte_same_catalog,
 )
 
 beta_fare = Beta('beta_fare', 0, None, 0, 0)
-beta_fare_catalog = segmentation_catalog(
-    beta_parameter=beta_fare,
+# The function returns a list. In this case, the list has only one
+# element. The variable is followed by a comma so that the only
+# catalog in the list is directly extracted and assigned to the
+# variable.
+(beta_fare_catalog,) = segmentation_catalogs(
+    generic_name='beta_fare',
+    beta_parameters=[beta_fare],
     potential_segmentations=tuple_of_segmentations,
     maximum_number=3,
 )
 
 beta_time = Beta('beta_time', 0, None, 0, 0)
-beta_time_catalog = segmentation_catalog(
-    beta_parameter=beta_time,
-    potential_segmentations=tuple_of_segmentations,
-    maximum_number=3,
-)
 
-beta_time_direct = Beta('beta_time_direct', 0, None, 0, 0)
-beta_time_direct_catalog = segmentation_catalog(
-    beta_parameter=beta_time_direct,
+(beta_time_catalog,) = generic_alt_specific_catalogs(
+    generic_name='beta_time',
+    beta_parameters=[beta_time],
+    alternatives=['direct', 'same', 'multiple'],
     potential_segmentations=tuple_of_segmentations,
     maximum_number=3,
 )
-beta_time_same = Beta('beta_time_same', 0, None, 0, 0)
-beta_time_same_catalog = segmentation_catalog(
-    beta_parameter=beta_time_same,
-    potential_segmentations=tuple_of_segmentations,
-    maximum_number=3,
-)
-beta_time_multiple = Beta('beta_time_multiple', 0, None, 0, 0)
-beta_time_multiple_catalog = segmentation_catalog(
-    beta_parameter=beta_time_multiple,
-    potential_segmentations=tuple_of_segmentations,
-    maximum_number=3,
-)
-
 
 beta_early = Beta('beta_early', 0, None, 0, 0)
-beta_early_catalog = segmentation_catalog(
-    beta_parameter=beta_early,
+# The function returns a list. In this case, the list has only one
+# element. The variable is followed by a comma so that the only
+# catalog in the list is directly extracted and assigned to the
+# variable.
+(beta_early_catalog,) = segmentation_catalogs(
+    generic_name='beta_early',
+    beta_parameters=[beta_early],
     potential_segmentations=tuple_of_segmentations,
     maximum_number=3,
 )
 
 beta_late = Beta('beta_late', 0, None, 0, 0)
-beta_late_catalog = segmentation_catalog(
-    beta_parameter=beta_late,
+# The function returns a list. In this case, the list has only one
+# element. The variable is followed by a comma so that the only
+# catalog in the list is directly extracted and assigned to the
+# variable.
+(beta_late_catalog,) = segmentation_catalogs(
+    generic_name='beta_late',
+    beta_parameters=[beta_late],
     potential_segmentations=tuple_of_segmentations,
     maximum_number=3,
 )
 
 beta_legroom = Beta('beta_legroom', 0, 0, None, 0)
-beta_legroom_catalog = segmentation_catalog(
-    beta_parameter=beta_legroom,
+# The function returns a list. In this case, the list has only one
+# element. The variable is followed by a comma so that the only
+# catalog in the list is directly extracted and assigned to the
+# variable.
+(beta_legroom_catalog,) = segmentation_catalogs(
+    generic_name='beta_legroom',
+    beta_parameters=[beta_legroom],
     potential_segmentations=tuple_of_segmentations,
     maximum_number=3,
 )
 
-# Time coef.  can be generic or alternatice specific
-term_time_direct_catalog = Catalog.from_dict(
-    catalog_name='term_time',
-    dict_of_expressions={
-        'generic': beta_time_catalog,
-        'alt. specific': beta_time_direct_catalog,
-    },
-)
-term_time_same_catalog = SynchronizedCatalog.from_dict(
-    catalog_name='term_time',
-    dict_of_expressions={
-        'generic': beta_time_catalog,
-        'alt. specific': beta_time_same_catalog,
-    },
-    controller=term_time_direct_catalog,
-)
-term_time_multiple_catalog = SynchronizedCatalog.from_dict(
-    catalog_name='term_time',
-    dict_of_expressions={
-        'generic': beta_time_catalog,
-        'alt. specific': beta_time_multiple_catalog,
-    },
-    controller=term_time_direct_catalog,
-)
 
 utility_direct = (
     beta_fare_catalog * fare_direct_catalog
     + beta_legroom_catalog * legroom_direct_catalog
     + beta_early_catalog * early_direct_catalog
     + beta_late_catalog * late_direct_catalog
-    + term_time_direct_catalog
+    + beta_time_catalog['direct'] * time_direct_catalog
 )
 
 utility_same = (
@@ -391,7 +363,7 @@ utility_same = (
     + beta_legroom_catalog * legroom_same_catalog
     + beta_early_catalog * early_same_catalog
     + beta_late_catalog * late_same_catalog
-    + term_time_same_catalog
+    + beta_time_catalog['same'] * time_same_catalog
 )
 
 utility_multiple = (
@@ -400,8 +372,7 @@ utility_multiple = (
     + beta_legroom_catalog * legroom_multiple_catalog
     + beta_early_catalog * early_multiple_catalog
     + beta_late_catalog * late_multiple_catalog
-    + beta_time_catalog * time_multiple_catalog
-    + term_time_multiple_catalog
+    + beta_time_catalog['multiple'] * time_multiple_catalog
 )
 
 V = {
