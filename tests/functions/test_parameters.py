@@ -10,7 +10,7 @@ from os import path
 import tempfile
 import unittest
 import numpy as np
-import biogeme.parameters as param
+from biogeme.parameters import biogeme_parameters
 import biogeme.exceptions as excep
 from biogeme.default_parameters import ParameterTuple
 import biogeme.check_parameters as cp
@@ -18,10 +18,56 @@ import biogeme.optimization as opt
 
 BLANKS = 25 * ' '
 
+FILE_CONTENT = """
+[Specification]
+suggest_scales = "True" # bool: If True, Biogeme suggests the scaling of
+                         # the variables in the database.
+missing_data = 99999 # number: If one variable has this value, it is assumed
+                         # that a data is missing and an exception will
+                         # be triggered.
+
+[Output]
+generate_html = "True" # bool: "True" if the HTML file
+                         # with the results must be generated.
+generate_pickle = "True" # bool: "True" if the pickle file
+                         # with the results must be generated.
+
+[Estimation]
+second_derivatives = 1.0 # float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated
+tolerance = 6.06273418136464e-06 # float: the algorithm stops when this precision is reached
+max_iterations = 100 # int: maximum number of iterations
+optimization_algorithm = "simple_bounds" # str: optimization algorithm to be used for estimation.
+                         # Valid values: ['scipy', 'LS-newton', 'TR-newton', 'LS-BFGS', 'TR-BFGS', 'simple_bounds']
+
+save_iterations = "True" # bool: If True, the current iterate is saved after
+                         # each iteration, in a file named
+                         # ``__[modelName].iter``, where
+                         # ``[modelName]`` is the name given to the
+                         # model. If such a file exists, the starting
+                         # values for the estimation are replaced by
+                         # the values saved in the file.
+
+a_param = "lopsum"
+
+[MonteCarlo]
+number_of_draws = 1000 # int: Number of draws for Monte-Carlo integration.
+seed = 0 # int: Seed used for the pseudo-random number generation. It is
+                         # useful only when each run should generate the exact same
+                         # result. If 0, a new seed is used at each run.
+
+[MultiThreading]
+number_of_threads = 0 # int: Number of threads/processors to be used. If
+                         # the parameter is 0, the number of
+                         # available threads is calculated using
+                         # cpu_count().
+
+"""
+
+
 default_parameters = (
     ParameterTuple(
         name='second_derivatives',
-        default=1.0,
+        value=1.0,
         type=float,
         section='Estimation',
         description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
@@ -29,7 +75,7 @@ default_parameters = (
     ),
     ParameterTuple(
         name='tolerance',
-        default=np.finfo(np.float64).eps ** 0.3333,
+        value=np.finfo(np.float64).eps ** 0.3333,
         type=float,
         section='Estimation',
         description='# float: the algorithm stops when this precision is reached',
@@ -37,7 +83,7 @@ default_parameters = (
     ),
     ParameterTuple(
         name='max_iterations',
-        default=100,
+        value=100,
         type=int,
         section='Estimation',
         description='# int: maximum number of iterations',
@@ -45,40 +91,40 @@ default_parameters = (
     ),
     ParameterTuple(
         name='optimization_algorithm',
-        default='simple_bounds',
+        value='simple_bounds',
         type=str,
         section='Estimation',
         description=(
             f'# str: optimization algorithm to be used for estimation.\n'
             f'{BLANKS}# Valid values: {list(opt.algorithms.keys())}'
         ),
-        check=(cp.check_algo_name),
+        check=(cp.check_algo_name,),
     ),
     ParameterTuple(
         name='generate_html',
-        default='True',
+        value=True,
         type=bool,
         section='Output',
         description=(
             '# bool: "True" if the HTML file\n'
             '{BLANKS}# with the results must be generated.'
         ),
-        check=(cp.is_boolean),
+        check=(cp.is_boolean,),
     ),
     ParameterTuple(
         name='generate_pickle',
-        default='True',
+        value=True,
         type=bool,
         section='Output',
         description=(
             f'# bool: "True" if the pickle file\n'
             f'{BLANKS}# with the results must be generated.'
         ),
-        check=(cp.is_boolean),
+        check=(cp.is_boolean,),
     ),
     ParameterTuple(
         name='number_of_threads',
-        default=0,
+        value=0,
         type=int,
         section='MultiThreading',
         description=(
@@ -91,7 +137,7 @@ default_parameters = (
     ),
     ParameterTuple(
         name='number_of_draws',
-        default=1000,
+        value=1000,
         type=int,
         section='MonteCarlo',
         description=('int: Number of draws for Monte-Carlo integration.'),
@@ -99,7 +145,7 @@ default_parameters = (
     ),
     ParameterTuple(
         name='skip_audit',
-        default='False',
+        value=False,
         type=bool,
         section='Specification',
         description=(
@@ -107,22 +153,22 @@ default_parameters = (
             f'{BLANKS}# formulas. It may save significant amount of\n'
             f'{BLANKS}# time for large models and large data sets.\n'
         ),
-        check=(cp.is_boolean),
+        check=(cp.is_boolean,),
     ),
     ParameterTuple(
         name='suggest_scales',
-        default='True',
+        value=True,
         type=bool,
         section='Specification',
         description=(
             f'# bool: If True, Biogeme suggests the scaling of\n'
             f'{BLANKS}# the variables in the database.'
         ),
-        check=(cp.is_boolean),
+        check=(cp.is_boolean,),
     ),
     ParameterTuple(
         name='missing_data',
-        default=99999,
+        value=99999,
         type=int,
         section='Specification',
         description=(
@@ -130,11 +176,11 @@ default_parameters = (
             f'{BLANKS}# that a data is missing and an exception will\n'
             f'{BLANKS}# be triggered.'
         ),
-        check=(cp.is_number),
+        check=(cp.is_number,),
     ),
     ParameterTuple(
         name='seed',
-        default=0,
+        value=0,
         type=int,
         section='MonteCarlo',
         description=(
@@ -146,7 +192,7 @@ default_parameters = (
     ),
     ParameterTuple(
         name='save_iterations',
-        default='True',
+        value=True,
         type=bool,
         section='Estimation',
         description=(
@@ -158,11 +204,11 @@ default_parameters = (
             f'{BLANKS}# values for the estimation are replaced by\n'
             f'{BLANKS}# the values saved in the file.'
         ),
-        check=(cp.is_boolean),
+        check=(cp.is_boolean,),
     ),
     ParameterTuple(
         name='a_param',
-        default='lopsum',
+        value='lopsum',
         type=str,
         section='Estimation',
         description='',
@@ -170,7 +216,7 @@ default_parameters = (
     ),
     ParameterTuple(
         name='a_param',
-        default='anything',
+        value='anything',
         type=str,
         section='Specification',
         description='',
@@ -181,23 +227,22 @@ default_parameters = (
 
 class TestParameters(unittest.TestCase):
     def setUp(self):
-        """Prepare for the tests"""
-        self.the_parameters = param.Parameters(default_parameters)
-
+        for p in default_parameters:
+            biogeme_parameters.add_parameter(p)
     def test_get_param_tuple_1(self):
         """Test the retrieval of parameter without the section name"""
-        the_tuple = self.the_parameters.get_param_tuple(name='missing_data')
+        the_tuple = biogeme_parameters.get_param_tuple(name='missing_data')
         self.assertEqual(the_tuple.name, 'missing_data')
-        self.assertEqual(the_tuple.default, 99999)
+        self.assertEqual(the_tuple.value, 99999)
         self.assertEqual(the_tuple.section, 'Specification')
 
     def test_get_param_tuple_2(self):
         """Test the retrieval of parameter with the section name"""
-        the_tuple = self.the_parameters.get_param_tuple(
+        the_tuple = biogeme_parameters.get_param_tuple(
             name='missing_data', section='Specification'
         )
         self.assertEqual(the_tuple.name, 'missing_data')
-        self.assertEqual(the_tuple.default, 99999)
+        self.assertEqual(the_tuple.value, 99999)
         self.assertEqual(the_tuple.section, 'Specification')
 
     def test_get_param_tuple_3(self):
@@ -205,15 +250,15 @@ class TestParameters(unittest.TestCase):
         mentioned section
         """
         with self.assertRaises(excep.BiogemeError):
-            _ = self.the_parameters.get_param_tuple(
+            _ = biogeme_parameters.get_param_tuple(
                 name='missing_data', section='Estimation'
             )
 
         with self.assertRaises(excep.BiogemeError):
-            _ = self.the_parameters.get_param_tuple(name='unknown_parameter')
+            _ = biogeme_parameters.get_param_tuple(name='unknown_parameter')
 
         with self.assertRaises(excep.BiogemeError):
-            _ = self.the_parameters.get_param_tuple(
+            _ = biogeme_parameters.get_param_tuple(
                 name='unknown_parameter', section='Estimation'
             )
 
@@ -222,7 +267,7 @@ class TestParameters(unittest.TestCase):
         sections, and the section is not specified.
         """
         with self.assertRaises(excep.BiogemeError):
-            _ = self.the_parameters.get_param_tuple(
+            _ = biogeme_parameters.get_param_tuple(
                 name='a_param',
             )
 
@@ -231,11 +276,11 @@ class TestParameters(unittest.TestCase):
         sections, with the section name
 
         """
-        the_tuple = self.the_parameters.get_param_tuple(
+        the_tuple = biogeme_parameters.get_param_tuple(
             name='a_param', section='Estimation'
         )
         self.assertEqual(the_tuple.name, 'a_param')
-        self.assertEqual(the_tuple.default, 'lopsum')
+        self.assertEqual(the_tuple.value, 'lopsum')
         self.assertEqual(the_tuple.section, 'Estimation')
 
     def test_get_param_tuple_6(self):
@@ -243,45 +288,103 @@ class TestParameters(unittest.TestCase):
         section, with the section name
 
         """
-        the_tuple = self.the_parameters.get_param_tuple(
+        the_tuple = biogeme_parameters.get_param_tuple(
             name='a_param', section='Specification'
         )
         self.assertEqual(the_tuple.name, 'a_param')
-        self.assertEqual(the_tuple.default, 'anything')
+        self.assertEqual(the_tuple.value, 'anything')
         self.assertEqual(the_tuple.section, 'Specification')
 
     def test_check_parameter_value(self):
         a_tuple = ParameterTuple(
             name='param_name',
-            default=2.0,
+            value=2.0,
             type=float,
             section='Estimation',
             description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
             check=(cp.zero_one, cp.is_number),
         )
-        ok, msg = self.the_parameters.check_parameter_value(a_tuple, 5)
+        ok, _ = biogeme_parameters.check_parameter_value(a_tuple)
         self.assertFalse(ok)
 
-    def test_set_value_from_tuple(self):
+    def test_add_parameter(self):
         a_tuple = ParameterTuple(
             name='param_name',
-            default=2.0,
+            value=0.5,
             type=float,
             section='Estimation',
             description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
             check=(cp.zero_one, cp.is_number),
         )
-        self.the_parameters.set_value_from_tuple(a_tuple, 1)
-        self.assertEqual(self.the_parameters.values[a_tuple], 1)
+        biogeme_parameters.add_parameter(a_tuple)
+        self.assertEqual(
+            biogeme_parameters.get_value(name=a_tuple.name, section=a_tuple.section),
+            0.5
+        )
+        another_tuple = ParameterTuple(
+            name='param_name',
+            value=1.5,
+            type=float,
+            section='Estimation',
+            description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
+            check=(cp.zero_one, cp.is_number),
+        )
         with self.assertRaises(excep.BiogemeError):
-            self.the_parameters.set_value_from_tuple(a_tuple, 2)
+            biogeme_parameters.add_parameter(another_tuple)
 
     def test_set_get_value(self):
         value = 1.0e-3
-        self.the_parameters.set_value('tolerance', value)
-        check = self.the_parameters.get_value('tolerance')
+        biogeme_parameters.set_value('tolerance', value, section='Estimation')
+        check = biogeme_parameters.get_value('tolerance', section='Estimation')
         self.assertEqual(value, check)
 
+class TestToml(unittest.TestCase):
+    """Tests for the biogeme.toml module"""
 
+    def test_from_file(self):
+        """Read the parameters from file"""
+        # Create a temporary directory
+        test_dir = tempfile.mkdtemp()
+        test_file = path.join(test_dir, 'biogeme.toml')
+        with open(test_file, 'w', encoding='utf-8') as f:
+            print(FILE_CONTENT, file=f)
+        biogeme_parameters.read_file(file_name=test_file)
+
+        with self.assertRaises(excep.BiogemeError):
+            _ = biogeme_parameters.get_value('a_wrong_param', section='Estimation')
+
+        check_int = biogeme_parameters.get_value('missing_data')
+        self.assertEqual(check_int, 99999)
+
+        check_float = biogeme_parameters.get_value('second_derivatives', section='Estimation')
+        self.assertEqual(check_float, 1.0)
+
+        check_str = biogeme_parameters.get_value('optimization_algorithm')
+        self.assertEqual(check_str, 'simple_bounds')
+
+        # Remove the directory after the test
+        shutil.rmtree(test_dir)
+
+    def test_from_default(self):
+        """Test with default parameters"""
+        test_dir = tempfile.mkdtemp()
+        test_file = path.join(test_dir, 'any_file_name.toml')
+        biogeme_parameters.read_file(file_name=test_file)
+
+        with self.assertRaises(excep.BiogemeError):
+            _ = biogeme_parameters.get_value('a_wrong_param', section='Estimation')
+
+        check_int = biogeme_parameters.get_value('missing_data')
+        self.assertEqual(check_int, 99999)
+
+        check_float = biogeme_parameters.get_value('second_derivatives', section='Estimation')
+        self.assertEqual(check_float, 1.0)
+
+        check_str = biogeme_parameters.get_value('optimization_algorithm')
+        self.assertEqual(check_str, 'simple_bounds')
+        # Remove the directory after the test
+        shutil.rmtree(test_dir)
+
+        
 if __name__ == '__main__':
     unittest.main()
