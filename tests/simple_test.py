@@ -2,18 +2,9 @@
 Simple estimation test from the Ben-Akiva and Lerman book
 
 :author: Michel Bierlaire
-:data: Wed Apr 29 18:43:34 2020
+:date: Wed Apr 29 18:43:34 2020
 
 """
-# Bug in pylint
-# pylint: disable=no-member
-#
-# Too constraining
-# pylint: disable=invalid-name, too-many-instance-attributes
-#
-# Not needed in test
-# pylint: disable=missing-function-docstring, missing-class-docstring
-
 import unittest
 from os import path
 import shutil
@@ -140,9 +131,7 @@ class test_biogeme(unittest.TestCase):
 
         logprob = models.loglogit(V, av, Choice)
 
-        biogeme = bio.BIOGEME(
-            self.database, logprob, parameter_file=self.toml_file
-        )
+        biogeme = bio.BIOGEME(self.database, logprob, parameter_file=self.toml_file)
         biogeme.modelName = 'test'
         biogeme.generate_html = False
         biogeme.generate_pickle = False
