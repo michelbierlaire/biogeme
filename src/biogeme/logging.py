@@ -29,7 +29,7 @@ def get_screen_logger(level=WARNING):
         # supersed the handler
         logger.setLevel(DEBUG)
         formatter_debug = logging.Formatter(
-            '[%(levelname)s] ' '%(asctime)s ' '%(message)s ' '<%(filename)s:%(lineno)d>'
+            '[%(levelname)s] %(asctime)s %(message)s <%(filename)s:%(lineno)d>'
         )
         formatter_normal = logging.Formatter('%(message)s ')
         formatter = formatter_debug if level == DEBUG else formatter_normal
@@ -54,7 +54,7 @@ def get_file_logger(filename, level=WARNING):
         # supersed the handler
         logger.setLevel(DEBUG)
         formatter = logging.Formatter(
-            '[%(levelname)s] ' '%(asctime)s ' '%(message)s ' '<%(filename)s:%(lineno)d>'
+            '[%(levelname)s] %(asctime)s %(message)s <%(filename)s:%(lineno)d>'
         )
         file_handler = logging.FileHandler(filename)
         file_handler.setLevel(level)
