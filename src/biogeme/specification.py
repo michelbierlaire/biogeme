@@ -6,6 +6,7 @@
 Implements a model specification in a multiple expression context (using Catalogs)
 """
 import logging
+from biogeme_optimization.pareto import SetElement
 import biogeme.biogeme as bio
 from biogeme import tools
 from biogeme.configuration import Configuration
@@ -80,12 +81,18 @@ class Specification:
         return str(self.config_id)
 
     def _estimate(self):
-        """Estimate the parameter of the current specification, if not already done"""
+        """Estimate the parameter of the current specification, if not already done
+
+        :param quick_estimate: if True, a "quick estimate" is
+            performed, in the sense that the final statistics are not
+            calculated
+        :type quick_estimate: bool
+        """
         if self.expression is None:
-            error_msg = f'No expression has been provided for the model.'
+            error_msg = 'No expression has been provided for the model.'
             raise excep.BiogemeError(error_msg)
         if self.database is None:
-            error_msg = f'No database has been provided for the estimation.'
+            error_msg = 'No database has been provided for the estimation.'
             raise excep.BiogemeError(error_msg)
         if self.model_names is None:
             self.model_names = tools.ModelNames(prefix=self.generic_name)
@@ -93,15 +100,14 @@ class Specification:
         if self.config_id in self.all_results:
             return
 
-        the_config = self.expression.current_configuration()
-        self.configure_expression()
         logger.debug(f'****** Estimate {self.config_id}')
-        user_notes = the_config.get_html()
-        the_biogeme = bio.BIOGEME(self.database, self.expression, userNotes=user_notes)
+        the_biogeme = bio.BIOGEME.from_configuration(
+            config_id=self.config_id, expression=self.expression, database=self.database
+        )
         the_biogeme.modelName = self.model_names(self.config_id)
+        logger.info(f'*** Estimate {the_biogeme.modelName}')
         the_biogeme.generate_html = False
         the_biogeme.generate_pickle = False
-        logger.info(f'*** Estimate {the_biogeme.modelName}')
         results = the_biogeme.quickEstimate()
         self.all_results[self.config_id] = results
 
@@ -113,3 +119,21 @@ class Specification:
         """
         the_results = self.get_results()
         return f'{the_results.short_summary()}'
+
+    def get_element(self, multi_objectives):
+        """Obtains the element from the Pareto set corresponding to a specification
+
+        :param multi_objectives: function calculating the objectives
+            from the estimation results
+        :type multi_objectives: fct(biogeme.results.bioResults) --> list[float]
+
+        :return: element from the Pareto set
+        :rtype: biogeme.pareto.SetElement
+
+        """
+        the_id = self.config_id
+        the_results = self.get_results()
+        the_objectives = multi_objectives(the_results)
+        element = SetElement(the_id, the_objectives)
+        logger.debug(f'{element=}')
+        return element
