@@ -32,7 +32,7 @@ ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
+B_TIME_S = Beta('B_TIME_S', 1, 0.0001, 10, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
 # Define a random parameter, normally distirbuted, designed to be used
