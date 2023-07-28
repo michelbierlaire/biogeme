@@ -50,12 +50,13 @@ class TestResults(unittest.TestCase):
             'beta1': beta1,
             'simul': simul,
         }
-        myBiogeme = bio.BIOGEME(myData, dictOfExpressions)
-        myBiogeme.generateHtml = False
-        myBiogeme.generatePickle = False
-        myBiogeme.saveIterations = False
-        myBiogeme.modelName = 'simpleExample'
-        self.results = myBiogeme.estimate(bootstrap=10)
+        my_biogeme = bio.BIOGEME(myData, dictOfExpressions)
+        my_biogeme.generate_html = False
+        my_biogeme.generate_pickle = False
+        my_biogeme.saveIterations = False
+        my_biogeme.modelName = 'simpleExample'
+        my_biogeme.bootstrap_samples = 10
+        self.results = my_biogeme.estimate(run_bootstrap=True)
 
     def test_calcPValue(self):
         p = res.calcPValue(1.96)
@@ -63,9 +64,9 @@ class TestResults(unittest.TestCase):
 
     def test_isBoundActive(self):
         beta1 = res.beta('beta1', -1, (-1, 1))
-        self.assertTrue(beta1.isBoundActive())
+        self.assertTrue(beta1.is_bound_active())
         beta2 = res.beta('beta2', 0, (-1, 1))
-        self.assertFalse(beta2.isBoundActive())
+        self.assertFalse(beta2.is_bound_active())
 
 
 if __name__ == '__main__':
