@@ -9,11 +9,12 @@ from itertools import product
 from biogeme.expressions import Beta
 from biogeme.multiple_expressions import MultipleExpression, NamedExpression
 import biogeme.exceptions as excep
+from biogeme.controller import Controller
 import biogeme.expressions as ex
 import biogeme.segmentation as seg
 from biogeme.configuration import (
-    SelectionTuple,
-    Configuration,
+    SEPARATOR,
+    SELECTION_SEPARATOR,
 )
 
 logger = logging.getLogger(__name__)
@@ -22,10 +23,10 @@ logger = logging.getLogger(__name__)
 class Catalog(MultipleExpression):
     """Catalog of expressions that are interchangeable. Only one of
     them defines the specification. They are designed to be
-    modified algorithmically.
+    modified algorithmically by a controller.
     """
 
-    def __init__(self, name, list_of_named_expressions):
+    def __init__(self, catalog_name, named_expressions, controlled_by=None):
         """Ctor
 
         :param name: name of the catalog of expressions
@@ -35,43 +36,79 @@ class Catalog(MultipleExpression):
             each containing a name and an expression.
         :type list_of_named_expressions: list(NamedExpression)
 
+        :param controlled_by: Object controlling the selection of the specifications.
+        :type controlled_by: Controller
+
         :raise BiogemeError: if list_of_named_expressions is empty
+        :raise BiogemeError: if incompatible Controller
 
         """
-        super().__init__(name)
+        super().__init__(catalog_name)
 
-        if not list_of_named_expressions:
+        if not named_expressions:
             raise excep.BiogemeError(
-                f'{name}: cannot create a catalog from an empty list.'
+                f'{catalog_name}: cannot create a catalog from an empty list.'
             )
 
-        # Transform numeric values into Biogeme expressions
-        self.list_of_named_expressions = [
+        if controlled_by and not isinstance(controlled_by, Controller):
+            error_msg = (
+                f'The controller must be of type Controller and not '
+                f'{type(controlled_by)}'
+            )
+            raise excep.BiogemeError(error_msg)
+
+        self.named_expressions = [
             NamedExpression(
                 name=named.name, expression=ex.process_numeric(named.expression)
             )
-            for named in list_of_named_expressions
+            for named in named_expressions
         ]
 
         # Check if the name of the catalog was not already used.
         if any(
             named.expression.contains_catalog(self.name)
-            for named in self.list_of_named_expressions
+            for named in self.named_expressions
         ):
             error_msg = (
                 f'Catalog {self.name} cannot contain itself. Use different names'
             )
             raise excep.BiogemeError(error_msg)
 
-        self.current_index = 0
-        self.dict_of_index = {
-            expression.name: index
-            for index, expression in enumerate(self.list_of_named_expressions)
-        }
-        self.synchronized_catalogs = []
+        # Declare the expressions as children of the catalog
+        for _, expression in self.named_expressions:
+            self.children.append(expression)
+
+        names = [named_expr.name for named_expr in self.named_expressions]
+        if controlled_by is None:
+            controller_name = catalog_name
+            self.controlled_by = Controller(
+                controller_name=controller_name, specification_names=names
+            )
+        else:
+            self.controlled_by = controlled_by
+            controller_names = list(controlled_by.specification_names)
+            if names != controller_names:
+                error_msg = (
+                    f'Incompatible IDs between catalog [{names}] and controller '
+                    f'[{controller_names}]'
+                )
+                raise excep.BiogemeError(error_msg)
+
+    def get_all_controllers(self):
+        """Provides all controllers controlling the specifications of
+            a multiple expression
+
+        :return: a set of controllers
+        :rtype: set(biogeme.controller.Controller)
+
+        """
+        all_controllers = {self.controlled_by}
+        for e in self.children:
+            all_controllers |= e.get_all_controllers()
+        return all_controllers
 
     @classmethod
-    def from_dict(cls, catalog_name, dict_of_expressions):
+    def from_dict(cls, catalog_name, dict_of_expressions, controlled_by=None):
         """Ctor using a dict instead of a list.
 
         Python does not guarantee the order of elements of a dict,
@@ -86,68 +123,27 @@ class Catalog(MultipleExpression):
             expression and the expression itself.
         :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
 
+        :param controlled_by: Object controlling the selection of the specifications.
+        :type controlled_by: Controller
+
         """
-        list_of_named_expressions = list(
+        named_expressions = [
             NamedExpression(name=name, expression=expression)
             for name, expression in dict_of_expressions.items()
+        ]
+        return cls(
+            catalog_name=catalog_name,
+            named_expressions=named_expressions,
+            controlled_by=controlled_by,
         )
-        return cls(catalog_name, list_of_named_expressions)
+
+    def catalog_size(self) -> int:
+        """Return the size of the catalog."""
+        return len(self.named_expressions)
 
     def get_iterator(self):
         """Obtain an iterator on the named expressions"""
-        return iter(self.list_of_named_expressions)
-
-    def set_index(self, index):
-        """Set the index of the selected expression, and update the
-            synchronized catalogs
-
-        :param index: value of the index
-        :type index: int
-
-        :raises BiogemeError: if index is out of range
-
-        """
-        if index >= self.catalog_size():
-            error_msg = (
-                f'Wrong index {index}. ' f'Must be in [0, {self.catalog_size()}]'
-            )
-            raise excep.BiogemeError(error_msg)
-        self.current_index = index
-        for sync_catalog in self.synchronized_catalogs:
-            sync_catalog.current_index = index
-
-    def set_of_configurations(self):
-        """Set of possible configurations for a multiple
-        expression. If the expression is simple, an empty set is
-        returned. If the number of configurations exceeds the maximum
-        length, None is returned.
-
-        :param maximum_length: maximum length for complete enumeration
-        :type maximum_length: int
-
-        :return: set of configurations, or None
-        :rtype: set(biogeme.configure.Configuration)
-        """
-        results = set()
-        for name, expression in self.get_iterator():
-            this_selection = Configuration(
-                [SelectionTuple(catalog=self.name, selection=name)]
-            )
-            this_set = expression.set_of_configurations()
-            if this_set is None:
-                return None
-            if this_set:
-                the_updated_set = {
-                    Configuration.from_tuple_of_configurations((conf, this_selection))
-                    for conf in this_set
-                }
-                results |= the_updated_set
-            else:
-                results.add(this_selection)
-
-            if len(results) > self.maximum_number_of_configurations:
-                return None
-        return results
+        return iter(self.named_expressions)
 
     def selected(self):
         """Return the selected expression and its name
@@ -155,7 +151,7 @@ class Catalog(MultipleExpression):
         :return: the name and the selected expression
         :rtype: NamedExpression
         """
-        return self.list_of_named_expressions[self.current_index]
+        return self.named_expressions[self.controlled_by.current_index]
 
     def selected_name(self):
         """Return the name of the selected expression
@@ -163,255 +159,19 @@ class Catalog(MultipleExpression):
         :return: the name of the selected expression
         :rtype: str
         """
-        return self.list_of_named_expressions[self.current_index].name
-
-    def current_configuration(self, includes_controlled_catalogs=False):
-        """Obtain the current configuration of an expression with Catalog
-
-        :param includes_controlled_catalogs: if True, the controlled
-            catalogs are included in the configuration. This is used
-            mainly for debugging purposes.
-        :type includes_controlled_catalogs: bool
-
-        :return: configuration
-        :rtype: biogeme.configuration.Configuration
-        """
-        the_result = self.selected_expression().current_configuration(
-            includes_controlled_catalogs
-        )
-        current_selection = Configuration(
-            [SelectionTuple(catalog=self.name, selection=self.selected_name())]
-        )
-        if the_result is None:
-            return Configuration.from_tuple_of_configurations((current_selection,))
-        return Configuration.from_tuple_of_configurations(
-            (the_result, current_selection)
-        )
-
-    def configure_catalogs(self, configuration):
-        """Select the items in each catalog corresponding to the
-        requested configuration
-
-        :param configuration: description of the configuration
-        :type configuration: biogeme.configuration.Configuration
-
-        """
-        selection = configuration.get_selection(self.name)
-        if selection is not None:
-            self.set_index(self.dict_of_index[selection])
-
-        for _, expr in self.list_of_named_expressions:
-            expr.configure_catalogs(configuration)
-
-    def modify_catalogs(self, set_of_catalogs, step, circular):
-        """Modify the specification of several catalogs
-
-        :param set_of_catalogs: set of catalogs to modify
-        :type set_of_catalogs: set(str)
-
-        :param step: increment of the modifications. Can be negative.
-        :type step: int
-
-        :param circular: If True, the modificiation is always made. If
-            the selection needs to move past the last one, it comes
-            back to the first one. For instance, if the catalog is
-            currently at its last value, and the step is 1, it is set
-            to its first value. If circular is False, and the
-            selection needs to move past the last one, the selection
-            is set to the last one. It works symmetrically if the step
-            is negative
-        :type circular: bool
-
-        :return: number of actual modifications
-        :rtype: int
-
-        """
-        total_modif = 0
-        for _, e in self.list_of_named_expressions:
-            total_modif += e.modify_catalogs(set_of_catalogs, step, circular)
-
-        if self.name not in set_of_catalogs:
-            return total_modif
-
-        the_size = self.catalog_size()
-        new_index = self.current_index + step
-        if circular:
-            self.set_index(new_index % the_size)
-            return total_modif + step
-
-        if new_index < 0:
-            total_modif += self.current_index
-            self.set_index(0)
-            return total_modif
-
-        if new_index >= the_size:
-            total_modif += the_size - 1 - self.current_index
-            self.set_index(the_size - 1)
-            return total_modif
-
-        self.set_index(new_index)
-        return total_modif + step
-
-    def reset_this_expression_selection(self):
-        """In each group of expressions, select the first one"""
-        self.set_index(0)
-
-    def select_expression(self, group_name, index):
-        """Select a specific expression in a group
-
-        :param group_name: name of the group of expressions
-        :type group_name: str
-
-        :param index: index of the expression in the group
-        :type index: int
-
-        """
-        total = 0
-        if self.name == group_name:
-            total = 1
-            self.set_index(index)
-        for _, expression in self.list_of_named_expressions:
-            total += expression.select_expression(group_name, index)
-        return total
+        return self.named_expressions[self.controlled_by.current_index].name
 
 
-class SynchronizedCatalog(Catalog):
-    """A catalog is synchronized when the selection of its expression
-    is controlled by another catalog of the same length.
-
-    """
-
-    def __init__(self, name, tuple_of_named_expressions, controller):
-        super().__init__(name, tuple_of_named_expressions)
-        if not isinstance(controller, Catalog):
-            error_msg = (
-                f'The controller of a synchronized catalog must be of type '
-                f'Catalog, and not {type(controller)}'
-            )
-            raise excep.BiogemeError(error_msg)
-        self.controller = controller
-        if self.catalog_size() != controller.catalog_size():
-            error_msg = (
-                f'Catalog {name} contains {self.catalog_size()} expressions. '
-                f'It must contain the same number of expressions '
-                f'({controller.catalog_size()}) as its controller '
-                f'({controller.name})'
-            )
-            raise excep.BiogemeError(error_msg)
-        self.controller.synchronized_catalogs.append(self)
-
-    @classmethod
-    def from_dict(cls, catalog_name, dict_of_expressions, controller):
-        """Ctor using a dict instead of a tuple.
-
-        Python does not guarantee the order of elements of a dict,
-        although, in practice, it is always preserved. If the order is
-        critical, it is better to use the main constructor. If not,
-        this constructor provides a more readable code.
-
-        :param catalog_name: name of the catalog
-        :type catalog_name: str
-
-        :param dict_of_expressions: dict associating the name of an
-            expression and the expression itself.
-        :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
-
-        :param controller: catalog that controls this one.
-        :type controller: Catalog
-        """
-        the_tuple = tuple(
-            NamedExpression(name=name, expression=expression)
-            for name, expression in dict_of_expressions.items()
-        )
-        return cls(catalog_name, the_tuple, controller)
-
-    def set_of_configurations(self):
-        """Set of possible configurations for a multiple
-        expression. If the expression is simple, an empty set is
-        returned.
-        """
-        results = set()
-        for _, expression in self.get_iterator():
-            the_set = expression.set_of_configurations()
-            results |= the_set
-        return results
-
-    def set_index(self, index):
-        """Set the index of the selected expression, and update the
-        synchronized catalogs
-
-        :param index: value of the index
-        :type index: int
-
-        :raises BiogemeError: the index of the catalog cannot be
-            changed directly. It must be changed by its controller
-
-        """
-        error_msg = (
-            f'The index of catalog {self.name} cannot be changed directly. '
-            f'It must be changed by its controller {self.controller.name}'
-        )
-        raise excep.BiogemeError(error_msg)
-
-    def current_configuration(self, includes_controlled_catalogs=False):
-        """Obtain the current configuration of an expression with Catalog
-
-        :param includes_controlled_catalogs: if True, the controlled
-            catalogs are included in the configuration. This is used
-            mainly for debugging purposes.
-        :type includes_controlled_catalogs: bool
-
-        :return: configuration
-        :rtype: biogeme.configuration.Configuration
-        """
-        the_result = self.selected_expression().current_configuration(
-            includes_controlled_catalogs
-        )
-        if not includes_controlled_catalogs:
-            return the_result
-        current_selection = Configuration(
-            [SelectionTuple(catalog=self.name, selection=self.selected_name())]
-        )
-        if the_result is None:
-            return Configuration.from_tuple_of_configurations((current_selection,))
-        return Configuration.from_tuple_of_configurations(
-            (the_result, current_selection)
-        )
-
-    def select_expression(self, group_name, index):
-        """Select a specific expression in a group
-
-        :param group_name: name of the group of expressions
-        :type group_name: str
-
-        :param index: index of the expression in the group
-        :type index: int
-
-        :raise BiogemeError: if the group_name is a synchronized group.
-        """
-        if self.name == group_name:
-            error_msg = (
-                f'Group {self.name} is controlled by group {self.controller}. '
-                f'It is not possible to select its expression independently. '
-            )
-            raise excep.BiogemeError(error_msg)
-        total = 0
-        for _, expression in self.list_of_named_expressions:
-            total += expression.select_expression(group_name, index)
-        return total
-
-
-def segmentation_catalog(
-    beta_parameter,
-    potential_segmentations,
-    maximum_number,
-    synchronized_with=None
+def segmentation_catalogs(
+    generic_name, beta_parameters, potential_segmentations, maximum_number
 ):
-    """Generate a catalog (possibly synchronized) for potential
-        segmentations of a parameter
+    """Generate catalogs for potential segmentations of a parameter
 
-    :param beta_parameter: parameter to be segmented
-    :type beta_parameter: biogeme.expressions.Beta
+    :param generic_name: name used for the definition of the group of catalogs
+    :type generic_name: str
+
+    :param beta_parameters: list of parameters to be segmented
+    :type beta_parameters: list(biogeme.expressions.Beta)
 
     :param potential_segmentations: tuple of potential segmentations
     :type potential_segmentations: tuple(biogeme.segmentation.DiscreteSegmentationTuple)
@@ -419,15 +179,22 @@ def segmentation_catalog(
     :param maximum_number: maximum number of segmentations to consider
     :type maximum_number: int
 
-    :param synchronized_with: Catalog that controls this one. If None, no control.
-    :type synchronized_with: Catalog
-
     """
+
+    for segmentation in potential_segmentations:
+        for key, value in segmentation.mapping.items():
+            if SEPARATOR in value or SELECTION_SEPARATOR in value:
+                error_msg = (
+                    f'Invalid segment name for variable {segmentation.variable.name}='
+                    f'{key}: [{value}]. Characters [{SEPARATOR}] and '
+                    f'[{SELECTION_SEPARATOR}] are reserved for specification coding.'
+                )
+                raise excep.BiogemeError(error_msg)
 
     def get_name_from_combination(combination):
         """Assign a name to a combination"""
         if sum(combination) == 0:
-            return f'{beta_parameter.name} (no seg.)'
+            return 'no_seg'
 
         return '-'.join(
             [
@@ -437,7 +204,7 @@ def segmentation_catalog(
             ]
         )
 
-    def get_expression_from_combination(combination):
+    def get_expression_from_combination(beta_parameter, combination):
         """Assign an expression to a combination"""
         selected_expressions = (
             segment
@@ -447,35 +214,110 @@ def segmentation_catalog(
         the_segmentation = seg.Segmentation(beta_parameter, selected_expressions)
         return the_segmentation.segmented_beta()
 
+    if not isinstance(beta_parameters, list):
+        error_msg = (
+            f'A list is expected for beta_parameters, and not an object of type '
+            f'{type(beta_parameters)}'
+        )
+        raise excep.BiogemeError(error_msg)
+
     list_of_possibilities = [
         combination
         for combination in product([False, True], repeat=len(potential_segmentations))
         if sum(combination) <= maximum_number
     ]
-    the_tuple_of_named_expressions = (
-        NamedExpression(
-            name=get_name_from_combination(combination),
-            expression=get_expression_from_combination(combination),
+    catalogs = []
+    names = [
+        get_name_from_combination(combination) for combination in list_of_possibilities
+    ]
+    the_controller = Controller(controller_name=generic_name, specification_names=names)
+    for beta_parameter in beta_parameters:
+        named_expressions = [
+            NamedExpression(
+                name=get_name_from_combination(combination),
+                expression=get_expression_from_combination(beta_parameter, combination),
+            )
+            for combination in list_of_possibilities
+        ]
+        name = f'segmented_{beta_parameter.name}'
+        catalog = Catalog(
+            catalog_name=name,
+            named_expressions=named_expressions,
+            controlled_by=the_controller,
         )
-        for combination in list_of_possibilities
-    )
-    name = f'segmented_{beta_parameter.name}'
-    if synchronized_with is None:
-        return Catalog(name, the_tuple_of_named_expressions)
-
-    return SynchronizedCatalog(name, the_tuple_of_named_expressions, synchronized_with)
+        catalogs.append(catalog)
+    return catalogs
 
 
-def generic_alt_specific_catalog(
-    coefficient,
+class SegmentedParameters:
+    """Class managing the names of segmented and alternative specific parameters"""
+
+    def __init__(self, beta_parameters, alternatives):
+        """Constructor"""
+
+        # The parameters are organized as follows:
+        #   - all generic parameters,
+        #   - all parameters associated with the first alternative,
+        #   - all parameters associated with the second alternative,
+        #   - etc.
+        self.beta_parameters = beta_parameters
+        self.all_parameters = beta_parameters.copy()
+        self.alternatives = alternatives
+        for alternative in self.alternatives:
+            self.all_parameters += [
+                Beta(
+                    name=f'{beta.name}_{alternative}',
+                    value=beta.initValue,
+                    lowerbound=beta.lb,
+                    upperbound=beta.ub,
+                    status=beta.status,
+                )
+                for beta in beta_parameters
+            ]
+
+    def get_index(self, beta_index, alternative):
+        """Returns the index in the list of the beta parameter with
+            the given index specific to the given alternative
+
+        :param beta_index: index of the beta in the generic list
+        :type beta_index: int
+
+        :param alternative: name of the alternative, or None for the generic parameter
+        :type alternative: str or None
+
+        """
+        if alternative is None:
+            return beta_index
+        alt_index = self.alternatives.index(alternative)
+        return beta_index + (alt_index + 1) * len(self.beta_parameters)
+
+    def get_beta(self, beta_index, alternative):
+        """Return the beta parameters for the given index and given alternative
+
+        :param beta_index: index of the beta in the generic list
+        :type beta_index: int
+
+        :param alternative: name of the alternative, or None for the generic parameter
+        :type alternative: str or None
+
+        """
+        return self.all_parameters[self.get_index(beta_index, alternative)]
+
+
+def generic_alt_specific_catalogs(
+    generic_name,
+    beta_parameters,
     alternatives,
     potential_segmentations=None,
     maximum_number=5,
 ):
     """Generate catalogs selecting generic or alternative specific coefficients
 
-    :param coefficient: coefficient of interest
-    :type coefficient: biogeme.expressions.Beta
+    :param generic_name: name associated with all the parameters in the catalog
+    :type generic_name: str
+    
+    :param beta_parameters: coefficients of interest
+    :type beta_parameters: list(biogeme.expressions.Beta)
 
     :param alternatives: names of the alternatives
     :type alternatives: tuple(str)
@@ -486,13 +328,9 @@ def generic_alt_specific_catalog(
     :param maximum_number: maximum number of segmentations to consider
     :type maximum_number: int
 
-    :return: a catalog for each alternative
-    :rtype: dict(str: biogeme.catalog.Catalog)
+    :return: a list of catalogs for each alternative
+    :rtype: list(dict(str: biogeme.catalog.Catalog))
     """
-    if not isinstance(coefficient, Beta):
-        error_msg = 'This function must be called with a Beta object'
-        raise excep.BiogemeError(error_msg)
-
     if len(alternatives) < 2:
         error_msg = (
             f'An alternative specific specification requires at least 2 '
@@ -500,70 +338,69 @@ def generic_alt_specific_catalog(
         )
         raise excep.BiogemeError(error_msg)
 
-    generic_coeff = (
-        coefficient
-        if potential_segmentations is None
-        else segmentation_catalog(
-            beta_parameter=coefficient,
-            potential_segmentations=potential_segmentations,
-            maximum_number=maximum_number,
-            synchronized_with=None,
+    if not isinstance(beta_parameters, list):
+        error_msg = (
+            f'Argument "beta_parameters" of function '
+            f'"{generic_alt_specific_catalogs.__name__}" must be a list.'
         )
+        raise excep.BiogemeError(error_msg)
+
+    wrong_indices = []
+    for index, beta in enumerate(beta_parameters):
+        if not isinstance(beta, Beta):
+            wrong_indices.append(index)
+
+    if wrong_indices:
+        error_msg = (
+            f'The entries at the following indices are not Beta expressions: '
+            f'{wrong_indices}'
+        )
+        raise excep.BiogemeError(error_msg)
+
+    # We first generate the alternative specific versions of the parameters
+    generic_parameters = beta_parameters
+    the_segmented_parameters = SegmentedParameters(
+        beta_parameters=generic_parameters,
+        alternatives=alternatives,
     )
 
-    altspec_coeffs = {}
-    controller = None
-    for alternative in alternatives:
-        the_beta = Beta(
-            name=f'{coefficient.name}_{alternative}',
-            value=coefficient.initValue,
-            lowerbound=coefficient.lb,
-            upperbound=coefficient.ub,
-            status=coefficient.status,
+    # If applicable, we apply the potential segmentations
+    if potential_segmentations:
+        segmented_catalogs = segmentation_catalogs(
+            generic_name=generic_name,
+            beta_parameters=the_segmented_parameters.all_parameters,
+            potential_segmentations=potential_segmentations,
+            maximum_number=maximum_number,
         )
-        if controller is None:
-            the_coeff = (
-                the_beta
-                if potential_segmentations is None
-                else segmentation_catalog(
-                        beta_parameter=the_beta,
-                        potential_segmentations=potential_segmentations,
-                        maximum_number=maximum_number,
-                )
-            )
-            controller = the_coeff
-        else:
-            the_coeff = (
-                the_beta
-                if potential_segmentations is None
-                else segmentation_catalog(
-                        beta_parameter=the_beta,
-                        potential_segmentations=potential_segmentations,
-                        maximum_number=maximum_number,
-                        synchronized_with=controller,
-                )
-            )
-        altspec_coeffs[alternative] = the_coeff
 
-    results = {}
-    controller = None
-    for alternative in alternatives:
-        catalog_name = f'_{coefficient.name}_{alternative}_gen_alt_spec'
-        expressions = {
-            'generic': coefficient,
-            'altspec': altspec_coeffs[alternative],
+    def get_expression(param_index, alternative):
+        """Returns either the parameter, or the segmented version if applicable"""
+
+        if potential_segmentations:
+            index = the_segmented_parameters.get_index(param_index, alternative)
+            return segmented_catalogs[index]
+        return the_segmented_parameters.get_beta(param_index, alternative)
+
+    # We now control for generic or alternative specific with a single
+    # controller for all catalogs
+    the_controller = Controller(
+        controller_name=f'{generic_name}_gen_altspec',
+        specification_names=('generic', 'altspec'),
+    )
+
+    # We organize the catalogs as a list of dict
+    results = []
+    for index, beta in enumerate(beta_parameters):
+        the_dict = {
+            alternative: Catalog.from_dict(
+                catalog_name=f'{beta.name}_{alternative}_gen_altspec',
+                dict_of_expressions={
+                    'generic': get_expression(index, None),
+                    'altspec': get_expression(index, alternative),
+                },
+                controlled_by=the_controller,
+            )
+            for alternative in alternatives
         }
-        if controller is None:
-            results[alternative] = Catalog.from_dict(
-                catalog_name=catalog_name,
-                dict_of_expressions=expressions,
-            )
-            controller = results[alternative]
-        else:
-            results[alternative] = SynchronizedCatalog.from_dict(
-                catalog_name=catalog_name,
-                dict_of_expressions=expressions,
-                controller=controller,
-            )
-
+        results.append(the_dict)
     return results
