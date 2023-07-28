@@ -79,29 +79,29 @@ class TestTools(unittest.TestCase):
         np.testing.assert_almost_equal(hdiff, [[0, 0], [0, 0]], decimal=5)
 
     def test_getPrimeNumbers(self):
-        result = tools.getPrimeNumbers(7)
+        result = tools.get_prime_numbers(7)
         self.assertListEqual(result, [2, 3, 5, 7, 11, 13, 17])
 
         with self.assertRaises(excep.BiogemeError):
-            result = tools.getPrimeNumbers(0)
+            result = tools.get_prime_numbers(0)
 
         with self.assertRaises(excep.BiogemeError):
-            result = tools.getPrimeNumbers(-1)
+            result = tools.get_prime_numbers(-1)
 
         with self.assertRaises(excep.BiogemeError):
-            result = tools.getPrimeNumbers(0.3)
+            result = tools.get_prime_numbers(0.3)
 
     def test_calculatePrimeNumbers(self):
-        result = tools.calculatePrimeNumbers(10)
+        result = tools.calculate_prime_numbers(10)
         self.assertListEqual(result, [2, 3, 5, 7])
-        result = tools.calculatePrimeNumbers(0)
+        result = tools.calculate_prime_numbers(0)
         self.assertListEqual(result, [])
 
         with self.assertRaises(excep.BiogemeError):
-            result = tools.calculatePrimeNumbers(-1)
+            result = tools.calculate_prime_numbers(-1)
 
         with self.assertRaises(excep.BiogemeError):
-            result = tools.calculatePrimeNumbers(0.3)
+            result = tools.calculate_prime_numbers(0.3)
 
     def test_countNumberOfGroups(self):
         df = pd.DataFrame(
@@ -200,8 +200,70 @@ class TestTools(unittest.TestCase):
         self.assertDictEqual(correct_dict_3, dict_3)
 
 
-        
+class UniqueProductTestCase(unittest.TestCase):
+    def test_unique_product(self):
+        # Test case with small iterables
+        iterables = [range(2), range(3), range(2)]
+        expected_output = [
+            (0, 0, 0),
+            (0, 0, 1),
+            (0, 1, 0),
+            (0, 1, 1),
+            (0, 2, 0),
+            (0, 2, 1),
+            (1, 0, 0),
+            (1, 0, 1),
+            (1, 1, 0),
+            (1, 1, 1),
+            (1, 2, 0),
+            (1, 2, 1),
+        ]
+        result = list(tools.unique_product(*iterables))
+        self.assertEqual(result, expected_output)
+
+        # Test case with larger iterables
+        iterables = [range(3), range(4), range(2)]
+        expected_output = [
+            (0, 0, 0),
+            (0, 0, 1),
+            (0, 1, 0),
+            (0, 1, 1),
+            (0, 2, 0),
+            (0, 2, 1),
+            (0, 3, 0),
+            (0, 3, 1),
+            (1, 0, 0),
+            (1, 0, 1),
+            (1, 1, 0),
+            (1, 1, 1),
+            (1, 2, 0),
+            (1, 2, 1),
+            (1, 3, 0),
+            (1, 3, 1),
+            (2, 0, 0),
+            (2, 0, 1),
+            (2, 1, 0),
+            (2, 1, 1),
+            (2, 2, 0),
+            (2, 2, 1),
+            (2, 3, 0),
+            (2, 3, 1),
+        ]
+        result = list(tools.unique_product(*iterables))
+        self.assertEqual(result, expected_output)
+
+        # Test case with empty iterable
+        iterables = [range(3), [], range(2)]
+        expected_output = []
+        result = list(tools.unique_product(*iterables))
+        self.assertEqual(result, expected_output)
+
+        # Test case with single iterable
+        iterables = [range(3)]
+        expected_output = [(0,), (1,), (2,)]
+        result = list(tools.unique_product(*iterables))
+        self.assertEqual(result, expected_output)
+
+
 if __name__ == '__main__':
     unittest.main()
-
-    
