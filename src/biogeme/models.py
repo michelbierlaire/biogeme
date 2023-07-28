@@ -9,6 +9,7 @@
 # pylint: disable=too-many-lines
 
 import logging
+import biogeme.distributions as dist
 import biogeme.exceptions as excep
 import biogeme.expressions as expr
 
@@ -148,6 +149,13 @@ def boxcox(x, ell):
     :return: the Box-Cox transform
     :rtype: biogeme.expressions.expr.Expression
     """
+    if isinstance(ell, expr.Beta) and (ell.ub is None or ell.lb is None):
+        warning_msg = (
+            f'It is advised to set the bounds on parameter {ell.name}. '
+            f'A value of -10 and 10 should be appropriate: Beta("{ell.name}", '
+            f'{ell.initValue}, -10, 10, {ell.status})'
+        )
+        logger.warning(warning_msg)
 
     regular = (x**ell - 1.0) / ell
     mclaurin = (
@@ -196,7 +204,7 @@ def piecewiseVariables(variable, thresholds):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -299,7 +307,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -395,7 +403,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         errorMsg = (
-            'All thresholds for the piecewise linear specification ' 'are set to None.'
+            'All thresholds for the piecewise linear specification are set to None.'
         )
         raise excep.BiogemeError(errorMsg)
     if None in thresholds[1:-1]:
@@ -416,7 +424,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     if betas is None:
         betas = []
         for i, a_threshold in enumerate(thresholds[1:-1]):
-            next_threshold = thresholds[i + 1]
+            next_threshold = thresholds[i + 2]
             a_name = 'minus_inf' if a_threshold is None else f'{a_threshold}'
             next_name = 'inf' if next_threshold is None else f'{next_threshold}'
             betas.append(
@@ -1912,3 +1920,144 @@ def checkValidityCNL(V, nests, alone):
         )
 
     return ok, message
+
+
+def ordered_likelihood(continuous_value, list_of_discrete_values, tau_parameter, cdf):
+    """Ordered model that maps a continuous quantity with a list of
+        discrete intervals (often logit or probit)
+
+    Example: discrete values = [1, 2, 3, 4]
+
+    We define thresholds tau_1_2, tau_2_3 and tau_3_4.
+    In order to impose that the threshold are sorted, we actually define
+        tau_1_2 = tau_parameter
+        tau_2_3 = tau_1_2 + diff2
+        tau_3_4 = tau_2_3 + diff3
+
+    The probability that the discrete value is 2, say, is the
+    probability that the continuous value lies between tau_1_2 and
+    tau_2_3, where the probability distribution is logistic.
+
+    :param continuous_value: continuous quantity to mapping
+    :type continuous_value: biogeme.expressions.Expression
+
+    :param list_of_discrete_values: discrete values
+    :type list_of_discrete_values: list(int)
+
+    :param tau_parameter: parameter for the first threshold
+    :type tau_parameter: biogeme.expressions.Beta
+
+    :param cdf: function calculating the CDF of the random variable
+    :type cdf: fct(float) -> float
+
+    :return: dict where the keys are the discrete values and the
+        values are the corresponding probability.
+    :rtype: dict(int: biogeme.expressions.Expression)
+    """
+    if not isinstance(tau_parameter, expr.Beta):
+        error_msg = (
+            f'tau_parameter must be a Beta expression, and not a {type(tau_parameter)}.'
+        )
+        raise excep.BiogemeError(error_msg)
+
+    if len(list_of_discrete_values) == 2:
+        the_proba = {
+            list_of_discrete_values[0]: 1 - cdf(continuous_value - tau_parameter),
+            list_of_discrete_values[1]: cdf(continuous_value - tau_parameter),
+        }
+
+        return the_proba
+
+    diffs = {
+        current_item: expr.Beta(
+            f'{tau_parameter.name}_diff_{current_item}',
+            1,
+            0,
+            None,
+            0,
+        )
+        for current_item in list_of_discrete_values[1:-1]
+    }
+
+    # First term
+    the_proba = {list_of_discrete_values[0]: 1 - cdf(continuous_value - tau_parameter)}
+
+    # Intermediate terms
+    tau = tau_parameter
+    for item in list_of_discrete_values[1:-1]:
+        next_tau = tau + diffs[item]
+        the_proba[item] = cdf(continuous_value - tau) - cdf(continuous_value - next_tau)
+        tau = next_tau
+
+    # Last term
+    the_proba[list_of_discrete_values[-1]] = cdf(continuous_value - tau)
+
+    return the_proba
+
+
+def ordered_logit(continuous_value, list_of_discrete_values, tau_parameter):
+    """Ordered logit model that maps a continuous quantity with a
+        list of discrete intervals
+
+    Example: discrete values = [1, 2, 3, 4]
+
+    We define thresholds tau_1_2, tau_2_3 and tau_3_4.
+    In order to impose that the threshold are sorted, we actually define
+        tau_1_2 = tau_parameter
+        tau_2_3 = tau_1_2 + diff2
+        tau_3_4 = tau_2_3 + diff3
+
+    The probability that the discrete value is 2, say, is the
+    probability that the continuous value lies between tau_1_2 and
+    tau_2_3, where the probability distribution is logistic.
+
+    :param continuous_value: continuous quantity to mapping
+    :type continuous_value: biogeme.expressions.Expression
+
+    :param list_of_discrete_values: discrete values
+    :type list_of_discrete_values: list(int)
+
+    :param tau_parameter: parameter for the first threshold
+    :type tau_parameter: biogeme.expressions.Beta
+
+    """
+    return ordered_likelihood(
+        continuous_value=continuous_value,
+        list_of_discrete_values=list_of_discrete_values,
+        tau_parameter=tau_parameter,
+        cdf=dist.logisticcdf,
+    )
+
+
+def ordered_probit(continuous_value, list_of_discrete_values, tau_parameter):
+    """Ordered probit model that maps a continuous quantity with a
+        list of discrete intervals
+
+    Example: discrete values = [1, 2, 3, 4]
+
+    We define thresholds tau_1_2, tau_2_3 and tau_3_4.
+    In order to impose that the threshold are sorted, we actually define
+        tau_1_2 = tau_parameter
+        tau_2_3 = tau_1_2 + diff2
+        tau_3_4 = tau_2_3 + diff3
+
+    The probability that the discrete value is 2, say, is the
+    probability that the continuous value lies between tau_1_2 and
+    tau_2_3, where the probability distribution is normal.
+
+    :param continuous_value: continuous quantity to mapping
+    :type continuous_value: biogeme.expressions.Expression
+
+    :param list_of_discrete_values: discrete values
+    :type list_of_discrete_values: list(int)
+
+    :param tau_parameter: parameter for the first threshold
+    :type tau_parameter: biogeme.expressions.Beta
+
+    """
+    return ordered_likelihood(
+        continuous_value=continuous_value,
+        list_of_discrete_values=list_of_discrete_values,
+        tau_parameter=tau_parameter,
+        cdf=expr.bioNormalCdf,
+    )
