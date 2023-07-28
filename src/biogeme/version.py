@@ -4,23 +4,18 @@
 :date: Tue Mar 26 16:45:15 2019
 
 """
-
-# Too constraining
-# pylint: disable=invalid-name,
-
-
 import datetime
 
 # Release date
 versionDate = f'{datetime.date.today()}'
-author = 'Michel Bierlaire'
-urlAuthor = 'http://people.epfl.ch/michel.bierlaire'
-department = 'Transport and Mobility Laboratory'
-urlDepartment = 'http://transp-or.epfl.ch'
-university = 'Ecole Polytechnique Fédérale de Lausanne (EPFL)'
-urlUniversity = 'http://www.epfl.ch'
-urlBiogeme = 'http://biogeme.epfl.ch'
-urlForum = 'https://groups.google.com/d/forum/biogeme'
+AUTHOR = 'Michel Bierlaire'
+URL_AUTHOR = 'http://people.epfl.ch/michel.bierlaire'
+DEPARTMENT = 'Transport and Mobility Laboratory'
+URL_DEPARTMENT = 'http://transp-or.epfl.ch'
+UNIVERSITY = 'Ecole Polytechnique Fédérale de Lausanne (EPFL)'
+URL_UNIVERSITY = 'http://www.epfl.ch'
+URL_BIOGEME = 'http://biogeme.epfl.ch'
+URL_FORUM = 'https://groups.google.com/d/forum/biogeme'
 
 __version__ = '3.2.12a0'
 
@@ -42,31 +37,31 @@ def getHtml():
     :rtype: string
 
     """
-    h = f'<p>biogeme {getVersion()} [{versionDate}]</p>\n'
-    h += (
+    html = f'<p>biogeme {getVersion()} [{versionDate}]</p>\n'
+    html += (
         '<p><a href="https://www.python.org/" '
         'target="_blank">Python</a> package</p>\n'
     )
-    h += (
-        f'<p>Home page: <a href="{urlBiogeme}" '
-        f'target="_blank">{urlBiogeme}</a></p>\n'
+    html += (
+        f'<p>Home page: <a href="{URL_BIOGEME}" '
+        f'target="_blank">{URL_BIOGEME}</a></p>\n'
     )
-    h += (
-        f'<p>Submit questions to <a href="{urlForum}" '
-        f'target="_blank">{urlForum}</a></p>\n'
+    html += (
+        f'<p>Submit questions to <a href="{URL_FORUM}" '
+        f'target="_blank">{URL_FORUM}</a></p>\n'
     )
-    h += f'<p><a href="{urlAuthor}">'
-    h += author
-    h += '</a>, <a href="'
-    h += urlDepartment
-    h += '">'
-    h += department
-    h += '</a>, <a href="'
-    h += urlUniversity
-    h += '">'
-    h += university.encode('ascii', 'xmlcharrefreplace').decode()
-    h += '</a></p>\n'
-    return h
+    html += f'<p><a href="{URL_AUTHOR}">'
+    html += AUTHOR
+    html += '</a>, <a href="'
+    html += URL_DEPARTMENT
+    html += '">'
+    html += DEPARTMENT
+    html += '</a>, <a href="'
+    html += URL_UNIVERSITY
+    html += '">'
+    html += UNIVERSITY.encode('ascii', 'xmlcharrefreplace').decode()
+    html += '</a></p>\n'
+    return html
 
 
 def getText():
@@ -76,11 +71,11 @@ def getText():
     :rtype: string
     """
 
-    h = f'biogeme {getVersion()} [{versionDate}]\n'
-    h += f'Home page: {urlBiogeme}\n'
-    h += f'Submit questions to {urlForum}\n'
-    h += f'{author}, {department}, {university}\n'
-    return h
+    text = f'biogeme {getVersion()} [{versionDate}]\n'
+    text += f'Home page: {URL_BIOGEME}\n'
+    text += f'Submit questions to {URL_FORUM}\n'
+    text += f'{AUTHOR}, {DEPARTMENT}, {UNIVERSITY}\n'
+    return text
 
 
 def getLaTeX():
@@ -89,9 +84,9 @@ def getLaTeX():
     :return: LaTeX comments
     :rtype: string
     """
-    h = f'%% biogeme {getVersion()} [{versionDate}]\n'
-    h += '%% Version entirely written in Python\n'
-    h += f'%% Home page: {urlBiogeme}\n'
-    h += f'%% Submit questions to {urlForum}\n'
-    h += f'%% {author}, {department}, {university}\n'
-    return h
+    latex = f'%% biogeme {getVersion()} [{versionDate}]\n'
+    latex += '%% Version entirely written in Python\n'
+    latex += f'%% Home page: {URL_BIOGEME}\n'
+    latex += f'%% Submit questions to {URL_FORUM}\n'
+    latex += f'%% {AUTHOR}, {DEPARTMENT}, {UNIVERSITY}\n'
+    return latex
