@@ -263,3 +263,26 @@ class Segmentation:
             joined_terms = ', '.join(terms)
             result += f'{self.prefix}_{self.beta.name} = bioMultSum([{joined_terms}])'
         return result
+
+def segmented_beta(beta, segmentation_tuples, prefix='segmented'):
+    """Obtain the segmented beta from a unique function call
+
+    :param beta: parameter to be segmented
+    :type beta: biogeme.expressions.Beta
+    
+    :param segmentation_tuples: characterization of the segmentations
+    :type segmentation_tuples: list(DiscreteSegmentationTuple)
+    
+    :param prefix: prefix to be used to generated the name of the
+        segmented parameter
+    :type prefix: str
+
+    :return: expression of the segmented beta
+    :rtype: biogeme.expressions.Expression
+    """
+    the_segmentation = Segmentation(
+        beta=beta,
+        segmentation_tuples=segmentation_tuples,
+        prefix=prefix
+    )
+    return the_segmentation.segmented_beta()
