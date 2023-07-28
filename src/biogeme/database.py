@@ -217,7 +217,7 @@ class Database:
         ),
         'NORMAL_MLHS_ANTI': (
             normal_MLHS_anti,
-            ('Antithetic normal draws from ' 'Modified Latin Hypercube Sampling'),
+            ('Antithetic normal draws from Modified Latin Hypercube Sampling'),
         ),
     }
 
@@ -754,7 +754,8 @@ class Database:
             if value not in segmentation_tuple.mapping:
                 error_msg = (
                     f'Variable {segmentation_tuple.variable.name} '
-                    f'takes the value {value} [{count} times], and it does not define any segment.'
+                    f'takes the value {value} [{count} times], and it does not '
+                    f'define any segment.'
                 )
                 raise excep.BiogemeError(error_msg)
 
@@ -825,7 +826,8 @@ class Database:
         :param types: A dict indexed by the names of the variables,
                       describing the types of draws. Each of them can
                       be a native type or any type defined by the
-                      function :func:`~biogeme.database.Database.setRandomNumberGenerators`.
+                      function
+                      :func:`~biogeme.database.Database.setRandomNumberGenerators`.
 
                       Native types:
 
@@ -901,6 +903,7 @@ class Database:
 
         :raise BiogemeError: if the output of the draw generator does not
             have the requested dimensions.
+
         """
         self.number_of_draws = number_of_draws
         # Dimensions of the draw table:
@@ -1025,7 +1028,7 @@ class Database:
         estimationSets = []
         validationSets = []
         for i, v in enumerate(theSlices):
-            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
+            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1:]))
             validationSets.append(v)
         return [
             EstimationValidation(estimation=e, validation=v)
@@ -1074,9 +1077,6 @@ class Database:
         """Sorts the data so that the observations for each individuals are
         contiguous, and builds a map that identifies the range of indices of
         the observations of each individuals.
-
-        :param sample: if True, the data is a sample of the full data set
-        :type sample: bool
         """
         if self.panelColumn is not None:
             self.data = self.data.sort_values(by=self.panelColumn)
