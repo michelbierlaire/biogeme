@@ -47,60 +47,8 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def configure_catalogs(self, configuration):
-        """Select the items in each catalog corresponding to the
-            requested configuration
-
-        :param configuration: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
-        :type configuration: biogeme.configuration.Configuration
-
-        """
-
-    @abc.abstractmethod
-    def modify_catalogs(self, set_of_catalogs, step, circular):
-        """Modify the specification of several catalogs
-
-        :param set_of_catalogs: set of catalogs to modify
-        :type set_of_catalogs: set(str)
-
-        :param step: increment of the modifications. Can be negative.
-        :type step: int
-
-        :param circular: If True, the modificiation is always made. If
-            the selection needs to move past the last one, it comes
-            back to the first one. For instance, if the catalog is
-            currently at its last value, and the step is 1, it is set
-            to its first value. If circular is False, and the
-            selection needs to move past the last one, the selection
-            is set to the last one. It works symmetrically if the step
-            is negative
-        :type circular: bool
-
-        :return: number of actual modifications
-        :rtype: int
-
-        """
-
-    @abc.abstractmethod
     def get_iterator(self):
         """Returns an iterator on NamedExpression"""
-
-    @abc.abstractmethod
-    def reset_this_expression_selection(self):
-        """In this group of expressions, select the first one"""
-
-    @abc.abstractmethod
-    def current_configuration(self):
-        """Obtain the current configuration of an expression with Catalog's
-
-        :return: a dictionary such that the keys are the catalog
-            names, and the values are the selected specification in
-            the Catalog
-
-        :rtype: biogeme.configuration.Configuration
-        """
 
     def catalog_size(self):
         """Provide the size of the catalog
@@ -129,25 +77,6 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         """
         _, the_expression = self.selected()
         return the_expression
-
-    def dict_of_catalogs(self, ignore_synchronized=False):
-        """Returns a dict with all catalogs in the expression.
-
-        :return: dict with all the catalogs
-        """
-        result = {}
-        for _, expr in self.get_iterator():
-            a_dict = expr.dict_of_catalogs(ignore_synchronized)
-            for key, the_catalog in a_dict.items():
-                result[key] = the_catalog
-        result[self.name] = self
-        return result
-
-    def reset_expression_selection(self):
-        """In each group of expressions, select the first one"""
-        self.reset_this_expression_selection()
-        for _, expression in self.get_iterator():
-            expression.reset_expression_selection()
 
     def getValue(self):
         """Evaluates the value of the expression
@@ -386,7 +315,7 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.countPanelTrajectoryExpressions()
 
-    def changeInitValues(self, betas):
+    def change_init_values(self, betas):
         """Modifies the initial values of the Beta parameters.
 
         The fact that the parameters are fixed or free is irrelevant here.
@@ -397,4 +326,4 @@ class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
         :type betas: dict(string:float)
         """
         _, expr = self.selected()
-        expr.changeInitValues(betas)
+        expr.change_init_values(betas)
