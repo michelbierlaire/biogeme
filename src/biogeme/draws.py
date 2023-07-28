@@ -208,13 +208,13 @@ def getHaltonDraws(
         i = 1
         while i < base and numbers_idx < req_length:
             max_numbers = min(req_length - numbers_idx, numbers_size)
-            numbers[numbers_idx : numbers_idx + max_numbers] = (
+            numbers[numbers_idx: numbers_idx + max_numbers] = (
                 numbers[:max_numbers] + d * i
             )
             numbers_idx += max_numbers
             i += 1
         t += 1
-    numbers = numbers[skip + 1 : length + skip + 1]
+    numbers = numbers[skip + 1: length + skip + 1]
 
     if shuffled:
         np.random.shuffle(numbers)
