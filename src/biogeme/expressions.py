@@ -6,14 +6,13 @@
 """
 
 import logging
-from itertools import chain, product
+from itertools import chain
 import numpy as np
 import cythonbiogeme.cythonbiogeme as ee
-from biogeme import tools
 import biogeme.exceptions as excep
 from biogeme.idmanager import IdManager
 from biogeme.elementary_expressions import TypeOfElementaryExpression
-from biogeme.configuration import Configuration
+from biogeme.controller import CentralController
 
 logger = logging.getLogger(__name__)
 
@@ -84,11 +83,6 @@ class Expression:
     It serves as a base class for concrete expressions.
     """
 
-    maximum_number_of_configurations = 100
-    """For multiple expressions (Catalogs), maximum number of
-           configurations allowed for full enumeration.
-    """
-
     def __init__(self):
         """Constructor"""
 
@@ -117,25 +111,12 @@ class Expression:
         """ Value interpreted as missing data
         """
 
-        self.locked = False
-        """ Meaningful only for multiple expressions (Catalogs). If
-        True, it is not possible to change the specification.
+        self.central_controller = None
+        """ Central controller for the multiple expressions
         """
 
     def __iter__(self):
-        if self.locked:
-            error_msg = (
-                'The expression is locked. It is not possible to obtain an '
-                'iterator. Set the locked attributes to False.'
-            )
-            raise excep.BiogemeError(error_msg)
         the_set = self.set_of_configurations()
-        if the_set is None:
-            error_msg = (
-                f'The total number of possible specifications exceeds '
-                f'{self.maximum_number_of_configurations}. No iterator is available. '
-            )
-            raise excep.ValueOutOfRange(error_msg)
         return SelectedExpressionsIterator(self, the_set)
 
     def check_panel_trajectory(self):
@@ -1206,23 +1187,23 @@ class Expression:
         :param database: database object
         :type database: biogeme.database.Database
 
-        :return: tuple listOfErrors, listOfWarnings
+        :return: tuple list_of_errors, list_of_warnings
         :rtype: list(string), list(string)
         """
-        listOfErrors = []
-        listOfWarnings = []
+        list_of_errors = []
+        list_of_warnings = []
 
         for e in self.get_children():
             if not isinstance(e, Expression):
-                theError = f'Invalid expression: {e}'
-                listOfErrors.append(theError)
+                the_error = f'Invalid expression: {e}'
+                list_of_errors.append(the_error)
             err, war = e.audit(database)
-            listOfErrors += err
-            listOfWarnings += war
+            list_of_errors += err
+            list_of_warnings += war
 
-        return listOfErrors, listOfWarnings
+        return list_of_errors, list_of_warnings
 
-    def changeInitValues(self, betas):
+    def change_init_values(self, betas):
         """Modifies the initial values of the Beta parameters.
 
         The fact that the parameters are fixed or free is irrelevant here.
@@ -1234,7 +1215,7 @@ class Expression:
         """
 
         for e in self.get_children():
-            e.changeInitValues(betas)
+            e.change_init_values(betas)
 
     def dict_of_catalogs(self, ignore_synchronized=False):
         """Returns a dict with all catalogs in the expression.
@@ -1262,30 +1243,30 @@ class Expression:
         all_catalogs = self.dict_of_catalogs()
         return name in all_catalogs
 
-    def set_of_configurations(self):
-        """Set of possible configurations for a multiple
-        expression. If the expression is simple, an empty set is
-        returned. If the number of configurations exceeds the maximum
-        length, None is returned.
+    def set_central_controller(self, the_central_controller=None):
+        if the_central_controller is None:
+            self.central_controller = CentralController(
+                expression=self,
+            )
+        else:
+            self.central_controller = the_central_controller
 
-        :return: set of configurations, or None
-        :rtype: set(biogeme.configure.Configuration)
+        for e in self.children:
+            e.set_central_controller(self.central_controller)
+        return self.central_controller
+
+    def get_all_controllers(self):
+        """Provides all controllers  controlling the specifications of a multiple expression
+
+        :return: a set of controllers
+        :rtype: set(biogeme.controller.Controller)
         """
         if not self.children:
             return set()
-        each_config = [e.set_of_configurations() for e in self.children]
-        if None in each_config:
-            return None
-        # Remove the empty sets
-        each_config = [e for e in each_config if e]
-        if not each_config:
-            return set()
-        all_combinations = tools.unique_product(*each_config)
-        final_set = set(
-            Configuration.from_tuple_of_configurations(the_tuple)
-            for the_tuple in all_combinations
-        )
-        return final_set
+        all_controllers = set()
+        for e in self.children:
+            all_controllers |= e.get_all_controllers()
+        return all_controllers
 
     def number_of_multiple_expressions(self):
         """Reports the number of multiple expressions available through the iterator
@@ -1293,20 +1274,19 @@ class Expression:
         :return: number of  multiple expressions
         :rtype: int
         """
-        the_set = self.set_of_configurations()
-        if the_set is None:
-            return None
-        return len(the_set)
+        if self.central_controller is None:
+            self.set_central_controller()
+
+        return self.central_controller.number_of_configurations()
+
+    def set_of_configurations(self):
+        """Provides the set of all possible configurations"""
+        if self.central_controller is None:
+            self.set_central_controller()
+        return self.central_controller.all_configurations
 
     def reset_expression_selection(self):
         """In each group of expressions, select the first one"""
-        if self.locked:
-            error_msg = (
-                'The expression is locked. It is not possible to change its '
-                'specification. Set the locked attributes to False.'
-            )
-            raise excep.BiogemeError(error_msg)
-
         for e in self.children:
             e.reset_expression_selection()
 
@@ -1316,96 +1296,36 @@ class Expression:
         :param configuration: catalog configuration
         :type configuration: biogeme.configuration.Configuration
         """
-        if self.locked:
-            error_msg = (
-                'The expression is locked. It is not possible to change its '
-                'specification. Set the locked attributes to False.'
-            )
-            raise excep.BiogemeError(error_msg)
-        for e in self.children:
-            e.configure_catalogs(configuration)
+        if self.central_controller is None:
+            self.set_central_controller()
+        self.central_controller.set_configuration(configuration)
 
-    def modify_catalogs(self, set_of_catalogs, step, circular):
-        """Modify the specification of several catalogs
+    def current_configuration(self):
+        """Obtain the current configuration of an expression
 
-        :param set_of_catalogs: set of catalogs to modify
-        :type set_of_catalogs: set(str)
-
-        :param step: increment of the modifications. Can be negative.
-        :type step: int
-
-        :param circular: If True, the modificiation is always made. If
-            the selection needs to move past the last one, it comes
-            back to the first one. For instance, if the catalog is
-            currently at its last value, and the step is 1, it is set
-            to its first value. If circular is False, and the
-            selection needs to move past the last one, the selection
-            is set to the last one. It works symmetrically if the step
-            is negative
-        :type circular: bool
-
-        :return: number of actual modifications
-        :rtype: int
+        :return: configuration
+        :rtype: biogeme.configuration.Configuration
         """
-        if self.locked:
-            error_msg = (
-                'The expression is locked. It is not possible to change its '
-                'specification. Set the locked attributes to False.'
-            )
-            raise excep.BiogemeError(error_msg)
-        total = 0
-        for e in self.children:
-            total += e.modify_catalogs(set_of_catalogs, step, circular)
-        return total
+        if self.central_controller is None:
+            self.set_central_controller()
 
-    def current_configuration(self, includes_controlled_catalogs=False):
-        """Obtain the current configuration of an expression with Catalog's
+        return self.central_controller.get_configuration()
 
-        :param includes_controlled_catalogs: if True, the controlled
-            catalogs are included in the configuration. This is used
-            mainly for debugging purposes.
-        :type includes_controlled_catalogs: bool
-
-        :return: configuration :rtype:
-        biogeme.configuration.Configuration
-
-        """
-        if not self.children:
-            return None
-        the_tuple_of_configurations = tuple(
-            e.current_configuration(includes_controlled_catalogs)
-            for e in self.children
-            if e.current_configuration(includes_controlled_catalogs) is not None
-        )
-        if not the_tuple_of_configurations:
-            return None
-        return Configuration.from_tuple_of_configurations(the_tuple_of_configurations)
-
-    def select_expression(self, group_name, index):
+    def select_expression(self, controller_name, index):
         """Select a specific expression in a group
 
-        :param group_name: name of the group of expressions
-        :type group_name: str
+        :param controller_name: name of the controller
+        :type controller_name: str
 
         :param index: index of the expression in the group
         :type index: int
 
-        :return: number of changes made
-        :rtype: int
-
         :raises BiogemeError: if index is out of range
         """
-        if self.locked:
-            error_msg = (
-                'The expression is locked. It is not possible to change its '
-                'specification. Set the locked attributes to False.'
-            )
-            raise excep.BiogemeError(error_msg)
-        total = 0
-        for e in self.get_children():
-            total = total + e.select_expression(group_name, index)
+        if self.central_controller is None:
+            self.set_central_controller()
 
-        return total
+        self.central_controller.set_controller(controller_name, index)
 
     def set_of_multiple_expressions(self):
         """Set of the multiple expressions found in the current expression
@@ -1755,30 +1675,20 @@ class ComparisonOperator(BinaryOperator):
 
     def audit(self, database=None):
         """Performs various checks on the expression."""
-        listOfErrors = []
-        listOfWarnings = []
+        list_of_errors = []
+        list_of_warnings = []
         if isinstance(self.left, ComparisonOperator) or isinstance(
             self.right, ComparisonOperator
         ):
-            print(f'Current expression: {self}')
-            print(
-                f'Left expression: {self.left} '
-                f'[{isinstance(self.left, ComparisonOperator)}]'
-            )
-            print(
-                f'Right expression: {self.right} '
-                f'[{isinstance(self.right, ComparisonOperator)}]'
-            )
-            print(f'Type left expression: {type(self.left)}')
             the_warning = (
-                f'Chaining two comparisons expressions is not recommended'
-                f' as it may be ambiguous. '
-                f'Keep in mind that, for Biogeme, the '
+                f'The following expression may potentially be ambiguous: [{self}] '
+                f'if it contains the chaining of two comparisons expressions. '
+                f'Keep in mind that, for Biogeme (like for Pandas), the '
                 f'expression (a <= x <= b) is not equivalent to (a <= x) '
-                f'and (x <= b) [{self}]'
+                f'and (x <= b).'
             )
-            listOfWarnings.append(the_warning)
-        return listOfErrors, listOfWarnings
+            list_of_warnings.append(the_warning)
+        return list_of_errors, list_of_warnings
 
 
 class Equal(ComparisonOperator):
@@ -2040,39 +1950,41 @@ class MonteCarlo(UnaryOperator):
         :param database: database object
         :type database: biogeme.database.Database
 
-        :return: tuple listOfErrors, listOfWarnings
+        :return: tuple list_of_errors, list_of_warnings
         :rtype: list(string), list(string)
 
         """
-        listOfErrors, listOfWarnings = self.child.audit(database)
+        list_of_errors, list_of_warnings = self.child.audit(database)
         if database is None:
             if self.child.embedExpression('PanelLikelihoodTrajectory'):
                 theWarning = (
                     'The formula contains a PanelLikelihoodTrajectory '
                     'expression, and no database is given'
                 )
-                listOfWarnings.append(theWarning)
+                list_of_warnings.append(theWarning)
         else:
             if database.isPanel() and not self.child.embedExpression(
                 'PanelLikelihoodTrajectory'
             ):
-                theError = (
+                the_error = (
                     f'As the database is panel, the argument '
                     f'of MonteCarlo must contain a'
                     f' PanelLikelihoodTrajectory: {self}'
                 )
-                listOfErrors.append(theError)
+                list_of_errors.append(the_error)
 
         if not self.child.embedExpression('bioDraws'):
-            theError = f'The argument of MonteCarlo must contain a' f' bioDraws: {self}'
-            listOfErrors.append(theError)
+            the_error = (
+                f'The argument of MonteCarlo must contain a' f' bioDraws: {self}'
+            )
+            list_of_errors.append(the_error)
         if self.child.embedExpression('MonteCarlo'):
-            theError = (
+            the_error = (
                 f'It is not possible to include a MonteCarlo '
                 f'statement in another one: {self}'
             )
-            listOfErrors.append(theError)
-        return listOfErrors, listOfWarnings
+            list_of_errors.append(the_error)
+        return list_of_errors, list_of_warnings
 
 
 class bioNormalCdf(UnaryOperator):
@@ -2128,20 +2040,20 @@ class PanelLikelihoodTrajectory(UnaryOperator):
         :param database: database object
         :type database: biogeme.database.Database
 
-        :return: tuple listOfErrors, listOfWarnings
+        :return: tuple list_of_errors, list_of_warnings
         :rtype: list(string), list(string)
 
         """
-        listOfErrors, listOfWarnings = self.child.audit(database)
+        list_of_errors, list_of_warnings = self.child.audit(database)
         if not database.isPanel():
-            theError = (
+            the_error = (
                 f'Expression PanelLikelihoodTrajectory can '
                 f'only be used with panel data. Use the statement '
                 f'database.panel("IndividualId") to declare the '
                 f'panel structure of the data: {self}'
             )
-            listOfErrors.append(theError)
-        return listOfErrors, listOfWarnings
+            list_of_errors.append(the_error)
+        return list_of_errors, list_of_warnings
 
 
 class exp(UnaryOperator):
@@ -2327,17 +2239,17 @@ class Integrate(UnaryOperator):
         :param database: database object
         :type database: biogeme.database.Database
 
-        :return: tuple listOfErrors, listOfWarnings
+        :return: tuple list_of_errors, list_of_warnings
         :rtype: list(string), list(string)
 
         """
-        listOfErrors, listOfWarnings = self.child.audit(database)
+        list_of_errors, list_of_warnings = self.child.audit(database)
         if not self.child.embedExpression('RandomVariable'):
-            theError = (
+            the_error = (
                 f'The argument of Integrate must contain a ' f'RandomVariable: {self}'
             )
-            listOfErrors.append(theError)
-        return listOfErrors, listOfWarnings
+            list_of_errors.append(the_error)
+        return list_of_errors, list_of_warnings
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -2604,8 +2516,8 @@ class bioDraws(Elementary):
     def dict_of_elementary_expression(self, the_type):
         """Extract a dict with all elementary expressions of a dpecific type
 
-        :param type: the type of expression
-        :type  type: TypeOfElementaryExpression
+        :param the_type: the type of expression
+        :type  the_type: TypeOfElementaryExpression
         """
         if the_type == TypeOfElementaryExpression.DRAWS:
             return {self.name: self.drawType}
@@ -2762,7 +2674,7 @@ class Variable(Elementary):
         :param database: database object
         :type database: biogeme.database.Database
 
-        :return: tuple listOfErrors, listOfWarnings
+        :return: tuple list_of_errors, list_of_warnings
         :rtype: list(string), list(string)
 
         :raise BiogemeError: if no database is provided.
@@ -2770,17 +2682,17 @@ class Variable(Elementary):
         :raise BiogemeError: if the name of the variable does not appear
             in the database.
         """
-        listOfErrors = []
-        listOfWarnings = []
+        list_of_errors = []
+        list_of_warnings = []
         if database is None:
             raise excep.BiogemeError(
                 'The database must be provided to audit the variable.'
             )
 
         if self.name not in database.data.columns:
-            theError = f'Variable {self.name} not found in the database.'
-            listOfErrors.append(theError)
-        return listOfErrors, listOfWarnings
+            the_error = f'Variable {self.name} not found in the database.'
+            list_of_errors.append(the_error)
+        return list_of_errors, list_of_warnings
 
     def getSignature(self):
         """The signature of a string characterizing an expression.
@@ -3125,7 +3037,7 @@ class Beta(Elementary):
         """
         return self.initValue
 
-    def changeInitValues(self, betas):
+    def change_init_values(self, betas):
         """Modifies the initial values of the Beta parameters.
 
         The fact that the parameters are fixed or free is irrelevant here.
@@ -3285,33 +3197,33 @@ class LogLogit(Expression):
         :param database: database object
         :type database: biogeme.database.Database
 
-        :return: tuple listOfErrors, listOfWarnings
+        :return: tuple list_of_errors, list_of_warnings
         :rtype: list(string), list(string)
 
         """
-        listOfErrors = []
-        listOfWarnings = []
+        list_of_errors = []
+        list_of_warnings = []
         for e in self.children:
             err, war = e.audit(database)
-            listOfErrors += err
-            listOfWarnings += war
+            list_of_errors += err
+            list_of_warnings += war
 
         if self.util.keys() != self.av.keys():
-            theError = 'Incompatible list of alternatives in logit expression. '
+            the_error = 'Incompatible list of alternatives in logit expression. '
             consistent = False
             myset = self.util.keys() - self.av.keys()
             if myset:
                 mysetContent = ', '.join(f'{str(k)} ' for k in myset)
-                theError += (
+                the_error += (
                     'Id(s) used for utilities and not for ' 'availabilities: '
                 ) + mysetContent
             myset = self.av.keys() - self.util.keys()
             if myset:
                 mysetContent = ', '.join(f'{str(k)} ' for k in myset)
-                theError += (
+                the_error += (
                     ' Id(s) used for availabilities and not ' 'for utilities: '
                 ) + mysetContent
-            listOfErrors.append(theError)
+            list_of_errors.append(the_error)
         else:
             consistent = True
         listOfAlternatives = list(self.util)
@@ -3330,21 +3242,21 @@ class LogLogit(Expression):
             truncate = 100
             if len(content) > truncate:
                 content = f'{content[:truncate]}...'
-            theError = (
+            the_error = (
                 f'The choice variable [{self.choice}] does not '
                 f'correspond to a valid alternative for the '
                 f'following observations (rownumber[choice]): '
             ) + content
-            listOfErrors.append(theError)
+            list_of_errors.append(the_error)
 
         if consistent:
             if database is None:
                 value_choice = self.choice.getValue_c()
                 if value_choice not in self.av.keys():
-                    theError = (
+                    the_error = (
                         f'The chosen alternative [{value_choice}] ' f'is not available'
                     )
-                    listOfWarnings.append(theError)
+                    list_of_warnings.append(the_error)
             else:
                 choiceAvailability = database.checkAvailabilityOfChosenAlt(
                     self.av, self.choice
@@ -3359,14 +3271,14 @@ class LogLogit(Expression):
                     truncate = 100
                     if len(content) > truncate:
                         content = f'{content[:truncate]}...'
-                    theError = (
+                    the_error = (
                         f'The chosen alternative [{self.choice}] '
                         f'is not available for the following '
                         f'observations (rownumber[choice]): '
                     ) + content
-                    listOfWarnings.append(theError)
+                    list_of_warnings.append(the_error)
 
-        return listOfErrors, listOfWarnings
+        return list_of_errors, list_of_warnings
 
     def getValue(self):
         """Evaluates the value of the expression
@@ -3729,28 +3641,28 @@ class bioLinearUtility(Expression):
         """
         Expression.__init__(self)
 
-        theError = ""
+        the_error = ""
         first = True
 
         for b, v in listOfTerms:
             if not isinstance(b, Beta):
                 if first:
-                    theError += (
+                    the_error += (
                         'Each element of the bioLinearUtility '
                         'must be a tuple (parameter, variable). '
                     )
                     first = False
-                theError += f' Expression {b} is not a parameter.'
+                the_error += f' Expression {b} is not a parameter.'
             if not isinstance(v, Variable):
                 if first:
-                    theError += (
+                    the_error += (
                         'Each element of the list should be '
                         'a tuple (parameter, variable).'
                     )
                     first = False
-                theError += f' Expression {v} is not a variable.'
+                the_error += f' Expression {v} is not a variable.'
         if not first:
-            raise excep.BiogemeError(theError)
+            raise excep.BiogemeError(the_error)
 
         self.betas, self.variables = zip(*listOfTerms)
 
