@@ -34,7 +34,7 @@ ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
-B_TIME_S = Beta('B_TIME_S', 0.1, None, None, 0)
+B_TIME_S = Beta('B_TIME_S', 0.1, 0.01, None, 0)
 
 # Define a random parameter, normally distirbuted, designed to be used
 # for Monte-Carlo simulation
