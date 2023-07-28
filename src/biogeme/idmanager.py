@@ -76,8 +76,8 @@ class IdManager:
         :return: tuple listOfErrors, listOfWarnings
         :rtype: list(string), list(string)
         """
-        listOfErrors = []
-        listOfWarnings = []
+        list_of_errors = []
+        list_of_warnings = []
         if self.database.isPanel():
             dict_of_variables = self.expressions.dictOfVariablesOutsidePanelTrajectory()
             if dict_of_variables:
@@ -94,10 +94,10 @@ class IdManager:
                     f'version of the data using the function '
                     f'`generateFlatPanelDataframe`.'
                 )
-                listOfErrors.append(err_msg)
-        return listOfErrors, listOfWarnings
+                list_of_errors.append(err_msg)
+        return list_of_errors, list_of_warnings
 
-    def changeInitValues(self, betas):
+    def change_init_values(self, betas):
         """Modifies the values of the pameters
 
         :param betas: dictionary where the keys are the names of the
