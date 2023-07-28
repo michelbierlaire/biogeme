@@ -24,15 +24,15 @@ logger = logging.getLogger()
 LRTuple = namedtuple('LRTuple', 'message statistic threshold')
 
 
-def findiff_g(theFunction, x):
+def findiff_g(the_function, x):
     """Calculates the gradient of a function :math:`f` using finite differences
 
-    :param theFunction: A function object that takes a vector as an
+    :param the_function: A function object that takes a vector as an
                         argument, and returns a tuple. The first
                         element of the tuple is the value of the
                         function :math:`f`. The other elements are not
                         used.
-    :type theFunction: function
+    :type the_function: function
 
     :param x: argument of the function
     :type x: numpy.array
@@ -46,7 +46,7 @@ def findiff_g(theFunction, x):
     tau = 0.0000001
     n = len(x)
     g = np.zeros(n)
-    f = theFunction(x)[0]
+    f = the_function(x)[0]
     for i in range(n):
         xi = x.item(i)
         xp = x.copy()
@@ -57,22 +57,22 @@ def findiff_g(theFunction, x):
         else:
             s = -tau
         xp[i] = xi + s
-        fp = theFunction(xp)[0]
+        fp = the_function(xp)[0]
         g[i] = (fp - f) / s
     return g
 
 
-def findiff_H(theFunction, x):
+def findiff_H(the_function, x):
     """Calculates the hessian of a function :math:`f` using finite differences
 
-    :param theFunction: A function object that takes a vector as an
+    :param the_function: A function object that takes a vector as an
                         argument, and returns a tuple. The first
                         element of the tuple is the value of the
                         function :math:`f`, and the second is the
                         gradient of the function.  The other elements
                         are not used.
 
-    :type theFunction: function
+    :type the_function: function
 
     :param x: argument of the function
     :type x: numpy.array
@@ -85,7 +85,7 @@ def findiff_H(theFunction, x):
     tau = 1.0e-7
     n = len(x)
     H = np.zeros((n, n))
-    g = theFunction(x)[1]
+    g = the_function(x)[1]
     eye = np.eye(n, n)
     for i in range(n):
         xi = x.item(i)
@@ -96,16 +96,16 @@ def findiff_H(theFunction, x):
         else:
             s = -tau
         ei = eye[i]
-        gp = theFunction(x + s * ei)[1]
+        gp = the_function(x + s * ei)[1]
         H[:, i] = (gp - g).flatten() / s
     return H
 
 
-def checkDerivatives(theFunction, x, names=None, logg=False):
+def checkDerivatives(the_function, x, names=None, logg=False):
     """Verifies the analytical derivatives of a function by comparing
     them with finite difference approximations.
 
-    :param theFunction: A function object that takes a vector as an argument,
+    :param the_function: A function object that takes a vector as an argument,
         and returns a tuple:
 
         - The first element of the tuple is the value of the
@@ -113,7 +113,7 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
         - the second is the gradient of the function,
         - the third is the hessian.
 
-    :type theFunction: function
+    :type the_function: function
 
     :param x: arguments of the function
     :type x: numpy.array
@@ -138,8 +138,8 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
 
     """
     x = np.array(x, dtype=float)
-    f, g, h = theFunction(x)
-    g_num = findiff_g(theFunction, x)
+    f, g, h = the_function(x)
+    g_num = findiff_g(the_function, x)
     gdiff = g - g_num
     if logg:
         if names is None:
@@ -148,7 +148,7 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
         for k, v in enumerate(gdiff):
             logger.info(f'{names[k]:15}\t{g[k]:+E}\t{g_num[k]:+E}\t{v:+E}')
 
-    h_num = findiff_H(theFunction, x)
+    h_num = findiff_H(the_function, x)
     hdiff = h - h_num
     if logg:
         logger.info('Row\t\tCol\t\tHessian\tFinDiff\t\tDifference')
@@ -161,7 +161,7 @@ def checkDerivatives(theFunction, x, names=None, logg=False):
     return f, g, h, gdiff, hdiff
 
 
-def getPrimeNumbers(n):
+def get_prime_numbers(n):
     """Get a given number of prime numbers
 
     :param n: number of primes that are requested
@@ -174,13 +174,13 @@ def getPrimeNumbers(n):
 
     """
     total = 0
-    upperBound = 100
+    upper_bound = 100
     if n <= 0:
         raise excep.BiogemeError(f'Incorrect number: {n}')
 
     while total < n:
-        upperBound *= 10
-        primes = calculatePrimeNumbers(upperBound)
+        upper_bound *= 10
+        primes = calculate_prime_numbers(upper_bound)
         total = len(primes)
     try:
         return primes[0:n]
@@ -188,42 +188,42 @@ def getPrimeNumbers(n):
         raise excep.BiogemeError(f'Incorrect number: {n}') from e
 
 
-def calculatePrimeNumbers(upperBound):
+def calculate_prime_numbers(upper_bound):
     """Calculate prime numbers
 
-    :param upperBound: prime numbers up to this value will be computed
-    :type upperBound: int
+    :param upper_bound: prime numbers up to this value will be computed
+    :type upper_bound: int
 
     :return: array with prime numbers
     :rtype: list(int)
 
-    :raise BiogemeError: if the upperBound is incorrectly defined
+    :raise BiogemeError: if the upper_bound is incorrectly defined
         (negative number, e.g.)
 
-    >>> tools.calculatePrimeNumbers(10)
+    >>> tools.calculate_prime_numbers(10)
     [2, 3, 5, 7]
 
     """
-    if upperBound < 0:
-        raise excep.BiogemeError(f'Incorrect value: {upperBound}')
+    if upper_bound < 0:
+        raise excep.BiogemeError(f'Incorrect value: {upper_bound}')
     try:
-        mywork = list(range(0, upperBound + 1))
+        mywork = list(range(0, upper_bound + 1))
     except TypeError as e:
-        raise excep.BiogemeError(f'Incorrect value: {upperBound}') from e
+        raise excep.BiogemeError(f'Incorrect value: {upper_bound}') from e
 
     try:
-        largest = int(np.ceil(np.sqrt(float(upperBound))))
+        largest = int(np.ceil(np.sqrt(float(upper_bound))))
     except ValueError as e:
-        raise excep.BiogemeError(f'Incorrect value: {upperBound}') from e
+        raise excep.BiogemeError(f'Incorrect value: {upper_bound}') from e
 
     # Remove all multiples
     for i in range(2, largest + 1):
         if mywork[i] != 0:
-            for k in range(2 * i, upperBound + 1, i):
+            for k in range(2 * i, upper_bound + 1, i):
                 mywork[k] = 0
     # Gather non zero entries, which are the prime numbers
     myprimes = []
-    for i in range(1, upperBound + 1):
+    for i in range(1, upper_bound + 1):
         if mywork[i] != 0 and mywork[i] != 1:
             myprimes += [mywork[i]]
 
@@ -525,7 +525,7 @@ def generate_unique_ids(list_of_ids):
     :param list_of_ids: list of ids
     :type list_of_ids: list[str]
 
-    :return: a dict that maps the uniue names with the original name
+    :return: a dict that maps the unique names with the original name
     """
     counts = defaultdict(int)
     for the_id in list_of_ids:
@@ -542,25 +542,24 @@ def generate_unique_ids(list_of_ids):
     return results
 
 
-import resource
-from itertools import product
-
-
 def unique_product(*iterables, max_memory_mb=1024):
-    """
-    Generate the Cartesian product of multiple iterables, keeping only the unique entries.
-    Raises a MemoryError if memory usage exceeds the specified threshold.
+    """Generate the Cartesian product of multiple iterables, keeping
+    only the unique entries.  Raises a MemoryError if memory usage
+    exceeds the specified threshold.
 
-    :param iterables: Variable number of iterables to compute the Cartesian product from.
+    :param iterables: Variable number of iterables to compute the
+        Cartesian product from.
     :type iterables: Iterable
+
     :param max_memory_mb: Maximum memory usage in megabytes (default: 1024MB).
     :type max_memory_mb: int
 
     :return: Yields unique entries from the Cartesian product.
     :rtype: Iterator[tuple]
+
     """
 
-    MB_TO_BYTES = 1024 * 1014
+    MB_TO_BYTES = 1024 * 1024
     max_memory_bytes = max_memory_mb * MB_TO_BYTES  # Convert MB to bytes
     seen = set()  # Set to store seen entries
     total_memory = 0  # Track memory usage
@@ -573,6 +572,7 @@ def unique_product(*iterables, max_memory_mb=1024):
             if total_memory > max_memory_bytes:
                 raise MemoryError(
                     f'Memory usage exceeded the specified threshold: '
-                    f'{total_memory/MB_TO_BYTES:.1f} MB > {max_memory_bytes/MB_TO_BYTES} MB.'
+                    f'{total_memory/MB_TO_BYTES:.1f} MB > '
+                    f'{max_memory_bytes/MB_TO_BYTES} MB.'
                 )
             yield items
