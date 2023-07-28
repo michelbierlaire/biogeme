@@ -24,6 +24,7 @@ import biogeme.database as db
 import biogeme.exceptions as excep
 from biogeme.expressions import Variable, bioDraws
 from biogeme.elementary_expressions import TypeOfElementaryExpression
+from biogeme.segmentation import DiscreteSegmentationTuple
 from test_data import (
     getData,
     output_flatten_database_1,
@@ -32,7 +33,7 @@ from test_data import (
 )
 
 
-class testDatabase(unittest.TestCase):
+class TestDatabase(unittest.TestCase):
     def setUp(self):
         np.random.seed(90267)
         self.myData1 = getData(1)
@@ -62,6 +63,29 @@ class testDatabase(unittest.TestCase):
         database.data = database.data[0:0]
         with self.assertRaises(excep.BiogemeError):
             result = database.valuesFromDatabase(expr)
+
+    def test_check_segmentation(self):
+        the_data = getData(1)
+        correct_mapping = {1: 'Alt. 1', 2: 'Alt. 2', 3: 'Alt. 3'}
+        correct_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping=correct_mapping
+        )
+        output = the_data.check_segmentation(correct_segmentation)
+        expected_output = {'Alt. 1': 2, 'Alt. 2': 2, 'Alt. 3': 1}
+        self.assertDictEqual(output, expected_output)
+        incorrect_mapping = {1: 'Alt. 1', 2: 'Alt. 2'}
+        incorrect_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping=incorrect_mapping
+        )
+        with self.assertRaises(excep.BiogemeError):
+            _ = the_data.check_segmentation(incorrect_segmentation)
+
+        another_incorrect_mapping = {1: 'Alt. 1', 2: 'Alt. 2', 4: 'Does not exist'}
+        another_incorrect_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping=another_incorrect_mapping
+        )
+        with self.assertRaises(excep.BiogemeError):
+            _ = the_data.check_segmentation(another_incorrect_segmentation)
 
     def test_checkAvailabilityOfChosenAlt(self):
         avail = {1: self.Av1, 2: self.Av2, 3: self.Av3}
@@ -380,6 +404,133 @@ class testDatabase(unittest.TestCase):
 
         result = self.myPanelData.split(2)
         self.assertEqual(len(result), 2)
+
+
+class TestVerifySegmentation(unittest.TestCase):
+    def setUp(self):
+        self.my_data = getData(1)
+
+    def test_verify_segmentation_valid(self):
+        # Define a valid segmentation
+        valid_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping={1: 'Alt. 1', 2: 'Alt. 2', 3: 'Alt. 3'}
+        )
+
+        # Verify segmentation
+        self.assertIsNone(self.my_data.verify_segmentation(valid_segmentation))
+
+    def test_verify_segmentation_invalid_variable(self):
+        # Define a segmentation with an invalid variable
+        invalid_variable_segmentation = DiscreteSegmentationTuple(
+            variable='invalid_variable', mapping={1: 'Alt. 1', 2: 'Alt. 2', 3: 'Alt. 3'}
+        )
+
+        # Verify segmentation and expect BiogemeError to be raised
+        with self.assertRaises(excep.BiogemeError):
+            self.my_data.verify_segmentation(invalid_variable_segmentation)
+
+    def test_verify_segmentation_missing_entries(self):
+        # Define a segmentation with missing entries in the data
+        missing_entries_segmentation = DiscreteSegmentationTuple(
+            variable='Choice',
+            mapping={
+                1: 'Alt. 1',
+                2: 'Alt. 2',
+            },
+        )
+
+        # Verify segmentation and expect BiogemeError to be raised
+        with self.assertRaises(excep.BiogemeError) as cm:
+            self.my_data.verify_segmentation(missing_entries_segmentation)
+        self.assertIn('missing in the segmentation', str(cm.exception))
+
+    def test_verify_segmentation_extra_entries(self):
+        # Define a segmentation with extra entries not present in the data
+        extra_entries_segmentation = DiscreteSegmentationTuple(
+            variable='Choice',
+            mapping={1: 'Alt. 1', 2: 'Alt. 2', 3: 'Alt. 3', 4: 'Alt. 4'},
+        )
+        # Verify segmentation and expect BiogemeError to be raised
+        with self.assertRaises(excep.BiogemeError) as cm:
+            self.my_data.verify_segmentation(extra_entries_segmentation)
+        self.assertIn('do not exist in the data', str(cm.exception))
+
+
+class TestGenerateSegmentation(unittest.TestCase):
+    def setUp(self):
+        self.my_data = getData(1)
+
+    def test_generate_segmentation_valid(self):
+        # Define a valid variable and mapping
+        variable = 'Choice'
+        mapping = {1: 'Alt. 1', 2: 'Alt. 2', 3: 'Alt. 3'}
+
+        # Generate segmentation
+        segmentation = self.my_data.generate_segmentation(variable, mapping)
+
+        expected_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping=mapping
+        )
+        # Verify the generated segmentation
+        self.assertIsInstance(segmentation, DiscreteSegmentationTuple)
+        self.assertEqual(segmentation.variable, expected_segmentation.variable)
+        self.assertDictEqual(segmentation.mapping, expected_segmentation.mapping)
+
+        segmentation = self.my_data.generate_segmentation(
+            variable, mapping, reference='Alt. 2'
+        )
+
+        expected_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping=mapping, reference='Alt. 2'
+        )
+        # Verify the generated segmentation
+        self.assertIsInstance(segmentation, DiscreteSegmentationTuple)
+        self.assertEqual(segmentation.variable, expected_segmentation.variable)
+        self.assertDictEqual(segmentation.mapping, expected_segmentation.mapping)
+        self.assertEqual(segmentation.reference, expected_segmentation.reference)
+
+        mapping = {1: 'Alt. 1', 2: 'Alt. 2'}
+        expected_mapping = {1: 'Alt. 1', 2: 'Alt. 2', 3: 'Choice_3'}
+
+        # Generate segmentation
+        segmentation = self.my_data.generate_segmentation(variable, mapping)
+
+        expected_segmentation = DiscreteSegmentationTuple(
+            variable='Choice', mapping=expected_mapping
+        )
+        # Verify the generated segmentation
+        self.assertIsInstance(segmentation, DiscreteSegmentationTuple)
+        self.assertEqual(segmentation.variable, expected_segmentation.variable)
+        self.assertDictEqual(segmentation.mapping, expected_segmentation.mapping)
+
+    def test_generate_segmentation_invalid_reference(self):
+        variable = 'Choice'
+        mapping = {1: 'Alt. 1', 2: 'Alt. 2', 3: 'Alt. 3'}
+
+        # Generate segmentation
+        with self.assertRaises(excep.BiogemeError):
+            _ = self.my_data.generate_segmentation(
+                variable, mapping, reference='invalid_reference'
+            )
+
+    def test_generate_segmentation_invalid_variable(self):
+        # Define an invalid variable
+        invalid_variable = 'invalid_variable'
+        mapping = {1: 'One', 2: 'Two'}
+
+        # Generate segmentation and expect BiogemeError to be raised
+        with self.assertRaises(excep.BiogemeError):
+            self.my_data.generate_segmentation(invalid_variable, mapping)
+
+    def test_generate_segmentation_values_not_in_data(self):
+        # Define a variable and mapping with values not present in the data
+        variable = 'Choice'
+        mapping = {1: 'One', 2: 'Two', 4: 'Four'}
+
+        # Generate segmentation and expect BiogemeError to be raised
+        with self.assertRaises(excep.BiogemeError) as cm:
+            self.my_data.generate_segmentation(variable, mapping)
+        self.assertIn('do not exist in the data', str(cm.exception))
 
 
 if __name__ == '__main__':
