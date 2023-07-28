@@ -15,13 +15,13 @@ import biogeme.optimization as opt
 import biogeme.check_parameters as cp
 
 ParameterTuple = namedtuple(
-    'ParameterTuple', 'name default type section description check'
+    'ParameterTuple', 'name value type section description check'
 )
 
 all_parameters_tuple = (
     ParameterTuple(
         name='identification_threshold',
-        default=1.0e-5,
+        value=1.0e-5,
         type=float,
         section='Output',
         description=(
@@ -34,7 +34,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='only_robust_stats',
-        default='True',
+        value=True,
         type=bool,
         section='Output',
         description=(
@@ -46,7 +46,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='generate_html',
-        default='True',
+        value=True,
         type=bool,
         section='Output',
         description=(
@@ -56,7 +56,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='generate_pickle',
-        default='True',
+        value=True,
         type=bool,
         section='Output',
         description=(
@@ -66,7 +66,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='number_of_threads',
-        default=0,
+        value=0,
         type=int,
         section='MultiThreading',
         description=(
@@ -79,7 +79,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='number_of_draws',
-        default=20000,
+        value=20000,
         type=int,
         section='MonteCarlo',
         description=('int: Number of draws for Monte-Carlo integration.'),
@@ -87,7 +87,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='missing_data',
-        default=99999,
+        value=99999,
         type=int,
         section='Specification',
         description=(
@@ -99,7 +99,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='seed',
-        default=0,
+        value=0,
         type=int,
         section='MonteCarlo',
         description=(
@@ -111,7 +111,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='bootstrap_samples',
-        default=100,
+        value=100,
         type=int,
         section='Estimation',
         description=('int: number of re-estimations for bootstrap sampling.'),
@@ -119,7 +119,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='max_number_parameters_to_report',
-        default=15,
+        value=15,
         type=int,
         section='Estimation',
         description=(
@@ -129,7 +129,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='save_iterations',
-        default='True',
+        value=True,
         type=bool,
         section='Estimation',
         description=(
@@ -145,7 +145,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='maximum_number_catalog_expressions',
-        default=100,
+        value=100,
         type=int,
         section='Estimation',
         description=(
@@ -160,7 +160,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='optimization_algorithm',
-        default='simple_bounds',
+        value='simple_bounds',
         type=str,
         section='Estimation',
         description=(
@@ -171,7 +171,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='second_derivatives',
-        default=1.0,
+        value=1.0,
         type=float,
         section='SimpleBounds',
         description=(
@@ -182,7 +182,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='tolerance',
-        default=np.finfo(np.float64).eps ** 0.3333,
+        value=np.finfo(np.float64).eps ** 0.3333,
         type=float,
         section='SimpleBounds',
         description='float: the algorithm stops when this precision is reached',
@@ -190,7 +190,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='max_iterations',
-        default=100,
+        value=100,
         type=int,
         section='SimpleBounds',
         description='int: maximum number of iterations',
@@ -198,7 +198,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='infeasible_cg',
-        default=False,
+        value=False,
         type=bool,
         section='SimpleBounds',
         description=(
@@ -212,7 +212,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='initial_radius',
-        default=100,
+        value=100,
         type=float,
         section='SimpleBounds',
         description='Initial radius of the trust region',
@@ -220,7 +220,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='steptol',
-        default=1.0e-5,
+        value=1.0e-5,
         type=float,
         section='SimpleBounds',
         description=(
@@ -232,7 +232,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='enlarging_factor',
-        default=10,
+        value=10,
         type=float,
         section='SimpleBounds',
         description=(
@@ -243,7 +243,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='dogleg',
-        default=True,
+        value=True,
         type=bool,
         section='TrustRegion',
         description=(
@@ -254,7 +254,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='number_of_neighbors',
-        default=20,
+        value=20,
         type=int,
         section='AssistedSpecification',
         description=(
@@ -264,7 +264,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='largest_neighborhood',
-        default=20,
+        value=20,
         type=int,
         section='AssistedSpecification',
         description=(
@@ -275,7 +275,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='maximum_attempts',
-        default=100,
+        value=100,
         type=int,
         section='AssistedSpecification',
         description=(
@@ -287,19 +287,3 @@ all_parameters_tuple = (
         check=(cp.is_integer, cp.is_non_negative),
     ),
 )
-
-
-def get_default_value(parameter_name):
-    """Return the default value of a parameter
-
-    :param parameter_name: name of the parameter
-    :type parameter_name: str
-
-    :return: default value, or None if the parameter is not found.
-    :rtype: depends on the type of parameter
-    """
-
-    for the_param in all_parameters_tuple:
-        if the_param.name == parameter_name:
-            return the_param.default
-    return None
