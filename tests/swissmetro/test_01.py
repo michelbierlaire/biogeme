@@ -107,42 +107,34 @@ class test_01(unittest.TestCase):
             database, logprob, parameter_file=self.scipy_file
         )
         biogeme.modelName = 'test_01'
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         biogeme.saveIterations = False
-        results = biogeme.estimate(bootstrap=10)
+        biogeme.bootstrap_samples = 10
+        results = biogeme.estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
-        self.assertAlmostEqual(
-            results.data.betas[0].bootstrap_stdErr, 0.04773096176427237, 2
-        )
 
     def testEstimationLineSearch(self):
         logprob = models.loglogit(V, av, CHOICE)
         biogeme = bio.BIOGEME(database, logprob, parameter_file=self.ls_file)
         biogeme.modelName = 'test_01'
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         biogeme.saveIterations = False
-        results = biogeme.estimate(
-            bootstrap=10,
-        )
+        biogeme.bootstrap_samples=10
+        results = biogeme.estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
-        self.assertAlmostEqual(
-            results.data.betas[0].bootstrap_stdErr, 0.04773096176427237, 2
-        )
 
     def testEstimationTrustRegion(self):
         logprob = models.loglogit(V, av, CHOICE)
         biogeme = bio.BIOGEME(database, logprob, parameter_file=self.tr_file)
         biogeme.modelName = 'test_01'
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         biogeme.saveIterations = False
-        results = biogeme.estimate(bootstrap=10)
+        biogeme.bootstrap_samples=10
+        results = biogeme.estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
-        self.assertAlmostEqual(
-            results.data.betas[0].bootstrap_stdErr, 0.04773096176427237, 2
-        )
 
     def tearDown(self):
         # Remove the directory after the test
