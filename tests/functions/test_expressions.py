@@ -373,7 +373,7 @@ class test_expressions(unittest.TestCase):
             + self.beta1 * (self.beta3 < self.beta4)
         )
         newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
-        expr1.changeInitValues(newvalues)
+        expr1.change_init_values(newvalues)
         self.assertAlmostEqual(expr1.getValue(), 1.9323323583816936, 5)
         res = expr1.getValue_c(prepareIds=True)
         self.assertAlmostEqual(res, 1.9323323583816936, 5)
@@ -384,7 +384,7 @@ class test_expressions(unittest.TestCase):
             + self.beta1 * (self.beta3 < self.beta4)
         )
         newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
-        expr1.changeInitValues(newvalues)
+        expr1.change_init_values(newvalues)
         f, g, h, b = expr1.getValueAndDerivatives(prepareIds=True)
         self.assertAlmostEqual(f, 1.9323323583816936, 5)
         g_ok = [2.0, 0.10150146242745953]
