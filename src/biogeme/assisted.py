@@ -7,12 +7,12 @@ New version of the assisted specification using Catalogs
 
 """
 import logging
-import random
-from datetime import date
 from biogeme_optimization.vns import vns, ParetoClass
 from biogeme_optimization.pareto import Pareto, SetElement, DATE_TIME_STRING
 from biogeme_optimization.neighborhood import Neighborhood
-from biogeme import biogeme, tools
+from biogeme.biogeme import BIOGEME
+from biogeme import tools
+from biogeme.parameters import biogeme_parameters
 import biogeme.version as bv
 import biogeme.exceptions as excep
 from biogeme.configuration import Configuration
@@ -21,157 +21,7 @@ from biogeme.specification import Specification
 logger = logging.getLogger(__name__)
 
 
-def get_element(specification, multi_objectives):
-    """Obtains the element from the Pareto set corresponding to a specification
-
-    :param specification: model specification
-    :type specification: biogeme.specification.Specification
-
-    :param multi_objectives: function calculating the objectives from the estimation results
-    :type multi_objectives: fct(biogeme.results.bioResults) --> list[float]
-
-    :return: element from the Pareto set
-    :rtype: biogeme.pareto.SetElement
-    """
-
-    the_id = specification.config_id
-    the_results = specification.get_results()
-    the_objectives = multi_objectives(the_results)
-    element = SetElement(the_id, the_objectives)
-    logger.debug(f'{element=}')
-    return element
-
-
 # Operators
-
-
-def modify_several_catalogs(selected_catalogs, element, step):
-    """Modify several catalogs in the specification
-
-    :param pareto: object managing the Pareto set
-    :type pareto: biogeme.pareto.Pareto
-
-    :param selected_catalogs: names of the catalogs to be modified. If
-        a name does not appear in the current configuration, it is
-        ignored.
-    :type selected_catalogs: set(str)
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param step: shift to apply to each catalog
-    :type step: int
-
-    :param size: number of catalogs to modify
-    :type size: int
-
-    :return: specification of the neighbor, and actual number of modifications
-    :rtype: tuple(Specification, int)
-
-    """
-    specification = Specification.from_string_id(element.element_id)
-    number_of_modifications = specification.expression.modify_catalogs(
-        selected_catalogs, step=step, circular=True
-    )
-    new_specification = Specification(specification.expression.current_configuration())
-    return new_specification, number_of_modifications
-
-
-def modify_random_catalogs(element, step, size=1):
-    """Modify several catalogs in the specification
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param step: shift to apply to each catalog
-    :type step: int
-
-    :param size: number of catalofs to modify
-    :type size: int
-
-    :return: specification of the neighbor, and actual number of modifications
-    :rtype: tuple(Specification, int)
-    """
-    specification = Specification.from_string_id(element.element_id)
-    the_catalogs = list(specification.configuration.set_of_catalogs())
-    actual_size = max(size, len(the_catalogs))
-    the_selected_catalogs = set(random.choices(the_catalogs, k=actual_size))
-    return modify_several_catalogs(
-        selected_catalogs=the_selected_catalogs, element=element, step=step
-    )
-
-
-def increase_configuration(catalog_name, element, size=1):
-    """Change the configuration of a catalog
-
-    :param catalog_name: name of the catalog to modify
-    :type catalog_name: str
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param size: number of increments to apply
-    :type size: int
-
-    :return: new specification, and number of
-        changes actually made
-    :rtype: tuple(Specification, int)
-
-    """
-    return modify_several_catalogs(
-        selected_catalogs={catalog_name}, element=element, step=size
-    )
-
-
-def decrease_configuration(catalog_name, element, size=1):
-    """Change the configuration of a catalog
-
-    :param catalog_name: name of the catalog to modify
-    :type catalog_name: str
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param size: number of increments to apply
-    :type size: int
-
-    :return: new specification, and number of changes actually made
-    :rtype: tuple(Specification, int)
-
-    """
-    return modify_several_catalogs(
-        selected_catalogs={catalog_name}, element=element, step=-size
-    )
-
-
-def increment_several_catalogs(element, size=1):
-    """Increment several catalogs in the specification
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param size: number of catalofs to modify
-    :type size: int
-
-    :return: specification of the neighbor, and actual number of modifications
-    :rtype: tuple(Specification, int)
-    """
-    return modify_random_catalogs(element=element, step=1, size=size)
-
-
-def decrement_several_catalogs(element, size=1):
-    """Increment several catalogs in the specification
-
-    :param element: ID of the current specification
-    :type element: class SetElement
-
-    :param size: number of catalofs to modify
-    :type size: int
-
-    :return: specification of the neighbor, and actual number of modifications
-    :rtype: tuple(Specification, int)
-    """
-    return modify_random_catalogs(element=element, step=1, size=size)
 
 
 class ParetoPostProcessing:
@@ -200,7 +50,7 @@ class ParetoPostProcessing:
         self.database = biogeme_object.database
         self.model_names = None
 
-    def reestimate(self, recycle):
+    def reestimate(self, recycle=False):
         """The assisted specification uses quickEstimate to estimate
         the models. A complete estimation is necessary to obtain the
         full estimation results.
@@ -209,22 +59,18 @@ class ParetoPostProcessing:
         if self.model_names is None:
             self.model_names = tools.ModelNames(prefix=self.biogeme_object.modelName)
 
-        new_results = {}
+        all_results = {}
         for element in self.pareto.pareto:
             config_id = element.element_id
-            logger.debug(f'REESTIMATE {config_id}')
-            config = Configuration.from_string(config_id)
-            self.expression.configure_catalogs(config)
-            self.expression.locked = True
-            user_notes = config.get_html()
-            the_biogeme = biogeme.BIOGEME(
-                self.database, self.expression, userNotes=user_notes
+            the_biogeme = BIOGEME.from_configuration(
+                config_id=config_id, expression=self.expression, database=self.database
             )
+            _ = Configuration.from_string(config_id)
             the_biogeme.modelName = self.model_names(config_id)
+            logger.debug(f'REESTIMATE {config_id}')
             the_result = the_biogeme.estimate(recycle=recycle)
-            new_results[config_id] = the_result
-            self.expression.locked = False
-        return new_results
+            all_results[config_id] = the_result
+        return all_results
 
     def log_statistics(self):
         """Report some statistics about the process in the logger"""
@@ -246,10 +92,10 @@ class ParetoPostProcessing:
             y-coordinate of the plot.
 
         :param objective_x: index of the objective function to use for the x-coordinate.
-        :param objective_x: int
+        :type objective_x: int
 
         :param objective_y: index of the objective function to use for the y-coordinate.
-        :param objective_y: int
+        :type objective_y: int
 
         :param label_x: label for the x_axis
         :type label_x: str
@@ -300,11 +146,11 @@ class AssistedSpecification(Neighborhood):
         """
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
-        self.parameters = biogeme_object.toml.parameters
+        self.central_controller = self.biogeme_object.loglike.set_central_controller()
         Specification.generic_name = biogeme_object.modelName
         self.multi_objectives = staticmethod(multi_objectives)
         self.validity = None if validity is None else staticmethod(validity)
-        largest_neighborhood = self.parameters.get_value(
+        largest_neighborhood = biogeme_parameters.get_value(
             name='largest_neighborhood', section='AssistedSpecification'
         )
         self.pareto = ParetoClass(
@@ -313,7 +159,7 @@ class AssistedSpecification(Neighborhood):
         self.pareto.comments = [
             f'Biogeme {bv.getVersion()} [{bv.versionDate}]',
             f'File {self.pareto.filename} created on {DATE_TIME_STRING}',
-            f'{bv.author}, {bv.department}, {bv.university}',
+            f'{bv.AUTHOR}, {bv.DEPARTMENT}, {bv.UNIVERSITY}',
         ]
         self.expression = biogeme_object.loglike
         if self.expression is None:
@@ -322,76 +168,36 @@ class AssistedSpecification(Neighborhood):
         self.database = biogeme_object.database
         Specification.expression = self.expression
         Specification.database = self.database
-        self.operators = {}
-        all_catalogs = list(
-            self.expression.dict_of_catalogs(ignore_synchronized=True).keys()
-        )
-        for catalog in all_catalogs:
-            self.operators[f'Increase {catalog}'] = self.generate_named_operator(
-                catalog, increase_configuration
-            )
-            self.operators[f'Decrease {catalog}'] = self.generate_named_operator(
-                catalog, decrease_configuration
-            )
-        self.operators['Increment several catalogs'] = self.generate_operator(
-            increment_several_catalogs
-        )
-        self.operators['Decrement several catalogs'] = self.generate_operator(
-            decrement_several_catalogs
-        )
-
-        logger.debug('Ctor assisted specification: Done')
+        self.operators = {
+            name: self.generate_operator(operator)
+            for name, operator in self.central_controller.prepare_operators().items()
+        }
         super().__init__(self.operators)
-        logger.debug('Ctor assisted specification: Done')
 
-    def generate_operator(self, the_function):
-        """Generate the operator function that complies with the
-            requirements, from a function that takes the name of the catalog
-            as an argument.
+    def generate_operator(self, function):
+        """Defines an operator that takes a SetElement as an argument, to
+            comply with the interface of the VNS algorithm.
 
-        :param the_function: a function that takes the catalog name, the
-            current element and the size as argument, and that returns a
-            neighbor specification.
-        :type the_function: function(SetElement, int) --> Specification
+        :param function: one of the function implementing the
+            operators from the central controller
+        :type function: function(str, int) --> str, int
 
-        :return: a function that takes the current element and the size as
-            argument, and that returns a neighbor. It can be used as an
-            operator for the VNS algorithm.
-        :rtype: function(SetElement, int)
+        :return: operator
+        :rtype: function(SetElement, int) --> SetElement, int
 
         """
 
-        def the_operator(element, size):
-            specification, modifications = the_function(element, size)
-            new_element = get_element(specification, self.multi_objectives)
-            return new_element, modifications
+        def the_operator(element, step):
 
-        return the_operator
-
-    def generate_named_operator(self, name, the_function):
-        """Generate the operator function that complies with the
-            requirements, from a function that takes the name of the catalog
-            as an argument.
-
-        :param name: name of the catalog
-        :type name: str
-
-        :param the_function: a function that takes the catalog name, the
-            current element and the size as argument, and that returns a
-            neighbor specification.
-        :type the_function: function(str, SetElement, int)
-
-        :return: a function that takes the current element and the size as
-            argument, and that returns a neighbor. It can be used as an
-            operator for the VNS algorithm.
-        :rtype: function(SetElement, int)
-
-        """
-
-        def the_operator(element, size):
-            specification, modifications = the_function(name, element, size)
-            new_element = get_element(specification, self.multi_objectives)
-            return new_element, modifications
+            the_new_config, number_of_modifications = function(
+                current_config=element.element_id,
+                step=step,
+            )
+            new_specification = Specification(the_new_config)
+            return (
+                new_specification.get_element(self.multi_objectives),
+                number_of_modifications,
+            )
 
         return the_operator
 
@@ -437,6 +243,7 @@ class AssistedSpecification(Neighborhood):
         Specification.pareto = self.pareto
         logger.debug('Default specification')
         default_specification = Specification.default_specification()
+        print(f'{default_specification=}')
         logger.debug('Default specification: done')
         pareto_before = self.pareto.length_of_all_sets()
 
@@ -445,23 +252,27 @@ class AssistedSpecification(Neighborhood):
             self.biogeme_object.loglike.number_of_multiple_expressions()
         )
         maximum_number = self.biogeme_object.maximum_number_catalog_expressions
-        if number_of_specifications is not None:
+        if number_of_specifications <= maximum_number:
             logger.info('We consider all possible combinations of the catalogs.')
-            for c in self.biogeme_object.loglike:
-                the_config = c.current_configuration()
-                _ = Specification(the_config)
+            for index, configuration in enumerate(self.biogeme_object.loglike):
+                logger.info(f'Model {index}/{number_of_specifications}')
+                the_config = configuration.current_configuration()
+                the_specification = Specification(the_config)
+                the_element = the_specification.get_element(self.multi_objectives)
+                Specification.pareto.add(the_element)
+                Specification.pareto.dump()
         else:
             logger.info(
-                f'The number of possible specifications '
+                f'The number of possible specifications [{number_of_specifications}] '
                 f'exceeds the maximum number [{maximum_number}]. '
                 f'A heuristic algorithm is applied.'
             )
 
-            default_element = get_element(default_specification, self.multi_objectives)
-            number_of_neighbors = self.parameters.get_value(
+            default_element = default_specification.get_element(self.multi_objectives)
+            number_of_neighbors = biogeme_parameters.get_value(
                 name='number_of_neighbors', section='AssistedSpecification'
             )
-            maximum_attempts = self.parameters.get_value(
+            maximum_attempts = biogeme_parameters.get_value(
                 name='maximum_attempts', section='AssistedSpecification'
             )
             logger.debug(f'{default_element=}')
@@ -497,6 +308,6 @@ class AssistedSpecification(Neighborhood):
         post_processing = ParetoPostProcessing(
             biogeme_object=self.biogeme_object, pareto_file_name=self.pareto.filename
         )
-        estimation_results = post_processing.reestimate(recycle=False)
+        estimation_results = post_processing.reestimate()
         post_processing.log_statistics()
         return estimation_results
