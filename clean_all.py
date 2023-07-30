@@ -6,8 +6,9 @@
 import os
 import sys
 
-EXTENSIONS_TO_CLEAN = ['pickle', 'iter', 'log', 'pareto', '~', '#']
-FILENAMES_TO_CLEAN = ['Untitled-checkpoint.ipynb', 'Untitled.ipynb']
+FILE_ENDING_WITH = ['pickle', 'iter', 'log', 'pareto', '~', '#']
+FILE_STARTING_WITH = ['Untitled', 'test_dumped']
+
 
 def file_to_erase(the_filename: str) -> bool:
     """Checks if a file must be erased
@@ -18,12 +19,14 @@ def file_to_erase(the_filename: str) -> bool:
     :return: True if the file must be erased. False otherwise.
     :rtype: bool
     """
-    for ext in EXTENSIONS_TO_CLEAN:
-        if the_filename.endswith(ext):
+    for end in FILE_ENDING_WITH:
+        if the_filename.endswith(end):
             return True
 
-    if the_filename in FILENAMES_TO_CLEAN:
-        return True
+    for start in FILE_STARTING_WITH:
+        if the_filename.startswith(start):
+            return True
+        
     return False
 
 
