@@ -7,8 +7,12 @@ Assisted specification for the airline case study. Generate results
 from the pareto file.
 
 """
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
 
-import matplotlib.pyplot as plt
 import biogeme.logging as blog
 from biogeme.assisted import AssistedSpecification, ParetoPostProcessing
 from biogeme.results import compile_estimation_results
@@ -41,5 +45,6 @@ for k, v in description.items():
     if k != v:
         print(f'{k}: {v}')
 
-ax = post_processing.plot()
-plt.show()
+if can_plot:
+    ax = post_processing.plot()
+    plt.show()
