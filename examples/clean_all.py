@@ -6,7 +6,7 @@
 import os
 import sys
 
-EXTENSIONS_TO_CLEAN = ['html', 'pickle', 'iter', 'log', 'pareto', '~', '#']
+EXTENSIONS_TO_CLEAN = ['html', 'pickle', 'iter', 'log', 'pareto', '.tex', '.F12', '~', '#']
 
 
 def file_to_erase(the_filename: str) -> bool:
