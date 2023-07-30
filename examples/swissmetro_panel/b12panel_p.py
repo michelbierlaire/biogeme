@@ -71,17 +71,13 @@ V3 = [
 # Associate utility functions with the numbering of alternatives
 V = [{1: V1[q], 2: V2[q], 3: V3[q]} for q in range(NBR_QUESTIONS)]
 
-av = [
-    {1: TRAIN_AV_SP[q], 2: SM_AV[q], 3: CAR_AV_SP[q]}
-    for q in range(NBR_QUESTIONS)
-]
+av = [{1: TRAIN_AV_SP[q], 2: SM_AV[q], 3: CAR_AV_SP[q]} for q in range(NBR_QUESTIONS)]
 
 
 # Conditional to B_TIME_RND, the likelihood of one observation is
 # given by the logit model (called the kernel)
 obslogprob = [
-    models.loglogit(V[q], av[q], Variable(f'CHOICE_{q}'))
-    for q in range(NBR_QUESTIONS)
+    models.loglogit(V[q], av[q], Variable(f'CHOICE_{q}')) for q in range(NBR_QUESTIONS)
 ]
 
 # Conditional to B_TIME_RND, the likelihood of all observations for

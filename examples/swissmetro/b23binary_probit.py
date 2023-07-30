@@ -1,4 +1,4 @@
-"""File b23probit.py
+"""File b23binary_probit.py
 
 :author: Michel Bierlaire, EPFL
 :date: Wed Apr 12 17:58:18 2023
@@ -49,6 +49,6 @@ the_biogeme.modelName = 'b23probit'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

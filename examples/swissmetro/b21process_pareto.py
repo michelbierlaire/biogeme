@@ -8,10 +8,19 @@ pareto optimal specification. This script is designed to re-estimate
 the Pareto optimal models
 
 """
-import matplotlib.pyplot as plt
+import biogeme.logging as blog
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
+from biogeme_optimization.exceptions import OptimizationError
 from biogeme.assisted import ParetoPostProcessing
 from biogeme.results import compileEstimationResults
 from b21multiple_models_spec import the_biogeme, PARETO_FILE_NAME
+
+logger = blog.get_screen_logger(blog.INFO)
+logger.info('Example b21process_pareto.py')
 
 CSV_FILE = 'b21process_pareto.csv'
 SEP_CSV = ','
@@ -20,7 +29,8 @@ the_pareto_post = ParetoPostProcessing(
     biogeme_object=the_biogeme,
     pareto_file_name=PARETO_FILE_NAME,
 )
-print(the_pareto_post.statistics())
+
+the_pareto_post.log_statistics()
 
 all_results = the_pareto_post.reestimate(recycle=True)
 
@@ -35,6 +45,9 @@ with open(CSV_FILE, 'a', encoding='utf-8') as f:
             print(f'{k}: {v}')
             print(f'{k}{SEP_CSV}{v}', file=f)
 
-
-_ = the_pareto_post.plot()
-plt.show()
+if can_plot:
+    try:
+        _ = the_pareto_post.plot()
+        plt.show()
+    except OptimizationError as e:
+        print(f'No plot available: {e}')

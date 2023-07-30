@@ -90,6 +90,6 @@ the_biogeme.modelName = 'b25triangular_mixture'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

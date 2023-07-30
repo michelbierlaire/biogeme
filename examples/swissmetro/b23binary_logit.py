@@ -1,4 +1,4 @@
-"""File b23logit.py
+"""File b23binary_logit.py
 
 :author: Michel Bierlaire, EPFL
 :date: Wed Apr 12 17:58:18 2023
@@ -9,7 +9,7 @@
 
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta, bioNormalCdf, Elem, log
+from biogeme.expressions import Beta
 from swissmetro_binary import (
     database,
     CHOICE,
@@ -49,6 +49,6 @@ the_biogeme.modelName = 'b23logit'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

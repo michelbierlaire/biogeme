@@ -38,31 +38,23 @@ print(
 # Definition of new variables
 SM_COST = [Variable(f'SM_CO_{q}') * (GA == 0) for q in range(NBR_QUESTIONS)]
 
-TRAIN_COST = [
-    Variable(f'TRAIN_CO_{q}') * (GA == 0) for q in range(NBR_QUESTIONS)
-]
+TRAIN_COST = [Variable(f'TRAIN_CO_{q}') * (GA == 0) for q in range(NBR_QUESTIONS)]
 
 # Definition of new variables: adding columns to the database
 CAR_AV_SP = [
-    database.DefineVariable(
-        f'CAR_AV_SP_{q}', Variable(f'CAR_AV_{q}') * (SP != 0)
-    )
+    database.DefineVariable(f'CAR_AV_SP_{q}', Variable(f'CAR_AV_{q}') * (SP != 0))
     for q in range(NBR_QUESTIONS)
 ]
 
 TRAIN_AV_SP = [
-    database.DefineVariable(
-        f'TRAIN_AV_SP_{q}', Variable(f'TRAIN_AV_{q}') * (SP != 0)
-    )
+    database.DefineVariable(f'TRAIN_AV_SP_{q}', Variable(f'TRAIN_AV_{q}') * (SP != 0))
     for q in range(NBR_QUESTIONS)
 ]
 
 SM_AV = [Variable(f'SM_AV_{q}') for q in range(NBR_QUESTIONS)]
 
 TRAIN_TT_SCALED = [
-    database.DefineVariable(
-        f'TRAIN_TT_SCALED_{q}', Variable(f'TRAIN_TT_{q}') / 100.0
-    )
+    database.DefineVariable(f'TRAIN_TT_SCALED_{q}', Variable(f'TRAIN_TT_{q}') / 100.0)
     for q in range(NBR_QUESTIONS)
 ]
 
@@ -72,9 +64,7 @@ TRAIN_COST_SCALED = [
 ]
 
 SM_TT_SCALED = [
-    database.DefineVariable(
-        f'SM_TT_SCALED_{q}', Variable(f'SM_TT_{q}') / 100.0
-    )
+    database.DefineVariable(f'SM_TT_SCALED_{q}', Variable(f'SM_TT_{q}') / 100.0)
     for q in range(NBR_QUESTIONS)
 ]
 
@@ -84,15 +74,11 @@ SM_COST_SCALED = [
 ]
 
 CAR_TT_SCALED = [
-    database.DefineVariable(
-        f'CAR_TT_SCALED_{q}', Variable(f'CAR_TT_{q}') / 100
-    )
+    database.DefineVariable(f'CAR_TT_SCALED_{q}', Variable(f'CAR_TT_{q}') / 100)
     for q in range(NBR_QUESTIONS)
 ]
 
 CAR_CO_SCALED = [
-    database.DefineVariable(
-        f'CAR_CO_SCALED_{q}', Variable(f'CAR_CO_{q}') / 100
-    )
+    database.DefineVariable(f'CAR_CO_SCALED_{q}', Variable(f'CAR_CO_{q}') / 100)
     for q in range(NBR_QUESTIONS)
 ]

@@ -52,16 +52,12 @@ V3 = [
 V = [{1: V1[q], 2: V2[q], 3: V3[q]} for q in range(NBR_QUESTIONS)]
 
 # Associate the availability conditions with the alternatives
-av = [
-    {1: TRAIN_AV_SP[q], 2: SM_AV[q], 3: CAR_AV_SP[q]}
-    for q in range(NBR_QUESTIONS)
-]
+av = [{1: TRAIN_AV_SP[q], 2: SM_AV[q], 3: CAR_AV_SP[q]} for q in range(NBR_QUESTIONS)]
 
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
 logprob = [
-    models.loglogit(V[q], av[q], Variable(f'CHOICE_{q}'))
-    for q in range(NBR_QUESTIONS)
+    models.loglogit(V[q], av[q], Variable(f'CHOICE_{q}')) for q in range(NBR_QUESTIONS)
 ]
 
 # Create the Biogeme object

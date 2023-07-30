@@ -1,16 +1,15 @@
 """File b22multiple_models_spec.py
 
 :author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 17:28:17 2023
+:date: Fri Jul 21 17:56:47 2023
 
-Specification of the Catalog of expressions for the assisted specification algorihm.
+Specification of the Catalog of expressions for the assisted specification algorithm.
 
 """
 from biogeme import models
 import biogeme.biogeme as bio
 from biogeme.expressions import Beta, logzero
-from biogeme.catalog import Catalog, SynchronizedCatalog
-from biogeme.segmentation import DiscreteSegmentationTuple, Segmentation
+from biogeme.catalog import Catalog, segmentation_catalogs
 from swissmetro_data import (
     database,
     CHOICE,
@@ -41,66 +40,48 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 B_HEADWAY = Beta('B_HEADWAY', 0, None, None, 0)
 
 # Define segmentations
-gender_segmentation = DiscreteSegmentationTuple(
+gender_segmentation = database.generate_segmentation(
     variable=MALE, mapping={0: 'female', 1: 'male'}
 )
 
-GA_segmentation = DiscreteSegmentationTuple(
+GA_segmentation = database.generate_segmentation(
     variable=GA, mapping={0: 'without_ga', 1: 'with_ga'}
 )
 
-luggage_segmentation = DiscreteSegmentationTuple(
+luggage_segmentation = database.generate_segmentation(
     variable=LUGGAGE, mapping={0: 'no_lugg', 1: 'one_lugg', 3: 'several_lugg'}
 )
 
-ASC_CAR_gender_segmentation = Segmentation(ASC_CAR, [gender_segmentation])
-ASC_TRAIN_gender_segmentation = Segmentation(ASC_TRAIN, [gender_segmentation])
-
-ASC_CAR_luggage_segmentation = Segmentation(ASC_CAR, [luggage_segmentation])
-ASC_TRAIN_luggage_segmentation = Segmentation(ASC_TRAIN, [luggage_segmentation])
-
-ASC_CAR_GA_segmentation = Segmentation(ASC_CAR, [GA_segmentation])
-ASC_TRAIN_GA_segmentation = Segmentation(ASC_TRAIN, [GA_segmentation])
-
-ASC_CAR_catalog = Catalog.from_dict(
-    'ASC_CAR_catalog',
-    {
-        'no_segment': ASC_CAR,
-        'gender_segment': ASC_CAR_gender_segmentation.segmented_beta(),
-        'luggage_segment': ASC_CAR_luggage_segmentation.segmented_beta(),
-        'GA_segment': ASC_CAR_GA_segmentation.segmented_beta(),
-    },
+ASC_CAR_catalog, ASC_TRAIN_catalog = segmentation_catalogs(
+    generic_name='ASC',
+    beta_parameters=[ASC_CAR, ASC_TRAIN],
+    potential_segmentations=[
+        gender_segmentation,
+        luggage_segmentation,
+        GA_segmentation,
+    ],
+    maximum_number=2,
 )
 
-ASC_TRAIN_catalog = SynchronizedCatalog.from_dict(
-    'ASC_TRAIN_catalog',
-    {
-        'no_segment': ASC_TRAIN,
-        'gender_segment': ASC_TRAIN_gender_segmentation.segmented_beta(),
-        'luggage_segment': ASC_TRAIN_luggage_segmentation.segmented_beta(),
-        'GA_segment': ASC_TRAIN_GA_segmentation.segmented_beta(),
-    },
-    ASC_CAR_catalog,
-)
 
 # We define a catalog with two different specifications for headway
 TRAIN_HEADWAY_catalog = Catalog.from_dict(
-    'TRAIN_HEADWAY_catalog',
-    {'without_headway': 0, 'with_headway': B_HEADWAY * TRAIN_HE},
+    catalog_name='TRAIN_HEADWAY_catalog',
+    dict_of_expressions={'without_headway': 0, 'with_headway': B_HEADWAY * TRAIN_HE},
 )
 
-SM_HEADWAY_catalog = SynchronizedCatalog.from_dict(
-    'SM_HEADWAY_catalog',
-    {'without_headway': 0, 'with_headway': B_HEADWAY * SM_HE},
-    TRAIN_HEADWAY_catalog,
+SM_HEADWAY_catalog = Catalog.from_dict(
+    catalog_name='SM_HEADWAY_catalog',
+    dict_of_expressions={'without_headway': 0, 'with_headway': B_HEADWAY * SM_HE},
+    controlled_by=TRAIN_HEADWAY_catalog.controlled_by,
 )
 
 
-ell_TT = Beta('lambda_TT', 1, None, None, 0)
+ell_TT = Beta('lambda_TT', 1, None, 10, 0)
 
 TRAIN_TT_catalog = Catalog.from_dict(
-    'TRAIN_TT_catalog',
-    {
+    catalog_name='TRAIN_TT_catalog',
+    dict_of_expressions={
         'linear': TRAIN_TT_SCALED,
         'log': logzero(TRAIN_TT_SCALED),
         'sqrt': TRAIN_TT_SCALED**0.5,
@@ -110,9 +91,9 @@ TRAIN_TT_catalog = Catalog.from_dict(
     },
 )
 
-SM_TT_catalog = SynchronizedCatalog.from_dict(
-    'SM_TT_catalog',
-    {
+SM_TT_catalog = Catalog.from_dict(
+    catalog_name='SM_TT_catalog',
+    dict_of_expressions={
         'linear': SM_TT_SCALED,
         'log': logzero(SM_TT_SCALED),
         'sqrt': SM_TT_SCALED**0.5,
@@ -120,12 +101,12 @@ SM_TT_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(SM_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(SM_TT_SCALED, ell_TT),
     },
-    TRAIN_TT_catalog,
+    controlled_by=TRAIN_TT_catalog.controlled_by,
 )
 
-CAR_TT_catalog = SynchronizedCatalog.from_dict(
-    'CAR_TT_catalog',
-    {
+CAR_TT_catalog = Catalog.from_dict(
+    catalog_name='CAR_TT_catalog',
+    dict_of_expressions={
         'linear': CAR_TT_SCALED,
         'log': logzero(CAR_TT_SCALED),
         'sqrt': CAR_TT_SCALED**0.5,
@@ -133,14 +114,14 @@ CAR_TT_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(CAR_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(CAR_TT_SCALED, ell_TT),
     },
-    TRAIN_TT_catalog,
+    controlled_by=TRAIN_TT_catalog.controlled_by,
 )
 
-ell_COST = Beta('lambda_COST', 1, None, None, 0)
+ell_COST = Beta('lambda_COST', 1, None, 10, 0)
 
 TRAIN_COST_catalog = Catalog.from_dict(
-    'TRAIN_COST_catalog',
-    {
+    catalog_name='TRAIN_COST_catalog',
+    dict_of_expressions={
         'linear': TRAIN_COST_SCALED,
         'log': logzero(TRAIN_COST_SCALED),
         'sqrt': TRAIN_COST_SCALED**0.5,
@@ -150,9 +131,9 @@ TRAIN_COST_catalog = Catalog.from_dict(
     },
 )
 
-SM_COST_catalog = SynchronizedCatalog.from_dict(
-    'SM_COST_catalog',
-    {
+SM_COST_catalog = Catalog.from_dict(
+    catalog_name='SM_COST_catalog',
+    dict_of_expressions={
         'linear': SM_COST_SCALED,
         'log': logzero(SM_COST_SCALED),
         'sqrt': SM_COST_SCALED**0.5,
@@ -160,12 +141,12 @@ SM_COST_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(SM_COST_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(SM_COST_SCALED, ell_COST),
     },
-    TRAIN_COST_catalog,
+    controlled_by=TRAIN_COST_catalog.controlled_by,
 )
 
-CAR_COST_catalog = SynchronizedCatalog.from_dict(
-    'CAR_COST_catalog',
-    {
+CAR_COST_catalog = Catalog.from_dict(
+    catalog_name='CAR_COST_catalog',
+    dict_of_expressions={
         'linear': CAR_CO_SCALED,
         'log': logzero(CAR_CO_SCALED),
         'sqrt': CAR_CO_SCALED**0.5,
@@ -173,11 +154,10 @@ CAR_COST_catalog = SynchronizedCatalog.from_dict(
         'piecewise_2': models.piecewiseFormula(CAR_CO_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(CAR_CO_SCALED, ell_COST),
     },
-    TRAIN_COST_catalog,
+    controlled_by=TRAIN_COST_catalog.controlled_by,
 )
 
-
-# Definition of the utility functions with linear cost
+# Definition of the utility functions
 V1 = (
     ASC_TRAIN_catalog
     + B_TIME * TRAIN_TT_catalog
@@ -185,6 +165,7 @@ V1 = (
     + TRAIN_HEADWAY_catalog
 )
 V2 = B_TIME * SM_TT_catalog + B_COST * SM_COST_catalog + SM_HEADWAY_catalog
+
 V3 = ASC_CAR_catalog + B_TIME * CAR_TT_catalog + B_COST * CAR_COST_catalog
 
 # Associate utility functions with the numbering of alternatives
