@@ -391,3 +391,4 @@ reports/pandasFirstModel3.2.11/pandasfirstmodel.ps
 examples/indicators/biogeme.toml
 *.toml
 *.csv
+sphinx/sphinx.log
