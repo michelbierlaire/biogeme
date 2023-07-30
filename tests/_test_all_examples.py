@@ -21,20 +21,31 @@ ROOT_DIR = (
 exclude = ['replace.py']
 
 examples_dirs = (
+    'swissmetro',
+    'swissmetro_panel',
+    'wtp_space',
     'assisted',
     'indicators',
     'latent',
     'latentbis',
     'montecarlo',
     'sampling',
-    'swissmetro',
-    'swissmetro_panel',
-    'wtp_space',
 )
+
+extensions_to_clean = ['html', 'pickle', 'iter', 'log', 'pareto']
+
+def clean_directory(directory):
+    file_list = os.listdir(directory)
+    for file in file_list:
+        for ext in extensions_to_clean:
+            if file.endswith(ext):
+                file_path = os.path.join(directory, file)
+                print(f'Remove {file_path}')
+                os.remove(file_path)
 
 class ScriptExecutionTests(unittest.TestCase):
     def setUp(self):
-        
+
         self.filename = tempfile.mktemp()
         biogeme_parameters.set_value(
             name='number_of_draws', value=4, section='MonteCarlo'
@@ -54,6 +65,10 @@ class ScriptExecutionTests(unittest.TestCase):
         biogeme_parameters.set_value(
             name='bootstrap_samples', value=2, section='Estimation'
         )
+
+        biogeme_parameters.set_value(
+            name='second_derivatives', value=0, section='SimpleBounds'
+        )
         
         biogeme_parameters.dump_file(file_name=self.filename)
 
@@ -65,7 +80,9 @@ class ScriptExecutionTests(unittest.TestCase):
 
         # Iterate over all directories
         for directory in examples_dirs:
+            # Clean the directory
             script_dir = f'{ROOT_DIR}/{directory}'
+            clean_directory(script_dir)
             toml_file = f'{script_dir}/biogeme.toml'
             orig_file_exists = False
             # Replace the file biogeme.toml, if present, with another file
