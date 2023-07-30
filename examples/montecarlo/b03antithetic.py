@@ -28,7 +28,7 @@ def halton13_anti(sample_size, number_of_draws):
 
     """
     the_draws = draws.getHaltonDraws(
-        sample_size, int(number_of_draws / 2), base=13, skip=10
+        sample_size, int(number_of_draws / 2.0), base=13, skip=10
     )
     return np.concatenate((the_draws, 1 - the_draws), axis=1)
 

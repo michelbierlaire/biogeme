@@ -6,7 +6,6 @@
 
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta, Variable
 
 from sample import SAMPLE_SIZE as N_ALT
 from choice_data import database

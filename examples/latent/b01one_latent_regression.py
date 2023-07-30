@@ -11,7 +11,6 @@ Linear regression.
 import biogeme.logging as blog
 import biogeme.biogeme as bio
 import biogeme.loglikelihood as ll
-import biogeme.messaging as msg
 from biogeme.expressions import Beta, Elem, bioMultSum
 from optima import (
     database,
