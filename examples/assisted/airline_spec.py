@@ -385,16 +385,16 @@ V = {
 av = {1: 1, 2: 1, 3: 1}
 
 # Nests
-onestop = Beta('mu_onestop', 1, 1, None, 0), [2, 3]
+onestop = Beta('mu_onestop', 1, 1, 10, 0), [2, 3]
 nonstop = 1.0, [1]
 nests_1 = nonstop, onestop
 
-same = Beta('mu_same', 1, 1, None, 0), [1, 2]
+same = Beta('mu_same', 1, 1, 10, 0), [1, 2]
 multiple = 1.0, [3]
 nests_2 = same, multiple
 
-mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
-mu_same = Beta('mu_same', 1, 1, None, 0)
+mu_onestop = Beta('mu_onestop', 1, 1, 10, 0)
+mu_same = Beta('mu_same', 1, 1, 10, 0)
 alpha_onestop = {1: 1.0, 2: 0.5, 3: 1}
 alpha_same = {1: 1.0, 2: 0.5, 3: 1}
 nest_onestop = mu_onestop, alpha_onestop
@@ -402,8 +402,8 @@ nest_same = mu_same, alpha_same
 cnl_nests_1 = nest_onestop, nest_same
 
 alpha = Beta('alpha', 0.5, 0, 1, 0)
-mu_onestop = Beta('mu_onestop', 1, 1, None, 0)
-mu_same = Beta('mu_same', 1, 1, None, 0)
+mu_onestop = Beta('mu_onestop', 1, 1, 10, 0)
+mu_same = Beta('mu_same', 1, 1, 10, 0)
 alpha_onestop = {1: 1.0, 2: alpha, 3: 1}
 alpha_same = {1: 1.0, 2: 1 - alpha, 3: 1}
 nest_onestop = mu_onestop, alpha_onestop
