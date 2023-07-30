@@ -389,3 +389,4 @@ reports/pandasFirstModel3.2.11/pandasfirstmodel.out
 reports/pandasFirstModel3.2.11/pandasfirstmodel.ps
 examples/indicators/biogeme.toml
 *.toml
+*.csv
