@@ -7,7 +7,13 @@ Example of manipulating mathematical expressions and calculation of
 derivatives.
 """
 import numpy as np
-import matplotlib.pyplot as plt
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
+    
+    
 from biogeme.expressions import Beta, exp
 
 
@@ -50,16 +56,17 @@ print(f'g({beta}) = {g}')
 print(f'h({beta}) = {h}')
 
 
-# We can also use it to plot the function and its derivatives
-x = np.arange(-2, 2, 0.01)
-f = [fct(xx)[0] for xx in x]
-g = [float(fct([xx])[1]) for xx in x]
-h = [float(fct([xx])[2]) for xx in x]
+if can_plot:
+    # We can also use it to plot the function and its derivatives
+    x = np.arange(-2, 2, 0.01)
+    f = [fct(xx)[0] for xx in x]
+    g = [float(fct([xx])[1]) for xx in x]
+    h = [float(fct([xx])[2]) for xx in x]
 
-ax = plt.gca()
-ax.plot(x, f, label="f(x)")
-ax.plot(x, g, label="f'(x)")
-ax.plot(x, h, label='f"(x)')
-ax.legend()
+    ax = plt.gca()
+    ax.plot(x, f, label="f(x)")
+    ax.plot(x, g, label="f'(x)")
+    ax.plot(x, h, label='f"(x)')
+    ax.legend()
 
-plt.show()
+    plt.show()

@@ -9,7 +9,8 @@
 """
 from biogeme import models
 import biogeme.biogeme as bio
-from scenarios import scenario, database
+from optima_data import database
+from scenarios import scenario
 
 # Obtain the specification for the default scenario
 V, nests, Choice, _ = scenario()
@@ -24,7 +25,8 @@ the_biogeme.modelName = 'b02estimation'
 
 print('Estimation...')
 # Estimate the parameters. Perform bootstrapping.
-results = the_biogeme.estimate(bootstrap=100)
+the_biogeme.bootstrap_samples = 100
+results = the_biogeme.estimate(run_bootstrap=True)
 
 # Get the results in a pandas table
 pandas_results = results.getEstimatedParameters()

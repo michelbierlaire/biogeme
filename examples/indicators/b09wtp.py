@@ -10,17 +10,18 @@
 """
 
 import sys
-import matplotlib.pyplot as plt
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
 import biogeme.biogeme as bio
 import biogeme.exceptions as excep
 import biogeme.results as res
 
 from biogeme.expressions import Derive
-from scenarios import (
-    scenario,
-    database,
-    normalized_weight,
-)
+from optima_data import database, normalized_weight
+from scenarios import scenario
 
 V, _, _, _ = scenario()
 
@@ -114,10 +115,11 @@ print(f'WTP car for males  : {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 # We plot the distribution of WTP in the population. In this case,
 # there are only two values
 
-plt.hist(
-    60 * simulated_values['WTP CAR time'],
-    weights=simulated_values['weight'],
-)
-plt.xlabel('WTP (CHF/hour)')
-plt.ylabel('Individuals')
-plt.show()
+if can_plot:
+    plt.hist(
+        60 * simulated_values['WTP CAR time'],
+        weights=simulated_values['weight'],
+    )
+    plt.xlabel('WTP (CHF/hour)')
+    plt.ylabel('Individuals')
+    plt.show()

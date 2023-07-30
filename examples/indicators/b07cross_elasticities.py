@@ -15,10 +15,9 @@ from biogeme import models
 import biogeme.exceptions as excep
 import biogeme.results as res
 from biogeme.expressions import Derive
+from optima_data import database, normalized_weight
 from scenarios import (
     scenario,
-    database,
-    normalized_weight,
     TimePT,
     TimeCar,
     MarginalCostPT,

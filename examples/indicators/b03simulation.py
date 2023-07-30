@@ -12,7 +12,8 @@ from biogeme import models
 import biogeme.biogeme as bio
 import biogeme.exceptions as excep
 import biogeme.results as res
-from scenarios import scenario, database, normalized_weight
+from optima_data import database, normalized_weight
+from scenarios import scenario
 
 # Obtain the specification for the default scenario
 V, nests, _, _ = scenario()

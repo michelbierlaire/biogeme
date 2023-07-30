@@ -7,13 +7,18 @@ We use an estimated model to calculate revenues
 """
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
 from tqdm import tqdm
 from biogeme import models
 import biogeme.exceptions as excep
 import biogeme.biogeme as bio
 import biogeme.results as res
-from scenarios import scenario, database, normalized_weight
+from optima_data import database, normalized_weight
+from scenarios import scenario
 
 # Read the estimation results from the file
 try:
@@ -58,9 +63,9 @@ def revenues(factor):
 
     # We also calculate confidence intervals for the calculated quantities
 
-    betas = the_biogeme.freeBetaNames()
-    b = results.getBetasForSensitivityAnalysis(betas)
-    left, right = the_biogeme.confidenceIntervals(b, 0.9)
+    betas = the_biogeme.free_beta_names()
+    beta_bootstrap = results.getBetasForSensitivityAnalysis(betas)
+    left, right = the_biogeme.confidenceIntervals(beta_bootstrap, 0.9)
 
     revenues_pt = (
         simulated_values['Revenue public transportation'] * simulated_values['weight']
@@ -96,11 +101,12 @@ print(
     f'factor {factors[max_index]:.1f}'
 )
 
-# We plot the results
-ax = plt.gca()
-ax.plot(factors, rev, label="Revenues")
-ax.plot(factors, lower, label="Lower bound of the CI")
-ax.plot(factors, upper, label="Upper bound of the CI")
-ax.legend()
+if can_plot:
+    # We plot the results
+    ax = plt.gca()
+    ax.plot(factors, rev, label="Revenues")
+    ax.plot(factors, lower, label="Lower bound of the CI")
+    ax.plot(factors, upper, label="Upper bound of the CI")
+    ax.legend()
 
-plt.show()
+    plt.show()

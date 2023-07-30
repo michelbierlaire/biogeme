@@ -14,7 +14,6 @@
 
 from biogeme.expressions import Beta
 from optima_data import (
-    database,
     Choice,
     TimePT,
     TimeCar,
@@ -23,7 +22,6 @@ from optima_data import (
     distance_km,
     Gender,
     OccupStat,
-    normalized_weight,
 )
 
 # List of parameters to be estimated
