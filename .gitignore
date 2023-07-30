@@ -386,3 +386,5 @@ examples/sampling/fullsample/obs_fullsample.dat
 examples/swissmetro/biogeme.toml
 reports/pandasFirstModel3.2.11/pandasfirstmodel.out
 reports/pandasFirstModel3.2.11/pandasfirstmodel.ps
+examples/indicators/biogeme.toml
+*.toml
