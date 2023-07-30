@@ -20,7 +20,7 @@ import pandas as pd
 from scipy.stats import chi2
 import biogeme.exceptions as excep
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class LRTuple(NamedTuple):
