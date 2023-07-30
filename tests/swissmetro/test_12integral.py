@@ -81,8 +81,7 @@ class test_12integral(unittest.TestCase):
         biogeme.generateHtml = False
         biogeme.generatePickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4359.520517074624, 2)
-
-
+        self.assertAlmostEqual(results.data.logLike, -4359.520506001082, 2)
+        
 if __name__ == '__main__':
     unittest.main()
