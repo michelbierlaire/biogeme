@@ -5,7 +5,7 @@ import sys
 import os
 import subprocess
 
-ignoreDirectory = ['workingNotToDistribute']
+ignoreDirectory = ['workingNotToDistribute', 'notebooks']
 
 TMP_FILE = '_tmp.py'
 with os.scandir('.') as root_dir:
