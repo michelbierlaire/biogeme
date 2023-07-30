@@ -315,7 +315,7 @@ def generic_alt_specific_catalogs(
 
     :param generic_name: name associated with all the parameters in the catalog
     :type generic_name: str
-    
+
     :param beta_parameters: coefficients of interest
     :type beta_parameters: list(biogeme.expressions.Beta)
 

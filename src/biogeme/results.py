@@ -13,7 +13,7 @@ import itertools
 import pickle
 import datetime
 import glob
-from collections import namedtuple
+from typing import NamedTuple
 import urllib.request as urlr
 import pandas as pd
 import numpy as np
@@ -30,7 +30,10 @@ from biogeme.parameters import biogeme_parameters
 
 logger = logging.getLogger(__name__)
 
-GeneralStatistic = namedtuple('GeneralStatistic', 'value format')
+
+class GeneralStatistic(NamedTuple):
+    value: float
+    format: str
 
 
 def calcPValue(t):

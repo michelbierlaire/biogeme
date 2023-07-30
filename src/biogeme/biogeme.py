@@ -10,7 +10,7 @@ It combines the database and the model specification.
 import logging
 import glob
 import difflib
-from collections import namedtuple
+from typing import NamedTuple
 import multiprocessing as mp
 from datetime import datetime
 import pickle
@@ -38,7 +38,11 @@ from biogeme.parameters import (
 DEFAULT_MODEL_NAME = 'biogemeModelDefaultName'
 logger = logging.getLogger(__name__)
 
-OldNewParamTuple = namedtuple('OldNewParamTuple', 'old new section')
+
+class OldNewParamTuple(NamedTuple):
+    old: str
+    new: str
+    section: str
 
 
 class BIOGEME:
@@ -337,7 +341,7 @@ class BIOGEME:
             formulas=expression,
             userNotes=user_notes,
             parameter_file=parameter_file,
-            skip_audit=skip_audit
+            skip_audit=skip_audit,
         )
 
     @staticmethod

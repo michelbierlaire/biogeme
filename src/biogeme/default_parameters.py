@@ -9,14 +9,20 @@ tuple.
 See https://www.w3schools.com/python/gloss_python_tuple_one_item.asp
 """
 
-from collections import namedtuple
+from typing import NamedTuple, Union, Type, Callable
 import numpy as np
 import biogeme.optimization as opt
 import biogeme.check_parameters as cp
 
-ParameterTuple = namedtuple(
-    'ParameterTuple', 'name value type section description check'
-)
+
+class ParameterTuple(NamedTuple):
+    name: str
+    value: Union[bool, int, float, str]
+    type: Type
+    section: str
+    description: str
+    check: Callable
+
 
 all_parameters_tuple = (
     ParameterTuple(
@@ -212,7 +218,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='initial_radius',
-        value=100,
+        value=10,
         type=float,
         section='SimpleBounds',
         description='Initial radius of the trust region',

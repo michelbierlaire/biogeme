@@ -8,7 +8,7 @@ for specific services to Biogeme
 """
 
 import logging
-from collections import namedtuple
+from typing import NamedTuple
 import numpy as np
 import pandas as pd
 
@@ -20,7 +20,11 @@ from biogeme import draws
 
 from biogeme.expressions import Variable, isNumeric, Numeric
 
-EstimationValidation = namedtuple('EstimationValidation', 'estimation validation')
+
+class EstimationValidation(NamedTuple):
+    estimation: pd.DataFrame
+    validation: pd.DataFrame
+
 
 logger = logging.getLogger(__name__)
 """Logger that controls the output of
@@ -143,7 +147,7 @@ class Database:
 
     # @staticmethod
     def normal_MLHS_anti(sample_size, number_of_draws):
-        unif = draws.getLatinHypercubeDraws(sample_size, int(number_of_draws / 2))
+        unif = draws.getLatinHypercubeDraws(sample_size, int(number_of_draws / 2.0))
         return draws.getNormalWichuraDraws(
             sample_size, number_of_draws, uniformNumbers=unif, antithetic=True
         )
@@ -1028,8 +1032,11 @@ class Database:
         estimationSets = []
         validationSets = []
         for i, v in enumerate(theSlices):
-            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1:]))
+            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
             validationSets.append(v)
+        for e, v in zip(estimationSets, validationSets):
+            print(type(e))
+            print(type(v))
         return [
             EstimationValidation(estimation=e, validation=v)
             for e, v in zip(estimationSets, validationSets)

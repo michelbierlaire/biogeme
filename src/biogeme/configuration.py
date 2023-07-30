@@ -6,12 +6,16 @@
 """
 
 import logging
-from collections import namedtuple
+from typing import NamedTuple
 import biogeme.exceptions as excep
 
 logger = logging.getLogger(__name__)
 
-SelectionTuple = namedtuple('SelectionTuple', 'controller selection')
+
+class SelectionTuple(NamedTuple):
+    controller: str
+    selection: str
+
 
 SEPARATOR = ';'
 SELECTION_SEPARATOR = ':'

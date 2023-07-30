@@ -10,7 +10,7 @@ section must have different names
 
 import logging
 from datetime import datetime
-from collections import namedtuple
+from typing import NamedTuple
 import tomlkit as tk
 import biogeme.exceptions as excep
 from biogeme.version import getVersion
@@ -23,7 +23,10 @@ FALSE_STR = ('False', 'false', 'No', 'no')
 DEFAULT_FILE_NAME = 'biogeme.toml'
 ROW_LENGTH = 80
 
-NameSectionTuple = namedtuple('NameSectionTuple', 'name section')
+
+class NameSectionTuple(NamedTuple):
+    name: str
+    section: str
 
 
 def format_comment(the_param):
@@ -314,7 +317,7 @@ class Parameters:
         :type section: str
         """
         the_tuple = self.get_param_tuple(name, section)
-        logger.info(f'{name} = {the_tuple.value}')
+        # logger.info(f'{name} = {the_tuple.value}')
         return the_tuple.value
 
 

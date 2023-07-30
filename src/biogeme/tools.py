@@ -11,7 +11,8 @@ import logging
 from itertools import product
 from os import path
 import shutil
-from collections import namedtuple, defaultdict
+from collections import defaultdict
+from typing import NamedTuple
 import tempfile
 import uuid
 import numpy as np
@@ -21,7 +22,11 @@ import biogeme.exceptions as excep
 
 logger = logging.getLogger()
 
-LRTuple = namedtuple('LRTuple', 'message statistic threshold')
+
+class LRTuple(NamedTuple):
+    message: str
+    statistic: float
+    threshold: float
 
 
 def findiff_g(the_function, x):

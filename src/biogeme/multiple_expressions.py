@@ -7,7 +7,7 @@ considered in a specification
 """
 import logging
 import abc
-from collections import namedtuple
+from typing import NamedTuple
 import biogeme.expressions as ex
 import biogeme.exceptions as excep
 from biogeme.configuration import (
@@ -17,9 +17,16 @@ from biogeme.configuration import (
 
 logger = logging.getLogger(__name__)
 
-NamedExpression = namedtuple('NamedExpression', 'name expression')
 
-CatalogItem = namedtuple('CatalogItem', 'catalog_name item_index item_name')
+class NamedExpression(NamedTuple):
+    name: str
+    expression: ex.Expression
+
+
+class CatalogItem(NamedTuple):
+    catalog_name: str
+    item_index: int
+    item_name: str
 
 
 class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):

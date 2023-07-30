@@ -4,12 +4,16 @@
 :date: Sat Jul 30 12:36:40 2022
 """
 import logging
-from collections import namedtuple
+from typing import NamedTuple, Dict, List
 import biogeme.exceptions as excep
-
 from biogeme.elementary_expressions import TypeOfElementaryExpression
 
-ElementsTuple = namedtuple('ElementsTuple', 'expressions indices names')
+
+class ElementsTuple(NamedTuple):
+    expressions: Dict[str, 'Expression']
+    indices: Dict[str, int]
+    names: List[str]
+
 
 logger = logging.getLogger(__name__)
 

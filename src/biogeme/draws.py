@@ -208,13 +208,13 @@ def getHaltonDraws(
         i = 1
         while i < base and numbers_idx < req_length:
             max_numbers = min(req_length - numbers_idx, numbers_size)
-            numbers[numbers_idx: numbers_idx + max_numbers] = (
+            numbers[numbers_idx : numbers_idx + max_numbers] = (
                 numbers[:max_numbers] + d * i
             )
             numbers_idx += max_numbers
             i += 1
         t += 1
-    numbers = numbers[skip + 1: length + skip + 1]
+    numbers = numbers[skip + 1 : length + skip + 1]
 
     if shuffled:
         np.random.shuffle(numbers)
@@ -259,7 +259,7 @@ def getAntithetic(unif, sample_size, number_of_draws):
                   0.18904413, 0.03828636, 0.59015183, 0.27822742, 0.83518904]])
 
     """
-    R = int(number_of_draws / 2)
+    R = int(number_of_draws / 2.0)
     draws = unif(sample_size, R)
     return np.concatenate((draws, 1 - draws), axis=1)
 
@@ -317,14 +317,14 @@ def getNormalWichuraDraws(
         raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
 
     if antithetic:
-        if 2 * int(number_of_draws / 2) != number_of_draws:
+        if number_of_draws % 2 != 0:
             errorMsg = (
                 f'Please specify an even number of draws for '
                 f'antithetic draws. Requested number of '
                 f'{number_of_draws}.'
             )
             raise excep.BiogemeError(errorMsg)
-        number_of_draws = int(number_of_draws / 2)
+        number_of_draws = int(number_of_draws / 2.0)
 
     if sample_size <= 0:
         raise excep.BiogemeError(

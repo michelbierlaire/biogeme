@@ -4,14 +4,19 @@
 :date: Wed Sep  7 15:54:55 2022
 """
 
-from collections import namedtuple, defaultdict
+from collections import defaultdict
+from typing import NamedTuple, Set
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import biogeme.exceptions as excep
 import biogeme.expressions as expr
 
-StratumTuple = namedtuple('StratumTuple', 'subset sample_size')
+
+class StratumTuple(NamedTuple):
+    subset: Set[int]
+    sample_size: int
+
 
 LOG_PROBA_COL = '_log_proba'
 
