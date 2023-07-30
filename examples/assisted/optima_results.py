@@ -7,7 +7,11 @@ Assisted specification for the Optima case study. Generation of the
 results from the Pareto file
 
 """
-import matplotlib.pyplot as plt
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
 import biogeme.logging as blog
 from biogeme.assisted import AssistedSpecification, ParetoPostProcessing
 from biogeme.results import compile_estimation_results
@@ -46,5 +50,6 @@ for k, v in description.items():
     if k != v:
         print(f'{k}: {v} AIC={summary.at["Akaike Information Criterion", k]}')
 
-ax = post_processing.plot()
-plt.show()
+if can_plot:
+    ax = post_processing.plot()
+    plt.show()
