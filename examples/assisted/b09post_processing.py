@@ -35,7 +35,11 @@ processing to re-estimate all Pareto optimal models, and display some
 information about the algorithm
 
 """
-import matplotlib.pyplot as plt
+try: 
+    import matplotlib.pyplot as plt
+    can_plot = True
+except ModuleNotFoundError:
+    can_plot = False
 import biogeme.logging as blog
 import biogeme.biogeme as bio
 from biogeme.assisted import ParetoPostProcessing
@@ -58,6 +62,6 @@ post_processing.reestimate(recycle=True)
 
 post_processing.log_statistics()
 
-_ = post_processing.plot()
-
-plt.show()
+if can_plot:
+    _ = post_processing.plot()
+    plt.show()
