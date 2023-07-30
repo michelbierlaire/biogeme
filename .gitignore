@@ -80,6 +80,7 @@ src/cbiogeme.cpp
 src/cythonbiogeme.cpp
 biogeme.egg-info
 build
+debug
 tests/functions/simpleExample.html
 tests/functions/simpleExample.pickle
 tests/functions/simpleExample~00.html
