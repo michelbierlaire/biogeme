@@ -14,6 +14,7 @@ config.log
 config.status
 archive/gtkgui/debuggui
 libtool
+oldwebpage
 archive/pythonbiogeme/debugbiogeme
 archive/pythonbiogeme/pythonbiogeme
 archive/pythonbiogeme/pythonbiogeme_static
