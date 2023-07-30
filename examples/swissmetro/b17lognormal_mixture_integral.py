@@ -47,7 +47,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 
 # It is advised not to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
+B_TIME_S = Beta('B_TIME_S', 1, -2, 2, 0)
 
 # Define a random parameter, log normally distributed, designed to be used
 # for Monte-Carlo simulation.
@@ -78,6 +78,6 @@ the_biogeme.modelName = 'b17lognormal_mixture_integral'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

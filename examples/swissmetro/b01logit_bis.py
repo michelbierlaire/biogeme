@@ -44,11 +44,11 @@ B_TIME = Beta('B_TIME', -1.28, None, None, 0)
 B_COST = Beta('B_COST', -1.08, None, None, 0)
 
 # Define segmentations
-gender_segmentation = seg.DiscreteSegmentationTuple(
+gender_segmentation = database.generate_segmentation(
     variable=MALE, mapping={0: 'female', 1: 'male'}
 )
 
-GA_segmentation = seg.DiscreteSegmentationTuple(
+GA_segmentation = database.generate_segmentation(
     variable=GA, mapping={0: 'without_ga', 1: 'with_ga'}
 )
 
@@ -105,7 +105,8 @@ the_biogeme.modelName = 'b01logit_bis'
 the_biogeme.saveIterations = False
 
 # Estimate the parameters
-results = the_biogeme.estimate(bootstrap=100)
+the_biogeme.bootstrap_samples = 100
+results = the_biogeme.estimate(run_bootstrap=True)
 
 # Get the results in a pandas table
 print('Parameters')
@@ -128,7 +129,9 @@ for description, message in results.data.optimizationMessages.items():
 
 # Generate the file in Alogit format
 results.writeF12(robustStdErr=True)
-results.writeF12(robustStdErr=False)
+print(f'Estimation results in ALogit format generated: {results.data.F12FileName}')
 
 # Generate LaTeX code with the results
-print(results.getLaTeX())
+
+results.writeLaTeX()
+print(f'Estimation results in LaTeX format generated: {results.data.latexFileName}')

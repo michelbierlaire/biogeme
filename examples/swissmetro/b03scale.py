@@ -65,6 +65,6 @@ the_biogeme.modelName = 'b03scale'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

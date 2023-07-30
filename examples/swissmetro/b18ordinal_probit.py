@@ -1,9 +1,9 @@
-"""File b18ordinal_logit.py
+"""File b18ordinal_probit.py
 
 :author: Michel Bierlaire, EPFL
 :date: Mon Apr 10 12:15:28 2023
 
- Example of an ordinal logit model.
+ Example of an ordinal probit model.
  This is just to illustrate the syntax, as the data are not ordered.
  But the example assume, for the sake of it, that they are 1->2->3
 """
@@ -11,7 +11,7 @@
 import biogeme.logging as blog
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
-from biogeme.models import ordered_logit
+from biogeme.models import ordered_probit
 from biogeme.expressions import Beta, log, Elem
 from swissmetro_data import (
     database,
@@ -21,13 +21,13 @@ from swissmetro_data import (
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b18ordinal_logit.py')
+logger.info('Example b18ordinal_probit.py')
 
 # Parameters to be estimated
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
-# Parameters for the ordered logit.
+# Parameters for the ordered probit.
 # tau1 <= 0
 tau1 = Beta('tau1', -1, None, 0, 0)
 # delta2 >= 0
@@ -48,7 +48,7 @@ ChoiceProba = {
     3: dist.logisticcdf(U - tau2),
 }
 
-the_proba = ordered_logit(
+the_proba = ordered_probit(
     continuous_value=U,
     list_of_discrete_values=[1, 2, 3],
     tau_parameter=tau1,
@@ -62,7 +62,7 @@ logprob = log(the_chosen_proba)
 
 # Create the Biogeme object
 the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b18ordinal_logit'
+the_biogeme.modelName = 'b18ordinal_probit'
 
 # Estimate the parameters
 results = the_biogeme.estimate()

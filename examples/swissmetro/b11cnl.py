@@ -37,8 +37,8 @@ ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, None, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, None, 0)
+MU_EXISTING = Beta('MU_EXISTING', 1, 1, 10, 0)
+MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, 10, 0)
 ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
 ALPHA_PUBLIC = 1 - ALPHA_EXISTING
 
@@ -72,6 +72,6 @@ the_biogeme.modelName = 'b11cnl'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

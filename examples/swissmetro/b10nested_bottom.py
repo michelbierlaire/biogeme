@@ -4,8 +4,7 @@
 :date: Sun Apr  9 18:05:04 2023
 
  Example of a nested logit model where the normalization is done at
- the bottom level.  
-
+ the bottom level.
 """
 
 import biogeme.logging as blog
@@ -72,6 +71,6 @@ the_biogeme.modelName = 'b10nested_bottom'
 
 # Estimate the parameters
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

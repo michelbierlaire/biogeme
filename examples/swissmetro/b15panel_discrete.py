@@ -87,9 +87,7 @@ ASC_SM_RND = [
 # Class membership probability
 
 the_beta = Beta('class0', 0, None, None, 0)
-PROB_class0 = exp(the_beta) / (
-    1 + exp(the_beta)
-)
+PROB_class0 = exp(the_beta) / (1 + exp(the_beta))
 PROB_class1 = 1 - PROB_class0
 
 # In class 0, it is assumed that the time coefficient is zero
@@ -133,6 +131,6 @@ the_biogeme.modelName = 'b15panel_discrete'
 
 # Estimate the parameters.
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)

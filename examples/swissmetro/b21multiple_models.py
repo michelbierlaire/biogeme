@@ -8,7 +8,8 @@
 
 """
 import biogeme.logging as blog
-from biogeme.results import compileEstimationResults, loglikelihood_dimension
+from biogeme.results import compile_estimation_results
+from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.assisted import AssistedSpecification
 from b21multiple_models_spec import the_biogeme, PARETO_FILE_NAME
 
@@ -20,15 +21,13 @@ assisted_specification = AssistedSpecification(
     multi_objectives=loglikelihood_dimension,
     pareto_file_name=PARETO_FILE_NAME,
 )
-print('Algorithm info: ')
-for m in assisted_specification.statistics():
-    print(m)
+
 non_dominated_models = assisted_specification.run()
 
-summary, description = compileEstimationResults(
+summary, description = compile_estimation_results(
     non_dominated_models, use_short_names=True
 )
 print(summary)
 for k, v in description.items():
     if k != v:
-        print(f'{k}: {v}')
+        print(f'{k}: {v} AIC={summary.at["Akaike Information Criterion", k]}')

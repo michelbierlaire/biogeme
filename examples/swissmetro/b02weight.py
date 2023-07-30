@@ -4,8 +4,7 @@
 :date: Sun Apr  9 17:02:59 2023
 
  Example of a logit model with Weighted Exogenous Sample Maximum
- Likelihood (WESML).  
-
+ Likelihood (WESML).
 """
 
 import biogeme.biogeme as bio
@@ -71,7 +70,7 @@ the_biogeme.modelName = 'b02weight'
 the_biogeme.generate_html = True
 the_biogeme.generate_pickle = False
 results = the_biogeme.estimate()
-print(results.shortSummary())
+print(results.short_summary())
 
 # Get the results in a pandas table
 pandas_results = results.getEstimatedParameters()

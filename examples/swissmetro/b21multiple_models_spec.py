@@ -1,7 +1,7 @@
 """File b21multiple_models_spec.py
 
 :author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 16:58:49 2023
+:date: Fri Jul 21 17:46:09 2023
 
  Example of the estimation of several versions of the model using
  assisted specification algorithm. Specification of the catalogs.
@@ -10,8 +10,7 @@
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, logzero
-from biogeme.catalog import Catalog, SynchronizedCatalog, segmentation_catalog
-from biogeme.segmentation import DiscreteSegmentationTuple
+from biogeme.catalog import Catalog, segmentation_catalogs
 
 from swissmetro_data import (
     database,
@@ -37,7 +36,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
 # Segmentations
-gender_segmentation = DiscreteSegmentationTuple(
+gender_segmentation = database.generate_segmentation(
     variable=MALE,
     mapping={
         0: 'female',
@@ -45,9 +44,10 @@ gender_segmentation = DiscreteSegmentationTuple(
     },
 )
 
-income_segmentation = DiscreteSegmentationTuple(
+income_segmentation = database.generate_segmentation(
     variable=INCOME,
     mapping={
+        0: 'inc-zero',
         1: 'inc-under50',
         2: 'inc-50-100',
         3: 'inc-100+',
@@ -55,35 +55,39 @@ income_segmentation = DiscreteSegmentationTuple(
     },
 )
 
-ga_segmentation = DiscreteSegmentationTuple(variable=GA, mapping={1: 'GA', 0: 'noGA'})
+print(f'{income_segmentation=}')
+ga_segmentation = database.generate_segmentation(
+    variable=GA, mapping={1: 'GA', 0: 'noGA'}
+)
 
 asc_segmentations = (
     gender_segmentation,
     ga_segmentation,
 )
-ASC_CAR_catalog = segmentation_catalog(
-    beta_parameter=ASC_CAR,
+
+ASC_CAR_catalog, ASC_TRAIN_catalog = segmentation_catalogs(
+    generic_name='ASC',
+    beta_parameters=[ASC_CAR, ASC_TRAIN],
     potential_segmentations=asc_segmentations,
     maximum_number=2,
-)
-ASC_TRAIN_catalog = segmentation_catalog(
-    beta_parameter=ASC_TRAIN,
-    potential_segmentations=asc_segmentations,
-    maximum_number=2,
-    synchronized_with=ASC_CAR_catalog,
 )
 
 cost_segmentations = (
     ga_segmentation,
     income_segmentation,
 )
-B_COST_catalog = segmentation_catalog(
-    beta_parameter=B_COST,
+
+# Note that the function returns a list. In this case, it contains
+# only one element. This is the reason of the presence of the comma
+# after B_COST_catalog
+(B_COST_catalog,) = segmentation_catalogs(
+    generic_name='B_COST',
+    beta_parameters=[B_COST],
     potential_segmentations=cost_segmentations,
     maximum_number=1,
 )
 
-ell_time = Beta('lambda_time', 1, None, None, 0)
+ell_time = Beta('lambda_time', 1, None, 10, 0)
 # Potential non linear specification of travel time
 TRAIN_TT_catalog = Catalog.from_dict(
     catalog_name='TRAIN_TT',
@@ -94,24 +98,24 @@ TRAIN_TT_catalog = Catalog.from_dict(
     },
 )
 
-SM_TT_catalog = SynchronizedCatalog.from_dict(
+SM_TT_catalog = Catalog.from_dict(
     catalog_name='SM_TT',
     dict_of_expressions={
         'linear': SM_TT_SCALED,
         'log': logzero(SM_TT_SCALED),
         'boxcox': models.boxcox(SM_TT_SCALED, ell_time),
     },
-    controller=TRAIN_TT_catalog,
+    controlled_by=TRAIN_TT_catalog.controlled_by,
 )
 
-CAR_TT_catalog = SynchronizedCatalog.from_dict(
+CAR_TT_catalog = Catalog.from_dict(
     catalog_name='CAR_TT',
     dict_of_expressions={
         'linear': CAR_TT_SCALED,
         'log': logzero(CAR_TT_SCALED),
         'boxcox': models.boxcox(CAR_TT_SCALED, ell_time),
     },
-    controller=TRAIN_TT_catalog,
+    controlled_by=TRAIN_TT_catalog.controlled_by,
 )
 
 # Definition of the utility functions with linear cost
