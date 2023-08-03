@@ -60,4 +60,4 @@ def get_file_logger(filename, level=WARNING):
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-    return logger[0]
+    return loggers[0]
