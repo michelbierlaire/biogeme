@@ -70,6 +70,7 @@ archive/pybiogeme/pybiogeme
 #############################################
 .idea
 examples/notebooks/.ipynb_checkpoints/*
+examples/notebooks/output_directory/*
 examples/workingNotToDistribute
 examples/sampling_experiment
 examples/latent/diagnostics
