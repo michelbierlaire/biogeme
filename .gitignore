@@ -394,3 +394,5 @@ examples/indicators/biogeme.toml
 *.csv
 sphinx/sphinx.log
 examples/sampling/sampled_alternatives.dat
+reports/sampling_of_alternatives/sampling_of_alternatives.pdf
+reports/sampling_of_alternatives/sampling_of_alternatives.ps
