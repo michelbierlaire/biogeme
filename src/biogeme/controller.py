@@ -1,4 +1,4 @@
-"""Defines controllers for multiple expressions
+"""Defines controllers for multiple expressions.
 
 :author: Michel Bierlaire
 :date: Sun Jul 16 15:23:46 2023

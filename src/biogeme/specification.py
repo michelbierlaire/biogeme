@@ -1,4 +1,4 @@
-"""File specification.py
+"""Model specification in a multiple expression context
 
 :author: Michel Bierlaire
 :date: Mon Apr 10 12:33:18 2023
