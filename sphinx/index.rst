@@ -10,13 +10,13 @@ Welcome to Biogeme's documentation!
   :maxdepth: 2
   :caption: Contents:
 
-  algorithms.rst
   assisted.rst
   biogeme.rst
   catalog.rst
   check_parameters.rst
   cnl.rst
   configuration.rst
+  controller.rst
   database.rst
   default_parameters.rst
   distributions.rst
@@ -26,23 +26,20 @@ Welcome to Biogeme's documentation!
   expressions.rst
   filenames.rst
   idmanager.rst
-  index.rst
   logging.rst
   loglikelihood.rst
   models.rst
+  multiobjectives.rst
   multiple_expressions.rst
   negative_likelihood.rst
   optimization.rst
   parameters.rst
-  pareto.rst
   results.rst
   sampling.rst
   segmentation.rst
   specification.rst
-  toml.rst
   tools.rst
   version.rst
-  vns.rst	    
 
 Indices and tables
 ==================
