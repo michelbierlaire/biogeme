@@ -2,7 +2,7 @@ import os
 import shutil
 import tomlkit as tk
 from faq import faq
-from sections import about, install, documentation, archives, resources
+from sections import about, install, documentation, archives, resources, special
 
 TARGET_FILE = 'index.html'
 DATA_FILE = 'data.toml'
@@ -12,6 +12,7 @@ PORTFOLIO_GRID_ITEM = 'portfolio_grid_item.html'
 HTML_FILE = 'index.html.orig'
 FAQ_FILE = 'faq.html'
 CARD_FILE = 'card.html'
+SPECIAL_FILE = 'special.html'
 
 def replace(orig_text, dictionary):
     for k, v in dictionary.items():
@@ -53,6 +54,20 @@ def get_faq():
     return all_html
 
 
+def get_special(content):
+    all_html = ''
+    with open(SPECIAL_FILE, 'r', encoding='utf-8') as f:
+        html = f.read()
+    
+    for special_title, special_content in content.items():
+        my_html = html
+        replacements = {
+            '__TITLE__': special_title,
+            '__CONTENT__': special_content,
+        }
+        all_html += replace(my_html, replacements)
+    return all_html
+        
 def get_portfolio_grid(doc):
     all_html = ''
     for data, values in doc.items():
@@ -119,8 +134,10 @@ replacements = {
     '__INSTALL_': get_section(install),
     '__DOC__': get_section(documentation),
     '__RES__': get_section(resources),
-    '__ARCHIVES__': get_section(archives)
+    '__ARCHIVES__': get_section(archives),
+    '__SPECIAL__': get_special(special)
 }
+
 html = replace(html, replacements)
 
 # Save the current website just in case

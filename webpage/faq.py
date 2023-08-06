@@ -1,5 +1,11 @@
 faq = {}
 
+faq['What was new in Biogeme 3.2.12?'] = """
+<p>
+This release mainly implements some re-organization of the code and bugs fixes. In particular, the generic optimization algorithms are now distributed in a different package, called biogeme_optimization.
+</p>
+"""
+
 faq['What was new in Biogeme 3.2.11?'] = """
 <dl>
 

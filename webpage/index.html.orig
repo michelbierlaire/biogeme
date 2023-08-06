@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
     <meta name="description" content="" >
     <meta name="author" content="" >
-    <title>Biogeme 3.11</title>
+    <title>Biogeme 3.2.12</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" >
     <!-- Font Awesome icons (free version)-->
@@ -46,6 +46,8 @@
     </nav>
     <!-- Masthead-->
     <header class="masthead">
+
+      __SPECIAL__
       <div class="container">
         <div class="masthead-subheading">Estimating discrete choice
           models with</div>
@@ -53,24 +55,6 @@
         <a class="btn btn-primary btn-xl text-uppercase" href="#start">Start</a>
       </div>
     </header>
-    <section class="page-section" id="poll">
-      <div class="container">
-        <div class="text-center">
-          <h2 class="section-heading text-uppercase">Biogeme User's meeting</h2>
-          <div class="row text-center">
-A couple of people suggested to organize a Biogeme users meeting,
-where participants could interact, share their experience with the
-software, propose new features, etc. If organized, it will happen just before the hEART conference in Zurich, on September 4 and 5. Can you please fill in the following poll (just one question)? 
-	  </div>
-          <div class="row text-center">
-	    <a href="https://docs.google.com/forms/d/1LH_aGEvigJudWNxnC2er0w-8iuJo0oRPmSBjrwzHlZY/prefill">Click here for the poll. </a>
-	  </div>
-          <div class="row text-center">
-	    <a href="https://www.ivt.ethz.ch/en/info/news/2023/09/heart-symposium.html">Click here for the hEART conference. </a>
-	  </div>
-	</div>
-      </div>
-    </section>    
     <!-- Start-->
     <section class="page-section" id="start">
       <div class="container">
@@ -104,7 +88,7 @@ software, propose new features, etc. If organized, it will happen just before th
             <p class="text-muted">Watch
               the <a href="https://youtu.be/lhbpra2dILA" target="_blank"> video on data</a>.</p>
             <p class="text-muted">Watch
-              the <a href="https://youtu.be/vS-Sg0htQP4" target="_blank"> video on model specification</a>.</p>
+              the <a href="https://youtu.be/jIAIsqh_g0E" target="_blank"> video on model specification</a>.</p>
           </div>
           <div class="col-md-3">
             <span class="fa-stack fa-4x">

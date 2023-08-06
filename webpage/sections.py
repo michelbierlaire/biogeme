@@ -1,11 +1,15 @@
 """
 Dictionary. Key: title of the card. Value: list of paragraphs.
 """
+special = {}
 about = {}
 install = {}
 documentation = {}
 archives = {}
 resources = {}
+
+special['Users meeting'] = 'Biogeme users meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. More details soon.'
+#special['Other special'] = 'Other special as well'
 
 about['Biogeme'] = (
 """
@@ -36,42 +40,14 @@ target="_blank">old webpage</a>.
 """
 )
 
-about['What\'s new in Biogeme 3.2.11?'] = (
+about['What\'s new in Biogeme 3.2.12?'] = (
 """
-<dl>
-
-<dt>Sampling of alternatives</dt>
-<dd>It is now possible to estimate logit, nested logit and cross-nested logit models using only a sample of alternatives. </dd>
-
-<dt>Assisted specification</dt>
-<dd>The assisted specification algorithm has been completely redesigned. The concept of <a href="sphinx/catalog.html#biogeme.catalog.Catalog"><samp>Catalog</samp></a> has been introduced to allow the modeler to suggest several versions of the model specification. The possible versions can either be fully enumerated (if their number allows for it) or can be algorithmically investigated. </dd>
-
-<dt>Pareto optimality</dt>
-<dd>It is possible to extract the Pareto optimal models from a list of estimation results.</dd>
-
-
-<dt>TOML file for the definition of the parameters</dt>
-<dd>A commented parameter file is now available to modify the various parameters of Biogeme. A  version of the file with default values of the parameters is created the first time Biogeme is executed in a directory. Note that parameters can still be defined directly from the Python script. It particularly simplifies the definitions of the parameters controlling the optimization algorithms. </dd>
-
-
-<dt>Explicit definition of the Beta parameters for simulation</dt>
-<dd>The <samp>simulate</samp> function now requires an explicit definition for the value of the parameters. The initial values can be retrieved from the <samp>get_beta_values</samp> function of a Biogeme expression. The estimated values can be retrieved from the <samp>getBetaValues</samp> function of the <samp>bioResult</samp> object.</dd>
-
-<dt>Use of the standard Python logging system</dt>
-<dd>The <samp>messaging</samp> module used to control the verbosity of Biogeme is now obsolete. Biogeme implements the standard Python logging system. If you do not know what it is, Biogeme includes a simple <a href="sphinx/logging.html"><samp>logging</samp></a> module, that provides simple access to the logging system.
-</dd>
-
-<dt>Naming conventions</dt>
-<dd>Some object/functions/variables have been renamed to comply better with the common Python practice. For example, the exception <samp>biogemeError</samp>, defined in the <samp>exceptions</samp> module is now called <samp>BiogemeError</samp>. </dd>
-
-<dt>Removed functions from the <samp>database</samp> module</dt>
-<dd>The functions <samp>sumFromDatabase</samp> and <samp>sampleWithoutReplacement</samp> are no longer available.</dd>
-<dt>New expression: <samp>logzero</samp></dt>
-<dd><samp>logzero(x)</samp> returns the logarithm of x if x is not zero, and zero otherwise.</dd>
-
-
-
-</dl>
+<p>
+In this release, various improvements have been made, including code
+reorganization and bug fixes. Notably, the generic optimization
+algorithms have been relocated to a separate package named
+"biogeme_optimization".
+</p>
 """,
 )
 
@@ -257,7 +233,7 @@ extra_link_args = -static -std=c++11 -static-libstdc++ -static-libgcc -Bstatic -
 <li> The compilation  requires the static version of the libraries <samp>vcruntime140.dll</samp> and <samp>python3x.dll</samp>, where <samp>3x</samp> corresponds to your version of Python. To generate them, the following "hack" must be performed:
 <ul>
 <li>Locate the DLL files in your current environment. They may be located in <samp>AppData\Local\Programs\Python\Python3x\</samp>
-<li>The stalic versions of the libraries can be created using the following commands. Make sure to replace "3x" by your version of Python ("311", "310", "39", etc.):
+<li>The static versions of the libraries can be created using the following commands. Make sure to replace "3x" by your version of Python ("311", "310", "39", etc.):
 <p>
 <pre>
 gendef python3x.dll
@@ -309,11 +285,11 @@ following commands in Python:
 </ul>
 The result should look like the following:
 <pre>
-Python 3.10.4 (main, Mar 31 2022, 03:38:35) [Clang 12.0.0 ] on darwin
+Python 3.11.3 (v3.11.3:f3909b8bc8, Apr  4 2023, 20:12:10) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import biogeme.version as ver
 >>> print(ver.getText())
-biogeme 3.2.11 [2023-04-19]
+biogeme 3.2.12 [2023-08-05]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
@@ -331,16 +307,11 @@ documentation['Preparing data for Biogeme'] = (
 )
 
 
-documentation['My first choice model with PandasBiogeme'] = (
+documentation['Estimating my first choice model with Biogeme'] = (
 """
-<p>This video has been recorded for earlier versions of Biogeme. Some aspects may not apply to the current version. A new video is under preparation.</p>
 <p class='text-center'>
-
-<p class='text-center'>
-<object width="425" height="344">
-<param name="movie" value="https://youtu.be/vS-Sg0htQP4"></param>
-<param name="allowFullScreen" value="true"></param>
-<embed src="https://youtu.be/vS-Sg0htQP4" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="344"></embed></object></p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/jIAIsqh_g0E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</p>
 """,
 )
 
@@ -386,8 +357,13 @@ Installing Biogeme 3.2.11 on Windows
 </a>
 """,
 """
-<a href="https://youtu.be/vS-Sg0htQP4" target="_blank">
-My first choice model with PandasBiogeme
+<a href="https://youtu.be/lhbpra2dILA" target="_blank">
+Preparing data for Biogeme
+</a>
+""",
+"""
+<a href="https://youtu.be/jIAIsqh_g0E" target="_blank">
+Estimating my first choice model with Biogeme
 </a>
 """,
 """
@@ -526,6 +502,8 @@ Package Index</a> repository.
 """
 Previous webpages:
 <ul>
+<li><a href="https://transp-or.epfl.ch/biogeme-3.2.11/"
+target="blank">Webpage for Pandasbiogeme 3.2.11</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.10/"
 target="blank">Webpage for Pandasbiogeme 3.2.10</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.8/"
