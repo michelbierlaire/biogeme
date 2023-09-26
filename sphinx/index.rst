@@ -21,21 +21,19 @@ Welcome to Biogeme's documentation!
   default_parameters.rst
   distributions.rst
   draws.rst
-  elementary_expressions.rst
   exceptions.rst
   expressions.rst
   filenames.rst
-  idmanager.rst
   logging.rst
   loglikelihood.rst
+  mdcev.rst
   models.rst
   multiobjectives.rst
-  multiple_expressions.rst
   negative_likelihood.rst
   optimization.rst
   parameters.rst
   results.rst
-  sampling.rst
+  sampling_of_alternatives.rst
   segmentation.rst
   specification.rst
   tools.rst

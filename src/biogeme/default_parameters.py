@@ -209,7 +209,7 @@ all_parameters_tuple = (
         section='SimpleBounds',
         description=(
             'If True, the conjugate gradient algorithm may generate '
-            'infeasible solutiona until termination.  The result will '
+            'infeasible solutions until termination.  The result will '
             'then be projected on the feasible domain.  If False, the '
             'algorithm stops as soon as an infeasible iterate is '
             'generated'
@@ -218,7 +218,7 @@ all_parameters_tuple = (
     ),
     ParameterTuple(
         name='initial_radius',
-        value=10,
+        value=1,
         type=float,
         section='SimpleBounds',
         description='Initial radius of the trust region',
@@ -257,6 +257,17 @@ all_parameters_tuple = (
             'True: dogleg. False: truncated conjugate gradient.'
         ),
         check=(cp.is_boolean,),
+    ),
+    ParameterTuple(
+        name='maximum_number_parameters',
+        value=50,
+        type=int,
+        section='AssistedSpecification',
+        description=(
+            'int: maximum number of parameters allowed in a model. Each specification '
+            'with a higher number is deemed invalid and not estimated.'
+        ),
+        check=(cp.is_integer, cp.is_positive),
     ),
     ParameterTuple(
         name='number_of_neighbors',

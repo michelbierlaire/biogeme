@@ -8,19 +8,19 @@ considered in a specification
 import logging
 import abc
 from typing import NamedTuple
-import biogeme.expressions as ex
 import biogeme.exceptions as excep
 from biogeme.configuration import (
     SEPARATOR,
     SELECTION_SEPARATOR,
 )
+from .base_expressions import Expression
 
 logger = logging.getLogger(__name__)
 
 
 class NamedExpression(NamedTuple):
     name: str
-    expression: ex.Expression
+    expression: Expression
 
 
 class CatalogItem(NamedTuple):
@@ -29,7 +29,7 @@ class CatalogItem(NamedTuple):
     item_name: str
 
 
-class MultipleExpression(ex.Expression, metaclass=abc.ABCMeta):
+class MultipleExpression(Expression, metaclass=abc.ABCMeta):
     """Interface for catalog of expressions that are interchangeable. Only one of
     them defines the specification. They are designed to be
     modified algorithmically.

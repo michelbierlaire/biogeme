@@ -84,7 +84,6 @@ class Parameters:
     """Parameters management"""
 
     def __init__(self):
-
         # Store values in a dict
         self.document = None  # TOML document
         self.file_name = None

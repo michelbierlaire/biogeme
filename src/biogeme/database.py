@@ -18,7 +18,7 @@ import biogeme.filenames as bf
 from biogeme import tools
 from biogeme import draws
 
-from biogeme.expressions import Variable, isNumeric, Numeric
+from biogeme.expressions import Variable, is_numeric, Numeric
 
 
 class EstimationValidation(NamedTuple):
@@ -727,7 +727,7 @@ class Database:
 
         """
         columnName = '__bioRemove__'
-        if isNumeric(expression):
+        if is_numeric(expression):
             self.addColumn(Numeric(expression), columnName)
         else:
             self.addColumn(expression, columnName)
@@ -1034,9 +1034,6 @@ class Database:
         for i, v in enumerate(theSlices):
             estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
             validationSets.append(v)
-        for e, v in zip(estimationSets, validationSets):
-            print(type(e))
-            print(type(v))
         return [
             EstimationValidation(estimation=e, validation=v)
             for e, v in zip(estimationSets, validationSets)

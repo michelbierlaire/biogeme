@@ -4,9 +4,13 @@
 :date: Sat Jul 30 12:36:40 2022
 """
 import logging
-from typing import NamedTuple, Dict, List
+from typing import NamedTuple, Dict, List, TYPE_CHECKING
 import biogeme.exceptions as excep
-from biogeme.elementary_expressions import TypeOfElementaryExpression
+
+if TYPE_CHECKING:
+    from .base_expressions import Expression
+
+from .elementary_types import TypeOfElementaryExpression
 
 
 class ElementsTuple(NamedTuple):

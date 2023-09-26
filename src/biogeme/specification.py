@@ -1,3 +1,8 @@
+######
+# TO DO: combine the validity conditions with the user defined validity
+# Do something with the validity message (why it is invalid)
+
+
 """Model specification in a multiple expression context
 
 :author: Michel Bierlaire
@@ -6,11 +11,14 @@
 Implements a model specification in a multiple expression context (using Catalogs)
 """
 import logging
+from typing import NamedTuple
 from biogeme_optimization.pareto import SetElement
 import biogeme.biogeme as bio
 from biogeme import tools
 from biogeme.configuration import Configuration
+from biogeme.parameters import biogeme_parameters
 import biogeme.exceptions as excep
+from biogeme.validity import Validity
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +33,7 @@ class Specification:
         function that generates all the objectives:
         fct(bioResults) -> list[floatNone]
     """
-    validity = None
+    user_defined_validity_check = None
     """
     function that checks the validity of the results
     """
@@ -42,6 +50,7 @@ class Specification:
             raise excep.BiogemeError(error_msg)
         self.configuration = configuration
         self.model_names = None
+        self.validity = Validity(status=False, reason='Not yet estimated')
         self._estimate()
 
     @classmethod
@@ -104,12 +113,32 @@ class Specification:
         the_biogeme = bio.BIOGEME.from_configuration(
             config_id=self.config_id, expression=self.expression, database=self.database
         )
+        number_of_parameters = the_biogeme.number_unknown_parameters()
+        maximum_number_parameters = biogeme_parameters.get_value(
+            name='maximum_number_parameters', section='AssistedSpecification'
+        )
+        if number_of_parameters > maximum_number_parameters:
+            self.validity = Validity(
+                status=False,
+                reason=(
+                    f'Too many parameters: {number_of_parameters} > '
+                    f'{maximum_number_parameters}'
+                ),
+            )
+            return
         the_biogeme.modelName = self.model_names(self.config_id)
         logger.info(f'*** Estimate {the_biogeme.modelName}')
         the_biogeme.generate_html = False
         the_biogeme.generate_pickle = False
         results = the_biogeme.quickEstimate()
         self.all_results[self.config_id] = results
+        if not results.algorithm_has_converged():
+            self.validity = Validity(
+                status=False, reason=(f'Optimization algorithm has not converged')
+            )
+            return
+        if self.user_defined_validity_check is not None:
+            self.validity = self.user_defined_validity_check(results)
 
     def describe(self):
         """Short description of the solution. Used for reporting.

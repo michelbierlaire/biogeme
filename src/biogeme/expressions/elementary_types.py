@@ -1,9 +1,10 @@
-""" Defines the types of the elementary expressions
+""" Arithmetic expressions: types of elementary expressions
 
 :author: Michel Bierlaire
 :date: Tue Mar  7 18:38:21 2023
 
 """
+import logging
 from enum import Enum, auto
 
 
@@ -18,3 +19,6 @@ class TypeOfElementaryExpression(Enum):
     FIXED_BETA = auto()
     RANDOM_VARIABLE = auto()
     DRAWS = auto()
+
+
+logger = logging.getLogger(__name__)

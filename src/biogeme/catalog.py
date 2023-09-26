@@ -7,7 +7,7 @@
 import logging
 from itertools import product
 from biogeme.expressions import Beta
-from biogeme.multiple_expressions import MultipleExpression, NamedExpression
+from biogeme.expressions import MultipleExpression, NamedExpression
 import biogeme.exceptions as excep
 from biogeme.controller import Controller
 import biogeme.expressions as ex

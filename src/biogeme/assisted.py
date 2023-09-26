@@ -140,8 +140,11 @@ class AssistedSpecification(Neighborhood):
         :param pareto_file_name: file where to read and write the Pareto solutions
         :type pareto_file_name: str
 
-        :param validity: function verifying that the estimation results are valid
-        :type validity: fct(biogeme.results.bioResults) --> bool
+        :param validity: function verifying that the estimation
+            results are valid. It must return a bool and an explanation
+            why if it is invalid, or None otherwise
+
+        :type validity: fct(biogeme.results.bioResults) --> Validity
 
         """
         logger.debug('Ctor assisted specification')
@@ -149,7 +152,9 @@ class AssistedSpecification(Neighborhood):
         self.central_controller = self.biogeme_object.loglike.set_central_controller()
         Specification.generic_name = biogeme_object.modelName
         self.multi_objectives = staticmethod(multi_objectives)
-        self.validity = None if validity is None else staticmethod(validity)
+        Specification.user_defined_validity_check = (
+            None if validity is None else staticmethod(validity)
+        )
         largest_neighborhood = biogeme_parameters.get_value(
             name='largest_neighborhood', section='AssistedSpecification'
         )
@@ -188,7 +193,6 @@ class AssistedSpecification(Neighborhood):
         """
 
         def the_operator(element, step):
-
             the_new_config, number_of_modifications = function(
                 current_config=element.element_id,
                 step=step,
@@ -217,14 +221,8 @@ class AssistedSpecification(Neighborhood):
                 f'Wrong type {type(element)} instead of SetElement'
             )
 
-        if self.validity is None:
-            return True, None
-
         specification = Specification.from_string_id(element.element_id)
-        results = specification.get_results()
-        print(f'{self.validity=}')
-        print(f'{results=}')
-        return self.validity(results)
+        return specification.validity
 
     def run(self):
         """Runs the VNS algorithm

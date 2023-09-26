@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from biogeme.version import __version__
 
 sys.path.insert(0, os.path.abspath('.hyperlearn'))
 
@@ -23,7 +24,7 @@ copyright = '2023, Michel Bierlaire'
 author = 'Michel Bierlaire'
 
 # The full version, including alpha/beta/rc tags
-release = '3.2.11'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
@@ -37,6 +38,7 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.autosummary',
     'sphinx.ext.todo',
+    'sphinx_autodoc_typehints',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -47,12 +49,16 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'setup.py']
 
+# Set the behavior for type hints. Options are "none", "description", or "signature".
+autodoc_typehints = "description"
+
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
+# html_theme = 'furo'
 # html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 # html_theme = 'sphinx_book_theme'

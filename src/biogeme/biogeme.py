@@ -28,7 +28,7 @@ import biogeme.exceptions as excep
 import biogeme.filenames as bf
 import biogeme.optimization as opt
 from biogeme import tools
-from biogeme.idmanager import IdManager
+from biogeme.expressions import IdManager
 from biogeme.negative_likelihood import NegativeLikelihood
 from biogeme.parameters import (
     biogeme_parameters,
@@ -279,6 +279,11 @@ class BIOGEME:
         self.optimizationMessages = None
         """ Information provided by the optimization algorithm
         after completion.
+        """
+
+        self.convergence = False
+        """ True if the algorithm has converged
+
         """
 
         self.bestIteration = None  #: Store the best iteration found so far.
@@ -865,6 +870,14 @@ class BIOGEME:
         :rtype: list(str)
         """
         return self.id_manager.free_betas.names
+
+    def number_unknown_parameters(self):
+        """Returns the number of parameters that must be estimated
+
+        :return: number of parameters
+        :rtype: int
+        """
+        return len(self.id_manager.free_betas.names)
 
     def get_beta_values(self):
         """Returns a dict with the initial values of beta. Typically
@@ -1454,11 +1467,12 @@ class BIOGEME:
         #        yep.stop()
 
         output = self.optimize(np.array(self.id_manager.free_betas_values))
-        xstar, optimizationMessages = output
+        xstar, optimizationMessages, convergence = output
         # Running time of the optimization algorithm
         optimizationMessages['Optimization time'] = datetime.now() - start_time
         # Information provided by the optimization algorithm after completion.
         self.optimizationMessages = optimizationMessages
+        self.convergence = convergence
 
         fgHb = self.calculateLikelihoodAndDerivatives(
             xstar, scaled=False, hessian=True, bhhh=True
@@ -1503,7 +1517,7 @@ class BIOGEME:
                 else:
                     sample = self.database.sampleWithReplacement()
                     self.theC.setData(sample)
-                x_br, _ = self.optimize(xstar)
+                x_br, _, _ = self.optimize(xstar)
                 self.bootstrap_results[b] = x_br
 
             # Time needed to generate the bootstrap results
@@ -1584,11 +1598,12 @@ class BIOGEME:
         #        yep.stop()
 
         output = self.optimize(np.array(self.id_manager.free_betas_values))
-        xstar, optimizationMessages = output
+        xstar, optimizationMessages, convergence = output
         # Running time of the optimization algorithm
         optimizationMessages['Optimization time'] = datetime.now() - start_time
         # Information provided by the optimization algorithm after completion.
         self.optimizationMessages = optimizationMessages
+        self.convergence = convergence
 
         f = self.calculateLikelihood(xstar, scaled=False)
 

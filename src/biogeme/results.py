@@ -278,6 +278,9 @@ class rawResults:
         self.optimizationMessages = theModel.optimizationMessages
         """Diagnostics given by the optimization algorithm"""
 
+        self.convergence = theModel.convergence
+        """Success of the optimization algorithm"""
+
         self.numberOfThreads = theModel.numberOfThreads
         """Number of threads used for parallel computing"""
 
@@ -357,6 +360,14 @@ class bioResults:
             raise excep.BiogemeError('No data provided.')
 
         self._calculate_stats()
+
+    def algorithm_has_converged(self):
+        """Reports if the algorithm has indeed converged
+
+        :return: True if the algorithm has converged.
+        :rtype: bool
+        """
+        return self.data.convergence
 
     def variance_covariance_missing(self):
         """Check if the variance covariance matrix is missing
@@ -1080,6 +1091,14 @@ class bioResults:
         )
         html += '</table>\n'
 
+        if not self.algorithm_has_converged():
+            html += '<h2>Algorithm failed to converge</h2>\n'
+            html += (
+                '<p>The optimization algorithm did not converge according. '
+                'Therefore, the results below do not correspond to the maximum '
+                'likelihood estimator. Check the specification of the model, '
+                'or the criteria for convergence of the algorithm. </p>'
+            )
         if np.abs(self.data.smallestEigenValue) <= self.identification_threshold:
             html += '<h2>Warning: identification issue</h2>\n'
             html += (
