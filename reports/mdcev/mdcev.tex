@@ -1,0 +1,424 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{epsfig}
+\usepackage{michel}
+
+\usepackage[dcucite,abbr]{harvard}
+\harvardparenthesis{none}
+\harvardyearparenthesis{round}
+%\newcommand{\citeasnoun}[1]{\cite{#1}}
+
+\usepackage{listings}
+\usepackage{inconsolata}
+\lstset{language=Python}
+\lstset{numbers=none, basicstyle=\ttfamily\footnotesize,
+  numberstyle=\tiny,keywordstyle=\color{blue},stringstyle=\ttfamily,showstringspaces=false}
+\lstset{backgroundcolor=\color[rgb]{0.95 0.95 0.95}}
+\lstdefinestyle{numbers}{numbers=left, stepnumber=1,
+  numberstyle=\tiny,basicstyle=\footnotesize, numbersep=10pt}
+\lstdefinestyle{nonumbers}{numbers=none}
+\lstset{
+  breaklines=true,
+  breakatwhitespace=true,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{euler,times}
+
+%\usepackage{euler,beton}
+
+\newcommand{\footnoteremember}[2]{
+\footnote{#2}
+  \newcounter{#1}
+  \setcounter{#1}{\value{footnote}}
+} 
+\newcommand{\footnoterecall}[1]{
+\footnotemark[\value{#1}]
+} 
+
+\renewcommand{\L}{\mathcal{L}}
+
+%\usepackage[french]{babel}
+
+\title{
+  \vspace{-3cm}
+  \epsfig{figure=transp-or.eps,height=2cm}
+  \hfill
+  \epsfig{figure=epfl,height=1.5cm}   \\*[-0.5cm]
+  \mbox{}\hrulefill\mbox{} \\*[3cm] Estimating the MDCEV model with Biogeme}
+\author{Michel Bierlaire \and Mengyi Wang}
+\date{\today}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+\pagestyle{empty}
+
+\maketitle
+\vspace{2cm}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%
+%The report number is coded as YYMMDD where YY is the year, MM the
+%month and DD the day. The number should be unique. If, by any chance,
+%two reports are produced the same, assign to one of then the number
+%corresponding to the date of the day after.
+%When a manuscript is finished, produce two versions. One with the
+%report number, and publish it as a technical report on our website,
+%one without the report number, and submit it to a journal.
+%In this case, use the template of the journal, or simply comment out the next lines.
+
+\begin{center}
+\small Report TRANSP-OR 23xxxx \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+\end{center}
+
+
+\end{titlepage}
+
+
+\section*{Abstract}
+
+The abstract...
+\section{The MDCEV model}
+
+The multiple discrete-continuous extreme value model (MDCEV) is a
+choice model where the choice of multiple alternatives can occur
+simultaneously. It has been introduced by \citeasnoun{BHAT2005679},
+building on the Karush-Kuhn-Tucker multiple discrete-continuous economic
+model proposed by \citeasnoun{wales1983estimation}. In this document, we introduce a generalization of the model, where the derivation is performed for a generic utility function. This is motivated by the need to obtain an implementation that is easily extendible to new models in the future.
+
+Consider an individual, denoted as $n$, who is presented with a
+distinct set of items, represented as $\mathcal{C}_n$, containing
+$J_n$ items in total. Given a total budget of $E_n$, this individual
+decides on purchasing a quantity $y_{in}$ of each item. This decision
+must verify the following budget constraint:
+\[
+\sum_{i \in \mathcal{C}_n} e_{in} = \sum_{i \in \mathcal{C}_n} p_{in} y_{in} = E_n,
+\]
+where:
+\begin{itemize}
+    \item $p_{in} > 0$ is the price per unit of item $i$ for the individual $n$.
+    \item $e_{in} = p_{in} y_{in}$ represents the total expenditure by individual $n$ on item $i$.
+\end{itemize}
+We assume that the entire budget is spent, and that at least one item is consumed.
+
+Each item $i$ is associated with a utility $U_{in}(y)$, that depends
+on the consumed quantity $y$.  We identify two
+properties that the utility functions must have. Both are relatively
+weak conditions. The first one is related to the optimality
+conditions, and are verified if the functions are concave, or
+quasi-concave. The second one is related to the specification of the
+error terms, needed for the derivation of the econometric model.
+It is assumed that there exists an order preserving function $\phi$ such that the random utility can be expressed in additive form, that is such that
+\begin{equation}
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = V_{in} + \varepsilon_{in},
+\end{equation}
+where $V_{in}$ is the deterministic part, and $\varepsilon_{in}$ is a random disturbance.
+On
+top of this, the specification of the utility functions should be
+associated with specific behavioral assumptions. This aspect is not discussed in this document, in order to keep the model as general as possible. 
+
+The purchase decisions $y_{1n}, \ldots, y_{J_n, n}$ are assumed to be the solution of the following optimization problem:
+\begin{equation}
+\max_{y} \sum_{i \in \C_n} U_{in}(y_i)
+\end{equation}
+subject to
+\begin{align}
+  \sum_{i \in \mathcal{C}_n} p_{in} y_{i} &= E_n,\\
+ y_{i} &\geq 0,
+\end{align}
+We refer the reader to Appendix~\ref{eq:derivation}, where the model is derived from first principles.
+
+\section{Model specifications}
+
+Biogeme implements the following specifications for the utility functionx.
+
+\subsection{Translated utility function}
+In the context of a time use model, \citeasnoun{BHAT2005679} uses the translated utility function introduced by \citeasnoun[Eq. (1)]{Jaehwan-Kim:2002aa}:
+\begin{equation}
+  \label{eq:orig_u}
+U_{in}(e_i) = \exp(\beta^T x_{in} + \varepsilon_{in})(e_i + \gamma_i)^{\alpha_i},
+\end{equation}
+where $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
+estimated. Note that there is no price involved in this specification,
+as it models time and not goods. It is equivalent to set $p_i=1$, for all $i$ in the model
+described above. Note also that,
+\citeasnoun{Jaehwan-Kim:2002aa} and \citeasnoun{BHAT2005679} impose
+the following restriction on $\alpha_i$: $0 < \alpha_i \leq
+1$. However, in the context of this implementation, $\alpha_i=1$ would
+create a singularity.
+
+We can calculate
+\begin{equation}
+\frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i(e_i + \gamma)^{\alpha_i-1}.
+\end{equation}
+In this context, we use the logarithm as the order preserving function to obtain the following specification:
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_i + \gamma_i),
+\]
+so that
+\[
+V_{in} = \beta^T x_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_i + \gamma_i),
+\]
+and
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} = \frac{1-\alpha_i}{e_i + \gamma_i}.
+\]
+In Biogeme, this model is referred to as
+\lstinline@translated@.
+
+
+\section{Generalized translated utility function}
+
+\citeasnoun{BHAT2008274} generalizes the above formulation and introduces the following specification, where the utility functions $U_{in}$ are defined as
+\begin{equation}
+  \label{eq:generalized_utility}
+U_{in} =\exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{\alpha_i} \left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right],
+\end{equation}
+where $\beta$, $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
+estimated. We can calculate
+\begin{equation}
+  \frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1}.
+\end{equation}
+We use again the logarithm as the order preserving function to obtain the following specification:
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = \beta^T x_{in} + \varepsilon_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right),
+\]
+so that
+\[
+V_{in} = \beta^T x_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right),
+\]
+and
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} =\frac{1-\alpha_i}{e_i + p_i \gamma_i}.
+\]
+In Biogeme, this model is referred to as \lstinline@generalized@.
+
+\subsection{The $\gamma$-profile}
+If $\alpha_i \to 0$, \req{eq:generalized_utility} collapses to the linear expenditure system (LES) form, defined as follows:
+\begin{equation}
+  \label{eq:u_les}
+U_{in}(e_{i})= \exp(\beta^T x_{in} + \varepsilon_{in}) \gamma_i \ln \left(\frac{e_i}{p_i \gamma_i}+1 \right),
+\end{equation}
+where $\beta$, $\gamma_i > 0$ is a  parameter to be
+estimated. We can calculate
+\[
+\frac{\partial U_{in}}{\partial e_i} =  \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{e_i + p_i \gamma_i}.
+\]
+Taking again the logarithm, we have
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in}) + \ln \gamma_i - \ln(e_i + p_i \gamma_i),
+\]
+so that
+\[
+V_{in} = \beta^T x_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i),
+\]
+and
+\[
+c_{in} = \frac{1}{e_i + p_i \gamma_i}.
+\]
+In Biogeme, this model is referred to as \lstinline@gamma_profile@.
+
+\subsection{The non-monotonic model}
+
+\citeasnoun{Wang:2023aa} introduce the following specification in order to accommodate non-monotonic preferences, motivated in the context of time consumption. With our notations, the specification is
+\[
+U_{in}(e_i) = \frac{\gamma_i}{\alpha_i} e^{\beta^T x_{in}}\left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right]+(\gamma^T z_{in} + \varepsilon_{in}) e_i.
+\]
+where $\beta$, $\gamma$, $0 < \alpha_i < 1$, and $\gamma_i > 0$  are parameters to be
+estimated. In the original paper, the model has been derived using $p_i=1$, for all $i$.
+We have
+\[
+\frac{\partial U_{in}}{\partial e_i} = \frac{1}{p_i} e^{\beta^T x_{in}}  \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1} + \gamma^T z_{in} + \varepsilon_{in}.
+\]
+Here, we do not need to apply an order preserving function, and
+\[
+V_{in} = \frac{1}{p_i} e^{\beta^T x_{in}}  \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1} + \gamma^T z_{in}.
+\]
+We have
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} =  \frac{1}{p^2_i} e^{\beta^T x_{in}} \frac{1-\alpha_i}{\gamma_i}\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-2},
+\]
+so that
+\[
+\ln c_{in} = -2\ln p_i + \beta^T x_{in} + \ln (1-\alpha_i) -\ln \gamma_i +(\alpha_i-2) \ln\left(\frac{e_i}{p_i \gamma_i}+1\right).
+\]
+and
+\[
+\frac{1}{c_{in}} =  p^2_i e^{-\beta^T x_{in}} \frac{\gamma_i}{1-\alpha_i}\left(\frac{e_i}{p_i \gamma_i}+1\right)^{2-\alpha_i}.
+\]
+
+In Biogeme, this model is referred to as \lstinline@non_monotonic@.
+
+
+%\subsection{Outside good}
+%
+%
+%Note that, if there is an outside good (see \cite[Section 5]{BHAT2008274}), label it alternative one, and define $\psi_{in}=\exp(\varepsilon_{in})$, and
+%\begin{equation}
+%U_{1n}(e_1) = \frac{1}{\alpha_1} e_1^{\alpha_i}.
+%\end{equation}
+
+\bibliographystyle{dcu}
+\bibliography{transpor}
+
+
+\appendix
+\section{Derivation of the model}
+\label{eq:derivation}
+To simplify the derivation that follows, we write the
+optimization problem as an equivalent minimization problem, in terms
+of expenditures instead of quantities:
+\begin{equation}
+\min_{e} -\sum_{i \in \C_n} U_{in}(e_i)
+\end{equation}
+subject to
+\begin{align}
+  \sum_{i \in \mathcal{C}_n} e_i &= E_n, \label{eq:budget_constraint}\\
+ e_{i} &\geq 0. \label{eq:non_negativity}
+\end{align}
+
+The optimality conditions can be derived from the Lagrangian of the problem. We introduce a Lagrange multiplier $\lambda$ associated with constraint \req{eq:budget_constraint} and a Lagrange multiplier $\mu_i \geq 0$ for each constraint \req{eq:non_negativity}. The Lagrangian is defined as
+\begin{equation}
+  \L(y;\lambda, \mu) = -\sum_{i \in \C_n} U_{in}(e_i) + \lambda\left(E_n -  \sum_{i \in \mathcal{C}_n} e_{i}\right) - \sum_{i \in \C_n} \mu_i e_i.
+\end{equation}
+The first order optimality conditions state that
+\begin{equation}
+  \label{eq:optimality}
+\frac{\partial \L}{\partial e_i} = - \frac{\partial U_{in}}{\partial e_i} - \lambda - \mu_i  = 0, \text{ and } \mu_i e_i = 0, \; \forall i \in \C_n.
+\end{equation}
+Note that we assume that the second order optimization conditions are also verified. This is the case if the utility functions are concave, for instance.
+
+At least one item is consumed. We assume without loss of generality that it is item 1. Therefore $e_{1n} > 0$ and $\mu_1=0$. Consequently, \req{eq:optimality} can be written
+\[
+\lambda = - \frac{\partial U_{1n}}{\partial e_1}.
+\]
+Consider an alternative $j\neq 1$ such that $e_{jn} > 0$. Using the same argument, we can write
+\[
+\frac{\partial U_{jn}}{\partial e_j} = \frac{\partial U_{1n}}{\partial e_1}.
+\]
+Consider an alternative $j$ such that $e_{jn} = 0$. In this case, $\mu_j \geq 0$ and
+\[
+\frac{\partial U_{in}}{\partial e_i}  \leq \frac{\partial U_{1n}}{\partial e_1}.
+\]
+Note that we can transform the utility functions $U_{in}$ with any order preserving function $F$ without changing the solution of the problem. An order preserving function is a strictly increasing function $F$ of one variable such that $F'(u) > 0$. In that case,
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) \leq \phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) \Longleftrightarrow
+\frac{\partial U_{in}}{\partial e_i}  \leq \frac{\partial U_{1n}}{\partial e_1}.
+\]
+
+We now assume that the utility function is a random variable, that can be written in an additive way. More specifically, we assume that there exists an order preserving transform of the utility functions such that
+\begin{equation}
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = V_{in} + \varepsilon_{in},
+\end{equation}
+where $V_{in}$ is the deterministic part, and $\varepsilon_{in}$ is a random disturbance. Therefore, the optimality conditions can be written as
+\begin{align}
+V_{in} + \varepsilon_{in}  &= V_{1n} + \varepsilon_{1n},  & \text{if } e_{in} > 0, \label{eq:non_zero}\\
+V_{in} + \varepsilon_{in}  &\leq V_{1n} + \varepsilon_{1n},  & \text{if } e_{in} = 0. \label{eq:zero}
+\end{align}
+We assume that the utility functions are defined in such a way that
+\req{eq:non_zero} defines a bijective relationship between $e_{in}$ and
+$\varepsilon_{in}$, for all $i\in\C_n$.
+
+\section{The distribution of expenditures}
+
+We are interested in the distribution of the vector $e_n$, and we have
+established that it is a function of the vector of disturbances
+$\varepsilon_n$: $e_n = H(\varepsilon_n)$.  Consequently, if we assume
+a distribution for $\varepsilon_n$, characterized by a probability
+density fonction (pdf) $f_\varepsilon$ and a cumulative distribution
+function (CDF) $F_\varepsilon$, we can characterize the distribution of $e_n$.
+
+We start by assuming that $e_{1n}$, the consumed quantity of item 1 is
+known and non zero. Consequently, the value of $\varepsilon_{1n}$ is known as
+well. In order to derive the pdf evaluated at $e$, we split the vector $e$ into its positive entries $e^+$ and its zero entries $e^0$, alternative 1 being excluded. In an analogous way, we denote $\C^+$ and $\C^0$ the corresponding sets of indices, of size $J^+$ and $J^0$, respectively. 
+
+For each $i \in \C^+$, we can use \req{eq:non_zero}
+to define $\varepsilon_n = H^{-1}(e_n)$, where $H^{-1}:\R^{J^+-1}\to\R^{J^+-1}$ is defined as  
+\begin{equation}
+  \label{eq:change_variable}
+H_i^{-1}(e) = \varepsilon_{i+1,n}   =   V_{1n}(e_1) - V_{i+1,n}(e_{i+1}) + \varepsilon_{1n}.
+\end{equation}
+Therefore, the density function can be decomposed as
+\begin{align*}
+  f_e(e^+, e^0 | e_1) &= f_e(e^+ | e^0, e_1) \prob(e^0 |e_1) \\
+                     &= f_\varepsilon(\varepsilon^+ | \varepsilon^0, \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right)  \prob(e^0 |e_1)
+\end{align*}
+where
+\begin{align*}
+  \prob(e^0 |e_1) &= \prob(V_{in} + \varepsilon_{in}  \leq V_{1n} + \varepsilon_{1n},\; \forall i\in\C^0) \\
+  &= \prob(\varepsilon_{in}  \leq V_{1n} -V_{in} + \varepsilon_{1n},\; \forall i\in\C^0) \\
+  &= F_\varepsilon(\varepsilon_{1n}, 1, \ldots, 1, (V_{1n} -V_{in} + \varepsilon_{1n})_{i\in \C^0}).
+\end{align*}
+From \req{eq:change_variable}, we can calculate the entries of the Jacobian $\partial H^{-1}/\partial e$. Indeed,
+\begin{align*}
+  \frac{\partial H_i^{-1}(e)}{\partial e_k} &= \frac{\partial V_{1n}}{\partial e_1}\frac{\partial e_1}{\partial e_k}  & \text{if } k \neq i+1, \\
+  &= \frac{\partial V_{1n}}{\partial e_1}\frac{\partial e_1}{\partial e_k} - \frac{\partial V_{i+1,n}}{\partial e_{i+1}}& \text{if } k = i+1.
+\end{align*}
+From \req{eq:budget_constraint}, we have
+\[
+e_1 = E - \sum_{j\neq 1} e_j,
+\]
+so that
+\[
+\frac{\partial e_1}{\partial e_k} = -1.
+\]
+Consequently,
+\begin{align*}
+  \frac{\partial H_i^{-1}(e)}{\partial e_k} &= -\frac{\partial V_{1n}}{\partial e_1}  & \text{if } k \neq i+1, \\
+  &= -\frac{\partial V_{1n}}{\partial e_1} - \frac{\partial V_{i+1,n}}{\partial e_{i+1}}& \text{if } k = i+1.
+\end{align*}
+If we denote
+\begin{equation}
+c_i =  - \frac{\partial V_{in}}{\partial e_{i}}
+\end{equation}
+the Jacobian has the following structure:
+\[
+\partial H^{-1}/\partial e= \left(
+\begin{array}{cccc}
+  c_1 + c_2 & c_1 & \cdots & c_1 \\
+  c_1      & c_1 + c_3 & \cdots & c_1 \\
+  &          &   \vdots    \\
+  c_1    &  c_1 & \cdots & c_1 + c_{J_n}
+\end{array}
+\right).
+\]
+Therefore, the determinant is equal to
+\[
+\det(\partial H^{-1}/\partial e) = \left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right).
+\]
+Note that this determinant depends only on the utility function, not on the distribution of the $\varepsilon_n$.
+
+Therefore, the density function of the expenditures is given by
+\begin{equation}
+  \label{eq:density}
+f_e(e^+, e^0) =   \left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\int_{\varepsilon_1=-\infty}^{+\infty}  f_\varepsilon(\varepsilon^+ | \varepsilon^0, \varepsilon_1) F_\varepsilon(\varepsilon_{1n}, \ldots)f_\varepsilon(\varepsilon_1) d\varepsilon_1,
+\end{equation}
+where $f_\varepsilon(\varepsilon_1)$ is the marginal distribution of $\varepsilon_1$, and
+\[
+F_\varepsilon(\varepsilon_{1n}, \ldots) = F_\varepsilon(\varepsilon_{1n}, 1, \ldots, 1, (V_{1n} -V_{in} + \varepsilon_{1n})_{i\in \C^0}).
+\]
+
+Equation \req{eq:density} corresponds to Equation~11 in \citeasnoun{BHAT2008274}.
+
+If we assume that the $\varepsilon_{in}$ are independent, we obtain the MDCEV model introduced by \citeasnoun{BHAT2005679}. In that case,  the density \req{eq:density} is 
+\begin{equation}
+  f_e(e^+, e^0) = \mu^{J^+-1}\left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right) \left( \frac{\prod_{i \in \C^+} e^{\mu V_{in}}}{(\sum_{i\in\C_n} e^{\mu V_{in}})^{J^+}} \right) (J^+-1)!,
+\end{equation}
+where the derivation is available in \citeasnoun{BHAT2008274}. Therefore, the contribution of observation $n$ to the log likelihood is
+\begin{align*}
+  \ln  f_e(e^+, e^0) =& (J^+-1) \ln \mu \\
+  &+ \sum_{i=1}^{J^+} \ln c_i \\
+  &+ \ln\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\\
+  &+ \mu \sum_{i \in \C^+} V_{in} \\
+  &- J^+ \ln \sum_{i\in\C_n} e^{\mu V_{in}} \\
+  &+ \ln (J^+-1)!.
+\end{align*}
+
+
+
+\end{document}
