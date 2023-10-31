@@ -8,7 +8,7 @@ approximated using MonteCarlo integration.
 
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.expressions import bioDraws
 from b07estimation_specification import get_biogeme
 
