@@ -10,7 +10,7 @@ Same as 01logit, using bioLinearUtility, and introducing some options
 
 Note that the parameters are defined in the file 01logitBis.toml
 """
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.segmentation as seg

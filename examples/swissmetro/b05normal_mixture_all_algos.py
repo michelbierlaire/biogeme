@@ -7,7 +7,7 @@
 Estimation using several algorithms
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.exceptions as excep

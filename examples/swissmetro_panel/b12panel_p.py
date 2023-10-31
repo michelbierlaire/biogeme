@@ -12,7 +12,7 @@ The Swissmetro data is organized such that each row contains all the
 responses of one individual.
 
 """
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import (

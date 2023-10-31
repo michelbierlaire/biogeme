@@ -10,7 +10,7 @@
 import numpy as np
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.expressions import (
     Beta,
     bioDraws,

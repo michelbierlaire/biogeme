@@ -7,7 +7,7 @@
  The mixing distribution is uniform.
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import (

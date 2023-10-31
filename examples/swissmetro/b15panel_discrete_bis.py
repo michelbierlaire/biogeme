@@ -8,7 +8,7 @@
  Here, we integrate before the discrete mixture to show that it is equivalent.
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import (

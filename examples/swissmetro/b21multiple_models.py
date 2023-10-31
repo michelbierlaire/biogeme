@@ -7,7 +7,7 @@
  assisted specification algorithm Three alternatives: Train, Car and
 
 """
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.assisted import AssistedSpecification

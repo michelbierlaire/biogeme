@@ -8,7 +8,7 @@ case, the number fo specifications exceed the maximum limit, so a heuristic is a
 It may actually end up enumerating all possiblities.
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import AIC_BIC_dimension
 from biogeme.assisted import AssistedSpecification

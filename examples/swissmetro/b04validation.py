@@ -60,9 +60,9 @@ results = the_biogeme.estimate()
 # dataframe. As this is done for each slice, the output is a list of
 # dataframes, each corresponding to one of these exercises.
 
-validationData = database.split(slices=5)
+validation_data = database.split(slices=5)
 
-validation_results = the_biogeme.validate(results, validationData)
+validation_results = the_biogeme.validate(results, validation_data)
 
 for slide in validation_results:
     print(

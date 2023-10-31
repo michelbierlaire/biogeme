@@ -7,7 +7,7 @@
  The datafile is organized as panel data.
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import (

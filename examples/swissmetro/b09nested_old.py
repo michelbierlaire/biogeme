@@ -1,15 +1,12 @@
-"""File b14nested_endogenous_sampling.py
+"""File b09nested_old.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 18:25:03 2023
+:date: Tue Oct 24 13:37:27 2023
 
- Example of a nested logit model, with the corrections for endogenous sampling.
- Three alternatives: Train, Car and Swissmetro
- Train and car are in the same nest.
-
+Example of a nested logit model, using the original syntax for nests.
+since biogeme 3.13, a new syntax, more explicit, has been adopted.
 """
 
-import numpy as np
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
@@ -30,7 +27,7 @@ from swissmetro_data import (
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b14nested_endogenous_sampling.py')
+logger.info('Example b09nested')
 
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -39,16 +36,6 @@ ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 MU = Beta('MU', 1, 1, 10, 0)
-
-# In this example, we assume that the three modes exist, and that the
-# sampling protocal is choice-based. The probability that a respondent
-# belongs to the sample is R_i.
-R_TRAIN = 4.42e-2
-R_SM = 3.36e-3
-R_CAR = 7.5e-3
-
-# The correction terms are the log of these quantities
-correction = {1: np.log(R_TRAIN), 2: np.log(R_SM), 3: np.log(R_CAR)}
 
 # Definition of the utility functions
 V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -68,19 +55,22 @@ existing = MU, [1, 3]
 future = 1.0, [2]
 nests = existing, future
 
-# The choice model is a nested logit, with corrections for endogenous sampling
-# We first obtain the expression of the Gi function for nested logit.
-Gi = models.getMevForNested(V, av, nests)
-
-# Then we calculate the MEV log probability, accounting for the correction.
-logprob = models.logmev_endogenousSampling(V, Gi, av, correction, CHOICE)
+# Definition of the model. This is the contribution of each
+# observation to the log likelihood function.
+# The choice model is a nested logit, with availability conditions
+logprob = models.lognested(V, av, nests, CHOICE)
 
 # Create the Biogeme object
 the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b14nested_endogenous_eampling'
+the_biogeme.modelName = "b09nested"
+
+# Calculate the null log likelihood for reporting.
+the_biogeme.calculateNullLoglikelihood(av)
 
 # Estimate the parameters
 results = the_biogeme.estimate()
 print(results.short_summary())
 pandas_results = results.getEstimatedParameters()
 print(pandas_results)
+
+

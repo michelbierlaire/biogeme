@@ -1,15 +1,12 @@
-"""File b14nested_endogenous_sampling.py
+"""File b10nested_bottom.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 18:25:03 2023
+:date: Sun Apr  9 18:05:04 2023
 
- Example of a nested logit model, with the corrections for endogenous sampling.
- Three alternatives: Train, Car and Swissmetro
- Train and car are in the same nest.
-
+ Example of a nested logit model where the normalization is done at
+ the bottom level.
 """
 
-import numpy as np
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
@@ -30,7 +27,7 @@ from swissmetro_data import (
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b14nested_endogenous_sampling.py')
+logger.info('Example b10nested_bottom.py')
 
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -38,17 +35,11 @@ ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
-MU = Beta('MU', 1, 1, 10, 0)
 
-# In this example, we assume that the three modes exist, and that the
-# sampling protocal is choice-based. The probability that a respondent
-# belongs to the sample is R_i.
-R_TRAIN = 4.42e-2
-R_SM = 3.36e-3
-R_CAR = 7.5e-3
-
-# The correction terms are the log of these quantities
-correction = {1: np.log(R_TRAIN), 2: np.log(R_SM), 3: np.log(R_CAR)}
+# If the lower bound is set to zero, the model cannot be evaluated.
+# Therefore, we set the lower bound to a small number, strictly larger
+# than zero.
+MU = Beta('MU', 0.5, 0.000001, 1.0, 0)
 
 # Definition of the utility functions
 V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
@@ -64,20 +55,19 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # Definition of nests:
 # 1: nests parameter
 # 2: list of alternatives
-existing = MU, [1, 3]
+existing = 1.0, [1, 3]
 future = 1.0, [2]
 nests = existing, future
 
-# The choice model is a nested logit, with corrections for endogenous sampling
-# We first obtain the expression of the Gi function for nested logit.
-Gi = models.getMevForNested(V, av, nests)
-
-# Then we calculate the MEV log probability, accounting for the correction.
-logprob = models.logmev_endogenousSampling(V, Gi, av, correction, CHOICE)
+# Definition of the model. This is the contribution of each
+# observation to the log likelihood function.
+# The choice model is a nested logit, with availability conditions,
+# where the scale parameter mu is explicitly involved.
+logprob = models.lognestedMevMu(V, av, nests, CHOICE, MU)
 
 # Create the Biogeme object
 the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b14nested_endogenous_eampling'
+the_biogeme.modelName = 'b10nested_bottom'
 
 # Estimate the parameters
 results = the_biogeme.estimate()

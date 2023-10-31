@@ -7,7 +7,7 @@
  The mixing distribution is distributed as a log normal.
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
 from biogeme import models

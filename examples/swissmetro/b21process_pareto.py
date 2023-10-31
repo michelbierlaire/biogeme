@@ -8,7 +8,7 @@ pareto optimal specification. This script is designed to re-estimate
 the Pareto optimal models
 
 """
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 try: 
     import matplotlib.pyplot as plt
     can_plot = True

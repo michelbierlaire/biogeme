@@ -1,16 +1,17 @@
 """File b10nested_bottom.py
 
 :author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 18:05:04 2023
+:date: Tue Oct 24 13:40:46 2023
 
  Example of a nested logit model where the normalization is done at
  the bottom level.
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
+from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
 
 from swissmetro_data import (
     database,
@@ -52,12 +53,19 @@ V = {1: V1, 2: V2, 3: V3}
 # Associate the availability conditions with the alternatives
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
-# Definition of nests:
-# 1: nests parameter
-# 2: list of alternatives
-existing = 1.0, [1, 3]
-future = 1.0, [2]
-nests = existing, future
+# Definition of nests. Only the non trival nests must be defined. A
+# trivial nest is a nest containing exactly one alternative.
+
+existing = OneNestForNestedLogit(
+    nest_param = 1.0,
+    list_of_alternatives = [1, 3],
+    name = 'existing'
+)
+
+nests = NestsForNestedLogit(
+    choice_set = list(V),
+    tuple_of_nests = (existing,)
+)
 
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
