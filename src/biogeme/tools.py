@@ -12,7 +12,8 @@ from itertools import product
 from os import path
 import shutil
 from collections import defaultdict
-from typing import NamedTuple
+import types
+from typing import NamedTuple, Callable, Any, Optional, Type
 import tempfile
 import uuid
 import numpy as np
@@ -24,12 +25,16 @@ logger = logging.getLogger(__name__)
 
 
 class LRTuple(NamedTuple):
+    """Tuple for the likelihood ratio test"""
+
     message: str
     statistic: float
     threshold: float
 
 
-def findiff_g(the_function, x):
+def findiff_g(
+    the_function: Callable[[np.ndarray], tuple[float, ...]], x: np.ndarray
+) -> np.ndarray:
     """Calculates the gradient of a function :math:`f` using finite differences
 
     :param the_function: A function object that takes a vector as an
@@ -37,15 +42,11 @@ def findiff_g(the_function, x):
                         element of the tuple is the value of the
                         function :math:`f`. The other elements are not
                         used.
-    :type the_function: function
 
     :param x: argument of the function
-    :type x: numpy.array
 
     :return: numpy vector, same dimension as x, containing the gradient
        calculated by finite differences.
-    :rtype: numpy.array
-
     """
     x = x.astype(float)
     tau = 0.0000001
@@ -67,7 +68,9 @@ def findiff_g(the_function, x):
     return g
 
 
-def findiff_H(the_function, x):
+def findiff_H(
+    the_function: Callable[[np.ndarray], tuple[float, np.ndarray, Any]], x: np.ndarray
+) -> np.ndarray:
     """Calculates the hessian of a function :math:`f` using finite differences
 
     :param the_function: A function object that takes a vector as an
@@ -77,15 +80,9 @@ def findiff_H(the_function, x):
                         gradient of the function.  The other elements
                         are not used.
 
-    :type the_function: function
-
     :param x: argument of the function
-    :type x: numpy.array
-
     :return: numpy matrix containing the hessian calculated by
              finite differences.
-    :rtype: numpy.array
-
     """
     tau = 1.0e-7
     n = len(x)
@@ -106,7 +103,12 @@ def findiff_H(the_function, x):
     return H
 
 
-def checkDerivatives(the_function, x, names=None, logg=False):
+def checkDerivatives(
+    the_function: Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]],
+    x: np.ndarray,
+    names: Optional[list[str]] = None,
+    logg: Optional[bool] = False,
+) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Verifies the analytical derivatives of a function by comparing
     them with finite difference approximations.
 
@@ -118,16 +120,11 @@ def checkDerivatives(the_function, x, names=None, logg=False):
         - the second is the gradient of the function,
         - the third is the hessian.
 
-    :type the_function: function
-
     :param x: arguments of the function
-    :type x: numpy.array
 
     :param names: the names of the entries of x (for reporting).
-    :type names: list(string)
-    :param logg: if True, messages will be displayed.
-    :type logg: bool
 
+    :param logg: if True, messages will be displayed.
 
     :return: tuple f, g, h, gdiff, hdiff where
 
@@ -138,8 +135,6 @@ def checkDerivatives(the_function, x, names=None, logg=False):
             and the finite difference approximation
           - hdiff is the difference between the analytical hessian
             and the finite difference approximation
-
-    :rtype: float, numpy.array,numpy.array,  numpy.array,numpy.array
 
     """
     x = np.array(x, dtype=float)
@@ -166,14 +161,12 @@ def checkDerivatives(the_function, x, names=None, logg=False):
     return f, g, h, gdiff, hdiff
 
 
-def get_prime_numbers(n):
+def get_prime_numbers(n: int) -> list[int]:
     """Get a given number of prime numbers
 
     :param n: number of primes that are requested
-    :type n: int
 
     :return: array with prime numbers
-    :rtype: list(int)
 
     :raise BiogemeError: if the requested number is non positive or a float
 
@@ -193,14 +186,12 @@ def get_prime_numbers(n):
         raise excep.BiogemeError(f'Incorrect number: {n}') from e
 
 
-def calculate_prime_numbers(upper_bound):
+def calculate_prime_numbers(upper_bound: int) -> list[int]:
     """Calculate prime numbers
 
     :param upper_bound: prime numbers up to this value will be computed
-    :type upper_bound: int
 
     :return: array with prime numbers
-    :rtype: list(int)
 
     :raise BiogemeError: if the upper_bound is incorrectly defined
         (negative number, e.g.)
@@ -235,7 +226,7 @@ def calculate_prime_numbers(upper_bound):
     return myprimes
 
 
-def countNumberOfGroups(df, column):
+def countNumberOfGroups(df: pd.DataFrame, column: str) -> int:
     """
     This function counts the number of groups of same value in a column.
     For instance: 1,2,2,3,3,3,4,1,1  would give 5.
@@ -264,20 +255,21 @@ def countNumberOfGroups(df, column):
     return result
 
 
-def likelihood_ratio_test(model1, model2, significance_level=0.05):
+def likelihood_ratio_test(
+    model1: tuple[float, int],
+    model2: tuple[float, int],
+    significance_level: float = 0.05,
+) -> LRTuple:
     """This function performs a likelihood ratio test between a
     restricted and an unrestricted model.
 
     :param model1: the final loglikelihood of one model, and the number of
                    estimated parameters.
-    :type model1: tuple(float, int)
 
     :param model2: the final loglikelihood of the other model, and
                    the number of estimated parameters.
-    :type model2: tuple(float, int)
 
     :param significance_level: level of significance of the test. Default: 0.05
-    :type significance_level: float
 
     :return: a tuple containing:
 
@@ -285,8 +277,6 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
                   - the statistic, that is minus two times the difference
                     between the loglikelihood  of the two models
                   - the threshold of the chi square distribution.
-
-    :rtype: LRTuple(str, float, float)
 
     :raise BiogemeError: if the unrestricted model has a lower log
         likelihood than the restricted model.
@@ -326,7 +316,12 @@ def likelihood_ratio_test(model1, model2, significance_level=0.05):
     return LRTuple(message=final_msg, statistic=stat, threshold=threshold)
 
 
-def flatten_database(df, merge_id, row_name=None, identical_columns=None):
+def flatten_database(
+    df: pd.DataFrame,
+    merge_id: str,
+    row_name: str = None,
+    identical_columns: list[str] = None,
+) -> pd.DataFrame:
     """Combine several rows of a Pandas database into one.
     For instance, consider the following database::
 
@@ -381,29 +376,25 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
     grouped = df.groupby(by=merge_id)
     all_columns = set(df.columns)
 
-    def are_values_identical(col):
+    def are_values_identical(col: pd.Series) -> bool:
         """This function checks if all the values in a column
         are identical
 
         :param col: the column
-        :type col: pandas.Series
 
         :return: True if all values are identical. False otherwise.
-        :rtype: bool
         """
 
         return (col.iloc[0] == col).all(0)
 
-    def get_varying_cols(g):
+    def get_varying_cols(g: pd.DataFrame) -> set[str]:
         """This functions returns the name of all columns
         that have constant values within each group of data.
 
         :param g: group of data
-        :type g: pandas.DataFrame
 
         :return: name of all columns that have constant values
             within each group of data.
-        :rtype: set(str)
         """
         return {colname for colname, col in g.items() if not are_values_identical(col)}
 
@@ -426,14 +417,12 @@ def flatten_database(df, merge_id, row_name=None, identical_columns=None):
     # Treat the other columns
     grouped_varying = df[[merge_id] + list(varying_columns)].groupby(by=merge_id)
 
-    def treat(x):
+    def treat(x: pd.DataFrame) -> pd.DataFrame:
         """Treat a group of data.
 
         :param x: group of data
-        :type x: pandas.DataFrame
 
         :return: the same data organized in one row, with proper column names
-        :rtype: pandas.DataFrame
 
         :raise BiogemeError:  if there are duplicates in the name of
         the row. Indeed, in that case, they cannot be used to name the
@@ -491,12 +480,17 @@ class TemporaryFile:
                 print('stuff', file=f)
     """
 
-    def __enter__(self, name=None):
+    def __enter__(self, name: str = None) -> str:
         self.dir = tempfile.mkdtemp()
         name = str(uuid.uuid4()) if name is None else name
         return path.join(self.dir, name)
 
-    def __exit__(self, ctype, value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[types.TracebackType],
+    ) -> None:
         """Destroys the temporary directory"""
         shutil.rmtree(self.dir)
 
@@ -504,7 +498,7 @@ class TemporaryFile:
 class ModelNames:
     """Class generating model names from unique configuration string"""
 
-    def __init__(self, prefix='Model'):
+    def __init__(self, prefix: str = 'Model'):
         self.prefix = prefix
         self.dict_of_names = {}
         self.current_number = 0

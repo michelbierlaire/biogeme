@@ -4,11 +4,15 @@
 :date: Thu Sep  7 10:14:54 2023
 """
 
-from typing import Tuple, Optional, Union
+import logging
+from typing import Tuple
+import copy
 import numpy as np
 import pandas as pd
 from biogeme.exceptions import BiogemeError
-from .sampling_context import SamplingContext, StratumTuple, LOG_PROBA_COL, MEV_WEIGHT
+from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT
+
+logger = logging.getLogger(__name__)
 
 
 def generate_segment_size(sample_size: int, number_of_segments: int) -> list[int]:
@@ -62,45 +66,77 @@ class SamplingOfAlternatives:
         self.id_column = context.id_column
         self.partition = context.partition
         self.second_partition = context.second_partition
+        self.cnl_nests = context.cnl_nests
 
-    def sample_alternatives(
-        self, partition: list[StratumTuple], chosen: Optional[int] = None
-    ) -> Tuple[pd.DataFrame, Union[None, pd.DataFrame]]:
+    def sample_alternatives(self, chosen: int) -> pd.DataFrame:
         """Performing the sampling of alternatives
 
-        :param partition: partition characterizing the sampling.
         :param chosen: ID of the chosen alternative, that must be included
-            in the choice set. If None, the chosen alternative is ignored.
+            in the choice set.
 
-        :return: two data frames: (i) data frame containing a sample of
-            alternatives, organized in such a way that the segment
-            containing the chosen alternative is the last one. Moreover,
-            if the chosen alternative has been sampled, it will be the
-            last one. (ii) one with the chosen alternative, if requested.
+        :return: data frame containing a sample of
+            alternatives. The first one is the chosen alternative
         :raise BiogemeError: if the chosen alternative is unknown.
 
         """
-        if chosen is None:
-            chosen_alternative = None
-        else:
-            chosen_alternative = self.alternatives[
-                self.alternatives[self.id_column] == chosen
-            ].copy()
-            if len(chosen_alternative) < 1:
-                error_msg = f'Unknown alternative: {chosen}'
-                raise BiogemeError(error_msg)
-            if len(chosen_alternative) > 1:
-                error_msg = f'Duplicate alternative: {chosen}'
-                raise BiogemeError(error_msg)
+        chosen_alternative = self.alternatives[
+            self.alternatives[self.id_column] == chosen
+        ].copy()
+        if len(chosen_alternative) < 1:
+            error_msg = f'Unknown alternative: {chosen}'
+            raise BiogemeError(error_msg)
+        if len(chosen_alternative) > 1:
+            error_msg = f'Duplicate alternative: {chosen}'
+            raise BiogemeError(error_msg)
 
         results = []
 
-        reordered = None
-
-        for stratum in partition:
+        for stratum in self.partition:
+            # statum.subset is a set of int
+            # We create a copy because we'll have to drop the chosen alternative
+            the_subset_of_alternatives = copy.deepcopy(stratum.subset)
             stratum_size = len(stratum.subset)
             sample_size = stratum.sample_size
             logproba = np.log(sample_size) - np.log(stratum_size)
+            if chosen in stratum.subset:
+                # Discard the chosen alternative
+                the_subset_of_alternatives.discard(chosen)
+                # And we sample one alternative less
+                sample_size -= 1
+                # Include the correction terms
+                chosen_alternative[LOG_PROBA_COL] = logproba
+
+            # subset is a pandas data frame containing the description
+            # of all alternatives in the subset
+            subset = self.alternatives[
+                self.alternatives[self.id_column].isin(the_subset_of_alternatives)
+            ]
+            # Perform the sampling
+            sample = subset.sample(
+                n=sample_size, replace=False, axis='index', ignore_index=True
+            )
+
+            sample[LOG_PROBA_COL] = logproba
+
+            results.append(sample)
+
+        the_sample = pd.concat(results, ignore_index=True)
+        # Add the chosen alternative. By construction, it is not in the sample.
+        the_sample = pd.concat([chosen_alternative, the_sample], ignore_index=True)
+        return the_sample
+
+    def sample_mev_alternatives(self) -> pd.DataFrame:
+        """Performing the sampling of alternatives for the MEV
+        terms. Here, the chosen alternative is ignored.
+
+        :return: data frame containing a sample of alternatives
+
+        """
+        results = []
+
+        for stratum in self.second_partition:
+            stratum_size = len(stratum.subset)
+            sample_size = stratum.sample_size
             mev_weight = stratum_size / sample_size
             subset = self.alternatives[
                 self.alternatives[self.id_column].isin(stratum.subset)
@@ -108,29 +144,20 @@ class SamplingOfAlternatives:
             sample = subset.sample(
                 n=sample_size, replace=False, axis='index', ignore_index=True
             )
-            sample[LOG_PROBA_COL] = logproba
             sample[MEV_WEIGHT] = mev_weight
 
-            if chosen is not None and chosen in stratum.subset:
-                # Include the correction terms
-                chosen_alternative[LOG_PROBA_COL] = logproba
-                chosen_alternative[MEV_WEIGHT] = mev_weight
-                # Move the chosen alternative to the end of the sample
-                chosen_row = sample[sample[self.id_column] == chosen]
-                unchosen_rows = sample[sample[self.id_column] != chosen]
-                if chosen_row.empty:
-                    reordered = unchosen_rows
-                else:
-                    reordered = pd.concat([unchosen_rows, chosen_row])
-            else:
-                results.append(sample)
+            results.append(sample)
 
-        if chosen is not None:
-            if reordered is None:
-                error_msg = (
-                    f'The chosen alternative {chosen} has not been found in any '
-                    f'segment of the partition.'
-                )
-                raise BiogemeError(error_msg)
-            results.append(reordered)
-        return pd.concat(results, ignore_index=True), chosen_alternative
+        the_sample = pd.concat(results, ignore_index=True)
+
+        if self.cnl_nests:
+            # We add the alpha parameters in the sample
+            def get_alphas(alternative_id: int) -> pd.Series:
+                """Prepare the alphas for insertion in the data frame"""
+                assert self.cnl_nests is not None
+                the_dict = self.cnl_nests.get_alpha_values(alternative_id)
+                return pd.Series(the_dict)
+
+            new_columns = the_sample[self.id_column].apply(get_alphas)
+            the_sample = pd.concat([the_sample, new_columns], axis='columns')
+        return the_sample

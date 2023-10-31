@@ -8,6 +8,7 @@ import logging
 import biogeme.exceptions as excep
 from .base_expressions import Expression
 from .elementary_types import TypeOfElementaryExpression
+from .numeric_tools import validate, MAX_VALUE
 
 logger = logging.getLogger(__name__)
 
@@ -250,7 +251,7 @@ class Variable(Elementary):
         """The evaluation of a Variable requires a database. Therefore, this
             function triggers an exception.
 
-        :raise BiogemeError: each time the function is calles
+        :raise BiogemeError: each time the function is called
 
         """
         error_msg = (
@@ -570,9 +571,18 @@ class Beta(Elementary):
             )
             raise excep.BiogemeError(error_msg)
         Elementary.__init__(self, name)
-        self.initValue = value
-        self.lb = lowerbound
-        self.ub = upperbound
+        the_value = validate(value, modify=False)
+        self.initValue = the_value
+        if lowerbound:
+            the_lowerbound = validate(lowerbound, modify=False)
+            self.lb = the_lowerbound
+        else:
+            self.lb = -MAX_VALUE
+        if upperbound:
+            the_upperbound = validate(upperbound, modify=False)
+            self.ub = the_upperbound
+        else:
+            self.ub = MAX_VALUE
         self.status = status
         self.betaId = None
 
@@ -655,7 +665,12 @@ class Beta(Elementary):
 
         :return: value of the expression
         :rtype: float
+
+        :raise BiogemeError: if the Beta is not fixed.
         """
+        if self.status == 0:
+            error_msg = f'Parameter {self.name} must be estimated from data.'
+            raise excep.BiogemeError(error_msg)
         return self.initValue
 
     def change_init_values(self, betas):

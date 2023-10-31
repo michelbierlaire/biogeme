@@ -7,6 +7,7 @@
 import logging
 import cythonbiogeme.cythonbiogeme as ee
 from biogeme.exceptions import BiogemeError
+
 logger = logging.getLogger(__name__)
 
 

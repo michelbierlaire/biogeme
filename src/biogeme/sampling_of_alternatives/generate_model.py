@@ -1,32 +1,31 @@
-""" Generation of models estimated with samples of alternatives
+"""Generation of models estimated with samples of alternatives 
 
 :author: Michel Bierlaire
 :date: Fri Sep 22 12:14:59 2023
 """
+
 import logging
 import copy
 from biogeme.models import loglogit
-from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Variable,
     Expression,
     BelongsTo,
     ConditionalTermTuple,
     ConditionalSum,
-    bioMultSum,
     exp,
     log,
-    Elem,
-    Numeric,
+    logzero,
 )
-from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT
+from biogeme.nests import NestsForNestedLogit
+from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT, CNL_PREFIX
 
 logger = logging.getLogger(__name__)
 
 
 class GenerateModel:
     """Class in charge of generating the biogeme expression for the
-        loglikelihood function
+    loglikelihood function
     """
 
     def __init__(self, context: SamplingContext):
@@ -39,44 +38,50 @@ class GenerateModel:
 
         self.context = context
         self.utility_function = context.utility_function
-        self.sample_size = context.sample_size
+        self.total_sample_size = context.total_sample_size
         self.attributes = context.attributes
         self.mev_prefix = context.mev_prefix
 
-    def generate_utility(self, alt_id: int, for_mev: bool = False) -> Expression:
+        self.utilities = {
+            alt_id: self.generate_utility(prefix='', suffix=f'_{alt_id}')
+            for alt_id in range(self.total_sample_size)
+        }
+        if self.context.second_partition is None:
+            self.mev_utilities = {
+                alt_id: self.utilities[alt_id]
+                for alt_id in range(1, self.total_sample_size)
+            }
+        else:
+            self.mev_utilities = {
+                alt_id: self.generate_utility(
+                    prefix=self.mev_prefix, suffix=f'_{alt_id}'
+                )
+                for alt_id in range(self.context.second_sample_size)
+            }
+
+    def generate_utility(self, prefix: str, suffix: str) -> Expression:
         """Generate the utility function for one alternative
 
-        :param alt_id: id of the alternative
-        
-        :param for_mev: True if the utility is generated for the
-            calculation of the MEV terms
+        :param prefix: prefix to add to the attributes
+
+        :param suffix: suffix to add to the attributes
 
         """
         copy_utility = copy.deepcopy(self.utility_function)
-        if for_mev:
-            if alt_id == 0:
-                error_msg = 'Alternative 0 cannot be involved in the MEV term.'
-                raise BiogemeError(error_msg)
-            copy_utility.rename_elementary(
-                self.attributes, suffix=f'_{alt_id}', prefix=self.mev_prefix
-            )
-        else:
-            copy_utility.rename_elementary(self.attributes, suffix=f'_{alt_id}')
+        copy_utility.rename_elementary(self.attributes, suffix=suffix, prefix=prefix)
         return copy_utility
 
     def get_logit(self) -> Expression:
         """Returns the expression for the log likelihood of the logit model"""
 
-        utilities = {
-            i: self.generate_utility(i) - Variable(f'{LOG_PROBA_COL}_{i}')
-            for i in range(self.sample_size)
+        corrected_utilities = {
+            i: utility - Variable(f'{LOG_PROBA_COL}_{i}')
+            for i, utility in self.utilities.items()
         }
 
-        return loglogit(utilities, None, 0)
+        return loglogit(corrected_utilities, None, 0)
 
-    def get_nested_logit(
-        self, nests: tuple[tuple[Expression, list[int]], ...]
-    ) -> Expression:
+    def get_nested_logit(self, nests: NestsForNestedLogit) -> Expression:
         """Returns the expression for the log likelihood of the nested logit model
 
         :param nests: A tuple containing as many items as nests.
@@ -95,55 +100,100 @@ class GenerateModel:
 
 
         """
-        utilities = {
-            i: self.generate_utility(i)
-            for i in range(self.sample_size)
-        }
-        correction_terms = {
-            i: -Variable(f'{LOG_PROBA_COL}_{i}') for i in range(self.sample_size)
-        }
 
-        dict_of_mev_terms = {}
+        dict_of_mev_sums = {}
 
+        # We first compute the MEV partial sum for each nest
         for nest in nests:
-            mu_param = nest[0]
-            list_of_alternatives = nest[1]
+            mu_param = nest.nest_param
+            list_of_alternatives = nest.list_of_alternatives
             self.context.check_valid_alternatives(set(list_of_alternatives))
             # We first build the MEV term using a sample of
             # alternatives. To build this term, we iterate from 1, as
             # we ignore the chosen alternative.
             list_of_terms = []
-            for i in range(1, self.sample_size + 1):
-                the_utility = self.generate_utility(i, for_mev=True)
+            for i, utility in self.mev_utilities.items():
                 alternative_id = Variable(
                     f'{self.mev_prefix}{self.context.id_column}_{i}'
                 )
                 belong_to_nest = BelongsTo(alternative_id, set(list_of_alternatives))
                 weight = Variable(f'{self.mev_prefix}{MEV_WEIGHT}_{i}')
                 the_term = ConditionalTermTuple(
-                    condition=belong_to_nest, term=weight * exp(mu_param * the_utility)
+                    condition=belong_to_nest, term=weight * exp(mu_param * utility)
                 )
-                list_of_terms.append(the_term)
-            mev_sum = ConditionalSum(list_of_terms)
-            # We then add the term to relevant utilities. Note that we iterate here from 0.
 
-            for i in range(self.sample_size):
-                the_utility = utilities.get(i)
-                if the_utility is None:
-                    raise BiogemeError('Could not retrieve utility for alternative {i}')
-                alternative_id = Variable(f'{self.context.id_column}_{i}')
-                belong_to_nest = BelongsTo(alternative_id, set(list_of_alternatives))
+                list_of_terms.append(the_term)
+            dict_of_mev_sums[tuple(list_of_alternatives)] = ConditionalSum(
+                list_of_terms
+            )
+
+        # We now add all relevant MEV terms to the utilities
+
+        dict_of_mev_terms = {}
+        for i, the_utility in self.utilities.items():
+            alternative_id = Variable(f'{self.context.id_column}_{i}')
+            list_of_terms = []
+            for nest in nests:
+                mu_param = nest.nest_param
+                mev_sum = dict_of_mev_sums[tuple(nest.list_of_alternatives)]
                 mev_term = (mu_param - 1.0) * the_utility + (
                     (1.0 / mu_param) - 1.0
                 ) * log(mev_sum)
-                the_mev_term = Elem({1: mev_term, 0: Numeric(0)}, belong_to_nest)
-                if i in dict_of_mev_terms:
-                    dict_of_mev_terms[i].append(the_mev_term)
-                else:
-                    dict_of_mev_terms[i] = [the_mev_term]
+                belong_to_nest = BelongsTo(
+                    alternative_id, set(nest.list_of_alternatives)
+                )
+                the_term = ConditionalTermTuple(condition=belong_to_nest, term=mev_term)
+
+                list_of_terms.append(the_term)
+            dict_of_mev_terms[i] = ConditionalSum(list_of_terms)
 
         corrected_utilities = {
-            key: util + correction_terms[key] + bioMultSum(dict_of_mev_terms[key])
-            for key, util in utilities.items()
+            key: util - Variable(f'{LOG_PROBA_COL}_{key}') + dict_of_mev_terms[key]
+            for key, util in self.utilities.items()
+        }
+        return loglogit(corrected_utilities, None, 0)
+
+    def get_cross_nested_logit(self) -> Expression:
+        """Returns the expression for the log likelihood of the nested logit model"""
+        nests = self.context.cnl_nests
+
+        # We  compute the MEV partial sum for each nest
+        dict_of_mev_sums = {}
+
+        for nest in nests:
+            mu_param = nest.nest_param
+            # We first build the MEV term using a sample of
+            # alternatives. To build this term, we iterate from 1, as
+            # we ignore the chosen alternative.
+            list_of_terms = []
+            for i, utility in self.mev_utilities.items():
+                alpha = Variable(f'{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}')
+                weight = Variable(f'{self.mev_prefix}{MEV_WEIGHT}_{i}')
+                the_term = ConditionalTermTuple(
+                    condition=alpha != 0.0,
+                    term=weight * alpha**mu_param * exp(mu_param * utility),
+                )
+                list_of_terms.append(the_term)
+
+            dict_of_mev_sums[nest.name] = ConditionalSum(list_of_terms)
+
+        # We now add all relevant MEV terms to the utilities
+        dict_of_mev_terms = {}
+        for i, the_utility in self.utilities.items():
+            list_of_terms = []
+            for nest in nests:
+                alpha = Variable(f'{CNL_PREFIX}{nest.name}_{i}')
+                mu_param = nest.nest_param
+                mev_sum = dict_of_mev_sums[nest.name] ** ((1.0 / mu_param) - 1.0)
+                mev_term = (
+                    alpha**mu_param * exp((mu_param - 1) * the_utility) * mev_sum
+                )
+                the_term = ConditionalTermTuple(condition=alpha != 0.0, term=mev_term)
+                list_of_terms.append(the_term)
+            dict_of_mev_terms[i] = logzero(ConditionalSum(list_of_terms))
+
+        corrected_utilities = {
+            key: util - Variable(f'{LOG_PROBA_COL}_{key}') + dict_of_mev_terms[key]
+            for key, util in self.utilities.items()
         }
         return loglogit(corrected_utilities, None, 0)

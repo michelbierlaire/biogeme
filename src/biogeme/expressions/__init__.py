@@ -18,7 +18,11 @@ from .unary_expressions import (
 )
 from .binary_expressions import bioMin, bioMax
 from .nary_expressions import (
-    bioMultSum, Elem, bioLinearUtility, ConditionalSum, ConditionalTermTuple
+    bioMultSum,
+    Elem,
+    bioLinearUtility,
+    ConditionalSum,
+    ConditionalTermTuple,
 )
 from .logit_expressions import LogLogit, _bioLogLogit, _bioLogLogitFullChoiceSet
 from .idmanager import IdManager

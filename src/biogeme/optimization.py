@@ -109,7 +109,7 @@ def newton_linesearch_for_biogeme(
     :param bounds: list of tuples (ell,u) containing the lower and
                    upper bounds for each free parameter. Note that
                    this algorithm does not support bound constraints.
-                   Therefore, all the bounds must be None.
+                   Therefore, all the bounds will be ignored.
 
     :type bounds: list(tuples)
 
@@ -135,19 +135,16 @@ def newton_linesearch_for_biogeme(
 
     :rtype: OptimizationResults
 
-    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on
-                the variables.
-
     """
     logger.info('Optimization algorithm: Newton with line search [LS-newton]')
 
     for ell, u in bounds:
         if ell is not None or u is not None:
-            errorMsg = (
+            warning_msg = (
                 'This algorithm does not handle bound constraints. '
-                'Remove the bounds, or select another algorithm.'
+                'The bounds will be ignored.'
             )
-            raise excep.BiogemeError(errorMsg)
+            logger.warning(warning_msg)
 
     maxiter = 100
     if parameters is not None:
@@ -174,7 +171,7 @@ def newton_trust_region_for_biogeme(
     :param bounds: list of tuples (ell, u) containing the lower and
                    upper bounds for each free parameter. Note that
                    this algorithm does not support bound constraints.
-                   Therefore, all the bounds must be None.
+                   Therefore, all the bounds will be ignored.
     :type bounds: list(tuples)
 
     :param variable_names: names of the variables.
@@ -203,19 +200,16 @@ def newton_trust_region_for_biogeme(
 
     :rtype: OptimizationResults
 
-    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on
-          the variables.
-
     """
     logger.info('Optimization algorithm: Newton with trust region [TR-newton]')
 
     for ell, u in bounds:
         if ell is not None or u is not None:
-            errorMsg = (
+            warning_msg = (
                 'This algorithm does not handle bound constraints. '
-                'Remove the bounds, or select another algorithm.'
+                'The bounds will be ignored.'
             )
-            raise excep.BiogemeError(errorMsg)
+            logger.warning(warning_msg)
 
     maxiter = 100
     apply_dogleg = False
@@ -255,7 +249,7 @@ def bfgs_linesearch_for_biogeme(
     :param bounds: list of tuples (ell,u) containing the lower and
                    upper bounds for each free parameter. Note that
                    this algorithm does not support bound constraints.
-                   Therefore, all the bounds must be None.
+                   Therefore, all the bounds will be ignored.
 
     :type bounds: list(tuples)
 
@@ -287,19 +281,16 @@ def bfgs_linesearch_for_biogeme(
 
     :rtype: numpy.array, dict(str:object)
 
-    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on
-                                             the variables.
-
     """
     logger.info('Optimization algorithm: BFGS with line search [LS-BFGS]')
 
     for ell, u in bounds:
         if ell is not None or u is not None:
-            errorMsg = (
+            warning_msg = (
                 'This algorithm does not handle bound constraints. '
-                'Remove the bounds, or select another algorithm.'
+                'The bounds will be ignored.'
             )
-            raise excep.BiogemeError(errorMsg)
+            logger.warning(warning_msg)
 
     maxiter = 100
     init_bfgs = None
@@ -329,7 +320,7 @@ def bfgs_trust_region_for_biogeme(
     :param bounds: list of tuples (ell,u) containing the lower and
                    upper bounds for each free parameter. Note that
                    this algorithm does not support bound constraints.
-                   Therefore, all the bounds must be None.
+                   Therefore, all the bounds will be ignored.
     :type bounds: list(tuples)
 
     :param variable_names: names of the variables.
@@ -364,18 +355,15 @@ def bfgs_trust_region_for_biogeme(
               related to the run of the algorithm.
     :rtype: numpy.array, dict(str:object)
 
-    :raises biogeme.exceptions.BiogemeError: if bounds are imposed on
-            the variables.
-
     """
     logger.info('Optimization algorithm: BFGS with trust region [TR-BFGS]')
     for ell, u in bounds:
         if ell is not None or u is not None:
-            errorMsg = (
+            warning_msg = (
                 'This algorithm does not handle bound constraints. '
-                'Remove the bounds, or select another algorithm.'
+                'The bounds will be ignored.'
             )
-            raise excep.BiogemeError(errorMsg)
+            logger.warning(warning_msg)
 
     maxiter = 100
     apply_dogleg = False
@@ -418,7 +406,7 @@ def simple_bounds_newton_algorithm_for_biogeme(
                    bounds for each free
                    parameter. Note that this algorithm does not support bound
                    constraints.
-                   Therefore, all the bounds must be None.
+                   Therefore, all the bounds will be ignored.
     :type bounds: list(tuples)
 
     :param variable_names: names of the variables.

@@ -4,16 +4,21 @@
 :date: Wed Sep  6 14:38:31 2023
 """
 
+import logging
 from dataclasses import dataclass
-from typing import Callable, NamedTuple, Optional
-import inspect
+from typing import NamedTuple, Optional, Iterable
 import pandas as pd
 from biogeme.expressions import Expression, TypeOfElementaryExpression
+from biogeme.nests import NestsForCrossNestedLogit
 from biogeme.exceptions import BiogemeError
+from biogeme.partition import Partition, Segment
+
+logger = logging.getLogger(__name__)
 
 MEV_PREFIX = 'MEV_'
 LOG_PROBA_COL = '_log_proba'
 MEV_WEIGHT = '_mev_weight'
+CNL_PREFIX = 'CNL_'
 
 
 class StratumTuple(NamedTuple):
@@ -21,7 +26,7 @@ class StratumTuple(NamedTuple):
     combined with the number of alternatives that must be sampled.
     """
 
-    subset: set[int]
+    subset: Segment
     sample_size: int
 
 
@@ -41,10 +46,9 @@ class SamplingContext:
     """Class gathering the data needed to perform an estimation with
     samples of alternatives
 
-    :param partition: Partition used for the sampling. Each
-       StratumTuple contains a set of IDs characterizing the subset,
-       and the sample size, that is the number of alternatives to
-       randomly draw from the subset.
+    :param partition: Partition used for the sampling.
+
+    :param sample_sizes: number of alternative to draw from each segment.
 
     :param individuals: Pandas data frame containing all the
         individuals as rows. One column must contain the choice of
@@ -64,13 +68,14 @@ class SamplingContext:
 
     :param combined_variables: definition of interaction variables
 
-    :param second_partition: If a second choice set need to be sampled
+    :param mev_partition: If a second choice set need to be sampled
         for the MEV terms, the corresponding partitition is provided
         here.
 
     """
 
-    partition: list[StratumTuple]
+    the_partition: Partition
+    sample_sizes: Iterable[int]
     individuals: pd.DataFrame
     choice_column: str
     alternatives: pd.DataFrame
@@ -78,7 +83,9 @@ class SamplingContext:
     biogeme_file_name: str
     utility_function: Expression
     combined_variables: list[CrossVariableTuple]
-    second_partition: Optional[list[StratumTuple]] = None
+    mev_partition: Optional[Partition] = None
+    mev_sample_sizes: Optional[Iterable[int]] = None
+    cnl_nests: Optional[NestsForCrossNestedLogit] = None
 
     def check_expression(self, expression: Expression) -> None:
         """Verifies if the variables contained in the expression can be found in the databases"""
@@ -97,10 +104,8 @@ class SamplingContext:
                 )
                 raise BiogemeError(error_msg)
 
-    def check_partition(self, partition: tuple[StratumTuple]) -> None:
+    def check_partition(self) -> None:
         """Check if the partition is truly a partition. If not, an exception is raised
-
-        :param partition: partition to check
 
         :raise BiogemeError: if some elements are present in more than one subset.
 
@@ -110,55 +115,16 @@ class SamplingContext:
         :raise BiogemeError: if an alternative in the partition does
             not appear in the database of alternatives
 
-        :raise BiogemeError: if a stratum is empty
+        :raise BiogemeError: if a segment is empty
 
         :raise BiogemeError: if the number of sampled alternatives in
             a stratum is incorrect , that is zero, or larger than the
             stratum size..
 
-        :raise BiogemeError: if the partition is not a tuple
-
-        :raise BiogemeError: if the partition is an empty tuple.
-
-        :raise BiogemeError: if an object in the partition is not a StratumTuple
         """
-        if not isinstance(partition, (list, tuple)):
-            if isinstance(partition, StratumTuple):
-                partition = (partition,)
-            else:
-                raise BiogemeError(
-                    f'partition: Expected argument to be a tuple, and not '
-                    f'{type(partition)}. Remember that, if the tuple'
-                )
-
-        if len(partition) == 0:
-            raise BiogemeError('partition: Expected non-empty tuple')
-
-        if not all(isinstance(item, StratumTuple) for item in partition):
-            raise BiogemeError(
-                'partition: All elements of the tuple must be of type StratumTuple'
-            )
-
-        nbr_unique_elements = len(set.union(*[s.subset for s in partition]))
-        total_nbr = sum(list(len(s.subset) for s in partition))
-        if nbr_unique_elements != total_nbr:
-            error_msg = (
-                f'This is not a partition. There are {nbr_unique_elements} '
-                f'unique elements, and the total size of the partition '
-                f'is {total_nbr}. Some elements are therefore present '
-                f'in more than one subset.'
-            )
-            raise BiogemeError(error_msg)
-
-        if nbr_unique_elements != self.number_of_alternatives:
-            error_msg = (
-                f'The partitions contain {nbr_unique_elements} alternatives '
-                f'while there are {self.number_of_alternatives} in the database'
-            )
-            raise BiogemeError(error_msg)
 
         # Verify that all requested alternatives appear in the database of alternatives
-        for stratum in partition:
+        for stratum in self.partition:
             n = len(stratum.subset)
             if n == 0:
                 error_msg = 'A stratum is empty'
@@ -180,7 +146,45 @@ class SamplingContext:
                     )
                     raise BiogemeError(error_msg)
 
-    def check_valid_alternatives(self, set_of_ids: set[int]):
+    def check_mev_partition(self) -> None:
+        """Check if the partition is a partition of the MEV
+        alternatives. It does not need to cover the full choice set"""
+
+        if self.mev_partition:
+            if self.mev_sample_sizes is None:
+                error_msg = (
+                    'If mev_partition is defined, mev_sample_size must also be defined'
+                )
+                raise BiogemeError(error_msg)
+
+        if self.mev_sample_sizes:
+            if self.mev_partition is None:
+                error_msg = (
+                    'If mev_sample_sizes is defined, mev_partition must also be defined'
+                )
+                raise BiogemeError(error_msg)
+
+        if self.cnl_nests and self.mev_partition:
+            if self.cnl_nests.mev_alternatives != self.mev_partition.full_set:
+                in_nest_not_in_partition = (
+                    self.cnl_nests.mev_alternatives - self.mev_partition.full_set
+                )
+                in_partition_not_in_nest = (
+                    self.mev_partition.full_set - self.cnl_nests.mev_alternatives
+                )
+                error_msg = ''
+                if in_nest_not_in_partition:
+                    error_msg += (
+                        f'The following alternative(s) belong to a nest but not to the'
+                        f' partition for the sample: {in_nest_not_in_partition}. '
+                    )
+                if in_partition_not_in_nest:
+                    error_msg += (
+                        f'The following alternative(s) belong to the partition for '
+                        f'the MEV sample, but not to any nest: {in_partition_not_in_nest}'
+                    )
+
+    def check_valid_alternatives(self, set_of_ids: set[int]) -> None:
         """Check if the IDs in set are indeed valid
             alternatives. Typically used to check if a nest is well
             defined
@@ -201,6 +205,17 @@ class SamplingContext:
                 f'The following IDs are not valid alternative IDs: {missing_values}'
             )
 
+    def include_cnl_alphas(self) -> None:
+        if self.cnl_nests is None:
+            return
+        for nest in self.cnl_nests:
+            column_name = f'{CNL_PREFIX}{nest.name}'
+            self.alternatives[column_name] = self.alternatives[self.id_column].map(
+                lambda x: self.cnl_nests.get_alpha_values(alternative_id=x)[nest.name]
+                if x in nest.dict_of_alpha
+                else 0.0
+            )
+
     def __post_init__(self):
         # Check for empty utility function
         if self.utility_function is None:
@@ -219,6 +234,35 @@ class SamplingContext:
                 'DataFrames individuals or alternatives should not be empty.'
             )
 
+        # A previous implementation used a list of StratumTuple. We
+        # now perform the conversion.
+        self.partition = [
+            StratumTuple(subset=segment, sample_size=size)
+            for segment, size in zip(self.the_partition, self.sample_sizes)
+        ]
+
+        self.check_partition()
+        logger.debug('Check if there is a MEV partition')
+        if self.mev_partition or self.mev_sample_sizes:
+            logger.debug('Yes, there is a MEV partition')
+            self.check_mev_partition()
+            self.second_partition = [
+                StratumTuple(subset=segment, sample_size=size)
+                for segment, size in zip(self.mev_partition, self.mev_sample_sizes)
+            ]
+        else:
+            logger.debug('No, there is no MEV partition')
+            self.second_partition = None
+
+        # If CNL nests are defined, check that the alphas are all
+        # fixed and that the nests have a name.
+        if self.cnl_nests:
+            if not self.cnl_nests.all_alphas_fixed():
+                error_msg = 'For the CNL model, all alpha parameters must be fixed.'
+                raise BiogemeError(error_msg)
+            if not self.cnl_nests.check_names():
+                error_msg = 'For the CNL model, all nests must have a name.'
+                raise BiogemeError(error_msg)
         self.number_of_alternatives = self.alternatives.shape[0]
         self.number_of_individuals = self.individuals.shape[0]
 
@@ -246,11 +290,7 @@ class SamplingContext:
                 f'Column {self.id_column} in alternatives should be of type int or float.'
             )
 
-        self.check_partition(self.partition)
-        if self.second_partition is not None:
-            self.check_partition(self.second_partition)
-
-        self.sample_size = sum(stratum.sample_size for stratum in self.partition)
+        self.total_sample_size = sum(stratum.sample_size for stratum in self.partition)
         self.second_sample_size = (
             None
             if self.second_partition is None
@@ -265,3 +305,40 @@ class SamplingContext:
         }
 
         self.mev_prefix = '' if self.second_partition is None else MEV_PREFIX
+
+        self.include_cnl_alphas()
+
+    def reporting(self) -> None:
+        """Summarizes the configuration specificed by the contect object."""
+        result = {}
+
+        result['Size of the choice set'] = self.alternatives.shape[0]
+        result['Main partition'] = (
+            f'{self.the_partition.number_of_segments()} segment(s) of size '
+            f'{", ".join([str(len(segment)) for segment in self.the_partition])}'
+        )
+        result['Main sample'] = f'{self.total_sample_size}: '
+        result['Main sample'] += ', '.join(
+            [
+                f'{stratum.sample_size}/{len(stratum.subset)}'
+                for stratum in self.partition
+            ]
+        )
+        if self.mev_partition:
+            result['Nbr of MEV alternatives'] = len(self.mev_partition.full_set)
+            result['MEV partition'] = (
+                f'{self.mev_partition.number_of_segments()} segment(s) of size '
+                f'{", ".join([str(len(segment)) for segment in self.mev_partition])}'
+            )
+            result['MEV sample'] = f'{self.second_sample_size}: '
+            result['MEV sample'] += ', '.join(
+                [
+                    f'{stratum.sample_size}/{len(stratum.subset)}'
+                    for stratum in self.second_partition
+                ]
+            )
+
+        output = ''
+        for section, description in result.items():
+            output += f'{section}: {description}\n'
+        return output

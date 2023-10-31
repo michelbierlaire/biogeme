@@ -228,6 +228,7 @@ class exp(UnaryOperator):
         """
         return np.exp(self.child.getValue())
 
+
 class sin(UnaryOperator):
     """
     sine expression
@@ -251,6 +252,7 @@ class sin(UnaryOperator):
         :rtype: float
         """
         return np.sin(self.child.getValue())
+
 
 class cos(UnaryOperator):
     """
@@ -276,7 +278,7 @@ class cos(UnaryOperator):
         """
         return np.cos(self.child.getValue())
 
-    
+
 class log(UnaryOperator):
     """
     logarithm expression
@@ -521,8 +523,8 @@ class BelongsTo(UnaryOperator):
 
         :param child: arithmetic expression
         :type child: biogeme.expressions.Expression
-        :param the_set: set of values 
-        :type the_set: set(float) 
+        :param the_set: set of values
+        :type the_set: set(float)
         """
         UnaryOperator.__init__(self, child)
         self.the_set = the_set
@@ -608,4 +610,3 @@ class BelongsTo(UnaryOperator):
 
     def __str__(self):
         return f'BelongsTo({self.child}, "{self.the_set}")'
-    

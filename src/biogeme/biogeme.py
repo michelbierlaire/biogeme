@@ -808,7 +808,7 @@ class BIOGEME:
             if check_rv:
                 err_msg = (
                     f'The following random variables are defined '
-                    f'outside the Integrate operator: {check_draws}'
+                    f'outside the Integrate operator: {check_rv}'
                 )
                 list_of_errors.append(err_msg)
             err, war = v.audit(self.database)

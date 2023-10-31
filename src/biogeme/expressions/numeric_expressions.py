@@ -6,7 +6,7 @@
 import logging
 import biogeme.exceptions as excep
 from .base_expressions import Expression
-from .numeric_tools import is_numeric
+from .numeric_tools import is_numeric, validate
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,8 @@ class Numeric(Expression):
         :type value: float
         """
         Expression.__init__(self)
-        self.value = float(value)  #: numeric value
+        the_value = validate(value, modify=False)
+        self.value = float(the_value)  #: numeric value
 
     def __str__(self):
         return '`' + str(self.value) + '`'
@@ -102,6 +103,7 @@ class Numeric(Expression):
         signature += f',{self.value}'
         return [signature.encode()]
 
+
 def validate_and_convert(expression):
     """Validates the expression and returns the converted expression if necessary."""
     if isinstance(expression, bool):
@@ -111,4 +113,3 @@ def validate_and_convert(expression):
     if not isinstance(expression, Expression):
         raise excep.BiogemeError(f'This is not a valid expression: {expression}')
     return expression
-    

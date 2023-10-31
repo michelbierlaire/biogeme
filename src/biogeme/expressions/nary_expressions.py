@@ -12,17 +12,20 @@ from .elementary_expressions import Beta, Variable, TypeOfElementaryExpression
 
 logger = logging.getLogger(__name__)
 
+
 class ConditionalTermTuple(NamedTuple):
     condition: Expression
     term: Expression
+
 
 class ConditionalSum(Expression):
     """This expression returns the sum of a selected list of
     expressions. An expressions is considered in the sum only if the
     corresponding key is True (that is, return a non zero value).
 
-    
+
     """
+
     def __init__(self, list_of_terms: Iterable[ConditionalTermTuple]):
         """Constructor
 
@@ -32,24 +35,25 @@ class ConditionalSum(Expression):
             neither a numeric value or a
             biogeme.expressions.Expression object.
         :raise BiogemeError: if the dict of expressions is empty
-        :raise BiogemeError: if the dict of expressions is not a dict 
-        
+        :raise BiogemeError: if the dict of expressions is not a dict
+
         """
         if not list_of_terms:
             raise excep.BiogemeError('The argument of ConditionalSum cannot be empty')
-        
+
         Expression.__init__(self)
 
         self.list_of_terms = [
             the_term._replace(
                 condition=validate_and_convert(the_term.condition),
-                term=validate_and_convert(the_term.term)
-            ) for the_term in list_of_terms
+                term=validate_and_convert(the_term.term),
+            )
+            for the_term in list_of_terms
         ]
         for the_term in self.list_of_terms:
             self.children.append(the_term.condition)
             self.children.append(the_term.term)
-            
+
     def getValue(self):
         """Evaluates the value of the expression
 
@@ -65,9 +69,9 @@ class ConditionalSum(Expression):
 
     def __str__(self):
         s = (
-            'ConditionalSum(' +
-            ', '.join([f'{k}: {v}' for k, v in self.list_of_terms]) +
-            ')'
+            'ConditionalSum('
+            + ', '.join([f'{k}: {v}' for k, v in self.list_of_terms])
+            + ')'
         )
         return s
 
@@ -134,7 +138,6 @@ class ConditionalSum(Expression):
         return list_of_signatures
 
 
-    
 class bioMultSum(Expression):
     """This expression returns the sum of several other expressions.
 
@@ -157,7 +160,7 @@ class bioMultSum(Expression):
         """
         if not listOfExpressions:
             raise excep.BiogemeError('The argument of bioMultSum cannot be empty')
-        
+
         Expression.__init__(self)
 
         if isinstance(listOfExpressions, dict):
@@ -169,7 +172,6 @@ class bioMultSum(Expression):
 
         for expression in items:
             self.children.append(validate_and_convert(expression))
-    
 
     def getValue(self):
         """Evaluates the value of the expression

@@ -5,8 +5,9 @@
 """
 
 import logging
-from itertools import chain
 import numpy as np
+from itertools import chain
+from collections import OrderedDict
 
 import biogeme.exceptions as excep
 from biogeme_optimization.function import FunctionToMinimize, FunctionData
@@ -755,31 +756,30 @@ class Expression:
             hessian,
             bhhh,
         )
+
         class Function(FunctionToMinimize):
             def _f(self):
                 f, g, h = expression_function(self.x)
                 return f
-            
+
             def _f_g(self):
                 f, g, h = expression_function(self.x)
-                return FunctionData(
-                    function=f,
-                    gradient=g,
-                    hessian=None
-                )
+                return FunctionData(function=f, gradient=g, hessian=None)
+
             def _f_g_h(self):
                 f, g, h = expression_function(self.x)
-                return FunctionData(
-                    function=f,
-                    gradient=g,
-                    hessian=h
-                )
+                return FunctionData(function=f, gradient=g, hessian=h)
+
             def dimension(self):
                 return self.idmanager.number_of_free_betas
 
         return Function()
 
-    
+    def getValue(self) -> float:
+        raise NotImplementedError(
+            'getValue method undefined at this level. Each expression must implement it.'
+        )
+
     def getValue_c(
         self,
         database=None,
@@ -788,7 +788,6 @@ class Expression:
         aggregation=False,
         prepareIds=False,
     ):
-
         """Evaluation of the expression, without the derivatives
 
         :param betas: values of the free parameters
@@ -997,7 +996,9 @@ class Expression:
         betas = self.dict_of_elementary_expression(TypeOfElementaryExpression.FREE_BETA)
         return {b.name: b.initValue for b in betas.values()}
 
-    def set_of_elementary_expression(self, the_type: TypeOfElementaryExpression) -> set[str]:
+    def set_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> set[str]:
         """Extract a set with all elementary expressions of a specific type
 
         :param the_type: the type of expression
