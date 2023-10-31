@@ -13,6 +13,8 @@
 import os
 import sys
 from biogeme.version import __version__
+import sphinx_gallery
+from sphinx_gallery.sorting import ExampleTitleSortKey
 
 sys.path.insert(0, os.path.abspath('.hyperlearn'))
 
@@ -33,6 +35,8 @@ release = __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx_gallery.gen_gallery',
+    'sphinx_gallery.load_style',
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
@@ -40,6 +44,13 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx_autodoc_typehints',
 ]
+
+sphinx_gallery_conf = {
+    'examples_dirs': ['../examples/notebooks'],   # path to your example scripts or notebooks
+    'gallery_dirs': ['_auto_examples'],  # path where to save gallery generated examples
+    'ignore_pattern': '/run_all\.py',  # Ignore files matching this regex pattern
+    'filename_pattern': '.'
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -51,7 +62,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'setup.py']
 
 # Set the behavior for type hints. Options are "none", "description", or "signature".
 autodoc_typehints = "description"
-
+autodoc_typehints_format = 'short'
+python_use_unqualified_type_names = True
 
 # -- Options for HTML output -------------------------------------------------
 
