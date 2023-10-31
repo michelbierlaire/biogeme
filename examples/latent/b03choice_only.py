@@ -9,7 +9,7 @@ No measurement equation for the indicators.
 
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.distributions as dist

@@ -8,7 +8,7 @@ Linear regression.
 
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 import biogeme.loglikelihood as ll
 from biogeme.expressions import Beta, Elem, bioMultSum

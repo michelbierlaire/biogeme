@@ -10,7 +10,7 @@
 """
 
 import biogeme.biogeme as bio
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.expressions import Beta, Elem, bioNormalCdf
 
 from optima import (

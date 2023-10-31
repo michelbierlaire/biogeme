@@ -11,7 +11,7 @@ Sequential estimation.
 """
 
 import sys
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.exceptions as excep
 import biogeme.biogeme as bio
 import biogeme.distributions as dist

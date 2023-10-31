@@ -8,7 +8,7 @@ Ordered probit.
 
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme.expressions import Beta, log, Elem, bioNormalCdf
 

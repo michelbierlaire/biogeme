@@ -45,7 +45,7 @@ simulated_values = the_biogeme.simulate(results.getBetaValues())
 
 # We also calculate confidence intervals for the calculated quantities
 
-betas = the_biogeme.freeBetaNames()
+betas = the_biogeme.free_beta_names()
 b = results.getBetasForSensitivityAnalysis(betas)
 left, right = the_biogeme.confidenceIntervals(b, 0.9)
 

@@ -10,7 +10,7 @@ Maximum likelihood (full information) estimation.
 """
 
 import sys
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 import biogeme.exceptions as excep
 from biogeme import models
