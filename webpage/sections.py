@@ -8,7 +8,8 @@ documentation = {}
 archives = {}
 resources = {}
 
-special['Users meeting'] = 'Biogeme users meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. More details soon.'
+#special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
+special['EPFL Short Course'] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
 #special['Other special'] = 'Other special as well'
 
 about['Biogeme'] = (
@@ -297,6 +298,27 @@ Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédér
 """,
 )
 
+documentation['Technical reports'] = (
+"""
+The following technical reports will walk through concrete examples to
+get familiar with the software.
+""",
+"""
+<ul>
+<li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf"
+target="_blank">A short introduction to Biogeme</a>.</li>
+<li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf" target="_blank">Calculating indicators with PandasBiogeme.</a></li>
+<li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf"
+target="_blank">Monte-Carlo integration with PandasBiogeme.</a></li>
+<li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf"
+target="_blank">Estimating choice models with latent
+variables with PandasBiogeme.</a></li>
+<li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf" target="_blank">Assisted specification with Biogeme 3.2.12.</a></li>
+</ul>
+""",
+)
+
+
 documentation['Preparing data for Biogeme'] = (
 """
 <p class='text-center'>
@@ -323,27 +345,6 @@ generated with the <a href="http://www.sphinx-doc.org"
 target="_blank">Python Documentation Generator Sphinx</a>.
 """,
 )
-
-documentation['Technical reports'] = (
-"""
-The following technical reports will walk through concrete examples to
-get familiar with the software.
-""",
-"""
-<ul>
-<li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf"
-target="_blank">A short introduction to Biogeme</a>.</li>
-<li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf" target="_blank">Calculating indicators with PandasBiogeme.</a></li>
-<li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf"
-target="_blank">Monte-Carlo integration with PandasBiogeme.</a></li>
-<li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf"
-target="_blank">Estimating choice models with latent
-variables with PandasBiogeme.</a></li>
-<li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierOrte22.pdf" target="_blank">Assisted specification with Biogeme.</a></li>
-</ul>
-""",
-)
-
 
 resources['Videos'] = (
 """
