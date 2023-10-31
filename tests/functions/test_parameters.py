@@ -229,6 +229,7 @@ class TestParameters(unittest.TestCase):
     def setUp(self):
         for p in default_parameters:
             biogeme_parameters.add_parameter(p)
+
     def test_get_param_tuple_1(self):
         """Test the retrieval of parameter without the section name"""
         the_tuple = biogeme_parameters.get_param_tuple(name='missing_data')
@@ -319,7 +320,7 @@ class TestParameters(unittest.TestCase):
         biogeme_parameters.add_parameter(a_tuple)
         self.assertEqual(
             biogeme_parameters.get_value(name=a_tuple.name, section=a_tuple.section),
-            0.5
+            0.5,
         )
         another_tuple = ParameterTuple(
             name='param_name',
@@ -337,6 +338,7 @@ class TestParameters(unittest.TestCase):
         biogeme_parameters.set_value('tolerance', value, section='Estimation')
         check = biogeme_parameters.get_value('tolerance', section='Estimation')
         self.assertEqual(value, check)
+
 
 class TestToml(unittest.TestCase):
     """Tests for the biogeme.toml module"""
@@ -356,7 +358,9 @@ class TestToml(unittest.TestCase):
         check_int = biogeme_parameters.get_value('missing_data')
         self.assertEqual(check_int, 99999)
 
-        check_float = biogeme_parameters.get_value('second_derivatives', section='Estimation')
+        check_float = biogeme_parameters.get_value(
+            'second_derivatives', section='Estimation'
+        )
         self.assertEqual(check_float, 1.0)
 
         check_str = biogeme_parameters.get_value('optimization_algorithm')
@@ -377,7 +381,9 @@ class TestToml(unittest.TestCase):
         check_int = biogeme_parameters.get_value('missing_data')
         self.assertEqual(check_int, 99999)
 
-        check_float = biogeme_parameters.get_value('second_derivatives', section='Estimation')
+        check_float = biogeme_parameters.get_value(
+            'second_derivatives', section='Estimation'
+        )
         self.assertEqual(check_float, 1.0)
 
         check_str = biogeme_parameters.get_value('optimization_algorithm')
@@ -385,6 +391,6 @@ class TestToml(unittest.TestCase):
         # Remove the directory after the test
         shutil.rmtree(test_dir)
 
-        
+
 if __name__ == '__main__':
     unittest.main()

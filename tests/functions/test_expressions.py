@@ -20,8 +20,8 @@ import pandas as pd
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
 from biogeme import models
-from biogeme.idmanager import IdManager
-from biogeme.elementary_expressions import TypeOfElementaryExpression
+from biogeme.expressions import IdManager, TypeOfElementaryExpression
+from biogeme_optimization.function import FunctionToMinimize, FunctionData
 from test_data import getData
 
 
@@ -64,14 +64,14 @@ class test_expressions(unittest.TestCase):
         except AssertionError as e:
             raise self.failureException(msg) from e
 
-    def test_isNumeric(self):
-        result = ex.isNumeric(1)
+    def test_is_numeric(self):
+        result = ex.is_numeric(1)
         self.assertTrue(result)
-        result = ex.isNumeric(0.1)
+        result = ex.is_numeric(0.1)
         self.assertTrue(result)
-        result = ex.isNumeric(True)
+        result = ex.is_numeric(True)
         self.assertTrue(result)
-        result = ex.isNumeric(self)
+        result = ex.is_numeric(self)
         self.assertFalse(result)
 
     def test_add(self):
@@ -359,6 +359,8 @@ class test_expressions(unittest.TestCase):
         )
 
     def test_expr1(self):
+        self.beta1.status = 1
+        self.beta2.status = 1
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
@@ -368,6 +370,8 @@ class test_expressions(unittest.TestCase):
         self.assertAlmostEqual(res, -1.275800115089098, 5)
 
     def test_expr1_newvalues(self):
+        self.beta1.status = 1
+        self.beta2.status = 1
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
@@ -760,6 +764,8 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(check_left, check_right, 5)
 
     def test_expr7(self):
+        self.beta1.status = 1
+        self.beta2.status = 1
         V = {0: -self.beta1, 1: -self.beta2, 2: -self.beta1}
         av = {0: 1, 1: 1, 2: 1}
         expr7 = ex.LogLogit(V, av, 1)
@@ -930,6 +936,47 @@ class test_expressions(unittest.TestCase):
         ]
         for i, j in zip(b_flat, b_ok):
             self.assertAlmostEqual(i, j, 2)
+
+    def test_belongs_to(self):
+        yes = ex.BelongsTo(ex.Numeric(2), {1, 2, 3})
+        self.assertEqual(yes.getValue_c(prepareIds=True), 1.0)
+        no = ex.BelongsTo(ex.Numeric(4), {1, 2, 3})
+        self.assertEqual(no.getValue_c(prepareIds=True), 0.0)
+
+    def test_conditional_sum(self):
+        the_terms = [
+            ex.ConditionalTermTuple(condition=ex.Numeric(0), term=ex.Numeric(10)),
+            ex.ConditionalTermTuple(condition=ex.Numeric(1), term=ex.Numeric(20)),
+        ]
+        the_sum = ex.ConditionalSum(the_terms)
+        self.assertEqual(the_sum.getValue_c(prepareIds=True), 20)
+
+    def test_sin(self):
+        beta = ex.Beta('beta', 0.11, None, None, 0)
+        the_sin = ex.sin(2 * beta)
+        expression_function = the_sin.createFunction()
+        f, g, h = expression_function([1.0])
+        self.assertAlmostEqual(f, 0.909297, 3)
+        optimization_function = the_sin.create_objective_function()
+        f, g, h, gdiff, hdiff = optimization_function.check_derivatives(x=[1.0])
+        norm_g = np.linalg.norm(gdiff)
+        self.assertAlmostEqual(norm_g, 0.0, delta=1.0e-4)
+        norm_h = np.linalg.norm(gdiff)
+        self.assertAlmostEqual(norm_h, 0.0, delta=1.0e-4)
+
+    def test_cos(self):
+        beta = ex.Beta('beta', 0.11, None, None, 0)
+        the_cos = ex.cos(2 * beta)
+        expression_function = the_cos.createFunction()
+        f, g, h = expression_function([1.0])
+        self.assertAlmostEqual(f, -0.4161468365471424, 3)
+
+        optimization_function = the_cos.create_objective_function()
+        f, g, h, gdiff, hdiff = optimization_function.check_derivatives(x=[1.0])
+        norm_g = np.linalg.norm(gdiff)
+        self.assertAlmostEqual(norm_g, 0.0, delta=1.0e-4)
+        norm_h = np.linalg.norm(gdiff)
+        self.assertAlmostEqual(norm_h, 0.0, delta=1.0e-4)
 
 
 if __name__ == '__main__':

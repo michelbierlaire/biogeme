@@ -22,8 +22,7 @@ import pandas as pd
 import numpy as np
 import biogeme.database as db
 import biogeme.exceptions as excep
-from biogeme.expressions import Variable, bioDraws
-from biogeme.elementary_expressions import TypeOfElementaryExpression
+from biogeme.expressions import Variable, bioDraws, TypeOfElementaryExpression
 from biogeme.segmentation import DiscreteSegmentationTuple
 from test_data import (
     getData,

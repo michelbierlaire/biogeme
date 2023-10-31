@@ -68,8 +68,8 @@ nest_public = MU_PUBLIC, alpha_public
 nests = nest_existing, nest_public
 
 # The choice model is a cross-nested logit, with availability conditions
-logprob = models.logcnl_avail(V, av, nests, CHOICE)
-prob1 = models.cnl_avail(V, av, nests, 1)
+logprob = models.logcnl(V, av, nests, CHOICE)
+prob1 = models.cnl(V, av, nests, 1)
 genelas1 = Derive(prob1, 'TRAIN_TT') * TRAIN_TT / prob1
 simulate = {'Prob. train': prob1, 'Elas. 1': genelas1}
 

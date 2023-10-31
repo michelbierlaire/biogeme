@@ -8,7 +8,7 @@ from biogeme.catalog import (
     segmentation_catalogs,
     generic_alt_specific_catalogs,
 )
-from biogeme.multiple_expressions import NamedExpression
+from biogeme.expressions import NamedExpression
 from biogeme.configuration import (
     SelectionTuple,
     Configuration,
@@ -175,9 +175,7 @@ class SegmentationCatalogTest(unittest.TestCase):
         wrong_segmentation_1 = DiscreteSegmentationTuple(
             self.variable_z, {0: 'zero:', 1: 'one'}
         )
-        potential_segmentations_1 = (
-            wrong_segmentation_1,
-        )
+        potential_segmentations_1 = (wrong_segmentation_1,)
         with self.assertRaises(BiogemeError):
             _ = segmentation_catalogs(
                 generic_name='wrong_segmentation',
@@ -185,14 +183,11 @@ class SegmentationCatalogTest(unittest.TestCase):
                 potential_segmentations=potential_segmentations_1,
                 maximum_number=1,
             )
-            
-        
+
         wrong_segmentation_2 = DiscreteSegmentationTuple(
             self.variable_z, {0: 'zero', 1: 'on;e'}
         )
-        potential_segmentations_2 = (
-            wrong_segmentation_2,
-        )
+        potential_segmentations_2 = (wrong_segmentation_2,)
         with self.assertRaises(BiogemeError):
             _ = segmentation_catalogs(
                 generic_name='wrong_segmentation',
@@ -200,7 +195,6 @@ class SegmentationCatalogTest(unittest.TestCase):
                 potential_segmentations=potential_segmentations_2,
                 maximum_number=1,
             )
-
 
     def test_segmentation_catalog_no_sync(self):
         catalogs = segmentation_catalogs(
@@ -267,7 +261,7 @@ class TestGenericAltSpecificCatalog(unittest.TestCase):
         result = generic_alt_specific_catalogs(
             generic_name='coefficient',
             beta_parameters=[coefficient],
-            alternatives=alternatives
+            alternatives=alternatives,
         )
 
         self.assertIsInstance(result, list)
@@ -310,7 +304,8 @@ class TestGenericAltSpecificCatalog(unittest.TestCase):
         with self.assertRaises(BiogemeError):
             generic_alt_specific_catalogs(
                 generic_name='any',
-                beta_parameters=[coefficient], alternatives=alternatives
+                beta_parameters=[coefficient],
+                alternatives=alternatives,
             )
 
 

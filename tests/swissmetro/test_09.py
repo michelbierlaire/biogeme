@@ -4,17 +4,27 @@ import pandas as pd
 import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta
+from biogeme.expressions import Beta, Variable
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
 database = db.Database('swissmetro', df)
 
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
+CHOICE = Variable('CHOICE')
+PURPOSE = Variable('PURPOSE')
+SM_CO = Variable('SM_CO')
+GA = Variable('GA')
+TRAIN_CO = Variable('TRAIN_CO')
+TRAIN_TT = Variable('TRAIN_TT')
+SM_TT = Variable('SM_TT')
+CAR_TT = Variable('CAR_TT')
+CAR_CO = Variable('CAR_CO')
+CAR_AV = Variable('CAR_AV')
+SP = Variable('SP')
+TRAIN_AV = Variable('TRAIN_AV')
+SM_AV = Variable('SM_AV')
 
-globals().update(database.variables)
+
 
 # Here we use the 'biogeme' way for backward compatibility
 exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
@@ -67,7 +77,7 @@ nests = existing, future
 logprob = models.lognested(V, av, nests, CHOICE)
 
 
-class test_09(unittest.TestCase):
+class Test09(unittest.TestCase):
     def testEstimation(self):
         biogeme = bio.BIOGEME(database, logprob)
         biogeme.saveIterations = False

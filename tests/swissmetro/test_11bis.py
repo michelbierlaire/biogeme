@@ -80,8 +80,8 @@ class test_11bis(unittest.TestCase):
     def testEstimationAndSimulation(self):
         biogeme = bio.BIOGEME(database, logprob)
         biogeme.saveIterations = False
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike, -5214.049202307744, 1)
         biosim = bio.BIOGEME(database, simulate)
