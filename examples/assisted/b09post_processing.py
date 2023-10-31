@@ -40,7 +40,7 @@ try:
     can_plot = True
 except ModuleNotFoundError:
     can_plot = False
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme.assisted import ParetoPostProcessing
 
@@ -60,8 +60,11 @@ post_processing = ParetoPostProcessing(
 
 post_processing.reestimate(recycle=True)
 
-post_processing.log_statistics()
-
 if can_plot:
-    _ = post_processing.plot()
-    plt.show()
+    _ = post_processing.plot(
+        label_x='Nbr of parameters',
+        label_y='Negative log likelihood',
+        objective_x=1,
+        objective_y=0,
+    )
+    plt.savefig('pareto.eps', format='eps', dpi=300)    

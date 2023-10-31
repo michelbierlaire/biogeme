@@ -33,7 +33,7 @@ After running the assisted specification algorithm, we select one
 specification and estimate it.
 
 """
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from everything_spec import model_catalog, database, av
 

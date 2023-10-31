@@ -29,54 +29,31 @@ from swissmetro_data import (
     CAR_CO_SCALED,
 )
 
-segmentation_ga = database.generate_segmentation(
-    variable='GA', mapping={0: 'noGA', 1: 'GA'}
-)
-
-segmentation_luggage = database.generate_segmentation(
-    variable='LUGGAGE', mapping={0: 'no_lugg', 1: 'one_lugg', 3: 'several_lugg'}
-)
-
-segmentation_first = database.generate_segmentation(
-    variable='FIRST', mapping={0: '2nd_class', 1: '1st_class'}
-)
-
-
-# We consider two trip purposes: 'commuters' and anything else. We
-# need to define a binary variable first
-
-database.data['COMMUTERS'] = np.where(database.data['PURPOSE'] == 1, 1, 0)
-
-segmentation_purpose = database.generate_segmentation(
-    variable='COMMUTERS', mapping={0: 'non_commuters', 1: 'commuters'}
-)
-
-
 # Parameters to be estimated
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
-(B_TIME_catalog,) = generic_alt_specific_catalogs(
+(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_TIME', beta_parameters=[B_TIME], alternatives=('TRAIN', 'SM', 'CAR')
 )
 
-(B_COST_catalog,) = generic_alt_specific_catalogs(
+(B_COST_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_COST', beta_parameters=[B_COST], alternatives=('TRAIN', 'SM', 'CAR')
 )
 
 # Definition of the utility functions
 V1 = (
     ASC_TRAIN
-    + B_TIME_catalog['TRAIN'] * TRAIN_TT_SCALED
-    + B_COST_catalog['TRAIN'] * TRAIN_COST_SCALED
+    + B_TIME_catalog_dict['TRAIN'] * TRAIN_TT_SCALED
+    + B_COST_catalog_dict['TRAIN'] * TRAIN_COST_SCALED
 )
-V2 = B_TIME_catalog['SM'] * SM_TT_SCALED + B_COST_catalog['SM'] * SM_COST_SCALED
+V2 = B_TIME_catalog_dict['SM'] * SM_TT_SCALED + B_COST_catalog_dict['SM'] * SM_COST_SCALED
 V3 = (
     ASC_CAR
-    + B_TIME_catalog['CAR'] * CAR_TT_SCALED
-    + B_COST_catalog['CAR'] * CAR_CO_SCALED
+    + B_TIME_catalog_dict['CAR'] * CAR_TT_SCALED
+    + B_COST_catalog_dict['CAR'] * CAR_CO_SCALED
 )
 
 # Associate utility functions with the numbering of alternatives

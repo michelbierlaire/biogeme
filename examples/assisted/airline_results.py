@@ -13,7 +13,7 @@ try:
 except ModuleNotFoundError:
     can_plot = False
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.assisted import AssistedSpecification, ParetoPostProcessing
 from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import loglikelihood_dimension

@@ -8,14 +8,14 @@ We investigate various specifications:
     - logit
     - nested logit with two nests: public and private transportation
     - nested logit with two nests existing and future modes
-- 3 functional form for the travel time variables
+- 3 functional forms for the travel time variables
     - linear specification,
     - Box-Cox transform,
     - power series,
-- 2 specification for the cost coefficients:
+- 2 specifications for the cost coefficients:
     - generic
     - alternative specific
-- 2 specification for the travel time coefficients:
+- 2 specifications for the travel time coefficients:
     - generic
     - alternative specific
 - 4 segmentations for the constants:
@@ -84,7 +84,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # Non linear specifications for the travel time
 
 # Parameter of the Box-Cox transform
-ell_travel_time = Beta('lambda_travel_time', 1, None, 10, 0)
+ell_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
 
 # Coefficients of the power series
 square_tt_coef = Beta('square_tt_coef', 0, None, None, 0)
@@ -155,7 +155,7 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 )
 
 
-(B_TIME_catalog,) = generic_alt_specific_catalogs(
+(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_TIME',
     beta_parameters=[B_TIME],
     alternatives=['TRAIN', 'SM', 'CAR'],
@@ -166,21 +166,21 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
     maximum_number=1,
 )
 
-(B_COST_catalog,) = generic_alt_specific_catalogs(
+(B_COST_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_COST', beta_parameters=[B_COST], alternatives=['TRAIN', 'SM', 'CAR']
 )
 
 # Definition of the utility functions
 V1 = (
     ASC_TRAIN_catalog
-    + B_TIME_catalog['TRAIN'] * train_tt_catalog
-    + B_COST_catalog['TRAIN'] * TRAIN_COST_SCALED
+    + B_TIME_catalog_dict['TRAIN'] * train_tt_catalog
+    + B_COST_catalog_dict['TRAIN'] * TRAIN_COST_SCALED
 )
-V2 = B_TIME_catalog['SM'] * sm_tt_catalog + B_COST_catalog['SM'] * SM_COST_SCALED
+V2 = B_TIME_catalog_dict['SM'] * sm_tt_catalog + B_COST_catalog_dict['SM'] * SM_COST_SCALED
 V3 = (
     ASC_CAR_catalog
-    + B_TIME_catalog['CAR'] * car_tt_catalog
-    + B_COST_catalog['CAR'] * CAR_CO_SCALED
+    + B_TIME_catalog_dict['CAR'] * car_tt_catalog
+    + B_COST_catalog_dict['CAR'] * CAR_CO_SCALED
 )
 
 # Associate utility functions with the numbering of alternatives

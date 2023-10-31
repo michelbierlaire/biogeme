@@ -85,7 +85,7 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 )
 
 
-(B_TIME_catalog,) = generic_alt_specific_catalogs(
+(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_TIME',
     beta_parameters=[B_TIME],
     alternatives=['TRAIN', 'SM', 'CAR'],
@@ -96,21 +96,21 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
     maximum_number=1,
 )
 
-(B_COST_catalog,) = generic_alt_specific_catalogs(
+(B_COST_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_COST', beta_parameters=[B_COST], alternatives=['TRAIN', 'SM', 'CAR']
 )
 
 # Definition of the utility functions
 V1 = (
     ASC_TRAIN_catalog
-    + B_TIME_catalog['TRAIN'] * TRAIN_TT_SCALED
-    + B_COST_catalog['TRAIN'] * TRAIN_COST_SCALED
+    + B_TIME_catalog_dict['TRAIN'] * TRAIN_TT_SCALED
+    + B_COST_catalog_dict['TRAIN'] * TRAIN_COST_SCALED
 )
-V2 = B_TIME_catalog['SM'] * SM_TT_SCALED + B_COST_catalog['SM'] * SM_COST_SCALED
+V2 = B_TIME_catalog_dict['SM'] * SM_TT_SCALED + B_COST_catalog_dict['SM'] * SM_COST_SCALED
 V3 = (
     ASC_CAR_catalog
-    + B_TIME_catalog['CAR'] * CAR_TT_SCALED
-    + B_COST_catalog['CAR'] * CAR_CO_SCALED
+    + B_TIME_catalog_dict['CAR'] * CAR_TT_SCALED
+    + B_COST_catalog_dict['CAR'] * CAR_CO_SCALED
 )
 
 # Associate utility functions with the numbering of alternatives

@@ -33,17 +33,29 @@ The algorithm implemented in the AssistedSpecification object is used to
 investigate some of these specifications.
 
 """
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme.assisted import AssistedSpecification
 from biogeme.multiobjectives import loglikelihood_dimension
 from everything_spec import model_catalog, database
 from results_analysis import report
 
-logger = blog.get_screen_logger(level=blog.INFO)
+logger = blog.get_screen_logger(level=blog.DEBUG)
 logger.info('Example b07everything_assisted')
 
 PARETO_FILE_NAME = 'b07everything_assisted.pareto'
+
+def validity(results):
+    """Function verifying that the estimation results are valid.
+
+    The results are not valid if any of the time or cost coefficient is non negative.
+    """
+    for beta in results.data.betas:
+        if 'TIME' in beta.name and beta.value >= 0:
+            return False, f'{beta.name} = {beta.value}'
+        if 'COST' in beta.name and beta.value >= 0:
+            return False, f'{beta.name} = {beta.value}'
+    return True, None
 
 # Create the Biogeme object
 the_biogeme = bio.BIOGEME(database, model_catalog)
@@ -56,6 +68,7 @@ assisted_specification = AssistedSpecification(
     biogeme_object=the_biogeme,
     multi_objectives=loglikelihood_dimension,
     pareto_file_name=PARETO_FILE_NAME,
+    validity=validity,
 )
 
 non_dominated_models = assisted_specification.run()

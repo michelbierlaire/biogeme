@@ -6,7 +6,7 @@
 Assisted specification for the Optima case study
 """
 
-import biogeme.logging as blog
+import biogeme.biogeme_logging as blog
 from biogeme.assisted import AssistedSpecification
 from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import loglikelihood_dimension

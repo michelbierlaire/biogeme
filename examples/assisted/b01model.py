@@ -72,7 +72,7 @@ model_catalog = Catalog.from_dict(
 )
 # Create the Biogeme object
 the_biogeme = bio.BIOGEME(database, model_catalog)
-the_biogeme.modelName = 'b05model'
+the_biogeme.modelName = 'b01model'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
 

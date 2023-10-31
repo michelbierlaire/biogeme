@@ -39,7 +39,7 @@ B_COST = Beta('B_COST', 0, None, 0, 0)
 # Non linear specifications for the travel time
 
 # Parameter of the Box-Cox transform
-ell_travel_time = Beta('lambda_travel_time', 1, None, 10, 0)
+ell_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
 
 # Coefficients of the power series
 square_tt_coef = Beta('square_tt_coef', 0, None, None, 0)
