@@ -4,6 +4,7 @@ Michel Bierlaire
 Mon Oct  9 10:53:03 2023
 """
 import pandas as pd
+from biogeme.partition import Partition
 
 alternatives = pd.read_csv('restaurants.dat')
 ID_COLUMN = 'ID'
@@ -36,3 +37,22 @@ others = all_alternatives - asian_or_downtown
 def complement(a_set: set[int]) -> set[int]:
     """Returns the complement of a set"""
     return all_alternatives - a_set
+
+
+partition_asian = Partition([asian, complement(asian)], full_set=all_alternatives)
+partition_downtown = Partition(
+    [downtown, complement(downtown)], full_set=all_alternatives
+)
+partition_uniform = Partition([all_alternatives], full_set=all_alternatives)
+partition_uniform_asian = Partition([asian], full_set=asian)
+partition_uniform_asian_or_downtown = Partition(
+    [asian_or_downtown], full_set=asian_or_downtown
+)
+
+partitions = {
+    'uniform': partition_uniform,
+    'asian': partition_asian,
+    'downtown': partition_downtown,
+    'uniform_asian_or_downtown': partition_uniform_asian_or_downtown,
+    'uniform_asian': partition_uniform_asian,
+}
