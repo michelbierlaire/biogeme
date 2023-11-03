@@ -1,18 +1,26 @@
 \documentclass[12pt,a4paper]{article}
 
 % Package to include code
+\usepackage{michel}
 \usepackage{listings}
+\usepackage{inconsolata}
 \usepackage{color}
+
 \usepackage{tikz}
 \usepackage{pgfplots}
 \lstset{language=Python}
-\lstset{numbers=none, basicstyle=\footnotesize,
+\lstset{numbers=none, basicstyle=\ttfamily\footnotesize,
   numberstyle=\tiny,keywordstyle=\color{blue},stringstyle=\ttfamily,showstringspaces=false}
 \lstset{backgroundcolor=\color[rgb]{0.95 0.95 0.95}}
 \lstdefinestyle{numbers}{numbers=left, stepnumber=1,
-  numberstyle=\tiny,basicstyle=\tiny, numbersep=10pt}
+  numberstyle=\tiny,basicstyle=\footnotesize, numbersep=10pt}
 \lstdefinestyle{nonumbers}{numbers=none}
+\lstset{
+  breaklines=true,
+  breakatwhitespace=true,
+}
 
+\newcommand*{\examplesPath}{../../examples}
 
 % Font selection: uncomment the next line to use the ``beton'' font
 %\usepackage{beton}
@@ -108,11 +116,6 @@
 \newcommand{\BBIOGEME}{BisonBiogeme}
 
 
-%Internal notes
-\newcommand{\note}[1]{
-  \begin{framed}{}%
-    \textbf{\underline{Internal note}:} #1
-\end{framed}}
 
 %Use this version to turn off the notes
 %\newcommand{\note}[1]{}
@@ -265,86 +268,11 @@
 
 
 
-%Put parentheses around the reference, as standard for equations
-\newcommand{\req}[1]{(\ref{#1})}
-
-%Short cut to make a column vector in math environment (centered)
-\newcommand{\cvect}[1]{\left(\begin{array}{c} #1 \end{array} \right) }
-
-%Short cut to make a column vector in math environment (right justified)
-\newcommand{\rvect}[1]{\left(\begin{array}{r} #1 \end{array} \right) }
-
-%A reference to a theorem. Prefix thm: is assumed for the label.
-\newcommand{\refthm}[1]{Theorem~\ref{thm:#1}}
-
-%Reference to a figure. Prefix fig: is assumed for the label.
-\newcommand{\reffig}[1]{Figure~\ref{fig:#1}}
-
-%Smart reference to a figure. Prefix fig: is assumed for the label.
-%\newcommand{\vreffig}[1]{Figure~\vref{fig:#1}}
-
-%C in mathcal font for the choice set
-\newcommand{\C}{\mathcal{C}}
-
-%R in bold font for the set of real numbers
-\newcommand{\R}{\mathbb{R}}
-
-%N in bold font for the set of natural numbers
-\newcommand{\N}{\mathbb{N}}
-
-%C in mathcal font for the log likelihood
-\renewcommand{\L}{\mathcal{L}}
-
-%S in mathcal font for the subset S
-\renewcommand{\S}{\mathcal{S}}
-
-%To write an half in math envionment
-\newcommand{\half}{\frac{1}{2}}
-
-%Probability
-\newcommand{\prob}{\operatorname{Pr}}
-
-%Expectation
-\newcommand{\expect}{\operatorname{E}}
-
-%Variance
-\newcommand{\var}{\operatorname{Var}}
-
-%Covariance
-\newcommand{\cov}{\operatorname{Cov}}
-
-%Correlation
-\newcommand{\corr}{\operatorname{Corr}}
-
-%Span
-\newcommand{\myspan}{\operatorname{span}}
-
-%plim
-\newcommand{\plim}{\operatorname{plim}}
-
-%Displays n in bold (for the normal distribution?)
-\newcommand{\n}{{\bf n}}
-
-%Includes footnote in a table environment. Warning: the footmark is
-%always 1.
-\newcommand{\tablefootnote}[1]{\begin{flushright}
-    \rule{5cm}{1pt}\\
-    \protect\footnotemark[1]{\footnotesize #1}
-  \end{flushright}
-}
-\renewcommand*{\thefootnote}{\alph{footnote}}
-
-%Defines the ``th'' as in ``19th'' to be a superscript
-\renewcommand{\th}{\textsuperscript{th}}
-
-%Begin and end of a proof
-\newcommand{\bpr}{{\bf Proof.} \hspace{1 em}}
-\newcommand{\epr}{$\Box$}
-
+\newcommand{\D}{\mathcal{D}}
 
 \title{Estimating MEV models with samples of alternatives}
-\author{Michel Bierlaire}
-\date{xxxx, 2023}
+\author{Michel Bierlaire \and Evangelos Paschalidis}
+\date{\today}
 
 
 \begin{document}
@@ -373,22 +301,907 @@ the parameters of various models using maximum likelihood
 estimation. It is particularly designed for discrete choice
 models.
 
-This document describes how to use \PDBIOGEME\ to estimate
+This document describes how to use Biogeme to estimate
 Multivariate Extreme Value (MEV) models using only a sample of
 alternatives. 
 
 We assume that the reader is already familiar with discrete choice
-models, and has successfully installed \PDBIOGEME.\@  \PDBIOGEME\ is
+models, and has successfully installed the package.  Biogeme is
 a Python package written in Python and C++, that relies on the
 Pandas library for the management of the data.  This document has
-been written using \PDBIOGEME\ 3.2.11.
+been written using Biogeme 3.2.12.
 
+In the rest of the document, we walk the reader through a concrete
+example. The theoretical background is available in the Appendix.
+
+\section{The context}
+\label{eq:context}
+
+The example that we are considering is the development of a restaurant choice model.
+
+\subsection{Data: the alternatives}
+We have a list of 100 restaurants, which constitutes our full choice set $\C$.
+For each restaurant, we know:
+\begin{itemize}
+\item its rating, on a scale from 1 to 5, 
+\item its price level, on a scale from 1 (cheap) to 4 (very expensive),
+\item its category, which is one element of the following list: Chinese, Japanese, Korean, Indian, French, Mexican, Lebanese, or Ethiopian,
+\item its exact location, in an arbitrary coordinate system, where the ``latitudes'' and ``longitudes'' range from 0 to 100. 
+\end{itemize}
+
+We consider also two other variables: 
+\begin{itemize}
+\item a dummy variable that is 1 if the restaurant is Asian, that is, if it is Chinese, Japanese, Korean or Indian,
+\item a dummy variable that is 1 if the restaurant is located ``downtown'', which means at a distance less or equal than 80 from the location (0,0), as illustrated in Figure~\ref{fig:restaurants}.
+\end{itemize}
+
+  
+\pgfplotstableread{data.txt}\mydata
+
+\begin{figure}[htb]
+\begin{center}
+\begin{tikzpicture}
+    \begin{axis}[
+        xlabel={res\_lat}, 
+        ylabel={res\_lon},
+        axis lines=left, 
+        enlargelimits=true,
+        xmin=0, xmax=100,
+        ymin=0, ymax=100,
+        axis equal
+    ]
+
+        % Draw square with continuous lines
+        \draw (axis cs:0,0) -- (axis cs:100,0) -- (axis cs:100,100) -- (axis cs:0,100) -- cycle;
+
+        % Draw quarter of a circle
+        \draw (axis cs:80,0) arc [start angle=0, end angle=90, radius=80];        
+
+        % Plot data from data.txt
+        \addplot[only marks, mark=*] table {data.txt};
+        
+    \end{axis}
+\end{tikzpicture}
+\end{center}
+\caption{\label{fig:restaurants}Location of the restaurants}
+\end{figure}
+
+The data is stored in the file \lstinline@restaurants.dat@ and the
+column labels are:
+\begin{lstlisting}
+  ID, rating, price, category_Chinese, category_Japanese, category_Korean, category_Indian, category_French, category_Mexican, category_Lebanese, category_Ethiopian, Asian, rest_lat, rest_lon, distance, downtown
+\end{lstlisting}
+
+\subsection{Data: observed choices}
+
+We have access to a sample of 10'000 individuals. For each of them we know
+\begin{itemize}
+\item her location in the same coordinate system as the restaurants,
+\item the chosen restaurant.
+\end{itemize}
+
+The ``observed'' choice is synthetic. It has been generated by
+simulation using a postulated ground truth. The utility function of
+each alternative contains the following variables, each associated
+with a coefficient:
+\begin{itemize}
+\item the rating of the restaurant,
+\item the price of the restaurant,
+  \item a dummy variable that is 1 if the restaurant is Chinese,
+  \item a dummy variable that is 1 if the restaurant is Japanese,
+  \item a dummy variable that is 1 if the restaurant is Korean,
+  \item a dummy variable that is 1 if the restaurant is Indian,
+  \item a dummy variable that is 1 if the restaurant is French,
+  \item a dummy variable that is 1 if the restaurant is Mexican,
+  \item a dummy variable that is 1 if the restaurant is Lebanese,
+  \item a dummy variable that is 1 if the restaurant is Ethiopian,
+  \item the log of the distance between the decision maker and the restaurant.
+\end{itemize}
+
+We have postulated three different models to generate the synthetic choices:
+\begin{enumerate}
+\item a logit model;
+\item a nested logit model where all the Asian alternatives are grouped in a nest, while each other alternative is alone in a nest;
+\item a cross-nested logit model where all the Asian alternatives are grouped in a nest, and all the restaurant located downtown are grouped in a nest, while each other alternative is alone in a nest.
+\end{enumerate}
+The assumed value of the parameters are reported in Table~\ref{tab:true_param}.
+
+
+\begin{table}[htb]
+  \[
+  \begin{array}{lr}
+    \beta_\text{rating}   &      0.75   \\
+    \beta_\text{price}   &     -0.4  \\
+    \beta_\text{chinese}   &      0.75   \\
+    \beta_\text{japanese}   &      1.25   \\
+    \beta_\text{korean}   &      0.75   \\
+    \beta_\text{indian}   &      1.0   \\
+    \beta_\text{french}   &      0.75   \\
+    \beta_\text{mexican}   &      1.25   \\
+    \beta_\text{lebanese}   &      0.75   \\
+    \beta_\text{ethiopian}   &      0.5   \\
+    \beta_\text{logdist}    &    -0.6    \\
+    \mu_\text{asian}   &      2.0    \\
+    \mu_\text{downtown}   &      2.0
+  \end{array}
+  \]
+  \caption{\label{tab:true_param}''True'' values of the parameters}
+\end{table}
+
+For each model, 5 synthetic choices have been generated. 
+The data is stored in the file \lstinline@obs_choice.dat@ and the column labels are
+\begin{lstlisting}
+  user_lat, user_lon,
+  logit_0, logit_1, logit_2, logit_3, logit_4,
+  nested_0, nested_1, nested_2, nested_3, nested_4,
+  cnl_0, cnl_1, cnl_2, cnl_3, cnl_4
+\end{lstlisting}
+
+\section{Sets of alternatives}
+
+The script \lstinline+alternatives.py+ (see
+Section~\ref{sec:alternatives}) provides sets of alternatives from the
+data file, and defines partitions for the sampling. In the example
+that we are considering, there are 100 alternatives, numbered from 0
+to 99.
+
+
+Among them, they are 33 Asian restaurants:
+\begin{lstlisting}
+0, 1, 3, 13, 15, 17, 18, 27, 31, 33, 34, 37, 40, 45, 47, 50, 51, 55, 57, 68, 70, 72, 76, 78, 79, 80, 81, 87, 89, 91, 92, 94, 98
+\end{lstlisting}
+They are 44 restaurants located downtown:
+\begin{lstlisting}
+0, 7, 9, 11, 13, 14, 15, 17, 18, 20, 22, 24, 30, 32, 33, 36, 37, 38, 45, 46, 47, 48, 49, 50, 54, 55, 56, 60, 61, 63, 70, 74, 75, 77, 80, 81, 83, 84, 86, 87, 88, 90, 93, 97, 98, 99
+\end{lstlisting}
+
+In addition to those two sets, the script defines the following sets:
+\begin{lstlisting}
+all_alternatives
+# Set of Asian restaurants in downtown
+asian_and_downtown = asian & downtown
+
+# Set of Asian restaurants, and of restaurants in downtown
+asian_or_downtown = asian | downtown
+
+# Set of Asian restaurants not in downtown
+only_asian = asian - asian_and_downtown
+
+# Set of non Asian restaurants in downtown
+only_downtown = downtown - asian_and_downtown
+
+# Set of restaurants that are neither Asian nor in downtown
+others = all_alternatives - asian_or_downtown
+\end{lstlisting}
+
+The script also defines partitions, using the \lstinline+Partition+ class, that can be imported as follows:
+\begin{lstlisting}
+from biogeme.partition import Partition
+\end{lstlisting}
+A partition is defined by a list of sets of alternatives, and by the complete set of all alternatives. Five partitions are defined in the script:
+
+\begin{itemize}
+  \item A partition of the full choice set into Asian and non-Asian restaurants: 
+\begin{lstlisting}
+partition_asian = Partition([asian, complement(asian)], full_set=all_alternatives)
+\end{lstlisting}
+Note the use of the \lstinline+complement+ function here, that basically returns
+\begin{lstlisting}
+  all_alternatives - asian.
+\end{lstlisting}
+
+  \item A partition of the full choice set into downtown and non-downtown restaurants: 
+\begin{lstlisting}
+partition_downtown = Partition(
+    [downtown, complement(downtown)], full_set=all_alternatives
+)
+\end{lstlisting}
+
+  \item A ``partition'' of the full choice set containing only one segment with all alternatives:
+\begin{lstlisting}
+partition_uniform = Partition([all_alternatives], full_set=all_alternatives)
+\end{lstlisting}
+This is designed to perform a uniform sampling. 
+\item For the nested logit model, we have a partition of the set of Asian restaurants, with only one segment in order to perform a uniform sampling:
+\begin{lstlisting}
+partition_uniform_asian = Partition([asian], full_set=asian)
+\end{lstlisting}
+
+\item For the cross-nested logit model, we have a partition of the set of restaurants that are either Asian or downtown, with only one segment in order to perform a uniform sampling:
+\begin{lstlisting}
+partition_uniform_asian_or_downtown = Partition(
+    [asian_or_downtown], full_set=asian_or_downtown
+)
+\end{lstlisting}
+\end{itemize}
+Those partitions are gathered into a dictionary so that they can be obtained from their name.
+
+\section{Model specification}
+
+The specification of the utility function, as well as of additional variables, are available in the script \lstinline+specification.py+ (Section~\ref{sec:specification}). In the context of sampling of alternatives, alternatives are unlabeled. Therefore, any alternative specific constant must be captured by dummy variables. In our example, the specification of the utility function is
+  \begin{lstlisting}
+beta_rating = Beta('beta_rating', 0, None, None, 0)
+beta_price = Beta('beta_price', 0, None, None, 0)
+beta_chinese = Beta('beta_chinese', 0, None, None, 0)
+beta_japanese = Beta('beta_japanese', 0, None, None, 0)
+beta_korean = Beta('beta_korean', 0, None, None, 0)
+beta_indian = Beta('beta_indian', 0, None, None, 0)
+beta_french = Beta('beta_french', 0, None, None, 0)
+beta_mexican = Beta('beta_mexican', 0, None, None, 0)
+beta_lebanese = Beta('beta_lebanese', 0, None, None, 0)
+beta_ethiopian = Beta('beta_ethiopian', 0, None, None, 0)
+beta_log_dist = Beta('beta_log_dist', 0, None, None, 0)
+V = (
+    beta_rating * Variable('rating')
+    + beta_price * Variable('price')
+    + beta_chinese * Variable('category_Chinese')
+    + beta_japanese * Variable('category_Japanese')
+    + beta_korean * Variable('category_Korean')
+    + beta_indian * Variable('category_Indian')
+    + beta_french * Variable('category_French')
+    + beta_mexican * Variable('category_Mexican')
+    + beta_lebanese * Variable('category_Lebanese')
+    + beta_ethiopian * Variable('category_Ethiopian')
+    + beta_log_dist * Variable('log_dist')
+    )
+  \end{lstlisting}
+
+  Note that the names of most variables correspond to the names of the
+  columns in the data frame with alternatives. There is one exception in our example:
+  the variable \lstinline+log_dist+. Indeed, this captures the
+  logarithm of the distance between each individual and each
+  restaurant. This can be calculated only after the sampling of
+  alternatives has been performed. We call such variables ``combined variables''.
+  Those are variables that combine attributes of the alternatives and characteristics of the individuals. Such variables are defined using a \lstinline+CrossVariableTuple+, that can be imported as follows:
+  \begin{lstlisting}
+from biogeme.sampling_of_alternatives import CrossVariableTuple
+  \end{lstlisting}
+  It has two entries: the name of the variable, and its expression. In our example, we have:
+  \begin{lstlisting}
+    CrossVariableTuple(
+        'log_dist',
+        log(
+            (
+                (Variable('user_lat') - Variable('rest_lat')) ** 2
+                + (Variable('user_lon') - Variable('rest_lon')) ** 2
+            )
+            ** 0.5
+        ),
+    )
+  \end{lstlisting}
+  Note that a list of such tuples must be provided, even if there is only one. Therefore, the syntax for our example is
+  \begin{lstlisting}
+combined_variables = [
+    CrossVariableTuple(
+        'log_dist',
+        log(
+            (
+                (Variable('user_lat') - Variable('rest_lat')) ** 2
+                + (Variable('user_lon') - Variable('rest_lon')) ** 2
+            )
+            ** 0.5
+        ),
+    )
+]
+  \end{lstlisting}
+  
+\section{Estimation of a logit model}
+
+All the information needed to perform the estimation of the model must be gathered in an object of type \lstinline+SamplingContext+, that involves 12 elements, 3 of them being necessary only for MEV models:
+\begin{lstlisting}
+    the_partition: Partition
+    sample_sizes: Iterable[int]
+    individuals: pd.DataFrame
+    choice_column: str
+    alternatives: pd.DataFrame
+    id_column: str
+    biogeme_file_name: str
+    utility_function: Expression
+    combined_variables: list[CrossVariableTuple]
+    mev_partition: Optional[Partition] = None
+    mev_sample_sizes: Optional[Iterable[int]] = None
+    cnl_nests: Optional[NestsForCrossNestedLogit] = None
+\end{lstlisting}
+
+\begin{enumerate}
+  \item \lstinline+the_partition+: we first define a partition of the full choice set into $K$ segments
+of size $R_k$: $J=\sum_{k=1}^K R_k$. The segments in the partition
+must be mutually exclusive and collectively exhaustive. In other
+words, each alternative must be contained in exactly one segment.
+In this example, we use the partition \lstinline+'asian'+ defined in the script \lstinline+alternatives.py+. 
+
+  \item \lstinline+sample_sizes+: we then define a list of integers that provides the number of
+alternatives that must be samples in each segment of the partition.
+
+It is often useful to use a ``balanced'' list, that is a list where a similar number of alternatives is sampled from each segment. This can be provided by the following statement:
+\begin{lstlisting}
+segment_sizes = generate_segment_size(SAMPLE_SIZE, the_partition.number_of_segments())
+\end{lstlisting}
+where the function \lstinline+generate_segment_size+ is imported as follows:
+\begin{lstlisting}
+from biogeme.sampling_of_alternatives import generate_segment_size
+\end{lstlisting}
+The function takes two arguments: the total size of the sample, and the number of segments in the partition. Here are some examples of what the function generates:
+\begin{lstlisting}
+>>> generate_segment_size(10, 3)
+[4, 3, 3]
+>>> generate_segment_size(11, 3)
+[4, 4, 3]
+>>> generate_segment_size(12, 3)
+[4, 4, 4]
+>>> generate_segment_size(13, 3)
+[5, 4, 4]
+>>> generate_segment_size(14, 3)
+[5, 5, 4]
+>>> generate_segment_size(15, 3)
+[5, 5, 5]
+\end{lstlisting}
+
+\item \lstinline+individuals+: the next entry is the Pandas data frame
+  containing the list of individuals and their observed choice. In our
+  example, the data frame is obtained as follows:
+  \begin{lstlisting}
+OBS_FILE = 'obs_choice.dat'
+observations = pd.read_csv(OBS_FILE)
+  \end{lstlisting}
+\item \lstinline+choice_column+: the next entry identifies the label of the column where the chosen alternative is reported. In our example, the file contains several synthetic choices. For example, we can have:
+  \begin{lstlisting}
+CHOICE_COLUMN = 'logit_4'
+  \end{lstlisting}
+
+\item \lstinline+alternatives+: the next entry is the Pandas data frame containing the list of alternatives and their attributes. In our example, it is available from the script \lstinline+alternatives.py+ (see Section~\ref{sec:alternatives}):
+  \begin{lstlisting}
+from alternatives import alternatives
+  \end{lstlisting}
+\item \lstinline+id_column+: the next entry identifies the label of the column where the ID of the alternatives is reported.  In our example, it happens to be \lstinline+ID+, and it also available from the script    \lstinline+alternatives.py+:
+  \begin{lstlisting}
+from alternatives import ID_COLUMN
+  \end{lstlisting}
+\item \lstinline+biogeme_file_name+: a data file in Biogeme format is generated for the model estimation. The name of this file must be provided here. For instance, \lstinline+logit_asian_10_alt.dat+.
+\item \lstinline+utility_function+: the next entry is the specification of the utility function. In our example, it is defined in the script \lstinline+specification.py+.
+\item \lstinline+combined_variables+: the next entry is the list of combined variables, that can be calculated only after the sample has been generated. In our example, it is defined in the script \lstinline+specification.py+.
+\end{enumerate}
+
+The context is therefore defined as follows:
+\begin{lstlisting}
+context = SamplingContext(
+    the_partition=the_partition,
+    sample_sizes=segment_sizes,
+    individuals=observations,
+    choice_column=CHOICE_COLUMN,
+    alternatives=alternatives,
+    id_column=ID_COLUMN,
+    biogeme_file_name=FILE_NAME,
+    utility_function=V,
+    combined_variables=combined_variables,
+)
+\end{lstlisting}
+
+Once the context is defined, the process consists of the following steps:
+
+\begin{itemize}
+\item Generation of the choice sets:
+  \begin{lstlisting}
+the_data_generation = ChoiceSetsGeneration(context=context)
+  \end{lstlisting}
+\item Generation of the Biogeme model:
+  \begin{lstlisting}
+the_model_generation = GenerateModel(context=context)
+  \end{lstlisting}
+\item Generation of the Biogeme database:
+  \begin{lstlisting}
+biogeme_database = the_data_generation.sample_and_merge(recycle=False)
+  \end{lstlisting}
+
+\item We then retrieve the specification of the model itself:
+  \begin{lstlisting}
+logprob = the_model_generation.get_logit()
+  \end{lstlisting}
+\item The rest is a standard estimation procedure for Biogeme:
+  \begin{lstlisting}
+the_biogeme = bio.BIOGEME(biogeme_database, logprob)
+the_biogeme.modelName = MODEL_NAME
+
+# Calculate the null log likelihood for reporting.
+the_biogeme.calculateNullLoglikelihood({i: 1 for i in range(SAMPLE_SIZE)})
+
+# Estimate the parameters
+results = the_biogeme.estimate(recycle=False)
+print(results.short_summary())
+estimated_parameters = results.getEstimatedParameters()
+print(estimated_parameters)
+  \end{lstlisting}
+\item Finally, in this example, we compare the estimated values of the parameters with the true values:
+  \begin{lstlisting}
+df, msg = compare(estimated_parameters)
+print(df)
+print(msg)
+  \end{lstlisting}
+\end{itemize}
+
+The output generated by the script is the following:
+\begin{lstlisting}
+Number of asian restaurants: 33
+Size of the choice set: 100
+Main partition: 2 segment(s) of size 33, 67
+Main sample: 10: 5/33, 5/67
+
+Generating 10 + None alternatives for 10000 observations
+Define new variables
+File logit_asian_10_alt.dat has been created.
+...
+Results saved in file logit_asian_10_alt.html
+Results saved in file logit_asian_10_alt.pickle
+Results for model logit_asian_10_alt
+Nbr of parameters:		11
+Sample size:			10000
+Excluded data:			0
+Null log likelihood:		-23025.85
+Final log likelihood:		-18431.26
+Likelihood ratio test (null):		9189.181
+Rho square (null):			0.2
+Rho bar square (null):			0.199
+Akaike Information Criterion:	36884.52
+Bayesian Information Criterion:	36963.84
+
+                   Value  Rob. Std err  Rob. t-test  Rob. p-value
+beta_chinese    0.587478      0.050580    11.614717           0.0
+beta_ethiopian  0.469240      0.050444     9.302233           0.0
+beta_french     0.650104      0.061684    10.539239           0.0
+beta_indian     0.914430      0.042991    21.270247           0.0
+beta_japanese   1.158041      0.046356    24.981289           0.0
+beta_korean     0.735705      0.042533    17.297299           0.0
+beta_lebanese   0.679695      0.062281    10.913295           0.0
+beta_log_dist  -0.590966      0.015000   -39.397598           0.0
+beta_mexican    1.194666      0.036449    32.776230           0.0
+beta_price     -0.415953      0.012768   -32.577617           0.0
+beta_rating     0.749331      0.015382    48.714011           0.0
+              Name  True Value  Estimated Value    T-Test
+0      beta_rating        0.75         0.749331  0.043496
+1       beta_price       -0.40        -0.415953  1.249472
+2     beta_chinese        0.75         0.587478  3.213145
+3    beta_japanese        1.25         1.158041  1.983737
+4      beta_korean        0.75         0.735705  0.336084
+5      beta_indian        1.00         0.914430  1.990416
+6      beta_french        0.75         0.650104  1.619472
+7     beta_mexican        1.25         1.194666  1.518113
+8    beta_lebanese        0.75         0.679695  1.128823
+9   beta_ethiopian        0.50         0.469240  0.609783
+10   beta_log_dist       -0.60        -0.590966 -0.602255
+Parameters not estimated: ['mu_asian', 'mu_downtown']
+\end{lstlisting}
+
+The complete specification is available at Section~\ref{sec:logit}.
+\section{Estimation of a nested model}
+
+We  estimate a nested logit model with a nest containing all the Asian restaurants.
+
+For the estimation of the nested logit model, we need to define a
+sampling protocol for the MEV terms. This is done with the
+\lstinline+mev_partition+ and the \lstinline+mev_sample_sizes+
+arguments of the context object. There are two important differences
+for this sampling protocol, compared to the other one, as explained in
+Section~\ref{sec:protocol}. First, the chosen alternative does not
+play any role in the sampling procedure. And, second, it is not
+necessary to partition the full choice set. Alternatives that are
+alone in a nest do not contribute to the calculation of the MEV
+terms, and can therefore be excluded.
+
+In this case, we sample from Asian alternatives only. We use a partition with a unique segment to perform a uniform sampling. 
+
+Then, the definition of the nests is done in the exact same way as for regular Biogeme models:
+\begin{lstlisting}
+mu_asian = Beta('mu_asian', 1.0, 1.0, None, 0)
+nest_asian = OneNestForNestedLogit(
+    nest_param=mu_asian, list_of_alternatives=asian, name='asian'
+)
+nests = NestsForNestedLogit(
+    choice_set=all_alternatives,
+    tuple_of_nests=(nest_asian,),
+)
+\end{lstlisting}
+
+The other difference with the estimation of the logit model is the extraction of the model itself:
+\begin{lstlisting}
+logprob = the_model_generation.get_nested_logit(nests)
+\end{lstlisting}
+The complete specification is available at Section~\ref{sec:nested}.
+
+The output generated by the script is the following:
+\begin{lstlisting}
+Number of asian restaurants: 33
+Size of the choice set: 100
+Main partition: 2 segment(s) of size 46, 54
+Main sample: 20: 10/46, 10/54
+Nbr of MEV alternatives: 33
+MEV partition: 1 segment(s) of size 33
+MEV sample: 33: 33/33
+
+Generating 20 + 33 alternatives for 10000 observations
+Define new variables
+File nested_downtown_20.dat has been created.
+File biogeme.toml has been parsed.
+...
+Results saved in file nested_downtown_20.html
+Results saved in file nested_downtown_20.pickle
+Results for model nested_downtown_20
+Nbr of parameters:		12
+Sample size:			10000
+Excluded data:			0
+Null log likelihood:		-29957.32
+Final log likelihood:		-22998.21
+Likelihood ratio test (null):		13918.22
+Rho square (null):			0.232
+Rho bar square (null):			0.232
+Akaike Information Criterion:	46020.43
+Bayesian Information Criterion:	46106.95
+
+                   Value  Rob. Std err  Rob. t-test  Rob. p-value
+beta_chinese    0.696196      0.071740     9.704438           0.0
+beta_ethiopian  0.499692      0.040332    12.389559           0.0
+beta_french     0.725736      0.048952    14.825608           0.0
+beta_indian     0.964207      0.063969    15.073097           0.0
+beta_japanese   1.220851      0.054594    22.362450           0.0
+beta_korean     0.689393      0.062379    11.051632           0.0
+beta_lebanese   0.718121      0.049852    14.405038           0.0
+beta_log_dist  -0.599724      0.012922   -46.412163           0.0
+beta_mexican    1.191239      0.029009    41.063987           0.0
+beta_price     -0.400633      0.012225   -32.771281           0.0
+beta_rating     0.762716      0.015255    49.999109           0.0
+mu_asian        2.020386      0.059454    33.982519           0.0
+              Name  True Value  Estimated Value    T-Test
+0      beta_rating        0.75         0.762716 -0.833553
+1       beta_price       -0.40        -0.400633  0.051812
+2     beta_chinese        0.75         0.696196  0.749980
+3    beta_japanese        1.25         1.220851  0.533933
+4      beta_korean        0.75         0.689393  0.971587
+5      beta_indian        1.00         0.964207  0.559546
+6      beta_french        0.75         0.725736  0.495671
+7     beta_mexican        1.25         1.191239  2.025583
+8    beta_lebanese        0.75         0.718121  0.639477
+9   beta_ethiopian        0.50         0.499692  0.007648
+10   beta_log_dist       -0.60        -0.599724 -0.021395
+11        mu_asian        2.00         2.020386 -0.342885
+Parameters not estimated: ['mu_downtown']
+\end{lstlisting}
+
+The complete specification is available at Section~\ref{sec:nested}.
+
+\section{Estimation of a cross-nested model}
+We estimate a cross-nested logit model with a nest containing all the
+Asian restaurants, and another nest containing all the downtown
+restaurants. The procedure is similar to the one of the previous
+section. Except that the definition of the nests must be provided in
+the context object. The reason is that the membership parameters
+$\alpha$ are included in the data file. In our example, all
+alternatives belonging to both nests are associated with a membership
+parameter set to 0.5.
+
+The definition of the nests is done as follows:
+\begin{lstlisting}
+mu_downtown = Beta('mu_downtown', 1, 1, None, 0)
+downtown_alpha_dict = {i: 0.5 for i in asian_and_downtown} | {
+    i: 1 for i in only_downtown
+}
+downtown_nest = OneNestForCrossNestedLogit(
+    nest_param=mu_downtown, dict_of_alpha=downtown_alpha_dict, name='downtown'
+)
+
+mu_asian = Beta('mu_asian', 1, 1, None, 0)
+asian_alpha_dict = {i: 0.5 for i in asian_and_downtown} | {i: 1.0 for i in only_asian}
+asian_nest = OneNestForCrossNestedLogit(
+    nest_param=mu_asian, dict_of_alpha=asian_alpha_dict, name='asian'
+)
+
+cnl_nests = NestsForCrossNestedLogit(
+    choice_set=all_alternatives,
+    tuple_of_nests=(downtown_nest, asian_nest),
+)
+\end{lstlisting}
+And the definition of the context is
+\begin{lstlisting}
+context = SamplingContext(
+    the_partition=the_partition,
+    sample_sizes=segment_sizes,
+    individuals=observations,
+    choice_column=CHOICE_COLUMN,
+    alternatives=alternatives,
+    id_column=ID_COLUMN,
+    biogeme_file_name=FILE_NAME,
+    utility_function=V,
+    combined_variables=combined_variables,
+    mev_partition=mev_partition,
+    mev_sample_sizes=mev_segment_sizes,
+    cnl_nests=cnl_nests,
+)
+\end{lstlisting}
+
+The other difference with the estimation of the nested logit model is the extraction of the model itself:
+\begin{lstlisting}
+logprob = the_model_generation.get_cross_nested_logit()
+\end{lstlisting}
+The complete specification is available at Section~\ref{sec:cnl}.
+The output generated by the script is the following:
+\begin{lstlisting}
+Number of asian restaurants: 33
+Size of the choice set: 100
+Main partition: 2 segment(s) of size 46, 54
+Main sample: 10: 5/46, 5/54
+Nbr of MEV alternatives: 63
+MEV partition: 1 segment(s) of size 63
+MEV sample: 63: 63/63
+
+Generating 10 + 63 alternatives for 10000 observations
+Define new variables
+File cnl_10_63.dat has been created.
+File biogeme.toml has been parsed.
+...
+Results saved in file cnl_10_63.html
+Results saved in file cnl_10_63.pickle
+Results for model cnl_10_63
+Nbr of parameters:		13
+Sample size:			10000
+Excluded data:			0
+Null log likelihood:		-23025.85
+Final log likelihood:		-14075.7
+Likelihood ratio test (null):		17900.29
+Rho square (null):			0.389
+Rho bar square (null):			0.388
+Akaike Information Criterion:	28177.41
+Bayesian Information Criterion:	28271.14
+
+                   Value  Rob. Std err  Rob. t-test  Rob. p-value
+beta_chinese    0.773087      0.061077    12.657588           0.0
+beta_ethiopian  0.530632      0.041761    12.706267           0.0
+beta_french     0.781766      0.049737    15.717875           0.0
+beta_indian     1.104800      0.052860    20.900552           0.0
+beta_japanese   1.321261      0.046652    28.321448           0.0
+beta_korean     0.800695      0.053581    14.943756           0.0
+beta_lebanese   0.777865      0.049342    15.764714           0.0
+beta_log_dist  -0.578576      0.012611   -45.878882           0.0
+beta_mexican    1.256891      0.030219    41.592729           0.0
+beta_price     -0.412996      0.012435   -33.212769           0.0
+beta_rating     0.749742      0.014775    50.742764           0.0
+mu_asian        2.110265      0.067011    31.491220           0.0
+mu_downtown     1.932841      0.030166    64.072716           0.0
+              Name  True Value  Estimated Value    T-Test
+0      beta_rating        0.75         0.749742  0.017432
+1       beta_price       -0.40        -0.412996  1.045136
+2     beta_chinese        0.75         0.773087 -0.378002
+3    beta_japanese        1.25         1.321261 -1.527495
+4      beta_korean        0.75         0.800695 -0.946153
+5      beta_indian        1.00         1.104800 -1.982602
+6      beta_french        0.75         0.781766 -0.638673
+7     beta_mexican        1.25         1.256891 -0.228048
+8    beta_lebanese        0.75         0.777865 -0.564732
+9   beta_ethiopian        0.50         0.530632 -0.733511
+10   beta_log_dist       -0.60        -0.578576 -1.698804
+11        mu_asian        2.00         2.110265 -1.645472
+12     mu_downtown        2.00         1.932841  2.226278
+\end{lstlisting}
 \clearpage
 
-\cite{BierKrue20}
-\cite{GuevBenA13}
-\cite{BenALerm85}
+
 \bibliographystyle{dcu}
 \bibliography{../dca}
+
+\appendix
+\section{Theoretical background}
+\label{app:theory}
+
+We denote by $\C$ the full choice set, containing $J$ alternatives. We
+assume, without loss of generality, that it is the same for all
+individuals. And we consider a choice model
+\[
+\prob(i | \C; \theta),
+\]
+for which we want to estimate the vector of parameters $\theta$ from data.
+
+When the choice set is large, we are using a sample of
+alternatives. We consider a sampling protocol, based on importance
+sampling, that generates a subset $\D_n$ from $\C$ for each individual
+$n$ in the sample.  Note that the sampling protocol must be exogenous,
+in the sense that the probability for each non chosen alternative to
+be in the choice set must not depend on the chosen alternative or the
+choice model. For estimation purposes, the chosen alternative must
+always be included in $\D_n$.
+
+The maximum likelihood estimation procedure, using the full choice
+set, amounts to solving the following optimization problem:
+\begin{equation}
+  \max_{\theta} \sum_{n=1}^N \ln \prob(i_n | \C; \theta).
+\end{equation}
+The estimator is consistent and asymptotically efficient, but complicated for large choice sets. We are considering instead the conditional maximum likelihood estimator
+\begin{equation}
+  \max_{\theta} \sum_{n=1}^N \ln \prob(i_n | \D_n, \C; \theta),
+\end{equation}
+which is consistent, but not asymptotically efficient\footnote{One of the implications is that the Rao Cramer bound cannot be used to estimate the variance-covariance matrix. The robust estimator or bootstrapping must be used instead.}.
+In order to be useful, the terms in the sum must not depend on the full choice set, that is:
+\[
+\prob(i_n | \D_n, \C; \theta) = \prob(i_n | \D_n; \theta).
+\]
+
+In order to derive $\prob(i_n | \D_n, \C; \theta)$, we rely on Bayes' theorem:
+\begin{equation}
+  \label{eq:cond_maxlike}
+\prob(i_n | \mathcal{D}_n, \C; \theta)
+= \frac{\prob(\mathcal{D}_n | i_n) \prob(i_n | \C; \theta)}{\sum_{j\in\mathcal{D}_n}\prob(\mathcal{D}_n | j) \prob(j | \C; \theta)},
+\end{equation}
+where the quantity $\prob(\mathcal{D}_n | j)$ represents the probability that the sample of alternatives $\D_n$ has been generated, conditional on the fact that alternative $j$ has been chosen by $n$.
+
+\subsection{Logit model}
+If we consider the logit model, we have
+\[
+\prob(i_n | \C; \theta) = \frac{e^{\mu V_{i_n,n}}}{\sum_{j\in\C} e^{\mu V_{jn}}} = \frac{e^{\mu V_{i_n,n}}}{\gamma_n},
+\]
+where $\gamma_n$ is the denominator. The point is that $\gamma_n$ cancels out in \req{eq:cond_maxlike}, so that we obtain
+\begin{equation}
+  \label{eq:logit}
+  \prob(i_n | \mathcal{D}_n, \C; \theta) = \prob(i_n | \mathcal{D}_n; \theta) =\frac{e^{\mu V_{i_n,n} + \ln(\prob(\mathcal{D}_n | i_n) )} }{\sum_{j\in\mathcal{D}} \; e^{\mu V_{jn}+ \ln(\prob(\mathcal{D}_n | j))}},
+    \end{equation}
+which does not depend on $\C$ anymore. Concretely, it means that we simply need to estimate a logit model on the sampled set of alternatives, where the utility functions include the correction term $\ln(\prob(\mathcal{D}_n | j))$.
+
+\subsection{MEV model}
+The derivation is similar for the MEV model, defined as
+\[
+\prob(i_n | \C;\theta) = \frac{e^{V_{i_n,n} + \ln G_{i_n}\left(e^{V_{1n}},\ldots,e^{V_{Jn}}\right)}}{\sum_{j\in\C} e^{V_{jn} + \ln G_j\left(e^{V_{1n}},\ldots,e^{V_{Jn}}\right)}} =  \frac{e^{V_{i_n} + \ln G_{i_n}\left(e^{V_{1n}},\ldots,e^{V_{Jn}}\right)}}{\gamma_n}.
+    \]
+    where $G$ is the MEV generating function, $\gamma_n$ is the denominator, and $G_i$ is its $i$th partial derivative. For example, for the nested logit model, 
+    \begin{equation}
+      \label{eq:gi_nested}
+      \ln G_i = \ln \mu  + (\mu_m -1) V_{in} +(\frac{\mu}{\mu_m}-1)(\ln \sum_{j \in \C_m} \exp(\mu_m V_{jn})),
+    \end{equation}
+    where $\C_m$ is the nest $m$. And for the cross-nested logit model,
+    \begin{equation}
+      \label{eq:gi_cnl}
+    G_i = \mu \sum_{m=1}^M \alpha_{im}^{\frac{\mu_m}{\mu}} \exp((\mu_m-1)V_{in})\left( \sum_{j\in\C} \alpha_{jm}^{\frac{\mu_m}{\mu}} \exp(\mu_m V_{jn}) \right)^{\frac{\mu}{\mu_m}-1}.
+    \end{equation}
+Again, $\gamma_n$ cancels out in  \req{eq:cond_maxlike}, so that we obtain
+\begin{equation}
+  \label{eq:mev}
+\prob(i_n | \D_n, \C;\theta) = \frac{e^{V_{i_{n},n} + \ln G_{i_n}\left(e^{V_{1n}},\ldots,e^{V_{Jn}}\right)+ \ln(\prob(\mathcal{D}_n | i_n))}}{\sum_{j\in\D_n} e^{V_{jn} + \ln G_j\left(e^{V_{1n}},\ldots,e^{V_{Jn}}\right)+ \ln(\prob(\mathcal{D}_n | j))}}.
+\end{equation}
+Contrarily to the logit case, the expression above still involves the full choice set, which is needed to calculate $G_i$. 
+\citeasnoun{GuevBenA13} have proposed to approximate any sum of alternatives in the $G_i$ by a sum involving only sampled alternatives.  We therefore  need another sample of alternatives. Note that the chosen alternative does not need to belong to it. We denote by $\mathcal{M}_n$ the set of alternatives sampled for this purpose. The index $n$ indicates that this set varies across individuals.
+Then, the sums involved in the MEV terms can be approximated in the following way:
+\begin{equation}
+  \label{eq:approx_nested}
+  \sum_{j \in \C_m} \exp(\mu_m V_{jn}) \approx \sum_{j \in \C_m \cap \mathcal{M}} w_{jn}\exp(\mu_m V_{jn}),
+\end{equation}
+  in \req{eq:gi_nested}, or
+\begin{equation}
+  \label{eq:approx_cnl}
+\sum_{j\in\C} \alpha_{jm}^{\frac{\mu_m}{\mu}} \exp(\mu_m V_{jn}) \approx \sum_{j\in\mathcal{M}}  w_{jn}\alpha_{jm}^{\frac{\mu_m}{\mu}} \exp(\mu_m V_{jn})
+\end{equation}
+in \req{eq:gi_cnl}, where
+\begin{equation}
+  \label{eq:w}
+    w_{jn} = \frac{1}{\prob(j)},
+\end{equation}
+    where $\prob(j)$ is the probability that alternative $j$ is integrated in the sample.
+
+
+We refer the reader to \citeasnoun{BenALerm85},
+\citeasnoun{GuevBenA13}, \citeasnoun{BierKrue20} for more details
+about the theoretical background.
+
+\section{Implementation}
+
+For the implementation of the MEV models, we need to deal with the fact that there are
+two numbering of alternatives:
+\begin{itemize}
+\item the numbering associated with the original choice set,
+\item a specific numbering for each sample.
+\end{itemize}
+We refer to the ``number'' of the alternative in the original choice set as its ``identifier'', or ``ID''. We use the letter $i$ to refer to them. We refer to the number of the alternative in the sampled choice set as its ``index'', and we use the letters $j$ for the main sample, and $k$ for the MEV sample.
+For observation $n$, the identifier of alternative with index $j$ is denoted by $i_{jn}$.
+
+\subsection{Nested logit}
+
+Consider nest $\C_m$, with parameter $\mu_m$. The calculation of \req{eq:approx_nested} is implemented as
+\[
+  \gamma_m =  \sum_{k \in \mathcal{M}} \Delta(i_{kn} \in \C_m) w_{kn}\exp(\mu_m V_{kn}),
+ \]
+  where $\Delta(i_{kn} \in \C_m)$ is 1 if $i_{kn} \in \C_m$ and 0 otherwise.
+  Then, the calculation of the MEV term for alternative $j\in\mathcal{D}$ is
+\[
+        \ln G_j = \ln \mu  + (\mu_m -1) V_{jn} + \sum_m \Delta(i_{jn}\in \C_m) (\frac{\mu}{\mu_m}-1)\ln \gamma_m.
+\]
+  
+\subsection{Cross Nested logit}
+
+The difficulty with the cross nested logit model is the handling of
+the nest membership parameters $\alpha$, that are associated with a
+nest and an alternative from the original choice set. We assume that the $\alpha$ parameters are fixed and available in the data set.
+
+The calculation of \req{eq:approx_cnl} is implemented as
+\[
+\gamma_m =  \sum_{k\in\mathcal{M}} \Delta(\alpha_{km} \neq 0) w_{kn}\alpha_{km}^{\frac{\mu_m}{\mu}} \exp(\mu_m V_{kn}).
+\]
+Note that the factor $\Delta(\alpha_{km} \neq 0)$ is redundant from a mathematical point of view, but is designed to speed up the calculation. Then, the calculation of the MEV term for alternative $j\in\D$ is
+\[
+    G_j =  \mu \sum_{m=1}^M  \Delta(\alpha_{jm} \neq 0) \alpha_{jm}^{\frac{\mu_m}{\mu}} \exp((\mu_m-1)V_{jn})\gamma_m^{\frac{\mu}{\mu_m}-1}.
+    \]
+    Finally, we shift each utility by $\ln G_j$.
+
+\section{Sampling protocol}
+\label{sec:protocol}
+
+For the set $\mathcal{D}_n$, the Biogeme implementation assumes the following sampling procedure:
+
+\begin{enumerate}
+  \item The full  choice set is partitioned into $K$ segments of size $R_k$: $J=\sum_{k=1}^K R_k$.
+  \item Let $r_k$ be the number of alternatives to be sampled in each segment, so that the size of $\mathcal{D}_n$: $\sum_{k=1}^K r_k$.
+  \item Denote $k(i)$ the segment containing the chosen alternative $i$.
+  \item Randomly draw $r_{k(i)}-1$ alternatives among the non chosen ones in segment $k(i)$, and add $i$ to obtain $\mathcal{D}_{k(i)}$.
+  \item Randomly draw $r_k$ alternatives in each segment $k$, $k\neq k(i)$ to obtain $\mathcal{D}_k$.
+  \item The sample is composed of the chosen alternative and all draws: $\mathcal{D} = \cup_k \mathcal{D}_k$.
+\end{enumerate}
+
+We can therefore calculate:
+
+\begin{align*}
+      \prob(\mathcal{D} | i) &= \cvect{R_{k(i)}-1 \\ r_{k(i)}-1} \prod_{k=2}^K \cvect{R_k \\ r_k} \\
+      &= \frac{R_{k(i)}}{r_{k(i)}} \prod_{k=1}^K \cvect{R_k \\ r_k} \\
+        &= \frac{1}{\prob(i)} \prob(\mathcal{D}).
+\end{align*}
+Note that the quantity $\prob(\mathcal{D})$ is a constant, that cancels out in all the expressions above. Therefore, instead of using $\prob(\mathcal{D} | i)$ as a correction term in \req{eq:logit} and \req{eq:mev}, it is equivalent to use
+\begin{equation}
+\frac{R_{k(i)}}{r_{k(i)}}  \propto \prob(\mathcal{D} | i),
+\end{equation}
+which is the number of alternatives in the segment containing alternative $i$, divided by the number of alternatives sampled from this segment, that is the inverse of the probability to sample alternative $i$. We can also write
+\begin{equation}
+\ln \prob(\mathcal{D} | i) = \frac{1}{\prob(i)} + K = \ln R_{k(i)} - \ln r_{k(i)} + K,
+\end{equation}
+where $K$ is a constant independent from $i$ that cancels out  in \req{eq:logit} and \req{eq:mev}.
+The correction term calculated by Biogeme is the opposite of this term:
+\begin{equation}
+  \label{eq:alt_sampling_proba}
+\ln \prob(i) = \ln r_{k(i)} - \ln R_{k(i)}.
+\end{equation}
+
+For the set $M_n$, the Biogeme implementation is the same as above, with two important differences:
+\begin{enumerate}
+\item the chosen alternative does not play any role in the sampling procedure,
+\item it is not necessary to partition the full choice
+  set. Alternatives that are alone in a nest do not contribute to
+  the calculation of the MEV terms, and can therefore be excluded.
+\end{enumerate}
+
+The procedure works as follows:
+\begin{enumerate}
+  \item The set of alternatives involved in nests is partitioned into $K$ segments of size $R_k$: $J=\sum_{k=1}^K R_k$.
+  \item Let $r_k$ be the number of alternatives to be sampled in each segment, so that the size of $\mathcal{M}_n$: $\sum_{k=1}^K r_k$.
+  \item Randomly draw $r_k$ alternatives in each segment $k$ to obtain $\mathcal{M}_k$.
+  \item The sample is composed of  all draws: $\mathcal{M}_n = \cup_k \mathcal{M}_k$.
+\end{enumerate}
+
+We can therefore calculate \req{eq:w} as:
+\[
+    w_{jn} = \frac{1}{\prob(j)} = \frac{R_{k(j)}}{r_{k(j)}}.
+\]
+
+\section{Python codes}
+
+\subsection{Sets of alternatives}
+\label{sec:alternatives}
+\lstinputlisting[style=numbers]{\examplesPath/sampling/alternatives.py}
+
+\subsection{Model specification}
+\label{sec:specification}
+\lstinputlisting[style=numbers]{\examplesPath/sampling/specification.py}
+
+\subsection{Estimation of the logit model}
+\label{sec:logit}
+\lstinputlisting[style=numbers]{\examplesPath/sampling/logit.py}
+
+\subsection{Estimation of the nested logit model}
+\label{sec:nested}
+\lstinputlisting[style=numbers]{\examplesPath/sampling/nested.py}
+
+\subsection{Estimation of the cross-nested logit model}
+\label{sec:cnl}
+\lstinputlisting[style=numbers]{\examplesPath/sampling/cnl.py}
+
 
 \end{document}
