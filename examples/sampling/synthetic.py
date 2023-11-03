@@ -12,9 +12,16 @@ from biogeme.nests import (
     OneNestForNestedLogit,
     NestsForNestedLogit,
     OneNestForCrossNestedLogit,
-    NestsForCrossNestedLogit
+    NestsForCrossNestedLogit,
 )
-from alternatives import asian, downtown, all_alternatives
+from alternatives import (
+    asian,
+    downtown,
+    asian_and_downtown,
+    only_asian,
+    only_downtown,
+    all_alternatives,
+)
 from true_parameters import true_parameters
 
 NUMBER_OF_DRAWS = 5
@@ -28,8 +35,12 @@ LOGIT_DRAWS = 'logit_draws.csv.gz'
 NESTED_DRAWS = 'nested_draws.csv.gz'
 CNL_DRAWS = 'cnl_draws.csv.gz'
 RESTAURANTS_FILE_NAME = 'restaurants.dat'
-OBS_FILE_NAME = 'individuals.csv.gz'
+OBS_FILE_NAME = 'individuals.dat'
+# OBS_FILE_NAME = 'tiny.dat'
+
 CHOICE_FILE_NAME = 'obs_choice.dat'
+# CHOICE_FILE_NAME = 'tiny_choice.dat'
+
 
 def choice_from_logp(logp: np.ndarray) -> int:
     """Draw a choice given the vector of log probabilities
@@ -172,14 +183,18 @@ else:
     print('Simulation: cross-nested logit')
 
     mu_downtown = true_parameters['mu_downtown']
-    downtown_alpha_dict = {i: 0.5 for i in downtown}
+    downtown_alpha_dict = {i: 0.5 for i in asian_and_downtown} | {
+        i: 1 for i in only_downtown
+    }
     downtown_nest = OneNestForCrossNestedLogit(
         nest_param=mu_downtown, dict_of_alpha=downtown_alpha_dict, name='downtown'
     )
 
     # Asian
     mu_asian = true_parameters['mu_asian']
-    asian_alpha_dict = {i: 0.5 for i in asian}
+    asian_alpha_dict = {i: 0.5 for i in asian_and_downtown} | {
+        i: 1.0 for i in only_asian
+    }
     asian_nest = OneNestForCrossNestedLogit(
         nest_param=mu_asian, dict_of_alpha=asian_alpha_dict, name='asian'
     )
@@ -202,7 +217,8 @@ else:
 
 def draw_samples(row):
     return np.random.choice(range(len(row)), size=NUMBER_OF_DRAWS, p=row)
-    
+
+
 print('Generating synthetic choices')
 if os.path.exists(LOGIT_DRAWS):
     print(f'File {LOGIT_DRAWS} already exists')
@@ -230,7 +246,7 @@ else:
     cnl_samples = prob.apply(draw_samples, axis=1, result_type='expand')
     cnl_samples.to_csv(CNL_DRAWS, compression='gzip', index=False)
     print(f'File {CNL_DRAWS} has been created')
-    
+
 logit = pd.read_csv(LOGIT_DRAWS)
 nested = pd.read_csv(NESTED_DRAWS)
 cnl = pd.read_csv(CNL_DRAWS)
