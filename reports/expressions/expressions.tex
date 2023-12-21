@@ -193,8 +193,8 @@ epsilon *= 2.0
 
 Arithmetic expressions in Biogeme are based on the following principles.
 \begin{itemize}
-\item A \emph{valid} value is a value $-\sqrt{u} \leq x \leq \sqrt{u}$, that is a value between $-10^{154}$ and $10^{354}$.
-\item Each arithmetic expression takes as input one or several valid values, and always returns a valid value.
+\item A \emph{valid} value is a value $-\sqrt{u} \leq x \leq \sqrt{u}$, that is a value between $-10^{154}$ and $10^{154}$.
+\item Each arithmetic expression takes as input one or several valid values, and returns a valid value or raises an exception.
 \item A value $x$ such that $x \leq \sqrt{\varepsilon}$, that is $x \leq 10^{-8}$ is considered to be zero in continuous arithmetic.  
 \end{itemize}
 
@@ -256,8 +256,19 @@ The elementary expressions are the building blocks of any expression. They corre
   \lstinline+ell+ is the lower bound on the parameter, \lstinline+u+ is the upper bound on the parameter, and \lstinline+fixed+ specifies if the parameter must be fixed (\lstinline+fixed=1+) of free (\lstinline+fixed=0+).
   If the value \lstinline+x_0+, \lstinline+ell+ or \lstinline+u+  is not valid, in the sense defined above, an exception is triggered.
 \item[Random variable] A random variable is used in the context of numerical integration.
+  The syntax is
+  \begin{lstlisting}
+    RandomVariable('name_of_the_random_variable').
+  \end{lstlisting}
 \item[Draws] Random draws are used in the context of Monte-Carlo integration. 
-
+  The syntax is
+  \begin{lstlisting}
+    bioDraws('name_of_the_draws', draw_type)
+  \end{lstlisting}
+  where \lstinline+draw_type+ is a string. It can refer to  a user defined type of draws, or one of the native draws from the following list:
+  \begin{lstlisting}
+'UNIFORM', 'UNIFORM_ANTI', 'UNIFORM_HALTON2', 'UNIFORM_HALTON3', 'UNIFORM_HALTON5', 'UNIFORM_MLHS', 'UNIFORM_MLHS_ANTI', 'UNIFORMSYM', 'UNIFORMSYM_ANTI', 'UNIFORMSYM_HALTON2', 'UNIFORMSYM_HALTON3', 'UNIFORMSYM_HALTON5', 'UNIFORMSYM_MLHS', 'UNIFORMSYM_MLHS_ANTI', 'NORMAL', 'NORMAL_ANTI', 'NORMAL_HALTON2', 'NORMAL_HALTON3', 'NORMAL_HALTON5', 'NORMAL_MLHS', 'NORMAL_MLHS_ANTI'
+  \end{lstlisting}
 \end{description}
 
 Biogeme calculates derivatives with respects to ``literals'', that is, variables and parameters. In the following, we denote by $x_i$ and $x_j$ the literals that are involved in the derivatives.
@@ -276,7 +287,12 @@ and
 
 Unary expressions take one value as input. Like any expression, they return a value and the derivatives.
 \begin{description}
-\item[Unary minus] If $\alpha$ is the input value, it returns $f(\alpha)=-\alpha$. The syntax is simply
+\item[Unary minus]
+  Syntax: if \lstinline+alpha+ is the input value, the unary minus is
+  \begin{lstlisting}
+    -alpha
+  \end{lstlisting}
+  If $\alpha$ is the input value, it returns $f(\alpha)=-\alpha$. The syntax is simply
   \begin{lstlisting}
     -alpha
   \end{lstlisting}
@@ -288,7 +304,11 @@ Unary expressions take one value as input. Like any expression, they return a va
   \[
   \frac{\partial^2 f}{\partial x_i \partial x_j} = - \frac{\partial \alpha}{\partial x_i \partial x_j}.
   \]
-\item[Exponential] Let $\alpha$ be the input value.
+\item[Exponential] If \lstinline+alpha+ is the input value, the syntax is
+  \begin{lstlisting}
+    exp(alpha)
+  \end{lstlisting}
+  Let $\alpha$ be the input value.
   \begin{itemize}
   \item  If $\alpha \leq \ln(\sqrt{u})$, then
     \[
@@ -309,7 +329,11 @@ Unary expressions take one value as input. Like any expression, they return a va
     \]
   \end{itemize}
 
-\item[Logarithm] Let $\alpha$ be the input value.
+\item[Logarithm] If \lstinline+alpha+ is the input value, the syntax is
+  \begin{lstlisting}
+    log(alpha)
+  \end{lstlisting}
+  Let $\alpha$ be the input value.
   \begin{itemize}
   \item If $\sqrt{\varepsilon} \leq \alpha \leq e^{\sqrt{u}}$, we define
     \begin{align*}
@@ -323,32 +347,195 @@ Unary expressions take one value as input. Like any expression, they return a va
     \frac{\partial^2 \alpha}{\partial x_i \partial x_j}
       \right).
     \end{align*}
-  \item If $\alpha > e^{\sqrt{u}}$, we define
-    \[
-    f(\alpha) = \frac{\partial f(\alpha)}{\partial x_i} = \frac{\partial^2 f(\alpha)}{\partial x_i \partial x_j} = \sqrt{u}.
-    \]
+  \item If $\alpha > e^{\sqrt{u}}$, we define 
+    \begin{align*}
+      f(\alpha) &= \sqrt{u}, \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= \sqrt{u},\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i \partial x_j} &= 0.
+    \end{align*}
   \item If $0 \leq  \alpha < \sqrt{\varepsilon}$, we define
-    
+    \begin{align*}
+      f(\alpha) &= -\sqrt{u}, \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= \sqrt{u},\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= 0.\\
+    \end{align*}
   \end{itemize}
- 
+
+
+\item[Logarithm or zero] This expression is the same as the logarithm, except that if the argument is zero, it returns 0. If \lstinline+alpha+ is the input value, the syntax is
+  \begin{lstlisting}
+    logzero(alpha)
+  \end{lstlisting}
+  Let $\alpha$ be the input value.
+  \begin{itemize}
+  \item If $\sqrt{\varepsilon} \leq \alpha \leq e^{\sqrt{u}}$, we define
+    \begin{align*}
+    f(\alpha)& =\ln(\alpha), \\ 
+    \frac{\partial f(\alpha)}{\partial x_i} &= v\left(\frac{1}{\alpha} \frac{\partial \alpha}{\partial x_i}\right), \\
+    \frac{\partial^2 f(\alpha)}{\partial x_i \partial x_j} &=
+    v\left(-\frac{1}{\alpha^{2}}
+    \frac{\partial \alpha}{\partial x_i}
+    \frac{\partial \alpha}{\partial x_j }
+    + \frac{1}{\alpha}
+    \frac{\partial^2 \alpha}{\partial x_i \partial x_j}
+      \right).
+    \end{align*}
+  \item If $\alpha > e^{\sqrt{u}}$, we define 
+    \begin{align*}
+      f(\alpha) &= \sqrt{u}, \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= \sqrt{u},\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i \partial x_j} &= 0.
+    \end{align*}
+  \item If $0 <  \alpha < \sqrt{\varepsilon}$, we define
+    \begin{align*}
+      f(\alpha) &= -\sqrt{u}, \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= \sqrt{u},\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= 0.\\
+    \end{align*}
+  \item If $\alpha = 0$, we define
+    \begin{align*}
+      f(\alpha) &= 0, \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= 0,\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= 0.\\
+    \end{align*}
+  \end{itemize}
+
+ \item[Sinus] If \lstinline+alpha+ is the input value, the syntax is
+  \begin{lstlisting}
+    sin(alpha)
+  \end{lstlisting}
+  Let $\alpha$ be the input value. We define
+  \begin{align*}
+      f(\alpha) &= \sin(\alpha), \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= \cos(\alpha) \frac{\partial \alpha}{\partial x_i},\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= -\sin(\alpha)\frac{\partial \alpha}{\partial x_i}\frac{\partial \alpha}{\partial x_j} + \cos(\alpha)\frac{\partial^2 \alpha}{\partial x_i\partial x_j}.\\
+  \end{align*}
+
+ \item[Cosinus] If \lstinline+alpha+ is the input value, the syntax is
+  \begin{lstlisting}
+    cos(alpha)
+  \end{lstlisting}
+  Let $\alpha$ be the input value. We define
+  \begin{align*}
+      f(\alpha) &= \cos(\alpha), \\
+      \frac{\partial f(\alpha)}{\partial x_i} &= -\sin(\alpha) \frac{\partial \alpha}{\partial x_i},\\
+      \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= -\cos(\alpha) \frac{\partial \alpha}{\partial x_i} \frac{\partial \alpha}{\partial x_j}- \sin(\alpha)\frac{\partial^2 \alpha}{\partial x_i\partial x_j}.\\
+  \end{align*}
+    
+\item[Derive] This expression calculates the derivative of the input
+  with respect to one of the literals. If \lstinline+alpha+ is the
+  input expression, the syntax for its derivative with respect to a
+  literal \lstinline+y+ is
+  \begin{lstlisting}
+    Derive(alpha, 'y')
+  \end{lstlisting}
+  Let $\alpha$ be the input value. Then,
+  \[
+  f(\alpha) = v\left(\frac{\partial \alpha}{\partial y}\right).
+  \]
+  The derivatives of this expression are not evaluated by Biogeme.
+
+\item[Integrate] This expression performs numerical integration using
+  a Gauss-Hermite algorithm. If takes as argument an expression
+  \lstinline+alpha+ that includes a random variable
+  \lstinline+omega+. The syntax is
+  \begin{lstlisting}
+    Integrate(alpha, 'omega')
+  \end{lstlisting}
+  Let $\alpha$ be the input value. We define
+  \begin{align*}
+    f(\alpha) &= v\left(\int_{-\infty}^{+\infty} \alpha(\omega) d\omega\right), \\
+    \frac{\partial f(\alpha)}{\partial x_i} &= v\left(\int_{-\infty}^{+\infty} \frac{\partial \alpha(\omega)}{\partial x_i} d\omega\right),\\
+    \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= v\left( \int_{-\infty}^{+\infty} \frac{\partial^2 \alpha(\omega)}{\partial x_i \partial x_j} d\omega\right).\\
+  \end{align*}
+
+NEED TO INCLUDE MORE INFO ABOUT THE IMPLEMENTATION
+  
+\item[MonteCarlo] This expression approximates an integral using Monte-Carlo integration.
+If takes as argument an expression
+  \lstinline+alpha+ that includes draws.
+The syntax is
+  \begin{lstlisting}
+    MonteCarlo(alpha)
+  \end{lstlisting}
+  Let $\alpha$ be the input value. We define
+  \begin{align*}
+    f(\alpha) &= v\left(\frac{1}{R}\sum_{r=1}^R \alpha(\xi_r)\right), \\
+    \frac{\partial f(\alpha)}{\partial x_i} &= v\left(\frac{1}{R}\sum_{r=1}^R \frac{\partial \alpha(\xi_r)}{\partial x_i}\right), \\
+    \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= v\left(\frac{1}{R}\sum_{r=1}^R \frac{\partial^2 \alpha(\xi_r)}{\partial x_i \partial x_j}\right), \\
+  \end{align*}
+  where $R$ is a parameter defining the number of draws to be used, and $\xi_r$ are the values of the draws.
+\item[bioNormalCdf] This expression provides an analytical approximation of the cumulative distribution function of a normal random variable. If \lstinline+alpha+ is the input, the syntax is
+  \begin{lstlisting}
+    bioNormalCdf(alpha).
+  \end{lstlisting}
+  Let $\alpha$ be the input value. We define
+  \begin{align*}
+    f(\alpha) &= , \\
+    \frac{\partial f(\alpha)}{\partial x_i} &= ,\\
+    \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= .\\
+  \end{align*}
+NEED TO INCLUDE MORE INFO ABOUT THE IMPLEMENTATION
+
+\item[Belongs to] This expression verifies if the input value belongs to a set. 
+If \lstinline+alpha+ is the input, the syntax is
+\begin{lstlisting}
+  BelongsTo(alpha, {1, 2, 3})
+\end{lstlisting}
+It returns the value 1 if the value belongs to the set, and 0 otherwise. The function is not differentiable.
+
+\item[Trajectory] This expression is necessary when the data is organized as panel data. It means that several observations are available for the same individual.
+If \lstinline+alpha+ is the input, the syntax is
+\begin{lstlisting}
+  PanelLikelihoodTrajectory(alpha)
+\end{lstlisting}
+We denote by $\alpha_t$ the value of the input expression for observation $t$. Those values must be positive. If not, an exception is raised.
+
+Then, we define
+  \begin{align*}
+    f(\alpha) &= v\left(\prod_{t=1}^T \alpha_t\right), \\
+    \frac{\partial f(\alpha)}{\partial x_i} &= v\left(f(\alpha)\sum_{t=1}^T \frac{1}{\alpha_t} \frac{\partial \alpha_t}{\partial x_i}\right),\\
+    \frac{\partial^2 f(\alpha)}{\partial x_i\partial x_j} &= v\left(\frac{1}{f(\alpha)}\frac{\partial f(\alpha)}{\partial x_i}\frac{\partial f(\alpha)}{\partial x_j} + f \sum_{t=1}^T\left[\frac{1}{\alpha_t}\frac{\partial^2 \alpha_t}{\partial x_i \partial x_j } - \frac{1}{\alpha_t^2} \frac{\partial \alpha_t}{\partial x_i}\frac{\partial \alpha_t}{\partial x_j} \right]\right).\\
+  \end{align*}
+
 \end{description}
   
 
 
 
-bioExprLogzero.h
-bioExprDerive.h
-bioExprIntegrate.h / bioExprGaussHermite.h
-bioExprMontecarlo.h
-bioExprNormalCdf.h
-bioExprPanelTrajectory.h
+
 \subsection{Comparison expressions}
-bioExprEqual.h
-bioExprNotEqual.h
-bioExprGreater.h
-bioExprGreaterOrEqual.h
+A comparison expression expects two expressions as argument. The output  is either 0 or 1, where 0 means ``False'' and 1 means ``True''. 
+  
+
+\begin{description}
+\item[Equal] This expression returns 1 if the two arguments have the same value, and 0 otherwise.
+  The expression is not differentiable. If \lstinline+alpha+ and \lstinline+beta+ are the two arguments,  the syntax is
+  \begin{lstlisting}
+    alpha == beta
+  \end{lstlisting}
+
+\item[Not equal] This expression returns 1 if the two arguments do not have the same value, and 0 otherwise.
+  The expression is not differentiable. If \lstinline+alpha+ and \lstinline+beta+ are the two arguments,  the syntax is
+  \begin{lstlisting}
+    alpha != beta
+  \end{lstlisting}
+
+\item[Greater than] This expression returns 1 if the value of the first argument is strictly greater than the value of the second one, and 0 otherwise.
+  The expression is not differentiable. If \lstinline+alpha+ and \lstinline+beta+ are the two arguments,  the syntax is
+  \begin{lstlisting}
+    alpha > beta
+  \end{lstlisting}
+
+\item[Greater or equal than] This expression returns 1 if the value of the first argument is greater or equal than the value of the second one, and 0 otherwise.
+  The expression is not differentiable. If \lstinline+alpha+ and \lstinline+beta+ are the two arguments,  the syntax is
+  \begin{lstlisting}
+    alpha >= beta
+  \end{lstlisting}
+  
 bioExprLess.h
 bioExprLessOrEqual.h
+\end{description}
 \subsection{Binary expressions}
 bioExprPlus.h
 bioExprMinus.h
