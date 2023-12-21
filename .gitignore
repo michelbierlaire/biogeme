@@ -397,3 +397,10 @@ sphinx/sphinx.log
 examples/sampling/sampled_alternatives.dat
 reports/sampling_of_alternatives/sampling_of_alternatives.pdf
 reports/sampling_of_alternatives/sampling_of_alternatives.ps
+dist/python_dateutil-2.8.2-py2.py3-none-any.whl
+dist/pytz-2023.3.post1-py2.py3-none-any.whl
+dist/scipy-1.11.4-cp312-cp312-macosx_12_0_arm64.whl
+dist/six-1.16.0-py2.py3-none-any.whl
+dist/tomlkit-0.12.3-py3-none-any.whl
+dist/tqdm-4.66.1-py3-none-any.whl
+dist/tzdata-2023.3-py2.py3-none-any.whl
