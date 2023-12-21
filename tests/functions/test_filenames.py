@@ -12,10 +12,10 @@ import biogeme.filenames as fn
 
 class TestVersion(unittest.TestCase):
     def test_get_new_filename(self):
-        the_name = fn.getNewFileName('the_name', 'ext')
+        the_name = fn.get_new_file_name('the_name', 'ext')
         self.assertEqual(the_name, 'the_name.ext')
         with open(the_name, 'w') as f:
             pass
-        the_next_name = fn.getNewFileName('the_name', 'ext')
+        the_next_name = fn.get_new_file_name('the_name', 'ext')
         self.assertEqual(the_next_name, 'the_name~00.ext')
         os.remove(the_name)

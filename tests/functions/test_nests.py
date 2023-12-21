@@ -10,7 +10,6 @@ from biogeme.nests import (
     NestsForNestedLogit,
     OneNestForCrossNestedLogit,
     NestsForCrossNestedLogit,
-    process_alpha_dict,
 )
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, Expression
@@ -42,8 +41,7 @@ class TestNestsForNestedLogitExtended(unittest.TestCase):
         )
 
         nests_for_nested_logit = NestsForNestedLogit(
-            choice_set=choice_set,
-            tuple_of_nests=nests_tuple
+            choice_set=choice_set, tuple_of_nests=nests_tuple
         )
 
         # Assuming that nest names are set in the NestsForNestedLogit constructor
@@ -61,8 +59,7 @@ class TestNestsForNestedLogitExtended(unittest.TestCase):
 
         with self.assertRaisesRegex(BiogemeError, '5, 6'):
             nests_for_nested_logit = NestsForNestedLogit(
-                choice_set=choice_set,
-                tuple_of_nests=nests
+                choice_set=choice_set, tuple_of_nests=nests
             )
 
     def test_check_intersection_with_overlapping_nests(self):
@@ -74,8 +71,7 @@ class TestNestsForNestedLogitExtended(unittest.TestCase):
         )
 
         nests_for_nested_logit = NestsForNestedLogit(
-            choice_set=choice_set,
-            tuple_of_nests=nests
+            choice_set=choice_set, tuple_of_nests=nests
         )
 
         # Test that check_intersection identifies the intersection
@@ -160,13 +156,6 @@ class TestNestsForCrossNestedLogit(unittest.TestCase):
         )
         for nest in the_nests:
             self.assertIsInstance(nest, OneNestForCrossNestedLogit)
-
-    def test_process_alpha_dict(self):
-        alpha_param_1 = Beta('alpha_param_1', 0.5, 0, 1, 0)
-        alpha_dict_1 = {1: alpha_param_1, 2: 0.0, 3: 1.0}
-        processed_dict = process_alpha_dict(alpha_dict_1)
-        for key, alpha in processed_dict.items():
-            self.assertIsInstance(alpha, Expression)
 
 
 if __name__ == '__main__':

@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
+from biogeme.expressions.numeric_tools import validate, MAX_VALUE
 from biogeme import models
 from biogeme.expressions import IdManager, TypeOfElementaryExpression
 from biogeme_optimization.function import FunctionToMinimize, FunctionData
@@ -45,11 +46,6 @@ class test_expressions(unittest.TestCase):
         self.xi2 = ex.bioDraws('xi2', 'UNIF')
         self.xi3 = ex.bioDraws('xi3', 'WRONGTYPE')
         self.addTypeEqualityFunc(pd.DataFrame, self.assertDataframeEqual)
-
-    def test_repr(self):
-        result = repr(self.beta1)
-        expected_result = 'beta1(init=0.2)'
-        self.assertEqual(result, expected_result)
 
     def test_errors(self):
         with self.assertRaises(excep.BiogemeError):
@@ -977,6 +973,39 @@ class test_expressions(unittest.TestCase):
         self.assertAlmostEqual(norm_g, 0.0, delta=1.0e-4)
         norm_h = np.linalg.norm(gdiff)
         self.assertAlmostEqual(norm_h, 0.0, delta=1.0e-4)
+
+
+class TestValidateFunction(unittest.TestCase):
+    def setUp(self):
+        self.outside_up = np.nextafter(MAX_VALUE, np.inf)
+        self.inside_up = np.nextafter(MAX_VALUE, -np.inf)
+        self.outside_low = np.nextafter(-MAX_VALUE, -np.inf)
+        self.inside_low = np.nextafter(-MAX_VALUE, np.inf)
+
+    def test_value_within_range(self):
+        self.assertEqual(validate(0), 0)
+        self.assertEqual(validate(self.inside_up), self.inside_up)
+        self.assertEqual(validate(self.inside_low), self.inside_low)
+
+    def test_value_exceeds_max_with_modify(self):
+        self.assertEqual(validate(self.outside_up, modify=True), MAX_VALUE)
+
+    def test_value_exceeds_max_without_modify(self):
+        with self.assertRaises(excep.BiogemeError):
+            validate(self.outside_up, modify=False)
+
+    def test_value_less_than_min_with_modify(self):
+        self.assertEqual(validate(self.outside_low, modify=True), -MAX_VALUE)
+
+    def test_value_less_than_min_without_modify(self):
+        with self.assertRaises(excep.BiogemeError):
+            validate(self.outside_low, modify=False)
+
+    def test_edge_case_max_value(self):
+        self.assertEqual(validate(MAX_VALUE), MAX_VALUE)
+
+    def test_edge_case_min_value(self):
+        self.assertEqual(validate(-MAX_VALUE), -MAX_VALUE)
 
 
 if __name__ == '__main__':
