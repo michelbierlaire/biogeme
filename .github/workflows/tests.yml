@@ -1,14 +1,10 @@
 on:
   push:
     branches:
-      - working
       - master
-      - dev
   pull_request:
     branches:
-      - working
       - master
-      - dev
 
 jobs:
   test:
