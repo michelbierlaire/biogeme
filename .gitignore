@@ -25,6 +25,8 @@ archive/tools/prepareData/biocheckdata
 archive/tools/prepareData/biopreparedata
 archive/tools/prepareData/biosampledata
 
+docs/source/auto_examples
+
 #############################################
 #                                           #
 #                Compilation                #
