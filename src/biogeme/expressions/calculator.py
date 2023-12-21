@@ -5,8 +5,13 @@
 
 """
 import logging
+from typing import TYPE_CHECKING
 import cythonbiogeme.cythonbiogeme as ee
 from biogeme.exceptions import BiogemeError
+
+if TYPE_CHECKING:
+    from .base_expressions import Expression
+    from biogeme.database import Database
 
 logger = logging.getLogger(__name__)
 

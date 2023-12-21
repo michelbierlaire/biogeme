@@ -45,7 +45,7 @@ class Controller:
         :rtype: list(str)
         """
         return [
-            f'{self.controller_name}{SELECTION_SEPARATOR}{specification}'
+            f"{self.controller_name}{SELECTION_SEPARATOR}{specification}"
             for specification in self.specification_names
         ]
 
@@ -62,7 +62,7 @@ class Controller:
         return repr(self.controller_name)
 
     def __str__(self):
-        return f'{self.controller_name}: {self.specification_names}'
+        return f"{self.controller_name}: {self.specification_names}"
 
     def controller_size(self):
         """Number of specifications managed by this controller"""
@@ -81,7 +81,7 @@ class Controller:
         the_index = self.dict_of_index.get(name)
         if the_index is None:
             error_msg = (
-                f'{name}: unknown specification for controller {self.controller_name}'
+                f"{name}: unknown specification for controller {self.controller_name}"
             )
             raise excep.BiogemeError(error_msg)
         self.set_index(the_index)
@@ -96,8 +96,8 @@ class Controller:
         """
         if index < 0 or index >= self.controller_size():
             error_msg = (
-                f'Wrong index {index} for controller {self.controller_name}. '
-                f'Must be in [0, {self.controller_size()}]'
+                f"Wrong index {index} for controller {self.controller_name}. "
+                f"Must be in [0, {self.controller_size()}]"
             )
             raise excep.BiogemeError(error_msg)
 
@@ -160,6 +160,7 @@ class CentralController:
 
         :param expression: controllers expression
         :type expression: biogeme.expressions.Expression
+
         """
 
         set_of_controllers = expression.get_all_controllers()
@@ -185,7 +186,7 @@ class CentralController:
             self._number_of_configurations = 0
 
         maximum_number_of_configurations = biogeme_parameters.get_value(
-            name='maximum_number_catalog_expressions', section='Estimation'
+            name="maximum_number_catalog_expressions", section="Estimation"
         )
         if self.number_of_configurations() > maximum_number_of_configurations:
             self.all_configurations_ids = None
@@ -228,8 +229,8 @@ class CentralController:
             controller = self.dict_of_controllers.get(selection.controller)
             if controller is None:
                 error_msg = (
-                    f'Wrong configuration: {configuration}. Controller '
-                    f'{selection.controller} is unknown'
+                    f"Wrong configuration: {configuration}. Controller "
+                    f"{selection.controller} is unknown"
                 )
                 raise excep.BiogemeError(error_msg)
             controller.set_name(selection.selection)
@@ -238,8 +239,8 @@ class CentralController:
         missing_controllers = [name for name, done in properly_set.items() if not done]
         if missing_controllers:
             error_msg = (
-                f'Incomplete configuration {configuration}. The following controllers '
-                f'are not defined: {missing_controllers}'
+                f"Incomplete configuration {configuration}. The following controllers "
+                f"are not defined: {missing_controllers}"
             )
             raise excep.BiogemeError(error_msg)
 
@@ -264,7 +265,7 @@ class CentralController:
         the_controller = self.dict_of_controllers.get(controller_name)
 
         if the_controller is None:
-            error_msg = f'Unknown controller: {controller_name}'
+            error_msg = f"Unknown controller: {controller_name}"
             raise excep.BiogemeError(error_msg)
 
         the_controller.set_index(index)
@@ -284,7 +285,7 @@ class CentralController:
         self.set_configuration_from_id(current_config)
         the_controller = self.dict_of_controllers.get(controller_name)
         if the_controller is None:
-            error_msg = f'Unknown controller {the_controller}'
+            error_msg = f"Unknown controller {the_controller}"
             raise excep.BiogemeError(error_msg)
         the_controller.modify_controller(step=step, circular=True)
         new_config = self.get_configuration()
@@ -308,7 +309,7 @@ class CentralController:
         self.set_configuration_from_id(current_config)
         the_controller = self.dict_of_controllers.get(controller_name)
         if the_controller is None:
-            error_msg = f'Unknown controller {the_controller}'
+            error_msg = f"Unknown controller {the_controller}"
             raise excep.BiogemeError(error_msg)
         the_controller.modify_controller(step=-step, circular=True)
         new_config = self.get_configuration()
@@ -352,23 +353,23 @@ class CentralController:
         :rtype: tuple(str, int)
 
         """
-        if direction not in ['NE', 'NW', 'SE', 'SW']:
-            error_msg = f'Incorrect direction {direction}. Must be NE, NW, SE or SW'
+        if direction not in ["NE", "NW", "SE", "SW"]:
+            error_msg = f"Incorrect direction {direction}. Must be NE, NW, SE or SW"
             raise excep.BiogemeError(error_msg)
         self.set_configuration_from_id(current_config)
         the_first_controller = self.dict_of_controllers.get(first_controller_name)
         if the_first_controller is None:
-            error_msg = f'Unknown controller {the_first_controller}'
+            error_msg = f"Unknown controller {the_first_controller}"
             raise excep.BiogemeError(error_msg)
         the_second_controller = self.dict_of_controllers.get(second_controller_name)
         if the_second_controller is None:
-            error_msg = f'Unknown controller {the_second_controller}'
+            error_msg = f"Unknown controller {the_second_controller}"
             raise excep.BiogemeError(error_msg)
         # The direction for the first controller is W (decrease) or E (increase)
         # The direction for the second controller is N (increase) or S (decrease)
-        actual_step = step if direction[1] == 'E' else -step
+        actual_step = step if direction[1] == "E" else -step
         the_first_controller.modify_controller(step=actual_step, circular=True)
-        actual_step = step if direction[0] == 'N' else -step
+        actual_step = step if direction[0] == "N" else -step
         the_second_controller.modify_controller(step=actual_step, circular=True)
         new_config = self.get_configuration()
         return new_config, step
@@ -382,7 +383,7 @@ class CentralController:
         """Increase the selection of "step" controllers by 1
 
         :param increase: If True, the indices are increased . If
-        False, they are decreased.
+            False, they are decreased.
         :type increase: bool
 
         :param current_config: current configuration
@@ -417,14 +418,14 @@ class CentralController:
         dict_of_operators = {}
         # Increase and decrease controllers
         for name in self.dict_of_controllers.keys():
-            dict_of_operators[f'Increase {name}'] = partial(
+            dict_of_operators[f"Increase {name}"] = partial(
                 self.increased_controller, controller_name=name
             )
-            dict_of_operators[f'Decrease {name}'] = partial(
+            dict_of_operators[f"Decrease {name}"] = partial(
                 self.decreased_controller, controller_name=name
             )
         # Pair of controllers
-        directions = ['NE', 'NW', 'SE', 'SW']
+        directions = ["NE", "NW", "SE", "SW"]
         # Using nested list comprehensions to generate all possible pairs
         all_pairs = [
             (name1, name2, direction)
@@ -441,7 +442,7 @@ class CentralController:
         ]
 
         for name1, name2, direction in filtered_pairs:
-            dict_of_operators[f'Pair_{name1}_{name2}_{direction}'] = partial(
+            dict_of_operators[f"Pair_{name1}_{name2}_{direction}"] = partial(
                 self.two_controllers,
                 first_controller_name=name1,
                 second_controller_name=name2,
@@ -449,10 +450,10 @@ class CentralController:
             )
 
         # Several controllers
-        dict_of_operators['Increase_several'] = partial(
+        dict_of_operators["Increase_several"] = partial(
             self.modify_random_controllers, increase=True
         )
-        dict_of_operators['Decrease_several'] = partial(
+        dict_of_operators["Decrease_several"] = partial(
             self.modify_random_controllers, increase=False
         )
         return dict_of_operators

@@ -18,7 +18,7 @@ loggers = (
 )
 
 
-def get_screen_logger(level=WARNING):
+def get_screen_logger(level: int = WARNING) -> logging.Logger:
     """Obtain a screen logger
 
     :param level: level of verbosity of the logger
@@ -40,7 +40,7 @@ def get_screen_logger(level=WARNING):
     return loggers[0]
 
 
-def get_file_logger(filename, level=WARNING):
+def get_file_logger(filename: str, level: int = WARNING) -> logging.Logger:
     """Obtain a file logger
 
     :param filename: name of the file. Extension .log recommended.

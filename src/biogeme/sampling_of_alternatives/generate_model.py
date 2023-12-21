@@ -32,8 +32,8 @@ class GenerateModel:
         """Constructor
 
         :param context: contains all the information that is needed to
-        perform the sampling of alternatives.
-        :type context: SamplingContext
+            perform the sampling of alternatives.
+
         """
 
         self.context = context
@@ -43,7 +43,7 @@ class GenerateModel:
         self.mev_prefix = context.mev_prefix
 
         self.utilities = {
-            alt_id: self.generate_utility(prefix='', suffix=f'_{alt_id}')
+            alt_id: self.generate_utility(prefix="", suffix=f"_{alt_id}")
             for alt_id in range(self.total_sample_size)
         }
         if self.context.second_partition is None:
@@ -54,7 +54,7 @@ class GenerateModel:
         else:
             self.mev_utilities = {
                 alt_id: self.generate_utility(
-                    prefix=self.mev_prefix, suffix=f'_{alt_id}'
+                    prefix=self.mev_prefix, suffix=f"_{alt_id}"
                 )
                 for alt_id in range(self.context.second_sample_size)
             }
@@ -75,7 +75,7 @@ class GenerateModel:
         """Returns the expression for the log likelihood of the logit model"""
 
         corrected_utilities = {
-            i: utility - Variable(f'{LOG_PROBA_COL}_{i}')
+            i: utility - Variable(f"{LOG_PROBA_COL}_{i}")
             for i, utility in self.utilities.items()
         }
 
@@ -85,7 +85,7 @@ class GenerateModel:
         """Returns the expression for the log likelihood of the nested logit model
 
         :param nests: A tuple containing as many items as nests.
-        Each item is also a tuple containing two items:
+            Each item is also a tuple containing two items:
 
         - an object of type biogeme.expressions.expr.Expression representing
           the nest parameter,
@@ -114,10 +114,10 @@ class GenerateModel:
             list_of_terms = []
             for i, utility in self.mev_utilities.items():
                 alternative_id = Variable(
-                    f'{self.mev_prefix}{self.context.id_column}_{i}'
+                    f"{self.mev_prefix}{self.context.id_column}_{i}"
                 )
                 belong_to_nest = BelongsTo(alternative_id, set(list_of_alternatives))
-                weight = Variable(f'{self.mev_prefix}{MEV_WEIGHT}_{i}')
+                weight = Variable(f"{self.mev_prefix}{MEV_WEIGHT}_{i}")
                 the_term = ConditionalTermTuple(
                     condition=belong_to_nest, term=weight * exp(mu_param * utility)
                 )
@@ -131,7 +131,7 @@ class GenerateModel:
 
         dict_of_mev_terms = {}
         for i, the_utility in self.utilities.items():
-            alternative_id = Variable(f'{self.context.id_column}_{i}')
+            alternative_id = Variable(f"{self.context.id_column}_{i}")
             list_of_terms = []
             for nest in nests:
                 mu_param = nest.nest_param
@@ -148,7 +148,7 @@ class GenerateModel:
             dict_of_mev_terms[i] = ConditionalSum(list_of_terms)
 
         corrected_utilities = {
-            key: util - Variable(f'{LOG_PROBA_COL}_{key}') + dict_of_mev_terms[key]
+            key: util - Variable(f"{LOG_PROBA_COL}_{key}") + dict_of_mev_terms[key]
             for key, util in self.utilities.items()
         }
         return loglogit(corrected_utilities, None, 0)
@@ -167,8 +167,8 @@ class GenerateModel:
             # we ignore the chosen alternative.
             list_of_terms = []
             for i, utility in self.mev_utilities.items():
-                alpha = Variable(f'{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}')
-                weight = Variable(f'{self.mev_prefix}{MEV_WEIGHT}_{i}')
+                alpha = Variable(f"{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}")
+                weight = Variable(f"{self.mev_prefix}{MEV_WEIGHT}_{i}")
                 the_term = ConditionalTermTuple(
                     condition=alpha != 0.0,
                     term=weight * alpha**mu_param * exp(mu_param * utility),
@@ -182,7 +182,7 @@ class GenerateModel:
         for i, the_utility in self.utilities.items():
             list_of_terms = []
             for nest in nests:
-                alpha = Variable(f'{CNL_PREFIX}{nest.name}_{i}')
+                alpha = Variable(f"{CNL_PREFIX}{nest.name}_{i}")
                 mu_param = nest.nest_param
                 mev_sum = dict_of_mev_sums[nest.name] ** ((1.0 / mu_param) - 1.0)
                 mev_term = (
@@ -193,7 +193,7 @@ class GenerateModel:
             dict_of_mev_terms[i] = logzero(ConditionalSum(list_of_terms))
 
         corrected_utilities = {
-            key: util - Variable(f'{LOG_PROBA_COL}_{key}') + dict_of_mev_terms[key]
+            key: util - Variable(f"{LOG_PROBA_COL}_{key}") + dict_of_mev_terms[key]
             for key, util in self.utilities.items()
         }
         return loglogit(corrected_utilities, None, 0)

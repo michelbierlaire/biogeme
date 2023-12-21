@@ -50,8 +50,11 @@ class Specification:
             raise excep.BiogemeError(error_msg)
         self.configuration = configuration
         self.model_names = None
-        self.validity = Validity(status=False, reason='Not yet estimated')
+        self.validity = None
         self._estimate()
+        assert (
+            self.validity is not None
+        ), 'Validity must be set by the _estimate function'
 
     @classmethod
     def from_string_id(cls, configuration_id):
@@ -107,38 +110,43 @@ class Specification:
             self.model_names = tools.ModelNames(prefix=self.generic_name)
 
         if self.config_id in self.all_results:
-            return
-
-        logger.debug(f'****** Estimate {self.config_id}')
-        the_biogeme = bio.BIOGEME.from_configuration(
-            config_id=self.config_id, expression=self.expression, database=self.database
-        )
-        number_of_parameters = the_biogeme.number_unknown_parameters()
-        maximum_number_parameters = biogeme_parameters.get_value(
-            name='maximum_number_parameters', section='AssistedSpecification'
-        )
-        if number_of_parameters > maximum_number_parameters:
-            self.validity = Validity(
-                status=False,
-                reason=(
-                    f'Too many parameters: {number_of_parameters} > '
-                    f'{maximum_number_parameters}'
-                ),
+            results = self.all_results.get(self.config_id)
+        else:
+            logger.debug(f'****** Estimate {self.config_id}')
+            the_biogeme = bio.BIOGEME.from_configuration(
+                config_id=self.config_id,
+                expression=self.expression,
+                database=self.database,
             )
-            return
-        the_biogeme.modelName = self.model_names(self.config_id)
-        logger.info(f'*** Estimate {the_biogeme.modelName}')
-        the_biogeme.generate_html = False
-        the_biogeme.generate_pickle = False
-        results = the_biogeme.quickEstimate()
+            number_of_parameters = the_biogeme.number_unknown_parameters()
+            maximum_number_parameters = biogeme_parameters.get_value(
+                name='maximum_number_parameters', section='AssistedSpecification'
+            )
+            if number_of_parameters > maximum_number_parameters:
+                self.validity = Validity(
+                    status=False,
+                    reason=(
+                        f'Too many parameters: {number_of_parameters} > '
+                        f'{maximum_number_parameters}'
+                    ),
+                )
+                return
+            the_biogeme.modelName = self.model_names(self.config_id)
+            logger.info(f'*** Estimate {the_biogeme.modelName}')
+            the_biogeme.generate_html = False
+            the_biogeme.generate_pickle = False
+            results = the_biogeme.quickEstimate()
         self.all_results[self.config_id] = results
         if not results.algorithm_has_converged():
             self.validity = Validity(
                 status=False, reason=(f'Optimization algorithm has not converged')
             )
             return
+
         if self.user_defined_validity_check is not None:
             self.validity = self.user_defined_validity_check(results)
+        else:
+            self.validity = Validity(status=True, reason='')
 
     def describe(self):
         """Short description of the solution. Used for reporting.

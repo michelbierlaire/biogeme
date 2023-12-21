@@ -247,19 +247,6 @@ class Variable(Elementary):
         """
         return {self.name}
 
-    def getValue(self):
-        """The evaluation of a Variable requires a database. Therefore, this
-            function triggers an exception.
-
-        :raise BiogemeError: each time the function is called
-
-        """
-        error_msg = (
-            f'Evaluating Variable {self.name} requires a database. Use the '
-            f'function getValue_c instead.'
-        )
-        raise excep.BiogemeError(error_msg)
-
     def setIdManager(self, id_manager=None):
         """The ID manager contains the IDs of the elementary expressions.
 
@@ -573,12 +560,13 @@ class Beta(Elementary):
         Elementary.__init__(self, name)
         the_value = validate(value, modify=False)
         self.initValue = the_value
-        if lowerbound:
+        self.estimated_value = None
+        if lowerbound is not None:
             the_lowerbound = validate(lowerbound, modify=False)
             self.lb = the_lowerbound
         else:
             self.lb = -MAX_VALUE
-        if upperbound:
+        if upperbound is not None:
             the_upperbound = validate(upperbound, modify=False)
             self.ub = the_upperbound
         else:
@@ -609,9 +597,10 @@ class Beta(Elementary):
             self.betaId = self.id_manager.free_betas.indices[self.name]
 
     def __str__(self):
-        if self.status == 0:
-            return f'{self.name}(init={self.initValue})'
-        return f'{self.name}(fixed={self.initValue})'
+        return (
+            f"Beta('{self.name}', {self.initValue}, {self.lb}, "
+            f"{self.ub}, {self.status})"
+        )
 
     def fix_betas(self, beta_values, prefix=None, suffix=None):
         """Fix all the values of the beta parameters appearing in the
@@ -669,8 +658,10 @@ class Beta(Elementary):
         :raise BiogemeError: if the Beta is not fixed.
         """
         if self.status == 0:
-            error_msg = f'Parameter {self.name} must be estimated from data.'
-            raise excep.BiogemeError(error_msg)
+            if self.estimated_value is None:
+                error_msg = f'Parameter {self.name} must be estimated from data.'
+                raise excep.BiogemeError(error_msg)
+            return self.estimated_value
         return self.initValue
 
     def change_init_values(self, betas):
@@ -686,6 +677,16 @@ class Beta(Elementary):
 
         if self.name in betas:
             self.initValue = betas[self.name]
+
+    def set_estimated_values(self, betas: dict[str, float]):
+        """Set the estimated values of beta
+
+        :param betas: dictionary where the keys are the names of the
+                      parameters, and the values are the new value for
+                      the parameters.
+        """
+        if self.name in betas:
+            self.estimated_value = betas[self.name]
 
     def getSignature(self):
         """The signature of a string characterizing an expression.

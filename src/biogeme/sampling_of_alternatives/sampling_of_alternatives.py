@@ -58,8 +58,8 @@ class SamplingOfAlternatives:
         """Constructor
 
         :param context: contains all the information that is needed to
-        perform the sampling of alternatives.
-        :type context: SamplingContext
+            perform the sampling of alternatives.
+
         """
 
         self.alternatives = context.alternatives
@@ -83,10 +83,10 @@ class SamplingOfAlternatives:
             self.alternatives[self.id_column] == chosen
         ].copy()
         if len(chosen_alternative) < 1:
-            error_msg = f'Unknown alternative: {chosen}'
+            error_msg = f"Unknown alternative: {chosen}"
             raise BiogemeError(error_msg)
         if len(chosen_alternative) > 1:
-            error_msg = f'Duplicate alternative: {chosen}'
+            error_msg = f"Duplicate alternative: {chosen}"
             raise BiogemeError(error_msg)
 
         results = []
@@ -113,7 +113,7 @@ class SamplingOfAlternatives:
             ]
             # Perform the sampling
             sample = subset.sample(
-                n=sample_size, replace=False, axis='index', ignore_index=True
+                n=sample_size, replace=False, axis="index", ignore_index=True
             )
 
             sample[LOG_PROBA_COL] = logproba
@@ -142,7 +142,7 @@ class SamplingOfAlternatives:
                 self.alternatives[self.id_column].isin(stratum.subset)
             ]
             sample = subset.sample(
-                n=sample_size, replace=False, axis='index', ignore_index=True
+                n=sample_size, replace=False, axis="index", ignore_index=True
             )
             sample[MEV_WEIGHT] = mev_weight
 
@@ -159,5 +159,5 @@ class SamplingOfAlternatives:
                 return pd.Series(the_dict)
 
             new_columns = the_sample[self.id_column].apply(get_alphas)
-            the_sample = pd.concat([the_sample, new_columns], axis='columns')
+            the_sample = pd.concat([the_sample, new_columns], axis="columns")
         return the_sample

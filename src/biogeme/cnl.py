@@ -7,46 +7,22 @@ implemented to verify the analytical derivatives of these functions.
 :date: Fri Apr 22 09:39:49 2022
 
 """
+from typing import Callable
 import numpy as np
+from biogeme.nests import NestsForCrossNestedLogit, get_alpha_values
 
 
-def cnl_G(alternatives, nests):
+def cnl_G(
+    alternatives: list[int], nests: NestsForCrossNestedLogit
+) -> Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]]:
     """Probability generating function and its derivatives
 
     :param alternatives: a list of alternatives in a given order. In
         principle, the alternative ids should be integers (to be
         consistent with Biogeme), but it may be actually be any object
         for this specific function.
-    :type alternatives: list(int)
 
-    :param nests: a tuple containing as many items as nests.
-        Each item is also a tuple containing two items:
-
-        - an object of type biogeme.expressions. expr.Expression
-          representing the nest parameter,
-        - a dictionary mapping the alternative ids with the cross-nested
-          parameters for the corresponding nest. If an alternative is
-          missing in the dictionary, the corresponding alpha is set to zero.
-
-        Example::
-
-            alphaA = {1: alpha1a,
-                      2: alpha2a,
-                      3: alpha3a,
-                      4: alpha4a,
-                      5: alpha5a,
-                      6: alpha6a}
-            alphaB = {1: alpha1b,
-                      2: alpha2b,
-                      3: alpha3b,
-                      4: alpha4b,
-                      5: alpha5b,
-                      6: alpha6b}
-            nesta = MUA, alphaA
-            nestb = MUB, alphaB
-            nests = nesta, nestb
-
-    :type nests: tuple
+    :param nests: the object describing the nests.
 
     :return: function that calculates the G function, and its first
         and second derivatives.
@@ -56,11 +32,10 @@ def cnl_G(alternatives, nests):
     order = {alt: index for index, alt in enumerate(alternatives)}
     J = len(alternatives)
 
-    def G_and_deriv(y):
+    def G_and_deriv(y: np.ndarray) -> tuple[float, np.ndarray, np.ndarray]:
         """Probability generating function
 
         :param y: vector of positive values
-        :type y: np.array
 
         :return: value of the CDF and its derivatives
         :rtype: floap, np.array(float), np.array(np.array(float))
@@ -70,8 +45,8 @@ def cnl_G(alternatives, nests):
         Gi = np.zeros(J)
         Gij = np.zeros((J, J))
         for m in nests:
-            mu_m = m[0]
-            alphas = m[1]
+            mu_m = m.nest_param
+            alphas = get_alpha_values(m.dict_of_alpha)
             nest_specific_sum = 0.0
             for alpha_alt, alpha_value in alphas.items():
                 if alpha_value != 0 and y[order[alpha_alt]] != 0:
@@ -113,47 +88,20 @@ def cnl_G(alternatives, nests):
     return G_and_deriv
 
 
-def cnl_CDF(alternatives, nests):
+def cnl_CDF(
+    alternatives: list[int], nests: NestsForCrossNestedLogit
+) -> Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]]:
     """Cumulative distribution function and its derivatives
 
     :param alternatives: a list of alternatives in a given order. In
         principle, the alternative ids should be integers (to be
         consistent with Biogeme), but it may be actually be any object
         for this specific function.
-    :type alternatives: list(int)
 
     :param nests: a tuple containing as many items as nests.
-        Each item is also a tuple containing two items:
-
-        - an object of type biogeme.expressions. expr.Expression
-          representing the nest parameter,
-        - a dictionary mapping the alternative ids with the cross-nested
-          parameters for the corresponding nest. If an alternative is
-          missing in the dictionaray, the corresponding alpha is set to zero.
-
-        Example::
-
-            alphaA = {1: alpha1a,
-                      2: alpha2a,
-                      3: alpha3a,
-                      4: alpha4a,
-                      5: alpha5a,
-                      6: alpha6a}
-            alphaB = {1: alpha1b,
-                      2: alpha2b,
-                      3: alpha3b,
-                      4: alpha4b,
-                      5: alpha5b,
-                      6: alpha6b}
-            nesta = MUA, alphaA
-            nestb = MUB, alphaB
-            nests = nesta, nestb
-
-    :type nests: tuple
 
     :return: function that calculates the CDF, and its first
         and second derivatives.
-    :rtype: f, g, H = fct(np.array(float))
 
     """
     J = len(alternatives)

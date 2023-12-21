@@ -193,8 +193,6 @@ class SamplingContext:
 
         :raise BiogemeError: if at least one id is invalid.
         """
-        print('Check: ', set_of_ids)
-        print('Valid ids: ', self.alternatives[self.id_column])
         if (
             not pd.Series(list(set_of_ids))
             .isin(self.alternatives[self.id_column])

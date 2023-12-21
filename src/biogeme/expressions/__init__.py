@@ -1,6 +1,6 @@
-from .base_expressions import Expression
+from .base_expressions import Expression, number_to_expression
 from .numeric_tools import is_numeric
-from .numeric_expressions import Numeric, process_numeric
+from .numeric_expressions import Numeric, process_numeric, validate_and_convert
 from .elementary_types import TypeOfElementaryExpression
 from .elementary_expressions import Beta, bioDraws, Variable, RandomVariable
 from .unary_expressions import (

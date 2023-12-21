@@ -63,7 +63,10 @@ class ParetoPostProcessing:
         for element in self.pareto.pareto:
             config_id = element.element_id
             the_biogeme = BIOGEME.from_configuration(
-                config_id=config_id, expression=self.expression, database=self.database
+                config_id=config_id,
+                expression=self.expression,
+                database=self.database,
+                parameter_file=self.biogeme_object.parameter_file,
             )
             _ = Configuration.from_string(config_id)
             the_biogeme.modelName = self.model_names(config_id)
@@ -241,7 +244,10 @@ class AssistedSpecification(Neighborhood):
         Specification.pareto = self.pareto
         logger.debug('Default specification')
         default_specification = Specification.default_specification()
-        print(f'{default_specification=}')
+        the_element = default_specification.get_element(self.multi_objectives)
+        Specification.pareto.add(the_element)
+
+        logger.info(f'{default_specification=}')
         logger.debug('Default specification: done')
         pareto_before = self.pareto.length_of_all_sets()
 

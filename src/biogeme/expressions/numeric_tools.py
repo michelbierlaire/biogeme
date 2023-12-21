@@ -3,9 +3,12 @@
 :author: Michel Bierlaire
 :date: Sat Sep  9 15:27:17 2023
 """
-from typing import Optional
+import logging
+from typing import Optional, Any
 import numpy as np
 from biogeme.exceptions import BiogemeError
+
+logger = logging.getLogger(__name__)
 
 MAX_VALUE = np.sqrt(np.finfo(float).max)
 EPSILON = np.sqrt(np.finfo(float).eps)

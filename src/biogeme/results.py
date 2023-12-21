@@ -351,7 +351,7 @@ class bioResults:
                     self.data = pickle.load(f)
             except FileNotFoundError as e:
                 error_msg = f'File {pickleFile} not found'
-                raise excep.BiogemeError(error_msg) from e
+                raise excep.FileNotFoundError(error_msg) from e
 
         else:
             raise excep.BiogemeError('No data provided.')
@@ -380,7 +380,7 @@ class bioResults:
         :return: name of the file.
         :rtype: string
         """
-        self.data.pickleFileName = bf.getNewFileName(self.data.modelName, 'pickle')
+        self.data.pickleFileName = bf.get_new_file_name(self.data.modelName, 'pickle')
         with open(self.data.pickleFileName, 'wb') as f:
             pickle.dump(self.data, f)
 
@@ -1091,7 +1091,7 @@ class bioResults:
         if not self.algorithm_has_converged():
             html += '<h2>Algorithm failed to converge</h2>\n'
             html += (
-                '<p>The optimization algorithm did not converge according. '
+                '<p>It seems that the optimization algorithm did not converge. '
                 'Therefore, the results below do not correspond to the maximum '
                 'likelihood estimator. Check the specification of the model, '
                 'or the criteria for convergence of the algorithm. </p>'
@@ -1273,14 +1273,14 @@ class bioResults:
 
     def writeHtml(self, onlyRobust=True):
         """Write the results in an HTML file."""
-        self.data.htmlFileName = bf.getNewFileName(self.data.modelName, 'html')
+        self.data.htmlFileName = bf.get_new_file_name(self.data.modelName, 'html')
         with open(self.data.htmlFileName, 'w', encoding='utf-8') as f:
             f.write(self.getHtml(onlyRobust))
         logger.info(f'Results saved in file {self.data.htmlFileName}')
 
     def writeLaTeX(self):
         """Write the results in a LaTeX file."""
-        self.data.latexFileName = bf.getNewFileName(self.data.modelName, 'tex')
+        self.data.latexFileName = bf.get_new_file_name(self.data.modelName, 'tex')
         with open(self.data.latexFileName, 'w', encoding='utf-8') as f:
             f.write(self.getLaTeX())
         logger.info(f'Results saved in file {self.data.latexFileName}')
@@ -1529,7 +1529,7 @@ class bioResults:
 
     def writeF12(self, robustStdErr=True):
         """Write the results in F12 file."""
-        self.data.F12FileName = bf.getNewFileName(self.data.modelName, 'F12')
+        self.data.F12FileName = bf.get_new_file_name(self.data.modelName, 'F12')
         with open(self.data.F12FileName, 'w', encoding='utf-8') as f:
             f.write(self.getF12(robustStdErr))
         logger.info(f'Results saved in file {self.data.F12FileName}')

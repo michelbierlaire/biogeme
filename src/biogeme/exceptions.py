@@ -1,17 +1,18 @@
-"""Defines a generic exception for Biogeme
+"""Defines exceptions for Biogeme
 
 :author: Michel Bierlaire
 
-:date: Tue Mar 26 16:47:11 2019
+:date: Fri Dec  8 20:34:09 2023
 
 """
-
-# Too constraining
-# pylint: disable=invalid-name
 
 
 class BiogemeError(Exception):
     """Defines a generic exception for Biogeme."""
+
+
+class FileNotFoundError(BiogemeError):
+    """Value of out range error."""
 
 
 class ValueOutOfRange(BiogemeError):

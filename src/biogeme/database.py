@@ -775,7 +775,7 @@ class Database:
         :rtype: string
         """
         theName = f'{self.name}_dumped'
-        dataFileName = bf.getNewFileName(theName, 'dat')
+        dataFileName = bf.get_new_file_name(theName, 'dat')
         self.data.to_csv(dataFileName, sep='\t', index_label='__rowId')
         logger.info(f'File {dataFileName} has been created')
         return dataFileName
@@ -1258,4 +1258,16 @@ class Database:
             variable=the_variable,
             mapping=the_mapping,
             reference=reference,
+        )
+
+    def mdcev_count(self, list_of_columns: list[str], new_column: str) -> None:
+        """For the MDCEV models, we calculate the number of
+            alternatives that are chosen, that is the number of
+            columns with a non zero entry.
+
+        :param list_of_columns: list of columns containing the quantity of each good.
+        :param new_column: name of the new column where the result is stored
+        """
+        self.data[new_column] = self.data[list_of_columns].apply(
+            lambda x: (x != 0).sum(), axis=1
         )

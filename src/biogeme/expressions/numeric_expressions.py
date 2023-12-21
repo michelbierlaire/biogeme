@@ -4,6 +4,7 @@
 :date: Sat Sep  9 15:27:17 2023
 """
 import logging
+from typing import Any
 import biogeme.exceptions as excep
 from .base_expressions import Expression
 from .numeric_tools import is_numeric, validate
@@ -104,12 +105,12 @@ class Numeric(Expression):
         return [signature.encode()]
 
 
-def validate_and_convert(expression):
+def validate_and_convert(expression: Any) -> Expression:
     """Validates the expression and returns the converted expression if necessary."""
     if isinstance(expression, bool):
         return Numeric(1) if expression else Numeric(0)
     if is_numeric(expression):
         return Numeric(expression)
     if not isinstance(expression, Expression):
-        raise excep.BiogemeError(f'This is not a valid expression: {expression}')
+        raise TypeError(f'This is not a valid expression: {expression}')
     return expression

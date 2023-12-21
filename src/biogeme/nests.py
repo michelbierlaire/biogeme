@@ -14,9 +14,104 @@ import pandas as pd
 from scipy.integrate import dblquad
 from biogeme.expressions import Expression, Numeric
 from biogeme.exceptions import BiogemeError
-from biogeme.results import bioResults
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class OneNestForNestedLogit:
+    """Class capturing the information for one nest of the nested logit model"""
+
+    nest_param: Union[Expression, float]
+    list_of_alternatives: list[int]
+    name: Optional[str] = None
+
+    @classmethod
+    def from_tuple(
+        cls, the_tuple: tuple[Union[Expression, float], list[int]]
+    ) -> 'OneNestForNestedLogit':
+        """Ctor to initialize the nest using the old syntax of Biogeme with a tuple"""
+        return cls(*the_tuple)
+
+    def intersection(self, other_nest: 'OneNestForNestedLogit') -> set[int]:
+        """Returns the intersection of two nests. Designed to verify the
+        validity of the specification
+
+        """
+        set1 = set(self.list_of_alternatives)
+        set2 = set(other_nest.list_of_alternatives)
+        return set1 & set2
+
+
+def get_alpha_expressions(
+    the_dict: dict[int, Union[Expression, float]]
+) -> dict[int, Expression]:
+    """If the dictionary contains float, they are transformed into a
+    numerical expression."""
+
+    def generate_expression(value: Union[Expression, float]) -> Expression:
+        """Remove the type ambiguity and generates an Expression"""
+        if isinstance(value, (int, float)):
+            return Numeric(value)
+        return value
+
+    return {key: generate_expression(value) for key, value in the_dict.items()}
+
+
+def get_alpha_values(
+    the_dict: dict[int, Union[Expression, float]],
+    parameters: Optional[dict[str, float]] = None,
+) -> dict[int, float]:
+    """If the dictionary contains float, they are transformed into a
+    numerical expression.
+
+    :param the_dict: dict of alphas.
+    :param parameters: value of the parameters.
+    """
+
+    def generate_value(
+        value: Union[Expression, float], parameters: dict[str, float]
+    ) -> float:
+        """Remove the type ambiguity and generates a value"""
+        if isinstance(value, (int, float)):
+            return value
+        if parameters is not None:
+            value.set_estimated_values(parameters)
+        v = value.getValue()
+        return v
+
+    return {key: generate_value(value, parameters) for key, value in the_dict.items()}
+
+
+@dataclass
+class OneNestForCrossNestedLogit:
+    """Tuple capturing the information for one nest of the cross-nested logit"""
+
+    nest_param: Union[Expression, float]
+    dict_of_alpha: dict[int, Expression]
+    name: Optional[str] = None
+
+    @classmethod
+    def from_tuple(
+        cls, the_tuple: tuple[Union[Expression, float], dict[int, Expression]]
+    ) -> 'OneNestForCrossNestedLogit':
+        """Ctor to initialize the nest using the old syntax of Biogeme with a tuple"""
+        return cls(*the_tuple)
+
+    def __post_init__(self):
+        self.dict_of_alpha = get_alpha_expressions(self.dict_of_alpha)
+        self.list_of_alternatives = list(self.dict_of_alpha.keys())
+
+    def is_alpha_fixed(self) -> bool:
+        """Check if the alpha parameters have a numeric value."""
+        for _, alpha in self.dict_of_alpha.items():
+            try:
+                _ = alpha.getValue()
+            except BiogemeError:
+                return False
+            except AttributeError:
+                return True
+        return True
 
 
 class Nests:
@@ -61,7 +156,9 @@ class Nests:
 
         self.alone = set(self.choice_set) - self.mev_alternatives
 
-    def __getitem__(self, index):
+    def __getitem__(
+        self, index: int
+    ) -> Union[OneNestForNestedLogit, OneNestForCrossNestedLogit]:
         if index < 0 or index >= len(self.tuple_of_nests):
             raise IndexError(
                 f'Index out of bounds. Valid indices are between 0 and '
@@ -113,31 +210,6 @@ class Nests:
         return True, ''
 
 
-@dataclass
-class OneNestForNestedLogit:
-    """Class capturing the information for one nest of the nested logit model"""
-
-    nest_param: Union[Expression, float]
-    list_of_alternatives: list[int]
-    name: Optional[str] = None
-
-    @classmethod
-    def from_tuple(
-        cls, the_tuple: tuple[Union[Expression, float], list[int]]
-    ) -> 'OneNestForNestedLogit':
-        """Ctor to initialize the nest using the old syntax of Biogeme with a tuple"""
-        return cls(*the_tuple)
-
-    def intersection(self, other_nest: 'OneNestForNestedLogit') -> set[int]:
-        """Returns the intersection of two nests. Designed to verify the
-        validity of the specification
-
-        """
-        set1 = set(self.list_of_alternatives)
-        set2 = set(other_nest.list_of_alternatives)
-        return set1 & set2
-
-
 class NestsForNestedLogit(Nests):
     """This class handles nests for the nested logit model"""
 
@@ -187,14 +259,14 @@ class NestsForNestedLogit(Nests):
 
     def correlation(
         self,
-        results: 'bioResults',
+        parameters: dict[str, float] = dict(),
         alternatives_names: Optional[dict[int, str]] = None,
         mu: float = 1.0,
     ) -> 'pd.DataFrame':
         """Calculate the correlation matrix of the error terms of all
             alternatives of a nested logit model.
 
-        :param results: estimation results
+        :param parameters: values of the parameters.
 
         :param alternatives_names: dictionary associating a name with each alternative.
 
@@ -202,16 +274,17 @@ class NestsForNestedLogit(Nests):
 
         :return: correlation matrix
         """
-        parameters = results.getBetaValues()
-
         index = {alt: i for i, alt in enumerate(self.choice_set)}
         nbr_of_alternatives = len(self.choice_set)
         if alternatives_names is None:
             alternatives_names = {i: str(i) for i in self.choice_set}
         correlation = np.identity(nbr_of_alternatives)
         for m in self.tuple_of_nests:
-            m.nest_param.change_init_values(parameters)
-            mu_m = m.nest_param.getValue_c(prepareIds=True)
+            if isinstance(m.nest_param, Expression):
+                m.nest_param.set_estimated_values(parameters)
+                mu_m = m.nest_param.getValue_c(prepareIds=True)
+            else:
+                mu_m = m.nest_param
             alt_m = m.list_of_alternatives
             for i, j in itertools.combinations(alt_m, 2):
                 correlation[index[i]][index[j]] = correlation[index[j]][index[i]] = (
@@ -260,52 +333,6 @@ class NestsForNestedLogit(Nests):
         valid_union, msg_union = self.check_union()
         valid_intersection, msg_intersection = self.check_intersection()
         return valid_union and valid_intersection, msg_union + '; ' + msg_intersection
-
-
-def process_alpha_dict(
-    the_dict: dict[int, Union[Expression, float]]
-) -> dict[int, Expression]:
-    """If the dictionary contains float, they are transformed into a
-    numerical expression."""
-
-    def generate_expression(value: Union[Expression, float]) -> Expression:
-        """Remove the type ambiguity and generates an Expression"""
-        if isinstance(value, (int, float)):
-            return Numeric(value)
-        return value
-
-    return {key: generate_expression(value) for key, value in the_dict.items()}
-
-
-@dataclass
-class OneNestForCrossNestedLogit:
-    """Tuple capturing the information for one nest of the cross-nested logit"""
-
-    nest_param: Union[Expression, float]
-    dict_of_alpha: dict[int, Expression]
-    name: Optional[str] = None
-
-    @classmethod
-    def from_tuple(
-        cls, the_tuple: tuple[Union[Expression, float], dict[int, Expression]]
-    ) -> 'OneNestForCrossNestedLogit':
-        """Ctor to initialize the nest using the old syntax of Biogeme with a tuple"""
-        return cls(*the_tuple)
-
-    def __post_init__(self):
-        process_alpha_dict(self.dict_of_alpha)
-        self.list_of_alternatives = list(self.dict_of_alpha.keys())
-
-    def is_alpha_fixed(self) -> bool:
-        """Check if the alpha parameters have a numeric value."""
-        for _, alpha in self.dict_of_alpha.items():
-            try:
-                _ = alpha.getValue()
-            except BiogemeError:
-                return False
-            except AttributeError:
-                return True
-        return True
 
 
 class NestsForCrossNestedLogit(Nests):
@@ -378,8 +405,8 @@ class NestsForCrossNestedLogit(Nests):
             error_msg = f'Unknown type {type(alpha)} for alpha parameter'
             raise BiogemeError(error_msg)
 
-        alphas = self.get_alpha_dict(alternative_id)
-        alphas = {key: get_value(alpha) for key, alpha in alphas.items()}
+        alphas_expressions = self.get_alpha_dict(alternative_id)
+        alphas = {key: get_value(alpha) for key, alpha in alphas_expressions.items()}
         return alphas
 
     def check_validity(self) -> tuple[bool, str]:
@@ -412,13 +439,15 @@ class NestsForCrossNestedLogit(Nests):
 
         return ok, message
 
-    def covariance(self, results: 'bioResults', i: int, j: int) -> float:
+    def covariance(
+        self, i: int, j: int, parameters: dict[str, float] = dict()
+    ) -> float:
         """Calculate the covariance between the error terms of two
         alternatives of a cross-nested logit model. It is assumed that
         the homogeneity parameter mu of the model has been normalized
         to one.
 
-        :param results: estimation results
+        :param parameters: values of the parameters.
 
         :param i: first alternative
 
@@ -435,12 +464,10 @@ class NestsForCrossNestedLogit(Nests):
         if j not in self.choice_set:
             raise BiogemeError(f'Unknown alternative: {j}')
 
-        parameters = results.getBetaValues()
-
         if i == j:
             return np.pi * np.pi / 6.0
 
-        def integrand(z_i, z_j):
+        def integrand(z_i: float, z_j: float) -> float:
             """Function to be integrated to calculate the correlation between
             alternative i and alternative j.
 
@@ -464,15 +491,18 @@ class NestsForCrossNestedLogit(Nests):
             Gj_sum = 0.0
             Gij_sum = 0.0
             for m in self.tuple_of_nests:
-                m.nest_param.change_init_values(parameters)
-                mu_m = m.nest_param.getValue_c(prepareIds=True)
-                alphas = m.dict_of_alpha
-                alpha_i = alphas.get(i, 0).getValue_c(prepareIds=True)
+                if isinstance(m.nest_param, Expression):
+                    m.nest_param.set_estimated_values(parameters)
+                    mu_m = m.nest_param.getValue_c(prepareIds=True)
+                else:
+                    mu_m = m.nest_param
+                alphas = get_alpha_values(m.dict_of_alpha, parameters)
+                alpha_i = alphas.get(i, 0)
                 if alpha_i != 0:
                     term_i = (alpha_i * y_i) ** mu_m
                 else:
                     term_i = 0
-                alpha_j = alphas.get(j, 0).getValue_c(prepareIds=True)
+                alpha_j = alphas.get(j, 0)
                 if alpha_j != 0:
                     term_j = (alpha_j * y_j) ** mu_m
                 else:
@@ -502,12 +532,14 @@ class NestsForCrossNestedLogit(Nests):
         return integral - np.euler_gamma * np.euler_gamma
 
     def correlation(
-        self, results: 'bioResults', alternatives_names: Optional[dict[int, str]] = None
+        self,
+        parameters: dict[str, float] = dict(),
+        alternatives_names: Optional[dict[int, str]] = None,
     ) -> pd.DataFrame:
         """Calculate the correlation matrix of the error terms of all
         alternatives of cross-nested logit model.
 
-        :param results: estimation results
+        :param parameters: values of the parameters.
 
         :param alternatives_names: names of the alternative, for
         better reporting. If not provided, the number are used.
@@ -522,7 +554,7 @@ class NestsForCrossNestedLogit(Nests):
         covar = np.empty((nbr_of_alternatives, nbr_of_alternatives))
         for i, alt_i in enumerate(self.choice_set):
             for j, alt_j in enumerate(self.choice_set):
-                covar[i][j] = self.covariance(results, alt_i, alt_j)
+                covar[i][j] = self.covariance(alt_i, alt_j, parameters)
                 if i != j:
                     covar[j][i] = covar[i][j]
 
