@@ -14,10 +14,12 @@ FAQ_FILE = 'faq.html'
 CARD_FILE = 'card.html'
 SPECIAL_FILE = 'special.html'
 
+
 def replace(orig_text, dictionary):
     for k, v in dictionary.items():
         orig_text = orig_text.replace(k, v)
     return orig_text
+
 
 def get_section(content):
     all_html = ''
@@ -58,7 +60,7 @@ def get_special(content):
     all_html = ''
     with open(SPECIAL_FILE, 'r', encoding='utf-8') as f:
         html = f.read()
-    
+
     for special_title, special_content in content.items():
         my_html = html
         replacements = {
@@ -67,7 +69,8 @@ def get_special(content):
         }
         all_html += replace(my_html, replacements)
     return all_html
-        
+
+
 def get_portfolio_grid(doc):
     all_html = ''
     for data, values in doc.items():
@@ -135,7 +138,7 @@ replacements = {
     '__DOC__': get_section(documentation),
     '__RES__': get_section(resources),
     '__ARCHIVES__': get_section(archives),
-    '__SPECIAL__': get_special(special)
+    '__SPECIAL__': get_special(special),
 }
 
 html = replace(html, replacements)
@@ -157,9 +160,9 @@ shutil.copytree('css', 'website/css')
 # Copy the Bootstrap assets
 shutil.copytree('assets', 'website/assets')
 
-    
+
 # Copy the PythonBiogeme distribution
 shutil.copytree('otherFiles/distrib', 'website/distrib')
 
 # Copy the sphinx documentation
-shutil.copytree('../sphinx/_build/html', 'website/sphinx')
+shutil.copytree('../docs/build/html', 'website/sphinx')

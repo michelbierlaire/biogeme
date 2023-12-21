@@ -1,12 +1,42 @@
 faq = {}
 
-faq['What was new in Biogeme 3.2.12?'] = """
+faq[
+    'What was new in Biogeme 3.2.13?'
+] = """
+<dl>
+<dt>MDCEV</dt>
+<dd>The Multiple Discrete Continuous Extreme Value model has been implemented. The code is still experimental, and the documentation is not ready yet.
+</dd>
+<dt>Local-sensitivy hashing</dt>
+<dd>The data reduction method introduced by <a href='https://transp-or.epfl.ch/documents/technicalReports/OrteLappBier2023.pdf'>Ortelli et al. (2023)</a> has been implemented. It has not yet been integrated in the optimization framework.</dd>
+<dt>Nests definition</dt>
+<dd>The definition of the nests for the nested logit and the cross-nested logit models has been improved, using specific objects. See <a href="sphinx/nests.html">the module documentation.</a> The calculation of the correlation structure among the alternatives is now performed by those objects, and not anymore by the <samp>bioResults</samp> object as in previous versions.</dd>
+<dt>Sampling of alternatives</dt>
+<dd>The methods for the sampling of alternatives have been completely reimplemented. A report with a complete documentation will be available soon.</dd>
+<dt>Examples</dt>
+<dd>The structure of the examples has been revisited. They are now integrated in the Sphinx documentation, and available both as Python scripts and Jupyter notebooks. <a href='sphinx/auto_examples/index.html'>Click here.</a></dd>
+<dt>Non convergence</dt>
+<dd>The reporting has been improved when the algorithm does not converge. </dd>
+<dt>Logging</dt>
+<dd>The logging module has been renamed from <code>biogeme.logging</code> into <code>biogeme.biogeme_logging.py</code>. It was necessary because of the ambiguity with the <code>logging</code> module from Python.
+</dd>
+<dt>File organization</dt>
+<dd>Several scripts have bben reorganized into modules. This improves the code readability and should be transparent for the user.</dd>
+
+
+</dl>
+"""
+faq[
+    'What was new in Biogeme 3.2.12?'
+] = """
 <p>
 This release mainly implements some re-organization of the code and bugs fixes. In particular, the generic optimization algorithms are now distributed in a different package, called biogeme_optimization.
 </p>
 """
 
-faq['What was new in Biogeme 3.2.11?'] = """
+faq[
+    'What was new in Biogeme 3.2.11?'
+] = """
 <dl>
 
 <dt>Sampling of alternatives</dt>
@@ -43,7 +73,9 @@ faq['What was new in Biogeme 3.2.11?'] = """
 </dl>
 """
 
-faq['What was new in Biogeme 3.2.10?'] = """
+faq[
+    'What was new in Biogeme 3.2.10?'
+] = """
   <p><strong>Note</strong>: versions 3.2.9 and 3.2.10 are
 	  identical. Therefore, version 3.2.9 has been removed from
 	  the official distribution platform. </p>
@@ -116,7 +148,9 @@ faq['What was new in Biogeme 3.2.10?'] = """
 	  </dl>
 
 """
-faq['What was new in Biogeme 3.2.8?'] = """
+faq[
+    'What was new in Biogeme 3.2.8?'
+] = """
 	  <p>Note that version 3.2.7 and 3.2.8 are almost
 	  identical. The description belows compares to version 3.2.6.
 	  <dl>
@@ -192,7 +226,9 @@ faq['What was new in Biogeme 3.2.8?'] = """
 
 """
 
-faq['What was new in Biogeme 3.2.6?'] = """
+faq[
+    'What was new in Biogeme 3.2.6?'
+] = """
 	  <dl>
 	    <dt>Optimization</dt>
 	    <dd>New optimization algorithms are
@@ -380,7 +416,9 @@ reason why the model returns a probability of zero.
 </p>
 """
 
-faq['ImportError: DLL load failed while importing cythonbiogeme: The specified module could not be found'] = """
+faq[
+    'ImportError: DLL load failed while importing cythonbiogeme: The specified module could not be found'
+] = """
 The issue is that in Python 3.8 and older on Windows, DLLs are loaded from trusted locations only  (<a href ="https://docs.python.org/3/whatsnew/3.8.html#ctypes" target="_blank">see this</a>).  It is necessary to add the path of the DLLs. Here is a way proposed by Facundo Storani, University of Salerno:
 <ul>
 <li>Search the DLLs folder of anaconda3. It may be similar to: <code>C:\\Users\\[USER_NAME]\\anaconda3\\DLLs or C:\\ProgramData\\Anaconda3\\DLLs</code>.</li>
@@ -392,7 +430,9 @@ The issue is that in Python 3.8 and older on Windows, DLLs are loaded from trust
 </ul> (credit: Facundo Storani)
 """
 
-faq['Why is Cython library not found?'] = """
+faq[
+    'Why is Cython library not found?'
+] = """
 On Mac OSX, the
 following error is sometimes
 generated: <pre>
@@ -440,7 +480,9 @@ pip install biogeme
 If it does not work... I don't know :-(
 """
 
-faq['Why is it trying to compile during installation?'] = """
+faq[
+    'Why is it trying to compile during installation?'
+] = """
 On Mac OSX and Windows, the procedure is designed to install
 from binaries, not sources. If you get messages that look like the
 following, it means that pip is trying to compile from sources. And

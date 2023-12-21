@@ -8,12 +8,14 @@ documentation = {}
 archives = {}
 resources = {}
 
-#special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
-special['EPFL Short Course'] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
-#special['Other special'] = 'Other special as well'
+# special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
+special[
+    'EPFL Short Course'
+] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
+# special['Other special'] = 'Other special as well'
 
 about['Biogeme'] = (
-"""
+    """
 Biogeme is a open
 source <a href="https://www.python.org/"
 target="_blank">Python</a> package designed for the
@@ -24,7 +26,7 @@ package <a href="https://pandas.pydata.org/"
 target="_blank">Python Data Analysis Library called
 Pandas</a>.
 """,
-"""
+    """
 It is developed and maintained by <a href="https://people.epfl.ch/michel.bierlaire"
 target="_blank">Prof. Michel
 Bierlaire</a>, <a href="https://transp-or.epfl.ch/"
@@ -32,17 +34,17 @@ targert="_blank">Transport and Mobility
 Laboratory</a>, <a href="https://www.epfl.ch" target="_blank">Ecole
 Polytechnique F&eacute;d&eacute;rale de Lausanne</a>, Switzerland.
 """,
-"""
+    """
 Biogeme used to be a stand alone software package,
 written in C++. All the material related to the previous
 versions of Biogeme are available on
 the <a href="http://transp-or.epfl.ch/pythonbiogeme/"
 target="_blank">old webpage</a>.
-"""
+""",
 )
 
 about['What\'s new in Biogeme 3.2.12?'] = (
-"""
+    """
 <p>
 In this release, various improvements have been made, including code
 reorganization and bug fixes. Notably, the generic optimization
@@ -53,7 +55,7 @@ algorithms have been relocated to a separate package named
 )
 
 about['Conditions of use'] = (
-"""
+    """
 BIOGEME is distributed free of charge. We ask each user
 <ul>
 <li>to register
@@ -71,9 +73,9 @@ ENAC, EPFL.</a>
 )
 
 about['Author'] = (
-"""
+    """
  Biogeme has been developed by
-	    <a href="http://people.epfl.ch/michel.bierlaire"
+ 	    <a href="http://people.epfl.ch/michel.bierlaire"
 	       target="_blank">Michel
 	      Bierlaire</a>, <a href="http://www.epfl.ch" target="_blank">Ecole Polytechnique
 	      F&eacute;d&eacute;rale de Lausanne</a>, Switzerland.
@@ -82,7 +84,7 @@ about['Author'] = (
 
 
 about['Acknowledgments'] = (
-"""
+    """
 I would like to thank the following persons who played various
 roles in the development of Biogeme along the years. The list is
 certainly not complete, and I apologize for those who are omitted:
@@ -94,7 +96,9 @@ certainly not complete, and I apologize for those who are omitted:
 	    John Bates,
 	    Denis Bolduc,
 	    David Bunch,
+            Pedro Camargo,
 	    Andrew Daly,
+            Nicolas Dubois,
 	    Anna Fernandez Antolin,
 	    Mamy Fetiarison,
 	    Mogens Fosgerau,
@@ -120,31 +124,31 @@ certainly not complete, and I apologize for those who are omitted:
 	    Michael Th&eacute;mans,
 	    Joan Walker.
 """,
-"""
+    """
 I would like to give special thanks to Moshe Ben-Akiva
 and Daniel McFadden for their friendship, and for the immense
 influence that they had and still have on my work.
-"""
+""",
 )
 
 install['Install Python'] = (
-"""
+    """
 Biogeme is an open source Python package, that relies on the version 3
 of Python. Make sure that Python 3.x is installed on your
 computer. If you have never used Python before, you may
 want to consider a complete platform such
 as <a href="https://www.anaconda.com/" target="_blank">Anaconda</a>.
 """,
-"""
+    """
 If Python is already installed on your computer, verify
 the version. Two versions of Python are distributed:
 version 2 and version 3. Biogeme  works only
 with version 3.
-"""
+""",
 )
 
 install['Installing PandasBiogeme on MaxOSX'] = (
-"""
+    """
 <p class='text-center'>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/Z1hkeWP0k9A" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </p>
@@ -152,7 +156,7 @@ install['Installing PandasBiogeme on MaxOSX'] = (
 )
 
 install['Installing Biogeme on Windows'] = (
-"""
+    """
 <p class=text-center>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/-P6zXrcodGs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </p>
@@ -160,7 +164,7 @@ install['Installing Biogeme on Windows'] = (
 )
 
 install['Install Biogeme from pip'] = (
-"""
+    """
 Biogeme is distributed using the
 <a href="https://pypi.org/project/pip/" target="_blank">pip</a>
 package manager. There are several tutorials available on the internet
@@ -170,7 +174,7 @@ target="_blank">this one</a> or
 <a href="https://www.youtube.com/watch?v=U2ZN104hIcc"
 target="_blank">this one</a>.
 """,
-"""
+    """
 The command to install is simply
 <pre>
 pip install biogeme
@@ -179,15 +183,15 @@ pip install biogeme
 )
 
 install['CythonBiogeme on Github'] = (
-"""
-A significant part of Biogeme is coded in C++ for the sake of computational efficiciency. Since version 3.2.11, this part of the code has been isolated in a separate package called <samp>cythonbiogeme</samp>. Binaries for Mac OSX and Windowns are available for versions of Python ranging from 3.7 to 3.11. If, for some reasons, the binary distribution for your system is not available, pip will attempt to compile the package from sources.
+    """
+A significant part of Biogeme is coded in C++ for the sake of computational efficiciency. Since version 3.2.11, this part of the code has been isolated in a separate package called <samp>cythonbiogeme</samp>. Binaries for Mac OSX and Windowns are available for versions of Python ranging from 3.9 to 3.12. If, for some reasons, the binary distribution for your system is not available, pip will attempt to compile the package from sources.
 In that case, it requires a proper
 environment to compile C++ code. In general, it is readily available on Linux, and
 MacOSX (if <a href="https://developer.apple.com/xcode/"
 target="_blank">Xcode</a> has been installed). It may be more
 complicated on Windows.
 """,
-"""
+    """
 The source code of CythonBiogeme is available on
 <a href="https://github.com/michelbierlaire/cythonbiogeme" target="_blank">GitHub</a>.
 There are several tutorials available on the internet
@@ -197,26 +201,26 @@ target="_blank">this one</a> or
 <a href="https://youtu.be/HkdAHXoRtos"
 target="_blank">this one</a>.
 """,
-"""
+    """
 The command to install CythonBiogeme from source is
 <pre>pip install -ve .</pre>
 """,
-"""
+    """
 that must be executed in the directory containing the
 files setup.cfg and setup.py.
 """,
-"""
+    """
 Note that it requires a proper
 environment to compile C++ code. In general, it is readily available on Linux, and
 MacOSX (if <a href="https://developer.apple.com/xcode/"
 target="_blank">Xcode</a> has been
 installed).
 """,
-"""
+    """
 On Windows, here is one possibility.
 <ol>
-<li> Install <samp>mingw64</samp> from <a href="https://winlibs.com">winlibs.com</a>. Download the zip file, and unzip it into c:\mingw64.</li>
-<li>Add c:\mingw64\\bin in the Windows PATH. </li>
+<li> Install <samp>mingw64</samp> from <a href="https://winlibs.com">winlibs.com</a>. Download the zip file, and unzip it into c:\\mingw64.</li>
+<li>Add c:\\mingw64\\bin in the Windows PATH. </li>
 <li>Edit the file <samp>setup.cfg</samp> and uncomment the lines dedicated to Windows:
 <p>
 <pre>
@@ -247,12 +251,12 @@ dlltool -D vcruntime140.dll -d vcruntime140.def -l libvcruntime140.a
 </li>
 <li>Install using the following command:
 <p><pre>pip install -ve .</pre></p></li>
-"""
+""",
 )
 
 
 install['Biogeme on Github'] = (
-"""
+    """
 The source code of Biogeme is available on
 <a href="https://github.com/michelbierlaire/biogeme" target="_blank">GitHub</a>.
 There are several tutorials available on the internet
@@ -262,21 +266,21 @@ target="_blank">this one</a> or
 <a href="https://youtu.be/HkdAHXoRtos"
 target="_blank">this one</a>.
 """,
-"""
+    """
 The command to install Biogeme from source is
 <pre>pip install -ve .</pre>
 """,
-"""
+    """
 that must be executed in the directory containing the
 files setup.cfg and setup.py.
 """,
-"""
+    """
 Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment where Python and CythonBiogeme are properly installed.
 """,
 )
 
 install['Check the installation'] = (
-"""
+    """
 To verify if biogeme is correctly installed, you can print
 the version of Biogeme. To do so,  execute the
 following commands in Python:
@@ -286,11 +290,11 @@ following commands in Python:
 </ul>
 The result should look like the following:
 <pre>
-Python 3.11.3 (v3.11.3:f3909b8bc8, Apr  4 2023, 20:12:10) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
+Python 3.12.0 (v3.12.0:0fb18b02c8, Oct  2 2023, 09:45:56) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import biogeme.version as ver
 >>> print(ver.getText())
-biogeme 3.2.12 [2023-08-05]
+biogeme 3.2.13 [2023-12-21]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
@@ -299,11 +303,11 @@ Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédér
 )
 
 documentation['Technical reports'] = (
-"""
+    """
 The following technical reports will walk through concrete examples to
 get familiar with the software.
 """,
-"""
+    """
 <ul>
 <li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf"
 target="_blank">A short introduction to Biogeme</a>.</li>
@@ -320,7 +324,7 @@ variables with PandasBiogeme.</a></li>
 
 
 documentation['Preparing data for Biogeme'] = (
-"""
+    """
 <p class='text-center'>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/lhbpra2dILA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </p>
@@ -330,7 +334,7 @@ documentation['Preparing data for Biogeme'] = (
 
 
 documentation['Estimating my first choice model with Biogeme'] = (
-"""
+    """
 <p class='text-center'>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/jIAIsqh_g0E" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </p>
@@ -339,7 +343,7 @@ documentation['Estimating my first choice model with Biogeme'] = (
 
 
 documentation['Code documentation'] = (
-"""
+    """
 <a href="sphinx/index.html" target="_blank">Click here for the documentation of the source of Biogeme</a>. It has been
 generated with the <a href="http://www.sphinx-doc.org"
 target="_blank">Python Documentation Generator Sphinx</a>.
@@ -347,53 +351,53 @@ target="_blank">Python Documentation Generator Sphinx</a>.
 )
 
 resources['Videos'] = (
-"""
+    """
 <a href="https://youtu.be/Z1hkeWP0k9A" target="_blank">
 Installing Biogeme 3.2.11 on Mac OSX
 </a>
 """,
-"""
+    """
 <a href="https://youtu.be/-P6zXrcodGs" target="_blank">
 Installing Biogeme 3.2.11 on Windows
 </a>
 """,
-"""
+    """
 <a href="https://youtu.be/lhbpra2dILA" target="_blank">
 Preparing data for Biogeme
 </a>
 """,
-"""
+    """
 <a href="https://youtu.be/jIAIsqh_g0E" target="_blank">
 Estimating my first choice model with Biogeme
 </a>
 """,
-"""
+    """
 <a href="https://youtu.be/GmNodW_pUHk" target="_blank">
 To be or not to be significant
 </a>
 """,
-"""
+    """
 <a href="https://youtu.be/_w7RxZIUBqI" target="_blank">
 Survival of the fittest... or not
 </a>
 """,
-"""
+    """
 <a href="https://youtu.be/hZsdMpNC-30" target="_blank">
 Aggregate elasticities
 </a>
-"""
+""",
 )
 
 resources['EPFL Winter Course'] = (
-"""
+    """
 <a href="https://transp-or-academia.epfl.ch/dca" target="_blank">Click here for information about the course</a>
 """,
-"""
+    """
 EPFL proposes a 5-day short course entitled <em>"Discrete Choice
 Analysis: Predicting Individual Behavior and Market Demand"</em>. It is
 organized every year in March (occasionally in February).
 """,
-"""
+    """
 Content:
 <ol>
 <li><em>Fundamental methodology</em>, e.g. the foundations of individual choice modeling, random utility models, discrete choice models (binary, multinomial, nested, cross-nested logit models, MEV models, probit models, and hybrid choice models such as logit kernel and mixed logit);</li>
@@ -406,7 +410,7 @@ and grouped data, Bayesian estimation;</li>
 <li><em>Examples and case studies</em>, including marketing (e.g., brand choice), housing (e.g., residential location), telecommunications (e.g., choice of residential telephone service), energy (e.g., appliance type), transportation (e.g., mode of travel).</li>
 </ol>
 """,
-"""
+    """
 <table>
 <tr valign="top"><td>Lecturers:</td><td><a href="https://cee.mit.edu/people_individual/moshe-e-ben-akiva/"
 target="_blank">Prof. Moshe
@@ -420,11 +424,11 @@ target="_blank">Prof. Michel
 Bierlaire</a></td><td>Ecole Polytechnique
 F&eacute;d&eacute;rale de Lausanne, Switzerland</td></tr>
 </table>
-"""
+""",
 )
 
 resources['Online courses'] = (
-"""
+    """
 An online course entitled "Introduction to Discrete Choice
 Models" is available on the following platforms:
 <ul>
@@ -438,37 +442,37 @@ target="_blank">edX.org</a></li>
 )
 
 resources['MIT Summer Course'] = (
-"""
+    """
 <a href="http://professional.mit.edu/programs/short-programs/discrete-choice-analysis"
 	     target="_blank">
 Click here for information about the course
 </a>
 """,
-"""
+    """
 MIT proposes a 5-day short course entitled <em>"Discrete Choice
 Analysis: Predicting demand and market shares"</em>. It is
 organized every year in June.
 """,
-"""
+    """
 Lecturer: <a href="https://cee.mit.edu/people_individual/moshe-e-ben-akiva/"
 target="_blank">Prof. Moshe
 Ben-Akiva</a>, Massachusetts Institute of Technology,
 Cambridge, Ma (USA)
-"""
+""",
 )
 
 resources['University of Sydney'] = (
-"""
+    """
 <a href="https://www.sydney.edu.au/business/our-research/institute-of-transport-and-logistics-studies/courses/discrete-choice-analysis.html">
 Click here for information about the course
 </a>
 """,
-"""
+    """
 The University of Sydney Business School offers a course taught by Prof. David Hensher, Prof. Michiel Bliemer, Prof. John Rose and Dr. Andrew Collins.
-"""
-    )
+""",
+)
 resources['Other software packages'] = (
-"""
+    """
 <dl>
 <dt><a href="https://rdrr.io/cran/mixl" target="_blank">mixl</a></dt>
 <dd>
@@ -496,13 +500,15 @@ and similar discrete choice models.
 )
 
 archives['PandasBiogeme Version 3'] = (
-"""
+    """
 The releases of PandasBiogeme are available on the  <a href="https://pypi.org/project/biogeme/" target="_blank">Python
 Package Index</a> repository.
 """,
-"""
+    """
 Previous webpages:
 <ul>
+<li><a href="https://transp-or.epfl.ch/biogeme-3.2.12/"
+target="blank">Webpage for Pandasbiogeme 3.2.12</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.11/"
 target="blank">Webpage for Pandasbiogeme 3.2.11</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.10/"
@@ -520,12 +526,12 @@ target="blank">Webpage for Pandasbiogeme 3.2.1</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.1.0/"
 target="blank">Webpage for Pandasbiogeme 3.1.0</a></li>
 </ul>
-"""
+""",
 )
 
 
 archives['PythonBiogeme Version 2.5'] = (
-"""
+    """
 <ul>
 <li><a href="https://transp-or.epfl.ch/biogeme-2.5/home.html"
 target="_blank"> Webpage</a>
@@ -539,7 +545,7 @@ target="_blank"> Webpage</a>
 )
 
 archives['PythonBiogeme Version 2.4'] = (
-"""
+    """
 <ul>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v24/biogeme-2.4.tar.gz">biogeme-2.4.tar.gz</a></li>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v24/examples-v24.zip">examples-v24.zip</a></li>
@@ -548,7 +554,7 @@ archives['PythonBiogeme Version 2.4'] = (
 )
 
 archives['PythonBiogeme Version 2.3'] = (
-"""
+    """
 <ul>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v23/biogeme-2.3.tar.gz">biogeme-2.3.tar.gz</a></li>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v23/examples-v23.zip">examples-v23.zip</a></li>
@@ -557,7 +563,7 @@ archives['PythonBiogeme Version 2.3'] = (
 )
 
 archives['PythonBiogeme Version 2.2'] = (
-"""
+    """
 <ul>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v22/biogeme-2.2.tar.gz">biogeme-2.2.tar.gz</a></li>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v22/biogeme-v22.zip">biogeme-v22.zip</a></li>
@@ -566,7 +572,7 @@ archives['PythonBiogeme Version 2.2'] = (
 )
 
 archives['PythonBiogeme Version 2.1'] = (
-"""
+    """
 <ul>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v21/biogeme-2.1.mpkg.zip">biogeme-2.1.mpkg.zip</a></li>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v21/biogeme-2.1beta.tar.gz">biogeme-2.1beta.tar.gz</a></li>
@@ -577,7 +583,7 @@ archives['PythonBiogeme Version 2.1'] = (
 )
 
 archives['PythonBiogeme Version 2.0'] = (
-"""
+    """
 <ul>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v20/biogeme-2.0.tar.gz">biogeme-2.0.tar.gz</a></li>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v20/biogeme-v20-macosx.zip">biogeme-v20-macosx.zip</a></li>
@@ -587,7 +593,7 @@ archives['PythonBiogeme Version 2.0'] = (
 )
 
 archives['PythonBiogeme Version 1.8'] = (
-"""
+    """
 <ul>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/biogeme-v18-macosx.zip">biogeme-v18-macosx.zip</a></li>
 <li><a href="http://transp-or.epfl.ch/pythonbiogeme/archives/v18/biogeme-v18-src.zip">biogeme-v18-src.zip</a></li>

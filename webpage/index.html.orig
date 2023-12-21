@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
     <meta name="description" content="" >
     <meta name="author" content="" >
-    <title>Biogeme 3.2.12</title>
+    <title>Biogeme 3.2.13</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" >
     <!-- Font Awesome icons (free version)-->
@@ -34,7 +34,7 @@
             <li class="nav-item"><a class="nav-link" href="#help">Help</a></li>
             <li class="nav-item"><a class="nav-link" href="#doc">Documentation</a></li>
             <li class="nav-item"><a class="nav-link"
-            href="https://github.com/michelbierlaire/biogeme/tree/master/examples"
+            href="sphinx/auto_examples/index.html"
             target="_blank">Examples</a></li>
             <li class="nav-item"><a class="nav-link" href="#res">Resources</a></li>
             <li class="nav-item"><a class="nav-link" href="#archives">Archives</a></li>
@@ -51,7 +51,8 @@
       <div class="container">
         <div class="masthead-subheading">Estimating discrete choice
           models with</div>
-        <div class="masthead-heading text-uppercase">Biogeme</div>
+        <div class="masthead-heading text-uppercase">Biogeme <span id="version"></span></div>
+
         <a class="btn btn-primary btn-xl text-uppercase" href="#start">Start</a>
       </div>
     </header>
@@ -317,7 +318,7 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-4 text-lg-start">Copyright
-            &copy; Michel Bierlaire 2022</div>
+            &copy; Michel Bierlaire 2024</div>
           <div class="col-lg-4 my-3 my-lg-0">
             <a class="btn btn-dark btn-social mx-2"
                target="_blank" href="https://groups.google.com/d/forum/biogeme"
@@ -343,5 +344,6 @@
     
     <!-- Core theme JS-->
     <script src="js/scripts.js"></script>
+    <script src="js/get_version.js"></script>
   </body>
 </html>
