@@ -176,21 +176,42 @@ In Biogeme, this model is referred to as
 
 \citeasnoun{BHAT2008274} generalizes the above formulation and introduces the following specification, where the utility functions $U_{in}$ are defined as
 \begin{equation}
+  \label{eq:generalized_utility_outside}
+U_{1n} =\exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{\alpha_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1},
+\end{equation}
+for the ``outside good'' that is always consumed and, for $i > 1$,
+\begin{equation}
   \label{eq:generalized_utility}
 U_{in} =\exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{\alpha_i} \left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right],
 \end{equation}
 where $\beta$, $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
 estimated. We can calculate
 \begin{equation}
+\frac{\partial U_{1n}}{\partial e_1} =\exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{p_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1-1},
+\end{equation}
+and
+\begin{equation}
   \frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1}.
 \end{equation}
 We use again the logarithm as the order preserving function to obtain the following specification:
+\[
+\phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) = \beta^T x_{1n} + \varepsilon_{1n} + (\alpha_1-1) \ln e_1 - \alpha_1 \ln p_1,
+\]
+and
 \[
 \phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = \beta^T x_{in} + \varepsilon_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right),
 \]
 so that
 \[
-V_{in} = \beta^T x_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right),
+V_{1n} = \beta^T x_{1n} + (\alpha_1-1) \ln e_1 - \alpha_1 \ln p_1,
+\]
+and
+\[
+V_{in} = \beta^T x_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right).
+\]
+Finally, we have
+\[
+c_{1n} = -\frac{\partial V_{1n}}{\partial e_1} = \frac{1-\alpha_1}{e_1},
 \]
 and
 \[
@@ -201,21 +222,42 @@ In Biogeme, this model is referred to as \lstinline@generalized@.
 \subsection{The $\gamma$-profile}
 If $\alpha_i \to 0$, \req{eq:generalized_utility} collapses to the linear expenditure system (LES) form, defined as follows:
 \begin{equation}
+  \label{eq:u_les_outside}
+U_{1n}(e_{1})= \exp(\beta^T x_{1n} + \varepsilon_{1n}) \ln \left(\frac{e_1}{p_1} \right),
+\end{equation}
+and
+\begin{equation}
   \label{eq:u_les}
 U_{in}(e_{i})= \exp(\beta^T x_{in} + \varepsilon_{in}) \gamma_i \ln \left(\frac{e_i}{p_i \gamma_i}+1 \right),
 \end{equation}
 where $\beta$, $\gamma_i > 0$ is a  parameter to be
 estimated. We can calculate
 \[
+\frac{\partial U_{1n}}{\partial e_1} =  \exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{e_1},
+\]
+and
+\[
 \frac{\partial U_{in}}{\partial e_i} =  \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{e_i + p_i \gamma_i}.
 \]
 Taking again the logarithm, we have
+\[
+\phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) =\beta^T x_{1n} + \varepsilon_{1n} - \ln e_1,
+\]
+and
 \[
 \phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in}) + \ln \gamma_i - \ln(e_i + p_i \gamma_i),
 \]
 so that
 \[
-V_{in} = \beta^T x_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i),
+V_{1n} = \beta^T x_{1n}  - \ln e_i,
+\]
+and
+\[
+V_{in} = \beta^T x_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i).
+\]
+Finally, we have
+\[
+c_{1n} = \frac{1}{e_1},
 \]
 and
 \[
@@ -227,23 +269,47 @@ In Biogeme, this model is referred to as \lstinline@gamma_profile@.
 
 \citeasnoun{Wang:2023aa} introduce the following specification in order to accommodate non-monotonic preferences, motivated in the context of time consumption. With our notations, the specification is
 \[
+U_{1n}(e_1) =  \frac{1}{\alpha_1}e^{\beta^T x_{in}}\left(\frac{e_1}{p_1}\right)^{\alpha_1}+(\gamma^T z_{in} + \varepsilon_{in}) e_i.
+\]
+for the outside good, and
+\[
 U_{in}(e_i) = \frac{\gamma_i}{\alpha_i} e^{\beta^T x_{in}}\left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right]+(\gamma^T z_{in} + \varepsilon_{in}) e_i.
 \]
 where $\beta$, $\gamma$, $0 < \alpha_i < 1$, and $\gamma_i > 0$  are parameters to be
 estimated. In the original paper, the model has been derived using $p_i=1$, for all $i$.
 We have
 \[
+\frac{\partial U_{1n}}{\partial e_1} = \frac{1}{p_1} e^{\beta^T x_{1n}}  \left(\frac{e_1}{p_1}\right)^{\alpha_1-1} + \gamma^T z_{1n} + \varepsilon_{1n},
+\]
+and
+\[
 \frac{\partial U_{in}}{\partial e_i} = \frac{1}{p_i} e^{\beta^T x_{in}}  \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1} + \gamma^T z_{in} + \varepsilon_{in}.
 \]
-Here, we do not need to apply an order preserving function, and
+Here, we do not need to apply an order preserving function, so that
+\[
+V_{1n} = \frac{1}{p_1} e^{\beta^T x_{1n}}  \left(\frac{e_1}{p_1}\right)^{\alpha_1-1} + \gamma^T z_{1n}.
+\]
+and
 \[
 V_{in} = \frac{1}{p_i} e^{\beta^T x_{in}}  \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1} + \gamma^T z_{in}.
 \]
 We have
 \[
-c_{in} = -\frac{\partial V_{in}}{\partial e_i} =  \frac{1}{p^2_i} e^{\beta^T x_{in}} \frac{1-\alpha_i}{\gamma_i}\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-2},
+c_{1n} = -\frac{\partial V_{1n}}{\partial e_1} =  \frac{1}{p^2_1} e^{\beta^T x_{1n}} (1-\alpha_1)\left(\frac{e_1}{p_1}\right)^{\alpha_1-2},
 \]
-so that
+and
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} =  \frac{1}{p^2_i} e^{\beta^T x_{in}} \frac{1-\alpha_i}{\gamma_i}\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-2}.
+\]
+For the outside good, we have
+\[
+\ln c_{1n} =  \beta^T x_{1n} + \ln (1-\alpha_1) +(\alpha_i-2) \ln e_1 - \alpha_1 \ln p_1,
+\]
+and
+\[
+\frac{1}{c_{1n}} =  p^2_1 e^{-\beta^T x_{1n}} \frac{1}{1-\alpha_1}\left(\frac{e_1}{p_1}\right)^{2-\alpha_1}.
+\]
+For the other goods, we have
 \[
 \ln c_{in} = -2\ln p_i + \beta^T x_{in} + \ln (1-\alpha_i) -\ln \gamma_i +(\alpha_i-2) \ln\left(\frac{e_i}{p_i \gamma_i}+1\right).
 \]
@@ -418,7 +484,7 @@ where the derivation is available in \citeasnoun{BHAT2008274}. Therefore, the co
   &- J^+ \ln \sum_{i\in\C_n} e^{\mu V_{in}} \\
   &+ \ln (J^+-1)!.
 \end{align*}
-
+Note that the last term is a constant, and is ignored by Biogeme.
 
 
 \end{document}
