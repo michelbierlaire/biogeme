@@ -383,3 +383,4 @@ reports/expressions/expressions.ps
 reports/specAssistance_v2/pareto.png
 reports/mdcev/mdcev.ps
 clean_all.py
+docs/examples/assisted/b07everything_assisted.pareto
