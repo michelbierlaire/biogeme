@@ -25,7 +25,7 @@ project = 'Biogeme'
 copyright = '2023, Michel Bierlaire'
 author = 'Michel Bierlaire'
 
-# The full version, including alpha/beta/rc tags
+# The full version, including alpha/Beta/rc tags
 release = __version__
 
 

@@ -7,16 +7,19 @@ Welcome to Biogeme's documentation!
 ***********************************
 
 Examples
-========
+~~~~~~~~
+
+For beginners, we recommend to look at the Swissmetro examples:
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Examples
+  :maxdepth: 2
+  :caption: Examples:
 
-   auto_examples/index.rst
+  auto_examples/index.rst
   
 Source code
-===========
+~~~~~~~~~~~
+
 
 .. toctree::
   :maxdepth: 2
@@ -36,23 +39,27 @@ Source code
   exceptions.rst
   expressions.rst
   filenames.rst
+  lsh.rst
   biogeme_logging.rst
   loglikelihood.rst
   mdcev.rst
   models.rst
   multiobjectives.rst
+  nests.rst
   negative_likelihood.rst
   optimization.rst
   parameters.rst
+  partition.rst
   results.rst
   sampling_of_alternatives.rst
   segmentation.rst
   specification.rst
   tools.rst
+  validity.rst
   version.rst
 
 Indices and tables
-==================
+~~~~~~~~~~~~~~~~~~
 
 * :ref:`genindex`
 * :ref:`modindex`
