@@ -8,7 +8,7 @@
 
 **/Makefile.in
 
-# Other binary files
+# Other binary .py
 config.h
 config.log
 config.status
@@ -37,13 +37,13 @@ docs/source/auto_examples
 .tox
 .eggs
 
-# All .lo files
+# All .lo .py
 **/*.lo
 **/*.la
 **/.libs
 
 
-# Other files
+# Other .py
 autom4te.cache/
 archive/libraries/utils/patCompilationDate.h
 archive/libraries/utils/patUser.h
@@ -378,7 +378,7 @@ biogeme/cbiogeme.cpython-310-darwin.so
 *.so
 examples/assisted/.ipynb_checkpoints/runknapsack-checkpoint.ipynb
 
-# Ignore dynaconf secret files
+# Ignore dynaconf secret .py
 .secrets.*
 src/biogeme/cpp/cythonbiogeme.cpp
 src/biogeme/.DS_Store
