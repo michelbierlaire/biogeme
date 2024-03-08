@@ -3,6 +3,7 @@
 :author: Michel Bierlaire
 :date: Sat Aug 20 17:20:35 2022
 """
+
 import os
 import shutil
 import fileinput
@@ -11,9 +12,7 @@ import ast
 import pathlib
 
 
-URLBINDER = (
-    'https://mybinder.org/v2/gh/michelbierlaire/biogeme/master?filepath='
-)
+URLBINDER = 'https://mybinder.org/v2/gh/michelbierlaire/biogeme/master?filepath='
 
 URLNOTO = (
     'https://noto.epfl.ch/hub/user-redirect/git-pull?'
@@ -63,7 +62,7 @@ def copy_example(name, adir, hfiles):
     :param adir: name of the directory where the example file is.
     :type adir: str
 
-    :param hfiles: list of HTML files that are associated with the example.
+    :param hfiles: list of HTML .py that are associated with the example.
     :type hfiles: list(str)
     """
     notebook_fname = f'{name.split(".")[0]}.ipynb'
@@ -224,15 +223,11 @@ imageFiles = [
 ]
 
 for img_f in imageFiles:
-    copy_file(
-        img_f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/images'
-    )
+    copy_file(img_f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/images')
 
 cssFiles = ['biomenu.css', 'biopanel.css', 'biobacktotop.css']
 for css_f in cssFiles:
-    copy_file(
-        css_f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/css'
-    )
+    copy_file(css_f, '/Users/michelbierlaire/ToBackupOnGoogleDrive/webpages/css')
 
 jsFiles = ['backtotop.js', 'os.js', 'menu.js']
 for js_f in jsFiles:
@@ -261,7 +256,7 @@ def table_of_contents(all_examples):
 
     :param all_examples: list of examples. Each item in the list is a
         tuple with two elements: the name of the example category, and
-        the name of the directory where the files are located.
+        the name of the directory where the .py are located.
     :type all_examples: list(tuple(str, str))
 
     :return: table of content
@@ -278,9 +273,7 @@ def table_of_contents(all_examples):
         result += f'<li><a href="#{i[1]}">{i[0]}</a></li>'
     result += '<li><a href="#jupyter">Modules illustrations</a></li>'
     result += '</ul>'
-    result += (
-        '<p>For each example, you have access to the following resources:</p>'
-    )
+    result += '<p>For each example, you have access to the following resources:</p>'
     result += '<ul>'
     result += '<li>A short description extracted from the file comments.</li>'
     result += (
@@ -303,12 +296,12 @@ def table_of_contents(all_examples):
     )
     result += (
         '<li>When available, estimation results are available in one or '
-        'several html files.</li>'
+        'several html .py.</li>'
     )
     result += '</ul>'
     result += '</div>'
     result += '<div class="panel-footer">'
-    result += 'Download the data files from <a href="data.html">here</a>'
+    result += 'Download the data .py from <a href="data.html">here</a>'
     result += '</div>'
     result += '</div>'
 
@@ -325,11 +318,11 @@ def one_example(name, the_dir, all_files, html):
     :type the_dir: str
 
     :param all_files: dictionary mapping a directory with the name of the
-        relevant .py files.
+        relevant .py .py.
     :type all_files: dict(str:str)
 
     :param html: dictionary mapping a directory with the name of the
-        relevant .html files.
+        relevant .html .py.
     :type html: dict(str:str)
     """
     result = f'<a id="{the_dir}"></a>'
@@ -379,9 +372,7 @@ def one_example(name, the_dir, all_files, html):
         for k, h_file in enumerate(hfiles):
             h_fname = f'examples/{the_dir}/{h_file}'
             result += '<tr>'
-            result += (
-                f'<td><a href="{h_fname}" target="_blank">{h_file}</a></td>'
-            )
+            result += f'<td><a href="{h_fname}" target="_blank">{h_file}</a></td>'
             if k == 0:
                 result += f'<td rowspan="{len(hfiles)}">{clean_doc(doc)}</td>'
             result += '</tr>'
@@ -441,8 +432,7 @@ def jupyter_examples():
     result += '</table>'
     result += '<div class="panel-footer">'
     result += (
-        '<p>Register on noto.epfl.ch '
-        '<a href="http://noto.epfl.ch">here</a></p>'
+        '<p>Register on noto.epfl.ch ' '<a href="http://noto.epfl.ch">here</a></p>'
     )
     result += '</div>'
     result += '</div>'
