@@ -1,23 +1,30 @@
-import os
 import unittest
-import pandas as pd
-import biogeme.database as db
+
 import biogeme.biogeme as bio
 from biogeme import models
+from biogeme.data.swissmetro import (
+    read_data,
+    PURPOSE,
+    CHOICE,
+    GA,
+    TRAIN_CO,
+    SM_CO,
+    SM_AV,
+    TRAIN_TT_SCALED,
+    TRAIN_COST_SCALED,
+    SM_TT_SCALED,
+    SM_COST_SCALED,
+    CAR_TT_SCALED,
+    CAR_CO_SCALED,
+    TRAIN_AV_SP,
+    CAR_AV_SP,
+)
 from biogeme.expressions import Beta
+from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
 
-myPath = os.path.dirname(os.path.abspath(__file__))
-df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
-
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
-
-globals().update(database.variables)
-
-# Here we use the 'biogeme' way for backward compatibility
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
+database = read_data()
+# Keep only trip purposes 1 (commuter) and 3 (business)
+exclude = ((PURPOSE != 1) * (PURPOSE != 3)) > 0
 database.remove(exclude)
 
 
@@ -34,14 +41,6 @@ MU = Beta('MU', 0.5, 0.000001, 1.0, 0)
 SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
-TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100.0)
-TRAIN_COST_SCALED = database.DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100
-)
-SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
-SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
-CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
-CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 
 V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
@@ -51,29 +50,27 @@ V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 V = {1: V1, 2: V2, 3: V3}
 
 
-# Associate the availability conditions with the alternatives
-CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
-
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Definition of nests:
 # 1: nests parameter
 # 2: list of alternatives
-existing = 1.0, [1, 3]
-future = 1.0, [2]
-nests = existing, future
+
+existing = OneNestForNestedLogit(
+    nest_param=1, list_of_alternatives=[1, 3], name='existing'
+)
+nests = NestsForNestedLogit(choice_set=[1, 2, 3], tuple_of_nests=(existing,))
 
 # The choice model is a nested logit, with availability conditions
-logprob = models.lognestedMevMu(V, av, nests, CHOICE, MU)
+logprob = models.lognested_mev_mu(V, av, nests, CHOICE, MU)
 
 
 class test_10(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob)
-        biogeme.saveIterations = False
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme = bio.BIOGEME(database, logprob, parameter_file='')
+        biogeme.save_iterations = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike, -5236.9, 2)
 

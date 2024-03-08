@@ -19,9 +19,7 @@ df.loc[df['TripPurpose'] != 1, 'TripPurpose'] = 2
 df.loc[df['CarAvail'] != 3, 'CarAvail'] = 1
 
 exclude = (
-    (df.Choice == -1)
-    | (df.CostCarCHF < 0)
-    | (df.CarAvail == 3) & (df.Choice == 1)
+    (df.Choice == -1) | (df.CostCarCHF < 0) | (df.CarAvail == 3) & (df.Choice == 1)
 )
 df.drop(df[exclude].index, inplace=True)
 df = df.reset_index()
@@ -37,8 +35,8 @@ class test_01(unittest.TestCase):
         biogeme.generateHtml = False
         biogeme.generatePickle = False
         biogeme.saveIterations = False
-        results = biogeme.quickEstimate()
-        self.assertAlmostEqual(results.data.logLike,  -1068.78, 1)
+        results = biogeme.quick_estimate()
+        self.assertAlmostEqual(results.data.logLike, -1068.78, 1)
 
 
 if __name__ == '__main__':

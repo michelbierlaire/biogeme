@@ -1,22 +1,31 @@
-import os
 import unittest
-import pandas as pd
-import biogeme.database as db
+
 import biogeme.biogeme as bio
 from biogeme import models
+from biogeme.data.swissmetro import (
+    read_data,
+    PURPOSE,
+    CHOICE,
+    GA,
+    TRAIN_CO,
+    SM_CO,
+    SM_AV,
+    TRAIN_TT_SCALED,
+    TRAIN_COST_SCALED,
+    SM_TT_SCALED,
+    SM_COST_SCALED,
+    CAR_TT_SCALED,
+    CAR_CO_SCALED,
+    TRAIN_AV_SP,
+    CAR_AV_SP,
+    TRAIN_TT,
+)
 from biogeme.expressions import Beta, Derive
+from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
 
-myPath = os.path.dirname(os.path.abspath(__file__))
-df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
-
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
-
-globals().update(database.variables)
-
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
+database = read_data()
+# Keep only trip purposes 1 (commuter) and 3 (business)
+exclude = ((PURPOSE != 1) * (PURPOSE != 3)) > 0
 database.remove(exclude)
 
 
@@ -36,14 +45,6 @@ ALPHA_PUBLIC = 1 - ALPHA_EXISTING
 SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
-TRAIN_TT_SCALED = TRAIN_TT / 100.0
-TRAIN_COST_SCALED = database.DefineVariable(
-    'TRAIN_COST_SCALED', TRAIN_COST / 100
-)
-SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100.0)
-SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
-CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
-CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
 
 V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
@@ -53,10 +54,6 @@ V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 V = {1: V1, 2: V2, 3: V3}
 
 
-# Associate the availability conditions with the alternatives
-CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
-
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Definition of nests:
@@ -64,9 +61,15 @@ alpha_existing = {1: ALPHA_EXISTING, 2: 0.0, 3: 1.0}
 
 alpha_public = {1: ALPHA_PUBLIC, 2: 1.0, 3: 0.0}
 
-nest_existing = MU_EXISTING, alpha_existing
-nest_public = MU_PUBLIC, alpha_public
-nests = nest_existing, nest_public
+nest_existing = OneNestForCrossNestedLogit(
+    nest_param=MU_EXISTING, dict_of_alpha=alpha_existing, name='existing'
+)
+nest_public = OneNestForCrossNestedLogit(
+    nest_param=MU_PUBLIC, dict_of_alpha=alpha_public, name='public'
+)
+nests = NestsForCrossNestedLogit(
+    choice_set=[1, 2, 3], tuple_of_nests=(nest_existing, nest_public)
+)
 
 # The choice model is a cross-nested logit, with availability conditions
 
@@ -78,17 +81,15 @@ simulate = {'Prob. train': prob1, 'Elas. 1': genelas1}
 
 class test_11bis(unittest.TestCase):
     def testEstimationAndSimulation(self):
-        biogeme = bio.BIOGEME(database, logprob)
-        biogeme.saveIterations = False
+        biogeme = bio.BIOGEME(database, logprob, parameter_file='')
+        biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
         self.assertAlmostEqual(results.data.logLike, -5214.049202307744, 1)
         biosim = bio.BIOGEME(database, simulate)
-        simresults = biosim.simulate(results.getBetaValues())
-        self.assertAlmostEqual(
-            sum(simresults['Prob. train']), 888.3883902853023, 1
-        )
+        simresults = biosim.simulate(results.get_beta_values())
+        self.assertAlmostEqual(sum(simresults['Prob. train']), 888.3883902853023, 1)
 
 
 if __name__ == '__main__':

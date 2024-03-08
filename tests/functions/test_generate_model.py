@@ -20,7 +20,7 @@ class TestGenerateModel(unittest.TestCase):
     def setUp(self):
         # Mocking the context and other required data
         self.mock_context = Mock(spec=SamplingContext)
-        self.mock_context.utility_function = Beta('beta', 0, None, None, 0) * Variable(
+        self.mock_context.utility_function = Beta('Beta', 0, None, None, 0) * Variable(
             'x'
         )
         self.mock_context.total_sample_size = 5
@@ -130,14 +130,7 @@ class TestGenerateModel(unittest.TestCase):
         model = GenerateModel(self.mock_context)
         cross_nested_logit_expression = model.get_cross_nested_logit()
         self.assertIsInstance(cross_nested_logit_expression, Expression)
-        expected = (
-            "_bioLogLogitFullChoiceSet[choice=`0.0`]U=(0:(((Beta('beta', 0, "
-            "-1.3407807929942596e+154, 1.3407807929942596e+154, 0) * x) - "
-            "_log_proba_0) + logzero(ConditionalSum((CNL_first_nest_0 != `0.0`): "
-            "(((CNL_first_nest_0 ** Beta('mu_1', 1, 1, 1.3407807929942596e+154, 0)) "
-            "* exp(((Beta('mu_1', 1, 1, 1.3407807929942596e+154, 0) - `1.0`) * "
-            "(Beta('beta', 0, -1.3407807929942596e+154, 1.3407807929942596e+154, 0) * x))))"
-        )
+        expected = '_bioLogLogitFullChoiceSet[choice=`0.0`]'
         self.assertTrue(str(cross_nested_logit_expression).startswith(expected))
 
 

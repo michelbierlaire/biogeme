@@ -4,6 +4,7 @@ Test the optimization module
 :author: Michel Bierlaire
 :data: Wed Apr 29 17:45:19 2020
 """
+
 # Bug in pylint
 # pylint: disable=no-member
 #
@@ -74,11 +75,11 @@ class test_optimization(unittest.TestCase):
             getData(1), self.likelihood, parameter_file=self.scipy_file
         )
         my_biogeme.modelName = 'simpleExample'
-        my_biogeme.generateHtml = False
-        my_biogeme.generatePickle = False
-        my_biogeme.saveIterations = False
+        my_biogeme.generate_html = False
+        my_biogeme.generate_pickle = False
+        my_biogeme.save_iterations = False
         results = my_biogeme.estimate()
-        beta = results.getBetaValues()
+        beta = results.get_beta_values()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 
@@ -87,11 +88,11 @@ class test_optimization(unittest.TestCase):
             getData(1), self.likelihood, parameter_file=self.ls_file
         )
         my_biogeme.modelName = 'simpleExample'
-        my_biogeme.generateHtml = False
-        my_biogeme.generatePickle = False
-        my_biogeme.saveIterations = False
+        my_biogeme.generate_html = False
+        my_biogeme.generate_pickle = False
+        my_biogeme.save_iterations = False
         results = my_biogeme.estimate()
-        beta = results.getBetaValues()
+        beta = results.get_beta_values()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 
@@ -100,11 +101,11 @@ class test_optimization(unittest.TestCase):
             getData(1), self.likelihood, parameter_file=self.tr_file
         )
         my_biogeme.modelName = 'simpleExample'
-        my_biogeme.generateHtml = False
-        my_biogeme.generatePickle = False
-        my_biogeme.saveIterations = False
+        my_biogeme.generate_html = False
+        my_biogeme.generate_pickle = False
+        my_biogeme.save_iterations = False
         results = my_biogeme.estimate()
-        beta = results.getBetaValues()
+        beta = results.get_beta_values()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 
@@ -113,11 +114,11 @@ class test_optimization(unittest.TestCase):
             getData(1), self.likelihood, parameter_file=self.simple_bounds_file
         )
         my_biogeme.modelName = 'simpleExample'
-        my_biogeme.generateHtml = False
-        my_biogeme.generatePickle = False
-        my_biogeme.saveIterations = False
+        my_biogeme.generate_html = False
+        my_biogeme.generate_pickle = False
+        my_biogeme.save_iterations = False
         results = my_biogeme.estimate()
-        beta = results.getBetaValues()
+        beta = results.get_beta_values()
         self.assertAlmostEqual(beta['beta1'], 0.144546, 3)
         self.assertAlmostEqual(beta['beta2'], 0.023502, 3)
 

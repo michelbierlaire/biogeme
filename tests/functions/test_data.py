@@ -5,6 +5,7 @@ Data for the tests
 :data: Wed Apr 29 18:31:18 2020
 
 """
+
 # Bug in pylint
 # pylint: disable=no-member
 #
@@ -162,29 +163,25 @@ output_flatten_3 = pd.DataFrame(
 
 output_flatten_database_1 = pd.DataFrame(
     {
-        '1_Age': [40, 18],
+        'Age': [40, 18],
         '1_Exclude': [0, 0],
         '1_Variable1': [1, 4],
         '1_Variable2': [10, 40],
         '1_Choice': [1, 1],
         '1_Av1': [0, 1],
-        '1_Av2': [1, 1],
+        'Av2': [1, 1],
         '1_Av3': [0, 1],
-        '2_Age': [40, 18],
         '2_Exclude': [0, 1],
         '2_Variable1': [2, 5],
         '2_Variable2': [20, 50],
         '2_Choice': [2, 2],
         '2_Av1': [1, 1],
-        '2_Av2': [1, 1],
         '2_Av3': [1, 1],
-        '3_Age': [40, np.nan],
         '3_Exclude': [1, np.nan],
         '3_Variable1': [3, np.nan],
         '3_Variable2': [30, np.nan],
         '3_Choice': [3, np.nan],
         '3_Av1': [1, np.nan],
-        '3_Av2': [1, np.nan],
         '3_Av3': [1, np.nan],
     },
     index=[1, 2],

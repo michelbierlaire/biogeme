@@ -5,12 +5,13 @@ Test the parameters module
 :date: Tue Nov 29 10:26:32 2022
 
 """
+
 import shutil
 from os import path
 import tempfile
 import unittest
 import numpy as np
-from biogeme.parameters import biogeme_parameters
+from biogeme.parameters import Parameters
 import biogeme.exceptions as excep
 from biogeme.default_parameters import ParameterTuple
 import biogeme.check_parameters as cp
@@ -227,19 +228,20 @@ default_parameters = (
 
 class TestParameters(unittest.TestCase):
     def setUp(self):
+        self.biogeme_parameters = Parameters()
         for p in default_parameters:
-            biogeme_parameters.add_parameter(p)
+            self.biogeme_parameters.add_parameter(p)
 
     def test_get_param_tuple_1(self):
         """Test the retrieval of parameter without the section name"""
-        the_tuple = biogeme_parameters.get_param_tuple(name='missing_data')
+        the_tuple = self.biogeme_parameters.get_param_tuple(name='missing_data')
         self.assertEqual(the_tuple.name, 'missing_data')
         self.assertEqual(the_tuple.value, 99999)
         self.assertEqual(the_tuple.section, 'Specification')
 
     def test_get_param_tuple_2(self):
         """Test the retrieval of parameter with the section name"""
-        the_tuple = biogeme_parameters.get_param_tuple(
+        the_tuple = self.biogeme_parameters.get_param_tuple(
             name='missing_data', section='Specification'
         )
         self.assertEqual(the_tuple.name, 'missing_data')
@@ -251,15 +253,15 @@ class TestParameters(unittest.TestCase):
         mentioned section
         """
         with self.assertRaises(excep.BiogemeError):
-            _ = biogeme_parameters.get_param_tuple(
+            _ = self.biogeme_parameters.get_param_tuple(
                 name='missing_data', section='Estimation'
             )
 
         with self.assertRaises(excep.BiogemeError):
-            _ = biogeme_parameters.get_param_tuple(name='unknown_parameter')
+            _ = self.biogeme_parameters.get_param_tuple(name='unknown_parameter')
 
         with self.assertRaises(excep.BiogemeError):
-            _ = biogeme_parameters.get_param_tuple(
+            _ = self.biogeme_parameters.get_param_tuple(
                 name='unknown_parameter', section='Estimation'
             )
 
@@ -268,7 +270,7 @@ class TestParameters(unittest.TestCase):
         sections, and the section is not specified.
         """
         with self.assertRaises(excep.BiogemeError):
-            _ = biogeme_parameters.get_param_tuple(
+            _ = self.biogeme_parameters.get_param_tuple(
                 name='a_param',
             )
 
@@ -277,7 +279,7 @@ class TestParameters(unittest.TestCase):
         sections, with the section name
 
         """
-        the_tuple = biogeme_parameters.get_param_tuple(
+        the_tuple = self.biogeme_parameters.get_param_tuple(
             name='a_param', section='Estimation'
         )
         self.assertEqual(the_tuple.name, 'a_param')
@@ -289,7 +291,7 @@ class TestParameters(unittest.TestCase):
         section, with the section name
 
         """
-        the_tuple = biogeme_parameters.get_param_tuple(
+        the_tuple = self.biogeme_parameters.get_param_tuple(
             name='a_param', section='Specification'
         )
         self.assertEqual(the_tuple.name, 'a_param')
@@ -305,7 +307,7 @@ class TestParameters(unittest.TestCase):
             description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
             check=(cp.zero_one, cp.is_number),
         )
-        ok, _ = biogeme_parameters.check_parameter_value(a_tuple)
+        ok, _ = self.biogeme_parameters.check_parameter_value(a_tuple)
         self.assertFalse(ok)
 
     def test_add_parameter(self):
@@ -317,9 +319,11 @@ class TestParameters(unittest.TestCase):
             description='# float: proportion (between 0 and 1) of iterations when the analytical Hessian is calculated',
             check=(cp.zero_one, cp.is_number),
         )
-        biogeme_parameters.add_parameter(a_tuple)
+        self.biogeme_parameters.add_parameter(a_tuple)
         self.assertEqual(
-            biogeme_parameters.get_value(name=a_tuple.name, section=a_tuple.section),
+            self.biogeme_parameters.get_value(
+                name=a_tuple.name, section=a_tuple.section
+            ),
             0.5,
         )
         another_tuple = ParameterTuple(
@@ -331,17 +335,22 @@ class TestParameters(unittest.TestCase):
             check=(cp.zero_one, cp.is_number),
         )
         with self.assertRaises(excep.BiogemeError):
-            biogeme_parameters.add_parameter(another_tuple)
+            self.biogeme_parameters.add_parameter(another_tuple)
 
     def test_set_get_value(self):
         value = 1.0e-3
-        biogeme_parameters.set_value('tolerance', value, section='Estimation')
-        check = biogeme_parameters.get_value('tolerance', section='Estimation')
+        self.biogeme_parameters.set_value('tolerance', value, section='Estimation')
+        check = self.biogeme_parameters.get_value('tolerance', section='Estimation')
         self.assertEqual(value, check)
 
 
 class TestToml(unittest.TestCase):
     """Tests for the biogeme.toml module"""
+
+    def setUp(self):
+        self.biogeme_parameters = Parameters()
+        for p in default_parameters:
+            self.biogeme_parameters.add_parameter(p)
 
     def test_from_file(self):
         """Read the parameters from file"""
@@ -350,20 +359,20 @@ class TestToml(unittest.TestCase):
         test_file = path.join(test_dir, 'biogeme.toml')
         with open(test_file, 'w', encoding='utf-8') as f:
             print(FILE_CONTENT, file=f)
-        biogeme_parameters.read_file(file_name=test_file)
+        self.biogeme_parameters.read_file(file_name=test_file)
 
         with self.assertRaises(excep.BiogemeError):
-            _ = biogeme_parameters.get_value('a_wrong_param', section='Estimation')
+            _ = self.biogeme_parameters.get_value('a_wrong_param', section='Estimation')
 
-        check_int = biogeme_parameters.get_value('missing_data')
+        check_int = self.biogeme_parameters.get_value('missing_data')
         self.assertEqual(check_int, 99999)
 
-        check_float = biogeme_parameters.get_value(
+        check_float = self.biogeme_parameters.get_value(
             'second_derivatives', section='Estimation'
         )
         self.assertEqual(check_float, 1.0)
 
-        check_str = biogeme_parameters.get_value('optimization_algorithm')
+        check_str = self.biogeme_parameters.get_value('optimization_algorithm')
         self.assertEqual(check_str, 'simple_bounds')
 
         # Remove the directory after the test
@@ -373,20 +382,20 @@ class TestToml(unittest.TestCase):
         """Test with default parameters"""
         test_dir = tempfile.mkdtemp()
         test_file = path.join(test_dir, 'any_file_name.toml')
-        biogeme_parameters.read_file(file_name=test_file)
+        self.biogeme_parameters.read_file(file_name=test_file)
 
         with self.assertRaises(excep.BiogemeError):
-            _ = biogeme_parameters.get_value('a_wrong_param', section='Estimation')
+            _ = self.biogeme_parameters.get_value('a_wrong_param', section='Estimation')
 
-        check_int = biogeme_parameters.get_value('missing_data')
+        check_int = self.biogeme_parameters.get_value('missing_data')
         self.assertEqual(check_int, 99999)
 
-        check_float = biogeme_parameters.get_value(
+        check_float = self.biogeme_parameters.get_value(
             'second_derivatives', section='Estimation'
         )
         self.assertEqual(check_float, 1.0)
 
-        check_str = biogeme_parameters.get_value('optimization_algorithm')
+        check_str = self.biogeme_parameters.get_value('optimization_algorithm')
         self.assertEqual(check_str, 'simple_bounds')
         # Remove the directory after the test
         shutil.rmtree(test_dir)

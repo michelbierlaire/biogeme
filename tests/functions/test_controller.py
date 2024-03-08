@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from biogeme.controller import Controller, CentralController
+from biogeme.controller import Controller, CentralController, ControllerOperator
 from biogeme.exceptions import BiogemeError
 from biogeme.configuration import Configuration, SelectionTuple
 
@@ -8,7 +8,7 @@ from biogeme.configuration import Configuration, SelectionTuple
 class TestController(unittest.TestCase):
     def setUp(self):
         self.controller_name = 'my_controller'
-        self.specification_names = ['spec_1', 'spec_2']
+        self.specification_names = ('spec_1', 'spec_2')
         self.the_controller = Controller(
             controller_name=self.controller_name,
             specification_names=self.specification_names,
@@ -16,20 +16,20 @@ class TestController(unittest.TestCase):
 
     def test_constructor(self):
         self.assertEqual(self.the_controller.controller_name, self.controller_name)
-        self.assertListEqual(
+        self.assertTupleEqual(
             self.the_controller.specification_names, self.specification_names
         )
         self.assertEqual(self.the_controller.current_index, 0)
-        self.assertListEqual(
-            list(self.the_controller.dict_of_index.keys()), self.specification_names
+        self.assertTupleEqual(
+            tuple(self.the_controller.dict_of_index.keys()), self.specification_names
         )
         self.assertListEqual(self.the_controller.controlled_catalogs, [])
         self.assertEqual(self.the_controller.controller_size(), 2)
 
     def test_all_configurations(self):
         all_configurations = self.the_controller.all_configurations()
-        expected_result = ['my_controller:spec_1', 'my_controller:spec_2']
-        self.assertListEqual(all_configurations, expected_result)
+        expected_result = {'my_controller:spec_1', 'my_controller:spec_2'}
+        self.assertSetEqual(all_configurations, expected_result)
 
     def test_name(self):
         name = 'spec_2'
@@ -125,8 +125,8 @@ class TestCentralController(unittest.TestCase):
         #    Total: 32
         self.assertEqual(len(operators), 32)
         # Test a specific operator function, e.g., 'Increase c1'
-        operator = operators['Increase c1']
-        current_config = 'c1:option1;c2:optionA;c3:choiceX'
+        operator: ControllerOperator = operators['Increase c1']
+        current_config = Configuration.from_string('c1:option1;c2:optionA;c3:choiceX')
         new_config, steps = operator(current_config=current_config, step=1)
         self.assertEqual(str(new_config), 'c1:option2;c2:optionA;c3:choiceX')
         self.assertEqual(steps, 1)
@@ -134,7 +134,7 @@ class TestCentralController(unittest.TestCase):
     def test_two_controllers(self):
         # Add test cases for two_controllers
         # Test for NE direction
-        current_config = 'c1:option1;c2:optionA;c3:choiceX'
+        current_config = Configuration.from_string('c1:option1;c2:optionA;c3:choiceX')
         new_config, steps = self.central_controller.two_controllers(
             first_controller_name='c1',
             second_controller_name='c2',
@@ -148,13 +148,17 @@ class TestCentralController(unittest.TestCase):
         # Test for invalid direction
         with self.assertRaises(BiogemeError):
             self.central_controller.two_controllers(
-                current_config, 'c1', 'c2', 1, 'invalid'
+                first_controller_name='c1',
+                second_controller_name='c2',
+                direction='invalid',
+                current_config=current_config,
+                step=1,
             )
 
     def test_modify_random_controllers(self):
         # Add test cases for modify_random_controllers
         # Test increasing controllers
-        current_config = 'c1:option1;c2:optionA;c3:choiceX'
+        current_config = Configuration.from_string('c1:option1;c2:optionA;c3:choiceX')
         new_config, steps = self.central_controller.modify_random_controllers(
             current_config=current_config, increase=True, step=2
         )
@@ -186,7 +190,7 @@ class TestCentralController(unittest.TestCase):
     def test_decreased_controller(self):
         # Add test cases for decreased_controller
         # Test decreasing c1 by 1
-        current_config = 'c1:option1;c2:optionA;c3:choiceX'
+        current_config = Configuration.from_string('c1:option1;c2:optionA;c3:choiceX')
         new_config, steps = self.central_controller.decreased_controller(
             current_config=current_config, controller_name='c1', step=1
         )
@@ -195,7 +199,9 @@ class TestCentralController(unittest.TestCase):
 
         # Test decreasing an unknown controller
         with self.assertRaises(BiogemeError):
-            self.central_controller.decreased_controller(current_config, 'c4', 1)
+            self.central_controller.decreased_controller(
+                controller_name='c4', current_config=current_config, step=1
+            )
 
 
 if __name__ == '__main__':

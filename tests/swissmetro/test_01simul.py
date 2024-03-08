@@ -1,23 +1,26 @@
-import os
 import unittest
-import pandas as pd
-import biogeme.database as db
+
 import biogeme.biogeme as bio
 from biogeme import models
+from biogeme.data.swissmetro import (
+    read_data,
+    PURPOSE,
+    GA,
+    TRAIN_CO,
+    SM_CO,
+    SM_AV,
+    TRAIN_AV_SP,
+    CAR_AV_SP,
+    TRAIN_TT,
+    SM_TT,
+    CAR_TT,
+    CAR_CO,
+)
 from biogeme.expressions import Beta, Elem, Derive
 
-myPath = os.path.dirname(os.path.abspath(__file__))
-df = pd.read_csv(f'{myPath}/swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
-
-# The Pandas data structure is available as database.data. Use all the
-# Pandas functions to invesigate the database
-# print(database.data.describe())
-
-globals().update(database.variables)
-
-# Here we use the 'biogeme' way for backward compatibility
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
+database = read_data()
+# Keep only trip purposes 1 (commuter) and 3 (business)
+exclude = ((PURPOSE != 1) * (PURPOSE != 3)) > 0
 database.remove(exclude)
 
 ASC_TRAIN = Beta('ASC_TRAIN', -0.701188, None, None, 0)
@@ -42,11 +45,6 @@ V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
 V = {1: V1, 2: V2, 3: V3}
-
-
-# Associate the availability conditions with the alternatives
-CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
 
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
@@ -80,25 +78,21 @@ the_betas_values = {
     'B_TIME': -1.27786,
     'B_COST': -1.08379,
     'ASC_SM': 0,
-    'ASC_CAR': -0.154633
+    'ASC_CAR': -0.154633,
 }
 
 
 class test_01simul(unittest.TestCase):
     def testSimulation(self):
-        biogeme = bio.BIOGEME(database, simulate)
-        biogeme.saveIterations = False
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
+        biogeme = bio.BIOGEME(database, simulate, parameter_file='')
+        biogeme.save_iterations = False
+        biogeme.generate_html = False
+        biogeme.generate_pickle = False
         biogeme.modelName = '01logit_simul'
         results = biogeme.simulate(the_betas_values)
         self.assertAlmostEqual(sum(results['P1']), 907.9992101964821, 2)
-        self.assertAlmostEqual(
-            sum(results['logit elas. 1']), -12673.838605478186, 2
-        )
-        self.assertAlmostEqual(
-            sum(results['generic elas. 1']), -12673.838605478186, 2
-        )
+        self.assertAlmostEqual(sum(results['logit elas. 1']), -12673.838605478186, 2)
+        self.assertAlmostEqual(sum(results['generic elas. 1']), -12673.838605478186, 2)
 
 
 if __name__ == '__main__':

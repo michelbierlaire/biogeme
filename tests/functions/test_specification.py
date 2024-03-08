@@ -11,7 +11,8 @@ from unittest.mock import MagicMock, patch
 import biogeme.exceptions as excep
 from biogeme.validity import Validity
 from biogeme.configuration import Configuration
-from biogeme.parameters import biogeme_parameters
+
+# from biogeme.parameters import biogeme_parameters
 from spec_swissmetro import logprob
 from swissmetro_data import database
 
@@ -55,13 +56,11 @@ class TestSpecification(unittest.TestCase):
     @patch('biogeme.biogeme.BIOGEME.from_configuration')
     def test_validity_for_excessive_parameters(self, mock_from_configuration):
         """We use a mock Biogeme object instead of the real one"""
-        biogeme_parameters.set_value(name='maximum_number_parameters', value=10)
-
         mock_biogeme = MagicMock()
         mock_biogeme.number_unknown_parameters.return_value = 11
         mock_from_configuration.return_value = mock_biogeme
         config = MagicMock(spec=Configuration)
-        the_specification = Specification(config)
+        the_specification = Specification(config, maximum_number_of_parameters=10)
         self.assertFalse(the_specification.validity.status)
         self.assertIn('Too many parameters', the_specification.validity.reason)
 
@@ -74,12 +73,13 @@ class TestSpecification(unittest.TestCase):
 
         mock_results = MagicMock()
         mock_results.algorithm_has_converged.return_value = False
-        mock_biogeme.quickEstimate.return_value = mock_results
+        mock_biogeme.quick_estimate.return_value = mock_results
 
         config = MagicMock(spec=Configuration)
 
         the_specification = Specification(config)
         self.assertFalse(the_specification.validity.status)
+        print(f'{the_specification.validity.reason=}')
         self.assertIn(
             'Optimization algorithm has not converged',
             the_specification.validity.reason,

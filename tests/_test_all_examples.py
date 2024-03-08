@@ -34,6 +34,7 @@ examples_dirs = (
 
 extensions_to_clean = ['html', 'pickle', 'iter', 'log', 'pareto']
 
+
 def clean_directory(directory):
     file_list = os.listdir(directory)
     for file in file_list:
@@ -42,6 +43,7 @@ def clean_directory(directory):
                 file_path = os.path.join(directory, file)
                 print(f'Remove {file_path}')
                 os.remove(file_path)
+
 
 class ScriptExecutionTests(unittest.TestCase):
     def setUp(self):
@@ -69,7 +71,7 @@ class ScriptExecutionTests(unittest.TestCase):
         biogeme_parameters.set_value(
             name='second_derivatives', value=0, section='SimpleBounds'
         )
-        
+
         biogeme_parameters.dump_file(file_name=self.filename)
 
     def tearDown(self):
@@ -93,13 +95,13 @@ class ScriptExecutionTests(unittest.TestCase):
 
             shutil.copy2(self.filename, toml_file)
 
-            # Iterate over all files in the directory
+            # Iterate over all .py in the directory
             os.chdir(script_dir)
             for file_name in sorted(os.listdir(script_dir)):
                 if file_name in exclude:
                     continue
                 file_path = os.path.join(script_dir, file_name)
-                # Skip directories and non-Python files
+                # Skip directories and non-Python .py
                 if not os.path.isfile(file_path) or not file_name.endswith('.py'):
                     continue
 

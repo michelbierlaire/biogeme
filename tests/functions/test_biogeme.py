@@ -5,6 +5,7 @@ Test the biogeme module
 :date: Wed Apr 29 18:32:42 2020
 
 """
+
 # Bug in pylint
 # pylint: disable=no-member
 #
@@ -13,6 +14,8 @@ Test the biogeme module
 #
 # Not needed in test
 # pylint: disable=missing-function-docstring, missing-class-docstring
+
+import biogeme.biogeme_logging as blog
 
 import os
 import unittest
@@ -30,7 +33,10 @@ from biogeme.expressions import (
     PanelLikelihoodTrajectory,
     Numeric,
 )
+from biogeme.function_output import FunctionOutput
 from test_data import getData, getPanelData
+
+logger = blog.get_screen_logger(level=blog.DEBUG)
 
 
 class TestBiogeme(unittest.TestCase):
@@ -58,7 +64,7 @@ class TestBiogeme(unittest.TestCase):
         likelihood = -((beta1 * Variable1) ** 2) - (beta2 * Variable2) ** 2
         simul = (beta1 + 2 * beta2) / Variable1 + (beta2 + 2 * beta1) / Variable2
         dict_of_expressions = {
-            'loglike': likelihood,
+            'log_like': likelihood,
             'weight': Numeric(1),
             'beta1': beta1,
             'simul': simul,
@@ -77,7 +83,7 @@ class TestBiogeme(unittest.TestCase):
         likelihood = -((beta1 * Variable1) ** 2) - (beta2 * Variable2) ** 2
         simul = (beta1 + 2 * beta2) / Variable1 + (beta2 + 2 * beta1) / Variable2
         dict_of_expressions = {
-            'loglike': likelihood,
+            'log_like': likelihood,
             'weight': Numeric(1),
             'beta1': beta1,
             'simul': simul,
@@ -93,7 +99,7 @@ class TestBiogeme(unittest.TestCase):
         likelihood = -((beta1 * Variable1) ** 2) - (beta2 * Variable2) ** 2
         simul = (beta1 + 2 * beta2) / Variable1 + (beta2 + 2 * beta1) / Variable2
         dict_of_expressions = {
-            'loglike': likelihood,
+            'log_like': likelihood,
             'weight': Numeric(1),
             'beta1': beta1,
             'simul': simul,
@@ -125,7 +131,7 @@ class TestBiogeme(unittest.TestCase):
         with self.assertRaises(excep.BiogemeError):
             bBiogeme = bio.BIOGEME(
                 getData(1),
-                {'loglike': 'wrong_object'},
+                {'log_like': 'wrong_object'},
             )
 
         wrong_expression = Variable('Variable1') * PanelLikelihoodTrajectory(
@@ -159,13 +165,13 @@ class TestBiogeme(unittest.TestCase):
 
     def test_saved_iterations(self):
         my_biogeme = self.get_biogeme_instance()
-        my_biogeme._loadSavedIteration()
+        my_biogeme._load_saved_iteration()
         # Remove the file and try to loaed it again
-        my_biogeme._loadSavedIteration()
+        my_biogeme._load_saved_iteration()
 
     def test_random_init_values(self):
         my_biogeme = self.get_biogeme_instance()
-        my_biogeme.setRandomInitValues(defaultBound=10)
+        my_biogeme.set_random_init_values(default_bound=10)
         for v in my_biogeme.id_manager.free_betas_values:
             self.assertLessEqual(v, 10)
             self.assertGreaterEqual(v, -10)
@@ -249,11 +255,11 @@ class TestBiogeme(unittest.TestCase):
 
     def test_bounds_on_beta(self):
         my_biogeme = self.get_biogeme_instance()
-        result = my_biogeme.getBoundsOnBeta('beta2')
+        result = my_biogeme.get_bounds_on_beta('beta2')
         expected_result = -3, 10
         self.assertTupleEqual(result, expected_result)
         with self.assertRaises(excep.BiogemeError):
-            _ = my_biogeme.getBoundsOnBeta('wrong_name')
+            _ = my_biogeme.get_bounds_on_beta('wrong_name')
 
     def test_saveIterationsFileName(self):
         my_biogeme = self.get_biogeme_instance()
@@ -261,7 +267,7 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.generate_pickle = False
         my_biogeme.saveIterations = False
         my_biogeme.modelName = 'simpleExample'
-        f = my_biogeme._saveIterationsFileName()
+        f = my_biogeme._save_iterations_file_name()
         self.assertEqual(f, '__simpleExample.iter')
 
     def test_generateDraws(self):
@@ -271,11 +277,11 @@ class TestBiogeme(unittest.TestCase):
         with self.assertRaises(excep.BiogemeError):
             b = bio.BIOGEME(the_data, ell)
         b = bio.BIOGEME(the_data, ell, skip_audit=True)
-        b._generateDraws(10)
+        b._generate_draws(10)
         self.assertTupleEqual(the_data.theDraws.shape, (5, 10, 1))
         ell2 = bioDraws('test', 'NORMAL') + bioDraws('test2', 'UNIFORM')
         b2 = bio.BIOGEME(the_data, ell2, skip_audit=True)
-        b2._generateDraws(20)
+        b2._generate_draws(20)
         self.assertTupleEqual(the_data.theDraws.shape, (5, 20, 2))
 
     def test_random_variable(self):
@@ -285,59 +291,61 @@ class TestBiogeme(unittest.TestCase):
 
     def test_getBoundsOnBeta(self):
         my_biogeme = self.get_biogeme_instance()
-        b = my_biogeme.getBoundsOnBeta('beta1')
+        b = my_biogeme.get_bounds_on_beta('beta1')
         self.assertTupleEqual(b, (-3, 3))
-        b = my_biogeme.getBoundsOnBeta('beta2')
+        b = my_biogeme.get_bounds_on_beta('beta2')
         self.assertTupleEqual(b, (-3, 10))
 
     def test_calculateNullLoglikelihood(self):
         my_biogeme = self.get_biogeme_instance()
-        null_ell = my_biogeme.calculateNullLoglikelihood({1: 1, 2: 1})
+        null_ell = my_biogeme.calculate_null_loglikelihood({1: 1, 2: 1})
         self.assertAlmostEqual(null_ell, -3.4657359027997265, 2)
-        null_ell_2 = my_biogeme.calculateNullLoglikelihood({1: 1, 2: 1, 3: 1})
+        null_ell_2 = my_biogeme.calculate_null_loglikelihood({1: 1, 2: 1, 3: 1})
         self.assertAlmostEqual(null_ell_2, -5.493061443340549, 2)
 
     def test_calculateInitLikelihood(self):
         my_biogeme = self.get_biogeme_instance()
-        res = my_biogeme.calculateInitLikelihood()
+        res = my_biogeme.calculate_init_likelihood()
         self.assertAlmostEqual(res, -22055, 5)
 
     def test_calculateLikelihood(self):
         my_biogeme = self.get_biogeme_instance()
         x = my_biogeme.id_manager.free_betas_values
         xplus = [v + 1 for v in x]
-        res = my_biogeme.calculateLikelihood(xplus, scaled=False)
+        res = my_biogeme.calculate_likelihood(xplus, scaled=False)
         self.assertEqual(res, -49500)
         with self.assertRaises(ValueError):
-            _ = my_biogeme.calculateLikelihood([1], scaled=False)
+            _ = my_biogeme.calculate_likelihood([1], scaled=False)
 
     def test_calculateLikelihoodAndDerivatives(self):
         my_biogeme = self.get_biogeme_instance()
         x = my_biogeme.id_manager.free_betas_values
         xplus = [v + 1 for v in x]
         my_biogeme.save_iterations = True
-        f, g, h, bhhh = my_biogeme.calculateLikelihoodAndDerivatives(
-            xplus, scaled=False, hessian=True, bhhh=True
+        the_function_output: FunctionOutput = (
+            my_biogeme.calculate_likelihood_and_derivatives(
+                xplus, scaled=False, hessian=True, bhhh=True
+            )
         )
         f_true = -49500
         g_true = [0.0, -33000.0]
         h_true = [[0.0, 0.0], [0.0, -11000.0]]
         bhhh_true = [[0.0, 0.0], [0.0, 352440000.0]]
-        self.assertEqual(f_true, f)
-        self.assertListEqual(g_true, g.tolist())
-        self.assertListEqual(h_true, h.tolist())
-        self.assertListEqual(bhhh_true, bhhh.tolist())
+        self.assertEqual(f_true, the_function_output.function)
+        self.assertListEqual(g_true, the_function_output.gradient.tolist())
+        self.assertListEqual(h_true, the_function_output.hessian.tolist())
+        self.assertListEqual(bhhh_true, the_function_output.bhhh.tolist())
         with self.assertRaises(ValueError):
             _ = my_biogeme.calculateLikelihoodAndDerivatives([1], scaled=False)
         my_biogeme.database.data = my_biogeme.database.data[0:0]
         with self.assertRaises(excep.BiogemeError):
-            _ = my_biogeme.calculateLikelihoodAndDerivatives(x, scaled=True)
+            _ = my_biogeme.calculate_likelihood_and_derivatives(x, scaled=True)
 
     def test_likelihoodFiniteDifferenceHessian(self):
         my_biogeme = self.get_biogeme_instance()
         x = my_biogeme.id_manager.free_betas_values
         xplus = [v + 1 for v in x]
-        h = my_biogeme.likelihoodFiniteDifferenceHessian(xplus)
+        h = my_biogeme.likelihood_finite_difference_hessian(xplus)
         h_true = [[-110, 0.0], [0.0, -11000]]
         for row, row_true in zip(h, h_true):
             for col, col_true in zip(row, row_true):
@@ -345,7 +353,7 @@ class TestBiogeme(unittest.TestCase):
 
     def test_checkDerivatives(self):
         my_biogeme = self.get_biogeme_instance()
-        _, _, _, gdiff, hdiff = my_biogeme.checkDerivatives([1, 10])
+        _, _, _, gdiff, hdiff = my_biogeme.check_derivatives([1, 10])
         gdiff_true = [-0.00032656, 0.00545755]
         hdiff_true = [[6.49379217e-09, 0.00000000e00], [0.00000000e00, -1.39698386e-06]]
         for col, col_true in zip(gdiff, gdiff_true):
@@ -376,7 +384,7 @@ class TestBiogeme(unittest.TestCase):
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         # We try to recycle, while there is no pickle file yet.
         results = my_biogeme.estimate(recycle=True)
-        # We estimate the model twice to generate two pickle files.
+        # We estimate the model twice to generate two pickle .py.
         my_biogeme.generate_pickle = True
         results = my_biogeme.estimate()
         results = my_biogeme.estimate()
@@ -407,11 +415,11 @@ class TestBiogeme(unittest.TestCase):
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.estimate(algoParameters='any_param')
 
-        aBiogeme = bio.BIOGEME(getData(1), {'loglike': Numeric(0)})
+        aBiogeme = bio.BIOGEME(getData(1), {'log_like': Numeric(0)})
         with self.assertRaises(excep.BiogemeError):
             _ = aBiogeme.estimate()
 
-        aBiogeme.loglike = None
+        aBiogeme.log_like = None
         with self.assertRaises(excep.BiogemeError):
             _ = aBiogeme.estimate()
 
@@ -424,24 +432,24 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.numberOfThreads = 1
         my_biogeme.algorithm_name = 'simple_bounds'
         my_biogeme.bootstrap_samples = 10
-        results = my_biogeme.quickEstimate(run_bootstrap=True)
+        results = my_biogeme.quick_estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         panelBiogeme = bio.BIOGEME(getPanelData(1), self.get_dict_of_expressions())
         panelBiogeme.bootstrap_samples = 10
-        results = panelBiogeme.quickEstimate()
+        results = panelBiogeme.quick_estimate()
         self.assertAlmostEqual(results.data.logLike, 0, 5)
 
         my_biogeme.algorithm_name = 'scipy'
         my_biogeme.saveIterations = True
-        results = my_biogeme.quickEstimate()
+        results = my_biogeme.quick_estimate()
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         # We try to recycle, while there is no pickle file yet.
-        results = my_biogeme.quickEstimate(recycle=True)
-        # We quickEstimate the model twice to generate two pickle files.
+        results = my_biogeme.quick_estimate(recycle=True)
+        # We quickEstimate the model twice to generate two pickle .py.
         my_biogeme.generate_pickle = True
-        results = my_biogeme.quickEstimate()
-        results = my_biogeme.quickEstimate()
-        results = my_biogeme.quickEstimate(recycle=True)
+        results = my_biogeme.quick_estimate()
+        results = my_biogeme.quick_estimate()
+        results = my_biogeme.quick_estimate(recycle=True)
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         my_biogeme.generate_pickle = False
 
@@ -451,45 +459,45 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme_without_bounds.saveIterations = False
 
         my_biogeme_without_bounds.algorithm_name = 'TR-newton'
-        results = my_biogeme_without_bounds.quickEstimate()
+        results = my_biogeme_without_bounds.quick_estimate()
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'TR-BFGS'
-        results = my_biogeme_without_bounds.quickEstimate()
+        results = my_biogeme_without_bounds.quick_estimate()
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'LS-newton'
-        results = my_biogeme_without_bounds.quickEstimate()
+        results = my_biogeme_without_bounds.quick_estimate()
         self.assertAlmostEqual(results.data.logLike, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'LS-BFGS'
-        results = my_biogeme_without_bounds.quickEstimate()
+        results = my_biogeme_without_bounds.quick_estimate()
         self.assertAlmostEqual(results.data.logLike, 0, 5)
 
         with self.assertRaises(excep.BiogemeError):
-            _ = my_biogeme.quickEstimate(algorithm='any_algo')
+            _ = my_biogeme.quick_estimate(algorithm='any_algo')
         with self.assertRaises(excep.BiogemeError):
-            _ = my_biogeme.quickEstimate(algoParameters='any_param')
+            _ = my_biogeme.quick_estimate(algoParameters='any_param')
 
-        aBiogeme = bio.BIOGEME(getData(1), {'loglike': Numeric(0)})
+        aBiogeme = bio.BIOGEME(getData(1), {'log_like': Numeric(0)})
         with self.assertRaises(excep.BiogemeError):
-            _ = aBiogeme.quickEstimate()
+            _ = aBiogeme.quick_estimate()
 
-        aBiogeme.loglike = None
+        aBiogeme.log_like = None
         with self.assertRaises(excep.BiogemeError):
-            _ = aBiogeme.quickEstimate()
+            _ = aBiogeme.quick_estimate()
 
     def test_simulate(self):
         my_biogeme = self.get_biogeme_instance()
         my_biogeme.algorithm_name = 'simple_bounds'
         results = my_biogeme.estimate()
         with self.assertRaises(excep.BiogemeError):
-            _ = my_biogeme.simulate(theBetaValues=None)
+            _ = my_biogeme.simulate(the_beta_values=None)
 
-        s = my_biogeme.simulate(results.getBetaValues())
-        self.assertAlmostEqual(s.loc[0, 'loglike'], 0, 3)
+        s = my_biogeme.simulate(results.get_beta_values())
+        self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
-        the_betas = results.getBetaValues()
+        the_betas = results.get_beta_values()
         the_betas['any_beta'] = 0.1
         s = my_biogeme.simulate(the_betas)
-        self.assertAlmostEqual(s.loc[0, 'loglike'], 0, 3)
+        self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.simulate('wrong_object')
@@ -497,7 +505,7 @@ class TestBiogeme(unittest.TestCase):
         myPanelBiogeme = bio.BIOGEME(getPanelData(1), self.get_dict_of_expressions())
         results = myPanelBiogeme.estimate()
         with self.assertRaises(excep.BiogemeError):
-            s = myPanelBiogeme.simulate(results.getBetaValues())
+            s = myPanelBiogeme.simulate(results.get_beta_values())
 
         myPanelBiogeme = bio.BIOGEME(
             getPanelData(1),
@@ -507,7 +515,7 @@ class TestBiogeme(unittest.TestCase):
                 )
             },
         )
-        s = myPanelBiogeme.simulate(results.getBetaValues())
+        s = myPanelBiogeme.simulate(results.get_beta_values())
 
     def test_changeInitValues(self):
         my_biogeme = self.get_biogeme_instance()
@@ -518,13 +526,13 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme = self.get_biogeme_instance()
         my_biogeme.bootstrap_samples = 100
         results = my_biogeme.estimate(run_bootstrap=True)
-        drawsFromBetas = results.getBetasForSensitivityAnalysis(
+        drawsFromBetas = results.get_betas_for_sensitivity_analysis(
             my_biogeme.id_manager.free_betas.names
         )
-        s = my_biogeme.simulate(results.getBetaValues())
-        left, right = my_biogeme.confidenceIntervals(drawsFromBetas)
-        self.assertLessEqual(left.loc[0, 'loglike'], s.loc[0, 'loglike'])
-        self.assertGreaterEqual(right.loc[0, 'loglike'], s.loc[0, 'loglike'])
+        s = my_biogeme.simulate(results.get_beta_values())
+        left, right = my_biogeme.confidence_intervals(drawsFromBetas)
+        self.assertLessEqual(left.loc[0, 'log_like'], s.loc[0, 'log_like'])
+        self.assertGreaterEqual(right.loc[0, 'log_like'], s.loc[0, 'log_like'])
 
     def test_validate(self):
         my_data = getData(1)
@@ -589,7 +597,7 @@ class TestBiogeme(unittest.TestCase):
             expression=catalog,
             database=getData(1),
         )
-        self.assertIs(the_biogeme.loglike, catalog)
+        self.assertIs(the_biogeme.log_like, catalog)
 
         # Invalid constructor: typo
         config_id = 'the_catalog:bta_2'
