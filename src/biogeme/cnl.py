@@ -7,14 +7,17 @@ implemented to verify the analytical derivatives of these functions.
 :date: Fri Apr 22 09:39:49 2022
 
 """
+
 from typing import Callable
 import numpy as np
+
+from biogeme.function_output import FunctionOutput
 from biogeme.nests import NestsForCrossNestedLogit, get_alpha_values
 
 
-def cnl_G(
+def cnl_g(
     alternatives: list[int], nests: NestsForCrossNestedLogit
-) -> Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]]:
+) -> Callable[[np.ndarray], FunctionOutput]:
     """Probability generating function and its derivatives
 
     :param alternatives: a list of alternatives in a given order. In
@@ -30,9 +33,9 @@ def cnl_G(
 
     """
     order = {alt: index for index, alt in enumerate(alternatives)}
-    J = len(alternatives)
+    nbr_of_alternatives = len(alternatives)
 
-    def G_and_deriv(y: np.ndarray) -> tuple[float, np.ndarray, np.ndarray]:
+    def g_and_deriv(y: np.ndarray) -> FunctionOutput:
         """Probability generating function
 
         :param y: vector of positive values
@@ -41,9 +44,9 @@ def cnl_G(
         :rtype: floap, np.array(float), np.array(np.array(float))
         """
 
-        G = 0.0
-        Gi = np.zeros(J)
-        Gij = np.zeros((J, J))
+        g = 0.0
+        g_i = np.zeros(nbr_of_alternatives)
+        g_ij = np.zeros((nbr_of_alternatives, nbr_of_alternatives))
         for m in nests:
             mu_m = m.nest_param
             alphas = get_alpha_values(m.dict_of_alpha)
@@ -53,14 +56,12 @@ def cnl_G(
                     nest_specific_sum += (alpha_value * y[order[alpha_alt]]) ** mu_m
             p1 = (1.0 / mu_m) - 1.0
             p2 = (1.0 / mu_m) - 2.0
-            G += nest_specific_sum ** (1.0 / mu_m)
-            for i in range(J):
+            g += nest_specific_sum ** (1.0 / mu_m)
+            for i in range(nbr_of_alternatives):
                 alpha_i = alphas.get(alternatives[i], 0)
                 if alpha_i != 0 and y[i] != 0:
-                    Gi[i] += (
-                        alpha_i**mu_m * y[i] ** (mu_m - 1) * nest_specific_sum**p1
-                    )
-                    Gij[i][i] += (1 - mu_m) * nest_specific_sum**p2 * alpha_i ** (
+                    g_i[i] += alpha_i**mu_m * y[i] ** (mu_m - 1) * nest_specific_sum**p1
+                    g_ij[i][i] += (1 - mu_m) * nest_specific_sum**p2 * alpha_i ** (
                         2 * mu_m
                     ) * y[i] ** (2 * mu_m - 2.0) + (
                         mu_m - 1
@@ -69,28 +70,28 @@ def cnl_G(
                     ] ** (
                         mu_m - 2
                     )
-                    for j in range(i + 1, J):
+                    for j in range(i + 1, nbr_of_alternatives):
                         alpha_j = alphas.get(alternatives[j], 0)
                         if alpha_j != 0 and y[j] != 0:
-                            Gij[i][j] += (
+                            g_ij[i][j] += (
                                 (1 - mu_m)
                                 * nest_specific_sum**p2
                                 * (alpha_i * alpha_j) ** mu_m
                                 * (y[i] * y[j]) ** (mu_m - 1.0)
                             )
 
-        for i in range(J):
-            for j in range(i + 1, J):
-                Gij[j][i] = Gij[i][j]
+        for i in range(nbr_of_alternatives):
+            for j in range(i + 1, nbr_of_alternatives):
+                g_ij[j][i] = g_ij[i][j]
 
-        return G, Gi, Gij
+        return FunctionOutput(function=g, gradient=g_i, hessian=g_ij)
 
-    return G_and_deriv
+    return g_and_deriv
 
 
-def cnl_CDF(
+def cnl_cdf(
     alternatives: list[int], nests: NestsForCrossNestedLogit
-) -> Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]]:
+) -> Callable[[np.ndarray], FunctionOutput]:
     """Cumulative distribution function and its derivatives
 
     :param alternatives: a list of alternatives in a given order. In
@@ -104,34 +105,39 @@ def cnl_CDF(
         and second derivatives.
 
     """
-    J = len(alternatives)
+    nbr_of_alternatives = len(alternatives)
 
-    G_fct = cnl_G(alternatives, nests)
+    g_fct = cnl_g(alternatives, nests)
 
-    def F_and_deriv(xi):
+    def f_and_deriv(xi: np.ndarray) -> FunctionOutput:
         """Cumulative distribution function
 
         :param xi: vector of arguments
         :type xi: np.array(float)
 
         :return: value of the CDF and its derivatives
-        :rtype: floap, np.array(float), np.array(np.array(float))
+        :rtype: float, np.array(float), np.array(np.array(float))
         """
         y = np.where(xi == np.inf, 0, np.exp(-xi))
-        G, Gi, Gii = G_fct(y)
+        g_output: FunctionOutput = g_fct(y)
+        g = g_output.function
+        g_i = g_output.gradient
+        g_ii = g_output.hessian
 
-        F = np.exp(-G)
-        Fi = Gi * y * F
-        Fij = np.zeros((J, J))
+        f = np.exp(-g)
+        f_i = g_i * y * f
+        f_ij = np.zeros((nbr_of_alternatives, nbr_of_alternatives))
 
-        for i in range(J):
-            Fij[i][i] = F * y[i] * y[i] * (Gi[i] * Gi[i] - Gii[i][i]) - F * Gi[i] * y[i]
-            for j in range(i + 1, J):
-                Fij[i][j] = F * y[i] * y[j] * (Gi[i] * Gi[j] - Gii[i][j])
-        for i in range(J):
-            for j in range(i + 1, J):
-                Fij[j][i] = Fij[i][j]
+        for i in range(nbr_of_alternatives):
+            f_ij[i][i] = (
+                f * y[i] * y[i] * (g_i[i] * g_i[i] - g_ii[i][i]) - f * g_i[i] * y[i]
+            )
+            for j in range(i + 1, nbr_of_alternatives):
+                f_ij[i][j] = f * y[i] * y[j] * (g_i[i] * g_i[j] - g_ii[i][j])
+        for i in range(nbr_of_alternatives):
+            for j in range(i + 1, nbr_of_alternatives):
+                f_ij[j][i] = f_ij[i][j]
 
-        return F, Fi, Fij
+        return FunctionOutput(function=f, gradient=f_i, hessian=f_ij)
 
-    return F_and_deriv
+    return f_and_deriv

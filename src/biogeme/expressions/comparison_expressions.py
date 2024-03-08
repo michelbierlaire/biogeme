@@ -4,9 +4,15 @@
 
 :date: Sat Sep  9 15:20:12 2023Tue Mar 26 16:47:49 2019
 """
+
+from __future__ import annotations
+
 import logging
 
+from . import ExpressionOrNumeric
 from .binary_expressions import BinaryOperator
+from ..database import Database
+from ..deprecated import deprecated
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +20,7 @@ logger = logging.getLogger(__name__)
 class ComparisonOperator(BinaryOperator):
     """Base class for comparison expressions."""
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -25,7 +31,7 @@ class ComparisonOperator(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def audit(self, database=None):
+    def audit(self, database: Database = None) -> tuple[list[str], list[str]]:
         """Performs various checks on the expression."""
         list_of_errors = []
         list_of_warnings = []
@@ -48,7 +54,7 @@ class Equal(ComparisonOperator):
     Logical equal
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -59,17 +65,22 @@ class Equal(ComparisonOperator):
         """
         ComparisonOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} == {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        r = 1 if self.left.getValue() == self.right.getValue() else 0
+        r = 1 if self.left.get_value() == self.right.get_value() else 0
         return r
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class NotEqual(ComparisonOperator):
@@ -77,7 +88,7 @@ class NotEqual(ComparisonOperator):
     Logical not equal
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -88,17 +99,22 @@ class NotEqual(ComparisonOperator):
         """
         ComparisonOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} != {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        r = 1 if self.left.getValue() != self.right.getValue() else 0
+        r = 1 if self.left.get_value() != self.right.get_value() else 0
         return r
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class LessOrEqual(ComparisonOperator):
@@ -106,7 +122,7 @@ class LessOrEqual(ComparisonOperator):
     Logical less or equal
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -118,17 +134,22 @@ class LessOrEqual(ComparisonOperator):
         """
         ComparisonOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} <= {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        r = 1 if self.left.getValue() <= self.right.getValue() else 0
+        r = 1 if self.left.get_value() <= self.right.get_value() else 0
         return r
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class GreaterOrEqual(ComparisonOperator):
@@ -136,7 +157,7 @@ class GreaterOrEqual(ComparisonOperator):
     Logical greater or equal
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -147,17 +168,22 @@ class GreaterOrEqual(ComparisonOperator):
         """
         ComparisonOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} >= {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        r = 1 if self.left.getValue() >= self.right.getValue() else 0
+        r = 1 if self.left.get_value() >= self.right.get_value() else 0
         return r
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Less(ComparisonOperator):
@@ -165,7 +191,7 @@ class Less(ComparisonOperator):
     Logical less
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -176,17 +202,22 @@ class Less(ComparisonOperator):
         """
         ComparisonOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} < {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        r = 1 if self.left.getValue() < self.right.getValue() else 0
+        r = 1 if self.left.get_value() < self.right.get_value() else 0
         return r
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Greater(ComparisonOperator):
@@ -194,7 +225,7 @@ class Greater(ComparisonOperator):
     Logical greater
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -205,14 +236,19 @@ class Greater(ComparisonOperator):
         """
         ComparisonOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} > {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        r = 1 if self.left.getValue() > self.right.getValue() else 0
+        r = 1 if self.left.get_value() > self.right.get_value() else 0
         return r
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass

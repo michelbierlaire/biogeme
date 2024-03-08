@@ -47,7 +47,7 @@ def normalpdf(
     mu_expr = validate_and_convert(mu)
     s_expr = validate_and_convert(s)
     try:
-        s_value = s_expr.getValue()
+        s_value = s_expr.get_value()
     except NotImplementedError:
         s_value = None
 
@@ -95,7 +95,7 @@ def lognormalpdf(
     s_expr = validate_and_convert(s)
 
     try:
-        x_value = x_expr.getValue()
+        x_value = x_expr.get_value()
     except (NotImplementedError, BiogemeError):
         x_value = None
 
@@ -103,7 +103,7 @@ def lognormalpdf(
         raise ValueError(f'Argument must be positive and not {x_value}')
 
     try:
-        s_value = s_expr.getValue()
+        s_value = s_expr.get_value()
     except (NotImplementedError, BiogemeError):
         s_value = None
 
@@ -147,11 +147,11 @@ def uniformpdf(
     a_expr = validate_and_convert(a)
     b_expr = validate_and_convert(b)
     try:
-        a_value = a_expr.getValue()
+        a_value = a_expr.get_value()
     except NotImplementedError:
         a_value = None
     try:
-        b_value = b_expr.getValue()
+        b_value = b_expr.get_value()
     except NotImplementedError:
         b_value = None
 
@@ -201,15 +201,15 @@ def triangularpdf(
     b_expr = validate_and_convert(b)
     c_expr = validate_and_convert(c)
     try:
-        a_value = a_expr.getValue()
+        a_value = a_expr.get_value()
     except (NotImplementedError, BiogemeError):
         a_value = None
     try:
-        b_value = b_expr.getValue()
+        b_value = b_expr.get_value()
     except (NotImplementedError, BiogemeError):
         b_value = None
     try:
-        c_value = c_expr.getValue()
+        c_value = c_expr.get_value()
     except (NotImplementedError, BiogemeError):
         c_value = None
 
@@ -279,7 +279,7 @@ def logisticcdf(
     mu_expr = validate_and_convert(mu)
     s_expr = validate_and_convert(s)
     try:
-        s_value = s_expr.getValue()
+        s_value = s_expr.get_value()
     except (NotImplementedError, BiogemeError):
         s_value = None
     if (s_value is not None) and (s_value <= 0):

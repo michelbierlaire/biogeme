@@ -3,13 +3,21 @@
 :author: Michel Bierlaire
 :date: Wed Oct 25 08:52:44 2023
 """
+
 import logging
-from biogeme.expressions import Expression, Elem, Numeric, log, Beta
+from biogeme.expressions import (
+    Expression,
+    Elem,
+    Numeric,
+    log,
+    Beta,
+    ExpressionOrNumeric,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def boxcox(x: Expression, ell: Expression) -> Expression:
+def boxcox(x: ExpressionOrNumeric, ell: ExpressionOrNumeric) -> Expression:
     """Box-Cox transform
 
     .. math:: B(x, \\ell) = \\frac{x^{\\ell}-1}{\\ell}.

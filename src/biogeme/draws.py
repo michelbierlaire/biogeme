@@ -5,14 +5,19 @@
 :date: Tue Jun 18 19:05:13 2019
 """
 
+from typing import Callable
+
 # Too constraining
 # pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements
 
 import numpy as np
 import biogeme.exceptions as excep
+from biogeme.deprecated import deprecated
 
 
-def getUniform(sample_size, number_of_draws, symmetric=False):
+def get_uniform(
+    sample_size: int, number_of_draws: int, symmetric: bool = False
+) -> np.ndarray:
     """Uniform [0, 1] or [-1, 1] numbers
 
     :param sample_size: number of observations for which draws must be
@@ -61,19 +66,27 @@ def getUniform(sample_size, number_of_draws, symmetric=False):
         raise excep.BiogemeError(
             f'Invalid sample size: {sample_size} when generating draws.'
         )
-    totalSize = number_of_draws * sample_size
+    total_size = number_of_draws * sample_size
 
-    uniformNumbers = np.random.uniform(size=totalSize)
+    uniform_numbers = np.random.uniform(size=total_size)
     if symmetric:
-        uniformNumbers = 2.0 * uniformNumbers - 1.0
+        uniform_numbers = 2.0 * uniform_numbers - 1.0
 
-    uniformNumbers.shape = (sample_size, number_of_draws)
-    return uniformNumbers
+    uniform_numbers.shape = (sample_size, number_of_draws)
+    return uniform_numbers
 
 
-def getLatinHypercubeDraws(
-    sample_size, number_of_draws, symmetric=False, uniformNumbers=None
-):
+@deprecated(get_uniform)
+def getUniform(sample_size: int, number_of_draws: int, symmetric: bool = False):
+    pass
+
+
+def get_latin_hypercube_draws(
+    sample_size: int,
+    number_of_draws: int,
+    symmetric: bool = False,
+    uniform_numbers: np.ndarray | None = None,
+) -> np.ndarray:
     """Implementation of the Modified Latin Hypercube Sampling proposed
     by `Hess et al., (2006)`_.
 
@@ -90,9 +103,9 @@ def getLatinHypercubeDraws(
     :param symmetric: if True, draws from [-1: 1] are generated.
        If False, draws from [0: 1] are generated.  Default: False
     :type symmetric: bool
-    :param uniformNumbers: numpy with uniformly distributed numbers.
+    :param uniform_numbers: numpy with uniformly distributed numbers.
        If None, the numpy uniform number generator is used.
-    :type uniformNumbers: numpy.array
+    :type uniform_numbers: numpy.array
 
     :return: numpy array with the draws
     :rtype: numpy.array
@@ -123,19 +136,19 @@ def getLatinHypercubeDraws(
         )
     totalSize = number_of_draws * sample_size
 
-    if uniformNumbers is None:
-        uniformNumbers = np.random.uniform(size=totalSize)
+    if uniform_numbers is None:
+        uniform_numbers = np.random.uniform(size=totalSize)
     else:
-        if uniformNumbers.size != totalSize:
+        if uniform_numbers.size != totalSize:
             errorMsg = (
                 f'A total of {totalSize} uniform draws '
-                f'must be provided, and not {uniformNumbers.size}.'
+                f'must be provided, and not {uniform_numbers.size}.'
             )
             raise excep.BiogemeError(errorMsg)
 
-    uniformNumbers.shape = (totalSize,)
+    uniform_numbers.shape = (totalSize,)
     numbers = np.array(
-        [(float(i) + uniformNumbers[i]) / float(totalSize) for i in range(totalSize)]
+        [(float(i) + uniform_numbers[i]) / float(totalSize) for i in range(totalSize)]
     )
     if symmetric:
         numbers = 2.0 * numbers - 1.0
@@ -145,9 +158,21 @@ def getLatinHypercubeDraws(
     return numbers
 
 
-def getHaltonDraws(
-    sample_size, number_of_draws, symmetric=False, base=2, skip=0, shuffled=False
+@deprecated(get_latin_hypercube_draws)
+def getLatinHypercubeDraws(
+    sample_size: int, number_of_draws: int, symmetric: bool = False, uniformNumbers=None
 ):
+    pass
+
+
+def get_halton_draws(
+    sample_size: int,
+    number_of_draws: int,
+    symmetric: bool = False,
+    base: int = 2,
+    skip: int = 0,
+    shuffled: bool = False,
+) -> np.ndarray:
     """Generate Halton draws.
     Implementation by Cristian Arteaga, University of Nevada Las Vegas,
 
@@ -226,12 +251,28 @@ def getHaltonDraws(
     return numbers
 
 
-def getAntithetic(unif, sample_size, number_of_draws):
+@deprecated(get_halton_draws)
+def getHaltonDraws(
+    sample_size: int,
+    number_of_draws: int,
+    symmetric: bool = False,
+    base: int = 2,
+    skip: int = 0,
+    shuffled: bool = False,
+):
+    pass
+
+
+def get_antithetic(
+    uniform_draws: Callable[[int, int], np.ndarray],
+    sample_size: int,
+    number_of_draws: int,
+) -> np.ndarray:
     """Returns antithetic uniform draws
 
-    :param unif: function taking two arguments (sample_size, number_of_draws)
+    :param uniform_draws: function taking two arguments (sample_size, number_of_draws)
                  and returning U[0, 1] draws
-    :type unif: function
+    :type uniform_draws: function
 
     :param sample_size: number of observations for which draws must be
                        generated. If None, a one dimensional array
@@ -260,12 +301,24 @@ def getAntithetic(unif, sample_size, number_of_draws):
 
     """
     R = int(number_of_draws / 2.0)
-    draws = unif(sample_size, R)
+    draws = uniform_draws(sample_size, R)
     return np.concatenate((draws, 1 - draws), axis=1)
 
 
-def getNormalWichuraDraws(
-    sample_size, number_of_draws, uniformNumbers=None, antithetic=False
+@deprecated(get_antithetic)
+def getAntithetic(
+    uniform_draws: Callable[[int, int], np.ndarray],
+    sample_size: int,
+    number_of_draws: int,
+) -> np.ndarray:
+    pass
+
+
+def get_normal_wichura_draws(
+    sample_size: int,
+    number_of_draws: int,
+    uniform_numbers: np.ndarray | None = None,
+    antithetic: bool = False,
 ):
     """Generate pseudo-random numbers from a normal distribution N(0, 1)
 
@@ -285,9 +338,9 @@ def getNormalWichuraDraws(
     :param number_of_draws: number of draws to generate.
     :type number_of_draws: int
 
-    :param uniformNumbers: numpy with uniformly distributed numbers.
+    :param uniform_numbers: numpy with uniformly distributed numbers.
                If None, the numpy uniform number generator is used.
-    :type uniformNumbers: numpy.array
+    :type uniform_numbers: numpy.array
     :param antithetic: if True, only half of the draws are
                        actually generated, and the series are completed
                        with their antithetic version.
@@ -381,20 +434,20 @@ def getNormalWichuraDraws(
     f6 = 1.42151175831644588870e-07
     f7 = 2.04426310338993978564e-15
 
-    if uniformNumbers is None:
-        uniformNumbers = np.random.uniform(size=totalSize)
-    elif uniformNumbers.size != totalSize:
+    if uniform_numbers is None:
+        uniform_numbers = np.random.uniform(size=totalSize)
+    elif uniform_numbers.size != totalSize:
         errorMsg = (
             f'A total of {totalSize} uniform draws must be '
-            f'provided, and not {uniformNumbers.size}.'
+            f'provided, and not {uniform_numbers.size}.'
         )
         raise excep.BiogemeError(errorMsg)
-    uniformNumbers.shape = (totalSize,)
+    uniform_numbers.shape = (totalSize,)
 
-    q = uniformNumbers - 0.5
-    draws = np.zeros(uniformNumbers.shape)
-    r = np.zeros(uniformNumbers.shape)
-    cond1 = np.abs(uniformNumbers) <= 0.45
+    q = uniform_numbers - 0.5
+    draws = np.zeros(uniform_numbers.shape)
+    r = np.zeros(uniform_numbers.shape)
+    cond1 = np.abs(uniform_numbers) <= 0.45
     r[cond1] = const1 - q[cond1] * q[cond1]
     draws[cond1] = (
         q[cond1]
@@ -433,11 +486,11 @@ def getNormalWichuraDraws(
             + 1
         )
     )
-    cond2 = np.abs(uniformNumbers) > 0.45
+    cond2 = np.abs(uniform_numbers) > 0.45
     cond2a = np.logical_and(cond2, q < 0.0)
     cond2b = np.logical_and(cond2, q >= 0.0)
-    r[cond2a] = uniformNumbers[cond2a]
-    r[cond2b] = 1 - uniformNumbers[cond2b]
+    r[cond2a] = uniform_numbers[cond2a]
+    r[cond2b] = 1 - uniform_numbers[cond2b]
     cond2c = np.logical_and(cond2, r <= 0)
     cond2d = np.logical_and(cond2, r > 0)
     draws[cond2c] = 0.0
@@ -520,3 +573,13 @@ def getNormalWichuraDraws(
         draws = np.concatenate((draws, -draws), axis=1)
 
     return draws
+
+
+@deprecated(get_normal_wichura_draws)
+def getNormalWichuraDraws(
+    sample_size: int,
+    number_of_draws: int,
+    uniform_numbers: np.ndarray | None = None,
+    antithetic: bool = False,
+):
+    pass

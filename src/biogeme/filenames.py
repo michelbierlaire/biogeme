@@ -1,4 +1,4 @@
-"""Implements the function providing names for the output files.
+"""Implements the function providing names for the output .py.
 
 :author: Michel Bierlaire
 
@@ -19,10 +19,10 @@ def get_new_file_name(name: str, ext: str) -> str:
 
     :param ext: file extension.
 
-    :return: name.ext if the file does not exists.  If it does, returns
+    :return: name.ext if the file does not exist.  If it does, returns
        name~xx.ext, where xx is the smallest integer such that the
        corresponding file does not exist. It is designed to avoid erasing
-       output files inadvertently.
+       output .py inadvertently.
 
     """
     file_name = name + '.' + ext
@@ -33,25 +33,3 @@ def get_new_file_name(name: str, ext: str) -> str:
         the_file = Path(file_name)
         number += 1
     return file_name
-
-
-def getNewFileName(name: str, ext: str) -> str:
-    """
-      Old version.
-
-    :param name: name of the file.
-
-    :param ext: file extension.
-
-    :return: name.ext if the file does not exists.  If it does, returns
-       name~xx.ext, where xx is the smallest integer such that the
-       corresponding file does not exist. It is designed to avoid erasing
-       output files inadvertently.
-
-    """
-    raise NotImplementedError
-    logger.warning(
-        'The syntax "getNewFileName" is deprecated and is replaced by '
-        'the syntax "get_new_file_name".'
-    )
-    return get_new_file_name()

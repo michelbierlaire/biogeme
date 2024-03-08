@@ -4,18 +4,23 @@
 :date: Fri Mar 31 08:54:07 2023
 
 """
+
+from __future__ import annotations
+
 import logging
 from itertools import product
-from biogeme.expressions import Beta
-from biogeme.expressions import MultipleExpression, NamedExpression
-import biogeme.exceptions as excep
-from biogeme.controller import Controller
+from typing import Iterator
+
 import biogeme.expressions as ex
 import biogeme.segmentation as seg
 from biogeme.configuration import (
     SEPARATOR,
     SELECTION_SEPARATOR,
 )
+from biogeme.controller import Controller
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Beta, Expression
+from biogeme.expressions import MultipleExpression, NamedExpression
 
 logger = logging.getLogger(__name__)
 
@@ -26,18 +31,20 @@ class Catalog(MultipleExpression):
     modified algorithmically by a controller.
     """
 
-    def __init__(self, catalog_name, named_expressions, controlled_by=None):
+    def __init__(
+        self,
+        catalog_name: str,
+        named_expressions: list[NamedExpression],
+        controlled_by: Controller | None = None,
+    ):
         """Ctor
 
-        :param name: name of the catalog of expressions
-        :type name: str
+        :param catalog_name: name of the catalog of expressions
 
-        :param list_of_named_expressions: list of NamedExpression,
+        :param named_expressions: list of NamedExpression,
             each containing a name and an expression.
-        :type list_of_named_expressions: list(NamedExpression)
 
         :param controlled_by: Object controlling the selection of the specifications.
-        :type controlled_by: Controller
 
         :raise BiogemeError: if list_of_named_expressions is empty
         :raise BiogemeError: if incompatible Controller
@@ -46,7 +53,7 @@ class Catalog(MultipleExpression):
         super().__init__(catalog_name)
 
         if not named_expressions:
-            raise excep.BiogemeError(
+            raise BiogemeError(
                 f'{catalog_name}: cannot create a catalog from an empty list.'
             )
 
@@ -55,11 +62,11 @@ class Catalog(MultipleExpression):
                 f'The controller must be of type Controller and not '
                 f'{type(controlled_by)}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         self.named_expressions = [
             NamedExpression(
-                name=named.name, expression=ex.process_numeric(named.expression)
+                name=named.name, expression=ex.validate_and_convert(named.expression)
             )
             for named in named_expressions
         ]
@@ -72,7 +79,7 @@ class Catalog(MultipleExpression):
             error_msg = (
                 f'Catalog {self.name} cannot contain itself. Use different names'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         # Declare the expressions as children of the catalog
         for _, expression in self.named_expressions:
@@ -92,9 +99,9 @@ class Catalog(MultipleExpression):
                     f'Incompatible IDs between catalog [{names}] and controller '
                     f'[{controller_names}]'
                 )
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
 
-    def get_all_controllers(self):
+    def get_all_controllers(self) -> set[Controller]:
         """Provides all controllers controlling the specifications of
             a multiple expression
 
@@ -108,7 +115,12 @@ class Catalog(MultipleExpression):
         return all_controllers
 
     @classmethod
-    def from_dict(cls, catalog_name, dict_of_expressions, controlled_by=None):
+    def from_dict(
+        cls,
+        catalog_name: str,
+        dict_of_expressions: dict[str, Expression],
+        controlled_by: Controller | None = None,
+    ):
         """Ctor using a dict instead of a list.
 
         Python does not guarantee the order of elements of a dict,
@@ -141,11 +153,11 @@ class Catalog(MultipleExpression):
         """Return the size of the catalog."""
         return len(self.named_expressions)
 
-    def get_iterator(self):
+    def get_iterator(self) -> Iterator[NamedExpression]:
         """Obtain an iterator on the named expressions"""
         return iter(self.named_expressions)
 
-    def selected(self):
+    def selected(self) -> NamedExpression:
         """Return the selected expression and its name
 
         :return: the name and the selected expression
@@ -153,7 +165,7 @@ class Catalog(MultipleExpression):
         """
         return self.named_expressions[self.controlled_by.current_index]
 
-    def selected_name(self):
+    def selected_name(self) -> str:
         """Return the name of the selected expression
 
         :return: the name of the selected expression
@@ -163,7 +175,10 @@ class Catalog(MultipleExpression):
 
 
 def segmentation_catalogs(
-    generic_name, beta_parameters, potential_segmentations, maximum_number
+    generic_name: str,
+    beta_parameters: list[Beta],
+    potential_segmentations: tuple[seg.DiscreteSegmentationTuple, ...],
+    maximum_number,
 ):
     """Generate catalogs for potential segmentations of a parameter
 
@@ -189,9 +204,9 @@ def segmentation_catalogs(
                     f'{key}: [{value}]. Characters [{SEPARATOR}] and '
                     f'[{SELECTION_SEPARATOR}] are reserved for specification coding.'
                 )
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
 
-    def get_name_from_combination(combination):
+    def get_name_from_combination(combination: tuple[bool, ...]) -> str:
         """Assign a name to a combination"""
         if sum(combination) == 0:
             return 'no_seg'
@@ -204,14 +219,16 @@ def segmentation_catalogs(
             ]
         )
 
-    def get_expression_from_combination(beta_parameter, combination):
+    def get_expression_from_combination(
+        the_beta_parameter: Beta, combination: tuple[bool, ...]
+    ) -> Expression:
         """Assign an expression to a combination"""
         selected_expressions = (
             segment
             for keep, segment in zip(combination, potential_segmentations)
             if keep
         )
-        the_segmentation = seg.Segmentation(beta_parameter, selected_expressions)
+        the_segmentation = seg.Segmentation(the_beta_parameter, selected_expressions)
         return the_segmentation.segmented_beta()
 
     if not isinstance(beta_parameters, list):
@@ -219,7 +236,7 @@ def segmentation_catalogs(
             f'A list is expected for beta_parameters, and not an object of type '
             f'{type(beta_parameters)}'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     list_of_possibilities = [
         combination
@@ -252,7 +269,7 @@ def segmentation_catalogs(
 class SegmentedParameters:
     """Class managing the names of segmented and alternative specific parameters"""
 
-    def __init__(self, beta_parameters, alternatives):
+    def __init__(self, beta_parameters: list[Beta], alternatives: tuple[str, ...]):
         """Constructor"""
 
         # The parameters are organized as follows:
@@ -260,9 +277,9 @@ class SegmentedParameters:
         #   - all parameters associated with the first alternative,
         #   - all parameters associated with the second alternative,
         #   - etc.
-        self.beta_parameters = beta_parameters
-        self.all_parameters = beta_parameters.copy()
-        self.alternatives = alternatives
+        self.beta_parameters: list[Beta] = beta_parameters
+        self.all_parameters: list[Beta] = beta_parameters.copy()
+        self.alternatives: tuple[str, ...] = alternatives
         for alternative in self.alternatives:
             self.all_parameters += [
                 Beta(
@@ -275,11 +292,11 @@ class SegmentedParameters:
                 for beta in beta_parameters
             ]
 
-    def get_index(self, beta_index, alternative):
-        """Returns the index in the list of the beta parameter with
+    def get_index(self, beta_index: int, alternative: str | None):
+        """Returns the index in the list of the Beta parameter with
             the given index specific to the given alternative
 
-        :param beta_index: index of the beta in the generic list
+        :param beta_index: index of the Beta in the generic list
         :type beta_index: int
 
         :param alternative: name of the alternative, or None for the generic parameter
@@ -291,10 +308,10 @@ class SegmentedParameters:
         alt_index = self.alternatives.index(alternative)
         return beta_index + (alt_index + 1) * len(self.beta_parameters)
 
-    def get_beta(self, beta_index, alternative):
-        """Return the beta parameters for the given index and given alternative
+    def get_beta(self, beta_index: int, alternative: str | None):
+        """Return the Beta parameters for the given index and given alternative
 
-        :param beta_index: index of the beta in the generic list
+        :param beta_index: index of the Beta in the generic list
         :type beta_index: int
 
         :param alternative: name of the alternative, or None for the generic parameter
@@ -305,10 +322,10 @@ class SegmentedParameters:
 
 
 def generic_alt_specific_catalogs(
-    generic_name,
-    beta_parameters,
-    alternatives,
-    potential_segmentations=None,
+    generic_name: str,
+    beta_parameters: list[Beta],
+    alternatives: tuple[str],
+    potential_segmentations: tuple[seg.DiscreteSegmentationTuple, ...] | None = None,
     maximum_number=5,
 ):
     """Generate catalogs selecting generic or alternative specific coefficients
@@ -336,14 +353,14 @@ def generic_alt_specific_catalogs(
             f'An alternative specific specification requires at least 2 '
             f'alternatives, and not {len(alternatives)}'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     if not isinstance(beta_parameters, list):
         error_msg = (
             f'Argument "beta_parameters" of function '
             f'"{generic_alt_specific_catalogs.__name__}" must be a list.'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     wrong_indices = []
     for index, beta in enumerate(beta_parameters):
@@ -355,7 +372,7 @@ def generic_alt_specific_catalogs(
             f'The entries at the following indices are not Beta expressions: '
             f'{wrong_indices}'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     # We first generate the alternative specific versions of the parameters
     generic_parameters = beta_parameters
@@ -373,12 +390,12 @@ def generic_alt_specific_catalogs(
             maximum_number=maximum_number,
         )
 
-    def get_expression(param_index, alternative):
+    def get_expression(param_index: int, alternative: str | None):
         """Returns either the parameter, or the segmented version if applicable"""
 
         if potential_segmentations:
-            index = the_segmented_parameters.get_index(param_index, alternative)
-            return segmented_catalogs[index]
+            the_index = the_segmented_parameters.get_index(param_index, alternative)
+            return segmented_catalogs[the_index]
         return the_segmented_parameters.get_beta(param_index, alternative)
 
     # We now control for generic or alternative specific with a single

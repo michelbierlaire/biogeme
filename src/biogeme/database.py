@@ -7,18 +7,33 @@ for specific services to Biogeme
 
 """
 
+from __future__ import annotations
+
 import logging
-from typing import NamedTuple
+from typing import NamedTuple, TYPE_CHECKING
+
 import numpy as np
 import pandas as pd
 
-from biogeme.segmentation import DiscreteSegmentationTuple
-import biogeme.exceptions as excep
 import biogeme.filenames as bf
-from biogeme import tools
-from biogeme import draws
+import biogeme.tools.database
+from biogeme.deprecated import deprecated
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import (
+    Variable,
+    Expression,
+    validate_and_convert,
+    bioDraws,
+)
+from biogeme.native_draws import (
+    RandomNumberGeneratorTuple,
+    RandomNumberGenerator,
+    native_random_number_generators,
+)
+from biogeme.segmentation import DiscreteSegmentationTuple
 
-from biogeme.expressions import Variable, is_numeric, Numeric
+if TYPE_CHECKING:
+    from biogeme.expressions import ExpressionOrNumeric
 
 
 class EstimationValidation(NamedTuple):
@@ -35,226 +50,14 @@ logger = logging.getLogger(__name__)
 class Database:
     """Class that contains and prepare the database."""
 
-    # @staticmethod
-    def uniform_antithetic(sample_size, number_of_draws):
-        return draws.getAntithetic(draws.getUniform, sample_size, number_of_draws)
-
-    # @staticmethod
-    def halton2(sample_size, number_of_draws):
-        return draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
-
-    # @staticmethod
-    def halton3(sample_size, number_of_draws):
-        return draws.getHaltonDraws(sample_size, number_of_draws, base=3, skip=10)
-
-    # @staticmethod
-    def halton5(sample_size, number_of_draws):
-        return draws.getHaltonDraws(sample_size, number_of_draws, base=5, skip=10)
-
-    # @staticmethod
-    def MLHS_anti(sample_size, number_of_draws):
-        return draws.getAntithetic(
-            draws.getLatinHypercubeDraws, sample_size, number_of_draws
-        )
-
-    # @staticmethod
-    def symm_uniform(sample_size, number_of_draws):
-        return draws.getUniform(sample_size, number_of_draws, symmetric=True)
-
-    # @staticmethod
-    def symm_uniform_antithetic(sample_size, number_of_draws):
-        R = int(number_of_draws / 2)
-        localDraws = Database.symm_uniform(sample_size, R)
-        return np.concatenate((localDraws, -localDraws), axis=1)
-
-    # @staticmethod
-    def symm_halton2(sample_size, number_of_draws):
-        return draws.getHaltonDraws(
-            sample_size, number_of_draws, symmetric=True, base=2, skip=10
-        )
-
-    # @staticmethod
-    def symm_halton3(sample_size, number_of_draws):
-        return draws.getHaltonDraws(
-            sample_size, number_of_draws, symmetric=True, base=3, skip=10
-        )
-
-    # @staticmethod
-    def symm_halton5(sample_size, number_of_draws):
-        return draws.getHaltonDraws(
-            sample_size, number_of_draws, symmetric=True, base=5, skip=10
-        )
-
-    # @staticmethod
-    def symm_MLHS(sample_size, number_of_draws):
-        return draws.getLatinHypercubeDraws(
-            sample_size, number_of_draws, symmetric=True
-        )
-
-    # @staticmethod
-    def symm_MLHS_anti(sample_size, number_of_draws):
-        R = int(number_of_draws / 2)
-        localDraws = Database.symm_MLHS(sample_size, R)
-        return np.concatenate((localDraws, -localDraws), axis=1)
-
-    # @staticmethod
-    def normal_antithetic(sample_size, number_of_draws):
-        return draws.getNormalWichuraDraws(
-            sample_size=sample_size,
-            number_of_draws=number_of_draws,
-            antithetic=True,
-        )
-
-    # @staticmethod
-    def normal_halton2(sample_size, number_of_draws):
-        unif = draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
-        return draws.getNormalWichuraDraws(
-            sample_size,
-            number_of_draws,
-            uniformNumbers=unif,
-            antithetic=False,
-        )
-
-    # @staticmethod
-    def normal_halton3(sample_size, number_of_draws):
-        unif = draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
-        return draws.getNormalWichuraDraws(
-            sample_size,
-            number_of_draws,
-            uniformNumbers=unif,
-            antithetic=False,
-        )
-
-    # @staticmethod
-    def normal_halton5(sample_size, number_of_draws):
-        unif = draws.getHaltonDraws(sample_size, number_of_draws, base=2, skip=10)
-        return draws.getNormalWichuraDraws(
-            sample_size,
-            number_of_draws,
-            uniformNumbers=unif,
-            antithetic=False,
-        )
-
-    # @staticmethod
-    def normal_MLHS(sample_size, number_of_draws):
-        unif = draws.getLatinHypercubeDraws(sample_size, number_of_draws)
-        return draws.getNormalWichuraDraws(
-            sample_size,
-            number_of_draws,
-            uniformNumbers=unif,
-            antithetic=False,
-        )
-
-    # @staticmethod
-    def normal_MLHS_anti(sample_size, number_of_draws):
-        unif = draws.getLatinHypercubeDraws(sample_size, int(number_of_draws / 2.0))
-        return draws.getNormalWichuraDraws(
-            sample_size, number_of_draws, uniformNumbers=unif, antithetic=True
-        )
-
-    # Dictionary containing native random number generators. Class attribute
-    nativeRandomNumberGenerators = {
-        'UNIFORM': (draws.getUniform, 'Uniform U[0, 1]'),
-        'UNIFORM_ANTI': (uniform_antithetic, 'Antithetic uniform U[0, 1]'),
-        'UNIFORM_HALTON2': (
-            halton2,
-            'Halton draws with base 2, skipping the first 10',
-        ),
-        'UNIFORM_HALTON3': (
-            halton3,
-            'Halton draws with base 3, skipping the first 10',
-        ),
-        'UNIFORM_HALTON5': (
-            halton5,
-            'Halton draws with base 5, skipping the first 10',
-        ),
-        'UNIFORM_MLHS': (
-            draws.getLatinHypercubeDraws,
-            'Modified Latin Hypercube Sampling on [0, 1]',
-        ),
-        'UNIFORM_MLHS_ANTI': (
-            MLHS_anti,
-            'Antithetic Modified Latin Hypercube Sampling on [0, 1]',
-        ),
-        'UNIFORMSYM': (symm_uniform, 'Uniform U[-1, 1]'),
-        'UNIFORMSYM_ANTI': (
-            symm_uniform_antithetic,
-            'Antithetic uniform U[-1, 1]',
-        ),
-        'UNIFORMSYM_HALTON2': (
-            symm_halton2,
-            'Halton draws on [-1, 1] with base 2, skipping the first 10',
-        ),
-        'UNIFORMSYM_HALTON3': (
-            symm_halton3,
-            'Halton draws on [-1, 1] with base 3, skipping the first 10',
-        ),
-        'UNIFORMSYM_HALTON5': (
-            symm_halton5,
-            'Halton draws on [-1, 1] with base 5, skipping the first 10',
-        ),
-        'UNIFORMSYM_MLHS': (
-            symm_MLHS,
-            'Modified Latin Hypercube Sampling on [-1, 1]',
-        ),
-        'UNIFORMSYM_MLHS_ANTI': (
-            symm_MLHS_anti,
-            'Antithetic Modified Latin Hypercube Sampling on [-1, 1]',
-        ),
-        'NORMAL': (draws.getNormalWichuraDraws, 'Normal N(0, 1) draws'),
-        'NORMAL_ANTI': (normal_antithetic, 'Antithetic normal draws'),
-        'NORMAL_HALTON2': (
-            normal_halton2,
-            'Normal draws from Halton base 2 sequence',
-        ),
-        'NORMAL_HALTON3': (
-            normal_halton3,
-            'Normal draws from Halton base 3 sequence',
-        ),
-        'NORMAL_HALTON5': (
-            normal_halton5,
-            'Normal draws from Halton base 5 sequence',
-        ),
-        'NORMAL_MLHS': (
-            normal_MLHS,
-            'Normal draws from Modified Latin Hypercube Sampling',
-        ),
-        'NORMAL_MLHS_ANTI': (
-            normal_MLHS_anti,
-            ('Antithetic normal draws from Modified Latin Hypercube Sampling'),
-        ),
-    }
-
-    # This statement does not work for versions of python before 3.10
-    # @staticmethod
-    def descriptionOfNativeDraws():
-        """Describe the draws available draws with Biogeme
-
-        :return: dict, where the keys are the names of the draws,
-                 and the value their description
-
-        Example of output::
-
-            {'UNIFORM: Uniform U[0, 1]',
-             'UNIFORM_ANTI: Antithetic uniform U[0, 1]'],
-             'NORMAL: Normal N(0, 1) draws'}
-
-        :rtype: dict
-
-        """
-        return {
-            key: tuple[1]
-            for key, tuple in Database.nativeRandomNumberGenerators.items()
-        }
-
-    def __init__(self, name, pandasDatabase):
+    def __init__(self, name: str, pandas_database: pd.DataFrame):
         """Constructor
 
         :param name: name of the database.
         :type name: string
 
-        :param pandasDatabase: data stored in a pandas data frame.
-        :type pandasDatabase: pandas.DataFrame
+        :param pandas_database: data stored in a pandas data frame.
+        :type pandas_database: pandas.DataFrame
 
         :raise BiogemeError: if the audit function detects errors.
         :raise BiogemeError: if the database is empty.
@@ -265,13 +68,13 @@ class Database:
         dumping data.
         """
 
-        if len(pandasDatabase.index) == 0:
+        if len(pandas_database.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
-        self.data = pandasDatabase  #: Pandas data frame containing the data.
+        self.data = pandas_database  #: Pandas data frame containing the data.
 
-        self.fullData = pandasDatabase
+        self.fullData = pandas_database
         """Pandas data frame containing the full data. Useful when batches of
         the sample are used for approximating the log likelihood.
         """
@@ -282,7 +85,7 @@ class Database:
         by _generateHeaders()
         """
 
-        self._generateHeaders()
+        self._generate_headers()
 
         self.excludedData = 0
         """Number of observations removed by the function
@@ -306,7 +109,7 @@ class Database:
         approximate the log likelihood function.
         """
 
-        self.userRandomNumberGenerators = {}
+        self.userRandomNumberGenerators: dict[str, RandomNumberGeneratorTuple] = {}
         """Dictionary containing user defined random number
         generators. Defined by the function
         Database.setRandomNumberGenerators that checks that reserved
@@ -330,52 +133,52 @@ class Database:
 
         self._expression = None  #: Expression to check
 
-        listOfErrors, _ = self._audit()
+        list_of_errors, _ = self._audit()
         # For now, the audit issues only errors. If warnings are
         # triggered in the future, the nexrt lines should be
         # uncommented.
         # if listOfWarnings:
         #    logger.warning('\n'.join(listOfWarnings))
-        if listOfErrors:
-            logger.warning('\n'.join(listOfErrors))
-            raise excep.BiogemeError('\n'.join(listOfErrors))
+        if list_of_errors:
+            logger.warning('\n'.join(list_of_errors))
+            raise BiogemeError('\n'.join(list_of_errors))
 
-    def _audit(self):
+    def _audit(self) -> tuple[list[str], list[str]]:
         """Performs a series of checks and reports warnings and errors.
-          - Check if there are non numerical entries.
+          - Check if there are non-numerical entries.
           - Check if there are NaN (not a number) entries.
           - Check if there are strings.
           - Check if the numbering of individuals are contiguous
             (panel data only).
 
         :return: A tuple of two lists with the results of the diagnostic:
-            listOfErrors, listOfWarnings
+            list_of_errors, list_of_warnings
         :rtype: tuple(list(str), list(str))
         """
-        listOfErrors = []
-        listOfWarnings = []
+        list_of_errors = []
+        list_of_warnings = []
         for col, dtype in self.data.dtypes.items():
             if not np.issubdtype(dtype, np.number):
-                theError = f'Column {col} in the database does contain {dtype}'
-                listOfErrors.append(theError)
+                the_error = f'Column {col} in the database does contain {dtype}'
+                list_of_errors.append(the_error)
 
         if self.data.isnull().values.any():
-            theError = (
+            the_error = (
                 'The database contains NaN value(s). '
                 'Detect where they are using the function isnan()'
             )
-            listOfErrors.append(theError)
+            list_of_errors.append(the_error)
 
-        return listOfErrors, listOfWarnings
+        return list_of_errors, list_of_warnings
 
-    def _generateHeaders(self):
+    def _generate_headers(self) -> None:
         """Record the names of the headers
         of the database so that they can be used as an object of type
         biogeme.expressions.Expression
         """
         self.variables = {col: Variable(col) for col in self.data.columns}
 
-    def valuesFromDatabase(self, expression):
+    def values_from_database(self, expression: Expression) -> pd.Series:
         """Evaluates an expression for each entry of the database.
 
         :param expression: expression to evaluate
@@ -390,11 +193,17 @@ class Database:
 
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
-        return expression.getValue_c(database=self, prepareIds=True)
+        return expression.get_value_c(database=self, prepare_ids=True)
 
-    def checkAvailabilityOfChosenAlt(self, avail, choice):
+    @deprecated
+    def valuesFromDatabase(self, expression: Expression) -> pd.Series:
+        pass
+
+    def check_availability_of_chosen_alt(
+        self, avail: dict[int, Expression], choice: Expression
+    ) -> pd.Series:
         """Check if the chosen alternative is available for each entry
         in the database.
 
@@ -418,32 +227,39 @@ class Database:
 
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
-        choice_array = choice.getValue_c(
-            database=self, aggregation=False, prepareIds=True
+        choice_array = choice.get_value_c(
+            database=self, aggregation=False, prepare_ids=True
         )
         calculated_avail = {}
         for key, expression in avail.items():
-            calculated_avail[key] = expression.getValue_c(
-                database=self, aggregation=False, prepareIds=True
+            calculated_avail[key] = expression.get_value_c(
+                database=self, aggregation=False, prepare_ids=True
             )
         try:
             avail_chosen = np.array(
                 [calculated_avail[c][i] for i, c in enumerate(choice_array)]
             )
+            return avail_chosen != 0
         except KeyError as exc:
             for c in choice_array:
-                err_msg = ''
                 if c not in calculated_avail:
                     err_msg = (
                         f'Chosen alternative {c} does not appear in '
                         f'availability dict: {calculated_avail.keys()}'
                     )
-                    raise excep.BiogemeError(err_msg) from exc
-        return avail_chosen != 0
+                    raise BiogemeError(err_msg) from exc
 
-    def choiceAvailabilityStatistics(self, avail, choice):
+    @deprecated
+    def checkAvailabilityOfChosenAlt(
+        self, avail: dict[int, Expression], choice: Expression
+    ) -> pd.Series:
+        pass
+
+    def choice_availability_statistics(
+        self, avail: dict[int, Expression], choice: Expression
+    ) -> dict[int, tuple[int, int]]:
         """Calculates the number of time an alternative is chosen and available
 
         :param avail: list of expressions to evaluate the
@@ -460,30 +276,36 @@ class Database:
         """
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         self._avail = avail
         self._choice = choice
 
-        choice_array = choice.getValue_c(
+        choice_array = choice.get_value_c(
             database=self,
             aggregation=False,
-            prepareIds=True,
+            prepare_ids=True,
         )
         unique = np.unique(choice_array, return_counts=True)
-        choice_stat = {alt: unique[1][i] for i, alt in enumerate(unique[0])}
+        choice_stat = {alt: int(unique[1][i]) for i, alt in enumerate(list(unique[0]))}
         calculated_avail = {}
         for key, expression in avail.items():
-            calculated_avail[key] = expression.getValue_c(
+            calculated_avail[key] = expression.get_value_c(
                 database=self,
                 aggregation=False,
-                prepareIds=True,
+                prepare_ids=True,
             )
         avail_stat = {k: sum(a) for k, a in calculated_avail.items()}
-        theResults = {alt: (c, avail_stat[alt]) for alt, c in choice_stat.items()}
-        return theResults
+        the_results = {alt: (c, avail_stat[alt]) for alt, c in choice_stat.items()}
+        return the_results
 
-    def scaleColumn(self, column, scale):
+    @deprecated(choice_availability_statistics)
+    def choiceAvailabilityStatistics(
+        self, avail: dict[int, Expression], choice: Expression
+    ) -> dict[tuple[int, int]]:
+        pass
+
+    def scale_column(self, column: str, scale: float):
         """Multiply an entire column by a scale value
 
         :param column: name of the column
@@ -493,9 +315,15 @@ class Database:
         :type scale: float
 
         """
-        self.data[column] = self.data[column] * scale
+        self.data[column] *= scale
 
-    def suggestScaling(self, columns=None, reportAll=False):
+    @deprecated
+    def scaleColumn(self, column: str, scale: float):
+        pass
+
+    def suggest_scaling(
+        self, columns: list[str] | None = None, report_all: bool = False
+    ):
         """Suggest a scaling of the variables in the database.
 
         For each column, :math:`\\delta` is the difference between the
@@ -511,9 +339,9 @@ class Database:
                         If None, all of them will be considered.
         :type columns: list(str)
 
-        :param reportAll: if False, remove entries where the suggested
+        :param report_all: if False, remove entries where the suggested
             scale is 1, 0.1 or 10
-        :type reportAll: bool
+        :type report_all: bool
 
         :return: A Pandas dataframe where each row contains the name
                  of the variable and the suggested scale s. Ideally,
@@ -528,25 +356,31 @@ class Database:
         else:
             for c in columns:
                 if c not in self.data:
-                    errorMsg = f'Variable {c} not found.'
-                    raise excep.BiogemeError(errorMsg)
+                    error_msg = f'Variable {c} not found.'
+                    raise BiogemeError(error_msg)
 
-        largestValue = [
+        largest_value = [
             max(np.abs(self.data[col].max()), np.abs(self.data[col].min()))
             for col in columns
         ]
         res = [
             [col, 1 / 10 ** np.round(np.log10(max(1.0, lv))), lv]
-            for col, lv in zip(columns, largestValue)
+            for col, lv in zip(columns, largest_value)
         ]
         df = pd.DataFrame(res, columns=['Column', 'Scale', 'Largest'])
-        if not reportAll:
+        if not report_all:
             # Remove entries where the suggested scale is 1, 0.1 or 10
             remove = (df.Scale == 1) | (df.Scale == 0.1) | (df.Scale == 10)
             df.drop(df[remove].index, inplace=True)
         return df
 
-    def sampleWithReplacement(self, size=None):
+    @deprecated
+    def suggestScaling(
+        self, columns: list[str] | None = None, report_all: bool = False
+    ):
+        pass
+
+    def sample_with_replacement(self, size: int | None = None) -> pd.DataFrame:
         """Extract a random sample from the database, with replacement.
 
         Useful for bootstrapping.
@@ -565,7 +399,13 @@ class Database:
         sample = self.data.iloc[np.random.randint(0, len(self.data), size=size)]
         return sample
 
-    def sampleIndividualMapWithReplacement(self, size=None):
+    @deprecated
+    def sampleWithReplacement(self, size: int | None = None) -> pd.DataFrame:
+        pass
+
+    def sample_individual_map_with_replacement(
+        self, size: int | None = None
+    ) -> pd.DataFrame:
         """Extract a random sample of the individual map
         from a panel data database, with replacement.
 
@@ -581,12 +421,12 @@ class Database:
 
         :raise BiogemeError: if the database in not in panel mode.
         """
-        if not self.isPanel():
-            errorMsg = (
+        if not self.is_panel():
+            error_msg = (
                 'Function sampleIndividualMapWithReplacement'
                 ' is available only on panel data.'
             )
-            raise excep.BiogemeError(errorMsg)
+            raise BiogemeError(error_msg)
 
         if size is None:
             size = len(self.individualMap)
@@ -594,6 +434,12 @@ class Database:
             np.random.randint(0, len(self.individualMap), size=size)
         ]
         return sample
+
+    @deprecated
+    def sampleIndividualMapWithReplacement(
+        self, size: int | None = None
+    ) -> pd.DataFrame:
+        pass
 
     #####
     # This has to be reimplemented in a cleaner way
@@ -634,7 +480,7 @@ class Database:
     #                )
     #                if right:
     #                    message += f' Columns that were added: {right}'
-    #                raise excep.BiogemeError(message)
+    #                raise exceptions.BiogemeError(message)
     #
     #            self.individualMap = self.fullIndividualMap.sample(
     #                frac=samplingRate, weights=columnWithSamplingWeights
@@ -661,7 +507,7 @@ class Database:
     #                    )
     #                    if right:
     #                        message += f' Columns that were added: {right}'
-    #                    raise excep.BiogemeError(message)
+    #                    raise exceptions.BiogemeError(message)
     #
     #            self.data = self.fullData.sample(
     #                frac=samplingRate, weights=columnWithSamplingWeights
@@ -671,16 +517,16 @@ class Database:
     #        """Re-establish the full sample for calculation of the likelihood"""
     #        if self.isPanel():
     #            if self.fullIndividualMap is None:
-    #                raise excep.BiogemeError(
+    #                raise exceptions.BiogemeError(
     #                    'Full panel data set has not been saved.'
     #                )
     #            self.individualMap = self.fullIndividualMap
     #        else:
     #            if self.fullData is None:
-    #                raise excep.BiogemeError('Full data set has not been saved.')
+    #                raise exceptions.BiogemeError('Full data set has not been saved.')
     #            self.data = self.fullData
 
-    def addColumn(self, expression, column):
+    def add_column(self, expression: Expression, column: str) -> pd.Series:
         """Add a new column in the database, calculated from an expression.
 
         :param expression:  expression to evaluate
@@ -698,7 +544,7 @@ class Database:
         """
         if len(self.data.index) == 0:
             error_msg = 'Database has no entry'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         if column in self.data.columns:
             raise ValueError(
@@ -706,19 +552,27 @@ class Database:
             )
 
         self._expression = expression
-        new_column = self._expression.getValue_c(
-            database=self, aggregation=False, prepareIds=True
+        new_column = self._expression.get_value_c(
+            database=self, aggregation=False, prepare_ids=True
         )
         self.data[column] = new_column
         self.variables[column] = Variable(column)
         return self.data[column]
 
-    def DefineVariable(self, name, expression):
+    @deprecated
+    def addColumn(self, expression: Expression, column: str) -> pd.Series:
+        pass
+
+    def define_variable(self, name: str, expression: Expression) -> Variable:
         """Insert a new column in the database and define it as a variable."""
-        self.addColumn(expression, name)
+        self.add_column(expression, name)
         return Variable(name)
 
-    def remove(self, expression):
+    @deprecated
+    def DefineVariable(self, name: str, expression: Expression) -> Variable:
+        pass
+
+    def remove(self, expression: ExpressionOrNumeric):
         """Removes from the database all entries such that the value
         of the expression is not 0.
 
@@ -726,16 +580,16 @@ class Database:
         :type expression: biogeme.expressions.Expression
 
         """
-        columnName = '__bioRemove__'
-        if is_numeric(expression):
-            self.addColumn(Numeric(expression), columnName)
-        else:
-            self.addColumn(expression, columnName)
-        self.excludedData = len(self.data[self.data[columnName] != 0].index)
-        self.data.drop(self.data[self.data[columnName] != 0].index, inplace=True)
-        self.data.drop(columns=[columnName], inplace=True)
+        column_name = '__bioRemove__'
+        expression = validate_and_convert(expression)
+        self.add_column(expression, column_name)
+        self.excludedData = len(self.data[self.data[column_name] != 0].index)
+        self.data.drop(self.data[self.data[column_name] != 0].index, inplace=True)
+        self.data.drop(columns=[column_name], inplace=True)
 
-    def check_segmentation(self, segmentation_tuple):
+    def check_segmentation(
+        self, segmentation_tuple: DiscreteSegmentationTuple
+    ) -> dict[str, int]:
         """Check that the segmentation covers the complete database
 
         :param segmentation_tuple: object describing the segmentation
@@ -753,7 +607,7 @@ class Database:
                     f'Variable {segmentation_tuple.variable.name} does not '
                     f'take the value {value} representing segment "{name}"'
                 )
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
         for value, count in all_values.items():
             if value not in segmentation_tuple.mapping:
                 error_msg = (
@@ -761,26 +615,30 @@ class Database:
                     f'takes the value {value} [{count} times], and it does not '
                     f'define any segment.'
                 )
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
 
         named_values = {}
         for value, name in segmentation_tuple.mapping.items():
             named_values[name] = all_values[value]
         return named_values
 
-    def dumpOnFile(self):
+    def dump_on_file(self) -> str:
         """Dumps the database in a CSV formatted file.
 
         :return:  name of the file
         :rtype: string
         """
-        theName = f'{self.name}_dumped'
-        dataFileName = bf.get_new_file_name(theName, 'dat')
-        self.data.to_csv(dataFileName, sep='\t', index_label='__rowId')
-        logger.info(f'File {dataFileName} has been created')
-        return dataFileName
+        the_name = f'{self.name}_dumped'
+        data_file_name = bf.get_new_file_name(the_name, 'dat')
+        self.data.to_csv(data_file_name, sep='\t', index_label='__rowId')
+        logger.info(f'File {data_file_name} has been created')
+        return data_file_name
 
-    def setRandomNumberGenerators(self, rng):
+    @deprecated
+    def dumpOnFile(self) -> str:
+        pass
+
+    def set_random_number_generators(self, rng: dict[str, RandomNumberGeneratorTuple]):
         """Defines user-defined random numbers generators.
 
         :param rng: a dictionary of generators. The keys of the dictionary
@@ -788,9 +646,10 @@ class Database:
            different from the pre-defined generators in Biogeme
            (see :func:`~biogeme.database.Database.generateDraws` for the list).
            The elements of the
-           dictionary are functions that take two arguments: the
+           dictionary are tuples, where the first element is a function that takes two arguments: the
            number of series to generate (typically, the size of the
-           database), and the number of draws per series.
+           database), and the number of draws per series, and returns the array of numbers.
+           The second element is a description.
         :type rng: dict
 
         Example::
@@ -806,29 +665,40 @@ class Database:
                                  'Draws from lognormal distribution'),
                     'EXP':(exponentialDraws,
                            'Draws from exponential distributions')}
-            myData.setRandomNumberGenerators(dict)
+            my_data.setRandomNumberGenerators(dict)
 
         :raise ValueError: if a reserved keyword is used for a
              user-defined draws.
 
         """
-        for k in self.nativeRandomNumberGenerators:
+        for k in native_random_number_generators:
             if k in rng:
-                errorMsg = (
+                error_msg = (
                     f'{k} is a reserved keyword for draws'
                     f' and cannot be used for user-defined '
                     f'generators'
                 )
-                raise ValueError(errorMsg)
+                raise ValueError(error_msg)
 
         self.userRandomNumberGenerators = rng
 
-    def generateDraws(self, types, names, number_of_draws):
+    @deprecated
+    def setRandomNumberGenerators(
+        self, rng: dict[str, tuple[RandomNumberGenerator, str]]
+    ):
+        pass
+
+    def generate_draws(
+        self,
+        draws: dict[str, bioDraws],
+        names: list[str],
+        number_of_draws: int,
+    ) -> np.ndarray:
         """Generate draws for each variable.
 
 
-        :param types: A dict indexed by the names of the variables,
-                      describing the types of draws. Each of them can
+        :param draws: A dict indexed by the names of the variables,
+                      describing the draws. Each of them can
                       be a native type or any type defined by the
                       function
                       :func:`~biogeme.database.Database.setRandomNumberGenerators`.
@@ -899,7 +769,7 @@ class Database:
               types = {'randomDraws1': 'NORMAL_MLHS_ANTI',
                        'randomDraws2': 'UNIFORM_MLHS_ANTI',
                        'randomDraws3': 'UNIFORMSYM_MLHS_ANTI'}
-              theDrawsTable = myData.generateDraws(types,
+              theDrawsTable = my_data.generateDraws(types,
                   ['randomDraws1', 'randomDraws2', 'randomDraws3'], 10)
 
 
@@ -909,40 +779,45 @@ class Database:
             have the requested dimensions.
 
         """
-        self.number_of_draws = number_of_draws
+        self.number_of_draws: int = number_of_draws
         # Dimensions of the draw table:
         # 1. number of variables
         # 2. number of individuals
         # 3. number of draws
-        listOfDraws = [None] * len(names)
+        list_of_draws = [None] * len(names)
         for i, v in enumerate(names):
             name = v
-            drawType = types[name]
-            self.typesOfDraws[name] = drawType
-            theGenerator = self.nativeRandomNumberGenerators.get(drawType)
-            if theGenerator is None:
-                theGenerator = self.userRandomNumberGenerators.get(drawType)
-                if theGenerator is None:
-                    native = self.nativeRandomNumberGenerators
+            draw_type = draws[name].drawType
+            self.typesOfDraws[name] = draw_type
+            the_generator: RandomNumberGeneratorTuple | None = (
+                native_random_number_generators.get(draw_type)
+            )
+            if the_generator is None:
+                the_generator: RandomNumberGeneratorTuple | None = (
+                    self.userRandomNumberGenerators.get(draw_type)
+                )
+                if the_generator is None:
                     user = self.userRandomNumberGenerators
-                    errorMsg = (
+                    error_msg = (
                         f'Unknown type of draws for '
-                        f'variable {name}: {drawType}. '
-                        f'Native types: {native}. '
+                        f'variable {name}: {draw_type}. '
+                        f'Native types: {native_random_number_generators}. '
                         f'User defined: {user}'
                     )
-                    raise excep.BiogemeError(errorMsg)
-            listOfDraws[i] = theGenerator[0](self.getSampleSize(), number_of_draws)
-            if listOfDraws[i].shape != (self.getSampleSize(), number_of_draws):
-                errorMsg = (
+                    raise BiogemeError(error_msg)
+            list_of_draws[i] = the_generator.generator(
+                self.get_sample_size(), number_of_draws
+            )
+            if list_of_draws[i].shape != (self.get_sample_size(), number_of_draws):
+                error_msg = (
                     f'The draw generator for {name} must'
                     f' generate a numpy array of dimensions'
-                    f' ({self.getSampleSize()}, {number_of_draws})'
-                    f' instead of {listOfDraws[i].shape}'
+                    f' ({self.get_sample_size()}, {number_of_draws})'
+                    f' instead of {list_of_draws[i].shape}'
                 )
-                raise excep.BiogemeError(errorMsg)
+                raise BiogemeError(error_msg)
 
-        self.theDraws = np.array(listOfDraws)
+        self.theDraws = np.array(list_of_draws)
         # Draws as a three-dimensional numpy series. The dimensions
         # are organized to be more suited for calculation.
         # 1. number of individuals
@@ -951,7 +826,16 @@ class Database:
         self.theDraws = np.moveaxis(self.theDraws, 0, -1)
         return self.theDraws
 
-    def getNumberOfObservations(self):
+    @deprecated
+    def generateDraws(
+        self,
+        types: dict[str, RandomNumberGeneratorTuple],
+        names: list[str],
+        number_of_draws: int,
+    ) -> np.ndarray:
+        pass
+
+    def get_number_of_observations(self) -> int:
         """
         Reports the number of observations in the database.
 
@@ -965,7 +849,11 @@ class Database:
         """
         return self.data.shape[0]
 
-    def getSampleSize(self):
+    @deprecated
+    def getNumberOfObservations(self) -> int:
+        pass
+
+    def get_sample_size(self) -> int:
         """Reports the size of the sample.
 
         If the data is cross-sectional, it is the number of
@@ -978,12 +866,18 @@ class Database:
         See also: getNumberOfObservations()
 
         """
-        if self.isPanel():
+        if self.is_panel():
             return self.individualMap.shape[0]
 
         return self.data.shape[0]
 
-    def split(self, slices, groups=None):
+    @deprecated
+    def getSampleSize(self) -> int:
+        pass
+
+    def split(
+        self, slices: int, groups: str | None = None
+    ) -> list[EstimationValidation]:
         """Prepare estimation and validation sets for validation.
 
         :param slices: number of slices
@@ -1005,41 +899,41 @@ class Database:
                 f'The number of slices is {slices}. It must be greater '
                 f'or equal to 2.'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
-        if groups is not None and self.isPanel():
+        if groups is not None and self.is_panel():
             if groups != self.panelColumn:
                 error_msg = (
                     f'The data is already organized by groups on '
                     f'{self.panelColumn}. The grouping by {groups} '
                     f'cannot be done.'
                 )
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
 
-        if self.isPanel():
+        if self.is_panel():
             groups = self.panelColumn
 
         if groups is None:
             shuffled = self.data.sample(frac=1)
-            theSlices = np.array_split(shuffled, slices)
+            the_slices = np.array_split(shuffled, slices)
         else:
             ids = self.data[groups].unique()
             np.random.shuffle(ids)
             the_slices_ids = np.array_split(ids, slices)
-            theSlices = [
+            the_slices = [
                 self.data[self.data[groups].isin(ids)] for ids in the_slices_ids
             ]
-        estimationSets = []
-        validationSets = []
-        for i, v in enumerate(theSlices):
-            estimationSets.append(pd.concat(theSlices[:i] + theSlices[i + 1 :]))
-            validationSets.append(v)
+        estimation_sets = []
+        validation_sets = []
+        for i, v in enumerate(the_slices):
+            estimation_sets.append(pd.concat(the_slices[:i] + the_slices[i + 1 :]))
+            validation_sets.append(v)
         return [
             EstimationValidation(estimation=e, validation=v)
-            for e, v in zip(estimationSets, validationSets)
+            for e, v in zip(estimation_sets, validation_sets)
         ]
 
-    def isPanel(self):
+    def is_panel(self) -> bool:
         """Tells if the data is panel or not.
 
         :return: True if the data is panel.
@@ -1047,37 +941,43 @@ class Database:
         """
         return self.panelColumn is not None
 
-    def panel(self, columnName):
+    @deprecated
+    def isPanel(self) -> bool:
+        pass
+
+    def panel(self, column_name: str):
         """Defines the data as panel data
 
-        :param columnName: name of the columns that identifies individuals.
-        :type columnName: string
+        :param column_name: name of the columns that identifies individuals.
+        :type column_name: string
 
         :raise BiogemeError: if the data are not sorted properly, that
             is if the data for the one individuals are not consecutive.
 
         """
 
-        self.panelColumn = columnName
+        self.panelColumn = column_name
 
         # Check if the data is organized in consecutive entries
         # Number of groups of data
-        nGroups = tools.countNumberOfGroups(self.data, self.panelColumn)
-        sortedData = self.data.sort_values(by=[self.panelColumn])
-        nIndividuals = tools.countNumberOfGroups(sortedData, self.panelColumn)
-        if nGroups != nIndividuals:
-            theError = (
+        n_groups = biogeme.tools.count_number_of_groups(self.data, self.panelColumn)
+        sorted_data = self.data.sort_values(by=[self.panelColumn])
+        n_individuals = biogeme.tools.count_number_of_groups(
+            sorted_data, self.panelColumn
+        )
+        if n_groups != n_individuals:
+            the_error = (
                 f'The data must be sorted so that the data'
                 f' for the same individual are consecutive.'
-                f' There are {nIndividuals} individuals '
-                f'in the sample, and {nGroups} groups of '
+                f' There are {n_individuals} individuals '
+                f'in the sample, and {n_groups} groups of '
                 f'data for column {self.panelColumn}.'
             )
-            raise excep.BiogemeError(theError)
+            raise BiogemeError(the_error)
 
-        self.buildPanelMap()
+        self.build_panel_map()
 
-    def buildPanelMap(self):
+    def build_panel_map(self) -> None:
         """Sorts the data so that the observations for each individuals are
         contiguous, and builds a map that identifies the range of indices of
         the observations of each individuals.
@@ -1094,25 +994,31 @@ class Database:
             self.individualMap = pd.DataFrame(local_map).T
             self.fullIndividualMap = self.individualMap
 
-    def count(self, columnName, value):
+    @deprecated
+    def buildPanelMap(self) -> None:
+        pass
+
+    def count(self, column_name: str, value: float) -> int:
         """Counts the number of observations that have a specific value in a
         given column.
 
-        :param columnName: name of the column.
-        :type columnName: string
-        :param value: value that is seeked.
+        :param column_name: name of the column.
+        :type column_name: string
+        :param value: value that is searched.
         :type value: float
 
         :return: Number of times that the value appears in the column.
         :rtype: int
         """
-        return self.data[self.data[columnName] == value].count()[columnName]
+        return self.data[self.data[column_name] == value].count()[column_name]
 
-    def generateFlatPanelDataframe(self, saveOnFile=None, identical_columns=tuple()):
+    def generate_flat_panel_dataframe(
+        self, save_on_file: bool = False, identical_columns: list[str] | None = None
+    ) -> pd.DataFrame:
         """Generate a flat version of the panel data
 
-        :param saveOnFile: if True, the flat database is saved on file.
-        :type saveOnFile: bool
+        :param save_on_file: if True, the flat database is saved on file.
+        :type save_on_file: bool
 
         :param identical_columns: tuple of columns that contain the
             same values for all observations of the same
@@ -1126,26 +1032,32 @@ class Database:
         :raise BiogemeError: if the database in not panel
 
         """
-        if not self.isPanel():
+        if not self.is_panel():
             error_msg = 'This function can only be called for panel data'
-            raise excep.BiogemeError(error_msg)
-        flat_data = tools.flatten_database(
+            raise BiogemeError(error_msg)
+        flat_data = biogeme.tools.database.flatten_database(
             self.data, self.panelColumn, identical_columns=identical_columns
         )
-        if saveOnFile:
+        if save_on_file:
             file_name = f'{self.name}_flatten.csv'
             flat_data.to_csv(file_name)
             logger.info(f'File {file_name} has been created.')
         return flat_data
 
-    def __str__(self):
-        """Allows to print the dabase"""
+    @deprecated
+    def generateFlatPanelDataframe(
+        self, save_on_file: bool = False, identical_columns: list[str] | None = None
+    ) -> pd.DataFrame:
+        pass
+
+    def __str__(self) -> str:
+        """Allows to print the database"""
         result = f'biogeme database {self.name}:\n{self.data}'
-        if self.isPanel():
+        if self.is_panel():
             result += f'\nPanel data\n{self.individualMap}'
         return result
 
-    def verify_segmentation(self, segmentation):
+    def verify_segmentation(self, segmentation: DiscreteSegmentationTuple) -> None:
         """Verifies if the definition of the segmentation is consistent with the data
 
         :param segmentation: definition of the segmentation
@@ -1163,7 +1075,7 @@ class Database:
         # Check if the variable is in the database.
         if variable.name not in self.data.columns:
             error_msg = f'Unknown variable {variable.name}'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         # Extract all unique values from the data base.
         unique_values = set(self.data[variable.name].unique())
@@ -1191,9 +1103,14 @@ class Database:
         )
 
         if error_msg_1 or error_msg_2:
-            raise excep.BiogemeError(f'{error_msg_1} {error_msg_2}')
+            raise BiogemeError(f'{error_msg_1} {error_msg_2}')
 
-    def generate_segmentation(self, variable, mapping=None, reference=None):
+    def generate_segmentation(
+        self,
+        variable: Variable | str,
+        mapping: dict[int, str] | None = None,
+        reference: str | None = None,
+    ) -> DiscreteSegmentationTuple:
         """Generate a segmentation tuple for a variable.
 
         :param variable: Variable object or name of the variable
@@ -1217,7 +1134,7 @@ class Database:
         # Check if the variable is in the database.
         if the_variable.name not in self.data.columns:
             error_msg = f'Unknown the_variable {the_variable.name}'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         # Extract all unique values from the data base.
         unique_values = set(self.data[the_variable.name].unique())
@@ -1240,7 +1157,7 @@ class Database:
                 f'The following values in the mapping do not exist in the data for '
                 f'variable {the_variable.name}: {values_not_in_data}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         the_mapping = {value: f'{the_variable.name}_{value}' for value in unique_values}
 
@@ -1252,7 +1169,7 @@ class Database:
                 f'Level {reference} of variable {the_variable.name} does not '
                 'appear in the mapping: {mapping.values()}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         return DiscreteSegmentationTuple(
             variable=the_variable,

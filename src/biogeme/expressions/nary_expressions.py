@@ -3,25 +3,37 @@
 :author: Michel Bierlaire
 :date: Sat Sep  9 15:29:36 2023
 """
+
+from __future__ import annotations
 import logging
-from typing import NamedTuple, Iterable
-import biogeme.exceptions as excep
+from typing import NamedTuple, Iterable, TYPE_CHECKING, Any
+
+from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
-from .numeric_expressions import Numeric, validate_and_convert
-from .elementary_expressions import Beta, Variable, TypeOfElementaryExpression
+from .elementary_expressions import (
+    Beta,
+    Variable,
+    TypeOfElementaryExpression,
+    Elementary,
+)
+from .numeric_expressions import validate_and_convert
+from ..deprecated import deprecated
+
+if TYPE_CHECKING:
+    from . import ExpressionOrNumeric
 
 logger = logging.getLogger(__name__)
 
 
 class ConditionalTermTuple(NamedTuple):
-    condition: Expression
-    term: Expression
+    condition: ExpressionOrNumeric
+    term: ExpressionOrNumeric
 
 
 class ConditionalSum(Expression):
     """This expression returns the sum of a selected list of
-    expressions. An expressions is considered in the sum only if the
-    corresponding key is True (that is, return a non zero value).
+    expressions. An expression is considered in the sum only if the
+    corresponding key is True (that is, return a non-zero value).
 
 
     """
@@ -29,17 +41,17 @@ class ConditionalSum(Expression):
     def __init__(self, list_of_terms: Iterable[ConditionalTermTuple]):
         """Constructor
 
-        :param tuple_of_expressions: list containing the terms and the associated conditions
+        :param list_of_terms: list containing the terms and the associated conditions
 
         :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
+            neither a numeric value nor a
             biogeme.expressions.Expression object.
         :raise BiogemeError: if the dict of expressions is empty
         :raise BiogemeError: if the dict of expressions is not a dict
 
         """
         if not list_of_terms:
-            raise excep.BiogemeError('The argument of ConditionalSum cannot be empty')
+            raise BiogemeError('The argument of ConditionalSum cannot be empty')
 
         Expression.__init__(self)
 
@@ -54,7 +66,7 @@ class ConditionalSum(Expression):
             self.children.append(the_term.condition)
             self.children.append(the_term.term)
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
@@ -62,12 +74,16 @@ class ConditionalSum(Expression):
         """
         result = 0.0
         for the_term in self.list_of_terms:
-            condition = the_term.condition.getValue()
+            condition = the_term.condition.get_value()
             if condition != 0:
-                result += the_term.term.getValue()
+                result += the_term.term.get_value()
         return result
 
-    def __str__(self):
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def __str__(self) -> str:
         s = (
             'ConditionalSum('
             + ', '.join([f'{k}: {v}' for k, v in self.list_of_terms])
@@ -75,7 +91,7 @@ class ConditionalSum(Expression):
         )
         return s
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -127,9 +143,9 @@ class ConditionalSum(Expression):
         """
         list_of_signatures = []
         for key, expression in self.list_of_terms:
-            list_of_signatures += key.getSignature()
-            list_of_signatures += expression.getSignature()
-        signature = f'<{self.getClassName()}>'
+            list_of_signatures += key.get_signature()
+            list_of_signatures += expression.get_signature()
+        signature = f'<{self.get_class_name()}>'
         signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.list_of_terms)})'
         for key, expression in self.list_of_terms:
@@ -144,36 +160,39 @@ class bioMultSum(Expression):
     It is a generalization of 'Plus' for more than two terms
     """
 
-    def __init__(self, listOfExpressions):
+    def __init__(
+        self,
+        list_of_expressions: list[ExpressionOrNumeric] | dict[Any:ExpressionOrNumeric],
+    ):
         """Constructor
 
-        :param listOfExpressions: list of objects representing the
+        :param list_of_expressions: list of objects representing the
                                      terms of the sum.
 
-        :type listOfExpressions: list(biogeme.expressions.Expression)
+        :type list_of_expressions: list(biogeme.expressions.Expression)
 
         :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
+            neither a numeric value nor a
             biogeme.expressions.Expression object.
         :raise BiogemeError: if the list of expressions is empty
-        :raise BiogemeError: if the list of expressions is neither a dict or a list
+        :raise BiogemeError: if the list of expressions is neither a dict nor a list
         """
-        if not listOfExpressions:
-            raise excep.BiogemeError('The argument of bioMultSum cannot be empty')
+        if not list_of_expressions:
+            raise BiogemeError('The argument of bioMultSum cannot be empty')
 
         Expression.__init__(self)
 
-        if isinstance(listOfExpressions, dict):
-            items = listOfExpressions.values()
-        elif isinstance(listOfExpressions, list):
-            items = listOfExpressions
+        if isinstance(list_of_expressions, dict):
+            items = list_of_expressions.values()
+        elif isinstance(list_of_expressions, list):
+            items = list_of_expressions
         else:
-            raise excep.BiogemeError('Argument of bioMultSum must be a dict or a list.')
+            raise BiogemeError('Argument of bioMultSum must be a dict or a list.')
 
         for expression in items:
             self.children.append(validate_and_convert(expression))
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
@@ -181,10 +200,14 @@ class bioMultSum(Expression):
         """
         result = 0.0
         for e in self.get_children():
-            result += e.getValue()
+            result += e.get_value()
         return result
 
-    def __str__(self):
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def __str__(self) -> str:
         s = 'bioMultSum(' + ', '.join([f'{e}' for e in self.get_children()]) + ')'
         return s
 
@@ -194,23 +217,27 @@ class Elem(Expression):
     from an expression and must return an integer, possibly negative.
     """
 
-    def __init__(self, dict_of_expressions, keyExpression):
+    def __init__(
+        self,
+        dict_of_expressions: dict[int, ExpressionOrNumeric],
+        key_expression: ExpressionOrNumeric,
+    ):
         """Constructor
 
         :param dict_of_expressions: dict of objects with numerical keys.
         :type dict_of_expressions: dict(int: biogeme.expressions.Expression)
 
-        :param keyExpression: object providing the key of the element
+        :param key_expression: object providing the key of the element
                               to be evaluated.
-        :type keyExpression: biogeme.expressions.Expression
+        :type key_expression: biogeme.expressions.Expression
 
         :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
+            neither a numeric value nor a
             biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
 
-        self.keyExpression = validate_and_convert(keyExpression)
+        self.keyExpression = validate_and_convert(key_expression)
         self.children.append(self.keyExpression)
 
         self.dict_of_expressions = {}  #: dict of expressions
@@ -218,7 +245,7 @@ class Elem(Expression):
             self.dict_of_expressions[k] = validate_and_convert(v)
             self.children.append(self.dict_of_expressions[k])
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
@@ -227,17 +254,21 @@ class Elem(Expression):
         :raise BiogemeError: if the calcuated key is not present in
             the dictionary.
         """
-        key = int(self.keyExpression.getValue())
+        key = int(self.keyExpression.get_value())
         if key in self.dict_of_expressions:
-            return self.dict_of_expressions[key].getValue()
+            return self.dict_of_expressions[key].get_value()
 
         error_msg = (
             f'Key {key} is not present in the dictionary. '
             f'Available keys: {self.dict_of_expressions.keys()}'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
-    def __str__(self):
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def __str__(self) -> str:
         s = '{{'
         first = True
         for k, v in self.dict_of_expressions.items():
@@ -249,7 +280,7 @@ class Elem(Expression):
         s += f'}}[{self.keyExpression}]'
         return s
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -300,10 +331,10 @@ class Elem(Expression):
         :rtype: list(string)
         """
         list_of_signatures = []
-        list_of_signatures += self.keyExpression.getSignature()
+        list_of_signatures += self.keyExpression.get_signature()
         for i, e in self.dict_of_expressions.items():
-            list_of_signatures += e.getSignature()
-        signature = f'<{self.getClassName()}>'
+            list_of_signatures += e.get_signature()
+        signature = f'<{self.get_class_name()}>'
         signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.dict_of_expressions)})'
         signature += f',{self.keyExpression.get_id()}'
@@ -313,17 +344,22 @@ class Elem(Expression):
         return list_of_signatures
 
 
+class LinearTermTuple(NamedTuple):
+    beta: Beta
+    x: Variable
+
+
 class bioLinearUtility(Expression):
     """When the utility function is linear, it is expressed as a list of
     terms, where a parameter multiplies a variable.
     """
 
-    def __init__(self, listOfTerms):
+    def __init__(self, list_of_terms: list[LinearTermTuple]):
         """Constructor
 
-        :param listOfTerms: a list of tuple. Each tuple contains first
-             a beta parameter, second the name of a variable.
-        :type listOfTerms: list(biogeme.expressions.Expression,
+        :param list_of_terms: a list of tuple. Each tuple contains first
+             a Beta parameter, second the name of a variable.
+        :type list_of_terms: list(biogeme.expressions.Expression,
             biogeme.expressions.Expression)
 
         :raises biogeme.exceptions.BiogemeError: if the object is not
@@ -335,7 +371,7 @@ class bioLinearUtility(Expression):
         the_error = ""
         first = True
 
-        for b, v in listOfTerms:
+        for b, v in list_of_terms:
             if not isinstance(b, Beta):
                 if first:
                     the_error += (
@@ -353,9 +389,9 @@ class bioLinearUtility(Expression):
                     first = False
                 the_error += f' Expression {v} is not a variable.'
         if not first:
-            raise excep.BiogemeError(the_error)
+            raise BiogemeError(the_error)
 
-        self.betas, self.variables = zip(*listOfTerms)
+        self.betas, self.variables = zip(*list_of_terms)
 
         self.betas = list(self.betas)  #: list of parameters
 
@@ -366,10 +402,12 @@ class bioLinearUtility(Expression):
 
         self.children += self.betas + self.variables
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ' + '.join([f'{b} * {x}' for b, x in self.listOfTerms])
 
-    def dict_of_elementary_expression(self, the_type):
+    def dict_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> dict[str, Elementary]:
         """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
@@ -394,7 +432,7 @@ class bioLinearUtility(Expression):
 
         return {}
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -408,8 +446,8 @@ class bioLinearUtility(Expression):
             4. the number of terms in the utility ( )
             5. for each term:
 
-                a. the id of the beta parameter
-                b. the unique id of the beta parameter
+                a. the id of the Beta parameter
+                b. the unique id of the Beta parameter
                 c. the name of the parameter
                 d. the id of the variable
                 e. the unique id of the variable
@@ -450,8 +488,8 @@ class bioLinearUtility(Expression):
         """
         list_of_signatures = []
         for e in self.get_children():
-            list_of_signatures += e.getSignature()
-        signature = f'<{self.getClassName()}>'
+            list_of_signatures += e.get_signature()
+        signature = f'<{self.get_class_name()}>'
         signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.listOfTerms)})'
         for b, v in self.listOfTerms:

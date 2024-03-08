@@ -4,8 +4,9 @@
 :date: Thu Oct 26 17:30:36 2023
 
 """
+
 import logging
-from typing import Iterable, Iterator, Optional
+from typing import Iterator, Sequence
 
 Segment = set[int]
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 class Partition:
     """Class defining a partition of a set"""
 
-    def __init__(self, segments: Iterable[Segment], full_set: Optional[Segment] = None):
+    def __init__(self, segments: Sequence[Segment], full_set: Segment | None = None):
         self.segments = segments
         if full_set:
             self.full_set = full_set
@@ -28,10 +29,10 @@ class Partition:
         self.validate_segments()
         self.validate_partition()
 
-    def number_of_segments(self):
+    def number_of_segments(self) -> int:
         return len(self.segments)
 
-    def validate_segments(self):
+    def validate_segments(self) -> None:
         """Check the types"""
         for segment in self.segments:
             if not isinstance(segment, set):
@@ -42,7 +43,7 @@ class Partition:
                 if not isinstance(item, int):
                     raise ValueError('Each item in the segment must be an integer.')
 
-    def validate_partition(self):
+    def validate_partition(self) -> None:
         """Check that there is no intersection between segments"""
         for s1, segment1 in enumerate(self.segments):
             for s2, segment2 in enumerate(self.segments):

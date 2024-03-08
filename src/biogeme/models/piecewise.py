@@ -3,9 +3,11 @@
 :author: Michel Bierlaire
 :date: Wed Oct 25 09:43:41 2023
 """
+
 import logging
-from typing import Union, Sequence, Optional
-import biogeme.exceptions as excep
+
+from biogeme.deprecated import deprecated
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
     Beta,
@@ -14,14 +16,15 @@ from biogeme.expressions import (
     bioMax,
     Numeric,
     bioMultSum,
+    ExpressionOrNumeric,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def piecewiseVariables(
-    variable: Union[Expression, str], thresholds: list[float]
-) -> Sequence[Expression]:
+def piecewise_variables(
+    variable: Expression | str, thresholds: list[float]
+) -> list[Expression]:
     """Generate the variables to include in a piecewise linear specification.
 
     If there are K thresholds, K-1 variables are generated. The first
@@ -55,13 +58,13 @@ def piecewiseVariables(
         error_msg = (
             'All thresholds for the piecewise linear specification are set to None.'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if None in thresholds[1:-1]:
         error_msg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     # If the name of the variable is given, we transform it into an expression.
     if isinstance(variable, str):
@@ -87,8 +90,17 @@ def piecewiseVariables(
     return results
 
 
-def piecewiseFormula(
-    variable: str, thresholds: list[float], betas: Optional[list[Beta]] = None
+@deprecated
+def piecewiseVariables(
+    variable: Expression | str, thresholds: list[float]
+) -> list[Expression]:
+    pass
+
+
+def piecewise_formula(
+    variable: str | Variable,
+    thresholds: list[float],
+    betas: list[ExpressionOrNumeric] | None = None,
 ) -> Expression:
     """Generate the formula for a piecewise linear specification.
 
@@ -113,7 +125,7 @@ def piecewiseFormula(
 
     :param thresholds: list of thresholds
 
-    :param betas: list of beta parameters to be used in the
+    :param betas: list of Beta parameters to be used in the
         specification.  The number of entries should be the number of
         thresholds, minus one. If None, for each interval, the
         parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
@@ -142,29 +154,29 @@ def piecewiseFormula(
             'The first argument of piecewiseFormula must be the '
             'name of a variable, or the variable itself..'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         error_msg = (
             'All thresholds for the piecewise linear specification are set to None.'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if None in thresholds[1:-1]:
         error_msg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if betas is not None:
         if len(betas) != eye - 1:
             error_msg = (
                 f'As there are {eye} thresholds, a total of {eye-1} '
                 f'Beta parameters are needed, and not {len(betas)}.'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
-    theVars = piecewiseVariables(the_variable, thresholds)
+    the_vars = piecewise_variables(the_variable, thresholds)
     if betas is None:
         betas = []
         for i, a_threshold in enumerate(thresholds[:-1]):
@@ -175,12 +187,21 @@ def piecewiseFormula(
                 Beta(f'beta_{the_name}_{a_name}_{next_name}', 0, None, None, 0)
             )
 
-    terms = [beta * theVars[i] for i, beta in enumerate(betas)]
+    terms = [beta * the_vars[i] for i, beta in enumerate(betas)]
 
     return bioMultSum(terms)
 
 
-def piecewise_as_variable(variable, thresholds, betas=None):
+@deprecated
+def piecewiseFormula(
+    variable: str | Variable, thresholds: list[float], betas: list[Beta] | None = None
+) -> Expression:
+    pass
+
+
+def piecewise_as_variable(
+    variable: str | Variable, thresholds: list[float], betas: list[Beta] | None = None
+) -> Expression:
     """Generate the formula for a piecewise linear specification, seen
     as a transformed variable.
 
@@ -206,7 +227,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     :param thresholds: list of thresholds
     :type thresholds: list(float)
 
-    :param betas: list of beta parameters to be used in the
+    :param betas: list of Beta parameters to be used in the
         specification.  The number of entries should be the number of
         thresholds, minus two. If None, for each interval, the
         parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
@@ -224,7 +245,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     :raise BiogemeError: if the length of list ``initialexpr.Betas`` is
         not equal to the length of ``thresholds`` minus one.
 
-    .. seealso:: :meth:`piecewiseVariables`
+    .. see also:: :meth:`piecewiseVariables`
 
     """
     if isinstance(variable, Variable):
@@ -238,29 +259,29 @@ def piecewise_as_variable(variable, thresholds, betas=None):
             'The first argument of piecewiseFormula must be the '
             'name of a variable, or the variable itself..'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     eye = len(thresholds)
     if all(t is None for t in thresholds):
         error_msg = (
             'All thresholds for the piecewise linear specification are set to None.'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if None in thresholds[1:-1]:
         error_msg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if betas is not None:
         if len(betas) != eye - 2:
             error_msg = (
                 f'As there are {eye} thresholds, a total of {eye-2} '
                 f'Beta parameters are needed, and not {len(betas)}.'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
-    theVars = piecewiseVariables(the_variable, thresholds)
+    theVars = piecewise_variables(the_variable, thresholds)
     if betas is None:
         betas = []
         for i, a_threshold in enumerate(thresholds[1:-1]):
@@ -276,7 +297,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     return theVars[0] + bioMultSum(terms)
 
 
-def piecewiseFunction(x, thresholds, betas):
+def piecewise_function(x: float, thresholds: list[float], betas: list[float]) -> float:
     """Plot a piecewise linear specification.
 
     If there are K thresholds, K-1 variables are generated. The first
@@ -296,7 +317,7 @@ def piecewiseFunction(x, thresholds, betas):
     :param thresholds: list of thresholds
     :type thresholds: list(float)
 
-    :param betas: list of the beta parameters.  The number of entries
+    :param betas: list of the Beta parameters.  The number of entries
                          should be the number of thresholds, plus
                          one.
     :type betas: list(float)
@@ -315,20 +336,20 @@ def piecewiseFunction(x, thresholds, betas):
         error_msg = (
             'All thresholds for the piecewise linear specification are set to None.'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if None in thresholds[1:-1]:
         error_msg = (
             'For piecewise linear specification, only the first and '
             'the last thresholds can be None'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
     if len(betas) != eye - 1:
         error_msg = (
             f'As there are {eye} thresholds, a total of {eye-1} values '
             f'are needed to initialize the parameters. But '
             f'{len(betas)} are provided'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     # If the first threshold is not -infinity, we need to check if
     # x is beyond it.
@@ -349,3 +370,8 @@ def piecewiseFunction(x, thresholds, betas):
         )
         rest = x - thresholds[i + 1]
     return total
+
+
+@deprecated
+def piecewiseFunction(x: float, thresholds: list[float], betas: list[float]) -> float:
+    pass

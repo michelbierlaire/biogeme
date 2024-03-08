@@ -8,14 +8,16 @@
 :author: Michel Bierlaire
 :date: Fri Oct 27 12:50:06 2023
 """
-import os
+
 import copy
 import logging
+import os
+
 import pandas as pd
 from tqdm import tqdm
-from biogeme.expressions import Expression, TypeOfElementaryExpression
+
 from biogeme.database import Database
-from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Expression, TypeOfElementaryExpression
 from .sampling_context import SamplingContext, MEV_PREFIX
 from .sampling_of_alternatives import SamplingOfAlternatives
 
@@ -64,16 +66,16 @@ class ChoiceSetsGeneration:
 
         :param individual_row: row corresponding to one individual
 
-        :return: a dictionnary containing the data for the extended row
+        :return: a dictionary containing the data for the extended row
         """
         choice = individual_row[self.choice_column]
 
         first_sample = self.sampling_of_alternatives.sample_alternatives(chosen=choice)
 
-        # Create the columnns
+        # Create the columns
         flattened_first_series: pd.Series[float, tuple[int, str]] = first_sample.stack()
         flattened_first_dict = {
-            (f"{col_name}_{row}"): value
+            f'{col_name}_{row}': value
             for (row, col_name), value in flattened_first_series.items()
         }
 
@@ -87,7 +89,7 @@ class ChoiceSetsGeneration:
             flattened_second_series = second_sample.stack()
 
             flattened_second_dict = {
-                (f"{MEV_PREFIX}{col_name}_{row}"): value
+                f"{MEV_PREFIX}{col_name}_{row}": value
                 for (row, col_name), value in flattened_second_series.items()
             }
             row_data.update(flattened_second_dict)
@@ -108,7 +110,7 @@ class ChoiceSetsGeneration:
                     copy_expression = copy.deepcopy(new_variable.formula)
                     attributes = self.get_attributes_from_expression(copy_expression)
                     copy_expression.rename_elementary(attributes, suffix=f"_{index}")
-                    database.DefineVariable(
+                    database.define_variable(
                         f"{new_variable.name}_{index}", copy_expression
                     )
                     progress_bar.update(1)
@@ -121,7 +123,7 @@ class ChoiceSetsGeneration:
                         copy_expression.rename_elementary(
                             attributes, prefix=MEV_PREFIX, suffix=f"_{index}"
                         )
-                        database.DefineVariable(
+                        database.define_variable(
                             f"{MEV_PREFIX}{new_variable.name}_{index}", copy_expression
                         )
 

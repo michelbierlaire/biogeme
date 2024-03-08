@@ -3,10 +3,11 @@
 :author: Michel Bierlaire
 :date: Fri Mar 29 17:13:14 2019
 """
+
 import logging
-from typing import Callable, Mapping
+from typing import Callable
 import biogeme.distributions as dist
-import biogeme.exceptions as excep
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, Beta, bioNormalCdf
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ def ordered_likelihood(
     list_of_discrete_values: list[int],
     tau_parameter: Beta,
     cdf: Callable[[Expression], Expression],
-) -> Mapping[int, Expression]:
+) -> dict[int, Expression]:
     """Ordered model that maps a continuous quantity with a list of
         discrete intervals (often logit or probit)
 
@@ -48,7 +49,7 @@ def ordered_likelihood(
         error_msg = (
             f'tau_parameter must be a Beta expression, and not a {type(tau_parameter)}.'
         )
-        raise excep.BiogemeError(error_msg)
+        raise BiogemeError(error_msg)
 
     if len(list_of_discrete_values) == 2:
         the_proba = {
@@ -89,7 +90,7 @@ def ordered_logit(
     continuous_value: Expression,
     list_of_discrete_values: list[int],
     tau_parameter: Beta,
-) -> Mapping[int, Expression]:
+) -> dict[int, Expression]:
     """Ordered logit model that maps a continuous quantity with a
         list of discrete intervals
 
@@ -124,7 +125,7 @@ def ordered_probit(
     continuous_value: Expression,
     list_of_discrete_values: list[int],
     tau_parameter: Beta,
-) -> Mapping[int, Expression]:
+) -> dict[int, Expression]:
     """Ordered probit model that maps a continuous quantity with a
         list of discrete intervals
 

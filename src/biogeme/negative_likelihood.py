@@ -4,72 +4,87 @@
 :date: Wed Nov 30 10:17:26 2022
 
 """
+
+from typing import Callable
+
+import numpy as np
 from biogeme_optimization.function import FunctionToMinimize, FunctionData
 import biogeme.exceptions as excep
+from biogeme.function_output import FunctionOutput
 
 
 class NegativeLikelihood(FunctionToMinimize):
     """Provides the value of the function to be minimized, as well as its
-    derivatives. To be used by the opimization package.
+    derivatives. To be used by the optimization package.
 
     """
 
-    # pylint: disable=too-many-instance-attributes
-
-    def __init__(self, dimension, like, like_deriv, parameters=None):
+    def __init__(
+        self,
+        dimension: int,
+        like: Callable[[np.ndarray, bool, float | None], float],
+        like_derivatives: Callable[
+            [np.ndarray, bool, bool, bool, float | None], FunctionOutput
+        ],
+        parameters=None,
+    ):
         """Constructor"""
 
         tolerance = None
-        steptol = None
+        step_tol = None
         if parameters is not None:
             if 'tolerance' in parameters:
                 tolerance = parameters['tolerance']
-            if 'steptol' in parameters:
-                steptol = parameters['steptol']
+            if 'step_tol' in parameters:
+                step_tol = parameters['step_tol']
 
-        super().__init__(epsilon=tolerance, steptol=steptol)
+        super().__init__(epsilon=tolerance, steptol=step_tol)
 
-        self.the_dimension = dimension  #: number of parameters to estimate
+        self.the_dimension: int = dimension  #: number of parameters to estimate
 
-        self.like = like  #: function calculating the log likelihood
+        self.like: Callable[[np.ndarray, bool, float | None], float] = (
+            like  #: function calculating the log likelihood
+        )
 
-        self.like_deriv = like_deriv
+        self.like_derivatives: Callable[
+            [np.ndarray, bool, bool, bool, float | None], FunctionOutput
+        ] = like_derivatives
         """function calculating the log likelihood and its derivatives.
         """
 
-    def dimension(self):
+    def dimension(self) -> int:
         """Provides the number of variables of the problem"""
         return self.the_dimension
 
-    def _f(self):
+    def _f(self) -> float:
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
 
         return -self.like(self.x, scaled=False, batch=None)
 
-    def _f_g(self):
+    def _f_g(self) -> FunctionData:
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
 
-        f, g, *_ = self.like_deriv(
+        the_function_output: FunctionOutput = self.like_derivatives(
             self.x, scaled=False, hessian=False, bhhh=False, batch=None
         )
 
         return FunctionData(
-            function=-f,
-            gradient=-g,
+            function=-the_function_output.function,
+            gradient=-the_function_output.gradient,
             hessian=None,
         )
 
-    def _f_g_h(self):
+    def _f_g_h(self) -> FunctionData:
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
 
-        f, g, h, _ = self.like_deriv(
+        the_function_output: FunctionOutput = self.like_derivatives(
             self.x, scaled=False, hessian=True, bhhh=False, batch=None
         )
         return FunctionData(
-            function=-f,
-            gradient=-g,
-            hessian=-h,
+            function=-the_function_output.function,
+            gradient=-the_function_output.gradient,
+            hessian=-the_function_output.hessian,
         )

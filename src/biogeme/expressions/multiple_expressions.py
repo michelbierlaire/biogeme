@@ -5,15 +5,19 @@ considered in a specification
 :date: Sun Feb  5 15:34:56 2023
 
 """
+
 import logging
 import abc
-from typing import NamedTuple
-import biogeme.exceptions as excep
+from typing import NamedTuple, Iterator
+from biogeme import exceptions
 from biogeme.configuration import (
     SEPARATOR,
     SELECTION_SEPARATOR,
 )
+from . import IdManager, TypeOfElementaryExpression
 from .base_expressions import Expression
+from .elementary_expressions import Elementary
+from ..deprecated import deprecated
 
 logger = logging.getLogger(__name__)
 
@@ -35,18 +39,18 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
     modified algorithmically.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         if SEPARATOR in name or SELECTION_SEPARATOR in name:
             error_msg = (
                 f'Invalid name: {name}. Cannot contain characters '
                 f'{SELECTION_SEPARATOR} or {SELECTION_SEPARATOR}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise exceptions.BiogemeError(error_msg)
         super().__init__()
         self.name = name
 
     @abc.abstractmethod
-    def selected(self):
+    def selected(self) -> NamedExpression:
         """Return the selected expression and its name
 
         :return: the name and the selected expression
@@ -54,10 +58,10 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def get_iterator(self):
+    def get_iterator(self) -> Iterator[NamedExpression]:
         """Returns an iterator on NamedExpression"""
 
-    def catalog_size(self):
+    def catalog_size(self) -> int:
         """Provide the size of the catalog
 
         :return: number of expressions in the catalog
@@ -67,7 +71,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
 
         return len(list(the_iterator))
 
-    def selected_name(self):
+    def selected_name(self) -> str:
         """Obtain the name of the selection
 
         :return: the name of the selected expression
@@ -76,7 +80,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         name, _ = self.selected()
         return name
 
-    def selected_expression(self):
+    def selected_expression(self) -> NamedExpression:
         """Obtain the selected expression
 
         :return: the selected expression
@@ -85,16 +89,20 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, the_expression = self.selected()
         return the_expression
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
         _, expr = self.selected()
-        return expr.getValue()
+        return expr.get_value()
 
-    def get_id(self):
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def get_id(self) -> int:
         """Retrieve the id of the expression used in the signature
 
         :return: id of the object
@@ -103,7 +111,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.get_id()
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -115,7 +123,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
             2. the name of the expression between < >
             3. the id of the expression between { }
             4. the number of children between ( )
-            5. the ids of each children, preceeded by a comma.
+            5. the ids of each child, preceded by a comma.
 
         Consider the following expression:
 
@@ -153,9 +161,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
 
         """
         _, expr = self.selected()
-        return expr.getSignature()
+        return expr.get_signature()
 
-    def get_children(self):
+    def get_children(self) -> list[Expression]:
         """Retrieve the list of children
 
         :return: list of children
@@ -164,11 +172,11 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.get_children()
 
-    def __str__(self):
-        named_expression = self.selected()
+    def __str__(self) -> str:
+        named_expression: NamedExpression = self.selected()
         return f'[{self.name}: {named_expression.name}]{named_expression.expression}'
 
-    def setIdManager(self, id_manager):
+    def set_id_manager(self, id_manager: IdManager):
         """The ID manager contains the IDs of the elementary expressions.
 
         It is externally created, as it may nee to coordinate the
@@ -180,9 +188,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         :type id_manager: class IdManager
         """
         _, expr = self.selected()
-        expr.setIdManager(id_manager)
+        expr.set_id_manager(id_manager)
 
-    def check_panel_trajectory(self):
+    def check_panel_trajectory(self) -> set[str]:
         """Set of variables defined outside of 'PanelLikelihoodTrajectory'
 
         :return: List of names of variables
@@ -191,7 +199,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.check_panel_trajectory()
 
-    def check_draws(self):
+    def check_draws(self) -> set[str]:
         """Set of draws defined outside of 'MonteCarlo'
 
         :return: List of names of variables
@@ -200,7 +208,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.check_draws()
 
-    def check_rv(self):
+    def check_rv(self) -> set[str]:
         """Set of random variables defined outside of 'Integrate'
 
         :return: List of names of variables
@@ -209,7 +217,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.check_rv()
 
-    def getStatusIdManager(self):
+    def get_status_id_manager(self) -> tuple[set[str], set[str]]:
         """Check the elementary expressions that are associated with
         an ID manager.
 
@@ -218,9 +226,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         :rtype: tuple(set(str), set(str))
         """
         _, expr = self.selected()
-        return expr.getStatusIdManager()
+        return expr.get_status_id_manager()
 
-    def getElementaryExpression(self, name):
+    def get_elementary_expression(self, name: str) -> Elementary:
         """Return: an elementary expression from its name if it appears in the
         expression.
 
@@ -231,9 +239,11 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         :rtype: biogeme.expressions.Expression
         """
         _, expr = self.selected()
-        return expr.getElementaryExpression(name)
+        return expr.get_elementary_expression(name)
 
-    def set_of_elementary_expression(self, the_type):
+    def set_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> set[Elementary]:
         """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
@@ -246,7 +256,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.set_of_elementary_expression(the_type)
 
-    def dict_of_elementary_expression(self, the_type):
+    def dict_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> dict[str, Elementary]:
         """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
@@ -260,7 +272,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.dict_of_elementary_expression(the_type)
 
-    def rename_elementary(self, names, prefix=None, suffix=None):
+    def rename_elementary(
+        self, names: list[str], prefix: str | None = None, suffix: str | None = None
+    ):
         """Rename elementary expressions by adding a prefix and/or a suffix
 
         :param names: names of expressions to rename
@@ -277,8 +291,13 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.rename_elementary(names, prefix, suffix)
 
-    def fix_betas(self, beta_values, prefix=None, suffix=None):
-        """Fix all the values of the beta parameters appearing in the
+    def fix_betas(
+        self,
+        beta_values: dict[str, float],
+        prefix: str | None = None,
+        suffix: str | None = None,
+    ):
+        """Fix all the values of the Beta parameters appearing in the
         dictionary
 
         :param beta_values: dictionary containing the betas to be
@@ -297,7 +316,7 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         _, expr = self.selected()
         return expr.fix_betas(beta_values, prefix, suffix)
 
-    def embedExpression(self, t):
+    def embed_expression(self, t: str) -> bool:
         """Check if the expression contains an expression of type t.
 
         Typically, this would be used to check that a MonteCarlo
@@ -308,9 +327,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
 
         """
         _, expr = self.selected()
-        return expr.embedExpression(t)
+        return expr.embed_expression(t)
 
-    def countPanelTrajectoryExpressions(self):
+    def count_panel_trajectory_expressions(self) -> int:
         """Count the number of times the PanelLikelihoodTrajectory
         is used in the formula. It should trigger an error if it
         is used more than once.
@@ -320,9 +339,9 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
         :rtype: int
         """
         _, expr = self.selected()
-        return expr.countPanelTrajectoryExpressions()
+        return expr.count_panel_trajectory_expressions()
 
-    def change_init_values(self, betas):
+    def change_init_values(self, betas: dict[str, float]):
         """Modifies the initial values of the Beta parameters.
 
         The fact that the parameters are fixed or free is irrelevant here.

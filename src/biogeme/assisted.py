@@ -6,16 +6,23 @@
 New version of the assisted specification using Catalogs
 
 """
+
 import logging
-from biogeme_optimization.vns import vns, ParetoClass
+from typing import Callable
+
+from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
 from biogeme_optimization.pareto import Pareto, SetElement, DATE_TIME_STRING
-from biogeme_optimization.neighborhood import Neighborhood
-from biogeme.biogeme import BIOGEME
-from biogeme import tools
-from biogeme.parameters import biogeme_parameters
+from biogeme_optimization.vns import vns, ParetoClass
+from matplotlib.axes import Axes
+
+import biogeme.tools.unique_ids
 import biogeme.version as bv
-import biogeme.exceptions as excep
+from biogeme.biogeme import BIOGEME
 from biogeme.configuration import Configuration
+from biogeme.controller import ControllerOperator
+from biogeme.exceptions import BiogemeError
+from biogeme.parameters import Parameters
+from biogeme.results import bioResults
 from biogeme.specification import Specification
 
 logger = logging.getLogger(__name__)
@@ -29,12 +36,12 @@ class ParetoPostProcessing:
 
     def __init__(
         self,
-        biogeme_object,
-        pareto_file_name,
+        biogeme_object: BIOGEME,
+        pareto_file_name: str,
     ):
         """Ctor
 
-        :param biogeme_object: object containnig the loglikelihood and the database
+        :param biogeme_object: object containing the loglikelihood and the database
         :type biogeme_object: biogeme.biogeme.BIOGEME
 
         :param pareto_file_name: file where to read and write the Pareto solutions
@@ -43,21 +50,23 @@ class ParetoPostProcessing:
         """
         self.biogeme_object = biogeme_object
         self.pareto = Pareto(filename=pareto_file_name)
-        self.expression = biogeme_object.loglike
+        self.expression = biogeme_object.log_like
         if self.expression is None:
             error_msg = 'No log likelihood function is defined'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         self.database = biogeme_object.database
         self.model_names = None
 
-    def reestimate(self, recycle=False):
+    def reestimate(self, recycle: bool = False) -> dict[str, bioResults]:
         """The assisted specification uses quickEstimate to estimate
         the models. A complete estimation is necessary to obtain the
         full estimation results.
 
         """
         if self.model_names is None:
-            self.model_names = tools.ModelNames(prefix=self.biogeme_object.modelName)
+            self.model_names = biogeme.tools.unique_ids.ModelNames(
+                prefix=self.biogeme_object.modelName
+            )
 
         all_results = {}
         for element in self.pareto.pareto:
@@ -70,25 +79,24 @@ class ParetoPostProcessing:
             )
             _ = Configuration.from_string(config_id)
             the_biogeme.modelName = self.model_names(config_id)
-            logger.debug(f'REESTIMATE {config_id}')
             the_result = the_biogeme.estimate(recycle=recycle)
             all_results[config_id] = the_result
         return all_results
 
-    def log_statistics(self):
+    def log_statistics(self) -> None:
         """Report some statistics about the process in the logger"""
         for msg in self.pareto.statistics():
             logger.info(msg)
 
     def plot(
         self,
-        objective_x=0,
-        objective_y=1,
-        label_x=None,
-        label_y=None,
-        margin_x=5,
-        margin_y=5,
-        ax=None,
+        objective_x: int = 0,
+        objective_y: int = 1,
+        label_x: str | None = None,
+        label_y: str | None = None,
+        margin_x: int = 5,
+        margin_y: int = 5,
+        ax: Axes | None = None,
     ):
         """Plot the members of the set according to two
             objective functions.  They  determine the x- and
@@ -127,14 +135,15 @@ class AssistedSpecification(Neighborhood):
 
     def __init__(
         self,
-        biogeme_object,
-        multi_objectives,
-        pareto_file_name,
-        validity=None,
+        biogeme_object: BIOGEME,
+        multi_objectives: Callable[[bioResults], list[float]],
+        pareto_file_name: str,
+        validity: Callable[[bioResults], bool] | None = None,
+        parameter_file: str | None = None,
     ):
         """Ctor
 
-        :param biogeme_object: object containnig the loglikelihood and the database
+        :param biogeme_object: object containing the loglikelihood and the database
         :type biogeme_object: biogeme.biogeme.BIOGEME
 
         :param multi_objectives: function calculating the objectives to minimize
@@ -150,29 +159,32 @@ class AssistedSpecification(Neighborhood):
         :type validity: fct(biogeme.results.bioResults) --> Validity
 
         """
+        self.biogeme_parameters: Parameters = Parameters()
+        self.biogeme_parameters.read_file(parameter_file)
+        self.parameter_file: str = self.biogeme_parameters.file_name
+        self.multi_objectives = multi_objectives
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
-        self.central_controller = self.biogeme_object.loglike.set_central_controller()
+        self.central_controller = self.biogeme_object.log_like.set_central_controller()
         Specification.generic_name = biogeme_object.modelName
-        self.multi_objectives = staticmethod(multi_objectives)
         Specification.user_defined_validity_check = (
             None if validity is None else staticmethod(validity)
         )
-        largest_neighborhood = biogeme_parameters.get_value(
+        largest_neighborhood = self.biogeme_parameters.get_value(
             name='largest_neighborhood', section='AssistedSpecification'
         )
         self.pareto = ParetoClass(
             max_neighborhood=largest_neighborhood, pareto_file=pareto_file_name
         )
         self.pareto.comments = [
-            f'Biogeme {bv.getVersion()} [{bv.versionDate}]',
+            f'Biogeme {bv.get_version()} [{bv.versionDate}]',
             f'File {self.pareto.filename} created on {DATE_TIME_STRING}',
             f'{bv.AUTHOR}, {bv.DEPARTMENT}, {bv.UNIVERSITY}',
         ]
-        self.expression = biogeme_object.loglike
+        self.expression = biogeme_object.log_like
         if self.expression is None:
             error_msg = 'No log likelihood function is defined'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         self.database = biogeme_object.database
         Specification.expression = self.expression
         Specification.database = self.database
@@ -182,7 +194,7 @@ class AssistedSpecification(Neighborhood):
         }
         super().__init__(self.operators)
 
-    def generate_operator(self, function):
+    def generate_operator(self, function: ControllerOperator) -> VnsOperator:
         """Defines an operator that takes a SetElement as an argument, to
             comply with the interface of the VNS algorithm.
 
@@ -195,12 +207,12 @@ class AssistedSpecification(Neighborhood):
 
         """
 
-        def the_operator(element, step):
-            the_new_config, number_of_modifications = function(
-                current_config=element.element_id,
-                step=step,
+        def the_operator(element: SetElement, step: int) -> tuple[SetElement, int]:
+            the_new_configuration, number_of_modifications = function(
+                Configuration.from_string(element.element_id),
+                step,
             )
-            new_specification = Specification(the_new_config)
+            new_specification = Specification(configuration=the_new_configuration)
             return (
                 new_specification.get_element(self.multi_objectives),
                 number_of_modifications,
@@ -208,7 +220,7 @@ class AssistedSpecification(Neighborhood):
 
         return the_operator
 
-    def is_valid(self, element):
+    def is_valid(self, element: SetElement) -> tuple[bool, str]:
         """Check the validity of the solution.
 
         :param element: solution to be checked
@@ -220,14 +232,12 @@ class AssistedSpecification(Neighborhood):
         :rtype: tuple(bool, str)
         """
         if not isinstance(element, SetElement):
-            raise excep.BiogemeError(
-                f'Wrong type {type(element)} instead of SetElement'
-            )
+            raise BiogemeError(f'Wrong type {type(element)} instead of SetElement')
 
         specification = Specification.from_string_id(element.element_id)
         return specification.validity
 
-    def run(self):
+    def run(self) -> dict[str, bioResults]:
         """Runs the VNS algorithm
 
         :return: doct with the estimation results of the Pareto optimal models
@@ -240,7 +250,7 @@ class AssistedSpecification(Neighborhood):
             logger.debug(elem.element_id)
         # We first try to estimate all possible configurations
         Specification.database = self.biogeme_object.database
-        Specification.expression = self.biogeme_object.loglike
+        Specification.expression = self.biogeme_object.log_like
         Specification.pareto = self.pareto
         logger.debug('Default specification')
         default_specification = Specification.default_specification()
@@ -253,12 +263,12 @@ class AssistedSpecification(Neighborhood):
 
         # Check if we can estimate everything
         number_of_specifications = (
-            self.biogeme_object.loglike.number_of_multiple_expressions()
+            self.biogeme_object.log_like.number_of_multiple_expressions()
         )
         maximum_number = self.biogeme_object.maximum_number_catalog_expressions
         if number_of_specifications <= maximum_number:
             logger.info('We consider all possible combinations of the catalogs.')
-            for index, configuration in enumerate(self.biogeme_object.loglike):
+            for index, configuration in enumerate(self.biogeme_object.log_like):
                 logger.info(f'Model {index}/{number_of_specifications}')
                 the_config = configuration.current_configuration()
                 the_specification = Specification(the_config)
@@ -273,10 +283,10 @@ class AssistedSpecification(Neighborhood):
             )
 
             default_element = default_specification.get_element(self.multi_objectives)
-            number_of_neighbors = biogeme_parameters.get_value(
+            number_of_neighbors = self.biogeme_parameters.get_value(
                 name='number_of_neighbors', section='AssistedSpecification'
             )
-            maximum_attempts = biogeme_parameters.get_value(
+            maximum_attempts = self.biogeme_parameters.get_value(
                 name='maximum_attempts', section='AssistedSpecification'
             )
             logger.debug(f'{default_element=}')

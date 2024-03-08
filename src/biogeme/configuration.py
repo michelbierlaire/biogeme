@@ -5,8 +5,9 @@
 
 """
 
+from __future__ import annotations
 import logging
-from typing import NamedTuple
+from typing import NamedTuple, Iterable
 import biogeme.exceptions as excep
 
 logger = logging.getLogger(__name__)
@@ -27,31 +28,31 @@ class Configuration:
 
     """
 
-    def __init__(self, selections=None):
+    def __init__(self, selections: Iterable[SelectionTuple] | None = None):
         """Ctor.
 
         :param selections: list of tuples, where each of
             them associates a controller name with the selected configuration
-        :type list_of_selections: list(SelectionTuple)
+        :type selections: list(SelectionTuple)
 
         """
         if selections is None:
-            self.__selections = None
+            self.__selections: list[SelectionTuple] | None = None
         else:
-            self.selections = selections
+            self.selections: list[SelectionTuple] = list(selections)
 
     @property
-    def selections(self):
+    def selections(self) -> list[SelectionTuple]:
         return self.__selections
 
     @selections.setter
-    def selections(self, value):
-        self.__selections = sorted(value)
+    def selections(self, the_list: list[SelectionTuple]):
+        self.__selections = sorted(the_list)
         self.__check_list_validity()
         self.string_id = self.get_string_id()
 
     @classmethod
-    def from_string(cls, string_id):
+    def from_string(cls, string_id: str) -> Configuration:
         """Ctor from a string representation
 
         :param string_id: string ID
@@ -74,7 +75,7 @@ class Configuration:
         return cls.from_dict(the_config)
 
     @classmethod
-    def from_dict(cls, dict_of_selections):
+    def from_dict(cls, dict_of_selections: dict[str, str]) -> Configuration:
         """Ctor from dict
 
         :param dict_of_selections: dict associating a catalog name
@@ -89,7 +90,9 @@ class Configuration:
         return cls(selections=the_list)
 
     @classmethod
-    def from_tuple_of_configurations(cls, tuple_of_configurations):
+    def from_tuple_of_configurations(
+        cls, tuple_of_configurations: tuple[Configuration, ...]
+    ) -> Configuration:
         """Ctor from tuple of configurations that are merged together.
 
         In the presence of two different selections for the same
@@ -110,22 +113,22 @@ class Configuration:
                         known_controllers.add(selection.controller)
         return cls(selections)
 
-    def set_of_controllers(self):
+    def set_of_controllers(self) -> set[str]:
         return {selection.controller for selection in self.selections}
 
-    def __eq__(self, other):
+    def __eq__(self, other: Configuration) -> bool:
         return self.string_id == other.string_id
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.string_id)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self.string_id)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.string_id)
 
-    def get_string_id(self):
+    def get_string_id(self) -> str:
         """The string ID is a unique string representation of the configuration
 
         :return: string ID
@@ -137,7 +140,7 @@ class Configuration:
         ]
         return SEPARATOR.join(terms)
 
-    def get_html(self):
+    def get_html(self) -> str:
         html = '<p>Specification</p><p><ul>\n'
         for selection_tuple in self.selections:
             html += (
@@ -147,7 +150,7 @@ class Configuration:
         html += '</ul></p>\n'
         return html
 
-    def get_selection(self, controller_name):
+    def get_selection(self, controller_name: str) -> str | None:
         """Retrieve the selection of a given controller
 
         :param controller_name: name of the controller
@@ -161,7 +164,7 @@ class Configuration:
                 return selection.selection
         return None
 
-    def __check_list_validity(self):
+    def __check_list_validity(self) -> None:
         """Check the validity of the list.
 
         :raise BiogemeError: if the same catalog appears more than once in the list

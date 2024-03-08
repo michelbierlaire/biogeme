@@ -9,12 +9,18 @@ section must have different names
 """
 
 import logging
+import os
 from datetime import datetime
 from typing import NamedTuple
 import tomlkit as tk
 import biogeme.exceptions as excep
-from biogeme.version import getVersion
-from biogeme.default_parameters import all_parameters_tuple, ParameterTuple
+from biogeme.tools.files import is_valid_filename
+from biogeme.version import get_version
+from biogeme.default_parameters import (
+    all_parameters_tuple,
+    ParameterTuple,
+    ParameterValue,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +35,7 @@ class NameSectionTuple(NamedTuple):
     section: str
 
 
-def format_comment(the_param):
+def format_comment(the_param: ParameterTuple) -> str:
     """Format the content of the file, in particular the description of the parameter
 
     :param the_param: parmeter to format
@@ -61,7 +67,7 @@ def format_comment(the_param):
     return formatted
 
 
-def parse_boolean(value):
+def parse_boolean(value: str) -> bool:
     """Transforms one of the string representing a boolean into an actual boolean
 
     :param value: value to be transformed
@@ -83,17 +89,19 @@ def parse_boolean(value):
 class Parameters:
     """Parameters management"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Store values in a dict
         self.document = None  # TOML document
         self.file_name = None
         self.all_parameters_dict = {}
         # Add the default parameters
-        for param in all_parameters_tuple:
+        for param in all_parameters_tuple():
             self.add_parameter(param)
 
-    def add_parameter(self, parameter_tuple):
-        """Add one aprameter
+        logger.debug(f'INIT PARAMETER: {self.get_value(name="optimization_algorithm")}')
+
+    def add_parameter(self, parameter_tuple: ParameterTuple):
+        """Add one parameter
 
         :param parameter_tuple: tuple containing the data associated with the parameter
         :type parameter_tuple: biogeme.default_parameters.ParameterTuple
@@ -106,11 +114,26 @@ class Parameters:
             raise excep.BiogemeError(messages)
         self.all_parameters_dict[key] = parameter_tuple
 
-    def read_file(self, file_name):
-        """Read TOML file"""
+    def read_file(self, file_name: str):
+        """Read TOML file. If the file name is invalid (typically, an empty string),
+        the default value sof the parameters are used"""
+        logger.debug(
+            f'READ FILE {file_name} : {self.get_value(name="optimization_algorithm")}'
+        )
+        if file_name is not None:
+            is_valid, why = is_valid_filename(os.path.basename(file_name))
+            if not is_valid:
+                self.file_name = None
+                logger.warning(
+                    f'The parameter file name provided is invalid :[{file_name}] ({why}).'
+                )
+                return
+
         self.file_name = DEFAULT_FILE_NAME if file_name is None else file_name
+
         try:
             with open(self.file_name, 'r', encoding='utf-8') as f:
+                logger.debug(f'Parameter file: {os.path.abspath(self.file_name)}')
                 content = f.read()
                 self.document = tk.parse(content)
                 self.import_document()
@@ -118,8 +141,9 @@ class Parameters:
 
         except FileNotFoundError:
             self.dump_file(self.file_name)
+            logger.info(f'File {self.file_name} has been created.')
 
-    def parameters_in_section(self, section_name):
+    def parameters_in_section(self, section_name: str) -> list[str]:
         """Returns the names of the parameters in a section
 
         :param section_name: name of the section
@@ -133,7 +157,7 @@ class Parameters:
         ]
         return results
 
-    def sections_from_name(self, name):
+    def sections_from_name(self, name: str) -> set[str]:
         """Obtain the list of sections containing the given entry
 
         :param name: name of the parameter
@@ -141,14 +165,14 @@ class Parameters:
         """
         return {p.section for p in self.all_parameters_dict if p.name == name}
 
-    def dump_file(self, file_name):
+    def dump_file(self, file_name: str):
         """Dump the values of the parameters in the TOML file"""
         self.document = self.generate_document()
         with open(file_name, 'w', encoding='utf-8') as f:
             print(tk.dumps(self.document), file=f)
         logger.warning(f'File {file_name} has been created')
 
-    def import_document(self):
+    def import_document(self) -> None:
         """Record the values of the parameters in the TOML document"""
         for section_name, entries in self.document.items():
             for entry_name, entry_value in entries.items():
@@ -185,13 +209,13 @@ class Parameters:
                 )
                 self.add_parameter(the_parameter)
 
-    def generate_document(self):
+    def generate_document(self) -> tk.TOMLDocument:
         """Generate the  TOML document"""
         current_datetime = datetime.now()
         formatted_datetime = current_datetime.strftime("%B %d, %Y. %H:%M:%S")
         doc = tk.document()
 
-        doc.add(tk.comment(f'Default parameter file for Biogeme {getVersion()}'))
+        doc.add(tk.comment(f'Default parameter file for Biogeme {get_version()}'))
         doc.add(tk.comment(f'Automatically created on {formatted_datetime}'))
 
         sections = {p.section for p in self.all_parameters_dict}
@@ -210,7 +234,7 @@ class Parameters:
             doc[s] = t
         return doc
 
-    def get_param_tuple(self, name, section=None):
+    def get_param_tuple(self, name: str, section: str | None = None) -> ParameterTuple:
         """Obtain a tuple describing the parameter
 
         :param name: name of the parameter
@@ -256,7 +280,7 @@ class Parameters:
         return the_tuple
 
     @staticmethod
-    def check_parameter_value(the_tuple):
+    def check_parameter_value(the_tuple: ParameterTuple):
         """Check if the value of the parameter is valid
 
         :param the_tuple: tuple to check
@@ -280,7 +304,7 @@ class Parameters:
                 )
         return ok, messages
 
-    def set_value(self, name, value, section=None):
+    def set_value(self, name: str, value: ParameterValue, section: str | None = None):
         """Set a value of a parameter. If the parameter appears in
         only one section, the name of the section can be ommitted.
 
@@ -305,7 +329,7 @@ class Parameters:
 
         self.add_parameter(the_parameter)
 
-    def get_value(self, name, section=None):
+    def get_value(self, name: str, section: str | None = None) -> ParameterValue:
         """Get the value of a parameter. If the parameter appears in
         only one section, the name of the section can be ommitted.
 
@@ -320,4 +344,6 @@ class Parameters:
         return the_tuple.value
 
 
-biogeme_parameters = Parameters()
+def get_default_value(name: str, section: str | None = None) -> ParameterValue:
+    the_parameters = Parameters()
+    return the_parameters.get_value(name=name, section=section)

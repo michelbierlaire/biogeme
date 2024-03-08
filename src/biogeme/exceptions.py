@@ -11,7 +11,7 @@ class BiogemeError(Exception):
     """Defines a generic exception for Biogeme."""
 
 
-class FileNotFoundError(BiogemeError):
+class FileNotFound(BiogemeError):
     """Value of out range error."""
 
 

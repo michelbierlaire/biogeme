@@ -4,7 +4,10 @@
 :date: Tue Mar 26 16:45:15 2019
 
 """
+
 import datetime
+
+from biogeme.deprecated import deprecated
 
 # Release date
 versionDate = f'{datetime.date.today()}'
@@ -17,10 +20,10 @@ URL_UNIVERSITY = 'http://www.epfl.ch'
 URL_BIOGEME = 'http://biogeme.epfl.ch'
 URL_FORUM = 'https://groups.google.com/d/forum/biogeme'
 
-__version__ = '3.2.13'
+__version__ = '3.2.14a0'
 
 
-def getVersion():
+def get_version() -> str:
     """
      Version of the software
 
@@ -30,14 +33,19 @@ def getVersion():
     return __version__
 
 
-def getHtml():
+@deprecated(get_version)
+def getVersion() -> str:
+    pass
+
+
+def get_html() -> str:
     """Package information in HTML format
 
     :return: HTML code.
     :rtype: string
 
     """
-    html = f'<p>biogeme {getVersion()} [{versionDate}]</p>\n'
+    html = f'<p>biogeme {get_version()} [{versionDate}]</p>\n'
     html += (
         '<p><a href="https://www.python.org/" '
         'target="_blank">Python</a> package</p>\n'
@@ -64,29 +72,44 @@ def getHtml():
     return html
 
 
-def getText():
+@deprecated(get_html)
+def getHtml() -> str:
+    pass
+
+
+def get_text() -> str:
     """Package information in text format
 
     :return: package information
     :rtype: string
     """
 
-    text = f'biogeme {getVersion()} [{versionDate}]\n'
+    text = f'biogeme {get_version()} [{versionDate}]\n'
     text += f'Home page: {URL_BIOGEME}\n'
     text += f'Submit questions to {URL_FORUM}\n'
     text += f'{AUTHOR}, {DEPARTMENT}, {UNIVERSITY}\n'
     return text
 
 
-def getLaTeX():
+@deprecated(get_text)
+def getText() -> str:
+    pass
+
+
+def get_latex() -> str:
     """Package information in LaTeX format
 
     :return: LaTeX comments
     :rtype: string
     """
-    latex = f'%% biogeme {getVersion()} [{versionDate}]\n'
+    latex = f'%% biogeme {get_version()} [{versionDate}]\n'
     latex += '%% Version entirely written in Python\n'
     latex += f'%% Home page: {URL_BIOGEME}\n'
     latex += f'%% Submit questions to {URL_FORUM}\n'
     latex += f'%% {AUTHOR}, {DEPARTMENT}, {UNIVERSITY}\n'
     return latex
+
+
+@deprecated(get_latex)
+def getLaTeX() -> str:
+    pass

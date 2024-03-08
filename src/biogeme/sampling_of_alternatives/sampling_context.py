@@ -46,7 +46,7 @@ class SamplingContext:
     """Class gathering the data needed to perform an estimation with
     samples of alternatives
 
-    :param partition: Partition used for the sampling.
+    :param the_partition: Partition used for the sampling.
 
     :param sample_sizes: number of alternative to draw from each segment.
 
@@ -209,12 +209,14 @@ class SamplingContext:
         for nest in self.cnl_nests:
             column_name = f'{CNL_PREFIX}{nest.name}'
             self.alternatives[column_name] = self.alternatives[self.id_column].map(
-                lambda x: self.cnl_nests.get_alpha_values(alternative_id=x)[nest.name]
-                if x in nest.dict_of_alpha
-                else 0.0
+                lambda x: (
+                    self.cnl_nests.get_alpha_values(alternative_id=x)[nest.name]
+                    if x in nest.dict_of_alpha
+                    else 0.0
+                )
             )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Check for empty utility function
         if self.utility_function is None:
             raise BiogemeError('No utility function has been provided')
@@ -306,16 +308,17 @@ class SamplingContext:
 
         self.include_cnl_alphas()
 
-    def reporting(self) -> None:
-        """Summarizes the configuration specificed by the contect object."""
-        result = {}
+    def reporting(self) -> str:
+        """Summarizes the configuration specified by the context object."""
+        result = {
+            'Size of the choice set': self.alternatives.shape[0],
+            'Main partition': (
+                f'{self.the_partition.number_of_segments()} segment(s) of size '
+                f'{", ".join([str(len(segment)) for segment in self.the_partition])}'
+            ),
+            'Main sample': f'{self.total_sample_size}: ',
+        }
 
-        result['Size of the choice set'] = self.alternatives.shape[0]
-        result['Main partition'] = (
-            f'{self.the_partition.number_of_segments()} segment(s) of size '
-            f'{", ".join([str(len(segment)) for segment in self.the_partition])}'
-        )
-        result['Main sample'] = f'{self.total_sample_size}: '
         result['Main sample'] += ', '.join(
             [
                 f'{stratum.sample_size}/{len(stratum.subset)}'

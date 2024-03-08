@@ -3,28 +3,29 @@
 :author: Michel Bierlaire
 :date: Sat Sep  9 15:27:17 2023
 """
+
+from __future__ import annotations
 import logging
-from typing import Any
-import biogeme.exceptions as excep
+from typing import TYPE_CHECKING
+
 from .base_expressions import Expression
 from .numeric_tools import is_numeric, validate
+from ..deprecated import deprecated
+
+if TYPE_CHECKING:
+    from . import ExpressionOrNumeric
 
 logger = logging.getLogger(__name__)
 
 
-def process_numeric(expression):
-    """Transforms a numeric value into an Expression object
-
-    :param expression: expression to process
-    :type expression: Expression or numeric
-
-    :raise BiogemeError: if expression is not of type expression
-    """
-
-    if isinstance(expression, (int, float, bool)):
+def validate_and_convert(expression: ExpressionOrNumeric) -> Expression:
+    """Validates the expression and returns the converted expression if necessary."""
+    if isinstance(expression, bool):
+        return Numeric(1) if expression else Numeric(0)
+    if is_numeric(expression):
         return Numeric(expression)
     if not isinstance(expression, Expression):
-        raise excep.BiogemeError(f'This is not a valid expression: {expression}')
+        raise TypeError(f'This is not a valid expression: {expression}')
     return expression
 
 
@@ -33,7 +34,7 @@ class Numeric(Expression):
     Numerical expression for a simple number
     """
 
-    def __init__(self, value):
+    def __init__(self, value: float | int | bool):
         """Constructor
 
         :param value: numerical value
@@ -43,10 +44,10 @@ class Numeric(Expression):
         the_value = validate(value, modify=False)
         self.value = float(the_value)  #: numeric value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '`' + str(self.value) + '`'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
@@ -54,7 +55,11 @@ class Numeric(Expression):
         """
         return self.value
 
-    def getSignature(self):
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -99,18 +104,7 @@ class Numeric(Expression):
         :return: list of the signatures of an expression and its children.
         :rtype: list(string)
         """
-        signature = f'<{self.getClassName()}>'
+        signature = f'<{self.get_class_name()}>'
         signature += f'{{{self.get_id()}}}'
         signature += f',{self.value}'
         return [signature.encode()]
-
-
-def validate_and_convert(expression: Any) -> Expression:
-    """Validates the expression and returns the converted expression if necessary."""
-    if isinstance(expression, bool):
-        return Numeric(1) if expression else Numeric(0)
-    if is_numeric(expression):
-        return Numeric(expression)
-    if not isinstance(expression, Expression):
-        raise TypeError(f'This is not a valid expression: {expression}')
-    return expression

@@ -12,8 +12,11 @@ returned.
 
 """
 
+from biogeme.deprecated import deprecated
+from biogeme.results import bioResults
 
-def loglikelihood_dimension(results):
+
+def loglikelihood_dimension(results: bioResults) -> list[float]:
     """Function returning the negative log likelihood and the number
     of parameters, designed for multi-objective optimization
 
@@ -23,7 +26,7 @@ def loglikelihood_dimension(results):
     return [-results.data.logLike, results.data.nparam]
 
 
-def AIC_BIC_dimension(results):
+def aic_bic_dimension(results: bioResults) -> list[float]:
     """Function returning the AIC, BIC and the number
     of parameters, designed for multi-objective optimization
 
@@ -31,3 +34,8 @@ def AIC_BIC_dimension(results):
     :type results: biogeme.results.bioResults
     """
     return [results.data.akaike, results.data.bayesian, results.data.nparam]
+
+
+@deprecated
+def AIC_BIC_dimension(results: bioResults) -> list[float]:
+    pass

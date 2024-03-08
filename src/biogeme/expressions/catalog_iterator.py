@@ -4,20 +4,29 @@
 :date: Sat Sep  9 16:18:02 2023
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from biogeme.configuration import Configuration
+
+if TYPE_CHECKING:
+    from biogeme.expressions import Expression
+
 
 class SelectedExpressionsIterator:
     """A multiple expression is an expression that contains
     Catalog. This iterator loops on pre-specified configurations
     """
 
-    def __init__(self, the_expression, configurations):
+    def __init__(self, the_expression: Expression, configurations: set[Configuration]):
         """Ctor.
 
         :param the_expression: expression containing Catalogs
         :type the_expression: Expression
 
         :param configurations: set of configurations
-        :type configurations: set(biogeme.configuration.Configuration))
+        :type configurations: set(biogeme.configuration.Configuration)
         """
         self.the_expression = the_expression
         self.configurations = configurations
@@ -27,10 +36,10 @@ class SelectedExpressionsIterator:
         self.first = True
         self.number = 0
 
-    def __iter__(self):
+    def __iter__(self) -> SelectedExpressionsIterator:
         return self
 
-    def __next__(self):
+    def __next__(self) -> Expression:
         self.number += 1
         if self.first:
             self.first = False

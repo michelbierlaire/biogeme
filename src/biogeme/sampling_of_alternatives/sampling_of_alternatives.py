@@ -4,13 +4,14 @@
 :date: Thu Sep  7 10:14:54 2023
 """
 
-import logging
-from typing import Tuple
 import copy
+import logging
+
 import numpy as np
 import pandas as pd
+
 from biogeme.exceptions import BiogemeError
-from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT
+from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT, CNL_PREFIX
 
 logger = logging.getLogger(__name__)
 
@@ -159,5 +160,8 @@ class SamplingOfAlternatives:
                 return pd.Series(the_dict)
 
             new_columns = the_sample[self.id_column].apply(get_alphas)
+            new_columns = new_columns.rename(columns=lambda x: CNL_PREFIX + x)
+
             the_sample = pd.concat([the_sample, new_columns], axis="columns")
+
         return the_sample

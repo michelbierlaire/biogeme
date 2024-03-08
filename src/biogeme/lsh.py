@@ -1,20 +1,24 @@
-"""Obtain sampling weights using local-sensitivity hashing
+"""
+Obtain sampling weights using local-sensitivity hashing
 
 :author: Nicola Ortelli
 :date: Fri Aug 11 18:25:39 2023
+
 """
+
 import numpy as np
+import pandas as pd
 
 
-def get_lsh_weights(df, w, a, max_weight):
-    """
-    Compute weights using Locality-Sensitive Hashing (LSH) on input data.
+def get_lsh_weights(
+    df: pd.DataFrame, w: float, a: np.ndarray, max_weight: int | None
+) -> np.ndarray:
+    """Compute weights using Locality-Sensitive Hashing (LSH) on input data.
 
     This function applies LSH to the input data frame, generating weights
     based on bucketing of the data. It also provides an option to limit
     the maximum weight assigned to a group of data points.
 
-    Parameters:
     :param df: The input data frame containing the data to compute weights for.
         The DataFrame should have at least one target column and one
         weight column.

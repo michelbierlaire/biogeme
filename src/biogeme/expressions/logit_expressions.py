@@ -3,13 +3,22 @@
 :author: Michel Bierlaire
 :date: Sat Sep  9 15:28:39 2023
 """
+
+from __future__ import annotations
 import logging
+from typing import TYPE_CHECKING
+
 import numpy as np
+
 import biogeme.exceptions as excep
 from .base_expressions import Expression
-from .numeric_tools import is_numeric
-from .numeric_expressions import Numeric
+from .numeric_expressions import Numeric, validate_and_convert
 
+from ..deprecated import deprecated
+
+if TYPE_CHECKING:
+    from . import ExpressionOrNumeric
+    from ..database import Database
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +31,12 @@ class LogLogit(Expression):
 
     """
 
-    def __init__(self, util, av, choice):
+    def __init__(
+        self,
+        util: dict[int, ExpressionOrNumeric],
+        av: dict[int, ExpressionOrNumeric] | None,
+        choice: ExpressionOrNumeric,
+    ):
         """Constructor
 
         :param util: dictionary where the keys are the identifiers of
@@ -44,36 +58,26 @@ class LogLogit(Expression):
         :type choice: biogeme.expressions.Expression
 
         :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
+            neither a numeric value nor a
             biogeme.expressions.Expression object.
         """
         Expression.__init__(self)
-        self.util = {}  #: dict of utility functions
-        for i, e in util.items():
-            if is_numeric(e):
-                self.util[i] = Numeric(e)
-            else:
-                if not isinstance(e, Expression):
-                    raise excep.BiogemeError(f'This is not a valid expression: {e}')
-                self.util[i] = e
-        self.av = {}  #: dict of availability formulas
+        self.util = {
+            alt_id: validate_and_convert(util_expression)
+            for (alt_id, util_expression) in util.items()
+        }
+
+        #: dict of availability formulas
         if av is None:
             self.av = {k: Numeric(1) for k, v in util.items()}
         else:
-            for i, e in av.items():
-                if is_numeric(e):
-                    self.av[i] = Numeric(e)
-                else:
-                    if not isinstance(e, Expression):
-                        raise excep.BiogemeError(f'This is not a valid expression: {e}')
-                    self.av[i] = e
-        if is_numeric(choice):
-            self.choice = Numeric(choice)
-            """expression for the chosen alternative"""
-        else:
-            if not isinstance(choice, Expression):
-                raise excep.BiogemeError(f'This is not a valid expression: {choice}')
-            self.choice = choice
+            self.av = {
+                alt_id: validate_and_convert(avail_expression)
+                for (alt_id, avail_expression) in av.items()
+            }
+
+        self.choice = validate_and_convert(choice)
+        """expression for the chosen alternative"""
 
         self.children.append(self.choice)
         for i, e in self.util.items():
@@ -81,7 +85,7 @@ class LogLogit(Expression):
         for i, e in self.av.items():
             self.children.append(e)
 
-    def audit(self, database=None):
+    def audit(self, database: Database | None = None):
         """Performs various checks on the expressions.
 
         :param database: database object
@@ -101,33 +105,33 @@ class LogLogit(Expression):
         if self.util.keys() != self.av.keys():
             the_error = 'Incompatible list of alternatives in logit expression. '
             consistent = False
-            myset = self.util.keys() - self.av.keys()
-            if myset:
-                mysetContent = ', '.join(f'{str(k)} ' for k in myset)
+            my_set = self.util.keys() - self.av.keys()
+            if my_set:
+                my_set_content = ', '.join(f'{str(k)} ' for k in my_set)
                 the_error += (
                     'Id(s) used for utilities and not for ' 'availabilities: '
-                ) + mysetContent
-            myset = self.av.keys() - self.util.keys()
-            if myset:
-                mysetContent = ', '.join(f'{str(k)} ' for k in myset)
+                ) + my_set_content
+            my_set = self.av.keys() - self.util.keys()
+            if my_set:
+                my_set_content = ', '.join(f'{str(k)} ' for k in my_set)
                 the_error += (
                     ' Id(s) used for availabilities and not ' 'for utilities: '
-                ) + mysetContent
+                ) + my_set_content
             list_of_errors.append(the_error)
         else:
             consistent = True
-        listOfAlternatives = list(self.util)
+        list_of_alternatives = list(self.util)
         if database is None:
-            choices = np.array([self.choice.getValue_c()])
+            choices = np.array([self.choice.get_value_c()])
         else:
-            choices = database.valuesFromDatabase(self.choice)
-        correctChoices = np.isin(choices, listOfAlternatives)
-        indexOfIncorrectChoices = np.argwhere(~correctChoices)
-        if indexOfIncorrectChoices.any():
-            incorrectChoices = choices[indexOfIncorrectChoices]
+            choices = database.values_from_database(self.choice)
+        correct_choices = np.isin(choices, list_of_alternatives)
+        index_of_incorrect_choices = np.argwhere(~correct_choices)
+        if index_of_incorrect_choices.any():
+            incorrect_choices = choices[index_of_incorrect_choices]
             content = '-'.join(
                 '{}[{}]'.format(*t)
-                for t in zip(indexOfIncorrectChoices, incorrectChoices)
+                for t in zip(index_of_incorrect_choices, incorrect_choices)
             )
             truncate = 100
             if len(content) > truncate:
@@ -141,22 +145,22 @@ class LogLogit(Expression):
 
         if consistent:
             if database is None:
-                value_choice = self.choice.getValue_c()
+                value_choice = self.choice.get_value_c()
                 if value_choice not in self.av.keys():
                     the_error = (
                         f'The chosen alternative [{value_choice}] ' f'is not available'
                     )
                     list_of_warnings.append(the_error)
             else:
-                choiceAvailability = database.checkAvailabilityOfChosenAlt(
+                choice_availability = database.check_availability_of_chosen_alt(
                     self.av, self.choice
                 )
-                indexOfUnavailableChoices = np.where(~choiceAvailability)[0]
-                if indexOfUnavailableChoices.size > 0:
-                    incorrectChoices = choices[indexOfUnavailableChoices]
+                index_of_unavailable_choices = np.where(~choice_availability)[0]
+                if index_of_unavailable_choices.size > 0:
+                    incorrect_choices = choices[index_of_unavailable_choices]
                     content = '-'.join(
                         '{}[{}]'.format(*t)
-                        for t in zip(indexOfUnavailableChoices, incorrectChoices)
+                        for t in zip(index_of_unavailable_choices, incorrect_choices)
                     )
                     truncate = 100
                     if len(content) > truncate:
@@ -170,7 +174,7 @@ class LogLogit(Expression):
 
         return list_of_errors, list_of_warnings
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
@@ -183,7 +187,7 @@ class LogLogit(Expression):
             to any of entry in the availability condition
 
         """
-        choice = int(self.choice.getValue())
+        choice = int(self.choice.get_value())
         if choice not in self.util:
             error_msg = (
                 f'Alternative {choice} does not appear in the list '
@@ -196,17 +200,21 @@ class LogLogit(Expression):
                 f'of availabilities: {self.av.keys()}'
             )
             raise excep.BiogemeError(error_msg)
-        if self.av[choice].getValue() == 0.0:
+        if self.av[choice].get_value() == 0.0:
             return -np.log(0)
-        Vchosen = self.util[choice].getValue()
+        v_chosen = self.util[choice].get_value()
         denom = 0.0
         for i, V in self.util.items():
-            if self.av[i].getValue() != 0.0:
-                denom += np.exp(V.getValue() - Vchosen)
+            if self.av[i].get_value() != 0.0:
+                denom += np.exp(V.get_value() - v_chosen)
         return -np.log(denom)
 
-    def __str__(self):
-        s = self.getClassName()
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def __str__(self) -> str:
+        s = self.get_class_name()
         s += f'[choice={self.choice}]'
         s += 'U=('
         first = True
@@ -228,7 +236,7 @@ class LogLogit(Expression):
         s += ')'
         return s
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -281,17 +289,17 @@ class LogLogit(Expression):
         :return: list of the signatures of an expression and its children.
         :rtype: list(string)
         """
-        listOfSignatures = []
+        list_of_signatures = []
         for e in self.get_children():
-            listOfSignatures += e.getSignature()
-        signature = f'<{self.getClassName()}>'
+            list_of_signatures += e.get_signature()
+        signature = f'<{self.get_class_name()}>'
         signature += f'{{{self.get_id()}}}'
         signature += f'({len(self.util)})'
         signature += f',{self.choice.get_id()}'
         for i, e in self.util.items():
             signature += f',{i},{e.get_id()},{self.av[i].get_id()}'
-        listOfSignatures += [signature.encode()]
-        return listOfSignatures
+        list_of_signatures += [signature.encode()]
+        return list_of_signatures
 
 
 class _bioLogLogit(LogLogit):

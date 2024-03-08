@@ -5,6 +5,7 @@ the technical report.
 :date: Sun Nov  5 15:43:18 2023
 
 """
+
 from typing import Optional
 from biogeme.expressions import Expression, log, Numeric
 
@@ -38,7 +39,6 @@ def translated(
 
         :param the_id: identifier of the good.
         :param consumption: expression for the consumption.
-        :param price: expression for the price, or None if prices are not considered.
         """
         gamma = gamma_parameters[the_id]
         if gamma is None:
@@ -59,7 +59,6 @@ def translated(
 
         :param the_id: identifier of the good.
         :param consumption: expression for the consumption.
-        :param price: expression for the price, or None if prices are not considered.
         """
         gamma = gamma_parameters[the_id]
         if gamma is None:
@@ -74,7 +73,6 @@ def translated(
 
         :param the_id: identifier of the good.
         :param consumption: expression for the consumption.
-        :param price: expression for the price, or None if prices are not considered.
         """
         gamma = gamma_parameters[the_id]
         if gamma is None:

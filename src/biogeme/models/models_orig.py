@@ -3,6 +3,7 @@
 :author: Michel Bierlaire
 :date: Fri Mar 29 17:13:14 2019
 """
+
 import logging
 import biogeme.distributions as dist
 import biogeme.exceptions as excep
@@ -26,7 +27,7 @@ def loglogit(V, av, i):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -60,7 +61,7 @@ def loglogit_sampling(V, av, correction, i):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -102,7 +103,7 @@ def logit(V, av, i):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -266,7 +267,7 @@ def piecewiseFormula(variable, thresholds, betas=None):
     :param thresholds: list of thresholds
     :type thresholds: list(float)
 
-    :param betas: list of beta parameters to be used in the
+    :param betas: list of Beta parameters to be used in the
         specification.  The number of entries should be the number of
         thresholds, minus one. If None, for each interval, the
         parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
@@ -362,7 +363,7 @@ def piecewise_as_variable(variable, thresholds, betas=None):
     :param thresholds: list of thresholds
     :type thresholds: list(float)
 
-    :param betas: list of beta parameters to be used in the
+    :param betas: list of Beta parameters to be used in the
         specification.  The number of entries should be the number of
         thresholds, minus two. If None, for each interval, the
         parameter Beta('beta_VAR_interval',0, None, None, 0) is used,
@@ -452,7 +453,7 @@ def piecewiseFunction(x, thresholds, betas):
     :param thresholds: list of thresholds
     :type thresholds: list(float)
 
-    :param betas: list of the beta parameters.  The number of entries
+    :param betas: list of the Beta parameters.  The number of entries
                          should be the number of thresholds, plus
                          one.
     :type betas: list(float)
@@ -527,7 +528,7 @@ def logmev(V, logGi, av, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -574,7 +575,7 @@ def mev(V, logGi, av, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -620,7 +621,7 @@ def logmev_endogenousSampling(V, logGi, av, correction, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -676,7 +677,7 @@ def mev_endogenousSampling(V, logGi, av, correction, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -717,7 +718,7 @@ def getMevGeneratingForNested(
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -766,7 +767,7 @@ def getMevForNested(
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -821,7 +822,7 @@ def getMevForNestedMu(
 
     :param availability: dict of objects representing the availability
         of each alternative, indexed
-        by numerical ids. Must be consistent with V, or
+        by numerical ids. Must be consistent with util, or
         None. In this case, all alternatives are supposed to be
         always available.
 
@@ -890,7 +891,7 @@ def nested(
 
     :param availability: dict of objects representing the availability
                          of each alternative, indexed by numerical
-                         ids. Must be consistent with V, or None. In
+                         ids. Must be consistent with util, or None. In
                          this case, all alternatives are supposed to
                          be always available.
 
@@ -925,7 +926,7 @@ def lognested(V, availability, nests: NestsForNestedLogit, choice):
 
     :param availability: dict of objects representing the availability of each
         alternative (:math:`a_i` in the above formula), indexed
-        by numerical ids. Must be consistent with V, or
+        by numerical ids. Must be consistent with util, or
         None. In this case, all alternatives are supposed to be
         always available.
 
@@ -991,7 +992,7 @@ def nestedMevMu(V, availability, nests, choice, mu):
 
     :param availability: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1049,7 +1050,7 @@ def lognestedMevMu(V, availability, nests, choice, mu):
 
     :param availability: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1106,7 +1107,7 @@ def cnl_avail(V, availability, nests, choice, sampling_log_probability=None):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1167,7 +1168,7 @@ def cnl(V, availability, nests, choice, sampling_log_probability=None):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1228,7 +1229,7 @@ def logcnl_avail(V, availability, nests, choice, sampling_log_probability=None):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1290,7 +1291,7 @@ def getMevForCrossNested(V, availability, nests, sampling_log_probability=None):
 
     :param availability: dict of objects representing the availability of each
         alternative, indexed
-        by numerical ids. Must be consistent with V, or
+        by numerical ids. Must be consistent with util, or
         None. In this case, all alternatives are supposed to be
         always available.
 
@@ -1404,7 +1405,7 @@ def logcnl(V, availability, nests, choice, sampling_log_probability=None):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1476,7 +1477,7 @@ def cnlmu(V, availability, nests, choice, mu):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1535,7 +1536,7 @@ def getMevForCrossNestedMu(V, availability, nests, mu):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -1621,7 +1622,7 @@ def logcnlmu(V, availability, nests, choice, mu):
 
     :param availability: dict of objects representing the availability of each
                alternative, indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 

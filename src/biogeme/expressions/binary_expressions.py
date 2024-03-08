@@ -4,11 +4,14 @@
 
 :date: Sat Sep  9 15:18:27 2023
 """
-import logging
-import biogeme.exceptions as excep
 
-from .base_expressions import Expression
-from .numeric_tools import is_numeric
+from __future__ import annotations
+
+import logging
+
+from . import validate_and_convert
+from .base_expressions import Expression, ExpressionOrNumeric
+from ..deprecated import deprecated
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +20,10 @@ class BinaryOperator(Expression):
     """
     Base class for arithmetic expressions that are binary operators.
     This expression is the result of the combination of two expressions,
-    typically addition, substraction, multiplication or division.
+    typically addition, subtraction, multiplication or division.
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -30,27 +33,14 @@ class BinaryOperator(Expression):
         :type right: biogeme.expressions.Expression
 
         :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value or a
+            neither a numeric value nor a
             biogeme.expressions.Expression object.
 
         """
         Expression.__init__(self)
-        if is_numeric(left):
-            from .numeric_expressions import Numeric
+        self.left = validate_and_convert(left)
+        self.right = validate_and_convert(right)
 
-            self.left = Numeric(left)  #: left child
-        else:
-            if not isinstance(left, Expression):
-                raise excep.BiogemeError(f'This is not a valid expression: {left}')
-            self.left = left
-        if is_numeric(right):
-            from .numeric_expressions import Numeric
-
-            self.right = Numeric(right)  #: right child
-        else:
-            if not isinstance(right, Expression):
-                raise excep.BiogemeError(f'This is not a valid expression: {right}')
-            self.right = right
         self.children.append(self.left)
         self.children.append(self.right)
 
@@ -60,7 +50,7 @@ class Plus(BinaryOperator):
     Addition expression
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -71,16 +61,21 @@ class Plus(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} + {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        return self.left.getValue() + self.right.getValue()
+        return self.left.get_value() + self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Minus(BinaryOperator):
@@ -88,7 +83,7 @@ class Minus(BinaryOperator):
     Substraction expression
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -99,16 +94,21 @@ class Minus(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} - {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        return self.left.getValue() - self.right.getValue()
+        return self.left.get_value() - self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Times(BinaryOperator):
@@ -116,7 +116,7 @@ class Times(BinaryOperator):
     Multiplication expression
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -128,16 +128,21 @@ class Times(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} * {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        return self.left.getValue() * self.right.getValue()
+        return self.left.get_value() * self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Divide(BinaryOperator):
@@ -145,7 +150,7 @@ class Divide(BinaryOperator):
     Division expression
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -156,16 +161,21 @@ class Divide(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} / {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        return self.left.getValue() / self.right.getValue()
+        return self.left.get_value() / self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Power(BinaryOperator):
@@ -173,7 +183,7 @@ class Power(BinaryOperator):
     Power expression
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -184,16 +194,21 @@ class Power(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} ** {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        return self.left.getValue() ** self.right.getValue()
+        return self.left.get_value() ** self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class bioMin(BinaryOperator):
@@ -201,7 +216,7 @@ class bioMin(BinaryOperator):
     Minimum of two expressions
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -212,19 +227,24 @@ class bioMin(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'bioMin({self.left}, {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        if self.left.getValue() <= self.right.getValue():
-            return self.left.getValue()
+        if self.left.get_value() <= self.right.get_value():
+            return self.left.get_value()
 
-        return self.right.getValue()
+        return self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class bioMax(BinaryOperator):
@@ -232,7 +252,7 @@ class bioMax(BinaryOperator):
     Maximum of two expressions
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -243,19 +263,24 @@ class bioMax(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'bioMax({self.left}, {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        if self.left.getValue() >= self.right.getValue():
-            return self.left.getValue()
+        if self.left.get_value() >= self.right.get_value():
+            return self.left.get_value()
 
-        return self.right.getValue()
+        return self.right.get_value()
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class And(BinaryOperator):
@@ -263,7 +288,7 @@ class And(BinaryOperator):
     Logical and
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -275,20 +300,25 @@ class And(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} and {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        if self.left.getValue() == 0.0:
+        if self.left.get_value() == 0.0:
             return 0.0
-        if self.right.getValue() == 0.0:
+        if self.right.get_value() == 0.0:
             return 0.0
         return 1.0
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass
 
 
 class Or(BinaryOperator):
@@ -296,7 +326,7 @@ class Or(BinaryOperator):
     Logical or
     """
 
-    def __init__(self, left, right):
+    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
         """Constructor
 
         :param left: first arithmetic expression
@@ -307,17 +337,22 @@ class Or(BinaryOperator):
         """
         BinaryOperator.__init__(self, left, right)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'({self.left} or {self.right})'
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
         :rtype: float
         """
-        if self.left.getValue() != 0.0:
+        if self.left.get_value() != 0.0:
             return 1.0
-        if self.right.getValue() != 0.0:
+        if self.right.get_value() != 0.0:
             return 1.0
         return 0.0
+
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        """Kept for backward compatibility"""
+        pass

@@ -5,15 +5,26 @@ nested and the cross-nested logit model.
 :date: Thu Oct  5 14:45:58 2023
 
 """
-import logging
+
+from __future__ import annotations
+
 import itertools
+import logging
 from dataclasses import dataclass
 from typing import Union, Iterator, Any, Optional
+
 import numpy as np
 import pandas as pd
 from scipy.integrate import dblquad
-from biogeme.expressions import Expression, Numeric
+
 from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Expression, Numeric, ExpressionOrNumeric
+
+# The first versions of Biogeme defined the nests as follows. We keep his for backward compatibility.
+OldOneNestForNestedLogit = tuple[ExpressionOrNumeric, list[int]]
+OldNestsForNestedLogit = tuple[OldOneNestForNestedLogit, ...]
+OldOneNestForCrossNestedLogit = tuple[ExpressionOrNumeric, dict[int, Expression]]
+OldNestsForCrossNestedLogit = tuple[OldOneNestForCrossNestedLogit, ...]
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +33,16 @@ logger = logging.getLogger(__name__)
 class OneNestForNestedLogit:
     """Class capturing the information for one nest of the nested logit model"""
 
-    nest_param: Union[Expression, float]
+    nest_param: Expression | float
     list_of_alternatives: list[int]
     name: Optional[str] = None
 
     @classmethod
-    def from_tuple(
-        cls, the_tuple: tuple[Union[Expression, float], list[int]]
-    ) -> 'OneNestForNestedLogit':
+    def from_tuple(cls, the_tuple: OldOneNestForNestedLogit) -> OneNestForNestedLogit:
         """Ctor to initialize the nest using the old syntax of Biogeme with a tuple"""
         return cls(*the_tuple)
 
-    def intersection(self, other_nest: 'OneNestForNestedLogit') -> set[int]:
+    def intersection(self, other_nest: OneNestForNestedLogit) -> set[int]:
         """Returns the intersection of two nests. Designed to verify the
         validity of the specification
 
@@ -43,13 +52,20 @@ class OneNestForNestedLogit:
         return set1 & set2
 
 
+def get_nest(a_nest: OneNestForNestedLogit | OldOneNestForNestedLogit):
+    """Convert a nest definition to an OneNestForNestedLogot, if needed."""
+
+    if isinstance(a_nest, OneNestForNestedLogit):
+        return
+
+
 def get_alpha_expressions(
-    the_dict: dict[int, Union[Expression, float]]
+    the_dict: dict[int, Expression | float]
 ) -> dict[int, Expression]:
     """If the dictionary contains float, they are transformed into a
     numerical expression."""
 
-    def generate_expression(value: Union[Expression, float]) -> Expression:
+    def generate_expression(value: Expression | float) -> Expression:
         """Remove the type ambiguity and generates an Expression"""
         if isinstance(value, (int, float)):
             return Numeric(value)
@@ -59,7 +75,7 @@ def get_alpha_expressions(
 
 
 def get_alpha_values(
-    the_dict: dict[int, Union[Expression, float]],
+    the_dict: dict[int, Expression | float],
     parameters: Optional[dict[str, float]] = None,
 ) -> dict[int, float]:
     """If the dictionary contains float, they are transformed into a
@@ -70,14 +86,14 @@ def get_alpha_values(
     """
 
     def generate_value(
-        value: Union[Expression, float], parameters: dict[str, float]
+        value: Expression | float, the_parameters: dict[str, float]
     ) -> float:
         """Remove the type ambiguity and generates a value"""
         if isinstance(value, (int, float)):
             return value
-        if parameters is not None:
-            value.set_estimated_values(parameters)
-        v = value.getValue()
+        if the_parameters is not None:
+            value.set_estimated_values(the_parameters)
+        v = value.get_value()
         return v
 
     return {key: generate_value(value, parameters) for key, value in the_dict.items()}
@@ -87,18 +103,18 @@ def get_alpha_values(
 class OneNestForCrossNestedLogit:
     """Tuple capturing the information for one nest of the cross-nested logit"""
 
-    nest_param: Union[Expression, float]
-    dict_of_alpha: dict[int, Expression]
+    nest_param: Expression | float
+    dict_of_alpha: dict[int, Expression | float]
     name: Optional[str] = None
 
     @classmethod
     def from_tuple(
-        cls, the_tuple: tuple[Union[Expression, float], dict[int, Expression]]
-    ) -> 'OneNestForCrossNestedLogit':
+        cls, the_tuple: OldOneNestForCrossNestedLogit
+    ) -> OneNestForCrossNestedLogit:
         """Ctor to initialize the nest using the old syntax of Biogeme with a tuple"""
         return cls(*the_tuple)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.dict_of_alpha = get_alpha_expressions(self.dict_of_alpha)
         self.list_of_alternatives = list(self.dict_of_alpha.keys())
 
@@ -106,7 +122,7 @@ class OneNestForCrossNestedLogit:
         """Check if the alpha parameters have a numeric value."""
         for _, alpha in self.dict_of_alpha.items():
             try:
-                _ = alpha.getValue()
+                _ = alpha.get_value()
             except BiogemeError:
                 return False
             except AttributeError:
@@ -120,7 +136,7 @@ class Nests:
     def __init__(
         self,
         choice_set: list[int],
-        tuple_of_nests: tuple[Any, ...],
+        tuple_of_nests: tuple[OneNestForNestedLogit | OneNestForCrossNestedLogit, ...],
     ):
         """Ctor
 
@@ -169,7 +185,7 @@ class Nests:
     def __iter__(self) -> Iterator[Any]:
         return iter(self.tuple_of_nests)
 
-    def check_names(self):
+    def check_names(self) -> bool:
         """Checks that all the nests have a name"""
         for nest in self.tuple_of_nests:
             if nest.name is None:
@@ -179,7 +195,7 @@ class Nests:
     def check_union(self) -> tuple[bool, str]:
         """Check if the union of the nests is the choice set
 
-        :return: a boolean with the result of the check, as a message is check fails.
+        :return: a boolean with the result of the check, as a message if check fails.
         """
 
         # Union Check: The union of all lists should be equal to choice_set
@@ -216,9 +232,7 @@ class NestsForNestedLogit(Nests):
     def __init__(
         self,
         choice_set: list[int],
-        tuple_of_nests: Union[
-            tuple[OneNestForNestedLogit, ...], tuple[tuple[Expression, list[int]], ...]
-        ],
+        tuple_of_nests: tuple[OneNestForNestedLogit, ...] | OldNestsForNestedLogit,
     ):
         """Ctor
 
@@ -237,32 +251,25 @@ class NestsForNestedLogit(Nests):
                 nesta = MUA ,[1, 2, 3]
                 nestb = MUB ,[4, 5, 6]
                 nests = nesta, nestb
-        :param alone: the list of alternatives alone in one nest. If
-            None, any alternative not present in a nest is supposed to
-            be alone
+
 
         """
 
         # In previous versions of Biogeme, the nests were defined
         # using regular tuples, not NamedTuple. We cast them here for
         # the sake of backward compatibility.
-        def cast_nested_logit(
-            one_nest: Union[OneNestForNestedLogit, tuple[Expression, list[int]]]
-        ) -> OneNestForNestedLogit:
-            if isinstance(one_nest, OneNestForNestedLogit):
-                return one_nest
-            return OneNestForNestedLogit.from_tuple(one_nest)
-
-        tuple_of_nests = tuple(cast_nested_logit(nest) for nest in tuple_of_nests)
-
+        if not all(isinstance(elem, OneNestForNestedLogit) for elem in tuple_of_nests):
+            tuple_of_nests = tuple(
+                OneNestForNestedLogit.from_tuple(nest) for nest in tuple_of_nests
+            )
         super().__init__(choice_set, tuple_of_nests)
 
     def correlation(
         self,
-        parameters: dict[str, float] = dict(),
-        alternatives_names: Optional[dict[int, str]] = None,
+        parameters: dict[str, float],
+        alternatives_names: dict[int, str] | None = None,
         mu: float = 1.0,
-    ) -> 'pd.DataFrame':
+    ) -> pd.DataFrame:
         """Calculate the correlation matrix of the error terms of all
             alternatives of a nested logit model.
 
@@ -282,7 +289,7 @@ class NestsForNestedLogit(Nests):
         for m in self.tuple_of_nests:
             if isinstance(m.nest_param, Expression):
                 m.nest_param.set_estimated_values(parameters)
-                mu_m = m.nest_param.getValue_c(prepareIds=True)
+                mu_m = m.nest_param.get_value_c(prepare_ids=True)
             else:
                 mu_m = m.nest_param
             alt_m = m.list_of_alternatives
@@ -341,7 +348,9 @@ class NestsForCrossNestedLogit(Nests):
     def __init__(
         self,
         choice_set: list[int],
-        tuple_of_nests: tuple[OneNestForCrossNestedLogit, ...],
+        tuple_of_nests: (
+            tuple[OneNestForCrossNestedLogit, ...] | OldNestsForCrossNestedLogit
+        ),
     ):
         """Ctor
 
@@ -353,12 +362,12 @@ class NestsForCrossNestedLogit(Nests):
         # In previous versions of Biogeme, the nests were defined
         # using regular tuples, not NamedTuple. We cast them here for
         # the sake of backward compatibility.
-        def cast_cross_nested_logit(one_nest):
-            if isinstance(one_nest, OneNestForCrossNestedLogit):
-                return one_nest
-            return OneNestForCrossNestedLogit.from_tuple(one_nest)
-
-        tuple_of_nests = tuple(cast_cross_nested_logit(nest) for nest in tuple_of_nests)
+        if not all(
+            isinstance(elem, OneNestForCrossNestedLogit) for elem in tuple_of_nests
+        ):
+            tuple_of_nests = tuple(
+                OneNestForCrossNestedLogit.from_tuple(nest) for nest in tuple_of_nests
+            )
         super().__init__(choice_set, tuple_of_nests)
 
     def all_alphas_fixed(self) -> bool:
@@ -388,7 +397,7 @@ class NestsForCrossNestedLogit(Nests):
         :param alternative_id: identifier of the alternative
         :return: a dict mapping the name of a nest and the alpha values
 
-        :raise: BiogemeError is one alpha is a non numeric expression
+        :raise: BiogemeError is one alpha is a non-numeric expression
         """
 
         def get_value(alpha: Union[Expression, float, int]) -> float:
@@ -401,7 +410,7 @@ class NestsForCrossNestedLogit(Nests):
             if isinstance(alpha, (int, float)):
                 return float(alpha)
             if isinstance(alpha, Expression):
-                return alpha.getValue()
+                return alpha.get_value()
             error_msg = f'Unknown type {type(alpha)} for alpha parameter'
             raise BiogemeError(error_msg)
 
@@ -439,9 +448,7 @@ class NestsForCrossNestedLogit(Nests):
 
         return ok, message
 
-    def covariance(
-        self, i: int, j: int, parameters: dict[str, float] = dict()
-    ) -> float:
+    def covariance(self, i: int, j: int, parameters: dict[str, float]) -> float:
         """Calculate the covariance between the error terms of two
         alternatives of a cross-nested logit model. It is assumed that
         the homogeneity parameter mu of the model has been normalized
@@ -455,7 +462,7 @@ class NestsForCrossNestedLogit(Nests):
 
         :return: value of the correlation
 
-        :raise BiogemeError: if the requested number is non positive or a float
+        :raise BiogemeError: if the requested number is non-positive or a float
 
         """
 
@@ -486,14 +493,14 @@ class NestsForCrossNestedLogit(Nests):
             dxi_i = -dy_i / y_i
             dxi_j = -dy_j / y_j
 
-            G_sum = 0.0
-            Gi_sum = 0.0
-            Gj_sum = 0.0
-            Gij_sum = 0.0
+            g_sum = 0.0
+            gi_sum = 0.0
+            gj_sum = 0.0
+            gij_sum = 0.0
             for m in self.tuple_of_nests:
                 if isinstance(m.nest_param, Expression):
                     m.nest_param.set_estimated_values(parameters)
-                    mu_m = m.nest_param.getValue_c(prepareIds=True)
+                    mu_m = m.nest_param.get_value_c(prepare_ids=True)
                 else:
                     mu_m = m.nest_param
                 alphas = get_alpha_values(m.dict_of_alpha, parameters)
@@ -510,31 +517,31 @@ class NestsForCrossNestedLogit(Nests):
                 the_sum = term_i + term_j
                 p1 = (1.0 / mu_m) - 1
                 p2 = (1.0 / mu_m) - 2
-                G_sum += the_sum ** (1.0 / mu_m)
+                g_sum += the_sum ** (1.0 / mu_m)
                 if alpha_i != 0:
-                    Gi_sum += alpha_i**mu_m * y_i ** (mu_m - 1) * the_sum**p1
+                    gi_sum += alpha_i**mu_m * y_i ** (mu_m - 1) * the_sum**p1
                 if alpha_j != 0:
-                    Gj_sum += alpha_j**mu_m * y_j ** (mu_m - 1) * the_sum**p1
+                    gj_sum += alpha_j**mu_m * y_j ** (mu_m - 1) * the_sum**p1
                 if mu_m != 1.0 and alpha_i != 0 and alpha_j != 0:
-                    Gij_sum += (
+                    gij_sum += (
                         (1 - mu_m)
                         * the_sum**p2
                         * (alpha_i * alpha_j) ** mu_m
                         * (y_i * y_j) ** (mu_m - 1)
                     )
 
-            F = np.exp(-G_sum)
-            F_second = F * y_i * y_j * (Gi_sum * Gj_sum - Gij_sum)
+            f = np.exp(-g_sum)
+            f_second = f * y_i * y_j * (gi_sum * gj_sum - gij_sum)
 
-            return xi_i * xi_j * F_second * dxi_i * dxi_j
+            return xi_i * xi_j * f_second * dxi_i * dxi_j
 
         integral, _ = dblquad(integrand, 0, 1, lambda x: 0, lambda x: 1)
         return integral - np.euler_gamma * np.euler_gamma
 
     def correlation(
         self,
-        parameters: dict[str, float] = dict(),
-        alternatives_names: Optional[dict[int, str]] = None,
+        parameters: dict[str, float],
+        alternatives_names: dict[int, str] | None = None,
     ) -> pd.DataFrame:
         """Calculate the correlation matrix of the error terms of all
         alternatives of cross-nested logit model.

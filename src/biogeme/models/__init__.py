@@ -7,31 +7,31 @@ from .logit import loglogit, logit
 from .mev import (
     logmev,
     mev,
-    logmev_endogenousSampling,
-    mev_endogenousSampling,
+    logmev_endogenous_sampling,
+    mev_endogenous_sampling,
 )
 from .piecewise import (
-    piecewiseVariables,
-    piecewiseFormula,
+    piecewise_variables,
+    piecewise_formula,
     piecewise_as_variable,
-    piecewiseFunction,
+    piecewise_function,
 )
 
 from .nested import (
-    getMevGeneratingForNested,
-    getMevForNested,
-    getMevForNestedMu,
+    get_mev_generating_for_nested,
+    get_mev_for_nested,
+    get_mev_for_nested_mu,
     nested,
     lognested,
-    nestedMevMu,
-    lognestedMevMu,
+    nested_mev_mu,
+    lognested_mev_mu,
 )
 
 from .cnl import (
     cnl_avail,
     logcnl_avail,
-    getMevForCrossNested,
-    getMevForCrossNestedMu,
+    get_mev_for_cross_nested,
+    get_mev_for_cross_nested_mu,
     cnl,
     logcnl,
     cnlmu,

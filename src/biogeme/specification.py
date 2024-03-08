@@ -10,15 +10,22 @@
 
 Implements a model specification in a multiple expression context (using Catalogs)
 """
+from __future__ import annotations
+
 import logging
-from typing import NamedTuple
+from typing import TYPE_CHECKING, Callable
+
 from biogeme_optimization.pareto import SetElement
+
 import biogeme.biogeme as bio
-from biogeme import tools
+import biogeme.tools.unique_ids
 from biogeme.configuration import Configuration
-from biogeme.parameters import biogeme_parameters
-import biogeme.exceptions as excep
+from biogeme.exceptions import BiogemeError
+from biogeme.parameters import get_default_value
 from biogeme.validity import Validity
+
+if TYPE_CHECKING:
+    from biogeme.results import bioResults
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +46,11 @@ class Specification:
     """
     generic_name = 'default_name'  #: short name for file names
 
-    def __init__(self, configuration):
+    def __init__(
+        self,
+        configuration: Configuration,
+        maximum_number_of_parameters: int | None = None,
+    ):
         """Creates a specification from a  configuration
 
         :param configuration: configuration of the multiple expression
@@ -47,67 +58,70 @@ class Specification:
         """
         if not isinstance(configuration, Configuration):
             error_msg = 'Ctor needs an object of type Configuration'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         self.configuration = configuration
         self.model_names = None
         self.validity = None
+        self.maximum_number_parameters = (
+            get_default_value(
+                name='maximum_number_parameters', section='AssistedSpecification'
+            )
+            if maximum_number_of_parameters is None
+            else maximum_number_of_parameters
+        )
         self._estimate()
         assert (
             self.validity is not None
         ), 'Validity must be set by the _estimate function'
 
     @classmethod
-    def from_string_id(cls, configuration_id):
+    def from_string_id(cls, configuration_id: str):
         """Constructor using a configuration"""
         return cls(Configuration.from_string(configuration_id))
 
-    def configure_expression(self):
+    def configure_expression(self) -> None:
         """Configure the expression to the current configuration"""
         self.expression.configure_catalogs(self.configuration)
 
     @classmethod
-    def default_specification(cls):
+    def default_specification(cls) -> 'Specification':
         """Alternative constructor for generate the default specification"""
         cls.expression.reset_expression_selection()
         the_config = cls.expression.current_configuration()
         return cls(the_config)
 
     @property
-    def config_id(self):
+    def config_id(self) -> str:
         """Defined config_id as a property"""
         return self.configuration.get_string_id()
 
     @config_id.setter
-    def config_id(self, value):
+    def config_id(self, value: str) -> None:
         self.configuration = Configuration.from_string(value)
 
-    def get_results(self):
+    def get_results(self) -> bioResults:
         """Obtain the estimation results of the specification"""
         the_results = self.all_results.get(self.config_id)
         if the_results is None:
             error_msg = f'No result is available for specification {self.config_id}'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         return the_results
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.config_id)
 
-    def _estimate(self):
-        """Estimate the parameter of the current specification, if not already done
-
-        :param quick_estimate: if True, a "quick estimate" is
-            performed, in the sense that the final statistics are not
-            calculated
-        :type quick_estimate: bool
-        """
+    def _estimate(self) -> None:
+        """Estimate the parameter of the current specification, if not already done"""
         if self.expression is None:
             error_msg = 'No expression has been provided for the model.'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.database is None:
             error_msg = 'No database has been provided for the estimation.'
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.model_names is None:
-            self.model_names = tools.ModelNames(prefix=self.generic_name)
+            self.model_names = biogeme.tools.unique_ids.ModelNames(
+                prefix=self.generic_name
+            )
 
         if self.config_id in self.all_results:
             results = self.all_results.get(self.config_id)
@@ -119,15 +133,13 @@ class Specification:
                 database=self.database,
             )
             number_of_parameters = the_biogeme.number_unknown_parameters()
-            maximum_number_parameters = biogeme_parameters.get_value(
-                name='maximum_number_parameters', section='AssistedSpecification'
-            )
-            if number_of_parameters > maximum_number_parameters:
+
+            if number_of_parameters > self.maximum_number_parameters:
                 self.validity = Validity(
                     status=False,
                     reason=(
                         f'Too many parameters: {number_of_parameters} > '
-                        f'{maximum_number_parameters}'
+                        f'{self.maximum_number_parameters}'
                     ),
                 )
                 return
@@ -135,11 +147,11 @@ class Specification:
             logger.info(f'*** Estimate {the_biogeme.modelName}')
             the_biogeme.generate_html = False
             the_biogeme.generate_pickle = False
-            results = the_biogeme.quickEstimate()
+            results = the_biogeme.quick_estimate()
         self.all_results[self.config_id] = results
         if not results.algorithm_has_converged():
             self.validity = Validity(
-                status=False, reason=(f'Optimization algorithm has not converged')
+                status=False, reason=f'Optimization algorithm has not converged'
             )
             return
 
@@ -148,7 +160,7 @@ class Specification:
         else:
             self.validity = Validity(status=True, reason='')
 
-    def describe(self):
+    def describe(self) -> str:
         """Short description of the solution. Used for reporting.
 
         :return: short description of the solution.
@@ -157,7 +169,9 @@ class Specification:
         the_results = self.get_results()
         return f'{the_results.short_summary()}'
 
-    def get_element(self, multi_objectives):
+    def get_element(
+        self, multi_objectives: Callable[[bioResults], list[float]]
+    ) -> SetElement:
         """Obtains the element from the Pareto set corresponding to a specification
 
         :param multi_objectives: function calculating the objectives

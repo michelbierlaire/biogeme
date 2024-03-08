@@ -5,8 +5,9 @@ the technical report.
 :date: Sun Nov  5 15:43:18 2023
 
 """
+
 from typing import Optional
-from biogeme.expressions import Expression, log
+from biogeme.expressions import Numeric, Expression, log
 from .mdcev import mdcev, info_gamma_parameters, SpecificModel
 
 
@@ -14,7 +15,7 @@ def generalized(
     baseline_utilities: dict[int, Expression],
     consumed_quantities: dict[int, Expression],
     alpha_parameters: dict[int, Expression],
-    gamma_parameters: dict[int, Optional[Expression]],
+    gamma_parameters: dict[int, Expression | None],
     prices: Optional[dict[int, Expression]] = None,
 ):
     """Calculates the determinant entries for the Bhat 2008 specification Eq (18)

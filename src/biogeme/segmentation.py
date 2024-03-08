@@ -5,14 +5,23 @@
 
 """
 
-from biogeme.expressions import Beta, bioMultSum, Variable, Numeric
-import biogeme.exceptions as excep
+from __future__ import annotations
+
+from typing import Iterable
+
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Beta, bioMultSum, Variable, Numeric, Expression
 
 
 class DiscreteSegmentationTuple:
     """Characterization of a segmentation"""
 
-    def __init__(self, variable, mapping, reference=None):
+    def __init__(
+        self,
+        variable: Variable | str,
+        mapping: dict[int, str],
+        reference: str | None = None,
+    ):
         """Ctor
 
         :param variable: socio-economic variable used for the segmentation, or its name
@@ -30,29 +39,29 @@ class DiscreteSegmentationTuple:
 
         """
 
-        self.variable = (
+        self.variable: Variable = (
             variable if isinstance(variable, Variable) else Variable(variable)
         )
-        self.mapping = mapping
+        self.mapping: dict[int, str] = mapping
         if reference is None:
-            self.reference = next(iter(mapping.values()))
+            self.reference: str = next(iter(mapping.values()))
         elif reference not in mapping.values():
             error_msg = (
                 f'Reference category {reference} does not appear in the list '
                 f'of categories: {mapping.values()}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         else:
-            self.reference = reference
+            self.reference: str = reference
 
         if self.reference is None:
-            raise excep.BiogemeError('Reference should not be None')
+            raise BiogemeError('Reference should not be None')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         result = f'{self.variable.name}: [{self.mapping}] ref: {self.reference}'
         return result
 
-    def __str__(self):
+    def __str__(self) -> str:
         result = f'{self.variable.name}: [{self.mapping}] ref: {self.reference}'
         return result
 
@@ -60,7 +69,7 @@ class DiscreteSegmentationTuple:
 class OneSegmentation:
     """Single segmentation of a parameter"""
 
-    def __init__(self, beta, segmentation_tuple):
+    def __init__(self, beta: Beta, segmentation_tuple: DiscreteSegmentationTuple):
         """Ctor
 
         :param beta: parameter to be segmented
@@ -69,14 +78,14 @@ class OneSegmentation:
         :param segmentation_tuple: characterization of the segmentation
         :type segmentation_tuple: DiscreteSegmentationTuple
         """
-        self.beta = beta
-        self.variable = segmentation_tuple.variable
-        self.reference = segmentation_tuple.reference
-        self.mapping = {
+        self.beta: Beta = beta
+        self.variable: Variable = segmentation_tuple.variable
+        self.reference: str = segmentation_tuple.reference
+        self.mapping: dict[int, str] = {
             k: v for k, v in segmentation_tuple.mapping.items() if v != self.reference
         }
 
-    def beta_name(self, category):
+    def beta_name(self, category: str) -> str:
         """Construct the name of the parameter associated with a specific category
 
         :param category: name of the category
@@ -93,10 +102,10 @@ class OneSegmentation:
                 f'Unknown category: {category}. List of known categories: '
                 f'{self.mapping.values()}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         return f'{self.beta.name}_{category}'
 
-    def beta_expression(self, category):
+    def beta_expression(self, category: str) -> Beta:
         """Constructs the expression for the parameter associated with
             a specific category
 
@@ -123,14 +132,14 @@ class OneSegmentation:
             self.beta.status,
         )
 
-    def beta_code(self, category, assignment):
+    def beta_code(self, category: str, assignment: bool) -> str:
         """Constructs the Python code for the expression of the
             parameter associated with a specific category
 
         :param category: name of the category
         :type category: str
 
-        :param assignment: if True, the code includes the assigbnment to a variable.
+        :param assignment: if True, the code includes the assignment to a variable.
         :type assignment: bool
 
         :return: the Python code
@@ -153,7 +162,7 @@ class OneSegmentation:
             f"{upper_bound}, {self.beta.status})"
         )
 
-    def list_of_expressions(self):
+    def list_of_expressions(self) -> list[Expression]:
         """Create a list of expressions involved in the segmentation of the parameter
 
         :return: list of expressions
@@ -166,7 +175,7 @@ class OneSegmentation:
         ]
         return terms
 
-    def list_of_code(self):
+    def list_of_code(self) -> list[str]:
         """Create a list of Python codes for the expressions involved
             in the segmentation of the parameter
 
@@ -186,7 +195,12 @@ class OneSegmentation:
 class Segmentation:
     """Segmentation of a parameter, possibly with multiple socio-economic variables"""
 
-    def __init__(self, beta, segmentation_tuples, prefix='segmented'):
+    def __init__(
+        self,
+        beta: Beta,
+        segmentation_tuples: Iterable[DiscreteSegmentationTuple],
+        prefix: str = 'segmented',
+    ):
         """Ctor
 
         :param beta: parameter to be segmented
@@ -199,13 +213,13 @@ class Segmentation:
             segmented parameter
         :type prefix: str
         """
-        self.beta = beta
-        self.segmentations = tuple(
+        self.beta: Beta = beta
+        self.segmentations: tuple[OneSegmentation, ...] = tuple(
             OneSegmentation(beta, s) for s in segmentation_tuples
         )
         self.prefix = prefix
 
-    def beta_code(self):
+    def beta_code(self) -> str:
         """Constructs the Python code for the parameter
 
         :return: Python code
@@ -218,7 +232,7 @@ class Segmentation:
             f'{self.beta.ub}, {self.beta.status})'
         )
 
-    def segmented_beta(self):
+    def segmented_beta(self) -> Expression:
         """Create an expressions that combines all the segments
 
         :return: combined expression
@@ -239,7 +253,7 @@ class Segmentation:
 
         return bioMultSum(terms)
 
-    def segmented_code(self):
+    def segmented_code(self) -> str:
         """Create the Python code for an expressions that combines all the segments
 
         :return: Python code for the combined expression
@@ -265,8 +279,12 @@ class Segmentation:
         return result
 
 
-def segmented_beta(beta, segmentation_tuples, prefix='segmented'):
-    """Obtain the segmented beta from a unique function call
+def segmented_beta(
+    beta: Beta,
+    segmentation_tuples: Iterable[DiscreteSegmentationTuple],
+    prefix: str = 'segmented',
+):
+    """Obtain the segmented Beta from a unique function call
 
     :param beta: parameter to be segmented
     :type beta: biogeme.expressions.Beta
@@ -278,7 +296,7 @@ def segmented_beta(beta, segmentation_tuples, prefix='segmented'):
         segmented parameter
     :type prefix: str
 
-    :return: expression of the segmented beta
+    :return: expression of the segmented Beta
     :rtype: biogeme.expressions.Expression
     """
     the_segmentation = Segmentation(

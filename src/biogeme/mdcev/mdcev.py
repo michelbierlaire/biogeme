@@ -5,7 +5,7 @@ See the technical report for a description of the various versions.
 
 The functions involved in this module have a similar list of arguments. We document them here once for all:
 
-- number_of_chosen_alternatives: number of alternative with non zero
+- number_of_chosen_alternatives: number of alternative with non-zero
     consumption. Note that it would be possible to calculate it from
     the consumption_quantities, but it would be too expensive in terms
     of calculation. Ideally should be stored as a variable in the
@@ -17,7 +17,7 @@ The functions involved in this module have a similar list of arguments. We docum
 
 - baseline_utilities: a dictionary of baseline utility functions for
     each alternative. Typically, they are linear in the parameters. In
-    the document, it is expressed as the inner product of beta and x.
+    the document, it is expressed as the inner product of Beta and x.
 
 - alpha_parameters: a dictionary of expressions for the alpha
     parameters appearing the specification of some the utility
@@ -38,8 +38,10 @@ The functions involved in this module have a similar list of arguments. We docum
 :date: Wed Aug 23 16:29:10 2023
 
 """
+
 import logging
-from typing import NamedTuple, Optional
+from typing import NamedTuple
+
 from biogeme.expressions import Expression, exp, Elem, log, bioMultSum
 
 logger = logging.getLogger(__name__)
@@ -51,7 +53,7 @@ class SpecificModel(NamedTuple):
     inverse_of_determinant_entries: dict[int, Expression]
 
 
-def info_gamma_parameters(gamma_parameters: dict[int, Optional[Expression]]) -> None:
+def info_gamma_parameters(gamma_parameters: dict[int, Expression | None]) -> None:
     """Provides logging information about the outside good
 
     :param gamma_parameters: see the module documentation :mod:`biogeme.mdcev`
@@ -69,10 +71,10 @@ def info_gamma_parameters(gamma_parameters: dict[int, Optional[Expression]]) -> 
 
 
 def mdcev(
-    number_of_chosen_alternatives,
-    consumed_quantities,
-    specific_model,
-    scale_parameter=None,
+    number_of_chosen_alternatives: Expression,
+    consumed_quantities: dict[int, Expression],
+    specific_model: SpecificModel,
+    scale_parameter: Expression | None = None,
 ):
     """Generate the Biogeme formula for the log probability of the MDCEV model
 

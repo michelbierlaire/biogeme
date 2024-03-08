@@ -1,27 +1,30 @@
-"""Implementation of the "non monotonic" MDCEV model. See section 3.2 in
+"""Implementation of the "non-monotonic" MDCEV model. See section 3.2 in
 the technical report.
 
 :author: Michel Bierlaire
 :date: Sun Nov  5 15:58:46 2023
 
 """
+
 from typing import Optional
 from biogeme.expressions import Expression, log, exp, Numeric
 from .mdcev import mdcev, info_gamma_parameters, SpecificModel
 
 
 def non_monotonic(
-    baseline_utilities,
-    mu_utilities,
-    consumed_quantities,
-    alpha_parameters,
-    gamma_parameters,
-    prices=None,
+    baseline_utilities: dict[int, Expression],
+    mu_utilities: dict[int, Expression],
+    consumed_quantities: dict[int, Expression],
+    alpha_parameters: dict[int, Expression],
+    gamma_parameters: dict[int, Expression],
+    prices: Expression | None = None,
 ):
     """Calculates the determinant entries for the linear expenditure system
 
     :param baseline_utilities: see the module documentation :mod:`biogeme.mdcev`
     :type baseline_utilities: dict[int: biogeme.expression.Expression]
+
+    :param mu_utilities:  see the module documentation :mod:`biogeme.mdcev`
 
     :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev`
     :type consumed_quantities: dict[int: biogeme.expression.Expression]
@@ -38,7 +41,7 @@ def non_monotonic(
 
 
     """
-    info_gamma_parameters()
+    info_gamma_parameters(gamma_parameters)
 
     def calculate_utility(
         the_id: int, consumption: Expression, price: Optional[Expression]
@@ -200,7 +203,7 @@ def non_monotonic(
     }
 
     inverse_of_determinant_entries = {
-        id: calculate_inverse_determinant(the_id, consumption, None)
+        the_id: calculate_inverse_determinant(the_id, consumption, None)
         for the_id, consumption in consumed_quantities.items()
     }
     return SpecificModel(

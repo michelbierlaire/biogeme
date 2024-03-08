@@ -4,26 +4,33 @@
 :date: Sat Sep  9 15:25:07 2023
 
 """
+
+from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 import cythonbiogeme.cythonbiogeme as ee
 from biogeme.exceptions import BiogemeError
 
+from biogeme.function_output import (
+    BiogemeFunctionOutput,
+    BiogemeDisaggregateFunctionOutput,
+)
+
 if TYPE_CHECKING:
-    from .base_expressions import Expression
     from biogeme.database import Database
+    from biogeme.expressions import Expression
 
 logger = logging.getLogger(__name__)
 
 
 def calculate_function_and_derivatives(
-    the_expression: 'Expression',
-    database: 'Database',
+    the_expression: Expression,
+    database: Database,
     calculate_gradient: bool,
     calculate_hessian: bool,
     calculate_bhhh: bool,
     aggregation: bool,
-):
+) -> BiogemeFunctionOutput | BiogemeDisaggregateFunctionOutput:
     """Interface with the C++ implementation calculating the expression
 
     :param the_expression: expression to calculate for each entry in the database.
@@ -42,11 +49,11 @@ def calculate_function_and_derivatives(
     the_cpp = ee.pyEvaluateOneExpression()
     if database is not None:
         the_cpp.setData(database.data)
-    if the_expression.embedExpression('PanelLikelihoodTrajectory'):
+    if the_expression.embed_expression('PanelLikelihoodTrajectory'):
         if database is None:
             raise BiogemeError('No database has been provided')
-        if database.isPanel():
-            database.buildPanelMap()
+        if database.is_panel():
+            database.build_panel_map()
             the_cpp.setDataMap(database.individualMap)
         else:
             error_msg = (
@@ -56,12 +63,12 @@ def calculate_function_and_derivatives(
             )
             raise BiogemeError(error_msg)
 
-    if the_expression.requiresDraws():
+    if the_expression.requires_draws():
         if database is None:
             raise BiogemeError('No database has been provided')
         the_cpp.setDraws(database.theDraws)
 
-    the_cpp.setExpression(the_expression.getSignature())
+    the_cpp.setExpression(the_expression.get_signature())
     the_cpp.setFreeBetas(the_expression.id_manager.free_betas_values)
     the_cpp.setFixedBetas(the_expression.id_manager.fixed_betas_values)
     the_cpp.setMissingData(the_expression.missingData)
@@ -77,13 +84,12 @@ def calculate_function_and_derivatives(
     hres = h if calculate_hessian else None
     bhhhres = b if calculate_bhhh else None
     if aggregation:
-        results = (
-            f[0],
-            None if gres is None else g[0],
-            None if hres is None else h[0],
-            None if bhhhres is None else b[0],
+        return BiogemeFunctionOutput(
+            function=f[0],
+            gradient=None if gres is None else g[0],
+            hessian=None if hres is None else h[0],
+            bhhh=None if bhhhres is None else b[0],
         )
-    else:
-        results = (f, gres, hres, bhhhres)
-
-    return results
+    return BiogemeDisaggregateFunctionOutput(
+        functions=f, gradients=gres, hessians=hres, bhhhs=bhhhres
+    )

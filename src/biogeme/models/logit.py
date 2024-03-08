@@ -3,15 +3,24 @@
 :author: Michel Bierlaire
 :date: Wed Oct 25 08:43:26 2023
 """
+
 import logging
-from typing import Optional
-from biogeme.expressions import Expression, _bioLogLogit, _bioLogLogitFullChoiceSet, exp
+
+from biogeme.expressions import (
+    Expression,
+    _bioLogLogit,
+    _bioLogLogitFullChoiceSet,
+    exp,
+    ExpressionOrNumeric,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def loglogit(
-    V: dict[int, Expression], av: Optional[dict[int, Expression]], i: int
+    util: dict[int, ExpressionOrNumeric],
+    av: dict[int, ExpressionOrNumeric] | None,
+    i: ExpressionOrNumeric,
 ) -> Expression:
     """The logarithm of the logit model
 
@@ -19,12 +28,12 @@ def loglogit(
 
     .. math:: \\frac{a_i e^{V_i}}{\\sum_{i=1}^J a_j e^{V_j}}
 
-    :param V: dict of objects representing the utility functions of
+    :param util: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -35,13 +44,15 @@ def loglogit(
     """
 
     if av is None:
-        return _bioLogLogitFullChoiceSet(V, av=None, choice=i)
+        return _bioLogLogitFullChoiceSet(util, av=None, choice=i)
 
-    return _bioLogLogit(V, av, i)
+    return _bioLogLogit(util, av, i)
 
 
 def logit(
-    V: dict[int, Expression], av: Optional[dict[int, Expression]], i: int
+    util: dict[int, ExpressionOrNumeric],
+    av: dict[int, ExpressionOrNumeric] | None,
+    i: ExpressionOrNumeric,
 ) -> Expression:
     """The logit model
 
@@ -49,12 +60,12 @@ def logit(
 
     .. math:: \\frac{a_i e^{V_i}}{\\sum_{i=1}^J a_j e^{V_j}}
 
-    :param V: dict of objects representing the utility functions of
+    :param util: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -65,6 +76,6 @@ def logit(
 
     """
     if av is None:
-        return exp(_bioLogLogitFullChoiceSet(V, av=None, choice=i))
+        return exp(_bioLogLogitFullChoiceSet(util, av=None, choice=i))
 
-    return exp(_bioLogLogit(V, av, i))
+    return exp(_bioLogLogit(util, av, i))

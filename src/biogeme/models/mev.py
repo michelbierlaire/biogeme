@@ -3,22 +3,28 @@
 :author: Michel Bierlaire
 :date: Wed Oct 25 11:35:34 2023
 """
+
 import logging
-from typing import Mapping
-from biogeme.expressions import Expression, _bioLogLogitFullChoiceSet, _bioLogLogit, exp
+from biogeme.expressions import (
+    Expression,
+    exp,
+    ExpressionOrNumeric,
+    _bioLogLogitFullChoiceSet,
+    _bioLogLogit,
+)
 
 logger = logging.getLogger(__name__)
 
 
 def logmev(
-    V: Mapping[int, Expression],
-    log_gi: Mapping[int, Expression],
-    av: Mapping[int, Expression],
-    choice: Expression,
+    util: dict[int, ExpressionOrNumeric],
+    log_gi: dict[int, ExpressionOrNumeric],
+    av: dict[int, ExpressionOrNumeric],
+    choice: ExpressionOrNumeric,
 ) -> Expression:
     """Log of the choice probability for a MEV model.
 
-    :param V: dict of objects representing the utility functions of
+    :param util: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
     :param log_gi: a dictionary mapping each alternative id with the function
@@ -31,7 +37,7 @@ def logmev(
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -45,21 +51,26 @@ def logmev(
               \\ldots,e^{V_J})}\\right)
 
     """
-    H = {i: v + log_gi[i] for i, v in V.items()}
+    h = {i: v + log_gi[i] for i, v in util.items()}
     if av is None:
-        log_p = _bioLogLogitFullChoiceSet(H, av=None, choice=choice)
+        log_p = _bioLogLogitFullChoiceSet(h, av=None, choice=choice)
     else:
-        log_p = _bioLogLogit(H, av, choice)
+        log_p = _bioLogLogit(h, av, choice)
     return log_p
 
 
-def mev(V, log_gi, av, choice):
+def mev(
+    util: dict[int, ExpressionOrNumeric],
+    log_gi: dict[int, Expression],
+    av: dict[int, ExpressionOrNumeric] | None,
+    choice: ExpressionOrNumeric,
+):
     """Choice probability for a MEV model.
 
-    :param V: dict of objects representing the utility functions of
+    :param util: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
-    :type V: dict(int:biogeme.expressions.expr.Expression)
+    :type util: dict(int:biogeme.expressions.expr.Expression)
 
 
     :param log_gi: a dictionary mapping each alternative id with the function
@@ -74,7 +85,7 @@ def mev(V, log_gi, av, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -92,10 +103,16 @@ def mev(V, log_gi, av, choice):
 
     :rtype: biogeme.expressions.expr.Expression
     """
-    return exp(logmev(V, log_gi, av, choice))
+    return exp(logmev(util, log_gi, av, choice))
 
 
-def logmev_endogenousSampling(V, log_gi, av, correction, choice):
+def logmev_endogenous_sampling(
+    util: dict[int, ExpressionOrNumeric],
+    log_gi: dict[int, Expression],
+    av: dict[int, ExpressionOrNumeric] | None,
+    correction: dict[int, ExpressionOrNumeric],
+    choice: ExpressionOrNumeric,
+):
     """Log of choice probability for a MEV model, including the
     correction for endogenous sampling as proposed by `Bierlaire, Bolduc
     and McFadden (2008)`_.
@@ -103,10 +120,10 @@ def logmev_endogenousSampling(V, log_gi, av, correction, choice):
     .. _`Bierlaire, Bolduc and McFadden (2008)`:
        http://dx.doi.org/10.1016/j.trb.2007.09.003
 
-    :param V: dict of objects representing the utility functions of
+    :param util: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
-    :type V: dict(int:biogeme.expressions.expr.Expression)
+    :type util: dict(int:biogeme.expressions.expr.Expression)
 
     :param log_gi: a dictionary mapping each alternative id with the function
 
@@ -120,7 +137,7 @@ def logmev_endogenousSampling(V, log_gi, av, correction, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -146,12 +163,18 @@ def logmev_endogenousSampling(V, log_gi, av, correction, choice):
     :rtype: biogeme.expressions.expr.Expression
 
     """
-    H = {i: v + log_gi[i] + correction[i] for i, v in V.items()}
-    log_p = _bioLogLogit(H, av, choice)
+    h = {i: v + log_gi[i] + correction[i] for i, v in util.items()}
+    log_p = _bioLogLogit(h, av, choice)
     return log_p
 
 
-def mev_endogenousSampling(V, log_gi, av, correction, choice):
+def mev_endogenous_sampling(
+    util: dict[int, ExpressionOrNumeric],
+    log_gi: dict[int, Expression],
+    av: dict[int, ExpressionOrNumeric] | None,
+    correction: dict[int, ExpressionOrNumeric],
+    choice: ExpressionOrNumeric,
+):
     """Choice probability for a MEV model, including the correction
     for endogenous sampling as proposed by
     `Bierlaire, Bolduc and McFadden (2008)`_.
@@ -159,10 +182,10 @@ def mev_endogenousSampling(V, log_gi, av, correction, choice):
     .. _`Bierlaire, Bolduc and McFadden (2008)`:
            http://dx.doi.org/10.1016/j.trb.2007.09.003
 
-    :param V: dict of objects representing the utility functions of
+    :param util: dict of objects representing the utility functions of
               each alternative, indexed by numerical ids.
 
-    :type V: dict(int:biogeme.expressions.expr.Expression)
+    :type util: dict(int:biogeme.expressions.expr.Expression)
 
     :param log_gi: a dictionary mapping each alternative id with the function
 
@@ -176,7 +199,7 @@ def mev_endogenousSampling(V, log_gi, av, correction, choice):
 
     :param av: dict of objects representing the availability of each
                alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with V, or
+               by numerical ids. Must be consistent with util, or
                None. In this case, all alternatives are supposed to be
                always available.
 
@@ -202,4 +225,4 @@ def mev_endogenousSampling(V, log_gi, av, correction, choice):
     :rtype: biogeme.expressions.expr.Expression
 
     """
-    return exp(logmev_endogenousSampling(V, log_gi, av, correction, choice))
+    return exp(logmev_endogenous_sampling(util, log_gi, av, correction, choice))

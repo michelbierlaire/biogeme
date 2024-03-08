@@ -182,7 +182,7 @@ class GenerateModel:
         for i, the_utility in self.utilities.items():
             list_of_terms = []
             for nest in nests:
-                alpha = Variable(f"{CNL_PREFIX}{nest.name}_{i}")
+                alpha = Variable(f"{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}")
                 mu_param = nest.nest_param
                 mev_sum = dict_of_mev_sums[nest.name] ** ((1.0 / mu_param) - 1.0)
                 mev_term = (

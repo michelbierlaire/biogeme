@@ -3,29 +3,75 @@
 :author: Michel Bierlaire
 :date: Sat Jul 30 12:36:40 2022
 """
+
+from __future__ import annotations
 import logging
-from typing import NamedTuple, Dict, List, TYPE_CHECKING
-import biogeme.exceptions as excep
+from typing import (
+    NamedTuple,
+    Dict,
+    List,
+    TYPE_CHECKING,
+    TypeVar,
+    Generic,
+    Type,
+    Iterable,
+)
+
+import numpy as np
+import pandas as pd
+
+from biogeme.exceptions import BiogemeError
+from ..deprecated import deprecated
 
 if TYPE_CHECKING:
-    from .base_expressions import Expression
+    from .base_expressions import Expression, Elementary
+    from . import Beta, RandomVariable, bioDraws, Variable
+    from ..database import Database
 
 from .elementary_types import TypeOfElementaryExpression
 
+T = TypeVar('T', bound='Elementary')
 
-class ElementsTuple(NamedTuple):
-    expressions: Dict[str, 'Expression']
-    indices: Dict[str, int]
+
+class ElementsTuple(Generic[T], NamedTuple):
+    """Data structure for elementary expressions"""
+
+    expressions: Dict[str, T] | None
+    indices: Dict[str, int] | None
     names: List[str]
 
 
 logger = logging.getLogger(__name__)
 
 
+def expressions_names_indices(dict_of_elements: dict[str, Type[T]]) -> ElementsTuple[T]:
+    """Assigns consecutive indices to expressions
+
+    :param dict_of_elements: dictionary of expressions. The keys
+        are the names.
+    :type dict_of_elements: dict(str: biogeme.expressions.Expression)
+
+    :return: a tuple with the original dictionary, the indices,
+        and the sorted names.
+    :rtype: ElementsTuple
+    """
+    indices = {}
+    names = sorted(dict_of_elements)
+    for i, v in enumerate(names):
+        indices[v] = i
+
+    return ElementsTuple(expressions=dict_of_elements, indices=indices, names=names)
+
+
 class IdManager:
     """Class combining managing the ids of an arithmetic expression."""
 
-    def __init__(self, expressions, database, number_of_draws):
+    def __init__(
+        self,
+        expressions: Iterable[Expression],
+        database: Database,
+        number_of_draws: int,
+    ):
         """Ctor
 
         :param expressions: list of expressions
@@ -41,44 +87,44 @@ class IdManager:
             no database is provided.
 
         """
-        self.expressions = expressions
-        self.database = database
-        self.number_of_draws = number_of_draws
-        self.elementary_expressions = None
-        self.free_betas = None
-        self.free_betas_values = None
-        self.number_of_free_betas = 0
-        self.fixed_betas = None
-        self.fixed_betas_values = None
-        self.bounds = None
-        self.random_variables = None
-        self.draws = None
-        self.variables = None
-        self.requires_draws = False
+        self.expressions: list[Expression] = list(expressions)
+        self.database: Database = database
+        self.number_of_draws: int = number_of_draws
+        self.elementary_expressions: ElementsTuple[Elementary] | None = None
+        self.free_betas: ElementsTuple[Beta] | None = None
+        self.free_betas_values: np.ndarray | None = None
+        self.number_of_free_betas: int = 0
+        self.fixed_betas: ElementsTuple[Beta] | None = None
+        self.fixed_betas_values: np.ndarray | None = None
+        self.bounds: list[tuple[float, float]] | None = None
+        self.random_variables: ElementsTuple[RandomVariable] | None = None
+        self.draws: ElementsTuple[bioDraws] | None = None
+        self.variables: ElementsTuple[Variable] | None = None
+        self.requires_draws: bool = False
         for f in self.expressions:
             the_variables = f.set_of_elementary_expression(
                 the_type=TypeOfElementaryExpression.VARIABLE
             )
             if the_variables and database is None:
-                raise excep.BiogemeError(
+                raise BiogemeError(
                     f'No database is provided and an expression '
                     f'contains variables: {the_variables}'
                 )
-            if f.embedExpression('MonteCarlo') or f.embedExpression('bioDraws'):
+            if f.embed_expression('MonteCarlo') or f.embed_expression('bioDraws'):
                 self.requires_draws = True
 
         self.prepare()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.elementary_expressions.indices)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.elementary_expressions.indices)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.elementary_expressions == other.elementary_expressions
 
-    def audit(self):
+    def audit(self) -> tuple[list[str], list[str]]:
         """Performs various checks on the expressions.
 
         :return: tuple listOfErrors, listOfWarnings
@@ -86,62 +132,27 @@ class IdManager:
         """
         list_of_errors = []
         list_of_warnings = []
-        if self.database.isPanel():
-            dict_of_variables = self.expressions.dictOfVariablesOutsidePanelTrajectory()
-            if dict_of_variables:
-                err_msg = (
-                    f'Error in the loglikelihood function. '
-                    f'Some variables are not inside '
-                    f'PanelLikelihoodTrajectory: '
-                    f'{dict_of_variables.keys()} .'
-                    f'If the database is organized as panel data, '
-                    f'all variables must be used inside a '
-                    f'PanelLikelihoodTrajectory. '
-                    f'If it is not consistent with your model, '
-                    f'generate a flat '
-                    f'version of the data using the function '
-                    f'`generateFlatPanelDataframe`.'
-                )
-                list_of_errors.append(err_msg)
+        if self.database.is_panel():
+            for the_expression in self.expressions:
+                dict_of_variables = the_expression.check_panel_trajectory()
+                if dict_of_variables:
+                    err_msg = (
+                        f'Error in the loglikelihood function. '
+                        f'Some variables are not inside '
+                        f'PanelLikelihoodTrajectory: '
+                        f'{dict_of_variables} .'
+                        f'If the database is organized as panel data, '
+                        f'all variables must be used inside a '
+                        f'PanelLikelihoodTrajectory. '
+                        f'If it is not consistent with your model, '
+                        f'generate a flat '
+                        f'version of the data using the function '
+                        f'`generateFlatPanelDataframe`.'
+                    )
+                    list_of_errors.append(err_msg)
         return list_of_errors, list_of_warnings
 
-    def change_init_values(self, betas):
-        """Modifies the values of the pameters
-
-        :param betas: dictionary where the keys are the names of the
-                      parameters, and the values are the new value for
-                      the parameters.
-        :type betas: dict(string:float)
-        """
-
-        def get_value(name):
-            v = betas.get(name)
-            if v is None:
-                return self.free_betas.expressions[name].initValue
-            return v
-
-        self.free_betas_values = [get_value(x) for x in self.free_betas.names]
-
-    def expressions_names_indices(self, dict_of_elements):
-        """Assigns consecutive indices to expressions
-
-        :param dict_of_elements: dictionary of expressions. The keys
-            are the names.
-        :type dict_of_elements: dict(str: biogeme.expressions.Expression)
-
-        :return: a tuple with the original dictionary, the indices,
-            and the sorted names.
-        :rtype: ElementsTuple
-        """
-        indices = {}
-        names = {}
-        names = sorted(dict_of_elements)
-        for i, v in enumerate(names):
-            indices[v] = i
-
-        return ElementsTuple(expressions=dict_of_elements, indices=indices, names=names)
-
-    def prepare(self):
+    def prepare(self) -> None:
         """Extract from the formulas the literals (parameters,
         variables, random variables) and decide a numbering convention.
 
@@ -168,7 +179,7 @@ class IdManager:
             )
             expr = dict(expr, **d)
 
-        self.free_betas = self.expressions_names_indices(expr)
+        self.free_betas = expressions_names_indices(expr)
 
         self.bounds = [
             (
@@ -178,14 +189,14 @@ class IdManager:
             for b in self.free_betas.names
         ]
         self.number_of_free_betas = len(self.free_betas.names)
-        # Fixed parameters (not to be estimated), sorted by alphatical order.
+        # Fixed parameters (not to be estimated), sorted by alphabetical order.
         expr = {}
         for f in self.expressions:
             d = f.dict_of_elementary_expression(
                 the_type=TypeOfElementaryExpression.FIXED_BETA
             )
             expr = dict(expr, **d)
-        self.fixed_betas = self.expressions_names_indices(expr)
+        self.fixed_betas = expressions_names_indices(expr)
 
         # Random variables for numerical integration
         expr = {}
@@ -194,7 +205,7 @@ class IdManager:
                 the_type=TypeOfElementaryExpression.RANDOM_VARIABLE
             )
             expr = dict(expr, **d)
-        self.random_variables = self.expressions_names_indices(expr)
+        self.random_variables = expressions_names_indices(expr)
 
         # Draws
         expr = {}
@@ -203,13 +214,13 @@ class IdManager:
                 the_type=TypeOfElementaryExpression.DRAWS
             )
             expr = dict(expr, **d)
-        self.draws = self.expressions_names_indices(expr)
+        self.draws = expressions_names_indices(expr)
 
         # Variables
         # Here, we do not extract the variables from the
         # formulas. Instead, we use all the variables in the database.
         if self.database is not None:
-            variables_names = list(self.database.data.columns.values)
+            variables_names = self.database.data.columns.to_list()
             variables_indices = {}
             for i, v in enumerate(variables_names):
                 variables_indices[v] = i
@@ -240,7 +251,7 @@ class IdManager:
                 f'The following elementary expressions are defined '
                 f'more than once: {duplicates}.'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         elementary_expressions_indices = {
             v: i for i, v in enumerate(elementary_expressions_names)
@@ -260,11 +271,11 @@ class IdManager:
         ]
 
         if self.requires_draws:
-            self.database.generateDraws(
+            self.database.generate_draws(
                 self.draws.expressions, self.draws.names, self.number_of_draws
             )
 
-    def setDataMap(self, sample):
+    def set_data_map(self, sample: pd.DataFrame):
         """Specify the map of the panel data in the expressions
 
         :param sample: map of the panel data (see
@@ -272,9 +283,13 @@ class IdManager:
         :type sample: pandas.DataFrame
         """
         for f in self.expressions:
-            f.cpp.setDataMap(sample)
+            f.cpp.set_data_map(sample)
 
-    def setData(self, sample):
+    @deprecated
+    def setDataMap(self, sample: pd.DataFrame):
+        pass
+
+    def set_data(self, sample: pd.DataFrame):
         """Specify the sample
 
         :param sample: map of the panel data (see
@@ -283,4 +298,8 @@ class IdManager:
 
         """
         for f in self.expressions:
-            f.cpp.setData(sample)
+            f.cpp.set_data(sample)
+
+    @deprecated
+    def setData(self, sample: pd.DataFrame):
+        pass

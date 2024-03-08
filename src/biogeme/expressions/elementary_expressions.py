@@ -4,11 +4,19 @@
 :date: Tue Mar  7 18:38:21 2023
 
 """
+
+from __future__ import annotations
 import logging
+from typing import TYPE_CHECKING
+
 import biogeme.exceptions as excep
 from .base_expressions import Expression
 from .elementary_types import TypeOfElementaryExpression
 from .numeric_tools import validate, MAX_VALUE
+from ..deprecated import deprecated
+
+if TYPE_CHECKING:
+    from biogeme.database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -19,34 +27,34 @@ class Elementary(Expression):
     It is typically defined by a name appearing in an expression. It
     can be a variable (from the database), or a parameter (fixed or to
     be estimated using maximum likelihood), a random variable for
-    numrerical integration, or Monte-Carlo integration.
+    numerical integration, or Monte-Carlo integration.
 
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """Constructor
 
-        :param name: name of the elementary experession.
+        :param name: name of the elementary expression.
         :type name: string
 
         """
         Expression.__init__(self)
-        self.name = name  #: name of the elementary expressiom
+        self.name = name  #: name of the elementary expression
 
         self.elementaryIndex = None
         """The id should be unique for all elementary expressions
         appearing in a given set of formulas.
         """
 
-    def __str__(self):
+    def __str__(self) -> str:
         """string method
 
         :return: name of the expression
         :rtype: str
         """
-        return f'{self.name}'
+        return f"{self.name}"
 
-    def getStatusIdManager(self):
+    def get_status_id_manager(self) -> tuple[list[str], list[str]]:
         """Check the elementary expressions that are associated with
         an ID manager.
 
@@ -58,7 +66,7 @@ class Elementary(Expression):
             return [], [self.name]
         return [self.name], []
 
-    def getElementaryExpression(self, name):
+    def get_elementary_expression(self, name: str) -> Expression | None:
         """
 
         :return: an elementary expression from its name if it appears in the
@@ -70,7 +78,9 @@ class Elementary(Expression):
 
         return None
 
-    def rename_elementary(self, names, prefix=None, suffix=None):
+    def rename_elementary(
+        self, names: list[str], prefix: str | None = None, suffix: str | None = None
+    ):
         """Rename elementary expressions by adding a prefix and/or a suffix
 
         :param names: names of expressions to rename
@@ -86,11 +96,11 @@ class Elementary(Expression):
         """
         if self.name in names:
             if prefix is not None:
-                self.name = f'{prefix}{self.name}'
+                self.name = f"{prefix}{self.name}"
             if suffix is not None:
-                self.name = f'{self.name}{suffix}'
+                self.name = f"{self.name}{suffix}"
 
-    def number_of_multiple_expressions(self):
+    def number_of_multiple_expressions(self) -> int:
         """Count the number of "parallel" expressions
 
         :return: the number of expressions
@@ -104,33 +114,33 @@ class bioDraws(Elementary):
     Draws for Monte-Carlo integration
     """
 
-    def __init__(self, name, drawType):
+    def __init__(self, name: str, draw_type: str):
         """Constructor
 
         :param name: name of the random variable with a series of draws.
         :type name: string
-        :param drawType: type of draws.
-        :type drawType: string
+        :param draw_type: type of draws.
+        :type draw_type: string
         """
         Elementary.__init__(self, name)
-        self.drawType = drawType
+        self.drawType = draw_type
         self.drawId = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'bioDraws("{self.name}", "{self.drawType}")'
 
-    def check_draws(self):
-        """List of draws defined outside of 'MonteCarlo'
+    def check_draws(self) -> set[str]:
+        """Set of draws defined outside of 'MonteCarlo'
 
         :return: List of names of variables
         :rtype: list(str)
         """
         return {self.name}
 
-    def setIdManager(self, id_manager=None):
+    def set_id_manager(self, id_manager: 'IdManager | None' = None):
         """The ID manager contains the IDs of the elementary expressions.
 
-        It is externally created, as it may nee to coordinate the
+        It is externally created, as it may need to coordinate the
         numbering of several expressions. It is stored only in the
         expressions of type Elementary.
 
@@ -146,7 +156,7 @@ class bioDraws(Elementary):
         self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         self.drawId = self.id_manager.draws.indices[self.name]
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -155,10 +165,10 @@ class bioDraws(Elementary):
         The list contains the following elements:
 
             1. the name of the expression between < >
-            2. the id of the expression between { }, preceeded by a comma
+            2. the id of the expression between { }, preceded by a comma
             3. the name of the draws
-            4. the unique ID (preceeded by a comma),
-            5. the draw ID (preceeded by a comma).
+            4. the unique ID (preceded by a comma),
+            5. the draw ID (preceded by a comma).
 
         Consider the following expression:
 
@@ -200,25 +210,27 @@ class bioDraws(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary ' f'expression {self.name}.'
+                f"No id has been defined for elementary " f"expression {self.name}."
             )
             raise excep.BiogemeError(error_msg)
         if self.drawId is None:
-            error_msg = f'No id has been defined for draw {self.name}.'
+            error_msg = f"No id has been defined for draw {self.name}."
             raise excep.BiogemeError(error_msg)
-        signature = f'<{self.getClassName()}>'
-        signature += f'{{{self.get_id()}}}'
+        signature = f"<{self.get_class_name()}>"
+        signature += f"{{{self.get_id()}}}"
         signature += f'"{self.name}",{self.elementaryIndex},{self.drawId}'
         return [signature.encode()]
 
-    def dict_of_elementary_expression(self, the_type):
-        """Extract a dict with all elementary expressions of a dpecific type
+    def dict_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> dict[str, Elementary]:
+        """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
         :type  the_type: TypeOfElementaryExpression
         """
         if the_type == TypeOfElementaryExpression.DRAWS:
-            return {self.name: self.drawType}
+            return {self.name: self}
         return {}
 
 
@@ -229,7 +241,7 @@ class Variable(Elementary):
     model. Typically, they come from the data set.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """Constructor
 
         :param name: name of the variable.
@@ -239,15 +251,15 @@ class Variable(Elementary):
         # Index of the variable
         self.variableId = None
 
-    def check_panel_trajectory(self):
-        """List of variables defined outside of 'PanelLikelihoodTrajectory'
+    def check_panel_trajectory(self) -> set[str]:
+        """Set of variables defined outside of 'PanelLikelihoodTrajectory'
 
         :return: List of names of variables
         :rtype: list(str)
         """
         return {self.name}
 
-    def setIdManager(self, id_manager=None):
+    def set_id_manager(self, id_manager: 'IdManager | None' = None):
         """The ID manager contains the IDs of the elementary expressions.
 
         It is externally created, as it may need to coordinate the
@@ -267,7 +279,9 @@ class Variable(Elementary):
         self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         self.variableId = self.id_manager.variables.indices[self.name]
 
-    def dict_of_elementary_expression(self, the_type):
+    def dict_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> dict[str:Elementary]:
         """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
@@ -277,7 +291,7 @@ class Variable(Elementary):
             return {self.name: self}
         return {}
 
-    def audit(self, database=None):
+    def audit(self, database: 'Database | None' = None) -> tuple[list[str], list[str]]:
         """Performs various checks on the expressions.
 
         :param database: database object
@@ -295,15 +309,15 @@ class Variable(Elementary):
         list_of_warnings = []
         if database is None:
             raise excep.BiogemeError(
-                'The database must be provided to audit the variable.'
+                "The database must be provided to audit the variable."
             )
 
         if self.name not in database.data.columns:
-            the_error = f'Variable {self.name} not found in the database.'
+            the_error = f"Variable {self.name} not found in the database."
             list_of_errors.append(the_error)
         return list_of_errors, list_of_warnings
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -314,8 +328,8 @@ class Variable(Elementary):
             1. the name of the expression between < >
             2. the id of the expression between { }
             3. the name of the variable,
-            4. the unique ID, preceeded by a comma.
-            5. the variabvle ID, preceeded by a comma.
+            4. the unique ID, preceded by a comma.
+            5. the variable ID, preceded by a comma.
 
         Consider the following expression:
 
@@ -357,14 +371,14 @@ class Variable(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary expression ' f'{self.name}.'
+                f"No id has been defined for elementary expression " f"{self.name}."
             )
             raise excep.BiogemeError(error_msg)
         if self.variableId is None:
-            error_msg = f'No id has been defined for variable {self.name}.'
+            error_msg = f"No id has been defined for variable {self.name}."
             raise excep.BiogemeError(error_msg)
-        signature = f'<{self.getClassName()}>'
-        signature += f'{{{self.get_id()}}}'
+        signature = f"<{self.get_class_name()}>"
+        signature += f"{{{self.get_id()}}}"
         signature += f'"{self.name}",{self.elementaryIndex},{self.variableId}'
         return [signature.encode()]
 
@@ -377,25 +391,22 @@ class DefineVariable(Variable):
     recalculated each time it is needed.
     """
 
-    def __init__(self, name, expression, database):
+    def __init__(self, name: str, expression: Expression, database: Database):
         """Constructor
 
         :param name: name of the variable.
-        :type name: string
         :param expression: formula that defines the variable
-        :type expression:  biogeme.expressions.Expression
         :param database: object identifying the database.
-        :type database: biogeme.database.Database
 
         :raise BiogemeError: if the expression is invalid, that is
-            neither a numeric value or a
+            neither a numeric value nor a
             biogeme.expressions.Expression object.
         """
         raise excep.BiogemeError(
-            'This expression is obsolete. Use the same function in the '
-            'database object. Replace "new_var = DefineVariable(\'NEW_VAR\','
+            "This expression is obsolete. Use the same function in the "
+            "database object. Replace \"new_var = DefineVariable('NEW_VAR',"
             ' expression, database)" by  "new_var = database.DefineVariable'
-            '(\'NEW_VAR\', expression)"'
+            "('NEW_VAR', expression)\""
         )
 
 
@@ -404,7 +415,7 @@ class RandomVariable(Elementary):
     Random variable for numerical integration
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str):
         """Constructor
 
         :param name: name of the random variable involved in the integration.
@@ -412,20 +423,20 @@ class RandomVariable(Elementary):
         """
         Elementary.__init__(self, name)
         # Index of the random variable
-        self.rvId = None
+        self.rvId: int | None = None
 
-    def check_rv(self):
-        """List of random variables defined outside of 'Integrate'
+    def check_rv(self) -> set[str]:
+        """Set of random variables defined outside of 'Integrate'
 
         :return: List of names of variables
         :rtype: list(str)
         """
         return {self.name}
 
-    def setIdManager(self, id_manager=None):
+    def set_id_manager(self, id_manager: 'IdManager | None' = None):
         """The ID manager contains the IDs of the elementary expressions.
 
-        It is externally created, as it may nee to coordinate the
+        It is externally created, as it may need to coordinate the
         numbering of several expressions. It is stored only in the
         expressions of type Elementary.
 
@@ -441,7 +452,9 @@ class RandomVariable(Elementary):
         self.elementaryIndex = self.id_manager.elementary_expressions.indices[self.name]
         self.rvId = self.id_manager.random_variables.indices[self.name]
 
-    def dict_of_elementary_expression(self, the_type):
+    def dict_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> dict[str:Elementary]:
         """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
@@ -451,7 +464,7 @@ class RandomVariable(Elementary):
             return {self.name: self}
         return {}
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -462,7 +475,7 @@ class RandomVariable(Elementary):
             1. the name of the expression between < >
             2. the id of the expression between { }
             3. the name of the random variable,
-            4. the unique ID, preceeded by a comma,
+            4. the unique ID, preceded by a comma,
             5. the ID of the random variable.
 
         Consider the following expression:
@@ -505,15 +518,15 @@ class RandomVariable(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary ' f'expression {self.name}.'
+                f"No id has been defined for elementary " f"expression {self.name}."
             )
             raise excep.BiogemeError(error_msg)
         if self.rvId is None:
-            error_msg = f'No id has been defined for random variable {self.name}.'
+            error_msg = f"No id has been defined for random variable {self.name}."
             raise excep.BiogemeError(error_msg)
 
-        signature = f'<{self.getClassName()}>'
-        signature += f'{{{self.get_id()}}}'
+        signature = f"<{self.get_class_name()}>"
+        signature += f"{{{self.get_id()}}}"
         signature += f'"{self.name}",{self.elementaryIndex},{self.rvId}'
         return [signature.encode()]
 
@@ -523,38 +536,40 @@ class Beta(Elementary):
     Unknown parameters to be estimated from data.
     """
 
-    def __init__(self, name, value, lowerbound, upperbound, status):
+    def __init__(
+        self,
+        name: str,
+        value: float,
+        lowerbound: float | None,
+        upperbound: float | None,
+        status: int,
+    ):
         """Constructor
 
         :param name: name of the parameter.
-        :type name: string
         :param value: default value.
-        :type value: float
         :param lowerbound: if different from None, imposes a lower
           bound on the value of the parameter during the optimization.
-        :type lowerbound: float
         :param upperbound: if different from None, imposes an upper
           bound on the value of the parameter during the optimization.
-        :type upperbound: float
         :param status: if different from 0, the parameter is fixed to
           its default value, and not modified by the optimization algorithm.
-        :type status: int
 
         :raise BiogemeError: if the first parameter is not a str.
 
-        :raise BiogemeError: if the second parameter is not a int or a float.
+        :raise BiogemeError: if the second parameter is not an int or a float.
         """
 
         if not isinstance(value, (int, float)):
             error_msg = (
-                f'The second parameter for {name} must be '
-                f'a float and not a {type(value)}: {value}'
+                f"The second parameter for {name} must be "
+                f"a float and not a {type(value)}: {value}"
             )
             raise excep.BiogemeError(error_msg)
         if not isinstance(name, str):
             error_msg = (
-                f'The first parameter must be a string and '
-                f'not a {type(name)}: {name}'
+                f"The first parameter must be a string and "
+                f"not a {type(name)}: {name}"
             )
             raise excep.BiogemeError(error_msg)
         Elementary.__init__(self, name)
@@ -574,7 +589,7 @@ class Beta(Elementary):
         self.status = status
         self.betaId = None
 
-    def setIdManager(self, id_manager=None):
+    def set_id_manager(self, id_manager: 'IdManager | None'):
         """The ID manager contains the IDs of the elementary expressions.
 
         It is externally created, as it may need to coordinate the
@@ -596,14 +611,19 @@ class Beta(Elementary):
         else:
             self.betaId = self.id_manager.free_betas.indices[self.name]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"Beta('{self.name}', {self.initValue}, {self.lb}, "
             f"{self.ub}, {self.status})"
         )
 
-    def fix_betas(self, beta_values, prefix=None, suffix=None):
-        """Fix all the values of the beta parameters appearing in the
+    def fix_betas(
+        self,
+        beta_values: dict[str, float],
+        prefix: str | None = None,
+        suffix: str | None = None,
+    ):
+        """Fix all the values of the Beta parameters appearing in the
         dictionary
 
         :param beta_values: dictionary containing the betas to be
@@ -623,11 +643,13 @@ class Beta(Elementary):
             self.initValue = beta_values[self.name]
             self.status = 1
             if prefix is not None:
-                self.name = f'{prefix}{self.name}'
+                self.name = f"{prefix}{self.name}"
             if suffix is not None:
-                self.name = f'{self.name}{suffix}'
+                self.name = f"{self.name}{suffix}"
 
-    def dict_of_elementary_expression(self, the_type):
+    def dict_of_elementary_expression(
+        self, the_type: TypeOfElementaryExpression
+    ) -> dict[str, Elementary]:
         """Extract a dict with all elementary expressions of a specific type
 
         :param the_type: the type of expression
@@ -649,7 +671,7 @@ class Beta(Elementary):
 
         return {}
 
-    def getValue(self):
+    def get_value(self) -> float:
         """Evaluates the value of the expression
 
         :return: value of the expression
@@ -659,12 +681,16 @@ class Beta(Elementary):
         """
         if self.status == 0:
             if self.estimated_value is None:
-                error_msg = f'Parameter {self.name} must be estimated from data.'
+                error_msg = f"Parameter {self.name} must be estimated from data."
                 raise excep.BiogemeError(error_msg)
             return self.estimated_value
         return self.initValue
 
-    def change_init_values(self, betas):
+    @deprecated(get_value)
+    def getValue(self) -> float:
+        pass
+
+    def change_init_values(self, betas: dict[str, float]):
         """Modifies the initial values of the Beta parameters.
 
         The fact that the parameters are fixed or free is irrelevant here.
@@ -679,7 +705,7 @@ class Beta(Elementary):
             self.initValue = betas[self.name]
 
     def set_estimated_values(self, betas: dict[str, float]):
-        """Set the estimated values of beta
+        """Set the estimated values of Beta
 
         :param betas: dictionary where the keys are the names of the
                       parameters, and the values are the new value for
@@ -688,7 +714,7 @@ class Beta(Elementary):
         if self.name in betas:
             self.estimated_value = betas[self.name]
 
-    def getSignature(self):
+    def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.
 
         This is designed to be communicated to C++, so that the
@@ -700,8 +726,8 @@ class Beta(Elementary):
             2. the id of the expression between { }
             3. the name of the parameter,
             4. the status between [ ]
-            5. the unique ID,  preceeded by a comma
-            6. the beta ID,  preceeded by a comma
+            5. the unique ID,  preceded by a comma
+            6. the Beta ID,  preceded by a comma
 
 
         Consider the following expression:
@@ -744,17 +770,17 @@ class Beta(Elementary):
         """
         if self.elementaryIndex is None:
             error_msg = (
-                f'No id has been defined for elementary ' f'expression {self.name}.'
+                f"No id has been defined for elementary " f"expression {self.name}."
             )
             raise excep.BiogemeError(error_msg)
         if self.betaId is None:
             raise excep.BiogemeError(
-                f'No id has been defined for parameter {self.name}.'
+                f"No id has been defined for parameter {self.name}."
             )
 
-        signature = f'<{self.getClassName()}>'
-        signature += f'{{{self.get_id()}}}'
+        signature = f"<{self.get_class_name()}>"
+        signature += f"{{{self.get_id()}}}"
         signature += (
-            f'"{self.name}"[{self.status}],' f'{self.elementaryIndex},{self.betaId}'
+            f'"{self.name}"[{self.status}],' f"{self.elementaryIndex},{self.betaId}"
         )
         return [signature.encode()]
