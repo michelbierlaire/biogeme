@@ -87,5 +87,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

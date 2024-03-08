@@ -10,11 +10,12 @@ Illustration of the application of an estimated model.
 """
 
 import sys
+
 import biogeme.biogeme as bio
-from biogeme import models
-import biogeme.results as res
-from biogeme.expressions import Beta, Derive
 import biogeme.exceptions as excep
+import biogeme.results as res
+from biogeme import models
+from biogeme.expressions import Beta, Derive
 from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
 
 # %%
@@ -24,13 +25,10 @@ from swissmetro_data import (
     SM_AV,
     CAR_AV_SP,
     TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
     TRAIN_TT,
     TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_TT,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
     CAR_TT,
     CAR_CO_SCALED,
 )
@@ -91,18 +89,18 @@ nests = NestsForCrossNestedLogit(
 # %%
 # Read the estimation results from the pickle file.
 try:
-    results = res.bioResults(pickleFile='saved_results/b11cnl.pickle')
+    results = res.bioResults(pickle_file='saved_results/b11cnl.pickle')
 except excep.BiogemeError:
     print('Run first the script b11cnl.py in order to generate the file 11cnl.pickle.')
     sys.exit()
 
 # %%
-print('Estimation results: ', results.getEstimatedParameters())
+print('Estimation results: ', results.get_estimated_parameters())
 
 # %%
 print('Calculating correlation matrix. It may generate numerical warnings from scipy.')
 corr = nests.correlation(
-    parameters=results.getBetaValues(),
+    parameters=results.get_beta_values(),
     alternatives_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'},
 )
 corr
@@ -139,7 +137,7 @@ biosim.modelName = 'b11cnl_simul'
 
 # %%
 # Perform the simulation.
-simresults = biosim.simulate(results.getBetaValues())
+simresults = biosim.simulate(results.get_beta_values())
 
 # %%
 print('Simulation results')

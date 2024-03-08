@@ -22,6 +22,7 @@ from biogeme.expressions import (
     PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
+    ExpressionOrNumeric,
 )
 
 # %%
@@ -58,7 +59,7 @@ B_TIME = [Beta(f'B_TIME_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CL
 B_TIME_S = [
     Beta(f'B_TIME_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
-B_TIME_RND = [
+B_TIME_RND: list[ExpressionOrNumeric] = [
     B_TIME[i] + B_TIME_S[i] * bioDraws(f'B_TIME_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
@@ -157,5 +158,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

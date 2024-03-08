@@ -44,7 +44,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # for Monte-Carlo simulation.
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
 
 # %%
 # Define values for these parameters
@@ -71,7 +71,7 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Conditional on B_TIME_RND, we have a logit model (called the kernel).
+# Conditional on b_time_rnd, we have a logit model (called the kernel).
 prob_chosen = models.logit(V, av, CHOICE)
 
 # %%

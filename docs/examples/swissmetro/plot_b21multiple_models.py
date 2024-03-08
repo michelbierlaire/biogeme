@@ -14,6 +14,7 @@ Assisted specification
 :date: Wed Apr 12 16:58:49 2023
 
 """
+
 import biogeme.biogeme_logging as blog
 from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import loglikelihood_dimension
@@ -30,7 +31,7 @@ logger.info('Example b21multipleModels')
 #    - the biogeme object containing the specifications and the
 #      database,
 #    - an object defining the objectives to minimize. Here, we use the
-#      opposite of the log lieklihood and the number of estimated
+#      opposite of the log likelihood and the number of estimated
 #      parameters.
 #    - the name of the file where the estimated are saved, and
 #      organized into a Pareto set.

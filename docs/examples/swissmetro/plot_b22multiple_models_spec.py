@@ -12,6 +12,7 @@ estimation. It is imported by other scripts:
 :date: Fri Jul 21 17:56:47 2023
 
 """
+
 from biogeme import models
 import biogeme.biogeme as bio
 from biogeme.expressions import Beta, logzero
@@ -42,8 +43,6 @@ from swissmetro_data import (
 # Parameters to be estimated.
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 B_HEADWAY = Beta('B_HEADWAY', 0, None, None, 0)
@@ -65,11 +64,11 @@ luggage_segmentation = database.generate_segmentation(
 ASC_CAR_catalog, ASC_TRAIN_catalog = segmentation_catalogs(
     generic_name='ASC',
     beta_parameters=[ASC_CAR, ASC_TRAIN],
-    potential_segmentations=[
+    potential_segmentations=(
         gender_segmentation,
         luggage_segmentation,
         GA_segmentation,
-    ],
+    ),
     maximum_number=2,
 )
 
@@ -92,15 +91,15 @@ SM_HEADWAY_catalog = Catalog.from_dict(
 ell_TT = Beta('lambda_TT', 1, None, 10, 0)
 
 # %%
-# Non linear specification for travel time.
+# Non-linear specification for travel time.
 TRAIN_TT_catalog = Catalog.from_dict(
     catalog_name='TRAIN_TT_catalog',
     dict_of_expressions={
         'linear': TRAIN_TT_SCALED,
         'log': logzero(TRAIN_TT_SCALED),
         'sqrt': TRAIN_TT_SCALED**0.5,
-        'piecewise_1': models.piecewiseFormula(TRAIN_TT_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewiseFormula(TRAIN_TT_SCALED, [0, 0.25, None]),
+        'piecewise_1': models.piecewise_formula(TRAIN_TT_SCALED, [0, 0.1, None]),
+        'piecewise_2': models.piecewise_formula(TRAIN_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(TRAIN_TT_SCALED, ell_TT),
     },
 )
@@ -111,8 +110,8 @@ SM_TT_catalog = Catalog.from_dict(
         'linear': SM_TT_SCALED,
         'log': logzero(SM_TT_SCALED),
         'sqrt': SM_TT_SCALED**0.5,
-        'piecewise_1': models.piecewiseFormula(SM_TT_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewiseFormula(SM_TT_SCALED, [0, 0.25, None]),
+        'piecewise_1': models.piecewise_formula(SM_TT_SCALED, [0, 0.1, None]),
+        'piecewise_2': models.piecewise_formula(SM_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(SM_TT_SCALED, ell_TT),
     },
     controlled_by=TRAIN_TT_catalog.controlled_by,
@@ -124,8 +123,8 @@ CAR_TT_catalog = Catalog.from_dict(
         'linear': CAR_TT_SCALED,
         'log': logzero(CAR_TT_SCALED),
         'sqrt': CAR_TT_SCALED**0.5,
-        'piecewise_1': models.piecewiseFormula(CAR_TT_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewiseFormula(CAR_TT_SCALED, [0, 0.25, None]),
+        'piecewise_1': models.piecewise_formula(CAR_TT_SCALED, [0, 0.1, None]),
+        'piecewise_2': models.piecewise_formula(CAR_TT_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(CAR_TT_SCALED, ell_TT),
     },
     controlled_by=TRAIN_TT_catalog.controlled_by,
@@ -143,8 +142,8 @@ TRAIN_COST_catalog = Catalog.from_dict(
         'linear': TRAIN_COST_SCALED,
         'log': logzero(TRAIN_COST_SCALED),
         'sqrt': TRAIN_COST_SCALED**0.5,
-        'piecewise_1': models.piecewiseFormula(TRAIN_COST_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewiseFormula(TRAIN_COST_SCALED, [0, 0.25, None]),
+        'piecewise_1': models.piecewise_formula(TRAIN_COST_SCALED, [0, 0.1, None]),
+        'piecewise_2': models.piecewise_formula(TRAIN_COST_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(TRAIN_COST_SCALED, ell_COST),
     },
 )
@@ -155,8 +154,8 @@ SM_COST_catalog = Catalog.from_dict(
         'linear': SM_COST_SCALED,
         'log': logzero(SM_COST_SCALED),
         'sqrt': SM_COST_SCALED**0.5,
-        'piecewise_1': models.piecewiseFormula(SM_COST_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewiseFormula(SM_COST_SCALED, [0, 0.25, None]),
+        'piecewise_1': models.piecewise_formula(SM_COST_SCALED, [0, 0.1, None]),
+        'piecewise_2': models.piecewise_formula(SM_COST_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(SM_COST_SCALED, ell_COST),
     },
     controlled_by=TRAIN_COST_catalog.controlled_by,
@@ -168,8 +167,8 @@ CAR_COST_catalog = Catalog.from_dict(
         'linear': CAR_CO_SCALED,
         'log': logzero(CAR_CO_SCALED),
         'sqrt': CAR_CO_SCALED**0.5,
-        'piecewise_1': models.piecewiseFormula(CAR_CO_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewiseFormula(CAR_CO_SCALED, [0, 0.25, None]),
+        'piecewise_1': models.piecewise_formula(CAR_CO_SCALED, [0, 0.1, None]),
+        'piecewise_2': models.piecewise_formula(CAR_CO_SCALED, [0, 0.25, None]),
         'boxcox': models.boxcox(CAR_CO_SCALED, ell_COST),
     },
     controlled_by=TRAIN_COST_catalog.controlled_by,

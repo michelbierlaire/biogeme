@@ -80,7 +80,7 @@ nests = nest_existing, nest_public
 
 # %%
 # The choice model is a cross-nested logit, with availability conditions.
-logprob = models.logcnl_avail(V, av, nests, CHOICE)
+logprob = models.logcnl(V, av, nests, CHOICE)
 
 # %%
 # Create the Biogeme object.
@@ -95,5 +95,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

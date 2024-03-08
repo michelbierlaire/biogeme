@@ -11,6 +11,7 @@ is imported by other scripts: :ref:`plot_b21multiple_models`, :ref:`plot_b21proc
 :date: Fri Jul 21 17:46:09 2023
 
 """
+
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, logzero
@@ -107,7 +108,7 @@ cost_segmentations = (
 ell_time = Beta('lambda_time', 1, None, 10, 0)
 
 # %%
-# Potential non linear specifications of travel time.
+# Potential non-linear specifications of travel time.
 TRAIN_TT_catalog = Catalog.from_dict(
     catalog_name='TRAIN_TT',
     dict_of_expressions={

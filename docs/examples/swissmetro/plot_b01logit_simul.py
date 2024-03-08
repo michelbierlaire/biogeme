@@ -123,5 +123,5 @@ betas = {
 # %%
 # Simulation
 #
-results = biosim.simulate(theBetaValues=betas)
+results = biosim.simulate(the_beta_values=betas)
 results.describe()

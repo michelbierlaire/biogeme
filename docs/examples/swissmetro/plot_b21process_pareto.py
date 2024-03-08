@@ -3,7 +3,7 @@
 Re-estimate the Pareto optimal models
 =====================================
 
-The assisted specification algorithm generates a file containg the
+The assisted specification algorithm generates a file containing the
 pareto optimal specification. This script is designed to re-estimate
 the Pareto optimal models. The catalog of specifications is defined in
 :ref:`plot_b21multiple_models_spec` .
@@ -12,6 +12,7 @@ the Pareto optimal models. The catalog of specifications is defined in
 :date: Wed Apr 12 17:46:14 2023
 
 """
+
 import biogeme.biogeme_logging as blog
 
 try:
@@ -22,7 +23,7 @@ except ModuleNotFoundError:
     can_plot = False
 from biogeme_optimization.exceptions import OptimizationError
 from biogeme.assisted import ParetoPostProcessing
-from biogeme.results import compileEstimationResults
+from biogeme.results import compile_estimation_results
 from plot_b21multiple_models_spec import the_biogeme
 
 PARETO_FILE_NAME = 'saved_results/b21multiple_models.pareto'
@@ -53,7 +54,7 @@ the_pareto_post.log_statistics()
 all_results = the_pareto_post.reestimate(recycle=False)
 
 # %%
-summary, description = compileEstimationResults(all_results, use_short_names=True)
+summary, description = compile_estimation_results(all_results, use_short_names=True)
 print(summary)
 
 # %%

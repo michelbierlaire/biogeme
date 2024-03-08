@@ -82,7 +82,7 @@ nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
 # observation to the log likelihood function.
 # The choice model is a nested logit, with availability conditions,
 # where the scale parameter mu is explicitly involved.
-logprob = models.lognestedMevMu(V, av, nests, CHOICE, MU)
+logprob = models.lognested_mev_mu(V, av, nests, CHOICE, MU)
 
 # %%
 # Create the Biogeme object.
@@ -97,5 +97,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

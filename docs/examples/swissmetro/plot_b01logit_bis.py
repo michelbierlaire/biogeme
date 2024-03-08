@@ -10,11 +10,13 @@ Same model as b01logit, using bioLinearUtility, segmentations
 :date: Sun Apr  9 17:03:31 2023
 
 """
+
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.segmentation as seg
-from biogeme.expressions import Beta, bioLinearUtility
+from biogeme.expressions import Beta, bioLinearUtility, LinearTermTuple
+
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -72,13 +74,22 @@ segmented_ASC_CAR = ASC_CAR_segmentation.segmented_beta()
 
 # %%
 # Definition of the utility functions.
-terms1 = [(B_TIME, TRAIN_TT_SCALED), (B_COST, TRAIN_COST_SCALED)]
+terms1 = [
+    LinearTermTuple(beta=B_TIME, x=TRAIN_TT_SCALED),
+    LinearTermTuple(beta=B_COST, x=TRAIN_COST_SCALED),
+]
 V1 = segmented_ASC_TRAIN + bioLinearUtility(terms1)
 
-terms2 = [(B_TIME, SM_TT_SCALED), (B_COST, SM_COST_SCALED)]
+terms2 = [
+    LinearTermTuple(beta=B_TIME, x=SM_TT_SCALED),
+    LinearTermTuple(beta=B_COST, x=SM_COST_SCALED),
+]
 V2 = bioLinearUtility(terms2)
 
-terms3 = [(B_TIME, CAR_TT_SCALED), (B_COST, CAR_CO_SCALED)]
+terms3 = [
+    LinearTermTuple(beta=B_TIME, x=CAR_TT_SCALED),
+    LinearTermTuple(beta=B_COST, x=CAR_CO_SCALED),
+]
 V3 = segmented_ASC_CAR + bioLinearUtility(terms3)
 
 # %%
@@ -110,7 +121,7 @@ USER_NOTES = (
 # %%
 # Create the Biogeme object.
 the_biogeme = bio.BIOGEME(
-    database, logprob, userNotes=USER_NOTES, parameter_file='b01logit_bis.toml'
+    database, logprob, user_notes=USER_NOTES, parameter_file='b01logit_bis.toml'
 )
 
 # %%
@@ -118,7 +129,7 @@ the_biogeme = bio.BIOGEME(
 #
 # As we have used starting values different from 0, the initial model
 # is not the equal probability model.
-the_biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculate_null_loglikelihood(av)
 the_biogeme.modelName = 'b01logit_bis'
 
 # %%
@@ -137,7 +148,7 @@ results = the_biogeme.estimate(run_bootstrap=True)
 #
 print('Parameters')
 print('----------')
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results
 
 # %%
@@ -145,7 +156,7 @@ pandas_results
 #
 print('General statistics')
 print('------------------')
-stats = results.getGeneralStatistics()
+stats = results.get_general_statistics()
 for description, (value, formatting) in stats.items():
     print(f'{description}: {value:{formatting}}')
 
@@ -160,11 +171,11 @@ for description, message in results.data.optimizationMessages.items():
 # %%
 # Generate the file in Alogit format.
 #
-results.writeF12(robustStdErr=True)
+results.write_f12(robust_std_err=True)
 print(f'Estimation results in ALogit format generated: {results.data.F12FileName}')
 
 # %%
 # Generate LaTeX code with the results.
 #
-results.writeLaTeX()
+results.write_latex()
 print(f'Estimation results in LaTeX format generated: {results.data.latexFileName}')

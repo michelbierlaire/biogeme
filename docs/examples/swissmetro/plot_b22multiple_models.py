@@ -19,10 +19,9 @@ algorithm.
 
 """
 
-
 import biogeme.biogeme_logging as blog
 from biogeme.results import compile_estimation_results
-from biogeme.multiobjectives import AIC_BIC_dimension
+from biogeme.multiobjectives import aic_bic_dimension
 from biogeme.assisted import AssistedSpecification
 from plot_b22multiple_models_spec import the_biogeme, PARETO_FILE_NAME
 
@@ -31,7 +30,7 @@ logger = blog.get_screen_logger(blog.INFO)
 logger.info('Example b22multiple_models')
 
 # %%
-nbr = the_biogeme.loglike.number_of_multiple_expressions()
+nbr = the_biogeme.log_like.number_of_multiple_expressions()
 if nbr is None:
     print('There are too many possible specifications to be enumerated')
 else:
@@ -50,7 +49,7 @@ else:
 #      organized into a Pareto set.
 assisted_specification = AssistedSpecification(
     biogeme_object=the_biogeme,
-    multi_objectives=AIC_BIC_dimension,
+    multi_objectives=aic_bic_dimension,
     pareto_file_name=PARETO_FILE_NAME,
 )
 

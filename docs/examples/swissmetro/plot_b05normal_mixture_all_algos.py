@@ -16,7 +16,7 @@ from biogeme.tools import format_timedelta
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.exceptions as excep
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
 
 # %%
@@ -53,7 +53,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
 
 # %%
 # Definition of the utility functions.
@@ -70,11 +70,11 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Conditional to B_TIME_RND, we have a logit model (called the kernel)
+# Conditional to b_time_rnd, we have a logit model (called the kernel)
 prob = models.logit(V, av, CHOICE)
 
 # %%
-# We integrate over B_TIME_RND using Monte-Carlo
+# We integrate over b_time_rnd using Monte-Carlo
 logprob = log(MonteCarlo(prob))
 
 # %%
@@ -94,7 +94,8 @@ initial_radius_values = [0.1, 1.0, 10.0]
 second_derivatives_values = [0.0, 0.5, 1.0]
 
 # %%
-# We run the optimization algorithm with all possible combinations of the parameters. The results are stored in a Pandas DataFrame called ``summary``.
+# We run the optimization algorithm with all possible combinations of the parameters.
+# The results are stored in a Pandas DataFrame called ``summary``.
 results = {}
 summary = pd.DataFrame(
     columns=[
@@ -115,7 +116,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     the_biogeme.infeasible_cg = infeasible_cg
     the_biogeme.initial_radius = initial_radius
     the_biogeme.second_derivatives = second_derivatives
-    # We cancel the generation of the outputfiles
+    # We cancel the generation of the output files
     the_biogeme.generate_html = False
     the_biogeme.generate_pickle = False
 
@@ -147,7 +148,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
             }
         )
 
-    except excep.BiogemeError as e:
+    except BiogemeError as e:
         print(e)
         result_data.update(
             {

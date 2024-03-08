@@ -9,6 +9,7 @@ Estimation of a logit model with several algorithms.
 :date: Tue Nov  7 17:00:09 2023
 
 """
+
 import itertools
 import pandas as pd
 from biogeme.tools import format_timedelta
@@ -77,7 +78,8 @@ initial_radius_values = [0.1, 1.0, 10.0]
 second_derivatives_values = [0.0, 0.5, 1.0]
 
 # %%
-# We run the optimization algorithm with all possible combinations of the parameters. The results are stored in a Pandas DataFrame called ``summary``.
+# We run the optimization algorithm with all possible combinations of the parameters.
+# The results are stored in a Pandas DataFrame called ``summary``.
 results = {}
 summary = pd.DataFrame(
     columns=[

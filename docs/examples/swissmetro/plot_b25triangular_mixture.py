@@ -18,6 +18,7 @@ import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
+from biogeme.native_draws import RandomNumberGeneratorTuple
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -74,20 +75,20 @@ def the_triangular_generator(sample_size: int, number_of_draws: int) -> np.ndarr
 # %%
 # Associate the function with a name.
 myRandomNumberGenerators = {
-    'TRIANGULAR': (
-        the_triangular_generator,
-        'Draws from a triangular distribution',
+    'TRIANGULAR': RandomNumberGeneratorTuple(
+        generator=the_triangular_generator,
+        description='Draws from a triangular distribution',
     )
 }
 
 # %%
 # Submit the generator to the database.
-database.setRandomNumberGenerators(myRandomNumberGenerators)
+database.set_random_number_generators(myRandomNumberGenerators)
 
 # %%
 # Define a random parameter with a triangular distribution, designed to be used
 # for Monte-Carlo simulation.
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'TRIANGULAR')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'TRIANGULAR')
 
 # %%
 # Definition of the utility functions.
@@ -104,11 +105,11 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Conditional to B_TIME_RND, we have a logit model (called the kernel)
+# Conditional to b_time_rnd, we have a logit model (called the kernel)
 prob = models.logit(V, av, CHOICE)
 
 # %%
-# We integrate over B_TIME_RND using Monte-Carlo
+# We integrate over b_time_rnd using Monte-Carlo
 logprob = log(MonteCarlo(prob))
 
 # %%
@@ -127,5 +128,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

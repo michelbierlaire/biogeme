@@ -80,7 +80,7 @@ the_biogeme.modelName = "b09nested"
 
 # %%
 # Calculate the null log likelihood for reporting.
-the_biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculate_null_loglikelihood(av)
 
 # %%
 # Estimate the parameters.
@@ -90,5 +90,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

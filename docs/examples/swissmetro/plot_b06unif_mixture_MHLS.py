@@ -61,7 +61,7 @@ B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 # %%
 # Define a random parameter, uniformly distributed, designed to be used
 # for Monte-Carlo simulation. The type of draws is set to ``NORMAL_MLHS``.
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL_MLHS')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_MLHS')
 
 # %%
 # Definition of the utility functions.
@@ -78,11 +78,11 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Conditional on B_TIME_RND, we have a logit model (called the kernel).
+# Conditional on b_time_rnd, we have a logit model (called the kernel).
 prob = exp(models.loglogit(V, av, CHOICE))
 
 # %%
-# We integrate over B_TIME_RND using Monte-Carlo
+# We integrate over b_time_rnd using Monte-Carlo
 logprob = log(MonteCarlo(prob))
 
 # %%
@@ -98,5 +98,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

@@ -58,7 +58,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL_ANTI')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_ANTI')
 
 # %%
 # We do the same for the constants, to address serial correlation.
@@ -119,5 +119,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

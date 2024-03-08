@@ -67,8 +67,8 @@ the_biogeme = bio.BIOGEME(database, logprob)
 the_biogeme.modelName = 'b08boxcox'
 
 # %%
-# Check the derivatives of the log liklelihood function around 0.
-the_biogeme.checkDerivatives(beta=[0, 0, 0, 0, 0], verbose=True)
+# Check the derivatives of the log likelihood function around 0.
+the_biogeme.check_derivatives(beta=[0, 0, 0, 0, 0], verbose=True)
 
 # %%
 # Estimate the parameters
@@ -78,5 +78,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

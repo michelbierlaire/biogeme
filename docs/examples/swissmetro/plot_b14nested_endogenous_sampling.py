@@ -78,7 +78,7 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Definition of nests. Only the non trivial nests must be defined. A
+# Definition of nests. Only the non-trivial nests must be defined. A
 # trivial nest is a nest containing exactly one alternative.  In this
 # example, we create a nest for the existing modes, that is train (1)
 # and car (3).
@@ -92,11 +92,11 @@ nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
 # %%
 # The choice model is a nested logit, with corrections for endogenous sampling
 # We first obtain the expression of the Gi function for nested logit.
-Gi = models.getMevForNested(V, av, nests)
+Gi = models.get_mev_for_nested(V, av, nests)
 
 # %%
 # Then we calculate the MEV log probability, accounting for the correction.
-logprob = models.logmev_endogenousSampling(V, Gi, av, correction, CHOICE)
+logprob = models.logmev_endogenous_sampling(V, Gi, av, correction, CHOICE)
 
 # %%
 # Create the Biogeme object.
@@ -111,5 +111,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

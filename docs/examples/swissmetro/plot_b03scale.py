@@ -88,5 +88,5 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

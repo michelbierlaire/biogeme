@@ -55,7 +55,7 @@ B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 # %%
 # Define a random parameter with a normal distribution, designed to be used
 # for quasi Monte-Carlo simulation with Halton draws (base 5).
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL_HALTON5')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_HALTON5')
 
 # %%
 # Definition of the utility functions.
@@ -72,11 +72,11 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Conditional on B_TIME_RND, we have a logit model (called the kernel)
+# Conditional on b_time_rnd, we have a logit model (called the kernel)
 prob = models.logit(V, av, CHOICE)
 
 # %%
-# We integrate over B_TIME_RND using Monte-Carlo.
+# We integrate over b_time_rnd using Monte-Carlo.
 logprob = log(MonteCarlo(prob))
 
 # %%
@@ -92,7 +92,7 @@ USER_NOTES = (
 # number of draws. To achieve that, we provide a parameter file
 # different from the default one.
 the_biogeme = bio.BIOGEME(
-    database, logprob, userNotes=USER_NOTES, parameter_file='few_draws.toml'
+    database, logprob, user_notes=USER_NOTES, parameter_file='few_draws.toml'
 )
 the_biogeme.modelName = 'b24halton_mixture'
 
@@ -104,5 +104,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

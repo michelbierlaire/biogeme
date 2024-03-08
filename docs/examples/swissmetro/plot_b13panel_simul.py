@@ -12,12 +12,12 @@ simulation. We also calculate the individual parameters.
 """
 
 import sys
-import pickle
-import biogeme.biogeme_logging as blog
+
 import biogeme.biogeme as bio
-from biogeme import models
+import biogeme.biogeme_logging as blog
 import biogeme.exceptions as excep
 import biogeme.results as res
+from biogeme import models
 from biogeme.expressions import (
     Beta,
     bioDraws,
@@ -42,7 +42,7 @@ from swissmetro_panel import (
     CAR_CO_SCALED,
 )
 
-print(f'Samples size = {database.getSampleSize()}')
+print(f'Samples size = {database.get_sample_size()}')
 
 # %%
 # We use a low number of draws, as the objective is to illustrate the
@@ -62,7 +62,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # designed to be used for Monte-Carlo simulation.
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL_ANTI')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_ANTI')
 
 # %%
 # We do the same for the constants, to address serial correlation.
@@ -110,7 +110,7 @@ logprob = log(MonteCarlo(condprobIndiv))
 # %%
 # We retrieve the parameters estimates.
 try:
-    results = res.bioResults(pickleFile='saved_results/b12panel.pickle')
+    results = res.bioResults(pickle_file='saved_results/b12panel.pickle')
 except excep.BiogemeError:
     sys.exit(
         'Run first the script b12panel.py '
@@ -121,12 +121,12 @@ except excep.BiogemeError:
 # %%
 # Simulate to recalculate the log likelihood directly from the
 # formula, without the Biogeme object
-simulated_loglike = logprob.getValue_c(
+simulated_loglike = logprob.get_value_c(
     database=database,
-    betas=results.getBetaValues(),
-    numberOfDraws=NUMBER_OF_DRAWS,
+    betas=results.get_beta_values(),
+    number_of_draws=NUMBER_OF_DRAWS,
     aggregation=True,
-    prepareIds=True,
+    prepare_ids=True,
 )
 
 # %%
@@ -148,7 +148,7 @@ biosim = bio.BIOGEME(database, simulate, parameter_file='few_draws.toml')
 
 # %%
 # Suimulation.
-sim = biosim.simulate(results.getBetaValues())
+sim = biosim.simulate(results.get_beta_values())
 
 # %%
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']

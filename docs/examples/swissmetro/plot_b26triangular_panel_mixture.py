@@ -11,6 +11,7 @@ Triangular mixture with panel data
 :date: Tue Dec  6 18:30:44 2022
 
 """
+
 import numpy as np
 import biogeme.biogeme as bio
 from biogeme import models
@@ -22,6 +23,7 @@ from biogeme.expressions import (
     PanelLikelihoodTrajectory,
     log,
 )
+from biogeme.native_draws import RandomNumberGeneratorTuple
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -56,7 +58,7 @@ def the_triangular_generator(sample_size: int, number_of_draws: int) -> np.ndarr
 # %%
 # Associate the function with a name.
 myRandomNumberGenerators = {
-    'TRIANGULAR': (
+    'TRIANGULAR': RandomNumberGeneratorTuple(
         the_triangular_generator,
         'Draws from a triangular distribution',
     )
@@ -64,7 +66,7 @@ myRandomNumberGenerators = {
 
 # %%
 # Submit the generator to the database.
-database.setRandomNumberGenerators(myRandomNumberGenerators)
+database.set_random_number_generators(myRandomNumberGenerators)
 
 # %%
 # Parameters to be estimated.
@@ -82,7 +84,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # Scale of the distribution. It is advised not to use 0 as starting
 # value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'TRIANGULAR')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'TRIANGULAR')
 
 # %%
 # We do the same for the constants, to address serial correlation.
@@ -143,5 +145,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

@@ -58,7 +58,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('B_TIME_RND', 'NORMAL')
+B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
 
 # %%
 # Definition of the utility functions.
@@ -77,7 +77,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # The estimation results are read from the pickle file.
 try:
-    results = res.bioResults(pickleFile='saved_results/b05_estimation_results.pickle')
+    results = res.bioResults(pickle_file='saved_results/b05_estimation_results.pickle')
 except BiogemeError:
     print(
         'Run first the script 05normalMixture.py in order to generate the '
@@ -86,7 +86,7 @@ except BiogemeError:
     sys.exit()
 
 # %%
-# Conditional to B_TIME_RND, we have a logit model (called the kernel)
+# Conditional to b_time_rnd, we have a logit model (called the kernel)
 prob = models.logit(V, av, CHOICE)
 
 # %%
@@ -117,7 +117,7 @@ biosim.modelName = 'b05normal_mixture_simul'
 
 # %%
 # Simulate the requested quantities. The output is a Pandas data frame.
-simresults = biosim.simulate(results.getBetaValues())
+simresults = biosim.simulate(results.get_beta_values())
 
 # %%
 # 95% confidence interval on the log likelihood.
@@ -149,17 +149,17 @@ print(
 
 # %%
 # Post processing to obtain the individual parameters.
-simresults['beta'] = simresults['Numerator'] / simresults['Denominator']
+simresults['Beta'] = simresults['Numerator'] / simresults['Denominator']
 
 # %%
 # Plot the histogram of individual parameters
 if PLOT:
-    simresults['beta'].plot(kind='hist', density=True, bins=20)
+    simresults['Beta'].plot(kind='hist', density=True, bins=20)
 
 
 # %%
-# Plot the general distribution of beta
-def normalpdf(val, mu=0.0, std=1.0):
+# Plot the general distribution of Beta
+def normalpdf(val: float, mu: float = 0.0, std: float = 1.0) -> float:
     """
     Calculate the pdf of the normal distribution, for plotting purposes.
 
@@ -174,8 +174,8 @@ def normalpdf(val, mu=0.0, std=1.0):
 
 
 # %%
-betas = results.getBetaValues(['B_TIME', 'B_TIME_S'])
-x = np.arange(simresults['beta'].min(), simresults['beta'].max(), 0.01)
+betas = results.get_beta_values(['B_TIME', 'B_TIME_S'])
+x = np.arange(simresults['Beta'].min(), simresults['Beta'].max(), 0.01)
 
 # %%
 if PLOT:

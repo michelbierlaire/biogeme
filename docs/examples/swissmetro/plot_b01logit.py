@@ -15,6 +15,7 @@ Estimation of a logit model
 :date: Sun Apr  9 17:02:18 2023
 
 """
+
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
@@ -70,7 +71,7 @@ the_biogeme.modelName = 'b01logit'
 
 # %%
 # Calculate the null log likelihood for reporting.
-the_biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculate_null_loglikelihood(av)
 
 # %%
 # Estimate the parameters.
@@ -81,5 +82,5 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 print(pandas_results)

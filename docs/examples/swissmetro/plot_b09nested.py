@@ -59,7 +59,7 @@ V = {1: V1, 2: V2, 3: V3}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Definition of nests. Only the non trivial nests must be defined. A
+# Definition of nests. Only the non-trivial nests must be defined. A
 # trivial nest is a nest containing exactly one alternative.  In this
 # example, we create a nest for the existing modes, that is train (1)
 # and car (3).
@@ -83,7 +83,7 @@ the_biogeme.modelName = "b09nested"
 
 # %%
 # Calculate the null log likelihood for reporting.
-the_biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculate_null_loglikelihood(av)
 
 # %%
 # Estimate the parameters
@@ -93,14 +93,14 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results
 
 # %%
 # We calculate the correlation between the error terms of the
 # alternatives.
 corr = nests.correlation(
-    parameters=results.getBetaValues(),
+    parameters=results.get_beta_values(),
     alternatives_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'},
 )
 print(corr)
