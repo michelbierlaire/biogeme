@@ -8,6 +8,7 @@ Function to estimate the parameters, or read them from a file, if available.
 :author: Michel Bierlaire, EPFL
 :date: Sat Dec  9 17:20:49 2023
 """
+
 import logging
 from typing import Optional
 from biogeme.biogeme import BIOGEME
@@ -31,8 +32,8 @@ def read_or_estimate(
     try:
         filename = f'{directory}/{the_biogeme.modelName}.pickle'
         logger.info('Results are read from the file {filename}.')
-        results = bioResults(pickleFile=filename)
-    except excep.FileNotFoundError:
+        results = bioResults(pickle_file=filename)
+    except excep.FileNotFound:
         logger.info('Parameters are estimated.')
         results = the_biogeme.estimate()
 

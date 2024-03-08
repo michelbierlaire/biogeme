@@ -144,30 +144,30 @@ database.remove(Choice == -1.0)
 
 # %%
 # Definition of other variables
-ScaledIncome = database.DefineVariable('ScaledIncome', CalculatedIncome / 1000)
-age_65_more = database.DefineVariable('age_65_more', age >= 65)
-moreThanOneCar = database.DefineVariable('moreThanOneCar', NbCar > 1)
-moreThanOneBike = database.DefineVariable('moreThanOneBike', NbBicy > 1)
-individualHouse = database.DefineVariable('individualHouse', HouseType == 1)
-male = database.DefineVariable('male', Gender == 1)
-haveChildren = database.DefineVariable(
+ScaledIncome = database.define_variable('ScaledIncome', CalculatedIncome / 1000)
+age_65_more = database.define_variable('age_65_more', age >= 65)
+moreThanOneCar = database.define_variable('moreThanOneCar', NbCar > 1)
+moreThanOneBike = database.define_variable('moreThanOneBike', NbBicy > 1)
+individualHouse = database.define_variable('individualHouse', HouseType == 1)
+male = database.define_variable('male', Gender == 1)
+haveChildren = database.define_variable(
     'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
 )
-haveGA = database.DefineVariable('haveGA', GenAbST == 1)
-highEducation = database.DefineVariable('highEducation', Education >= 6)
-childCenter = database.DefineVariable(
+haveGA = database.define_variable('haveGA', GenAbST == 1)
+highEducation = database.define_variable('highEducation', Education >= 6)
+childCenter = database.define_variable(
     'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
 )
 
-childSuburb = database.DefineVariable(
+childSuburb = database.define_variable(
     'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
 )
-TimePT_scaled = database.DefineVariable('TimePT_scaled', TimePT / 200)
-TimeCar_scaled = database.DefineVariable('TimeCar_scaled', TimeCar / 200)
-MarginalCostPT_scaled = database.DefineVariable(
+TimePT_scaled = database.define_variable('TimePT_scaled', TimePT / 200)
+TimeCar_scaled = database.define_variable('TimeCar_scaled', TimeCar / 200)
+MarginalCostPT_scaled = database.define_variable(
     'MarginalCostPT_scaled', MarginalCostPT / 10
 )
-CostCarCHF_scaled = database.DefineVariable('CostCarCHF_scaled', CostCarCHF / 10)
-distance_km_scaled = database.DefineVariable('distance_km_scaled', distance_km / 5)
-PurpHWH = database.DefineVariable('PurpHWH', TripPurpose == 1)
-PurpOther = database.DefineVariable('PurpOther', TripPurpose != 1)
+CostCarCHF_scaled = database.define_variable('CostCarCHF_scaled', CostCarCHF / 10)
+distance_km_scaled = database.define_variable('distance_km_scaled', distance_km / 5)
+PurpHWH = database.define_variable('PurpHWH', TripPurpose == 1)
+PurpOther = database.define_variable('PurpOther', TripPurpose != 1)

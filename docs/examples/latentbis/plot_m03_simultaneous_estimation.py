@@ -59,14 +59,14 @@ logger.info('Example m03_simultaneous_estimation.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'm01_latent_variable'
 try:
-    struct_results = res.bioResults(pickleFile=f'saved_results/{MODELNAME}.pickle')
+    struct_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
 except excep.BiogemeError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
         f'file {MODELNAME}.pickle, and move it to the directory saved_results'
     )
     sys.exit()
-struct_betas = struct_results.getBetaValues()
+struct_betas = struct_results.get_beta_values()
 
 
 # %%
@@ -189,14 +189,14 @@ prob_indicators = reduce(
 # them as starting values
 MODELNAME = 'm02_sequential_estimation'
 try:
-    choice_results = res.bioResults(pickleFile=f'saved_results/{MODELNAME}.pickle')
+    choice_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
 except excep.BiogemeError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
         f'file {MODELNAME}.pickle, and move it to the directory saved_results'
     )
     sys.exit()
-choice_betas = choice_results.getBetaValues()
+choice_betas = choice_results.get_beta_values()
 
 # %%
 ASC_CAR = Beta('ASC_CAR', choice_betas['ASC_CAR'], None, None, 0)
@@ -280,4 +280,4 @@ print(f'Final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()

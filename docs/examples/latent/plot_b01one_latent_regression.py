@@ -3,7 +3,7 @@
 Measurement equations: continuous indicators
 ============================================
 
-It is actually a simle linear regression.
+It is actually a simple linear regression.
 
 :author: Michel Bierlaire, EPFL
 :date: Thu Apr 13 16:42:02 2023
@@ -11,7 +11,7 @@ It is actually a simle linear regression.
 
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
-from biogeme.models import piecewiseFormula
+from biogeme.models import piecewise_formula
 import biogeme.loglikelihood as ll
 from biogeme.expressions import Beta, Elem, bioMultSum
 from optima import (
@@ -50,7 +50,7 @@ coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
 thresholds = [None, 4, 6, 8, 10, None]
-formula_income = piecewiseFormula(variable=ScaledIncome, thresholds=thresholds)
+formula_income = piecewise_formula(variable=ScaledIncome, thresholds=thresholds)
 
 # %%
 # Latent variable: structural equation.
@@ -114,56 +114,57 @@ SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, None, None, 0)
 # %%
 # We build a dict with each contribution to the loglikelihood if
 # (var > 0) and (var < 6). If not, 0 is returned.
-F = {}
-F['Envir01'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Envir01, MODEL_Envir01, SIGMA_STAR_Envir01),
-    },
-    (Envir01 > 0) * (Envir01 < 6),
-)
-F['Envir02'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Envir02, MODEL_Envir02, SIGMA_STAR_Envir02),
-    },
-    (Envir02 > 0) * (Envir02 < 6),
-)
-F['Envir03'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Envir03, MODEL_Envir03, SIGMA_STAR_Envir03),
-    },
-    (Envir03 > 0) * (Envir03 < 6),
-)
-F['Mobil11'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Mobil11, MODEL_Mobil11, SIGMA_STAR_Mobil11),
-    },
-    (Mobil11 > 0) * (Mobil11 < 6),
-)
-F['Mobil14'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Mobil14, MODEL_Mobil14, SIGMA_STAR_Mobil14),
-    },
-    (Mobil14 > 0) * (Mobil14 < 6),
-)
-F['Mobil16'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Mobil16, MODEL_Mobil16, SIGMA_STAR_Mobil16),
-    },
-    (Mobil16 > 0) * (Mobil16 < 6),
-)
-F['Mobil17'] = Elem(
-    {
-        0: 0,
-        1: ll.loglikelihoodregression(Mobil17, MODEL_Mobil17, SIGMA_STAR_Mobil17),
-    },
-    (Mobil17 > 0) * (Mobil17 < 6),
-)
+F = {
+    'Envir01': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Envir01, MODEL_Envir01, SIGMA_STAR_Envir01),
+        },
+        (Envir01 > 0) * (Envir01 < 6),
+    ),
+    'Envir02': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Envir02, MODEL_Envir02, SIGMA_STAR_Envir02),
+        },
+        (Envir02 > 0) * (Envir02 < 6),
+    ),
+    'Envir03': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Envir03, MODEL_Envir03, SIGMA_STAR_Envir03),
+        },
+        (Envir03 > 0) * (Envir03 < 6),
+    ),
+    'Mobil11': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Mobil11, MODEL_Mobil11, SIGMA_STAR_Mobil11),
+        },
+        (Mobil11 > 0) * (Mobil11 < 6),
+    ),
+    'Mobil14': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Mobil14, MODEL_Mobil14, SIGMA_STAR_Mobil14),
+        },
+        (Mobil14 > 0) * (Mobil14 < 6),
+    ),
+    'Mobil16': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Mobil16, MODEL_Mobil16, SIGMA_STAR_Mobil16),
+        },
+        (Mobil16 > 0) * (Mobil16 < 6),
+    ),
+    'Mobil17': Elem(
+        {
+            0: 0,
+            1: ll.loglikelihoodregression(Mobil17, MODEL_Mobil17, SIGMA_STAR_Mobil17),
+        },
+        (Mobil17 > 0) * (Mobil17 < 6),
+    ),
+}
 
 # %%
 # The log likelihood is the sum of the elements of the above dict
@@ -182,8 +183,8 @@ results = the_biogeme.estimate()
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
-results.writeLaTeX()
+results.write_latex()
 print(f'LaTeX file: {results.data.latexFileName}')
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()

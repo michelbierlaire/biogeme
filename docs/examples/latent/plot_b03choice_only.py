@@ -66,7 +66,7 @@ coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 # Latent variable: structural equation.
 
 # %%
-# Define a random parameter, normally distributed)
+# Define a random parameter, normally distributed,
 # designed to be used
 # for numerical integration.
 omega = RandomVariable('omega')
@@ -74,7 +74,7 @@ density = dist.normalpdf(omega)
 sigma_s = Beta('sigma_s', 1, None, None, 0)
 
 thresholds = [None, 4, 6, 8, 10, None]
-formula_income = models.piecewiseFormula(variable=ScaledIncome, thresholds=thresholds)
+formula_income = models.piecewise_formula(variable=ScaledIncome, thresholds=thresholds)
 
 CARLOVERS = (
     coef_intercept
@@ -156,4 +156,4 @@ print(f'Final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()

@@ -19,7 +19,7 @@ Illustration of a common estimation problem
 """
 
 import biogeme.biogeme_logging as blog
-from biogeme.models import piecewiseFormula
+from biogeme.models import piecewise_formula
 import biogeme.biogeme as bio
 from biogeme.expressions import Beta, log, Elem, bioNormalCdf
 
@@ -59,7 +59,7 @@ coef_haveChildren = Beta('coef_haveChildren', 0.0, None, None, 0)
 coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 
 thresholds = [None, 4, 6, 8, 10, None]
-formula_income = piecewiseFormula(variable=ScaledIncome, thresholds=thresholds)
+formula_income = piecewise_formula(variable=ScaledIncome, thresholds=thresholds)
 
 # %%
 # Latent variable: structural equation.
@@ -273,8 +273,8 @@ results = the_biogeme.estimate()
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
-results.writeLaTeX()
+results.write_latex()
 print(f'LaTeX file: {results.data.latexFileName}')
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()

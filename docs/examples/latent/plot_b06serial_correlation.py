@@ -66,14 +66,14 @@ logger.info('Example b06serial_correlation.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'b05latent_choice_full'
 try:
-    struct_results = res.bioResults(pickleFile=f'saved_results/{MODELNAME}.pickle')
+    struct_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
 except excep.BiogemeError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
         f'file {MODELNAME}.pickle, and move it to the directory saved_results'
     )
     sys.exit()
-betas = struct_results.getBetaValues()
+betas = struct_results.get_beta_values()
 
 # %%
 # Coefficients.
@@ -150,7 +150,7 @@ betas_thresholds = [
     ),
 ]
 
-formula_income = models.piecewiseFormula(
+formula_income = models.piecewise_formula(
     variable=ScaledIncome,
     thresholds=thresholds,
     betas=betas_thresholds,
@@ -441,4 +441,4 @@ print(f'Final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()

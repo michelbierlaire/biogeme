@@ -57,14 +57,14 @@ logger.info('Example b04latent_choice_seq_mc.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'b02one_latent_ordered'
 try:
-    struct_results = bioResults(pickleFile=f'saved_results/{MODELNAME}.pickle')
+    struct_results = bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
 except excep.BiogemeError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
         f'file {MODELNAME}.pickle, and move it to the directory saved_results'
     )
     sys.exit()
-struct_betas = struct_results.getBetaValues()
+struct_betas = struct_results.get_beta_values()
 
 # %%
 # Coefficients.
@@ -91,7 +91,7 @@ error_component = sigma_s * bioDraws('EC', 'NORMAL_MLHS')
 # %%
 # Piecewise linear specification for income.
 thresholds = [None, 4, 6, 8, 10, None]
-formula_income = models.piecewiseFormula(
+formula_income = models.piecewise_formula(
     variable=ScaledIncome,
     thresholds=thresholds,
     betas=[
@@ -189,8 +189,8 @@ results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
 print(f'Estimated betas: {len(results.data.betaValues)}')
 print(f'Final log likelihood: {results.data.logLike:.3f}')
 print(f'Output file: {results.data.htmlFileName}')
-results.writeLaTeX()
+results.write_latex()
 print(f'LaTeX file: {results.data.latexFileName}')
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()
