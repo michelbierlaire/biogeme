@@ -178,7 +178,7 @@ faq[
 	    <dt>Saved iterations</dt>
 	    <dd>Iterations are saved in a file with
 	      extension <code>.iter</code>. If the file exists, Biogeme
-	      will initialize the parameters from this files, and
+	      will initialize the parameters from this .py, and
 	      ignore the starting values provided. To turn this feature
 	      off, set <code>biogeme.saveIterations=False</code></dd>
 	    <dt>Random starting values</dt>
@@ -213,7 +213,7 @@ faq[
 	      for nested and cross nested logit models is new
 	      checked.</dd>
 	    <dt>ALOGIT file</dt>
-	    <dd>Output files in F12 format compatible with ALOGIT can
+	    <dd>Output .py in F12 format compatible with ALOGIT can
 	      now be
 	      produced. [<a href="sphinx/results.html?highlight=f12#biogeme.results.bioResults.writeF12">Click
 	      here for the documentation</a>. </dd>
@@ -246,7 +246,7 @@ faq[
 	      stochastic gradient algorithm, for instance. See <a href="sphinx/biogeme.html?highlight=calculatelikelihood#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">documentation</a>.</dd>
 	    <dt>User's notes</dt>
 	    <dd>It is possible to include your own notes in the HTML
-	      file using the <code>userNotes</code> parameter of the
+	      file using the <code>user_notes</code> parameter of the
 	      <code>biogeme</code>
 	      object. See <a href="sphinx/biogeme.html?highlight=usernotes#biogeme.biogeme.BIOGEME"
 			     target="_blank">documentation</a>. See
@@ -344,7 +344,7 @@ for the estimation of similar models. If not, it depends
 on the nature of the parameters:
 <ul>
 <li>If the parameter is a coefficient (traditionally
-denoted by &beta;), the value 0 is
+denoted by &Beta;), the value 0 is
 appropriate.</li>
 <li>If the parameter is a nest parameter of a nested or
 cross-nested logit model (traditionally
@@ -506,7 +506,7 @@ Python. To check which versions are supported, go to the repository
 <p>
 <a href="https://pypi.org/project/biogeme/">pypi.org/project/biogeme/</a>
 </p>
-<p>For instance, the following files are available for version 3.2.10:
+<p>For instance, the following .py are available for version 3.2.10:
 <pre>biogeme-3.2.10.tar.gz</pre>
 <pre>biogeme-3.2.10-cp310-cp310-win_amd64.whl</pre>
 <pre>biogeme-3.2.10-cp310-cp310-macosx_10_9_x86_64.whl</pre>

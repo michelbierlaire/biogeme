@@ -1,6 +1,7 @@
 """
 Dictionary. Key: title of the card. Value: list of paragraphs.
 """
+
 special = {}
 about = {}
 install = {}
@@ -9,9 +10,9 @@ archives = {}
 resources = {}
 
 # special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
-special[
-    'EPFL Short Course'
-] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
+# special[
+#    'EPFL Short Course'
+# ] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
 # special['Other special'] = 'Other special as well'
 
 about['Biogeme'] = (
@@ -40,6 +41,16 @@ written in C++. All the material related to the previous
 versions of Biogeme are available on
 the <a href="http://transp-or.epfl.ch/pythonbiogeme/"
 target="_blank">old webpage</a>.
+""",
+)
+
+about['Links'] = (
+    """
+<ul>
+<li><a href="https://pypi.org/project/biogeme/">PyPi Distribution</a></li>
+<li> <a href="https://www.pepy.tech/projects/Biogeme">Download statistics</a></li>
+<li> <a href="https://groups.google.com/d/forum/biogeme">Users' group </a></li>
+</ul>
 """,
 )
 
@@ -207,7 +218,7 @@ The command to install CythonBiogeme from source is
 """,
     """
 that must be executed in the directory containing the
-files setup.cfg and setup.py.
+.py setup.cfg and setup.py.
 """,
     """
 Note that it requires a proper
@@ -237,7 +248,7 @@ extra_link_args = -static -std=c++11 -static-libstdc++ -static-libgcc -Bstatic -
 </p>
 <li> The compilation  requires the static version of the libraries <samp>vcruntime140.dll</samp> and <samp>python3x.dll</samp>, where <samp>3x</samp> corresponds to your version of Python. To generate them, the following "hack" must be performed:
 <ul>
-<li>Locate the DLL files in your current environment. They may be located in <samp>AppData\Local\Programs\Python\Python3x\</samp>
+<li>Locate the DLL .py in your current environment. They may be located in <samp>AppData\\Local\\Programs\\Python\\Python3x\\</samp>
 <li>The static versions of the libraries can be created using the following commands. Make sure to replace "3x" by your version of Python ("311", "310", "39", etc.):
 <p>
 <pre>
@@ -272,7 +283,7 @@ The command to install Biogeme from source is
 """,
     """
 that must be executed in the directory containing the
-files setup.cfg and setup.py.
+.py setup.cfg and setup.py.
 """,
     """
 Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment where Python and CythonBiogeme are properly installed.
@@ -318,6 +329,7 @@ target="_blank">Monte-Carlo integration with PandasBiogeme.</a></li>
 target="_blank">Estimating choice models with latent
 variables with PandasBiogeme.</a></li>
 <li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf" target="_blank">Assisted specification with Biogeme 3.2.12.</a></li>
+<li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierPasc23.pdf" target="_blank">Estimating MEV models with samples of alternatives.</a></li>
 </ul>
 """,
 )
