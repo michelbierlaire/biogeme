@@ -86,7 +86,7 @@ the_biogeme.modelName = MODEL_NAME
 
 # %%
 # Calculate the null log likelihood for reporting.
-the_biogeme.calculateNullLoglikelihood({i: 1 for i in range(SAMPLE_SIZE)})
+the_biogeme.calculate_null_loglikelihood({i: 1 for i in range(SAMPLE_SIZE)})
 
 # %%
 # Estimate the parameters
@@ -96,7 +96,7 @@ results = the_biogeme.estimate(recycle=False)
 print(results.short_summary())
 
 # %%
-estimated_parameters = results.getEstimatedParameters()
+estimated_parameters = results.get_estimated_parameters()
 estimated_parameters
 
 # %%

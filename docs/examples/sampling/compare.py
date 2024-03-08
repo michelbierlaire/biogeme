@@ -8,13 +8,14 @@ Function to compare estimated parameters with true parameters.
 :author: Michel Bierlaire
 :date: Wed Nov  1 18:07:08 2023
 """
+
 import pandas as pd
-from biogeme.results import bioResults
+
 from true_parameters import true_parameters
 
 
 # %%
-def compare(estimated_parameters: bioResults) -> tuple[pd.DataFrame, str]:
+def compare(estimated_parameters: pd.DataFrame) -> tuple[pd.DataFrame, str]:
     """Compare estimated and true parameters
 
     :param estimated_parameters: estimation results
