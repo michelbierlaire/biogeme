@@ -20,7 +20,7 @@ import biogeme.biogeme_logging as blog
 
 # %%
 # Version of Biogeme.
-print(ver.getText())
+print(ver.get_text())
 
 # %%
 # In Python, the levels of reporting are:

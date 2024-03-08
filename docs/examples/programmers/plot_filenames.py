@@ -19,7 +19,7 @@ import biogeme.filenames as fl
 
 # %%
 # Version of Biogeme.
-print(ver.getText())
+print(ver.get_text())
 
 # %%
 # The role of this function is to obtain the name of a file that does not exist.

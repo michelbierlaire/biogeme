@@ -19,16 +19,17 @@ import biogeme.database as db
 import pandas as pd
 from biogeme.expressions import Beta, Variable, exp
 import biogeme.biogeme_logging as blog
+from biogeme.function_output import BiogemeFunctionOutput
 
 # %%
 # Version of Biogeme.
-print(ver.getText())
+print(ver.get_text())
 
 
 # %%
 # Logger.
 logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Logger initalized')
+logger.info('Logger initialized')
 
 
 # %%
@@ -45,11 +46,11 @@ df = pd.DataFrame(
         'Av3': [0, 1, 1, 1, 1],
     }
 )
-myData = db.Database('test', df)
+my_data = db.Database('test', df)
 
 # %%
 # Data
-myData.data
+my_data.data
 
 
 # %%
@@ -60,52 +61,54 @@ beta1 = Beta('beta1', -1.0, -3, 3, 0)
 beta2 = Beta('beta2', 2.0, -3, 10, 0)
 likelihood = -(beta1**2) * Variable1 - exp(beta2 * beta1) * Variable2 - beta2**4
 simul = beta1 / Variable1 + beta2 / Variable2
-dictOfExpressions = {'loglike': likelihood, 'beta1': beta1, 'simul': simul}
+dict_of_expressions = {'log_like': likelihood, 'beta1': beta1, 'simul': simul}
 
 # %%
 # Creation of the BIOGEME object.
-myBiogeme = bio.BIOGEME(myData, dictOfExpressions)
-myBiogeme.modelName = 'simple_example'
-print(myBiogeme)
+my_biogeme = bio.BIOGEME(my_data, dict_of_expressions)
+my_biogeme.modelName = 'simple_example'
+print(my_biogeme)
 
 # %%
 # The data is stored in the Biogeme object.
-myBiogeme.database.data
+my_biogeme.database.data
 
 # %%
 # Log likelihood with the initial values of the parameters.
-myBiogeme.calculateInitLikelihood()
+my_biogeme.calculate_init_likelihood()
 
 # %%
 # Calculate the log-likelihood with a different value of the
 # parameters. We retieve the current value and add 1 to each of them.
-x = myBiogeme.id_manager.free_betas_values
+x = my_biogeme.id_manager.free_betas_values
 xplus = [v + 1 for v in x]
 print(xplus)
 
 # %%
-myBiogeme.calculateLikelihood(xplus, scaled=True)
+my_biogeme.calculate_likelihood(xplus, scaled=True)
 
 # %%
 # Calculate the log-likelihood function and its derivatives.
-f, g, h, bhhh = myBiogeme.calculateLikelihoodAndDerivatives(
-    xplus, scaled=True, hessian=True, bhhh=True
+the_function_output: BiogemeFunctionOutput = (
+    my_biogeme.calculate_likelihood_and_derivatives(
+        xplus, scaled=True, hessian=True, bhhh=True
+    )
 )
 # %%
-print(f'f = {f}')
+print(f'f = {the_function_output.function}')
 
 # %%
-print(f'g = {g}')
+print(f'g = {the_function_output.gradient}')
 
 # %%
-pd.DataFrame(h)
+pd.DataFrame(the_function_output.hessian)
 
 # %%
-pd.DataFrame(bhhh)
+pd.DataFrame(the_function_output.bhhh)
 
 # %%
 # Now the unscaled version.
-f, g, h, bhhh = myBiogeme.calculateLikelihoodAndDerivatives(
+f, g, h, bhhh = my_biogeme.calculateLikelihoodAndDerivatives(
     xplus, scaled=False, hessian=True, bhhh=True
 )
 # %%
@@ -123,14 +126,14 @@ pd.DataFrame(bhhh)
 
 # %%
 # Calculate the hessian of the log likelihood function using finite difference.
-fin_diff_hessian = myBiogeme.likelihoodFiniteDifferenceHessian(xplus)
+fin_diff_hessian = my_biogeme.likelihood_finite_difference_hessian(xplus)
 pd.DataFrame(fin_diff_hessian)
 
 # %%
-# Check numerically the derivatives implementation. The analytical
+# Check numerically the derivatives' implementation. The analytical
 # derivatives are compared to the numerical derivatives obtains by
 # finite differences.
-f, g, h, gdiff, hdiff = myBiogeme.checkDerivatives(xplus, verbose=True)
+f, g, h, gdiff, hdiff = my_biogeme.check_derivatives(xplus, verbose=True)
 
 # %%
 print(f'f = {f}')
@@ -151,11 +154,11 @@ pd.DataFrame(hdiff)
 
 # %%
 # Estimation of the parameters, with bootstrapping
-myBiogeme.bootstrap_samples = 10
-results = myBiogeme.estimate(run_bootstrap=True)
+my_biogeme.bootstrap_samples = 10
+results = my_biogeme.estimate(run_bootstrap=True)
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 # If the model has already been estimated, it is possible to recycle
@@ -163,13 +166,13 @@ results.getEstimatedParameters()
 # ignored, and the results are whatever is in the file.
 
 # %%
-recycled_results = myBiogeme.estimate(recycle=True, run_bootstrap=True)
+recycled_results = my_biogeme.estimate(recycle=True, run_bootstrap=True)
 
 # %%
 print(recycled_results.short_summary())
 
 # %%
-recycled_results.getEstimatedParameters()
+recycled_results.get_estimated_parameters()
 
 # %%
 # Simulation
@@ -177,24 +180,26 @@ recycled_results.getEstimatedParameters()
 
 # %%
 # Simulate with the initial values for the parameters.
-simulation_with_default_betas = myBiogeme.simulate(myBiogeme.loglike.get_beta_values())
+simulation_with_default_betas = my_biogeme.simulate(
+    my_biogeme.log_like.get_beta_values()
+)
 simulation_with_default_betas
 
 # %%
 # Simulate with the estimated values for the parameters.
 
 # %%
-print(results.getBetaValues())
+print(results.get_beta_values())
 
 # %%
-simulation_with_estimated_betas = myBiogeme.simulate(results.getBetaValues())
+simulation_with_estimated_betas = my_biogeme.simulate(results.get_beta_values())
 simulation_with_estimated_betas
 
 # %%
 # Confidence intervals.
 # First, we extract the values of betas from the bootstrapping draws.
-draws_from_betas = results.getBetasForSensitivityAnalysis(
-    myBiogeme.id_manager.free_betas.names
+draws_from_betas = results.get_betas_for_sensitivity_analysis(
+    my_biogeme.id_manager.free_betas.names
 )
 for draw in draws_from_betas:
     print(draw)
@@ -202,7 +207,7 @@ for draw in draws_from_betas:
 # %%
 # Then, we calculate the confidence intervals. The default interval
 # size is 0.9. Here, we use a different one.
-left, right = myBiogeme.confidenceIntervals(draws_from_betas, interval_size=0.95)
+left, right = my_biogeme.confidence_intervals(draws_from_betas, interval_size=0.95)
 left
 
 # %%
@@ -221,8 +226,8 @@ right
 # dataframes, each corresponding to one of these exercises.
 
 # %%
-validationData = myData.split(slices=5)
-validation_results = myBiogeme.validate(results, validationData)
+validationData = my_data.split(slices=5)
+validation_results = my_biogeme.validate(results, validationData)
 
 # %%
 for slide in validation_results:
@@ -233,6 +238,6 @@ for slide in validation_results:
 
 
 # %%
-# The following tools is used to find files with the model name and a
+# The following tools is used to find .py with the model name and a
 # specific extension.
-myBiogeme.files_of_type('pickle')
+my_biogeme.files_of_type('pickle')

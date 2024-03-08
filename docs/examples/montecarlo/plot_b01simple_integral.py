@@ -21,14 +21,14 @@ from biogeme.tools import TemporaryFile
 # to store the draws
 df = pd.DataFrame()
 df['FakeColumn'] = [1.0]
-database = db.Database('fakeDatabase', df)
+database = db.Database('fake_database', df)
 
 # %%
 integrand = exp(bioDraws('U', 'UNIFORM'))
-simulatedI = MonteCarlo(integrand)
+simulated_integral = MonteCarlo(integrand)
 
 # %%
-trueI = exp(1.0) - 1.0
+true_integral = exp(1.0) - 1.0
 
 # %%
 R = 200
@@ -41,14 +41,16 @@ with TemporaryFile() as filename:
         print('[MonteCarlo]', file=f)
         print(f'number_of_draws = {R}', file=f)
 
-    sampleVariance = MonteCarlo(integrand * integrand) - simulatedI * simulatedI
-    stderr = (sampleVariance / R) ** 0.5
-    error = simulatedI - trueI
+    sample_variance = (
+        MonteCarlo(integrand * integrand) - simulated_integral * simulated_integral
+    )
+    stderr = (sample_variance / R) ** 0.5
+    error = simulated_integral - true_integral
 
     simulate = {
-        'Analytical Integral': trueI,
-        'Simulated Integral': simulatedI,
-        'Sample variance   ': sampleVariance,
+        'Analytical Integral': true_integral,
+        'Simulated Integral': simulated_integral,
+        'Sample variance   ': sample_variance,
         'Std Error         ': stderr,
         'Error             ': error,
     }
@@ -56,10 +58,10 @@ with TemporaryFile() as filename:
     biosim = bio.BIOGEME(database, simulate, parameter_file=filename)
     R = biosim.number_of_draws
     biosim.modelName = f'01simpleIntegral_{R}'
-    results = biosim.simulate(theBetaValues={})
+    results = biosim.simulate(the_beta_values={})
     print(f'Number of draws: {R}')
     for c in results.columns:
-        print(f'{c}: {results.loc[0,c]}')
+        print(f'{c}: {results.loc[0, c]}')
 
 # %%
 # Create a parameter file to set the number of draws.
@@ -70,7 +72,7 @@ with TemporaryFile() as filename:
 
     biogeme2 = bio.BIOGEME(database, simulate, parameter_file=filename)
     biogeme2.modelName = '01simpleIntegral_{multiplier*R}'
-    results2 = biogeme2.simulate(theBetaValues={})
+    results2 = biogeme2.simulate(the_beta_values={})
     print(f'Number of draws: {MULTIPLIER * R}')
     for c in results2.columns:
         print(f'{c}: {results2.loc[0, c]}')

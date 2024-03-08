@@ -13,20 +13,21 @@ syntax. They do not correspond to any meaningful model.
 :date: Tue Nov 21 14:53:49 2023
 """
 
-from biogeme.version import getText
 import numpy as np
 import pandas as pd
-import biogeme.expressions as ex
+
+import biogeme.biogeme_logging as blog
 import biogeme.database as db
 import biogeme.exceptions as excep
+import biogeme.expressions as ex
+import biogeme.tools.derivatives
 from biogeme import models
-from biogeme import tools
-from biogeme.expressions import IdManager, TypeOfElementaryExpression
-import biogeme.biogeme_logging as blog
+from biogeme.expressions import IdManager, TypeOfElementaryExpression, LinearTermTuple
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
-print(getText())
+print(get_text())
 
 # %%
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -46,7 +47,7 @@ x
 x.getValue()
 
 # %%
-x.getValue_c(prepareIds=True)
+x.get_value_c(prepare_ids=True)
 
 
 # %%
@@ -57,7 +58,7 @@ y
 y.getValue()
 
 # %%
-y.getValue_c(prepareIds=True)
+y.get_value_c(prepare_ids=True)
 
 # %%
 # Note that if the parameter has to be estimated, its value cannot be obtained.
@@ -75,7 +76,7 @@ one
 one.getValue()
 
 # %%
-one.getValue_c(prepareIds=True)
+one.get_value_c(prepare_ids=True)
 
 # %%
 # Addition
@@ -83,7 +84,7 @@ z = x + y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Substraction
@@ -91,7 +92,7 @@ z = x - y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Multiplication
@@ -99,7 +100,7 @@ z = x * y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Division
@@ -107,7 +108,7 @@ z = x / y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Power
@@ -115,7 +116,7 @@ z = x**y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Exponential
@@ -123,7 +124,7 @@ z = ex.exp(x)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Logarithm
@@ -131,7 +132,7 @@ z = ex.log(x)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Minimum
@@ -139,7 +140,7 @@ z = ex.bioMin(x, y)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Maximum
@@ -147,7 +148,7 @@ z = ex.bioMax(x, y)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # And
@@ -155,14 +156,14 @@ z = x & y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 z = x & 0
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Or
@@ -172,14 +173,14 @@ z = x | y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 z = ex.Numeric(0) | ex.Numeric(0)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Equal
@@ -187,14 +188,14 @@ z = x == y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 z = (x + 1) == y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Not equal
@@ -202,14 +203,14 @@ z = x != y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 z = (x + 1) != y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Lesser or equal
@@ -217,7 +218,7 @@ z = x <= y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Greater or equal
@@ -225,7 +226,7 @@ z = x >= y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Lesser than
@@ -233,7 +234,7 @@ z = x < y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Greater than
@@ -241,7 +242,7 @@ z = x > y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Opposite
@@ -249,7 +250,7 @@ z = -x
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Sum of multiples expressions
@@ -258,7 +259,7 @@ z = ex.bioMultSum(listOfExpressions)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # The result is the same as the following, but it implements the sum
@@ -267,7 +268,7 @@ z = x + y + 1 + x + 1 + y
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Element: this expression considers a dictionary of expressions, and
@@ -284,7 +285,7 @@ z = ex.Elem(my_dict, index)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 index = x - 1
@@ -295,7 +296,7 @@ z = ex.Elem(my_dict, index)
 z.getValue()
 
 # %%
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 index = x - 2
@@ -315,7 +316,7 @@ except excep.BiogemeError as e:
 # %%
 z = ex.Elem(my_dict, index)
 try:
-    z.getValue_c(prepareIds=True)
+    z.get_value_c(prepare_ids=True)
 except RuntimeError as e:
     print(f'Exception raised: {e}')
 
@@ -333,11 +334,11 @@ except RuntimeError as e:
 # .. math:: \Phi(x) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^{x}
 #     e^{-\frac{1}{2}\omega^2}d\omega.
 z = ex.bioNormalCdf(x)
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 z = ex.bioNormalCdf(0)
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Derivative
@@ -345,11 +346,11 @@ z = 30 * x + 20 * y
 
 # %%
 zx = ex.Derive(z, 'x')
-zx.getValue_c(prepareIds=True)
+zx.get_value_c(prepare_ids=True)
 
 # %%
 zx = ex.Derive(z, 'y')
-zx.getValue_c(prepareIds=True)
+zx.get_value_c(prepare_ids=True)
 
 # %%
 # Integral: let's calculate the integral of the pdf of a normal distribution:
@@ -359,7 +360,7 @@ zx.getValue_c(prepareIds=True)
 omega = ex.RandomVariable('omega')
 pdf = ex.exp(-omega * omega / 2)
 z = ex.Integrate(pdf, 'omega') / np.sqrt(2 * np.pi)
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # In order to change the bounds of integration, a change of variables
@@ -381,7 +382,7 @@ t = a + (b - a) / (1 + ex.exp(-omega))
 dt = (b - a) * ex.exp(-omega) * (1 + ex.exp(-omega)) ** -2
 integrand = t * t
 z = ex.Integrate(integrand * dt / (b - a), 'omega')
-z.getValue_c(prepareIds=True)
+z.get_value_c(prepare_ids=True)
 
 # %%
 # Expressions using a database
@@ -407,17 +408,17 @@ v1 = ex.Variable('Variable1')
 v2 = ex.Variable('Variable2')
 
 # %%
-listOfTerms = [
-    (beta1, v1),
-    (beta2, v2),
+list_of_terms = [
+    LinearTermTuple(beta=beta1, x=v1),
+    LinearTermTuple(beta=beta2, x=v2),
 ]
-z = ex.bioLinearUtility(listOfTerms)
-z.getValue_c(database=my_data, prepareIds=True)
+z = ex.bioLinearUtility(list_of_terms)
+z.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # It is equivalent to the following, but implemented in a more efficient way.
 z = beta1 * v1 + beta2 * v2
-z.getValue_c(database=my_data, prepareIds=True)
+z.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # Monte Carlo: we approximate the integral
@@ -428,14 +429,14 @@ z.getValue_c(database=my_data, prepareIds=True)
 # calculated for each entry in the database.
 draws = ex.bioDraws('draws', 'UNIFORM')
 z = ex.MonteCarlo(draws * draws)
-z.getValue_c(database=my_data, prepareIds=True)
+z.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # Panel Trajectory: we first calculate a quantity for each entry in the database.
 v1 = ex.Variable('Variable1')
 v2 = ex.Variable('Variable2')
 p = v1 / (v1 + v2)
-p.getValue_c(database=my_data, prepareIds=True)
+p.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # We now declare the data as "panel", based on the identified
@@ -457,7 +458,7 @@ my_data.panel('Person')
 # %%
 # We verify that it is indeed the case:
 z = ex.PanelLikelihoodTrajectory(p)
-z.getValue_c(database=my_data, prepareIds=True)
+z.get_value_c(database=my_data, prepare_ids=True)
 
 
 # %%
@@ -504,7 +505,7 @@ Av3 = ex.Variable('Av3')
 # %%
 # It is possible to add a new column to the database, that creates a
 # new variable that can be used in expressions.
-newvar_b = my_data.DefineVariable('newvar_b', Variable1 + Variable2)
+newvar_b = my_data.define_variable('newvar_b', Variable1 + Variable2)
 my_data.data
 
 # %%
@@ -578,12 +579,12 @@ print(expr1)
 # The function `getValue_c` is implemented in C++, and works for any
 # expression. When use outside a specific context, the IDs must be
 # explicitly prepared.
-expr1.getValue_c(prepareIds=True)
+expr1.get_value_c(prepare_ids=True)
 
 # %%
 # It actually calls the function `getValueAndDerivates`, and returns
 # its first output (without calculating the derivatives).
-f, g, h, bhhh = expr1.getValueAndDerivatives(prepareIds=True)
+f, g, h, bhhh = expr1.get_value_and_derivatives(prepare_ids=True)
 
 # %%
 f
@@ -605,14 +606,16 @@ pd.DataFrame(np.outer(g, g))
 # %%
 # If the derivatives are not needed, their calculation can be
 # skipped. Here, we calculate the gradient, but not the hessian.
-expr1.getValueAndDerivatives(gradient=True, hessian=False, bhhh=False, prepareIds=True)
+expr1.get_value_and_derivatives(
+    gradient=True, hessian=False, bhhh=False, prepare_ids=True
+)
 
 # %%
 # It can also generate a function that takes the value of the
 # parameters as argument, and provides a tuple with the value of the
 # expression and its derivatives. By default, it returns the value of
 # the function, its gradient and its hessian.
-the_function = expr1.createFunction()
+the_function = expr1.create_function()
 
 # %%
 # We evaluate it at one point...
@@ -624,11 +627,11 @@ the_function([10, -2])
 
 # %%
 # We can use it to check the derivatives.
-tools.checkDerivatives(the_function, [1, 2], logg=True)
+biogeme.tools.derivatives.check_derivatives(the_function, [1, 2], logg=True)
 
 # %%
 # And it is possible to also obtain the BHHH matrix.
-the_function = expr1.createFunction(bhhh=True)
+the_function = expr1.create_function(bhhh=True)
 the_function([1, 2])
 
 # %%
@@ -636,7 +639,7 @@ the_function([1, 2])
 # derivatives for each entry in the database.  In the following
 # example, as no variable of the database is involved in the
 # expression, the output of the expression is the same for each entry.
-results = expr1.getValueAndDerivatives(database=my_data, aggregation=False)
+results = expr1.get_value_and_derivatives(database=my_data, aggregation=False)
 print(len(results))
 
 # %%
@@ -651,7 +654,7 @@ for f, g, h, bhhh in zip(f_array, g_array, h_array, bhhh_array):
 
 # %%
 # If `aggregation` is set to `True`, the results are accumulated as a sum.
-f, g, h, bhhh = expr1.getValueAndDerivatives(database=my_data, aggregation=True)
+f, g, h, bhhh = expr1.get_value_and_derivatives(database=my_data, aggregation=True)
 print(f'{f=}')
 print(f'{g=}')
 print(f'{h=}')
@@ -671,7 +674,7 @@ expr1.set_of_elementary_expression(TypeOfElementaryExpression.BETA)
 
 # %%
 # It is possible also to extract an elementary expression from its name.
-expr1.getElementaryExpression('beta2')
+expr1.get_elementary_expression('beta2')
 
 # %%
 # Let's consider an expression involving two variables :math:`V_1` and
@@ -705,12 +708,12 @@ except excep.BiogemeError as e:
 # variables. Indeed, the values of these variables cannot be found
 # anywhere.
 try:
-    expr2.getValue_c(prepareIds=True)
+    expr2.get_value_c(prepare_ids=True)
 except excep.BiogemeError as e:
     print(f'Exception raised: {e}')
 
 # %%
-expr2.getValue_c(database=my_data, aggregation=False, prepareIds=True)
+expr2.get_value_c(database=my_data, aggregation=False, prepare_ids=True)
 
 # %%
 # The following function extracts the names of the parameters
@@ -733,7 +736,7 @@ expr2.set_of_elementary_expression(TypeOfElementaryExpression.VARIABLE)
 # Expressions are defined recursively, using a tree
 # representation. The following function describes the type of the
 # upper most node of the tree.
-expr2.getClassName()
+expr2.get_class_name()
 
 # %%
 # The signature is a formal representation of the expression,
@@ -744,12 +747,12 @@ expr2.getClassName()
 # %%
 # As the expression is used out of a specific context, it must be
 # prepared before using it.
-expr2.prepare(database=my_data, numberOfDraws=0)
-expr2.getStatusIdManager()
+expr2.prepare(database=my_data, number_of_draws=0)
+expr2.get_status_id_manager()
 print(expr2)
 
 # %%
-expr2.getSignature()
+expr2.get_signature()
 
 # %%
 # The elementary expressions are
@@ -822,14 +825,14 @@ expr3.check_draws()
 
 # %%
 # The expression is a Monte-Carlo integration.
-expr3.getClassName()
+expr3.get_class_name()
 
 # %%
 # Note that the draws are associated with a database. Therefore, the
 # evaluation of expressions involving Monte Carlo integration can only
 # be done on a database. If none is provided, an exception is raised.
 try:
-    expr3.getValue_c(numberOfDraws=NUMBER_OF_DRAWS)
+    expr3.get_value_c(number_of_draws=NUMBER_OF_DRAWS)
 except excep.BiogemeError as e:
     print(f'Exception raised: {e}')
 
@@ -837,12 +840,12 @@ except excep.BiogemeError as e:
 # Here is its value. It is an approximation of
 #
 # .. math:: \int_0^1 x^2 dx=\frac{1}{3}.
-expr3.getValue_c(database=my_data, numberOfDraws=NUMBER_OF_DRAWS, prepareIds=True)
+expr3.get_value_c(database=my_data, number_of_draws=NUMBER_OF_DRAWS, prepare_ids=True)
 
 # %%
 # Here is its signature.
-expr3.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-expr3.getSignature()
+expr3.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+expr3.get_signature()
 
 # %%
 # The same integral can be calculated using numerical integration,
@@ -880,7 +883,7 @@ expr4.check_rv()
 
 # %%
 # Calculating its value requires the C++ implementation.
-expr4.getValue_c(my_data, prepareIds=True)
+expr4.get_value_c(my_data, prepare_ids=True)
 
 # %%
 # We illustrate now the Elem function. It takes two arguments: a
@@ -911,12 +914,12 @@ expr5.dict_of_elementary_expression(TypeOfElementaryExpression.VARIABLE)
 # this formula, and this numbering is invalid for the new expression
 # `expr5`. An error is triggered
 try:
-    expr5.getValue_c(database=my_data)
+    expr5.get_value_c(database=my_data)
 except excep.BiogemeError as e:
     print(e)
 
 # %%
-expr5.getValue_c(database=my_data, prepareIds=True)
+expr5.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 testElem = ex.MonteCarlo(ex.Elem({1: my_draws * my_draws}, 1))
@@ -931,7 +934,7 @@ expr6 = ex.bioMultSum([expr1, expr2, expr4])
 print(expr6)
 
 # %%
-expr6.getValue_c(database=my_data, numberOfDraws=NUMBER_OF_DRAWS, prepareIds=True)
+expr6.get_value_c(database=my_data, number_of_draws=NUMBER_OF_DRAWS, prepare_ids=True)
 
 # %%
 # We now illustrate how to calculate a logit model, that is
@@ -945,7 +948,7 @@ av = {0: 1, 1: 1, 2: 1}
 expr7 = ex._bioLogLogit(V, av, 1)
 
 # %%
-expr7.getValue_c(prepareIds=True)
+expr7.get_value_c(prepare_ids=True)
 
 # %%
 # If the alternative is not in the choice set, an exception is raised.
@@ -961,18 +964,18 @@ except excep.BiogemeError as e:
 
 # %%
 expr8 = models.loglogit(V, av, 1)
-expr8.getValue_c(database=my_data, prepareIds=True)
+expr8.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # As the result is a numpy array, it can be used for any
 # calculation. Here, we show how to calculate the logsum.
 for v in V.values():
-    print(v.getValue_c(database=my_data, prepareIds=True))
+    print(v.get_value_c(database=my_data, prepare_ids=True))
 
 # %%
 logsum = np.log(
     np.sum(
-        [np.exp(v.getValue_c(database=my_data, prepareIds=True)) for v in V.values()],
+        [np.exp(v.get_value_c(database=my_data, prepare_ids=True)) for v in V.values()],
         axis=1,
     )
 )
@@ -984,7 +987,7 @@ logsum
 #
 # .. math:: e_9=\frac{\partial e_8}{\partial \beta_2}.
 expr9 = ex.Derive(expr8, 'beta2')
-expr9.getValue_c(database=my_data, prepareIds=True)
+expr9.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 expr9.elementaryName
@@ -998,36 +1001,36 @@ expr9.elementaryName
 #     {{ - \left( {x - \mu } \right)^2 } {2\sigma ^2 }}} \right. }
 #     {2\sigma ^2 }}}dx.
 expr10 = ex.bioNormalCdf(Variable1 / 10 - 1)
-expr10.getValue_c(database=my_data, prepareIds=True)
+expr10.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # Min and max operators are also available. To avoid any ambiguity
 # with the Python operator, they are called bioMin and bioMax.
 expr11 = ex.bioMin(expr5, expr10)
-expr11.getValue_c(database=my_data, prepareIds=True)
+expr11.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 expr12 = ex.bioMax(expr5, expr10)
-expr12.getValue_c(database=my_data, prepareIds=True)
+expr12.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # For the sake of efficiency, it is possible to specify explicitly a
 # linear function, where each term is the product of a parameter and a
 # variable.
 terms = [
-    (beta1, ex.Variable('Variable1')),
-    (beta2, ex.Variable('Variable2')),
-    (beta3, ex.Variable('newvar_b')),
+    LinearTermTuple(beta=beta1, x=ex.Variable('Variable1')),
+    LinearTermTuple(beta=beta2, x=ex.Variable('Variable2')),
+    LinearTermTuple(beta=beta3, x=ex.Variable('newvar_b')),
 ]
 expr13 = ex.bioLinearUtility(terms)
-expr13.getValue_c(database=my_data, prepareIds=True)
+expr13.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # In terms of specification, it is equivalent to the expression
 # below. But the calculation of the derivatives is more efficient, as
 # the linear structure of the specification is exploited.
 expr13bis = beta1 * Variable1 + beta2 * Variable2 + beta3 * newvar_b
-expr13bis.getValue_c(database=my_data, prepareIds=True)
+expr13bis.get_value_c(database=my_data, prepare_ids=True)
 
 # %%
 # A Pythonic way to write a linear utility function.
@@ -1046,7 +1049,7 @@ print(util)
 
 # %%
 # Our database contains 5 observations.
-my_data.getSampleSize()
+my_data.get_sample_size()
 
 # %%
 my_data.panel('Person')
@@ -1058,13 +1061,13 @@ my_data.panel('Person')
 # of observations.
 
 # %%
-my_data.getSampleSize()
+my_data.get_sample_size()
 
 # %%
 # If we try to evaluate again the integral :math:`\int_0^1 x^2
 # dx=\frac{1}{3}`, an exception is raised.
 try:
-    expr3.getValue_c(database=my_data)
+    expr3.get_value_c(database=my_data)
 except excep.BiogemeError as e:
     print(f'Exception: {e}')
 
@@ -1087,25 +1090,25 @@ expr14 = ex.log(
 )
 
 # %%
-expr14.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
+expr14.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
 expr14
 
 # %%
-expr14.getValue_c(database=my_data, numberOfDraws=NUMBER_OF_DRAWS, prepareIds=True)
+expr14.get_value_c(database=my_data, number_of_draws=NUMBER_OF_DRAWS, prepare_ids=True)
 
 # %%
-expr14.getValueAndDerivatives(
+expr14.get_value_and_derivatives(
     database=my_data,
-    numberOfDraws=NUMBER_OF_DRAWS,
+    number_of_draws=NUMBER_OF_DRAWS,
     gradient=True,
     hessian=True,
     aggregation=False,
 )
 
 # %%
-expr14.getValueAndDerivatives(
+expr14.get_value_and_derivatives(
     database=my_data,
-    numberOfDraws=NUMBER_OF_DRAWS,
+    number_of_draws=NUMBER_OF_DRAWS,
     gradient=True,
     hessian=True,
     aggregation=True,
@@ -1117,8 +1120,8 @@ expr14.getValueAndDerivatives(
 # the database.
 
 # %%
-the_function = expr14.createFunction(
-    database=my_data, numberOfDraws=NUMBER_OF_DRAWS, gradient=True, hessian=True
+the_function = expr14.create_function(
+    database=my_data, number_of_draws=NUMBER_OF_DRAWS, gradient=True, hessian=True
 )
 
 # %%
@@ -1128,7 +1131,7 @@ the_function([0, 0])
 the_function([0.1, 0.1])
 
 # %%
-# It is possible to fix the value of some (or all) beta parameters
+# It is possible to fix the value of some (or all) Beta parameters
 print(expr14)
 
 # %%
@@ -1174,7 +1177,7 @@ id(expr1)
 
 # %%
 # <Numeric>{identifier},0.0
-ex.Numeric(0).getSignature()
+ex.Numeric(0).get_signature()
 
 # %%
 # Beta parameters
@@ -1196,12 +1199,12 @@ ex.Numeric(0).getSignature()
 # first.
 
 # %%
-beta1.prepare(database=my_data, numberOfDraws=0)
-beta1.getSignature()
+beta1.prepare(database=my_data, number_of_draws=0)
+beta1.get_signature()
 
 # %%
-beta3.prepare(database=my_data, numberOfDraws=0)
-beta3.getSignature()
+beta3.prepare(database=my_data, number_of_draws=0)
+beta3.get_signature()
 
 # %%
 # Variables
@@ -1216,7 +1219,7 @@ beta3.getSignature()
 # - variableId is a unique index given by Biogeme to all variables.
 
 # %%
-Variable1.getSignature()
+Variable1.get_signature()
 
 # %%
 # Random variables
@@ -1232,8 +1235,8 @@ Variable1.getSignature()
 #   variables.
 
 # %%
-omega.prepare(database=my_data, numberOfDraws=0)
-omega.getSignature()
+omega.prepare(database=my_data, number_of_draws=0)
+omega.get_signature()
 
 # %%
 # Draws
@@ -1248,8 +1251,8 @@ omega.getSignature()
 # - drawId is a unique index given by Biogeme to all draws.
 
 # %%
-my_draws.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-my_draws.getSignature()
+my_draws.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+my_draws.get_signature()
 
 # %%
 # General expression
@@ -1290,7 +1293,7 @@ my_draws.getSignature()
 the_sum = beta1 + Variable1
 
 # %%
-the_sum.getSignature()
+the_sum.get_signature()
 
 # %%
 # Unary operator
@@ -1311,18 +1314,19 @@ the_sum.getSignature()
 m = -beta1
 
 # %%
-m.getSignature()
+m.get_signature()
 
 # %%
 # LogLogit
 # ////////
 
 # %%
-# <LogLogit>{identifier}(nbrOfAlternatives),chosenAlt,altNumber,utility,availability,altNumber,utility,availability, etc.
+# <LogLogit>{identifier}(nbrOfAlternatives),
+# chosenAlt,altNumber,utility,availability,altNumber,utility,availability, etc.
 
 # %%
-expr7.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-expr7.getSignature()
+expr7.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+expr7.get_signature()
 
 # %%
 # Derive
@@ -1332,8 +1336,8 @@ expr7.getSignature()
 # <Derive>{identifier},id of expression to derive,unique index of elementary expression
 
 # %%
-expr9.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-expr9.getSignature()
+expr9.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+expr9.get_signature()
 
 # %%
 # Integrate
@@ -1343,8 +1347,8 @@ expr9.getSignature()
 # <Integrate>{identifier},id of expression to derive,index of random variable
 
 # %%
-expr4.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-expr4.getSignature()
+expr4.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+expr4.get_signature()
 
 # %%
 # Elem
@@ -1360,25 +1364,26 @@ expr4.getSignature()
 #   value of number_of_expressions
 
 # %%
-elemExpr.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-elemExpr.getSignature()
+elemExpr.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+elemExpr.get_signature()
 
 # %%
 # bioLinearUtility
 # ////////////////
 
 # %%
-# <bioLinearUtility>{identifier}(numberOfTerms), beta1_exprId, beta1_uniqueId, beta1_name, variable1_exprId, variable1_uniqueId, variable1_name, etc...
+# <bioLinearUtility>{identifier}(numberOfTerms),
+# beta1_exprId, beta1_uniqueId, beta1_name, variable1_exprId, variable1_uniqueId, variable1_name, etc...
 #
 # where 6 entries are provided for each term:
 #
-#     - beta1_exprId is the expression id of the beta parameter
-#     - beta1_uniqueId is the unique id of the beta parameter
+#     - beta1_exprId is the expression id of the Beta parameter
+#     - beta1_uniqueId is the unique id of the Beta parameter
 #     - beta1_name is the name of the parameter
 #     - variable1_exprId is the expression id of the variable
 #     - variable1_uniqueId is the unique id of the variable
 #     - variable1_name is the name of the variable
 
 # %%
-expr13.prepare(database=my_data, numberOfDraws=NUMBER_OF_DRAWS)
-expr13.getSignature()
+expr13.prepare(database=my_data, number_of_draws=NUMBER_OF_DRAWS)
+expr13.get_signature()

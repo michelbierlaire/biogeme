@@ -22,7 +22,7 @@ logger.info('Example b07estimation_monte_carlo_anti_500.py')
 R = 500
 
 # %%
-the_draws = bioDraws('B_TIME_RND', 'NORMAL_ANTI')
+the_draws = bioDraws('b_time_rnd', 'NORMAL_ANTI')
 the_biogeme = get_biogeme(the_draws=the_draws, number_of_draws=R)
 the_biogeme.modelName = 'b07estimation_monte_carlo_anti_500'
 
@@ -31,5 +31,5 @@ results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

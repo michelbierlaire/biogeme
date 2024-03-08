@@ -12,6 +12,7 @@ syntax. They do not correspond to any meaningful model.
 :author: Michel Bierlaire
 :date: Wed Nov 22 15:16:56 2023
 """
+
 # %%
 import numpy as np
 import pandas as pd
@@ -24,7 +25,7 @@ import biogeme.models as md
 
 # %%
 # Version of Biogeme.
-print(ver.getText())
+print(ver.get_text())
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -37,9 +38,9 @@ logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
 V1 = 0
-beta = ex.Beta('beta', 0, None, None, 0)
+beta = ex.Beta('Beta', 0, None, None, 0)
 sigma = ex.Beta('sigma', 1, 0, None, 0)
-V2 = beta + sigma * ex.bioDraws('V2', 'NORMAL')
+V2 = beta + sigma * ex.bioDraws('v2', 'NORMAL')
 V = {1: V1, 2: V2}
 condprob = md.logit(V, None, 0)
 prob = ex.MonteCarlo(condprob)
@@ -68,7 +69,7 @@ print(loglike)
 # %%
 x = ex.Variable('x')
 y = ex.Variable('y')
-beta = ex.Beta('beta', 1, None, None, 0)
+beta = ex.Beta('Beta', 1, None, None, 0)
 sigma = ex.Beta('sigma', 1, None, None, 0)
 intercept = ex.Beta('intercept', 0, None, None, 0)
 model = intercept + beta * x
@@ -99,11 +100,11 @@ df = pd.DataFrame({'x': [-2, -1, 0, 1, 2], 'y': [1, 1, 1, 1, 1]})
 my_data = db.Database('test', df)
 
 # %%
-lr = like.getValue_c(my_data, prepareIds=True)
+lr = like.get_value_c(my_data, prepare_ids=True)
 lr
 
 # %%
 np.log(lr)
 
 # %%
-loglike.getValue_c(my_data, prepareIds=True)
+loglike.get_value_c(my_data, prepare_ids=True)

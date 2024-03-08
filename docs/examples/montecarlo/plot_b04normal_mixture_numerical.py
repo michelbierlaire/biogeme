@@ -43,17 +43,17 @@ B_COST = -1.29
 # designed to be used for integration
 omega = RandomVariable('omega')
 density = dist.normalpdf(omega)
-B_TIME_RND = B_TIME + B_TIME_S * omega
+b_time_rnd = B_TIME + B_TIME_S * omega
 
 # %%
 # Definition of the utility functions
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v1 = ASC_TRAIN + b_time_rnd * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
+v2 = ASC_SM + b_time_rnd * SM_TT_SCALED + B_COST * SM_COST_SCALED
+v3 = ASC_CAR + b_time_rnd * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives
-V = {1: V1, 2: V2, 3: V3}
+util = {1: v1, 2: v2, 3: v3}
 
 # %%
 # Associate the availability conditions with the alternatives
@@ -61,17 +61,17 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # The choice model is a logit, with availability conditions
-integrand = models.logit(V, av, CHOICE)
-numericalI = Integrate(integrand * density, 'omega')
+integrand = models.logit(util, av, CHOICE)
+numerical_integral = Integrate(integrand * density, 'omega')
 
 # %%
-simulate = {'Numerical': numericalI}
+simulate = {'Numerical': numerical_integral}
 
 # %%
 biosim = bio.BIOGEME(database, simulate)
 
 # %%
-results = biosim.simulate(theBetaValues={})
+results = biosim.simulate(the_beta_values={})
 results
 
 # %%

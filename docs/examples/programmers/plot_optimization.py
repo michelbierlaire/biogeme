@@ -13,9 +13,8 @@ syntax. They do not correspond to any meaningful model.
 :date: Thu Nov 23 22:25:13 2023
 """
 
-
 import pandas as pd
-from biogeme.version import getText
+from biogeme.version import get_text
 import biogeme.biogeme as bio
 import biogeme.database as db
 from biogeme import models
@@ -25,7 +24,7 @@ import biogeme.biogeme_logging as blog
 
 # %%
 # Version of Biogeme.
-print(getText())
+print(get_text())
 
 # %%
 logger = blog.get_screen_logger(blog.INFO)
@@ -71,7 +70,7 @@ my_biogeme.generate_pickle = False
 print(my_biogeme)
 
 # %%
-f, g, h, gdiff, hdiff = my_biogeme.checkDerivatives(
+f, g, h, gdiff, hdiff = my_biogeme.check_derivatives(
     beta=my_biogeme.beta_values_dict_to_list(), verbose=True
 )
 
@@ -85,7 +84,7 @@ pd.DataFrame(hdiff)
 # **scipy**: this is the optimization algorithm from scipy.
 my_biogeme.algorithm_name = 'scipy'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -95,7 +94,7 @@ for k, v in results.data.optimizationMessages.items():
 # **Newton with linesearch**
 my_biogeme.algorithm_name = 'LS-newton'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -105,7 +104,7 @@ for k, v in results.data.optimizationMessages.items():
 # Changing the requested precision
 my_biogeme.tolerance = 0.1
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -115,7 +114,7 @@ for k, v in results.data.optimizationMessages.items():
 # **Newton with trust region**
 my_biogeme.algorithm_name = 'TR-newton'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -132,7 +131,7 @@ my_biogeme.dogleg = False
 my_biogeme.initial_radius = 0.001
 my_biogeme.maxiter = 3
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -143,7 +142,7 @@ for k, v in results.data.optimizationMessages.items():
 my_biogeme.tolerance = 0.1
 my_biogeme.maxiter = 1000
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -155,7 +154,7 @@ my_biogeme.algorithm_name = 'LS-BFGS'
 my_biogeme.tolerance = 1.0e-6
 my_biogeme.maxiter = 1000
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -165,7 +164,7 @@ for k, v in results.data.optimizationMessages.items():
 # **BFGS with trust region**
 my_biogeme.algorithm_name = 'TR-BFGS'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -180,7 +179,7 @@ for k, v in results.data.optimizationMessages.items():
 # <https://www.ams.org/journals/mcom/1988-50-182/S0025-5718-1988-0929544-3/S0025-5718-1988-0929544-3.pdf>`_.
 my_biogeme.algorithm_name = 'simple_bounds'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -195,7 +194,7 @@ for k, v in results.data.optimizationMessages.items():
 # %%
 my_biogeme.second_derivatives = 0.5
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -208,7 +207,7 @@ for k, v in results.data.optimizationMessages.items():
 # %%
 my_biogeme.second_derivatives = 0.0
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -218,7 +217,7 @@ for k, v in results.data.optimizationMessages.items():
 # There are shortcuts to call the BFGS and the Newton versions
 my_biogeme.algorithm_name = 'simple_bounds_newton'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():
@@ -227,7 +226,7 @@ for k, v in results.data.optimizationMessages.items():
 # %%
 my_biogeme.algorithm_name = 'simple_bounds_BFGS'
 results = my_biogeme.estimate()
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 # %%
 for k, v in results.data.optimizationMessages.items():

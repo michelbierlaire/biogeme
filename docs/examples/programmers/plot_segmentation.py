@@ -12,13 +12,14 @@ syntax. They do not correspond to any meaningful model.
 :author: Michel Bierlaire
 :date: Thu Dec  7 15:18:45 2023
 """
-from biogeme.version import getText
+
+from biogeme.version import get_text
 import biogeme.segmentation as seg
 from biogeme.expressions import Variable, Beta
 
 # %%
 # Version of Biogeme.
-print(getText())
+print(get_text())
 
 # %%
 socio_eco_1 = Variable('socio_eco_1')
@@ -62,7 +63,7 @@ segmented_parameter.segmented_beta()
 print(segmented_parameter.segmented_code())
 
 # %%
-# The code of the original beta is also available:
+# The code of the original Beta is also available:
 print(segmented_parameter.beta_code())
 
 # %%
@@ -76,7 +77,7 @@ segmented_parameter.segmented_beta()
 print(segmented_parameter.segmented_code())
 
 # %%
-# The two segmentations can be combined together
+# The two segmentations can be combined.
 segmented_parameter = seg.Segmentation(
     beta_x,
     (

@@ -11,7 +11,6 @@ with various types of draws.
 :date: Thu Apr 13 20:58:50 2023
 """
 
-
 import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.distributions as dist
@@ -53,12 +52,12 @@ B_COST = -1.29
 # Generate several versions of the error component.
 omega = RandomVariable('omega')
 density = dist.normalpdf(omega)
-B_TIME_RND = B_TIME + B_TIME_S * omega
-B_TIME_RND_normal = B_TIME + B_TIME_S * bioDraws('B_NORMAL', 'NORMAL')
-B_TIME_RND_anti = B_TIME + B_TIME_S * bioDraws('B_ANTI', 'NORMAL_ANTI')
-B_TIME_RND_halton = B_TIME + B_TIME_S * bioDraws('B_HALTON', 'NORMAL_HALTON2')
-B_TIME_RND_mlhs = B_TIME + B_TIME_S * bioDraws('B_MLHS', 'NORMAL_MLHS')
-B_TIME_RND_antimlhs = B_TIME + B_TIME_S * bioDraws('B_ANTIMLHS', 'NORMAL_MLHS_ANTI')
+b_time_rnd = B_TIME + B_TIME_S * omega
+b_time_rnd_normal = B_TIME + B_TIME_S * bioDraws('B_NORMAL', 'NORMAL')
+b_time_rnd_anti = B_TIME + B_TIME_S * bioDraws('B_ANTI', 'NORMAL_ANTI')
+b_time_rnd_halton = B_TIME + B_TIME_S * bioDraws('B_HALTON', 'NORMAL_HALTON2')
+b_time_rnd_mlhs = B_TIME + B_TIME_S * bioDraws('B_MLHS', 'NORMAL_MLHS')
+b_time_rnd_antimlhs = B_TIME + B_TIME_S * bioDraws('B_ANTIMLHS', 'NORMAL_MLHS_ANTI')
 
 
 # %%
@@ -87,16 +86,16 @@ def logit(the_b_time_rnd: Expression) -> Expression:
 
 # %%
 # Generate each integral.
-numericalI = Integrate(logit(B_TIME_RND) * density, 'omega')
-normal = MonteCarlo(logit(B_TIME_RND_normal))
-anti = MonteCarlo(logit(B_TIME_RND_anti))
-halton = MonteCarlo(logit(B_TIME_RND_halton))
-mlhs = MonteCarlo(logit(B_TIME_RND_mlhs))
-antimlhs = MonteCarlo(logit(B_TIME_RND_antimlhs))
+numerical_integral = Integrate(logit(b_time_rnd) * density, 'omega')
+normal = MonteCarlo(logit(b_time_rnd_normal))
+anti = MonteCarlo(logit(b_time_rnd_anti))
+halton = MonteCarlo(logit(b_time_rnd_halton))
+mlhs = MonteCarlo(logit(b_time_rnd_mlhs))
+antimlhs = MonteCarlo(logit(b_time_rnd_antimlhs))
 
 # %%
 simulate = {
-    'Numerical': numericalI,
+    'Numerical': numerical_integral,
     'MonteCarlo': normal,
     'Antithetic': anti,
     'Halton': halton,
@@ -109,10 +108,10 @@ biosim = bio.BIOGEME(database, simulate)
 biosim.number_of_draws = R
 
 # %%
-results = biosim.simulate(theBetaValues={})
+results = biosim.simulate(the_beta_values={})
 results
 
 # %%
 print(f'Number of draws: {R}')
 for c in results.columns:
-    print(f'{c}:\t{results.loc[0,c]}')
+    print(f'{c}:\t{results.loc[0, c]}')

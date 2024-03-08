@@ -16,6 +16,7 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import draws
 from biogeme.expressions import exp, bioDraws, MonteCarlo
+from biogeme.native_draws import RandomNumberGeneratorTuple
 
 # %%
 R = 10000
@@ -39,48 +40,52 @@ def halton13(sample_size: int, number_of_draws: int) -> np.array:
     :param number_of_draws: number of draws to generate.
 
     """
-    return draws.getHaltonDraws(sample_size, number_of_draws, base=13, skip=10)
+    return draws.get_halton_draws(sample_size, number_of_draws, base=13, skip=10)
 
 
 # %%
-my_draws = {'HALTON13': (halton13, 'Halton draws, base 13, skipping 10')}
-database.setRandomNumberGenerators(my_draws)
+my_draws = {
+    'HALTON13': RandomNumberGeneratorTuple(
+        halton13, 'Halton draws, base 13, skipping 10'
+    )
+}
+database.set_random_number_generators(my_draws)
 
 # %%
 U = bioDraws('U', 'UNIFORM')
 integrand = exp(U) + exp(1 - U)
-simulatedI = MonteCarlo(integrand) / 2.0
+simulated_integral = MonteCarlo(integrand) / 2.0
 
 # %%
 U_halton13 = bioDraws('U_halton13', 'HALTON13')
 integrand_halton13 = exp(U_halton13) + exp(1 - U_halton13)
-simulatedI_halton13 = MonteCarlo(integrand_halton13) / 2.0
+simulated_integral_halton13 = MonteCarlo(integrand_halton13) / 2.0
 
 # %%
 U_mlhs = bioDraws('U_mlhs', 'UNIFORM_MLHS')
 integrand_mlhs = exp(U_mlhs) + exp(1 - U_mlhs)
-simulatedI_mlhs = MonteCarlo(integrand_mlhs) / 2.0
+simulated_integral_mlhs = MonteCarlo(integrand_mlhs) / 2.0
 
 # %%
-trueI = exp(1.0) - 1.0
+true_integral = exp(1.0) - 1.0
 
 # %%
-error = simulatedI - trueI
+error = simulated_integral - true_integral
 
 # %%
-error_halton13 = simulatedI_halton13 - trueI
+error_halton13 = simulated_integral_halton13 - true_integral
 
 # %%
-error_mlhs = simulatedI_mlhs - trueI
+error_mlhs = simulated_integral_mlhs - true_integral
 
 # %%
 simulate = {
-    'Analytical Integral': trueI,
-    'Simulated Integral': simulatedI,
+    'Analytical Integral': true_integral,
+    'Simulated Integral': simulated_integral,
     'Error             ': error,
-    'Simulated Integral (Halton13)': simulatedI_halton13,
+    'Simulated Integral (Halton13)': simulated_integral_halton13,
     'Error (Halton13)             ': error_halton13,
-    'Simulated Integral (MLHS)': simulatedI_mlhs,
+    'Simulated Integral (MLHS)': simulated_integral_mlhs,
     'Error (MLHS)             ': error_mlhs,
 }
 
@@ -89,7 +94,7 @@ biosim = bio.BIOGEME(database, simulate)
 biosim.modelName = 'b03antithetic_explicit'
 
 # %%
-results = biosim.simulate(theBetaValues={})
+results = biosim.simulate(the_beta_values={})
 results
 
 # %%

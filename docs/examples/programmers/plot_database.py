@@ -19,12 +19,13 @@ import numpy as np
 import biogeme.database as db
 from biogeme.expressions import Variable, exp, bioDraws
 from biogeme.expressions import TypeOfElementaryExpression
+from biogeme.native_draws import description_of_native_draws, RandomNumberGeneratorTuple
 from biogeme.segmentation import DiscreteSegmentationTuple
 from biogeme.exceptions import BiogemeError
 
 # %%
 # Version of Biogeme.
-print(ver.getText())
+print(ver.get_text())
 
 # %%
 # We set the seed so that the outcome of random operations is always the same.
@@ -57,7 +58,7 @@ print(my_data)
 Variable1 = Variable('Variable1')
 Variable2 = Variable('Variable2')
 expr = Variable1 + Variable2
-result = my_data.valuesFromDatabase(expr)
+result = my_data.values_from_database(expr)
 print(result)
 
 # %%
@@ -115,13 +116,13 @@ Av2 = Variable('Av2')
 Av3 = Variable('Av3')
 Choice = Variable('Choice')
 avail = {1: Av1, 2: Av2, 3: Av3}
-result = my_data.checkAvailabilityOfChosenAlt(avail, Choice)
+result = my_data.check_availability_of_chosen_alt(avail, Choice)
 print(result)
 
 # %%
 # `choiceAvailabilityStatistics`: calculates the number of time an
 # alternative is chosen and available.
-my_data.choiceAvailabilityStatistics(avail, Choice)
+my_data.choice_availability_statistics(avail, Choice)
 
 # %%
 # Suggest a scaling of the variables in the database
@@ -129,10 +130,10 @@ my_data.choiceAvailabilityStatistics(avail, Choice)
 my_data.data.columns
 
 # %%
-my_data.suggestScaling()
+my_data.suggest_scaling()
 
 # %%
-my_data.suggestScaling(columns=['Variable1', 'Variable2'])
+my_data.suggest_scaling(columns=['Variable1', 'Variable2'])
 
 # %%
 # `scaleColumn`: divide an entire column by a scale value
@@ -141,7 +142,7 @@ my_data.suggestScaling(columns=['Variable1', 'Variable2'])
 my_data.data
 
 # %%
-my_data.scaleColumn('Variable2', 0.01)
+my_data.scale_column('Variable2', 0.01)
 
 # %%
 # After.
@@ -153,8 +154,8 @@ my_data.data
 Variable1 = Variable('Variable1')
 Variable2 = Variable('Variable2')
 expression = exp(0.5 * Variable2) / Variable1
-expression = Variable2 * Variable1
-result = my_data.addColumn(expression, 'NewVariable')
+# expression = Variable2 * Variable1
+result = my_data.add_column(expression, 'NewVariable')
 print(my_data.data['NewVariable'].tolist())
 
 # %%
@@ -195,7 +196,7 @@ my_data.data
 
 # %%
 # `dumpOnFile`: dumps the database in a CSV formatted file.
-my_data.dumpOnFile()
+my_data.dump_on_file()
 
 # %%
 # %%bash
@@ -218,7 +219,7 @@ my_data.dumpOnFile()
 
 # %%
 # List of native types and their description
-db.Database.descriptionOfNativeDraws()
+description_of_native_draws()
 
 # %%
 random_draws1 = bioDraws('random_draws1', 'NORMAL_MLHS_ANTI')
@@ -233,7 +234,7 @@ print(types)
 
 # %%
 # Generation of the draws.
-the_draws_table = my_data.generateDraws(
+the_draws_table = my_data.generate_draws(
     types, ['random_draws1', 'random_draws2', 'random_draws3'], 10
 )
 the_draws_table
@@ -255,32 +256,38 @@ the_draws_table
 
 # %%
 # A lognormal distribution.
-def logNormalDraws(sample_size, number_of_draws):
+def log_normal_draws(sample_size: int, number_of_draws: int) -> np.ndarray:
     return np.exp(np.random.randn(sample_size, number_of_draws))
 
 
 # %%
 # An exponential distribution.
-def exponentialDraws(sample_size, number_of_draws):
+def exponential_draws(sample_size: int, number_of_draws: int) -> np.ndarray:
     return -1.0 * np.log(np.random.rand(sample_size, number_of_draws))
 
 
 # %%
 # We associate these functions with a name in a dictionary.
 # %%
-dict = {
-    'LOGNORMAL': (logNormalDraws, 'Draws from lognormal distribution'),
-    'EXP': (exponentialDraws, 'Draws from exponential distributions'),
+rnd_dict = {
+    'LOGNORMAL': RandomNumberGeneratorTuple(
+        generator=log_normal_draws, description='Draws from lognormal distribution'
+    ),
+    'EXP': RandomNumberGeneratorTuple(
+        generator=exponential_draws, description='Draws from exponential distributions'
+    ),
 }
-my_data.setRandomNumberGenerators(dict)
+my_data.set_random_number_generators(rnd_dict)
 
 # %%
 # We can now generate draws from these distributions.
 random_draws1 = bioDraws('random_draws1', 'LOGNORMAL')
 random_draws2 = bioDraws('random_draws2', 'EXP')
 x = random_draws1 + random_draws2
-types = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
-the_draws_table = my_data.generateDraws(types, ['random_draws1', 'random_draws2'], 10)
+the_draws = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
+the_draws_table = my_data.generate_draws(
+    draws=the_draws, names=['random_draws1', 'random_draws2'], number_of_draws=10
+)
 print(the_draws_table)
 
 # %%
@@ -288,10 +295,10 @@ print(the_draws_table)
 # with replacement. Useful for bootstrapping.
 
 # %%
-my_data.sampleWithReplacement()
+my_data.sample_with_replacement()
 
 # %%
-my_data.sampleWithReplacement(6)
+my_data.sample_with_replacement(6)
 
 # %%
 # `panel`: defines the data as panel data. Takes as argument the name
@@ -300,14 +307,14 @@ my_panel_data = db.Database('test', df)
 
 # %%
 # Data is not considered panel yet
-my_panel_data.isPanel()
+my_panel_data.is_panel()
 
 # %%
 my_panel_data.panel('Person')
 
 # %%
 # Now it is panel.
-print(my_panel_data.isPanel())
+print(my_panel_data.is_panel())
 
 # %%
 print(my_panel_data)
@@ -322,7 +329,7 @@ random_draws2 = bioDraws('random_draws2', 'UNIFORM_HALTON3')
 # We build an expression that involves the two random variables
 x = random_draws1 + random_draws2
 types = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
-the_draws_table = my_panel_data.generateDraws(
+the_draws_table = my_panel_data.generate_draws(
     types, ['random_draws1', 'random_draws2'], 10
 )
 print(the_draws_table)
@@ -331,22 +338,22 @@ print(the_draws_table)
 # `getNumberOfObservations`: reports the number of observations in the
 # database. Note that it returns the same value, irrespectively if the
 # database contains panel data or not.
-my_data.getNumberOfObservations()
+my_data.get_number_of_observations()
 
 # %%
-my_panel_data.getNumberOfObservations()
+my_panel_data.get_number_of_observations()
 
 # %%
 # `getSampleSize`: reports the size of the sample. If the data is
 # cross-sectional, it is the number of observations in the
 # database. If the data is panel, it is the number of individuals.
-my_data.getSampleSize()
+my_data.get_sample_size()
 
 # %%
-my_panel_data.getSampleSize()
+my_panel_data.get_sample_size()
 
 # %%
 # `sampleIndividualMapWithReplacement`: extracts a random sample of
 # the individual map from a panel data database, with
 # replacement. Useful for bootstrapping.
-my_panel_data.sampleIndividualMapWithReplacement(10)
+my_panel_data.sample_individual_map_with_replacement(10)

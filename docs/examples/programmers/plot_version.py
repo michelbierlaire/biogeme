@@ -17,19 +17,19 @@ import biogeme.version as ver
 
 # %%
 # Obtain the version number
-ver.getVersion()
+ver.get_version()
 
 # %%
 # Package information in text format.
-print(ver.getText())
+print(ver.get_text())
 
 # %%
 # Package information in HTML format
-print(ver.getHtml())
+print(ver.get_html())
 
 # %%
 # Package information in LaTeX format
-print(ver.getLaTeX())
+print(ver.get_latex())
 
 # %%
 # Defines the `__version__` variable.

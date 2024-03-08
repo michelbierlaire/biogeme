@@ -20,7 +20,7 @@ logger.info('Example b07estimation_specification_mlhs_anti_500.py')
 
 # %%
 R = 500
-the_draws = bioDraws('B_TIME_RND', 'NORMAL_MLHS_ANTI')
+the_draws = bioDraws('b_time_rnd', 'NORMAL_MLHS_ANTI')
 the_biogeme = get_biogeme(the_draws=the_draws, number_of_draws=R)
 the_biogeme.modelName = 'b07estimation_monte_carlo_mlhs_anti_500'
 
@@ -31,5 +31,5 @@ results = the_biogeme.estimate()
 print(results.shortSummary())
 
 # %%
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

@@ -15,7 +15,7 @@ import biogeme.version as ver
 import biogeme.distributions as dist
 from biogeme.expressions import Beta
 
-print(ver.getText())
+print(ver.get_text())
 
 # %%
 # pdf of the normal distributio: returns the biogeme expression of the
@@ -30,7 +30,7 @@ resulting_expression = dist.normalpdf(0)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # Calculated for an expression.
@@ -43,7 +43,7 @@ resulting_expression = dist.normalpdf(a_parameter, mu=mu, s=sigma)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # pdf of the lognormal distribution: returns the biogeme expression of
@@ -58,7 +58,7 @@ resulting_expression = dist.lognormalpdf(1)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # Calculated for an expression.
@@ -71,7 +71,7 @@ resulting_expression = dist.lognormalpdf(a_parameter, mu=mu, s=sigma)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # pdf of the uniform distribution: returns the biogeme expression of
@@ -87,7 +87,7 @@ resulting_expression = dist.uniformpdf(0)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # Calculated for an expression
@@ -100,7 +100,7 @@ resulting_expression = dist.uniformpdf(a_parameter, a=a, b=b)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # pdf of the triangular distribution: returns the biogeme expression
@@ -121,7 +121,7 @@ resulting_expression = dist.triangularpdf(0)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # Calculated for an expression.
@@ -135,7 +135,7 @@ resulting_expression = dist.triangularpdf(a_parameter, a=a, b=b, c=c)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # CDF of the logistic distribution: returns the biogeme expression of
@@ -152,7 +152,7 @@ resulting_expression = dist.logisticcdf(0)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()
 
 # %%
 # Calculated for an expression
@@ -165,4 +165,4 @@ resulting_expression = dist.logisticcdf(a_parameter, mu=mu, s=sigma)
 resulting_expression
 
 # %%
-resulting_expression.getValue()
+resulting_expression.get_value()

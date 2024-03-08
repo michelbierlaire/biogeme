@@ -18,6 +18,7 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 from biogeme import draws
 from biogeme.expressions import exp, bioDraws, MonteCarlo
+from biogeme.native_draws import RandomNumberGeneratorTuple
 
 # %%
 # We create a fake database with one entry, as it is required
@@ -38,85 +39,92 @@ def halton13(sample_size: int, number_of_draws: int) -> np.array:
     :param number_of_draws: number of draws to generate.
 
     """
-    return draws.getHaltonDraws(sample_size, number_of_draws, base=13, skip=10)
+    return draws.get_halton_draws(sample_size, number_of_draws, base=13, skip=10)
 
 
 # %%
-mydraws = {'HALTON13': (halton13, 'Halton draws, base 13, skipping 10')}
-database.setRandomNumberGenerators(mydraws)
+mydraws = {
+    'HALTON13': RandomNumberGeneratorTuple(
+        generator=halton13, description='Halton draws, base 13, skipping 10'
+    )
+}
+database.set_random_number_generators(mydraws)
 
 # %%
 # Integrate with pseudo-random number generator.
 integrand = exp(bioDraws('U', 'UNIFORM'))
-simulatedI = MonteCarlo(integrand)
+simulated_integral = MonteCarlo(integrand)
 
 # %%
 # Integrate with Halton draws, base 2.
 integrand_halton = exp(bioDraws('U_halton', 'UNIFORM_HALTON2'))
-simulatedI_halton = MonteCarlo(integrand_halton)
+simulated_integral_halton = MonteCarlo(integrand_halton)
 
 # %%
 # Integrate with Halton draws, base 13.
 integrand_halton13 = exp(bioDraws('U_halton13', 'HALTON13'))
-simulatedI_halton13 = MonteCarlo(integrand_halton13)
+simulated_integral_halton13 = MonteCarlo(integrand_halton13)
 
 # %%
 # Integrate with MLHS.
 integrand_mlhs = exp(bioDraws('U_mlhs', 'UNIFORM_MLHS'))
-simulatedI_mlhs = MonteCarlo(integrand_mlhs)
+simulated_integral_mlhs = MonteCarlo(integrand_mlhs)
 
 # %%
 # True value
-trueI = exp(1.0) - 1.0
+true_integral = exp(1.0) - 1.0
 
 # %%
 # Number of draws.
 R = 20000
 
 # %%
-sampleVariance = MonteCarlo(integrand * integrand) - simulatedI * simulatedI
-stderr = (sampleVariance / R) ** 0.5
-error = simulatedI - trueI
+sample_variance = (
+    MonteCarlo(integrand * integrand) - simulated_integral * simulated_integral
+)
+stderr = (sample_variance / R) ** 0.5
+error = simulated_integral - true_integral
 
 # %%
-sampleVariance_halton = (
+sample_variance_halton = (
     MonteCarlo(integrand_halton * integrand_halton)
-    - simulatedI_halton * simulatedI_halton
+    - simulated_integral_halton * simulated_integral_halton
 )
-stderr_halton = (sampleVariance_halton / R) ** 0.5
-error_halton = simulatedI_halton - trueI
+stderr_halton = (sample_variance_halton / R) ** 0.5
+error_halton = simulated_integral_halton - true_integral
 
 # %%
 sampleVariance_halton13 = (
     MonteCarlo(integrand_halton13 * integrand_halton13)
-    - simulatedI_halton13 * simulatedI_halton13
+    - simulated_integral_halton13 * simulated_integral_halton13
 )
 stderr_halton13 = (sampleVariance_halton13 / R) ** 0.5
-error_halton13 = simulatedI_halton13 - trueI
+error_halton13 = simulated_integral_halton13 - true_integral
 
 # %%
 sampleVariance_mlhs = (
-    MonteCarlo(integrand_mlhs * integrand_mlhs) - simulatedI_mlhs * simulatedI_mlhs
+    MonteCarlo(integrand_mlhs * integrand_mlhs)
+    - simulated_integral_mlhs * simulated_integral_mlhs
 )
 stderr_mlhs = (sampleVariance_mlhs / R) ** 0.5
-error_mlhs = simulatedI_mlhs - trueI
+error_mlhs = simulated_integral_mlhs - true_integral
 
 # %%
 simulate = {
-    'Analytical Integral': trueI,
-    'Simulated Integral': simulatedI,
-    'Sample variance   ': sampleVariance,
+    'Analytical Integral': true_integral,
+    'Simulated Integral': simulated_integral,
+    'Sample variance   ': sample_variance,
     'Std Error         ': stderr,
     'Error             ': error,
-    'Simulated Integral (Halton)': simulatedI_halton,
-    'Sample variance (Halton)   ': sampleVariance_halton,
+    'Simulated Integral (Halton)': simulated_integral_halton,
+    'Sample variance (Halton)   ': sample_variance_halton,
     'Std Error (Halton)         ': stderr_halton,
     'Error (Halton)             ': error_halton,
-    'Simulated Integral (Halton13)': simulatedI_halton13,
+    'Simulated Integral (Halton13)': simulated_integral_halton13,
     'Sample variance (Halton13)   ': sampleVariance_halton13,
     'Std Error (Halton13)         ': stderr_halton13,
     'Error (Halton13)             ': error_halton13,
-    'Simulated Integral (MLHS)': simulatedI_mlhs,
+    'Simulated Integral (MLHS)': simulated_integral_mlhs,
     'Sample variance (MLHS)   ': sampleVariance_mlhs,
     'Std Error (MLHS)         ': stderr_mlhs,
     'Error (MLHS)             ': error_mlhs,
@@ -125,7 +133,7 @@ simulate = {
 # %%
 biosim = bio.BIOGEME(database, simulate)
 biosim.modelName = 'b02simple_integral'
-results = biosim.simulate(theBetaValues={})
+results = biosim.simulate(the_beta_values={})
 results
 
 # %%
