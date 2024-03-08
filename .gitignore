@@ -384,3 +384,7 @@ reports/specAssistance_v2/pareto.png
 reports/mdcev/mdcev.ps
 clean_all.py
 docs/examples/assisted/b07everything_assisted.pareto
+docs/examples/latent/b01one_latent_regression.tex
+docs/examples/latent/b02one_latent_ordered.tex
+docs/examples/latent/b04latent_choice_seq_mc.tex
+docs/examples/latent/b07problem.tex
