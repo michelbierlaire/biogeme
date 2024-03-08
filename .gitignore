@@ -15,16 +15,8 @@ config.status
 archive/gtkgui/debuggui
 libtool
 old_webpage
-archive/pythonbiogeme/debugbiogeme
-archive/pythonbiogeme/pythonbiogeme
-archive/pythonbiogeme/pythonbiogeme_static
+archive/*
 stamp-h1
-archive/tools/histograms/histogram
-archive/tools/histograms/weightedhistogram
-archive/tools/prepareData/biocheckdata
-archive/tools/prepareData/biopreparedata
-archive/tools/prepareData/biosampledata
-
 docs/source/auto_examples
 
 #############################################
@@ -45,25 +37,6 @@ docs/source/auto_examples
 
 # Other .py
 autom4te.cache/
-archive/libraries/utils/patCompilationDate.h
-archive/libraries/utils/patUser.h
-archive/biogeme/biogeme
-archive/biogeme/biogeme-biogeme.o
-archive/libraries/bisonbiogeme/.libs/
-archive/libraries/pythonbiogeme/.libs/
-archive/libraries/pythonbiogeme/bioCompilationDate.h
-archive/libraries/pythonbiogeme/bioUser.h
-archive/pybiogeme/pybiogeme-pybiogeme.o
-archive/libraries/bisonbiogeme/patSpecParser.cc
-archive/libraries/bisonbiogeme/patSpecParser.hh
-archive/biomerge/biomerge
-archive/biomerge/biomerge-biomerge.o
-archive/biosim/biosim
-archive/biosim/biosim-biosim.o
-archive/biosim/biosim-patSimVersion.o
-archive/mod2py/mod2py
-archive/mod2py/mod2py-mod2py.o
-archive/pybiogeme/pybiogeme
 
 #############################################
 #                                           #
