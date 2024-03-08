@@ -44,7 +44,7 @@ asian_or_downtown = asian | downtown
 only_asian = asian - asian_and_downtown
 
 # %%
-# Set of non Asian restaurants in downtown
+# Set of non-Asian restaurants in downtown
 only_downtown = downtown - asian_and_downtown
 
 # %%
