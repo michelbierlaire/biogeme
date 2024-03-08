@@ -58,7 +58,7 @@ the_biogeme = bio.BIOGEME(database, simulate)
 # %%
 # Read the estimation results from the file.
 try:
-    results = res.bioResults(pickleFile='saved_results/b02estimation.pickle')
+    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
 except excep.BiogemeError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
@@ -68,7 +68,7 @@ except excep.BiogemeError:
 # %%
 # `simulated_values` is a Pandas dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
-simulated_values = the_biogeme.simulate(results.getBetaValues())
+simulated_values = the_biogeme.simulate(results.get_beta_values())
 simulated_values
 
 # %%
@@ -77,12 +77,12 @@ wtpcar = (60 * simulated_values['WTP CAR time'] * simulated_values['weight']).me
 
 # %%
 # Calculate confidence intervals
-b = results.getBetasForSensitivityAnalysis(the_biogeme.free_beta_names())
+b = results.get_betas_for_sensitivity_analysis(the_biogeme.free_beta_names())
 
 # %%
 # Returns data frame containing, for each simulated value, the left
 # and right bounds of the confidence interval calculated by simulation.
-left, right = the_biogeme.confidenceIntervals(b, 0.9)
+left, right = the_biogeme.confidence_intervals(b, 0.9)
 
 # %%
 # Lower bounds of the confidence intervals

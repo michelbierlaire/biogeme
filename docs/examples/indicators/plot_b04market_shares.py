@@ -9,6 +9,7 @@ We use an estimated model to calculate market shares.
 :date: Wed Apr 12 21:03:52 2023
 
 """
+
 import sys
 from biogeme import models
 import biogeme.biogeme as bio
@@ -30,7 +31,7 @@ prob_SM = models.nested(V, None, nests, 2)
 # %%
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickleFile='saved_results/b02estimation.pickle')
+    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
 except excep.BiogemeError:
     sys.exit(
         'Run first the script b02simulation.py '
@@ -48,13 +49,13 @@ simulate = {
 }
 
 the_biogeme = bio.BIOGEME(database, simulate)
-simulated_values = the_biogeme.simulate(results.getBetaValues())
+simulated_values = the_biogeme.simulate(results.get_beta_values())
 
 # %%
 # We also calculate confidence intervals for the calculated quantities,
 betas = the_biogeme.free_beta_names()
-b = results.getBetasForSensitivityAnalysis(betas)
-left, right = the_biogeme.confidenceIntervals(b, 0.9)
+b = results.get_betas_for_sensitivity_analysis(betas)
+left, right = the_biogeme.confidence_intervals(b, 0.9)
 
 # %%
 # Market shares are calculated using the weighted mean of the

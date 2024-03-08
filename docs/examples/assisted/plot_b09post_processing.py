@@ -57,7 +57,7 @@ print(spec)
 print(results.short_summary())
 
 # %%
-results.getEstimatedParameters()
+results.get_estimated_parameters()
 
 
 # %%

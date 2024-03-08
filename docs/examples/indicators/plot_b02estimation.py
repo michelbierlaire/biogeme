@@ -10,6 +10,7 @@ Estimation and simulation of a nested logit model
 :date: Wed Apr 12 21:05:16 2023
 
 """
+
 from biogeme import models
 import biogeme.biogeme as bio
 from optima_data import database
@@ -37,18 +38,20 @@ results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results
 
 
 # %%
 # Simulation
-simulated_choices = logprob.getValue_c(betas=results.getBetaValues(), database=database)
+simulated_choices = logprob.get_value_c(
+    betas=results.get_beta_values(), database=database
+)
 simulated_choices
 
 # %%
-loglikelihood = logprob.getValue_c(
-    betas=results.getBetaValues(),
+loglikelihood = logprob.get_value_c(
+    betas=results.get_beta_values(),
     database=database,
     aggregation=True,
 )

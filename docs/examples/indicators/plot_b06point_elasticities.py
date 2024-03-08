@@ -77,7 +77,7 @@ the_biogeme = bio.BIOGEME(database, simulate)
 # %%
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickleFile='saved_results/b02estimation.pickle')
+    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
 except excep.BiogemeError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
@@ -87,7 +87,7 @@ except excep.BiogemeError:
 # %%
 # `simulated_values` is a Pandas dataframe with the same number of rows as
 # the database, and as many columns as formulas to simulate.
-simulated_values = the_biogeme.simulate(results.getBetaValues())
+simulated_values = the_biogeme.simulate(results.get_beta_values())
 simulated_values
 
 # %%

@@ -9,6 +9,7 @@ We use an estimated model to perform various simulations.
 :date: Wed Apr 12 21:04:33 2023
 
 """
+
 import sys
 import time
 import pandas as pd
@@ -36,7 +37,7 @@ prob_SM = models.nested(V, None, nests, 2)
 
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickleFile='saved_results/b02estimation.pickle')
+    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
 except excep.BiogemeError:
     sys.exit(
         'Run first the script b02simulation.py '
@@ -51,26 +52,26 @@ except excep.BiogemeError:
 # %%
 start_time = time.time()
 simulate_formulas = {
-    'weight': normalized_weight.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'weight': normalized_weight.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
-    'Utility PT': V_PT.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'Utility PT': V_PT.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
-    'Utility car': V_CAR.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'Utility car': V_CAR.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
-    'Utility SM': V_SM.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'Utility SM': V_SM.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
-    'Prob. PT': prob_PT.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'Prob. PT': prob_PT.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
-    'Prob. car': prob_CAR.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'Prob. car': prob_CAR.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
-    'Prob. SM': prob_SM.getValue_c(
-        betas=results.getBetaValues(), database=database, prepareIds=True
+    'Prob. SM': prob_SM.get_value_c(
+        betas=results.get_beta_values(), database=database, prepare_ids=True
     ),
 }
 
@@ -106,7 +107,7 @@ simulate = {
 # %%
 start_time = time.time()
 the_biogeme = bio.BIOGEME(database, simulate)
-biogeme_simulation = the_biogeme.simulate(results.getBetaValues())
+biogeme_simulation = the_biogeme.simulate(results.get_beta_values())
 
 # %%
 print(

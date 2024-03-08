@@ -9,6 +9,7 @@ We use an estimated model to calculate revenues.
 :date: Wed Apr 12 21:02:19 2023
 
 """
+
 import sys
 import numpy as np
 
@@ -29,7 +30,7 @@ from scenarios import scenario
 # %%
 # Read the estimation results from the file.
 try:
-    results = res.bioResults(pickleFile='saved_results/b02estimation.pickle')
+    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
 except excep.BiogemeError:
     sys.exit(
         'Run first the script b02simulation.py '
@@ -66,13 +67,13 @@ def revenues(factor: float) -> tuple[float, float, float]:
     }
 
     the_biogeme = bio.BIOGEME(database, simulate)
-    simulated_values = the_biogeme.simulate(results.getBetaValues())
+    simulated_values = the_biogeme.simulate(results.get_beta_values())
 
     # We also calculate confidence intervals for the calculated quantities
 
     betas = the_biogeme.free_beta_names()
-    beta_bootstrap = results.getBetasForSensitivityAnalysis(betas)
-    left, right = the_biogeme.confidenceIntervals(beta_bootstrap, 0.9)
+    beta_bootstrap = results.get_betas_for_sensitivity_analysis(betas)
+    left, right = the_biogeme.confidence_intervals(beta_bootstrap, 0.9)
 
     revenues_pt = (
         simulated_values['Revenue public transportation'] * simulated_values['weight']

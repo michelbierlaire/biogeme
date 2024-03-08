@@ -9,6 +9,7 @@ Logit model.
 :date: Thu Jul 13 16:18:10 2023
 
 """
+
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta
@@ -64,7 +65,7 @@ the_biogeme.generate_pickle = False
 
 # %%
 # Calculate the null log likelihood for reporting.
-the_biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculate_null_loglikelihood(av)
 
 # %%
 # Estimate the parameters
@@ -75,5 +76,5 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 pandas_results

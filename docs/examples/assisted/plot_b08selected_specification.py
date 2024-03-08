@@ -12,6 +12,7 @@ See `Bierlaire and Ortelli (2023)
 :date: Sat Jul 15 15:46:56 2023
 
 """
+
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from everything_spec import model_catalog, database, av
@@ -42,7 +43,7 @@ the_biogeme.modelName = 'my_favorite_model'
 
 # %%
 # Calculate of the null log-likelihood for reporting.
-the_biogeme.calculateNullLoglikelihood(av)
+the_biogeme.calculate_null_loglikelihood(av)
 
 # %%
 # Estimate the parameters.
@@ -53,7 +54,7 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.getEstimatedParameters()
+pandas_results = results.get_estimated_parameters()
 
 # %%
 pandas_results
