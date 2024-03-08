@@ -48,16 +48,16 @@ database.remove(exclude)
 
 # %%
 # Definition of new variables
-SM_COST = database.DefineVariable('SM_COST', SM_CO * (GA == 0))
-TRAIN_COST = database.DefineVariable('TRAIN_COST', TRAIN_CO * (GA == 0))
-CAR_AV_SP = database.DefineVariable('CAR_AV_SP', CAR_AV * (SP != 0))
-TRAIN_AV_SP = database.DefineVariable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
-TRAIN_TT_SCALED = database.DefineVariable('TRAIN_TT_SCALED', TRAIN_TT / 100)
-TRAIN_COST_SCALED = database.DefineVariable('TRAIN_COST_SCALED', TRAIN_COST / 100)
-SM_TT_SCALED = database.DefineVariable('SM_TT_SCALED', SM_TT / 100)
-SM_COST_SCALED = database.DefineVariable('SM_COST_SCALED', SM_COST / 100)
-CAR_TT_SCALED = database.DefineVariable('CAR_TT_SCALED', CAR_TT / 100)
-CAR_CO_SCALED = database.DefineVariable('CAR_CO_SCALED', CAR_CO / 100)
+SM_COST = database.define_variable('SM_COST', SM_CO * (GA == 0))
+TRAIN_COST = database.define_variable('TRAIN_COST', TRAIN_CO * (GA == 0))
+CAR_AV_SP = database.define_variable('CAR_AV_SP', CAR_AV * (SP != 0))
+TRAIN_AV_SP = database.define_variable('TRAIN_AV_SP', TRAIN_AV * (SP != 0))
+TRAIN_TT_SCALED = database.define_variable('TRAIN_TT_SCALED', TRAIN_TT / 100)
+TRAIN_COST_SCALED = database.define_variable('TRAIN_COST_SCALED', TRAIN_COST / 100)
+SM_TT_SCALED = database.define_variable('SM_TT_SCALED', SM_TT / 100)
+SM_COST_SCALED = database.define_variable('SM_COST_SCALED', SM_COST / 100)
+CAR_TT_SCALED = database.define_variable('CAR_TT_SCALED', CAR_TT / 100)
+CAR_CO_SCALED = database.define_variable('CAR_CO_SCALED', CAR_CO / 100)
 
 # %%
 # Qualify the data as panel. ID identifies the individuals.
@@ -65,5 +65,5 @@ database.panel('ID')
 
 # %%
 # We flatten the database, so that each row corresponds to one individual.
-flat_df = database.generateFlatPanelDataframe(identical_columns=None)
+flat_df = database.generate_flat_panel_dataframe(identical_columns=None)
 flat_database = db.Database('swissmetro_flat', flat_df)
