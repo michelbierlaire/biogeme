@@ -1,8 +1,9 @@
-"""Scripts deleting Biogeme output files
+"""Scripts deleting Biogeme output .py
 
 :author: Michel Bierlaire
 :date: Sun Jul 30 15:58:57 2023
 """
+
 import os
 import sys
 
@@ -26,17 +27,17 @@ def file_to_erase(the_filename: str) -> bool:
     for start in FILE_STARTING_WITH:
         if the_filename.startswith(start):
             return True
-        
+
     return False
 
 
 def get_file_list():
-    """Retrieves the list of files to be erased.
+    """Retrieves the list of .py to be erased.
 
     :return: list of file names
     :rtype: list[str]
     """
-    
+
     the_list = []
     current_directory = os.getcwd()
     for dirpath, _, filenames in os.walk(current_directory):
@@ -50,14 +51,14 @@ def get_file_list():
 def ask_for_confirmation(the_list):
     """Function asking confirmation to the user.
 
-    :param the_list: luist of files to erase
+    :param the_list: luist of .py to erase
     :type the_list: list[str]
 
     :return: True if OK to proceed, False otherwise.
     :rtype: bool
     """
     while True:
-        print('This script will erase the following files:')
+        print('This script will erase the following .py:')
         print('\n'.join(the_list))
         text = 'Do you want to proceed? (yes/no): '
         response = input(text).strip().lower()
@@ -80,7 +81,7 @@ if ask_for_confirmation(file_list):
     if len(file_list) == 1:
         print('One file has been erased.')
     else:
-        print(f'{len(file_list)} files have been erased.')
+        print(f'{len(file_list)} .py have been erased.')
 
 else:
     print("Script execution aborted.")
