@@ -88,7 +88,7 @@ trap 'exit 1' 1 2 15
 
 # CC_FOR_BUILD -- compiler used by this script. Note that the use of a
 # compiler to aid in system detection is discouraged as it requires
-# temporary files to be created and, as you can see below, it is a
+# temporary .py to be created and, as you can see below, it is a
 # headache to deal with in a portable fashion.
 
 # Historically, `CC_FOR_BUILD' used to be named `HOST_CC'. We still

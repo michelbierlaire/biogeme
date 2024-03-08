@@ -48,7 +48,7 @@ func_file_conv ()
   case $file in
     / | /[!/]*) # absolute file, and not a UNC file
       if test -z "$file_conv"; then
-	# lazily determine how to convert abs files
+	# lazily determine how to convert abs .py
 	case `uname -s` in
 	  MINGW*)
 	    file_conv=mingw

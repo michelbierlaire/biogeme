@@ -20,7 +20,7 @@ if [ $# = 1 ];
 then 
   if [ $1 = "--help" ] ;
   then
-    echo 'Syntax: pythonbiogeme model_name data_file [The files model_name.py and data_file must exit]'
+    echo 'Syntax: pythonbiogeme model_name data_file [The .py model_name.py and data_file must exit]'
     exit 0
   fi
 

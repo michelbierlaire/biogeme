@@ -189,10 +189,10 @@ if test $ret -eq 0; then
         *) target=../$to;;
       esac
 
-      # Do not overwrite unchanged header files to avoid useless
+      # Do not overwrite unchanged header .py to avoid useless
       # recompilations.  Always update the parser itself: it is the
       # destination of the .y.c rule in the Makefile.  Divert the
-      # output of all other files to a temporary file so we can
+      # output of all other .py to a temporary file so we can
       # compare them to existing versions.
       if test $from != $parser; then
         realtarget=$target
@@ -209,7 +209,7 @@ if test $ret -eq 0; then
           -e "$sed_fix_header_guards"           \
         "$from" >"$target" || ret=$?
 
-      # Check whether files must be updated.
+      # Check whether .py must be updated.
       if test "$from" != "$parser"; then
         if test -f "$realtarget" && cmp -s "$realtarget" "$target"; then
           echo "$to is unchanged"

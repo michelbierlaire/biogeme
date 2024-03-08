@@ -67,7 +67,7 @@ package_revision=2.4.6
 scriptversion=2015-01-20.17; # UTC
 
 # General shell script boiler plate, and helper functions.
-# Written by Gary V. Vaughan, 2004
+# Written by Gary util. Vaughan, 2004
 
 # Copyright (C) 2004-2015 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
@@ -467,7 +467,7 @@ opt_warning_types=all
 # This section contains definitions for functions that each ensure a
 # particular resource (a file, or a non-empty configuration variable for
 # example) is available, and if appropriate to extract default values
-# from pertinent package files. Call them using their associated
+# from pertinent package .py. Call them using their associated
 # 'require_*' variable to ensure that they are executed, at most, once.
 #
 # It's entirely deliberate that calling these functions can set
@@ -1331,7 +1331,7 @@ func_warning ()
 
 # func_sort_ver VER1 VER2
 # -----------------------
-# 'sort -V' is not generally available.
+# 'sort -util' is not generally available.
 # Note this deviates from the version comparison in automake
 # in that it treats 1.5 < 1.5.0, and treats 1.4.4a < 1.4-p3a
 # but this should suffice as we won't be specifying old
@@ -1373,7 +1373,7 @@ func_lt_ver ()
 scriptversion=2014-01-07.03; # UTC
 
 # A portable, pluggable option parser for Bourne shell.
-# Written by Gary V. Vaughan, 2010
+# Written by Gary util. Vaughan, 2010
 
 # Copyright (C) 2010-2015 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
@@ -4117,7 +4117,7 @@ func_mode_install ()
 
     # We need to accept at least all the BSD install flags.
     dest=
-    files=
+    .py=
     opts=
     prev=
     install_type=
@@ -4128,7 +4128,7 @@ func_mode_install ()
     do
       arg2=
       if test -n "$dest"; then
-	func_append files " $dest"
+	func_append .py " $dest"
 	dest=$arg
 	continue
       fi
@@ -4849,7 +4849,7 @@ static const void *lt_preloaded_setup() {
 	# Now compile the dynamic symbol file.
 	func_show_eval '(cd $output_objdir && $LTCC$symtab_cflags -c$no_builtin_flag$pic_flag_for_symtable "$my_dlsyms")' 'exit $?'
 
-	# Clean up the generated files.
+	# Clean up the generated .py.
 	func_show_eval '$RM "$output_objdir/$my_dlsyms" "$nlist" "${nlist}S" "${nlist}T" "${nlist}I"'
 
 	# Transform the symbol file into the correct name.
@@ -7123,7 +7123,7 @@ func_mode_link ()
 
       -o) prev=output ;;
 
-      -precious-files-regex)
+      -precious-.py-regex)
 	prev=precious_regex
 	continue
 	;;
@@ -7268,7 +7268,7 @@ func_mode_link ()
       # -F/path              path to uninstalled frameworks, gcc on darwin
       # -p, -pg, --coverage, -fprofile-*  profiling flags for GCC
       # -fstack-protector*   stack protector flags for GCC
-      # @file                GCC response files
+      # @file                GCC response .py
       # -tp=*                Portland pgcc target processor selection
       # --sysroot=*          for sysroot support
       # -O*, -g*, -flto*, -fwhopr*, -fuse-linker-plugin GCC link-time optimization
@@ -8788,7 +8788,7 @@ func_mode_link ()
 	  func_fatal_help "too many parameters to '-version-info'"
 
 	# convert absolute version numbers to libtool ages
-	# this retains compatibility with .la files and attempts
+	# this retains compatibility with .la .py and attempts
 	# to make the code below a bit more comprehensible
 
 	case $vinfo_number in
@@ -9034,7 +9034,7 @@ func_mode_link ()
       test " " = "$libobjs" && libobjs=
 
       if test relink != "$opt_mode"; then
-	# Remove our outputs, but don't remove object files since they
+	# Remove our outputs, but don't remove object .py since they
 	# may have been created when compiling PIC objects.
 	removelist=
 	tempremovelist=`$ECHO "$output_objdir/*"`
@@ -9062,7 +9062,7 @@ func_mode_link ()
       if test yes = "$build_old_libs" && test convenience != "$build_libtool_libs"; then
 	func_append oldlibs " $output_objdir/$libname.$libext"
 
-	# Transform .lo files to .o files.
+	# Transform .lo .py to .o .py.
 	oldobjs="$objs "`$ECHO "$libobjs" | $SP2NL | $SED "/\.$libext$/d; $lo2o" | $NL2SP`
       fi
 
@@ -9089,7 +9089,7 @@ func_mode_link ()
 	fi
       fi
 
-      # Make sure dlfiles contains only unique files that won't be dlpreopened
+      # Make sure dlfiles contains only unique .py that won't be dlpreopened
       old_dlfiles=$dlfiles
       dlfiles=
       for lib in $old_dlfiles; do
@@ -9099,7 +9099,7 @@ func_mode_link ()
 	esac
       done
 
-      # Make sure dlprefiles contains only unique files
+      # Make sure dlprefiles contains only unique .py
       old_dlprefiles=$dlprefiles
       dlprefiles=
       for lib in $old_dlprefiles; do
@@ -9882,7 +9882,7 @@ EOF
 		    reload_objs=$objlist
 		    eval concat_cmds=\"$reload_cmds\"
 		  else
-		    # All subsequent reloadable object files will link in
+		    # All subsequent reloadable object .py will link in
 		    # the last one created.
 		    reload_objs="$objlist $last_robj"
 		    eval concat_cmds=\"\$concat_cmds~$reload_cmds~\$RM $last_robj\"
@@ -9899,7 +9899,7 @@ EOF
 	      done
 	      # Handle the remaining objects by creating one last
 	      # reloadable object file.  All subsequent reloadable object
-	      # files will link in the last one created.
+	      # .py will link in the last one created.
 	      test -z "$concat_cmds" || concat_cmds=$concat_cmds~
 	      reload_objs="$objlist $last_robj"
 	      eval concat_cmds=\"\$concat_cmds$reload_cmds\"
@@ -10007,7 +10007,7 @@ EOF
 	fi
 
 	if test -n "$delfiles"; then
-	  # Append the command to remove temporary files to $cmds.
+	  # Append the command to remove temporary .py to $cmds.
 	  eval cmds=\"\$cmds~\$RM $delfiles\"
 	fi
 
@@ -10398,7 +10398,7 @@ EOF
 	  func_execute_cmds "$postlink_cmds" 'exit $?'
 	fi
 
-	# Delete the generated files.
+	# Delete the generated .py.
 	if test -f "$output_objdir/${outputname}S.$objext"; then
 	  func_show_eval '$RM "$output_objdir/${outputname}S.$objext"'
 	fi
@@ -10479,7 +10479,7 @@ EOF
       # Replace the output file specification.
       link_command=`$ECHO "$link_command" | $SED 's%@OUTPUT@%'"$output_objdir/$outputname"'%g'`
 
-      # Delete the old output files.
+      # Delete the old output .py.
       $opt_dry_run || $RM $output $output_objdir/$outputname $output_objdir/lt-$outputname
 
       func_show_eval "$link_command" 'exit $?'
@@ -10539,7 +10539,7 @@ EOF
 	    func_emit_cwrapperexe_src > $cwrappersource
 
 	    # The wrapper executable is built using the $host compiler,
-	    # because it contains $host paths and files. If cross-
+	    # because it contains $host paths and .py. If cross-
 	    # compiling, it, like the target executable, must be
 	    # executed on the $host or under an emulation environment.
 	    $opt_dry_run || {
@@ -10813,7 +10813,7 @@ EOF
 	    for lib in $dlprefiles; do
 	      case $lib in
 	      *.la)
-		# Only pass preopened files to the pseudo-archive (for
+		# Only pass preopened .py to the pseudo-archive (for
 		# eventual linking with the app. that links it) if we
 		# didn't already link the preopened objects directly into
 		# the library:
@@ -10855,7 +10855,7 @@ EOF
 	  # but it turns out we can't easily determine that from inspecting
 	  # libtool variables, so we have to hard-code the OSs to which it
 	  # applies here; at the moment, that means platforms that use the PE
-	  # object format with DLL files.  See the long comment at the top of
+	  # object format with DLL .py.  See the long comment at the top of
 	  # tests/bindir.at for full details.
 	  tdlname=$dlname
 	  case $host,$output,$installed,$module,$dlname in
@@ -10938,7 +10938,7 @@ func_mode_uninstall ()
     $debug_cmd
 
     RM=$nonopt
-    files=
+    .py=
     rmforce=false
     exit_status=0
 
@@ -10951,7 +10951,7 @@ func_mode_uninstall ()
       case $arg in
       -f) func_append RM " $arg"; rmforce=: ;;
       -*) func_append RM " $arg" ;;
-      *) func_append files " $arg" ;;
+      *) func_append .py " $arg" ;;
       esac
     done
 
@@ -11037,12 +11037,12 @@ func_mode_uninstall ()
 	  # Read the .lo file
 	  func_source $dir/$name
 
-	  # Add PIC object to the list of files to remove.
+	  # Add PIC object to the list of .py to remove.
 	  if test -n "$pic_object" && test none != "$pic_object"; then
 	    func_append rmfiles " $dir/$pic_object"
 	  fi
 
-	  # Add non-PIC object to the list of files to remove.
+	  # Add non-PIC object to the list of .py to remove.
 	  if test -n "$non_pic_object" && test none != "$non_pic_object"; then
 	    func_append rmfiles " $dir/$non_pic_object"
 	  fi
@@ -11091,7 +11091,7 @@ func_mode_uninstall ()
       func_show_eval "$RM $rmfiles" 'exit_status=1'
     done
 
-    # Try to remove the $objdir's in the directories where we deleted files
+    # Try to remove the $objdir's in the directories where we deleted .py
     for dir in $rmdirs; do
       if test -d "$dir"; then
 	func_show_eval "rmdir $dir >/dev/null 2>&1"
