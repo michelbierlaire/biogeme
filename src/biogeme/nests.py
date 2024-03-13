@@ -11,7 +11,7 @@ from __future__ import annotations
 import itertools
 import logging
 from dataclasses import dataclass
-from typing import Union, Iterator, Any, Optional
+from typing import Iterator, Any
 
 import numpy as np
 import pandas as pd
@@ -36,7 +36,7 @@ class OneNestForNestedLogit:
 
     nest_param: Expression | float
     list_of_alternatives: list[int]
-    name: Optional[str] = None
+    name: str | None = None
 
     @classmethod
     def from_tuple(cls, the_tuple: OldOneNestForNestedLogit) -> OneNestForNestedLogit:
@@ -77,7 +77,7 @@ def get_alpha_expressions(
 
 def get_alpha_values(
     the_dict: dict[int, Expression | float],
-    parameters: Optional[dict[str, float]] = None,
+    parameters: dict[str, float] | None = None,
 ) -> dict[int, float]:
     """If the dictionary contains float, they are transformed into a
     numerical expression.
@@ -106,7 +106,7 @@ class OneNestForCrossNestedLogit:
 
     nest_param: Expression | float
     dict_of_alpha: dict[int, Expression | float]
-    name: Optional[str] = None
+    name: str | None = None
 
     @classmethod
     def from_tuple(
@@ -174,7 +174,7 @@ class Nests:
 
     def __getitem__(
         self, index: int
-    ) -> Union[OneNestForNestedLogit, OneNestForCrossNestedLogit]:
+    ) -> OneNestForNestedLogit | OneNestForCrossNestedLogit:
         if index < 0 or index >= len(self.tuple_of_nests):
             raise IndexError(
                 f'Index out of bounds. Valid indices are between 0 and '
@@ -200,9 +200,9 @@ class Nests:
 
         # Union Check: The union of all lists should be equal to choice_set
 
-        union_of_lists = set(
+        union_of_lists = {
             i for nest in self.tuple_of_nests for i in nest.list_of_alternatives
-        )
+        }
         union_of_lists |= set(self.alone)
         if union_of_lists != set(self.choice_set):
             missing_values = set(self.choice_set) - union_of_lists  # set difference
@@ -400,7 +400,7 @@ class NestsForCrossNestedLogit(Nests):
         :raise: BiogemeError is one alpha is a non-numeric expression
         """
 
-        def get_value(alpha: Union[Expression, float, int]) -> float:
+        def get_value(alpha: Expression | float | int) -> float:
             """Returns a float, irrespectively of the original type
 
             :param alpha: alpha parameter
