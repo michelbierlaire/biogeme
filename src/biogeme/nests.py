@@ -18,7 +18,8 @@ import pandas as pd
 from scipy.integrate import dblquad
 
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, Numeric, ExpressionOrNumeric
+from biogeme.expressions import Expression, Numeric, ExpressionOrNumeric, Beta
+
 
 # The first versions of Biogeme defined the nests as follows. We keep his for backward compatibility.
 OldOneNestForNestedLogit = tuple[ExpressionOrNumeric, list[int]]
@@ -118,15 +119,14 @@ class OneNestForCrossNestedLogit:
         self.dict_of_alpha = get_alpha_expressions(self.dict_of_alpha)
         self.list_of_alternatives = list(self.dict_of_alpha.keys())
 
-    def is_alpha_fixed(self) -> bool:
+    def all_alpha_fixed(self) -> bool:
         """Check if the alpha parameters have a numeric value."""
         for _, alpha in self.dict_of_alpha.items():
-            try:
-                _ = alpha.get_value()
-            except BiogemeError:
+            if isinstance(alpha, Beta):
+                if alpha.status == 0:
+                    return False
+            elif isinstance(alpha, Expression) and not isinstance(alpha, Numeric):
                 return False
-            except AttributeError:
-                return True
         return True
 
 
@@ -373,7 +373,7 @@ class NestsForCrossNestedLogit(Nests):
     def all_alphas_fixed(self) -> bool:
         """Check if all the alphas are fixed"""
         for nest in self.tuple_of_nests:
-            if not nest.is_alpha_fixed():
+            if not nest.all_alpha_fixed():
                 return False
         return True
 

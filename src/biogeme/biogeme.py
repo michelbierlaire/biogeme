@@ -7,6 +7,7 @@ Implementation of the main Biogeme class
 It combines the database and the model specification.
 """
 
+from __future__ import annotations
 import difflib
 import glob
 import logging
@@ -319,7 +320,7 @@ class BIOGEME:
         user_notes: str | None = None,
         parameter_file: str | None = None,
         skip_audit: bool = False,
-    ):
+    ) -> BIOGEME:
         """Obtain the Biogeme object corresponding to the
         configuration of a multiple expression
 
@@ -873,7 +874,7 @@ class BIOGEME:
         self.monte_carlo = self.id_manager.requires_draws
         if self.monte_carlo:
             self.database.generate_draws(
-                self.id_manager.draws.expressions,
+                self.id_manager.draw_types(),
                 self.id_manager.draws.names,
                 number_of_draws,
             )

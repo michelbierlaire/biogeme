@@ -31,14 +31,14 @@ class NegativeLikelihood(FunctionToMinimize):
         """Constructor"""
 
         tolerance = None
-        step_tol = None
+        steptol = None
         if parameters is not None:
             if 'tolerance' in parameters:
                 tolerance = parameters['tolerance']
-            if 'step_tol' in parameters:
-                step_tol = parameters['step_tol']
+            if 'steptol' in parameters:
+                steptol = parameters['steptol']
 
-        super().__init__(epsilon=tolerance, steptol=step_tol)
+        super().__init__(epsilon=tolerance, steptol=steptol)
 
         self.the_dimension: int = dimension  #: number of parameters to estimate
 
@@ -59,7 +59,6 @@ class NegativeLikelihood(FunctionToMinimize):
     def _f(self) -> float:
         if self.x is None:
             raise excep.BiogemeError('The variables must be set first.')
-
         return -self.like(self.x, scaled=False, batch=None)
 
     def _f_g(self) -> FunctionData:

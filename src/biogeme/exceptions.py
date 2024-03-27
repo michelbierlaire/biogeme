@@ -21,3 +21,7 @@ class ValueOutOfRange(BiogemeError):
 
 class DuplicateError(BiogemeError):
     """duplicate error."""
+
+
+class NotImplementedError(BiogemeError):
+    """Not implemented error."""

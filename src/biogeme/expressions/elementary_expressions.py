@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-import biogeme.exceptions as excep
+from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
 from .elementary_types import TypeOfElementaryExpression
 from .numeric_tools import validate, MAX_VALUE
@@ -212,10 +212,10 @@ class bioDraws(Elementary):
             error_msg = (
                 f"No id has been defined for elementary " f"expression {self.name}."
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.drawId is None:
             error_msg = f"No id has been defined for draw {self.name}."
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         signature = f"<{self.get_class_name()}>"
         signature += f"{{{self.get_id()}}}"
         signature += f'"{self.name}",{self.elementaryIndex},{self.drawId}'
@@ -308,9 +308,7 @@ class Variable(Elementary):
         list_of_errors = []
         list_of_warnings = []
         if database is None:
-            raise excep.BiogemeError(
-                "The database must be provided to audit the variable."
-            )
+            raise BiogemeError("The database must be provided to audit the variable.")
 
         if self.name not in database.data.columns:
             the_error = f"Variable {self.name} not found in the database."
@@ -373,10 +371,10 @@ class Variable(Elementary):
             error_msg = (
                 f"No id has been defined for elementary expression " f"{self.name}."
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.variableId is None:
             error_msg = f"No id has been defined for variable {self.name}."
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         signature = f"<{self.get_class_name()}>"
         signature += f"{{{self.get_id()}}}"
         signature += f'"{self.name}",{self.elementaryIndex},{self.variableId}'
@@ -402,7 +400,7 @@ class DefineVariable(Variable):
             neither a numeric value nor a
             biogeme.expressions.Expression object.
         """
-        raise excep.BiogemeError(
+        raise BiogemeError(
             "This expression is obsolete. Use the same function in the "
             "database object. Replace \"new_var = DefineVariable('NEW_VAR',"
             ' expression, database)" by  "new_var = database.DefineVariable'
@@ -520,10 +518,10 @@ class RandomVariable(Elementary):
             error_msg = (
                 f"No id has been defined for elementary " f"expression {self.name}."
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.rvId is None:
             error_msg = f"No id has been defined for random variable {self.name}."
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         signature = f"<{self.get_class_name()}>"
         signature += f"{{{self.get_id()}}}"
@@ -565,13 +563,13 @@ class Beta(Elementary):
                 f"The second parameter for {name} must be "
                 f"a float and not a {type(value)}: {value}"
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if not isinstance(name, str):
             error_msg = (
                 f"The first parameter must be a string and "
                 f"not a {type(name)}: {name}"
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         Elementary.__init__(self, name)
         the_value = validate(value, modify=False)
         self.initValue = the_value
@@ -679,12 +677,13 @@ class Beta(Elementary):
 
         :raise BiogemeError: if the Beta is not fixed.
         """
-        if self.status == 0:
-            if self.estimated_value is None:
-                error_msg = f"Parameter {self.name} must be estimated from data."
-                raise excep.BiogemeError(error_msg)
-            return self.estimated_value
-        return self.initValue
+        if self.status != 0:
+            return self.initValue
+        if self.estimated_value is None:
+            warning_msg = f"Parameter {self.name} must be estimated from data. Its initial value is used here."
+            logger.warning(warning_msg)
+            return self.initValue
+        return self.estimated_value
 
     @deprecated(get_value)
     def getValue(self) -> float:
@@ -772,11 +771,9 @@ class Beta(Elementary):
             error_msg = (
                 f"No id has been defined for elementary " f"expression {self.name}."
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.betaId is None:
-            raise excep.BiogemeError(
-                f"No id has been defined for parameter {self.name}."
-            )
+            raise BiogemeError(f"No id has been defined for parameter {self.name}.")
 
         signature = f"<{self.get_class_name()}>"
         signature += f"{{{self.get_id()}}}"

@@ -19,7 +19,7 @@ from ..deprecated import deprecated
 if TYPE_CHECKING:
     from . import ExpressionOrNumeric
     from ..database import Database
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 
 class LogLogit(Expression):
@@ -146,6 +146,7 @@ class LogLogit(Expression):
         if consistent:
             if database is None:
                 value_choice = self.choice.get_value_c()
+                logger.debug(f'{value_choice=}')
                 if value_choice not in self.av.keys():
                     the_error = (
                         f'The chosen alternative [{value_choice}] ' f'is not available'

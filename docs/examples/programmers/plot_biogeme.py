@@ -108,20 +108,20 @@ pd.DataFrame(the_function_output.bhhh)
 
 # %%
 # Now the unscaled version.
-f, g, h, bhhh = my_biogeme.calculateLikelihoodAndDerivatives(
+the_output: BiogemeFunctionOutput = my_biogeme.calculate_likelihood_and_derivatives(
     xplus, scaled=False, hessian=True, bhhh=True
 )
 # %%
-print(f'f = {f}')
+print(f'f = {the_output.function}')
 
 # %%
-print(f'g = {g}')
+print(f'g = {the_output.gradient}')
 
 # %%
-pd.DataFrame(h)
+pd.DataFrame(the_output.hessian)
 
 # %%
-pd.DataFrame(bhhh)
+pd.DataFrame(the_output.bhhh)
 
 
 # %%

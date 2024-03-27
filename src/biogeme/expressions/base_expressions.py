@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 import numpy as np
-from biogeme.exceptions import BiogemeError
+from biogeme.exceptions import BiogemeError, NotImplementedError
 from biogeme_optimization.function import FunctionToMinimize, FunctionData
 from .idmanager import IdManager
 from .numeric_tools import is_numeric
