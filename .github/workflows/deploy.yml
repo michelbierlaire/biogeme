@@ -61,13 +61,13 @@ jobs:
       id-token: write
     steps:
       - name: Download Wheel Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels
           path: dist
 
       - name: Download sdist Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: sdist
           path: dist
