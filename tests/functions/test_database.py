@@ -193,9 +193,10 @@ class TestDatabase(unittest.TestCase):
         the_random_draws = description_of_native_draws()
         for draw_type in the_random_draws:
             random_draws = bioDraws('random_draws', draw_type)
-            types = random_draws.dict_of_elementary_expression(
+            dict_of_draws = random_draws.dict_of_elementary_expression(
                 the_type=TypeOfElementaryExpression.DRAWS
             )
+            types = {name: draw.drawType for name, draw in dict_of_draws.items()}
 
             the_draws_table = self.myData1.generate_draws(types, ['random_draws'], 10)
             dim = the_draws_table.shape
@@ -237,9 +238,12 @@ class TestDatabase(unittest.TestCase):
         randomDraws1 = bioDraws('randomDraws1', 'LOGNORMAL')
         randomDraws2 = bioDraws('randomDraws2', 'EXP')
         x = randomDraws1 + randomDraws2
-        types = x.dict_of_elementary_expression(
+        dict_of_draws = x.dict_of_elementary_expression(
             the_type=TypeOfElementaryExpression.DRAWS
         )
+        types = {
+            name: expression.drawType for name, expression in dict_of_draws.items()
+        }
         theDrawsTable = self.myData1.generate_draws(
             types, ['randomDraws1', 'randomDraws2'], 10
         )
@@ -281,9 +285,12 @@ class TestDatabase(unittest.TestCase):
         randomDraws2 = bioDraws('randomDraws2', 'UNIFORMSYM')
         # We build an expression that involves the two random variables
         x = randomDraws1 + randomDraws2
-        types = x.dict_of_elementary_expression(
+        dict_of_draws = x.dict_of_elementary_expression(
             the_type=TypeOfElementaryExpression.DRAWS
         )
+        types = {
+            name: expression.drawType for name, expression in dict_of_draws.items()
+        }
         self.myPanelData.panel('Person')
         theDrawsTable = self.myPanelData.generate_draws(
             types, ['randomDraws1', 'randomDraws2'], 10

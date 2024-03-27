@@ -25,7 +25,7 @@ import scipy.optimize as sc
 from biogeme_optimization.bounds import Bounds
 from biogeme_optimization.diagnostics import OptimizationResults
 from biogeme_optimization.function import FunctionToMinimize
-from biogeme_optimization.linesearch import newton_linesearch, bfgs_linesearch
+from biogeme_optimization.linesearch import newton_line_search, bfgs_line_search
 from biogeme_optimization.simple_bounds import simple_bounds_newton_algorithm
 from biogeme_optimization.trust_region import newton_trust_region, bfgs_trust_region
 
@@ -164,7 +164,7 @@ def newton_linesearch_for_biogeme(
             maxiter = parameters['maxiter']
 
     logger.info('** Optimization: Newton with linesearch')
-    return newton_linesearch(
+    return newton_line_search(
         the_function=fct, starting_point=init_betas, maxiter=maxiter
     )
 
@@ -318,7 +318,7 @@ def bfgs_linesearch_for_biogeme(
             init_bfgs = parameters['initBfgs']
 
     logger.info('** Optimization: BFGS with line search')
-    return bfgs_linesearch(
+    return bfgs_line_search(
         the_function=fct,
         starting_point=init_betas,
         init_bfgs=init_bfgs,
@@ -521,7 +521,7 @@ def simple_bounds_newton_algorithm_for_biogeme(
         variable_names=variable_names,
         proportion_analytical_hessian=proportion_true_hessian,
         first_radius=radius,
-        cgtol=cgtol,
+        conjugate_gradient_tol=cgtol,
         maxiter=maxiter,
         eta1=eta1,
         eta2=eta2,

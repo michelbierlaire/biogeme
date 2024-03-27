@@ -4,7 +4,9 @@ Test the nests module
 :author: Michel Bierlaire
 :date: Thu Oct  5 16:13:40 2023
 """
+
 import unittest
+
 from biogeme.nests import (
     OneNestForNestedLogit,
     NestsForNestedLogit,
@@ -104,13 +106,13 @@ class TestNestsForCrossNestedLogit(unittest.TestCase):
         nest_1 = OneNestForCrossNestedLogit(
             nest_param=Beta('mu', 1, 1, None, 0), dict_of_alpha={1: alpha_1, 2: alpha_2}
         )
-        is_fixed = nest_1.is_alpha_fixed()
+        is_fixed = nest_1.all_alpha_fixed()
         self.assertFalse(is_fixed)
 
         nest_2 = OneNestForCrossNestedLogit(
             nest_param=Beta('mu', 1, 1, None, 0), dict_of_alpha={1: 0.5, 2: 0.5}
         )
-        is_fixed = nest_2.is_alpha_fixed()
+        is_fixed = nest_2.all_alpha_fixed()
         self.assertTrue(is_fixed)
 
     def test_get_alpha_dict(self):

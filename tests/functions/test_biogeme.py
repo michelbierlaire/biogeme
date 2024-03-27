@@ -36,7 +36,7 @@ from biogeme.expressions import (
 from biogeme.function_output import FunctionOutput
 from test_data import getData, getPanelData
 
-logger = blog.get_screen_logger(level=blog.DEBUG)
+logger = blog.get_screen_logger(level=blog.INFO)
 
 
 class TestBiogeme(unittest.TestCase):
@@ -336,7 +336,7 @@ class TestBiogeme(unittest.TestCase):
         self.assertListEqual(h_true, the_function_output.hessian.tolist())
         self.assertListEqual(bhhh_true, the_function_output.bhhh.tolist())
         with self.assertRaises(ValueError):
-            _ = my_biogeme.calculateLikelihoodAndDerivatives([1], scaled=False)
+            _ = my_biogeme.calculate_likelihood_and_derivatives([1], scaled=False)
         my_biogeme.database.data = my_biogeme.database.data[0:0]
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.calculate_likelihood_and_derivatives(x, scaled=True)

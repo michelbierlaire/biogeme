@@ -9,7 +9,8 @@ Welcome to Biogeme's documentation!
 Examples
 ~~~~~~~~
 
-For beginners, we recommend to look at the Swissmetro examples:
+For beginners, we recommend to look at the Swissmetro examples: :ref:`sphx_glr_auto_examples_swissmetro` 
+
 
 .. toctree::
   :maxdepth: 2

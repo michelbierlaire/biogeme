@@ -1,0 +1,76 @@
+name: Build wheels on multiple OS
+
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  build_sdist:
+    name: Build Source Distribution
+    runs-on: ubuntu-latest  # Source distribution is independent of OS and Python version
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install build dependencies
+        run: python -m pip install --upgrade pip build
+      - name: Build source distribution
+        run: python -m build --sdist --outdir dist/
+      - name: Upload Source Distribution Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+
+  build:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12']
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install build dependencies
+      run: python -m pip install --upgrade pip wheel
+    - name: Build wheels
+      run: pip wheel . -w dist
+    - name: Check directory
+      run: ls dist
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels
+        path: dist/biogeme*.whl
+
+  pypi-publish:
+    name: upload release to PyPI
+    needs: [build_sdist, build]
+    runs-on: ubuntu-latest
+    # Specifying a GitHub environment is optional, but strongly encouraged
+    environment: release
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+    steps:
+      - name: Download Wheel Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: dist
+
+      - name: Download sdist Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: sdist
+          path: dist
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

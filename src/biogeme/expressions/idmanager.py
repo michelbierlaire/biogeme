@@ -5,11 +5,10 @@
 """
 
 from __future__ import annotations
+
 import logging
 from typing import (
     NamedTuple,
-    Dict,
-    List,
     TYPE_CHECKING,
     TypeVar,
     Generic,
@@ -32,13 +31,26 @@ from .elementary_types import TypeOfElementaryExpression
 
 T = TypeVar('T', bound='Elementary')
 
+try:
 
-class ElementsTuple(Generic[T], NamedTuple):
-    """Data structure for elementary expressions"""
+    class ElementsTuple(Generic[T], NamedTuple):
+        """Data structure for elementary expressions."""
 
-    expressions: Dict[str, T] | None
-    indices: Dict[str, int] | None
-    names: List[str]
+        expressions: dict[str, T] | None
+        indices: dict[str, int] | None
+        names: list[str]
+
+except TypeError:
+    # This exception is raised by Python 3.10.
+    class _ElementsTuple(NamedTuple):
+        """Data structure for elementary expressions."""
+
+        expressions: dict[str, T] | None
+        indices: dict[str, int] | None
+        names: list[str]
+
+    class ElementsTuple(Generic[T], _ElementsTuple):
+        pass
 
 
 logger = logging.getLogger(__name__)
@@ -123,6 +135,13 @@ class IdManager:
 
     def __eq__(self, other) -> bool:
         return self.elementary_expressions == other.elementary_expressions
+
+    def draw_types(self) -> dict[str, str]:
+        """Retrieve the type of draw for each draw expression"""
+        return {
+            name: expression.drawType
+            for name, expression in self.draws.expressions.items()
+        }
 
     def audit(self) -> tuple[list[str], list[str]]:
         """Performs various checks on the expressions.
@@ -272,7 +291,7 @@ class IdManager:
 
         if self.requires_draws:
             self.database.generate_draws(
-                self.draws.expressions, self.draws.names, self.number_of_draws
+                self.draw_types(), self.draws.names, self.number_of_draws
             )
 
     def set_data_map(self, sample: pd.DataFrame):

@@ -23,7 +23,6 @@ from biogeme.expressions import (
     Variable,
     Expression,
     validate_and_convert,
-    bioDraws,
 )
 from biogeme.native_draws import (
     RandomNumberGeneratorTuple,
@@ -690,14 +689,14 @@ class Database:
 
     def generate_draws(
         self,
-        draws: dict[str, bioDraws],
+        draw_types: dict[str, str],
         names: list[str],
         number_of_draws: int,
     ) -> np.ndarray:
         """Generate draws for each variable.
 
 
-        :param draws: A dict indexed by the names of the variables,
+        :param draw_types: A dict indexed by the names of the variables,
                       describing the draws. Each of them can
                       be a native type or any type defined by the
                       function
@@ -747,7 +746,7 @@ class Database:
 
 
 
-        :type types: dict
+        :type draw_types: dict
 
         :param names: the list of names of the variables that require draws
             to be generated.
@@ -787,7 +786,7 @@ class Database:
         list_of_draws = [None] * len(names)
         for i, v in enumerate(names):
             name = v
-            draw_type = draws[name].drawType
+            draw_type: str = draw_types[name]
             self.typesOfDraws[name] = draw_type
             the_generator: RandomNumberGeneratorTuple | None = (
                 native_random_number_generators.get(draw_type)

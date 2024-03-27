@@ -229,7 +229,8 @@ random_draws3 = bioDraws('random_draws3', 'UNIFORMSYM_MLHS_ANTI')
 # %%
 # We build an expression that involves the three random variables
 x = random_draws1 + random_draws2 + random_draws3
-types = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
+dict_of_draws = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
+types = {name: expression.drawType for name, expression in dict_of_draws.items()}
 print(types)
 
 # %%
@@ -285,8 +286,9 @@ random_draws1 = bioDraws('random_draws1', 'LOGNORMAL')
 random_draws2 = bioDraws('random_draws2', 'EXP')
 x = random_draws1 + random_draws2
 the_draws = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
+the_types = {name: expression.drawType for name, expression in the_draws.items()}
 the_draws_table = my_data.generate_draws(
-    draws=the_draws, names=['random_draws1', 'random_draws2'], number_of_draws=10
+    draw_types=the_types, names=['random_draws1', 'random_draws2'], number_of_draws=10
 )
 print(the_draws_table)
 
@@ -328,7 +330,8 @@ random_draws2 = bioDraws('random_draws2', 'UNIFORM_HALTON3')
 # %%
 # We build an expression that involves the two random variables
 x = random_draws1 + random_draws2
-types = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
+the_draws = x.dict_of_elementary_expression(TypeOfElementaryExpression.DRAWS)
+types = {name: expression.drawType for name, expression in the_draws.items()}
 the_draws_table = my_panel_data.generate_draws(
     types, ['random_draws1', 'random_draws2'], 10
 )

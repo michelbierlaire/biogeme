@@ -23,6 +23,10 @@ import biogeme.expressions as ex
 import biogeme.tools.derivatives
 from biogeme import models
 from biogeme.expressions import IdManager, TypeOfElementaryExpression, LinearTermTuple
+from biogeme.function_output import (
+    BiogemeDisaggregateFunctionOutput,
+    BiogemeFunctionOutput,
+)
 from biogeme.version import get_text
 
 # %%
@@ -30,13 +34,13 @@ from biogeme.version import get_text
 print(get_text())
 
 # %%
-logger = blog.get_screen_logger(level=blog.INFO)
+logger = blog.get_screen_logger(level=blog.DEBUG)
 
 # %%
 # Simple expressions
 # ------------------
 # Simple expressions can be evaluated both with the functions
-# `getValue`(implemented in Python) and the `getValue_c` (implemented
+# `get_value`(implemented in Python) and the `get_value_c` (implemented
 # in C++). They do not require a database.
 
 # %%
@@ -44,7 +48,7 @@ x = ex.Beta('x', 2, None, None, 1)
 x
 
 # %%
-x.getValue()
+x.get_value()
 
 # %%
 x.get_value_c(prepare_ids=True)
@@ -55,7 +59,7 @@ y = ex.Beta('y', 3, None, None, 1)
 y
 
 # %%
-y.getValue()
+y.get_value()
 
 # %%
 y.get_value_c(prepare_ids=True)
@@ -64,7 +68,7 @@ y.get_value_c(prepare_ids=True)
 # Note that if the parameter has to be estimated, its value cannot be obtained.
 unknown_parameter = ex.Beta('x', 2, None, None, 0)
 try:
-    unknown_parameter.getValue()
+    unknown_parameter.get_value()
 except excep.BiogemeError as e:
     print(e)
 
@@ -73,7 +77,7 @@ one = ex.Numeric(1)
 one
 
 # %%
-one.getValue()
+one.get_value()
 
 # %%
 one.get_value_c(prepare_ids=True)
@@ -81,7 +85,7 @@ one.get_value_c(prepare_ids=True)
 # %%
 # Addition
 z = x + y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -89,7 +93,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Substraction
 z = x - y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -97,7 +101,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Multiplication
 z = x * y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -105,7 +109,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Division
 z = x / y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -113,7 +117,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Power
 z = x**y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -121,7 +125,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Exponential
 z = ex.exp(x)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -129,7 +133,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Logarithm
 z = ex.log(x)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -137,7 +141,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Minimum
 z = ex.bioMin(x, y)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -145,7 +149,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Maximum
 z = ex.bioMax(x, y)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -153,14 +157,14 @@ z.get_value_c(prepare_ids=True)
 # %%
 # And
 z = x & y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
 
 # %%
 z = x & 0
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -170,14 +174,14 @@ z.get_value_c(prepare_ids=True)
 
 # %%
 z = x | y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
 
 # %%
 z = ex.Numeric(0) | ex.Numeric(0)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -185,14 +189,14 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Equal
 z = x == y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
 
 # %%
 z = (x + 1) == y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -200,14 +204,14 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Not equal
 z = x != y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
 
 # %%
 z = (x + 1) != y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -215,7 +219,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Lesser or equal
 z = x <= y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -223,7 +227,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Greater or equal
 z = x >= y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -231,7 +235,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Lesser than
 z = x < y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -239,7 +243,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Greater than
 z = x > y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -247,7 +251,7 @@ z.get_value_c(prepare_ids=True)
 # %%
 # Opposite
 z = -x
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -256,7 +260,7 @@ z.get_value_c(prepare_ids=True)
 # Sum of multiples expressions
 listOfExpressions = [x, y, 1 + x, 1 + y]
 z = ex.bioMultSum(listOfExpressions)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -265,7 +269,7 @@ z.get_value_c(prepare_ids=True)
 # The result is the same as the following, but it implements the sum
 # in a more efficient way.
 z = x + y + 1 + x + 1 + y
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
@@ -278,29 +282,29 @@ my_dict = {1: ex.exp(-1), 2: ex.log(1.2), 3: 1234}
 
 # %%
 index = x
-index.getValue()
+index.get_value()
 
 # %%
 z = ex.Elem(my_dict, index)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
 
 # %%
 index = x - 1
-index.getValue()
+index.get_value()
 
 # %%
 z = ex.Elem(my_dict, index)
-z.getValue()
+z.get_value()
 
 # %%
 z.get_value_c(prepare_ids=True)
 
 # %%
 index = x - 2
-index.getValue()
+index.get_value()
 
 # %%
 # If the value returned as index does not corresponds to an entry in
@@ -309,7 +313,7 @@ index.getValue()
 # %%
 z = ex.Elem(my_dict, index)
 try:
-    z.getValue()
+    z.get_value()
 except excep.BiogemeError as e:
     print(f'Exception raised: {e}')
 
@@ -323,8 +327,8 @@ except RuntimeError as e:
 # %%
 # Complex expressions
 # -------------------
-# When an expression is deemed complex in Biogeme, the `getValue`
-# function is not available. Only the `getValue_c` function must be
+# When an expression is deemed complex in Biogeme, the `get_value`
+# function is not available. Only the `get_value_c` function must be
 # used. It calculates the expressions using a C++ implementation of
 # the expression.
 
@@ -551,15 +555,15 @@ print(expr0)
 
 # %%
 # The evaluation of expressions can be done in two ways. For simple
-# expressions, the fonction `getValue`, implemented in Python, returns
+# expressions, the fonction `get_value`, implemented in Python, returns
 # the value of the expression.
-expr0.getValue()
+expr0.get_value()
 
 # %%
 # It is possible to modify the values of the parameters.
 newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
 expr0.change_init_values(newvalues)
-expr0.getValue()
+expr0.get_value()
 
 # %%
 # Consider another expression:
@@ -576,32 +580,32 @@ print(expr1)
 
 
 # %%
-# The function `getValue_c` is implemented in C++, and works for any
+# The function `get_value_c` is implemented in C++, and works for any
 # expression. When use outside a specific context, the IDs must be
 # explicitly prepared.
 expr1.get_value_c(prepare_ids=True)
 
 # %%
-# It actually calls the function `getValueAndDerivates`, and returns
+# It actually calls the function `get_value_and_derivatives`, and returns
 # its first output (without calculating the derivatives).
-f, g, h, bhhh = expr1.get_value_and_derivatives(prepare_ids=True)
+the_output = expr1.get_value_and_derivatives(prepare_ids=True)
 
 # %%
-f
+the_output.function
 
 # %%
 # We create a pandas DataFrame just to have a nicer display of the results.
-pd.DataFrame(g)
+pd.DataFrame(the_output.gradient)
 
 # %%
-pd.DataFrame(h)
+pd.DataFrame(the_output.hessian)
 
 # %%
-pd.DataFrame(bhhh)
+pd.DataFrame(the_output.bhhh)
 
 # %%
 # Note that the BHHH matrix is the outer product of the gradient with itself.
-pd.DataFrame(np.outer(g, g))
+pd.DataFrame(np.outer(the_output.gradient, the_output.gradient))
 
 # %%
 # If the derivatives are not needed, their calculation can be
@@ -639,11 +643,16 @@ the_function([1, 2])
 # derivatives for each entry in the database.  In the following
 # example, as no variable of the database is involved in the
 # expression, the output of the expression is the same for each entry.
-results = expr1.get_value_and_derivatives(database=my_data, aggregation=False)
-print(len(results))
+results: BiogemeDisaggregateFunctionOutput = expr1.get_value_and_derivatives(
+    database=my_data, aggregation=False
+)
+print(len(results.functions))
 
 # %%
-f_array, g_array, h_array, bhhh_array = results
+f_array = results.functions
+g_array = results.gradients
+h_array = results.hessians
+bhhh_array = results.bhhhs
 
 for f, g, h, bhhh in zip(f_array, g_array, h_array, bhhh_array):
     print('******')
@@ -654,11 +663,13 @@ for f, g, h, bhhh in zip(f_array, g_array, h_array, bhhh_array):
 
 # %%
 # If `aggregation` is set to `True`, the results are accumulated as a sum.
-f, g, h, bhhh = expr1.get_value_and_derivatives(database=my_data, aggregation=True)
-print(f'{f=}')
-print(f'{g=}')
-print(f'{h=}')
-print(f'{bhhh=}')
+the_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
+    database=my_data, aggregation=True
+)
+print(f'{the_output.function=}')
+print(f'{the_output.gradient=}')
+print(f'{the_output.hessian=}')
+print(f'{the_output.bhhh=}')
 
 # %%
 # The following function scans the expression and extracts a dict with
@@ -694,10 +705,10 @@ print(expr2)
 
 # %%
 # It is not a simple expression anymore, and only the function
-# `getValue_c` can be invoked. If we try the `getValue` function, it
+# `get_value_c` can be invoked. If we try the `get_value` function, it
 # raises an exception.
 try:
-    expr2.getValue()
+    expr2.get_value()
 except excep.BiogemeError as e:
     print(f'Exception raised: {e}')
 
@@ -871,7 +882,7 @@ expr4.dict_of_elementary_expression(TypeOfElementaryExpression.RANDOM_VARIABLE)
 print(expr4)
 
 # %%
-# The folllowing function checks if random variables are defined
+# The following function checks if random variables are defined
 # outside an Integrate statement.
 wrong_expression = x * x
 wrong_expression.check_rv()
@@ -948,13 +959,13 @@ av = {0: 1, 1: 1, 2: 1}
 expr7 = ex._bioLogLogit(V, av, 1)
 
 # %%
-expr7.get_value_c(prepare_ids=True)
+expr7.get_value()
 
 # %%
 # If the alternative is not in the choice set, an exception is raised.
 expr7_wrong = ex.LogLogit(V, av, 3)
 try:
-    expr7_wrong.getValue()
+    expr7_wrong.get_value()
 except excep.BiogemeError as e:
     print(f'Exception: {e}')
 
