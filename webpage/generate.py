@@ -25,7 +25,7 @@ def get_section(content):
     all_html = ''
     id = 0
     for card_title, card_paragraphs in content.items():
-        with open(CARD_FILE, 'r', encoding='utf-8') as f:
+        with open(CARD_FILE, encoding='utf-8') as f:
             html = f.read()
         text = ''
         for p in card_paragraphs:
@@ -45,7 +45,7 @@ def get_faq():
     id = 0
     for question, answer in faq.items():
         id += 1
-        with open(FAQ_FILE, 'r', encoding='utf-8') as f:
+        with open(FAQ_FILE, encoding='utf-8') as f:
             html = f.read()
         replacements = {
             '__ID__': str(id),
@@ -58,7 +58,7 @@ def get_faq():
 
 def get_special(content):
     all_html = ''
-    with open(SPECIAL_FILE, 'r', encoding='utf-8') as f:
+    with open(SPECIAL_FILE, encoding='utf-8') as f:
         html = f.read()
 
     for special_title, special_content in content.items():
@@ -74,7 +74,7 @@ def get_special(content):
 def get_portfolio_grid(doc):
     all_html = ''
     for data, values in doc.items():
-        with open(PORTFOLIO_GRID_ITEM, 'r') as f:
+        with open(PORTFOLIO_GRID_ITEM) as f:
             html = f.read()
         replacements = {
             '__ID__': data,
@@ -92,7 +92,7 @@ def get_portfolio_grid(doc):
 def get_portfolio_modals(doc):
     all_html = ''
     for data, values in doc.items():
-        with open(PORTFOLIO_MODAL, 'r', encoding='utf-8') as f:
+        with open(PORTFOLIO_MODAL, encoding='utf-8') as f:
             html = f.read()
         replacements = {
             '__ID__': data,
@@ -107,14 +107,14 @@ def get_portfolio_modals(doc):
     return all_html
 
 
-with open(DATA_FILE, 'r', encoding='utf-8') as f:
+with open(DATA_FILE, encoding='utf-8') as f:
     text = f.read()
 doc = tk.parse(text)
 
-with open(HTML_FILE, 'r', encoding='utf-8') as f:
+with open(HTML_FILE, encoding='utf-8') as f:
     html = f.read()
 
-with open(PORTFOLIO_FILE, 'r', encoding='utf-8') as f:
+with open(PORTFOLIO_FILE, encoding='utf-8') as f:
     portfolio_html = f.read()
 
 portfolio_html = replace(

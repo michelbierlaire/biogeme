@@ -127,7 +127,7 @@ class Expression:
         """Kept for backward compatibility"""
         pass
 
-    def prepare(self, database: "Database", number_of_draws: int) -> None:
+    def prepare(self, database: Database, number_of_draws: int) -> None:
         """Prepare the expression to be evaluated
 
         :param database: Biogeme database
@@ -1376,7 +1376,7 @@ class Expression:
 
     def dict_of_catalogs(
         self, ignore_synchronized: bool = False
-    ) -> dict[str, 'Catalog']:
+    ) -> dict[str, Catalog]:
         """Returns a dict with all catalogs in the expression.
 
         :return: dict with all the catalogs
@@ -1489,7 +1489,7 @@ class Expression:
 
         self.central_controller.set_controller(controller_name, index)
 
-    def set_of_multiple_expressions(self) -> set['MultipleExpression']:
+    def set_of_multiple_expressions(self) -> set[MultipleExpression]:
         """Set of the multiple expressions found in the current expression
 
         :return: a set of descriptions of the multiple expressions

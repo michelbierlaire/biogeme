@@ -84,7 +84,7 @@ class Specification:
         self.expression.configure_catalogs(self.configuration)
 
     @classmethod
-    def default_specification(cls) -> 'Specification':
+    def default_specification(cls) -> Specification:
         """Alternative constructor for generate the default specification"""
         cls.expression.reset_expression_selection()
         the_config = cls.expression.current_configuration()

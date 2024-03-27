@@ -12,7 +12,6 @@ from typing import (
     TYPE_CHECKING,
     TypeVar,
     Generic,
-    Type,
     Iterable,
 )
 
@@ -56,7 +55,7 @@ except TypeError:
 logger = logging.getLogger(__name__)
 
 
-def expressions_names_indices(dict_of_elements: dict[str, Type[T]]) -> ElementsTuple[T]:
+def expressions_names_indices(dict_of_elements: dict[str, type[T]]) -> ElementsTuple[T]:
     """Assigns consecutive indices to expressions
 
     :param dict_of_elements: dictionary of expressions. The keys

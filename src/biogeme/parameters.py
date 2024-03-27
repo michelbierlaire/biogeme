@@ -132,7 +132,7 @@ class Parameters:
         self.file_name = DEFAULT_FILE_NAME if file_name is None else file_name
 
         try:
-            with open(self.file_name, 'r', encoding='utf-8') as f:
+            with open(self.file_name, encoding='utf-8') as f:
                 logger.debug(f'Parameter file: {os.path.abspath(self.file_name)}')
                 content = f.read()
                 self.document = tk.parse(content)
