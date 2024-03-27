@@ -162,7 +162,7 @@ shutil.copytree('assets', 'website/assets')
 
 
 # Copy the PythonBiogeme distribution
-shutil.copytree('otherFiles/distrib', 'website/distrib')
+# shutil.copytree('otherFiles/distrib', 'website/distrib')
 
 # Copy the sphinx documentation
 shutil.copytree('../docs/build/html', 'website/sphinx')
