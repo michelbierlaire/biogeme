@@ -13,6 +13,7 @@ the integral is approximated using MonteCarlo integration.
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, MonteCarlo, log, bioDraws
+from biogeme.parameters import Parameters
 from biogeme.tools import TemporaryFile
 
 from swissmetro import (
@@ -67,11 +68,11 @@ def get_biogeme(the_draws: bioDraws, number_of_draws: int) -> bio.BIOGEME:
     prob = models.logit(utilities, av, CHOICE)
     logprob = log(MonteCarlo(prob))
 
-    with TemporaryFile() as filename:
-        with open(filename, 'w', encoding='utf-8') as f:
-            print('[MonteCarlo]', file=f)
-            print(f'number_of_draws = {number_of_draws}', file=f)
+    parameters = Parameters()
+    parameters.set_value(
+        name='number_of_draws', value=number_of_draws, section='MonteCarlo'
+    )
 
-        the_biogeme = bio.BIOGEME(database, logprob, parameter_file=filename)
+    the_biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
 
     return the_biogeme

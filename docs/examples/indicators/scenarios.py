@@ -107,5 +107,10 @@ def scenario(
     no_car_nest = OneNestForNestedLogit(
         nest_param=mu_nocar, list_of_alternatives=[0, 2], name='no_car'
     )
-    nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(no_car_nest,))
+    car_nest = OneNestForNestedLogit(
+        nest_param=1.0, list_of_alternatives=[1], name='car'
+    )
+    nests = NestsForNestedLogit(
+        choice_set=list(V), tuple_of_nests=(no_car_nest, car_nest)
+    )
     return V, nests, Choice, marginal_cost_scenario

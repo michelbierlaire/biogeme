@@ -12,6 +12,8 @@ Example of the use of different algorithms to estimate the model.
 
 import itertools
 import pandas as pd
+
+from biogeme.parameters import Parameters
 from biogeme.tools import format_timedelta
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
@@ -107,11 +109,20 @@ summary = pd.DataFrame(
     ]
 )
 
+# %%
+# As the objective is to illustrate the
+# syntax, we calculate the Monte-Carlo approximation with a small
+# number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', value=100, section='MonteCarlo')
+parameters.set_value(name='seed', value=1223, section='MonteCarlo')
+
+
 for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     infeasible_cg_values, initial_radius_values, second_derivatives_values
 ):
     # Create the Biogeme object
-    the_biogeme = bio.BIOGEME(database, logprob, parameter_file='few_draws.toml')
+    the_biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
     # We set the parameters of the optimization algorithm
     the_biogeme.infeasible_cg = infeasible_cg
     the_biogeme.initial_radius = initial_radius

@@ -5,6 +5,7 @@ Simple estimation test from the Ben-Akiva and Lerman book
 :date: Wed Apr 29 18:43:34 2020
 
 """
+
 import unittest
 from os import path
 import shutil
@@ -131,7 +132,7 @@ class test_biogeme(unittest.TestCase):
 
         logprob = models.loglogit(V, av, Choice)
 
-        biogeme = bio.BIOGEME(self.database, logprob, parameter_file=self.toml_file)
+        biogeme = bio.BIOGEME(self.database, logprob, parameters=self.toml_file)
         biogeme.modelName = 'test'
         biogeme.generate_html = False
         biogeme.generate_pickle = False

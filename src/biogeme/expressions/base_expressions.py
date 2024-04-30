@@ -10,6 +10,7 @@ import logging
 from itertools import chain
 from typing import TYPE_CHECKING, Callable, Iterable
 
+
 from biogeme.configuration import Configuration
 from biogeme.deprecated import deprecated
 from biogeme.controller import CentralController, Controller
@@ -18,6 +19,8 @@ from biogeme.function_output import (
     BiogemeFunctionOutput,
     BiogemeDisaggregateFunctionOutput,
     FunctionOutput,
+    NamedBiogemeDisaggregateFunctionOutput,
+    NamedBiogemeFunctionOutput,
 )
 
 if TYPE_CHECKING:
@@ -842,7 +845,7 @@ class Expression:
     def get_value(self) -> float:
         """Abstract method"""
         raise NotImplementedError(
-            "getValue method undefined at this level. Each expression must implement it."
+            f'getValue method undefined at this level: {type(self)}. Each expression must implement it.'
         )
 
     @deprecated(get_value)
@@ -894,8 +897,8 @@ class Expression:
         """
         if self.requires_draws() and database is None:
             error_msg = (
-                "An expression involving MonteCarlo integration "
-                "must be associated with a database."
+                'An expression involving MonteCarlo integration '
+                'must be associated with a database.'
             )
             raise BiogemeError(error_msg)
 
@@ -937,7 +940,13 @@ class Expression:
         bhhh: bool = True,
         aggregation: bool = True,
         prepare_ids: bool = False,
-    ) -> BiogemeDisaggregateFunctionOutput | BiogemeFunctionOutput:
+        named_results: bool = False,
+    ) -> (
+        BiogemeDisaggregateFunctionOutput
+        | BiogemeFunctionOutput
+        | NamedBiogemeDisaggregateFunctionOutput
+        | NamedBiogemeFunctionOutput
+    ):
         """Evaluation of the expression
 
         In Biogeme the complexity of some expressions requires a
@@ -977,6 +986,9 @@ class Expression:
             the expression.
         :type prepare_ids: bool
 
+        :param named_results: if True, the gradients, hessians, etc. are reported as dicts associating the names of
+            the variables with their corresponding entry.
+
         :return: if a database is provided, a list where each entry is
             the result of applying the expression on one entry of the
             database. It returns a float, a vector, and a matrix,
@@ -999,7 +1011,7 @@ class Expression:
             self.keep_id_manager = self.id_manager
             self.prepare(database, number_of_draws)
         elif self.id_manager is None:
-            error_msg = "Expression evaluated out of context. Set prepare_ids to True."
+            error_msg = 'Expression evaluated out of context. Set prepare_ids to True.'
             raise BiogemeError(error_msg)
 
         errors, warnings = self.audit(database)
@@ -1054,6 +1066,19 @@ class Expression:
             calculate_bhhh=bhhh,
             aggregation=aggregation,
         )
+
+        if named_results:
+            if isinstance(results, BiogemeFunctionOutput):
+                results = NamedBiogemeFunctionOutput(
+                    function_output=results, mapping=self.id_manager.free_betas.indices
+                )
+            elif isinstance(results, BiogemeDisaggregateFunctionOutput):
+                results = NamedBiogemeDisaggregateFunctionOutput(
+                    function_output=results, mapping=self.id_manager.free_betas.indices
+                )
+            else:
+                error_msg = f'Unknown type: {type(results)}'
+                raise BiogemeError(error_msg)
 
         # Now, if we had to set the IDS, we reset them as they cannot
         # be used in another context.
@@ -1363,16 +1388,6 @@ class Expression:
 
         for e in self.get_children():
             e.change_init_values(betas)
-
-    def set_estimated_values(self, betas: dict[str, float]):
-        """Set the estimated values of Beta
-
-        :param betas: dictionary where the keys are the names of the
-                      parameters, and the values are the new value for
-                      the parameters.
-        """
-        for e in self.get_children():
-            e.set_estimated_values(betas)
 
     def dict_of_catalogs(
         self, ignore_synchronized: bool = False

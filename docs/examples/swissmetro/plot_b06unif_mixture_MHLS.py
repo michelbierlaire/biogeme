@@ -22,6 +22,7 @@ from biogeme.expressions import (
     log,
     MonteCarlo,
 )
+from biogeme.parameters import Parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -86,8 +87,16 @@ prob = exp(models.loglogit(V, av, CHOICE))
 logprob = log(MonteCarlo(prob))
 
 # %%
+# As the objective is to illustrate the
+# syntax, we calculate the Monte-Carlo approximation with a small
+# number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', value=100, section='MonteCarlo')
+parameters.set_value(name='seed', value=1223, section='MonteCarlo')
+
+# %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob, parameter_file='few_draws.toml')
+the_biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
 the_biogeme.modelName = '06unif_mixture_MHLS'
 
 # %%

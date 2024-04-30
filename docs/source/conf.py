@@ -50,7 +50,14 @@ sphinx_gallery_conf = {
 }
 
 templates_path = ['_templates']
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "setup.py", "flycheck*"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "setup.py",
+    "flycheck*",
+    "verify_scripts.py",
+]
 
 # Set the behavior for type hints. Options are "none", "description", or "signature".
 autodoc_typehints = "description"

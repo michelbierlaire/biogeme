@@ -14,12 +14,28 @@ import pandas as pd
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
 from biogeme import models
-from biogeme.expressions import IdManager, TypeOfElementaryExpression, LinearTermTuple
+from biogeme.expressions import (
+    IdManager,
+    TypeOfElementaryExpression,
+    LinearTermTuple,
+    Numeric,
+    Beta,
+    Expression,
+)
+
+# Assuming the module name is expressions.py and the necessary classes are imported
+from biogeme.expressions import (
+    validate_and_convert,
+    expression_to_value,
+    get_dict_values,
+    get_dict_expressions,
+)
+from biogeme.expressions.numeric_tools import validate, MAX_VALUE
 from biogeme.function_output import (
     BiogemeDisaggregateFunctionOutput,
     BiogemeFunctionOutput,
+    convert_to_dict,
 )
-from biogeme.expressions.numeric_tools import validate, MAX_VALUE
 from test_data import getData
 
 
@@ -165,6 +181,10 @@ class test_expressions(unittest.TestCase):
         result = 1**self.Variable1
         self.assertEqual(str(result), '(`1.0` ** Variable1)')
         self.assertTrue(result.children[1] is self.Variable1)
+
+        result = Numeric(3) ** Numeric(2)
+        nine = result.get_value()
+        self.assertEqual(9, nine)
 
         with self.assertRaises(excep.BiogemeError):
             result = self**self.Variable1
@@ -401,6 +421,30 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(check_left, check_right, 5)
         for check_left, check_right in zip(the_function_output.bhhh[1], bhhh1_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
+
+    def test_expr1_named_derivatives(self):
+        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+            self.beta2 * (self.beta3 >= self.beta4)
+            + self.beta1 * (self.beta3 < self.beta4)
+        )
+        newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
+        expr1.change_init_values(newvalues)
+        the_function_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
+            prepare_ids=True, named_results=True
+        )
+        self.assertAlmostEqual(the_function_output.function, 1.9323323583816936, 5)
+        g_ok = {'beta1': 2.0, 'beta2': 0.10150146242745953}
+        self.assertDictEqual(the_function_output.gradient, g_ok)
+        h_ok = {
+            'beta1': {'beta1': 0.0, 'beta2': 0.0},
+            'beta2': {'beta1': 0.0, 'beta2': -0.16916910404576588},
+        }
+        self.assertDictEqual(the_function_output.hessian, h_ok)
+        bhhh_ok = {
+            'beta1': {'beta1': 4, 'beta2': 0.20300292485491905},
+            'beta2': {'beta1': 0.20300292485491905, 'beta2': 0.010302546874912978},
+        }
+        self.assertDictEqual(the_function_output.bhhh, bhhh_ok)
 
     def test_expr1_gradient(self):
         expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
@@ -987,6 +1031,36 @@ class test_expressions(unittest.TestCase):
         norm_h = np.linalg.norm(gdiff)
         self.assertAlmostEqual(norm_h, 0.0, delta=1.0e-4)
 
+    def test_bioMin(self):
+        expr = ex.bioMin(Numeric(3), Numeric(2))
+        result = expr.get_value()
+        expected_result = 2
+        self.assertEqual(expected_result, result)
+
+    def test_bioMax(self):
+        expr = ex.bioMax(Numeric(3), Numeric(2))
+        result = expr.get_value()
+        expected_result = 3
+        self.assertEqual(expected_result, result)
+
+    def test_and(self):
+        true_expr_1 = Numeric(3) == 3
+        true_expr_2 = Numeric(2) == 2
+        false_expr = Numeric(3) == 2
+        result = true_expr_1 & true_expr_2
+        self.assertEqual(result, 1)
+        result = true_expr_1 & false_expr
+        self.assertEqual(result, 0)
+
+    def test_and(self):
+        true_expr = Numeric(3) == 3
+        false_expr_1 = Numeric(3) == 2
+        false_expr_2 = Numeric(2) == 3
+        result = true_expr | false_expr_1
+        self.assertEqual(result, 1)
+        result = false_expr_1 | false_expr_2
+        self.assertEqual(result, 0)
+
 
 class TestValidateFunction(unittest.TestCase):
     def setUp(self):
@@ -1019,6 +1093,99 @@ class TestValidateFunction(unittest.TestCase):
 
     def test_edge_case_min_value(self):
         self.assertEqual(validate(-MAX_VALUE), -MAX_VALUE)
+
+
+class TestExpressionConversion(unittest.TestCase):
+    def setUp(self):
+        self.beta = Beta('beta', 42, None, None, 0)
+
+    def test_validate_and_convert_numeric(self):
+        self.assertIsInstance(validate_and_convert(3.14), Numeric)
+
+    def test_validate_and_convert_boolean(self):
+        self.assertEqual(validate_and_convert(True).value, Numeric(1).value)
+        self.assertEqual(validate_and_convert(False).value, Numeric(0).value)
+
+    def test_validate_and_convert_invalid_type(self):
+        with self.assertRaises(TypeError):
+            validate_and_convert("invalid")
+
+    def test_expression_to_value_numeric(self):
+        self.assertEqual(expression_to_value(3.14), 3.14)
+
+    def test_expression_to_value_boolean(self):
+        self.assertEqual(expression_to_value(True), 1.0)
+
+    def test_expression_to_value_invalid_type(self):
+        with self.assertRaises(TypeError):
+            expression_to_value("invalid")
+
+    def test_expression_to_value_expression(self):
+        self.assertEqual(expression_to_value(self.beta), 42.0)
+
+    def test_expression_to_value_expression_with_error(self):
+        class ErrorExpression(Expression):
+            def get_value(self):
+                raise excep.BiogemeError("Complex error")
+
+        with self.assertRaises(excep.BiogemeError):
+            expression_to_value(ErrorExpression())
+
+    def test_get_dict_values(self):
+        test_dict = {1: 3.14, 2: True, 3: self.beta}
+        expected = {1: 3.14, 2: 1.0, 3: 42.0}
+        self.assertEqual(get_dict_values(test_dict), expected)
+
+    def test_get_dict_expressions(self):
+        test_dict = {1: 3.14, 2: True, 3: self.beta}
+        result = get_dict_expressions(test_dict)
+        self.assertIsInstance(result[1], Numeric)
+        self.assertIsInstance(result[2], Numeric)
+        self.assertIsInstance(result[3], Beta)
+
+
+class TestConvertToDict(unittest.TestCase):
+    def test_basic_conversion(self):
+        sequence = ['apple', 'banana', 'cherry']
+        name_to_index = {'first': 0, 'second': 1, 'third': 2}
+        expected_result = {'first': 'apple', 'second': 'banana', 'third': 'cherry'}
+        self.assertEqual(convert_to_dict(sequence, name_to_index), expected_result)
+
+    def test_empty_sequence(self):
+        sequence = []
+        name_to_index = {}
+        expected_result = {}
+        self.assertEqual(convert_to_dict(sequence, name_to_index), expected_result)
+
+    def test_empty_map(self):
+        sequence = ['apple', 'banana', 'cherry']
+        name_to_index = {}
+        expected_result = {}
+        self.assertEqual(convert_to_dict(sequence, name_to_index), expected_result)
+
+    def test_index_out_of_bounds(self):
+        sequence = ['apple', 'banana']
+        name_to_index = {'first': 0, 'third': 2}
+        with self.assertRaises(IndexError):
+            convert_to_dict(sequence, name_to_index)
+
+    def test_negative_index(self):
+        sequence = ['apple', 'banana', 'cherry']
+        name_to_index = {'first': -1}
+        with self.assertRaises(IndexError):
+            convert_to_dict(sequence, name_to_index)
+
+    def test_large_index_in_small_list(self):
+        sequence = ['apple']
+        name_to_index = {'second': 1}
+        with self.assertRaises(IndexError):
+            convert_to_dict(sequence, name_to_index)
+
+    def test_with_non_integer_indices(self):
+        sequence = ['apple', 'banana', 'cherry']
+        name_to_index = {'first': '0'}  # index as a string by mistake
+        with self.assertRaises(TypeError):  # Assumes TypeError for non-integers
+            convert_to_dict(sequence, name_to_index)
 
 
 if __name__ == '__main__':

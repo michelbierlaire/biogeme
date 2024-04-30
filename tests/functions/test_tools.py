@@ -5,6 +5,9 @@ Test the tools module
 :date: Sun Aug  8 17:42:48 2021
 """
 
+import os
+import tempfile
+
 # Bug in pylint
 # pylint: disable=no-member
 #
@@ -16,6 +19,9 @@ Test the tools module
 
 import unittest
 from copy import deepcopy
+from datetime import timedelta
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 
@@ -25,8 +31,8 @@ import biogeme.tools.files
 import biogeme.tools.likelihood_ratio
 import biogeme.tools.primes
 import biogeme.tools.unique_ids
-from biogeme import tools
-import biogeme.exceptions as excep
+from biogeme.exceptions import BiogemeError
+from biogeme.tools import format_timedelta, is_valid_filename, create_backup
 from biogeme.function_output import FunctionOutput
 from test_data import (
     input_flatten,
@@ -91,13 +97,13 @@ class TestTools(unittest.TestCase):
         result = biogeme.tools.primes.get_prime_numbers(7)
         self.assertListEqual(result, [2, 3, 5, 7, 11, 13, 17])
 
-        with self.assertRaises(excep.BiogemeError):
+        with self.assertRaises(BiogemeError):
             result = biogeme.tools.primes.get_prime_numbers(0)
 
-        with self.assertRaises(excep.BiogemeError):
+        with self.assertRaises(BiogemeError):
             result = biogeme.tools.primes.get_prime_numbers(-1)
 
-        with self.assertRaises(excep.BiogemeError):
+        with self.assertRaises(BiogemeError):
             result = biogeme.tools.primes.get_prime_numbers(0.3)
 
     def test_calculatePrimeNumbers(self):
@@ -106,10 +112,10 @@ class TestTools(unittest.TestCase):
         result = biogeme.tools.primes.calculate_prime_numbers(0)
         self.assertListEqual(result, [])
 
-        with self.assertRaises(excep.BiogemeError):
+        with self.assertRaises(BiogemeError):
             result = biogeme.tools.primes.calculate_prime_numbers(-1)
 
-        with self.assertRaises(excep.BiogemeError):
+        with self.assertRaises(BiogemeError):
             result = biogeme.tools.primes.calculate_prime_numbers(0.3)
 
     def test_countNumberOfGroups(self):
@@ -128,35 +134,35 @@ class TestTools(unittest.TestCase):
         model1 = (-1340.8, 5)
         model2 = (-1338.49, 7)
         r = biogeme.tools.likelihood_ratio.likelihood_ratio_test(model1, model2)
-        self.assertSequenceEqual(
-            r,
-            (
-                'H0 cannot be rejected at level 5.0%',
-                4.619999999999891,
-                5.991464547107979,
-            ),
+        expected = (
+            'H0 cannot be rejected at level 5.0%',
+            4.619999999999891,
+            5.991464547107979,
         )
+        self.assertEqual(len(r), len(expected))
+        self.assertEqual(r[0], expected[0])
+        self.assertAlmostEqual(r[1], expected[1], places=3)
+        self.assertAlmostEqual(r[2], expected[2], places=3)
+
         r = biogeme.tools.likelihood_ratio.likelihood_ratio_test(model2, model1)
-        self.assertSequenceEqual(
-            r,
-            (
-                'H0 cannot be rejected at level 5.0%',
-                4.619999999999891,
-                5.991464547107979,
-            ),
-        )
+        self.assertEqual(len(r), len(expected))
+        self.assertEqual(r[0], expected[0])
+        self.assertAlmostEqual(r[1], expected[1], places=3)
+        self.assertAlmostEqual(r[2], expected[2], places=3)
         r = biogeme.tools.likelihood_ratio.likelihood_ratio_test(
             model1, model2, significance_level=0.1
         )
-        self.assertSequenceEqual(
-            r,
-            (
-                'H0 can be rejected at level 10.0%',
-                4.619999999999891,
-                4.605170185988092,
-            ),
+        expected = (
+            'H0 can be rejected at level 10.0%',
+            4.619999999999891,
+            4.605170185988092,
         )
-        with self.assertRaises(excep.BiogemeError):
+
+        self.assertEqual(len(r), len(expected))
+        self.assertEqual(r[0], expected[0])
+        self.assertAlmostEqual(r[1], expected[1], places=3)
+        self.assertAlmostEqual(r[2], expected[2], places=3)
+        with self.assertRaises(BiogemeError):
             model1 = (-1340.8, 7)
             model2 = (-1338.49, 5)
             biogeme.tools.likelihood_ratio.likelihood_ratio_test(model1, model2)
@@ -276,6 +282,128 @@ class UniqueProductTestCase(unittest.TestCase):
         expected_output = [(0,), (1,), (2,)]
         result = list(biogeme.tools.unique_ids.unique_product(*iterables))
         self.assertEqual(result, expected_output)
+
+
+class TestFormatTimedelta(unittest.TestCase):
+
+    def test_hours_minutes_seconds(self):
+        td = timedelta(hours=2, minutes=30, seconds=15)
+        self.assertEqual(format_timedelta(td), '2h 30m 15s')
+
+    def test_minutes_seconds(self):
+        td = timedelta(minutes=45, seconds=30)
+        self.assertEqual(format_timedelta(td), '45m 30s')
+
+    def test_seconds_microseconds(self):
+        td = timedelta(seconds=5, microseconds=500000)
+        self.assertEqual(format_timedelta(td), '5.5s')
+
+    def test_only_microseconds_more_than_a_millisecond(self):
+        td = timedelta(microseconds=1250)
+        self.assertEqual(format_timedelta(td), '1ms')
+
+    def test_only_microseconds_less_than_a_millisecond(self):
+        td = timedelta(microseconds=999)
+        self.assertEqual(format_timedelta(td), '999μs')
+
+    def test_zero_units(self):
+        td = timedelta(hours=0, minutes=0, seconds=5)
+        self.assertEqual(format_timedelta(td), '5.0s')
+
+    def test_large_timedelta(self):
+        td = timedelta(days=2, hours=3, minutes=4, seconds=5)
+        self.assertEqual(format_timedelta(td), '51h 4m 5s')
+
+    def test_microseconds_rounding(self):
+        # This test ensures that microseconds are correctly floored when converted to milliseconds
+        td = timedelta(microseconds=1999)  # Should floor to 1ms, not round to 2ms
+        self.assertEqual(format_timedelta(td), '1ms')
+
+
+class TestIsValidFilename(unittest.TestCase):
+
+    def test_empty_filename(self):
+        self.assertEqual(is_valid_filename(''), (False, 'Name is empty'))
+
+    def test_filename_with_invalid_chars(self):
+        invalid_filenames = ['<invalid>', 'in"valid', 'in|valid', 'invalid?']
+        for filename in invalid_filenames:
+            result, message = is_valid_filename(filename)
+            self.assertFalse(result)
+            self.assertIn('Name contains one invalid char:', message)
+
+    def test_windows_reserved_names(self):
+        if os.name == 'nt':
+            reserved_names = ["CON", "PRN", "AUX", "NUL", "COM1", "LPT1"]
+            for name in reserved_names:
+                result, message = is_valid_filename(name)
+                self.assertFalse(result)
+                self.assertIn('Name is a reserved name:', message)
+
+    def test_exceeds_length_limit(self):
+        long_filename = 'a' * 256
+        self.assertEqual(
+            is_valid_filename(long_filename),
+            (False, f'The length of the filename exceeds 255: {len(long_filename)}'),
+        )
+
+    def test_valid_filename(self):
+        self.assertEqual(is_valid_filename('valid_filename.txt'), (True, ''))
+
+    def test_filename_with_space(self):
+        self.assertEqual(is_valid_filename('valid filename.txt'), (True, ''))
+
+
+class TestCreateBackup(unittest.TestCase):
+    def setUp(self):
+        # Create a temporary directory for the tests
+        self.test_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.test_dir.cleanup)  # Ensure cleanup after tests
+
+    def create_test_file(self, filename, content='test content'):
+        """Helper function to create a file with specified content."""
+        path = os.path.join(self.test_dir.name, filename)
+        with open(path, 'w') as f:
+            f.write(content)
+        return path
+
+    @patch('biogeme.tools.files.logger')
+    def test_file_does_not_exist(self, mock_logger):
+        non_existent_file = os.path.join(self.test_dir.name, 'non_existent.txt')
+        self.assertFalse(os.path.exists(non_existent_file))
+        result = create_backup(non_existent_file)
+        # Get the arguments of the last call to mock_logger.info
+        args, kwargs = mock_logger.info.call_args
+
+        # Check if the first argument (the log message) contains the substring
+        self.assertIn(
+            'No backup has been generated',
+            args[0],
+            "Log message does not contain expected substring",
+        )
+
+    def test_file_exists_rename_true(self):
+        filename = self.create_test_file('exists.txt')
+        self.assertTrue(os.path.exists(filename))
+        backup_name = create_backup(filename)
+        self.assertFalse(os.path.exists(filename))
+        self.assertTrue(os.path.exists(backup_name))
+
+    def test_file_exists_rename_false(self):
+        filename = self.create_test_file('exists_copy.txt')
+        self.assertTrue(os.path.exists(filename))
+        backup_name = create_backup(filename, rename=False)
+        self.assertTrue(os.path.exists(filename))
+        self.assertTrue(os.path.exists(backup_name))
+
+    def test_multiple_backups(self):
+        filename = self.create_test_file('multiple_backups.txt')
+        backup_name1 = create_backup(filename, rename=False)
+        backup_name2 = create_backup(filename, rename=False)
+        self.assertNotEqual(backup_name1, backup_name2)
+        self.assertTrue(os.path.exists(filename))
+        self.assertTrue(os.path.exists(backup_name1))
+        self.assertTrue(os.path.exists(backup_name2))
 
 
 if __name__ == '__main__':

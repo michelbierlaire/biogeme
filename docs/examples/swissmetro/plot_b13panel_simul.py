@@ -25,6 +25,7 @@ from biogeme.expressions import (
     MonteCarlo,
     log,
 )
+from biogeme.parameters import Parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -143,8 +144,15 @@ simulate = {
 }
 
 # %%
+# For the sake if illustrative example, we use only a low number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', section='MonteCarlo', value=100)
+parameters.set_value(name='seed', section='MonteCarlo', value=1223)
+
+
+# %%
 # Creation of the Biogeme object.
-biosim = bio.BIOGEME(database, simulate, parameter_file='few_draws.toml')
+biosim = bio.BIOGEME(database, simulate, parameters=parameters)
 
 # %%
 # Suimulation.

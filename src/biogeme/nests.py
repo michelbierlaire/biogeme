@@ -11,14 +11,21 @@ from __future__ import annotations
 import itertools
 import logging
 from dataclasses import dataclass
-from typing import Union, Iterator, Any, Optional
+from typing import Iterator, Any
 
 import numpy as np
 import pandas as pd
 from scipy.integrate import dblquad
 
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, Numeric, ExpressionOrNumeric, Beta
+from biogeme.expressions import (
+    Expression,
+    Numeric,
+    ExpressionOrNumeric,
+    Beta,
+    get_dict_expressions,
+    get_dict_values,
+)
 
 
 # The first versions of Biogeme defined the nests as follows. We keep his for backward compatibility.
@@ -34,9 +41,9 @@ logger = logging.getLogger(__name__)
 class OneNestForNestedLogit:
     """Class capturing the information for one nest of the nested logit model"""
 
-    nest_param: Expression | float
+    nest_param: ExpressionOrNumeric
     list_of_alternatives: list[int]
-    name: Optional[str] = None
+    name: str | None = None
 
     @classmethod
     def from_tuple(cls, the_tuple: OldOneNestForNestedLogit) -> OneNestForNestedLogit:
@@ -57,56 +64,19 @@ def get_nest(a_nest: OneNestForNestedLogit | OldOneNestForNestedLogit):
     """Convert a nest definition to an OneNestForNestedLogot, if needed."""
 
     if isinstance(a_nest, OneNestForNestedLogit):
-        return
-
-
-def get_alpha_expressions(
-    the_dict: dict[int, Expression | float]
-) -> dict[int, Expression]:
-    """If the dictionary contains float, they are transformed into a
-    numerical expression."""
-
-    def generate_expression(value: Expression | float) -> Expression:
-        """Remove the type ambiguity and generates an Expression"""
-        if isinstance(value, (int, float)):
-            return Numeric(value)
-        return value
-
-    return {key: generate_expression(value) for key, value in the_dict.items()}
-
-
-def get_alpha_values(
-    the_dict: dict[int, Expression | float],
-    parameters: Optional[dict[str, float]] = None,
-) -> dict[int, float]:
-    """If the dictionary contains float, they are transformed into a
-    numerical expression.
-
-    :param the_dict: dict of alphas.
-    :param parameters: value of the parameters.
-    """
-
-    def generate_value(
-        value: Expression | float, the_parameters: dict[str, float]
-    ) -> float:
-        """Remove the type ambiguity and generates a value"""
-        if isinstance(value, (int, float)):
-            return value
-        if the_parameters is not None:
-            value.set_estimated_values(the_parameters)
-        v = value.get_value()
-        return v
-
-    return {key: generate_value(value, parameters) for key, value in the_dict.items()}
+        return a_nest
+    if isinstance(a_nest, tuple):
+        return OneNestForNestedLogit.from_tuple(a_nest)
+    raise TypeError(f'Object to type {type(a_nest)} does not represent a nest.')
 
 
 @dataclass
 class OneNestForCrossNestedLogit:
     """Tuple capturing the information for one nest of the cross-nested logit"""
 
-    nest_param: Expression | float
-    dict_of_alpha: dict[int, Expression | float]
-    name: Optional[str] = None
+    nest_param: ExpressionOrNumeric
+    dict_of_alpha: dict[int, ExpressionOrNumeric]
+    name: str | None = None
 
     @classmethod
     def from_tuple(
@@ -116,7 +86,7 @@ class OneNestForCrossNestedLogit:
         return cls(*the_tuple)
 
     def __post_init__(self) -> None:
-        self.dict_of_alpha = get_alpha_expressions(self.dict_of_alpha)
+        self.dict_of_alpha = get_dict_expressions(self.dict_of_alpha)
         self.list_of_alternatives = list(self.dict_of_alpha.keys())
 
     def all_alpha_fixed(self) -> bool:
@@ -141,7 +111,7 @@ class Nests:
         """Ctor
 
         :param choice_set: the list of all alternatives in the choice
-            set. We use a list instread of a set because thre order
+            set. We use a list instead of a set because the order
             matters.
 
         :param tuple_of_nests: the list of nests
@@ -171,10 +141,16 @@ class Nests:
             )
 
         self.alone = set(self.choice_set) - self.mev_alternatives
+        if self.alone:
+            warning_msg = (
+                f'The following elements do not appear in any nest and are assumed each to be alone in a separate '
+                f'nest: {self.alone}. If it is not the intention, check the assignment of alternatives to nests.'
+            )
+            logger.warning(warning_msg)
 
     def __getitem__(
         self, index: int
-    ) -> Union[OneNestForNestedLogit, OneNestForCrossNestedLogit]:
+    ) -> OneNestForNestedLogit | OneNestForCrossNestedLogit:
         if index < 0 or index >= len(self.tuple_of_nests):
             raise IndexError(
                 f'Index out of bounds. Valid indices are between 0 and '
@@ -390,36 +366,8 @@ class NestsForCrossNestedLogit(Nests):
         }
         return alphas
 
-    def get_alpha_values(self, alternative_id: int) -> dict[str, float]:
-        """Generates a dict mapping each nest with the alpha
-        values, for a given alternative
-
-        :param alternative_id: identifier of the alternative
-        :return: a dict mapping the name of a nest and the alpha values
-
-        :raise: BiogemeError is one alpha is a non-numeric expression
-        """
-
-        def get_value(alpha: Union[Expression, float, int]) -> float:
-            """Returns a float, irrespectively of the original type
-
-            :param alpha: alpha parameter
-
-            :raise BiogemeError: if the alpha does not have one of the expected types.
-            """
-            if isinstance(alpha, (int, float)):
-                return float(alpha)
-            if isinstance(alpha, Expression):
-                return alpha.get_value()
-            error_msg = f'Unknown type {type(alpha)} for alpha parameter'
-            raise BiogemeError(error_msg)
-
-        alphas_expressions = self.get_alpha_dict(alternative_id)
-        alphas = {key: get_value(alpha) for key, alpha in alphas_expressions.items()}
-        return alphas
-
     def check_validity(self) -> tuple[bool, str]:
-        """Verifies if the cross-nested logit specifciation is valid
+        """Verifies if the cross-nested logit specification is valid
 
         :return: a boolean with the result of the check, and a message if check fails.
         """
@@ -503,7 +451,7 @@ class NestsForCrossNestedLogit(Nests):
                     mu_m = m.nest_param.get_value_c(prepare_ids=True)
                 else:
                     mu_m = m.nest_param
-                alphas = get_alpha_values(m.dict_of_alpha, parameters)
+                alphas = get_dict_values(m.dict_of_alpha, parameters)
                 alpha_i = alphas.get(i, 0)
                 if alpha_i != 0:
                     term_i = (alpha_i * y_i) ** mu_m

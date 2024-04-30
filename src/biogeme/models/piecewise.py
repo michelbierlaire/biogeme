@@ -54,6 +54,9 @@ def piecewise_variables(
 
     """
     eye = len(thresholds)
+    if eye == 0:
+        error_msg = 'No threshold has been provided.'
+        raise BiogemeError(error_msg)
     if all(t is None for t in thresholds):
         error_msg = (
             'All thresholds for the piecewise linear specification are set to None.'
@@ -69,6 +72,9 @@ def piecewise_variables(
     # If the name of the variable is given, we transform it into an expression.
     if isinstance(variable, str):
         variable = Variable(variable)
+    if not isinstance(variable, Variable):
+        error_msg = f'Expression of type Variable expected, not {type(variable)}'
+        raise BiogemeError(error_msg)
 
     # First variable
     if thresholds[0] is None:

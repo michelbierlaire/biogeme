@@ -6,15 +6,6 @@ Test the biogeme module
 
 """
 
-# Bug in pylint
-# pylint: disable=no-member
-#
-# Too constraining
-# pylint: disable=invalid-name, too-many-instance-attributes
-#
-# Not needed in test
-# pylint: disable=missing-function-docstring, missing-class-docstring
-
 import biogeme.biogeme_logging as blog
 
 import os
@@ -252,6 +243,12 @@ class TestBiogeme(unittest.TestCase):
         result = my_biogeme.free_beta_names()
         expected_result = ['beta1', 'beta2']
         self.assertListEqual(result, expected_result)
+
+    def test_get_beta_values(self):
+        my_biogeme = self.get_biogeme_instance()
+        result = my_biogeme.get_beta_values()
+        expected_result = {'beta1': -1.0, 'beta2': 2.0}
+        self.assertDictEqual(result, expected_result)
 
     def test_bounds_on_beta(self):
         my_biogeme = self.get_biogeme_instance()
@@ -617,6 +614,32 @@ class TestBiogeme(unittest.TestCase):
                 database=getData(1),
             )
 
+    def test_report_array(self):
+        my_biogeme = self.get_biogeme_instance()
+        array = np.array([12, 45])
+        result = my_biogeme.report_array(array)
+        expected_result = 'beta1=12, beta2=45'
+        self.assertEqual(result, expected_result)
+        result = my_biogeme.report_array(array, with_names=False)
+        expected_result = '12, 45'
+        self.assertEqual(result, expected_result)
+
+    def test_beta_values_dict_to_list(self):
+        my_biogeme = self.get_biogeme_instance()
+        result = my_biogeme.beta_values_dict_to_list()
+        expected_result = [-1.0, 2.0]
+        self.assertEqual(expected_result, result)
+        beta_dict = {'beta1': 1.0, 'beta2': 2.0}
+        result = my_biogeme.beta_values_dict_to_list(beta_dict=beta_dict)
+        expected_result = [1.0, 2.0]
+        self.assertEqual(expected_result, result)
+        with self.assertRaises(excep.BiogemeError):
+            _ = my_biogeme.beta_values_dict_to_list(beta_dict=3)
+        beta_dict = {'beta1': 1.0}
+        with self.assertRaises(excep.BiogemeError):
+            _ = my_biogeme.beta_values_dict_to_list(beta_dict=beta_dict)
+
 
 if __name__ == '__main__':
+
     unittest.main()

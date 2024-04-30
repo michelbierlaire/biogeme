@@ -17,6 +17,7 @@ import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 import biogeme.exceptions as excep
 from biogeme import models
+from biogeme.parameters import Parameters
 from biogeme.results import bioResults
 from biogeme.expressions import (
     Beta,
@@ -172,12 +173,19 @@ condprob = models.logit(V, None, Choice)
 # We integrate over omega using numerical integration
 loglike = log(MonteCarlo(condprob))
 
-#
-# Create the Biogeme object. As the objective is to illustrate the
+# %%
+# As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
-# number of draws. To achieve that, we provide a parameter file
-# different from the default one: `few_draws.toml<few_draws.toml>`_
-the_biogeme = bio.BIOGEME(database, loglike, parameter_file='few_draws.toml')
+# number of draws. Therefore, we first define the parameters.
+
+parameters = Parameters()
+parameters.set_value(name='second_derivatives', section='SimpleBounds', value=0.1)
+parameters.set_value(name='number_of_draws', section='MonteCarlo', value=100)
+parameters.set_value(name='seed', section='MonteCarlo', value=1223)
+
+# %%
+# Create the Biogeme object.
+the_biogeme = bio.BIOGEME(database, loglike, parameters=parameters)
 the_biogeme.modelName = 'b04latent_choice_seq_mc'
 
 # %%

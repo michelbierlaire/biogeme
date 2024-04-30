@@ -1,193 +1,280 @@
-"""Implementation of the "generalized" MDCEV model. See section 3 in
-the technical report.
+"""Implementation of the "generalized translated utility function" MDCEV model. See the technical report.
 
-:author: Michel Bierlaire
-:date: Sun Nov  5 15:43:18 2023
-
+Michel Bierlaire
+Tue Apr 9 08:44:12 2024
 """
 
-from typing import Optional
-from biogeme.expressions import Numeric, Expression, log
-from .mdcev import mdcev, info_gamma_parameters, SpecificModel
+from typing import Callable
+
+import numpy as np
+
+from biogeme.database import Database
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Expression, log, Numeric, exp
+from biogeme.mdcev.mdcev import Mdcev, Configuration
+from biogeme.tools.checks import validate_dict_types
 
 
-def generalized(
-    baseline_utilities: dict[int, Expression],
-    consumed_quantities: dict[int, Expression],
-    alpha_parameters: dict[int, Expression],
-    gamma_parameters: dict[int, Expression | None],
-    prices: Optional[dict[int, Expression]] = None,
-):
-    """Calculates the determinant entries for the Bhat 2008 specification Eq (18)
+class Generalized(Mdcev):
+    """Implementation of the MDCEV model with generalized translated utility function."""
 
-    :param baseline_utilities: see the module documentation :mod:`biogeme.mdcev`
+    def __init__(
+        self,
+        model_name: str,
+        baseline_utilities: dict[int, Expression],
+        gamma_parameters: dict[int, Expression | None],
+        alpha_parameters: dict[int, Expression] | None = None,
+        scale_parameter: Expression | None = None,
+        prices: dict[int, Expression] | None = None,
+        weights: Expression | None = None,
+    ) -> None:
+        """Implementation of the MDCEV model with Gamma profile."""
+        super().__init__(
+            model_name=model_name,
+            baseline_utilities=baseline_utilities,
+            gamma_parameters=gamma_parameters,
+            alpha_parameters=alpha_parameters,
+            scale_parameter=scale_parameter,
+            weights=weights,
+        )
+        self.prices: dict[int, Expression] | None = prices
+        if self.prices is not None:
+            validate_dict_types(self.prices, 'prices', Expression)
 
-    :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev`
-
-    :param alpha_parameters: see the module documentation :mod:`biogeme.mdcev`
-
-    :param gamma_parameters: see the module documentation :mod:`biogeme.mdcev`
-
-    :param prices: see the module documentation :mod:`biogeme.mdcev`.
-        If None, assumed to be 1.
-
-    """
-    info_gamma_parameters(gamma_parameters)
-
-    def calculate_utility(
-        the_id: int, consumption: Expression, price: Optional[Expression]
+    def transformed_utility(
+        self,
+        the_id: int,
+        the_consumption: Expression,
     ) -> Expression:
-        """Calculate the utility. The formula is different is it is an
-            outside good, characterized by the absence of a gamma
-            parameter.
+        """Calculates the utility for one alternative."""
 
-        :param the_id: identifier of the good.
-        :param consumption: expression for the consumption.
-        :param price: expression for the price, or None if prices are not considered.
-        """
+        if the_id not in self.alternatives:
+            error_msg = (
+                f'Alternative id {the_id} is invalid. Valid ids: {self.alternatives}'
+            )
+            raise BiogemeError(error_msg)
+        gamma: Expression | None = self.gamma_parameters[the_id]
+        price: Expression | None = None if self.prices is None else self.prices[the_id]
 
-        gamma = gamma_parameters[the_id]
-        if gamma is None:
-            if price is None:
-                # gamma is None. price is None
-                return baseline_utilities[the_id] + (
-                    alpha_parameters[the_id] - 1
-                ) * log(consumption)
-            # gamma is None. price is not None
+        baseline_utility = self.baseline_utilities[the_id]
+        alpha_parameter = self.alpha_parameters[the_id]
+
+        def no_gamma_no_price() -> Expression:
+            """gamma is None. price is None"""
+            return baseline_utility + (alpha_parameter - 1) * log(the_consumption)
+
+        def no_gamma_yes_price() -> Expression:
+            """gamma is None. price is not None"""
             return (
-                baseline_utilities[the_id]
-                + (alpha_parameters[the_id] - 1) * log(consumption)
-                - alpha_parameters[the_id] * log(price)
+                baseline_utility
+                + (alpha_parameter - 1) * log(the_consumption)
+                - alpha_parameter * log(price)
             )
-        # gamma is not None. price is None
-        if price is None:
-            return baseline_utilities[the_id] + (alpha_parameters[the_id] - 1) * log(
-                1.0 + consumption / gamma
+
+        def yes_gamma_no_price() -> Expression:
+            """gamma is not None. price is None"""
+            return baseline_utility + (alpha_parameter - 1) * log(
+                1.0 + the_consumption / gamma
             )
-        # gamma is not None. price is not None
-        return (
-            baseline_utilities[the_id]
-            - log(price)
-            + (alpha_parameters[the_id] - 1) * log(1.0 + consumption / (price * gamma))
+
+        def yes_gamma_yes_price() -> Expression:
+            """gamma is not None. price is not None"""
+            return (
+                baseline_utility
+                - log(price)
+                + (alpha_parameter - 1) * log(1.0 + the_consumption / (price * gamma))
+            )
+
+        dict_of_configurations: dict[
+            Configuration, Callable[[], Expression | float]
+        ] = {
+            Configuration(gamma_is_none=True, price_is_none=True): no_gamma_no_price,
+            Configuration(gamma_is_none=True, price_is_none=False): no_gamma_yes_price,
+            Configuration(gamma_is_none=False, price_is_none=True): yes_gamma_no_price,
+            Configuration(
+                gamma_is_none=False, price_is_none=False
+            ): yes_gamma_yes_price,
+        }
+
+        current_configuration = Configuration(
+            gamma_is_none=gamma is None, price_is_none=price is None
         )
 
-    def calculate_log_determinant(
-        the_id: int, consumption: Expression, price: Optional[Expression]
+        return dict_of_configurations[current_configuration]()
+
+    def calculate_log_determinant_one_alternative(
+        self, the_id: int, consumption: Expression
     ) -> Expression:
         """Calculate the log of the entries for the determinant. For
             the outside good, gamma is equal to 0.
 
         :param the_id: identifier of the good.
         :param consumption: expression for the consumption.
-        :param price: expression for the price, or None if prices are not considered.
         """
-        gamma = gamma_parameters[the_id]
+        if the_id not in self.alternatives:
+            error_msg = (
+                f'Alternative id {the_id} is invalid. Valid ids: {self.alternatives}'
+            )
+            raise BiogemeError(error_msg)
+        price = None if self.prices is None else self.prices[the_id]
+        gamma = self.gamma_parameters[the_id]
         if gamma is None:
-            return log(Numeric(1) - alpha_parameters[the_id]) - log(consumption)
+            return log(Numeric(1) - self.alpha_parameters[the_id]) - log(consumption)
         if price is None:
-            return log(Numeric(1) - alpha_parameters[the_id]) - log(consumption + gamma)
-        return log(Numeric(1) - alpha_parameters[the_id]) - log(
+            return log(Numeric(1) - self.alpha_parameters[the_id]) - log(
+                consumption + gamma
+            )
+        return log(Numeric(1) - self.alpha_parameters[the_id]) - log(
             consumption + price * gamma
         )
 
-    def calculate_inverse_determinant(
-        the_id: int, consumption: Expression, price: Optional[Expression]
+    def calculate_inverse_of_determinant_one_alternative(
+        self, the_id: int, consumption: Expression
     ) -> Expression:
         """Calculate the inverse of the entries for the determinant. For
             the outside good, gamma is equal to 0.
 
         :param the_id: identifier of the good.
         :param consumption: expression for the consumption.
-        :param price: expression for the price, or None if prices are not considered.
         """
-        gamma = gamma_parameters[the_id]
+        if the_id not in self.alternatives:
+            error_msg = (
+                f'Alternative id {the_id} is invalid. Valid ids: {self.alternatives}'
+            )
+            raise BiogemeError(error_msg)
+        price = None if self.prices is None else self.prices[the_id]
+        gamma = self.gamma_parameters[the_id]
         if gamma is None:
-            return consumption / (Numeric(1) - alpha_parameters[the_id])
+            return consumption / (Numeric(1) - self.alpha_parameters[the_id])
         if price is None:
-            return (consumption + gamma) / (Numeric(1) - alpha_parameters[the_id])
-        return (consumption + price * gamma) / (Numeric(1) - alpha_parameters[the_id])
-
-    if prices:
-        utilities = {
-            the_id: (calculate_utility(the_id, consumption, prices[the_id]))
-            for the_id, consumption in consumed_quantities.items()
-        }
-        log_determinant_entries = {
-            the_id: calculate_log_determinant(the_id, consumption, prices[the_id])
-            for the_id, consumption in consumed_quantities.items()
-        }
-        inverse_of_determinant_entries = {
-            the_id: calculate_inverse_determinant(the_id, consumption, prices[the_id])
-            for the_id, consumption in consumed_quantities.items()
-        }
-        return SpecificModel(
-            utilities=utilities,
-            log_determinant_entries=log_determinant_entries,
-            inverse_of_determinant_entries=inverse_of_determinant_entries,
+            return (consumption + gamma) / (Numeric(1) - self.alpha_parameters[the_id])
+        return (consumption + price * gamma) / (
+            Numeric(1) - self.alpha_parameters[the_id]
         )
-    # Use unit prices if prices is set to None
-    utilities = {
-        the_id: (calculate_utility(the_id, consumption, None))
-        for the_id, consumption in consumed_quantities.items()
-    }
-    log_determinant_entries = {
-        the_id: calculate_log_determinant(the_id, consumption, None)
-        for the_id, consumption in consumed_quantities.items()
-    }
-    inverse_of_determinant_entries = {
-        the_id: calculate_inverse_determinant(the_id, consumption, None)
-        for the_id, consumption in consumed_quantities.items()
-    }
-    return SpecificModel(
-        utilities=utilities,
-        log_determinant_entries=log_determinant_entries,
-        inverse_of_determinant_entries=inverse_of_determinant_entries,
-    )
 
+    def utility_expression_one_alternative(
+        self,
+        the_id: int,
+        the_consumption: Expression,
+        unscaled_epsilon: Expression,
+    ) -> Expression:
+        """Utility expression. Used only for code validation."""
+        baseline_utility = self.baseline_utilities[the_id]
+        epsilon: Expression = (
+            unscaled_epsilon
+            if self.scale_parameter is None
+            else unscaled_epsilon / self.scale_parameter
+        )
+        price: Expression = Numeric(1) if self.prices is None else self.prices[the_id]
+        alpha: Expression = self.alpha_parameters[the_id]
+        gamma: Expression | None = self.gamma_parameters[the_id]
+        if gamma is None:
+            return (
+                exp(baseline_utility + epsilon)
+                * (the_consumption / price) ** alpha
+                / alpha
+            )
+        the_term = (1 + the_consumption / (price * gamma)) ** alpha
+        return exp(baseline_utility + epsilon) * gamma * (the_term - 1) / alpha
 
-def mdcev_generalized(
-    number_of_chosen_alternatives: Expression,
-    consumed_quantities: dict[int, Expression],
-    baseline_utilities: dict[int, Expression],
-    alpha_parameters: dict[int, Expression],
-    gamma_parameters: dict[int, Optional[Expression]],
-    prices: Optional[dict[int, Expression]] = None,
-    scale_parameter: Optional[Expression] = None,
-):
-    """Generate the Biogeme formula for the log probability of the
-    MDCEV model using the generalized translated utility function
+    def utility_one_alternative(
+        self,
+        the_id: int,
+        the_consumption: float,
+        epsilon: float,
+        one_observation: Database,
+    ) -> float:
+        """Utility needed for forecasting"""
+        baseline_utility = self.calculate_baseline_utility(
+            alternative_id=the_id, one_observation=one_observation
+        )
+        if self.scale_parameter is not None:
+            epsilon /= self.scale_parameter.get_value()
+        price: float = 1 if self.prices is None else self.prices[the_id].get_value()
+        alpha: float = self.alpha_parameters[the_id].get_value()
+        gamma: float = self.gamma_parameters[the_id].get_value()
+        if gamma is None:
+            return (
+                np.exp(baseline_utility + epsilon)
+                * (the_consumption / price) ** alpha
+                / alpha
+            )
+        the_term = (1 + the_consumption / (price * gamma)) ** alpha
+        return np.exp(baseline_utility + epsilon) * gamma * (the_term - 1) / alpha
 
-    :param number_of_chosen_alternatives: see the module documentation
-        :mod:`biogeme.mdcev`
+    def sorting_utility_one_alternative(
+        self,
+        alternative_id: int,
+        epsilon: float,
+        one_observation: Database,
+    ) -> float:
+        """Utility used to sort the alternatives. Used in the forecasting algorithm to identify chosen and non chpsen
+        alternatives"""
+        baseline_utility = self.calculate_baseline_utility(
+            alternative_id=alternative_id, one_observation=one_observation
+        )
+        if self.scale_parameter is not None:
+            epsilon /= self.scale_parameter.get_value()
 
-    :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev`
+        if self.prices:
+            price = self.prices[alternative_id].get_value()
+            return baseline_utility + epsilon - np.log(price)
+        return baseline_utility + epsilon
 
-    :param baseline_utilities: see the module documentation :mod:`biogeme.mdcev`
+    def derivative_utility_one_alternative(
+        self,
+        the_id: int,
+        the_consumption: float,
+        epsilon: float,
+        one_observation: Database,
+    ) -> float:
+        """Used in the optimization problem solved for forecasting tp calculate the dual variable."""
+        baseline_utility = self.calculate_baseline_utility(
+            alternative_id=the_id, one_observation=one_observation
+        )
+        if self.scale_parameter is not None:
+            epsilon /= self.scale_parameter.get_value()
+        price: float = 1.0 if self.prices is None else self.prices[the_id].get_value()
+        alpha: float = self.alpha_parameters[the_id].get_value()
+        gamma: float = self.gamma_parameters[the_id].get_value()
+        if gamma is None:
+            return (
+                np.exp(baseline_utility + epsilon)
+                * (the_consumption / price) ** (alpha - 1)
+                / price
+            )
+        return (
+            np.exp(baseline_utility + epsilon)
+            * (1 + the_consumption / (price * gamma)) ** (alpha - 1)
+            / price
+        )
 
-    :param alpha_parameters: see the module documentation :mod:`biogeme.mdcev`
+    def optimal_consumption_one_alternative(
+        self,
+        the_id: int,
+        dual_variable: float,
+        epsilon: float,
+        one_observation: Database,
+    ) -> float:
+        """Analytical calculation of the optimal consumption if the dual variable is known."""
+        baseline_utility = self.calculate_baseline_utility(
+            alternative_id=the_id, one_observation=one_observation
+        )
+        if self.scale_parameter is not None:
+            epsilon /= self.scale_parameter.get_value()
+        price: float = 1.0 if self.prices is None else self.prices[the_id].get_value()
+        alpha: float = self.alpha_parameters[the_id].get_value()
+        gamma: float = self.gamma_parameters[the_id].get_value()
+        numerator = price * dual_variable
+        denominator = np.exp(baseline_utility + epsilon)
+        ratio = numerator / denominator
+        exponent = 1 / (alpha - 1)
+        if gamma is None:
+            return price * ratio**exponent
+        return price * gamma * (ratio**exponent - 1)
 
-    :param gamma_parameters: see the module documentation :mod:`biogeme.mdcev`
-
-    :param prices: see the module documentation :mod:`biogeme.mdcev`
-
-    :param scale_parameter: see the module documentation :mod:`biogeme.mdcev`
-
-    A detailed explanation is provided in the technical report
-    "Estimating the MDCEV model with Biogeme"
-
-    """
-
-    specific_model = generalized(
-        baseline_utilities,
-        consumed_quantities,
-        alpha_parameters,
-        gamma_parameters,
-        prices,
-    )
-
-    return mdcev(
-        number_of_chosen_alternatives=number_of_chosen_alternatives,
-        consumed_quantities=consumed_quantities,
-        specific_model=specific_model,
-        scale_parameter=scale_parameter,
-    )
+    def _list_of_expressions(self) -> list[Expression]:
+        """Extract the list of expressions involved in the model"""
+        if self.prices is None:
+            return []
+        return [expression for expression in self.prices.values()]

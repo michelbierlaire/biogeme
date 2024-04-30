@@ -17,6 +17,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 
 from biogeme.expressions import Beta, bioDraws, MonteCarlo, log
+from biogeme.parameters import Parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -87,12 +88,17 @@ USER_NOTES = (
 )
 
 # %%
-# Create the Biogeme object. As the objective is to illustrate the
+# As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
-# number of draws. To achieve that, we provide a parameter file
-# different from the default one.
+# number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', value=100, section='MonteCarlo')
+parameters.set_value(name='seed', value=1223, section='MonteCarlo')
+
+# %%
+# Create the Biogeme object.
 the_biogeme = bio.BIOGEME(
-    database, logprob, user_notes=USER_NOTES, parameter_file='few_draws.toml'
+    database, logprob, user_notes=USER_NOTES, parameters=parameters
 )
 the_biogeme.modelName = 'b24halton_mixture'
 

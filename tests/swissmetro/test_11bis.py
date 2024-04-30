@@ -81,7 +81,7 @@ simulate = {'Prob. train': prob1, 'Elas. 1': genelas1}
 
 class test_11bis(unittest.TestCase):
     def testEstimationAndSimulation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameter_file='')
+        biogeme = bio.BIOGEME(database, logprob, parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

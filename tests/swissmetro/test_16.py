@@ -23,7 +23,7 @@ from biogeme.expressions import (
     bioMultSum,
     Variable,
 )
-from biogeme.tools import TemporaryFile
+from biogeme.parameters import Parameters
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -122,11 +122,10 @@ logprob = log(MonteCarlo(probIndiv))
 
 class test_16(unittest.TestCase):
     def testEstimation(self):
-        with TemporaryFile() as parameter_file:
-            parameters = '[MonteCarlo]\nnumber_of_draws = 5\nseed = 10'
-            with open(parameter_file, 'w') as f:
-                print(parameters, file=f)
-            biogeme = bio.BIOGEME(flat_database, logprob, parameter_file=parameter_file)
+        parameters = Parameters()
+        parameters.set_value(section='MonteCarlo', name='number_of_draws', value=5)
+        parameters.set_value(section='MonteCarlo', name='seed', value=10)
+        biogeme = bio.BIOGEME(flat_database, logprob, parameters=parameters)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

@@ -8,6 +8,7 @@ It combines the database and the model specification.
 """
 
 from __future__ import annotations
+
 import difflib
 import glob
 import logging
@@ -16,6 +17,7 @@ import pickle
 from datetime import datetime
 from typing import NamedTuple
 
+from fuzzywuzzy import fuzz
 import cythonbiogeme.cythonbiogeme as cb
 import numpy as np
 import pandas as pd
@@ -68,7 +70,7 @@ class BIOGEME:
         database: db.Database,
         formulas: Expression | dict[str, Expression],
         user_notes: str | None = None,
-        parameter_file: str | None = None,
+        parameters: str | Parameters | None = None,
         skip_audit: bool = False,
         **kwargs,
     ):
@@ -94,17 +96,39 @@ class BIOGEME:
         :param user_notes: these notes will be included in the report file.
         :type user_notes: str
 
-        :param parameter_file: name of the .toml file where the parameters are read. If it is an empty string,
-                 the default values of the parameters are used
-        :type parameter_file: str
+        :param parameters: name of the .toml file where the parameters are read, or Parameters object containing
+        the parameters. If None, the default values of the parameters are used.
+
 
         :raise BiogemeError: an audit of the formulas is performed.
            If a formula has issues, an error is detected and an
            exception is raised.
 
         """
-        self.biogeme_parameters: Parameters = Parameters()
-        self.biogeme_parameters.read_file(parameter_file)
+        value = kwargs.get('parameter_file')
+        if value is not None:
+            warning_msg = (
+                f'Argument "parameter_file={value}" has been replaced by "parameters={value}", that can be either '
+                f'a file name as before, or an object of the class "Parameters".'
+            )
+            logger.warning(warning_msg)
+
+        if isinstance(parameters, Parameters):
+            self.biogeme_parameters: Parameters = parameters
+        else:
+            self.biogeme_parameters: Parameters = Parameters()
+            if isinstance(parameters, str):
+                self.biogeme_parameters.read_file(parameters)
+            else:
+                if parameters is None:
+                    info_msg = f'Default values of the Biogeme parameters are used.'
+                    logger.info(info_msg)
+                else:
+                    error_msg = (
+                        f'Argument "parameters" is of wrong type: {type(parameters)}'
+                    )
+                    raise AttributeError(error_msg)
+
         self.parameter_file: str = self.biogeme_parameters.file_name
 
         logger.debug(f'Ctor Biogeme: {self.algorithm_name=}')
@@ -141,12 +165,14 @@ class BIOGEME:
                     value,
                     the_param.section,
                 )
-        obsolete = ("suggestScales",)
+        obsolete = ('suggestScales', 'parameter_file')
         for the_param in obsolete:
             value = kwargs.get(the_param)
             if value is not None:
                 warning_msg = f"Parameter {the_param} is obsolete and ignored."
                 logger.warning(warning_msg)
+                if the_param == 'parameter_file':
+                    raise BiogemeError(warning_msg)
 
         self._algorithm = opt.algorithms.get(self.algorithm_name)
         self.algo_parameters = None
@@ -235,7 +261,17 @@ class BIOGEME:
                         f"It is of type {type(f)}"
                     )
             self.log_like = formulas.get(self.log_like_name)
+            if self.log_like is None:
+                for key in formulas:
+                    if fuzz.ratio(self.log_like_name, key) >= 80:
+                        warning_msg = f'In the formulas, one key is "{key}". Should it be "{self.log_like_name}" instead?'
+                        logger.warning(warning_msg)
             self.weight = formulas.get(self.weight_name)
+            if self.weight is None:
+                for key in formulas:
+                    if fuzz.ratio(self.weight_name, key) >= 80:
+                        warning_msg = f'In the formulas, one key is "{key}". Should it be "{self.weight_name}" instead?'
+                        logger.warning(warning_msg)
 
         for f in self.formulas.values():
             f.missingData = self.missingData
@@ -1622,7 +1658,7 @@ class BIOGEME:
 
         estimated_betas = r.get_beta_values()
         for f in self.formulas.values():
-            f.set_estimated_values(estimated_betas)
+            f.change_init_values(estimated_betas)
 
         if not r.algorithm_has_converged():
             logger.warning(

@@ -11,8 +11,9 @@ implemented to verify the analytical derivatives of these functions.
 from typing import Callable
 import numpy as np
 
+from biogeme.expressions import get_dict_values
 from biogeme.function_output import FunctionOutput
-from biogeme.nests import NestsForCrossNestedLogit, get_alpha_values
+from biogeme.nests import NestsForCrossNestedLogit
 
 
 def cnl_g(
@@ -49,7 +50,7 @@ def cnl_g(
         g_ij = np.zeros((nbr_of_alternatives, nbr_of_alternatives))
         for m in nests:
             mu_m = m.nest_param
-            alphas = get_alpha_values(m.dict_of_alpha)
+            alphas = get_dict_values(m.dict_of_alpha)
             nest_specific_sum = 0.0
             for alpha_alt, alpha_value in alphas.items():
                 if alpha_value != 0 and y[order[alpha_alt]] != 0:

@@ -12,6 +12,8 @@ Estimation of a logit model with several algorithms.
 
 import itertools
 import pandas as pd
+
+from biogeme.parameters import Parameters
 from biogeme.tools import format_timedelta
 import biogeme.biogeme as bio
 from biogeme import models
@@ -91,11 +93,18 @@ summary = pd.DataFrame(
     ]
 )
 
+# %%
+# For the sake if illustrative example, we use only a low number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', section='MonteCarlo', value=100)
+parameters.set_value(name='seed', section='MonteCarlo', value=1223)
+
+
 for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     infeasible_cg_values, initial_radius_values, second_derivatives_values
 ):
     # Create the Biogeme object
-    the_biogeme = bio.BIOGEME(database, logprob, parameter_file='few_draws.toml')
+    the_biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
     # We set the parameters of the optimization algorithm
     the_biogeme.infeasible_cg = infeasible_cg
     the_biogeme.initial_radius = initial_radius

@@ -93,12 +93,28 @@ class Parameters:
         # Store values in a dict
         self.document = None  # TOML document
         self.file_name = None
-        self.all_parameters_dict = {}
+        self.all_parameters_dict: dict[NameSectionTuple, ParameterTuple] = {}
         # Add the default parameters
         for param in all_parameters_tuple():
             self.add_parameter(param)
 
-        logger.debug(f'INIT PARAMETER: {self.get_value(name="optimization_algorithm")}')
+    def __str__(self) -> str:
+        output = ''
+        for section in self.sections:
+            output += f'[{section}]\n'
+            report = [
+                f'\t{param.name} = {param.value} '
+                for param in self.parameters_in_section(section)
+            ]
+            output += '\n'.join(report)
+            output += '\n'
+        return output
+
+    @property
+    def sections(self) -> list[str]:
+        return sorted(
+            {name_section.section for name_section in self.all_parameters_dict.keys()}
+        )
 
     def add_parameter(self, parameter_tuple: ParameterTuple):
         """Add one parameter
@@ -143,17 +159,15 @@ class Parameters:
             self.dump_file(self.file_name)
             logger.info(f'File {self.file_name} has been created.')
 
-    def parameters_in_section(self, section_name: str) -> list[str]:
-        """Returns the names of the parameters in a section
+    def parameters_in_section(self, section_name: str) -> list[ParameterTuple]:
+        """Returns the parameters in a section
 
         :param section_name: name of the section
         :type section_name: str
 
         """
         results = [
-            p.name
-            for p in self.all_parameters_dict.values()
-            if p.section == section_name
+            p for p in self.all_parameters_dict.values() if p.section == section_name
         ]
         return results
 
@@ -269,7 +283,7 @@ class Parameters:
             else:
                 known = self.parameters_in_section(section)
                 if known:
-                    known_msg = f'Known parameter(s): {", ".join(known)}.'
+                    known_msg = f'Known parameter(s): {", ".join([param.name for param in known])}.'
                 else:
                     known_msg = 'The section does not exist.'
                 error_msg = (

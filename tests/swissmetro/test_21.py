@@ -55,7 +55,7 @@ prob = Elem(P, CHOICE)
 
 class test_02(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, log(prob), parameter_file='')
+        biogeme = bio.BIOGEME(database, log(prob), parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

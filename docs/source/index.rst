@@ -14,9 +14,7 @@ For beginners, we recommend to look at the Swissmetro examples: :ref:`sphx_glr_a
 
 .. toctree::
   :maxdepth: 2
-  :caption: Examples:
 
-  auto_examples/index.rst
   
 Source code
 ~~~~~~~~~~~

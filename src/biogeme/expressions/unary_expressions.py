@@ -216,7 +216,7 @@ class exp(UnaryOperator):
     exponential expression
     """
 
-    def __init__(self, child: ExpressionOrNumeric):
+    def __init__(self, child: ExpressionOrNumeric) -> None:
         """Constructor
 
         :param child: first arithmetic expression

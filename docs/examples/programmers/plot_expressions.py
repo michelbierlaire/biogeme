@@ -20,12 +20,15 @@ import biogeme.biogeme_logging as blog
 import biogeme.database as db
 import biogeme.exceptions as excep
 import biogeme.expressions as ex
+import biogeme.expressions.beta_parameters
 import biogeme.tools.derivatives
 from biogeme import models
 from biogeme.expressions import IdManager, TypeOfElementaryExpression, LinearTermTuple
 from biogeme.function_output import (
     BiogemeDisaggregateFunctionOutput,
     BiogemeFunctionOutput,
+    NamedBiogemeFunctionOutput,
+    NamedBiogemeDisaggregateFunctionOutput,
 )
 from biogeme.version import get_text
 
@@ -614,6 +617,21 @@ expr1.get_value_and_derivatives(
     gradient=True, hessian=False, bhhh=False, prepare_ids=True
 )
 
+# %% It is possible to use obtain the results with the names of the parameters.
+the_output: NamedBiogemeFunctionOutput = expr1.get_value_and_derivatives(
+    prepare_ids=True, named_results=True
+)
+
+# %%
+print(the_output.gradient)
+
+# %%
+print(the_output.hessian)
+
+# %%
+print(the_output.bhhh)
+
+
 # %%
 # It can also generate a function that takes the value of the
 # parameters as argument, and provides a tuple with the value of the
@@ -661,6 +679,27 @@ for f, g, h, bhhh in zip(f_array, g_array, h_array, bhhh_array):
     print(f'{h=}')
     print(f'{bhhh=}')
 
+# %% If the names of the variables are needed, the parameter `named_results` must be set to True
+
+results: NamedBiogemeDisaggregateFunctionOutput = expr1.get_value_and_derivatives(
+    database=my_data, aggregation=False, named_results=True
+)
+print(len(results.functions))
+
+# %%
+f_array = results.functions
+g_array = results.gradients
+h_array = results.hessians
+bhhh_array = results.bhhhs
+
+for f, g, h, bhhh in zip(f_array, g_array, h_array, bhhh_array):
+    print('******')
+    print(f'{f=}')
+    print(f'{g=}')
+    print(f'{h=}')
+    print(f'{bhhh=}')
+
+exit(0)
 # %%
 # If `aggregation` is set to `True`, the results are accumulated as a sum.
 the_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
@@ -1046,7 +1085,10 @@ expr13bis.get_value_c(database=my_data, prepare_ids=True)
 # %%
 # A Pythonic way to write a linear utility function.
 variables = ['v1', 'v2', 'v3', 'cost', 'time', 'headway']
-coefficients = {f'{v}': ex.Beta(f'beta_{v}', 0, None, None, 0) for v in variables}
+coefficients = {
+    f'{v}': biogeme.expressions.beta_parameters.Beta(f'beta_{v}', 0, None, None, 0)
+    for v in variables
+}
 terms = [coefficients[v] * ex.Variable(v) for v in variables]
 util = sum(terms)
 print(util)
@@ -1091,8 +1133,14 @@ expr3.audit(database=my_data)
 # We now evaluate an expression for panel data.
 c1 = ex.bioDraws('draws1', 'NORMAL_HALTON2')
 c2 = ex.bioDraws('draws2', 'NORMAL_HALTON2')
-U1 = ex.Beta('beta1', 0, None, None, 0) * Variable1 + 10 * c1
-U2 = ex.Beta('beta2', 0, None, None, 0) * Variable2 + 10 * c2
+U1 = (
+    biogeme.expressions.beta_parameters.Beta('beta1', 0, None, None, 0) * Variable1
+    + 10 * c1
+)
+U2 = (
+    biogeme.expressions.beta_parameters.Beta('beta2', 0, None, None, 0) * Variable2
+    + 10 * c2
+)
 U3 = 0
 U = {1: U1, 2: U2, 3: U3}
 av = {1: Av1, 2: Av2, 3: Av3}

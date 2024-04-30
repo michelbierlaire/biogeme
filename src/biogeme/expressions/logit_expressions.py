@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-import biogeme.exceptions as excep
 from .base_expressions import Expression
-from .numeric_expressions import Numeric, validate_and_convert
-
+from .numeric_expressions import Numeric
+from .convert import validate_and_convert
 from ..deprecated import deprecated
+from ..exceptions import BiogemeError
 
 if TYPE_CHECKING:
     from . import ExpressionOrNumeric
@@ -194,13 +194,13 @@ class LogLogit(Expression):
                 f'Alternative {choice} does not appear in the list '
                 f'of utility functions: {self.util.keys()}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if choice not in self.av:
             error_msg = (
                 f'Alternative {choice} does not appear in the list '
                 f'of availabilities: {self.av.keys()}'
             )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
         if self.av[choice].get_value() == 0.0:
             return -np.log(0)
         v_chosen = self.util[choice].get_value()

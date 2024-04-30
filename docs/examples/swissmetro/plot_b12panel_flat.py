@@ -27,6 +27,7 @@ from biogeme.expressions import (
     exp,
     bioMultSum,
 )
+from biogeme.parameters import Parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -125,11 +126,16 @@ condprobIndiv = exp(bioMultSum(obsprob))
 logprob = log(MonteCarlo(condprobIndiv))
 
 # %%
-# Create the Biogeme object. As the objective is to illustrate the
+# As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
-# number of draws. To achieve that, we provide a parameter file
-# different from the default one: `<few_draws.toml>`_
-the_biogeme = bio.BIOGEME(flat_database, logprob, parameter_file='few_draws.toml')
+# number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', value=100, section='MonteCarlo')
+parameters.set_value(name='seed', value=1223, section='MonteCarlo')
+
+# %%
+# Create the Biogeme object.
+the_biogeme = bio.BIOGEME(flat_database, logprob, parameters=parameters)
 the_biogeme.modelName = 'b12panel_flat'
 
 # %%

@@ -11,12 +11,12 @@ from typing import NamedTuple, Iterable, TYPE_CHECKING, Any
 from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
 from .elementary_expressions import (
-    Beta,
     Variable,
     TypeOfElementaryExpression,
     Elementary,
 )
-from .numeric_expressions import validate_and_convert
+from .beta_parameters import Beta
+from .convert import validate_and_convert
 from ..deprecated import deprecated
 
 if TYPE_CHECKING:

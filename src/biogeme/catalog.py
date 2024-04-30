@@ -12,6 +12,7 @@ from itertools import product
 from typing import Iterator
 
 import biogeme.expressions as ex
+import biogeme.expressions.convert
 import biogeme.segmentation as seg
 from biogeme.configuration import (
     SEPARATOR,
@@ -66,7 +67,10 @@ class Catalog(MultipleExpression):
 
         self.named_expressions = [
             NamedExpression(
-                name=named.name, expression=ex.validate_and_convert(named.expression)
+                name=named.name,
+                expression=biogeme.expressions.convert.validate_and_convert(
+                    named.expression
+                ),
             )
             for named in named_expressions
         ]

@@ -19,6 +19,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
 from biogeme.native_draws import RandomNumberGeneratorTuple
+from biogeme.parameters import Parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -113,11 +114,16 @@ prob = models.logit(V, av, CHOICE)
 logprob = log(MonteCarlo(prob))
 
 # %%
-# Create the Biogeme object.  As the objective is to illustrate the
+# As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
-# number of draws. To achieve that, we provide a parameter file
-# different from the default one.
-the_biogeme = bio.BIOGEME(database, logprob, parameter_file='few_draws.toml')
+# number of draws.
+parameters = Parameters()
+parameters.set_value(name='number_of_draws', value=100, section='MonteCarlo')
+parameters.set_value(name='seed', value=1223, section='MonteCarlo')
+
+# %%
+# Create the Biogeme object.
+the_biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
 the_biogeme.modelName = 'b25triangular_mixture'
 
 # %%

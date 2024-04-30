@@ -10,7 +10,7 @@ for specific services to Biogeme
 from __future__ import annotations
 
 import logging
-from typing import NamedTuple, TYPE_CHECKING
+from typing import NamedTuple, TYPE_CHECKING, Iterable
 
 import numpy as np
 import pandas as pd
@@ -1104,6 +1104,24 @@ class Database:
         if error_msg_1 or error_msg_2:
             raise BiogemeError(f'{error_msg_1} {error_msg_2}')
 
+    def extract_rows(self, a_range: Iterable[int]) -> Database:
+        """
+        Create a database object using only some rows
+
+        :param a_range: specify the desired range of rows.
+        :return: the reduced dataabse
+        """
+
+        # Validate the provided range
+        max_index = len(self.data) - 1
+        if any(i < 0 or i > max_index for i in a_range):
+            raise IndexError(
+                'One or more indices in a_range are out of the valid range.'
+            )
+        reduced_data_frame = self.data.iloc[list(a_range)]
+
+        return Database(name=f'{self.name}_reduced', pandas_database=reduced_data_frame)
+
     def generate_segmentation(
         self,
         variable: Variable | str,
@@ -1187,3 +1205,28 @@ class Database:
         self.data[new_column] = self.data[list_of_columns].apply(
             lambda x: (x != 0).sum(), axis=1
         )
+
+    def mdcev_row_split(self, a_range: Iterable[int] | None = None) -> list[Database]:
+        """
+        For the MDCEV model, we generate a list of Database objects, each of them associated with a different row of
+        the database,
+
+        :param a_range: specify the desired range of rows.
+        :return: list of rows, each in a Database format
+        """
+        if a_range is None:
+            the_range = range(len(self.data))
+        else:
+            # Validate the provided range
+            max_index = len(self.data) - 1
+            if any(i < 0 or i > max_index for i in a_range):
+                raise IndexError(
+                    'One or more indices in a_range are out of the valid range.'
+                )
+            the_range = a_range
+
+        rows_of_database = [
+            Database(name=f'row_{i}', pandas_database=self.data.iloc[[i]])
+            for i in the_range
+        ]
+        return rows_of_database

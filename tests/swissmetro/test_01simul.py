@@ -84,7 +84,7 @@ the_betas_values = {
 
 class test_01simul(unittest.TestCase):
     def testSimulation(self):
-        biogeme = bio.BIOGEME(database, simulate, parameter_file='')
+        biogeme = bio.BIOGEME(database, simulate, parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

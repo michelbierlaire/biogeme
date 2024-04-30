@@ -16,7 +16,7 @@ import biogeme.biogeme as bio
 from biogeme import models
 import biogeme.segmentation as seg
 from biogeme.expressions import Beta, bioLinearUtility, LinearTermTuple
-
+from biogeme.parameters import Parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -119,9 +119,19 @@ USER_NOTES = (
 )
 
 # %%
+# Default parameter values
+parameters = Parameters()
+print(parameters)
+
+# %
+# We change one value
+parameters.set_value(name='second_derivatives', value=0)
+print(parameters)
+
+# %%
 # Create the Biogeme object.
 the_biogeme = bio.BIOGEME(
-    database, logprob, user_notes=USER_NOTES, parameter_file='b01logit_bis.toml'
+    database, logprob, user_notes=USER_NOTES, parameters=parameters
 )
 
 # %%
