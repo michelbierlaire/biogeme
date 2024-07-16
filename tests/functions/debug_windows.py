@@ -2,7 +2,7 @@ import pandas as pd
 
 from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
-from biogeme.expressions import Variable, Beta
+from biogeme.expressions import Variable, Beta, Numeric
 
 df1 = pd.DataFrame(
     {
