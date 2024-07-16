@@ -22,13 +22,16 @@ beta1 = Beta('beta1', -1.0, -3, 3, 0)
 beta2 = Beta('beta2', 2.0, -3, 10, 0)
 likelihood = -((beta1 * Variable1) ** 2) - (beta2 * Variable2) ** 2
 simul = (beta1 + 2 * beta2) / Variable1 + (beta2 + 2 * beta1) / Variable2
-dict_of_expressions = {
-    'log_like': likelihood,
-    'weight': Numeric(1),
-    'beta1': beta1,
-    'simul': simul,
-}
+# dict_of_expressions = {
+#    'log_like': likelihood,
+#    'weight': Numeric(1),
+#    'beta1': beta1,
+#    'simul': simul,
+# }
 
+dict_of_expressions = {
+    'beta1': beta1,
+}
 data = Database(f'test_1', df1)
 my_biogeme = BIOGEME(data, dict_of_expressions)
 my_biogeme.bootstrap_samples = 100
