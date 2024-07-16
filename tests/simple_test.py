@@ -56,7 +56,7 @@ class test_biogeme(unittest.TestCase):
 
         data = {
             'ID': pd.Series([i + 1 for i in range(21)]),
-            'AutoTime': pd.Series(
+            'auto_time': pd.Series(
                 [
                     52.9,
                     4.1,
@@ -81,7 +81,7 @@ class test_biogeme(unittest.TestCase):
                     41.6,
                 ]
             ),
-            'TransitTime': pd.Series(
+            'transit_time': pd.Series(
                 [
                     4.4,
                     28.5,
@@ -119,8 +119,8 @@ class test_biogeme(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     def testEstimation(self):
-        AutoTime = Variable('AutoTime')
-        TransitTime = Variable('TransitTime')
+        AutoTime = Variable('auto_time')
+        TransitTime = Variable('transit_time')
         Choice = Variable('Choice')
 
         ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)

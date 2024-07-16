@@ -33,7 +33,7 @@ class TestOneNestForNestedLogit(unittest.TestCase):
         list_of_alternatives = [1, 2, 3]
         tuple_input = (nest_param, list_of_alternatives)
         nest = OneNestForNestedLogit.from_tuple(tuple_input)
-        self.assertEqual(nest.nest_param, nest_param)
+        self.assertEqual(repr(nest.nest_param), repr(nest_param))
         self.assertEqual(nest.list_of_alternatives, list_of_alternatives)
 
     def test_intersection(self):
@@ -181,11 +181,19 @@ class TestNestsForCrossNestedLogit(unittest.TestCase):
     def test_old_initialization(self):
         mu_param_1 = Beta('mu_param_1', 1, 1, 10, 0)
         alpha_param_1 = Beta('alpha_param_1', 0.5, 0, 1, 0)
-        alpha_dict_1 = {1: alpha_param_1, 2: 0.0, 3: 1.0}
+        alpha_dict_1 = {1: alpha_param_1, 2: Numeric(0.0), 3: Numeric(1.0)}
         nest_1 = mu_param_1, alpha_dict_1
         the_nest_1 = OneNestForCrossNestedLogit.from_tuple(nest_1)
         self.assertIs(the_nest_1.nest_param, mu_param_1)
-        self.assertDictEqual(the_nest_1.dict_of_alpha, alpha_dict_1)
+        self.assertEqual(
+            set(the_nest_1.dict_of_alpha.keys()),
+            set(alpha_dict_1.keys()),
+            "Dictionaries have different keys",
+        )
+        for key in alpha_dict_1:
+            self.assertEqual(
+                repr(the_nest_1.dict_of_alpha[key]), repr(alpha_dict_1[key])
+            )
         mu_param_2 = Beta('mu_param_2', 1, 1, 10, 0)
         alpha_param_2 = Beta('alpha_param_2', 0.5, 0, 1, 0)
         alpha_dict_2 = {1: alpha_param_2, 2: 1.0, 3: 0.0}
@@ -211,7 +219,7 @@ class TestOneNestForCrossNestedLogit(unittest.TestCase):
         dict_of_alpha = {1: Numeric(0.3), 2: Numeric(0.7)}
         tuple_input = (nest_param, dict_of_alpha)
         nest = OneNestForCrossNestedLogit.from_tuple(tuple_input)
-        self.assertEqual(nest.nest_param, nest_param)
+        self.assertEqual(repr(nest.nest_param), repr(nest_param))
         self.assertTrue(
             all(isinstance(alpha, Numeric) for alpha in nest.dict_of_alpha.values())
         )
@@ -247,7 +255,7 @@ class TestOneNestForCrossNestedLogit(unittest.TestCase):
         """Test creation from the old tuple syntax."""
         tuple_input = (self.nest_param, self.dict_of_alpha)
         nest = OneNestForCrossNestedLogit.from_tuple(tuple_input)
-        self.assertEqual(nest.nest_param, self.nest_param)
+        self.assertEqual(repr(nest.nest_param), repr(self.nest_param))
         self.assertEqual(nest.dict_of_alpha, self.dict_of_alpha)
 
 
@@ -267,7 +275,7 @@ class TestGetNest(unittest.TestCase):
         old_nest = (self.expression, self.list_of_alternatives)
         result = get_nest(old_nest)
         self.assertIsInstance(result, OneNestForNestedLogit)
-        self.assertEqual(result.nest_param, self.expression)
+        self.assertEqual(repr(result.nest_param), repr(self.expression))
         self.assertEqual(result.list_of_alternatives, self.list_of_alternatives)
 
     def test_get_nest_with_invalid_type(self):

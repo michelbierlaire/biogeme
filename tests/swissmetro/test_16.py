@@ -23,7 +23,6 @@ from biogeme.expressions import (
     bioMultSum,
     Variable,
 )
-from biogeme.parameters import Parameters
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -40,22 +39,22 @@ flat_database = db.Database('swissmetro_flat', flat_df)
 
 # Define a random parameter, normally distirbuted, designed to be used
 # for Monte-Carlo simulation
-SIGMA_CAR = Beta('SIGMA_CAR', 3.7, None, None, 0)
-SIGMA_SM = Beta('SIGMA_SM', 0.759, None, None, 0)
-SIGMA_TRAIN = Beta('SIGMA_TRAIN', 3.02, None, None, 0)
+SIGMA_CAR = Beta('SIGMA_CAR', 3.818728, None, None, 0)
+SIGMA_SM = Beta('SIGMA_SM', 0.946202, None, None, 0)
+SIGMA_TRAIN = Beta('SIGMA_TRAIN', 2.874614, None, None, 0)
 
 EC_CAR = SIGMA_CAR * bioDraws('EC_CAR', 'NORMAL')
 EC_SM = SIGMA_SM * bioDraws('EC_SM', 'NORMAL')
 EC_TRAIN = SIGMA_TRAIN * bioDraws('EC_TRAIN', 'NORMAL')
 
-ASC_CAR = Beta('ASC_CAR', 0.136, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', -1, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', -0.035345, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.747857, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', -6.3, None, 0, 0)
-B_COST = Beta('B_COST', -3.29, None, 0, 0)
+B_TIME = Beta('B_TIME', -6.136095, None, 0, 0)
+B_COST = Beta('B_COST', -2.955199, None, 0, 0)
 
 
-# For latent class 1, whete the time coefficient is zero
+# For latent class 1, where the time coefficient is zero
 V11 = [
     ASC_TRAIN + B_COST * Variable(f'{t}_TRAIN_COST_SCALED') + EC_TRAIN
     for t in range(1, 10)
@@ -65,7 +64,7 @@ V13 = [ASC_CAR + B_COST * Variable(f'{t}_CAR_CO_SCALED') + EC_CAR for t in range
 
 V1 = [{1: V11[t], 2: V12[t], 3: V13[t]} for t in range(9)]
 
-# For latent class 2, whete the time coefficient is estimated
+# For latent class 2, where the time coefficient is estimated
 V21 = [
     ASC_TRAIN
     + B_TIME * Variable(f'{t}_TRAIN_TT_SCALED')
@@ -95,8 +94,8 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # Class membership model
 # Class membership model
-CLASS_CTE = Beta('CLASS_CTE', 0, None, None, 0)
-CLASS_INC = Beta('CLASS_INC', 0, None, None, 0)
+CLASS_CTE = Beta('CLASS_CTE', -0.792233, None, None, 0)
+CLASS_INC = Beta('CLASS_INC', -0.251995, None, None, 0)
 W1 = CLASS_CTE + CLASS_INC * INCOME
 probClass1 = models.logit({1: W1, 2: 0}, None, 1)
 probClass2 = models.logit({1: W1, 2: 0}, None, 2)
@@ -120,17 +119,14 @@ probIndiv = probClass1 * prob1 + probClass2 * prob2
 logprob = log(MonteCarlo(probIndiv))
 
 
-class test_16(unittest.TestCase):
+class Test16(unittest.TestCase):
     def testEstimation(self):
-        parameters = Parameters()
-        parameters.set_value(section='MonteCarlo', name='number_of_draws', value=5)
-        parameters.set_value(section='MonteCarlo', name='seed', value=10)
-        biogeme = bio.BIOGEME(flat_database, logprob, parameters=parameters)
+        biogeme = bio.BIOGEME(flat_database, logprob, number_of_draws=100, seed=1111)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4071.8391253004647, 2)
+        self.assertAlmostEqual(results.data.logLike, -3638.208607302033, 2)
 
 
 if __name__ == '__main__':

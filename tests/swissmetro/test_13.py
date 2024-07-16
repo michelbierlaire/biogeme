@@ -35,18 +35,18 @@ database.remove(exclude)
 
 database.panel('ID')
 
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', -0.165109, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.756938, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+B_TIME = Beta('B_TIME', -0.756938, None, None, 0)
+B_COST = Beta('B_COST', -0.756938, None, None, 0)
 
-SIGMA_CAR = Beta('SIGMA_CAR', 0, None, None, 0)
+SIGMA_CAR = Beta('SIGMA_CAR', 0.262894, None, None, 0)
 SIGMA_SM = Beta('SIGMA_SM', 0, None, None, 1)
-SIGMA_TRAIN = Beta('SIGMA_TRAIN', 0, None, None, 0)
+SIGMA_TRAIN = Beta('SIGMA_TRAIN', -0.756938, None, None, 0)
 
 
-# Define a random parameter, normally distirbuted, designed to be used
+# Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
 EC_CAR = SIGMA_CAR * bioDraws('EC_CAR', 'NORMAL')
 EC_SM = SIGMA_SM * bioDraws('EC_SM', 'NORMAL')
@@ -73,15 +73,12 @@ logprob = log(MonteCarlo(condprobIndiv))
 
 class test_13(unittest.TestCase):
     def testEstimation(self):
-        parameters = Parameters()
-        parameters.set_value(section='MonteCarlo', name='number_of_draws', value=5)
-        parameters.set_value(section='MonteCarlo', name='seed', value=10)
-        biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
+        biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=111)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4634.307424865441, 2)
+        self.assertAlmostEqual(results.data.logLike, -4963.571594784284, 2)
 
 
 if __name__ == '__main__':

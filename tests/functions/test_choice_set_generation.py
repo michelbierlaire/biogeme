@@ -17,13 +17,12 @@ from biogeme.expressions import Variable
 from biogeme.database import Database
 
 
-
 class TestChoiceSetsGeneration(unittest.TestCase):
     def setUp(self):
         # Create a temporary directory
         test_dir = tempfile.mkdtemp()
         self.test_file = os.path.join(test_dir, 'test_file.csv')
-        
+
         self.individuals = pd.DataFrame({'choice': [1, 2, 1], 'age': [25, 30, 35]})
         alternatives = pd.DataFrame({'alt_id': [1, 2, 3, 4], 'cost': [10, 20, 30, 40]})
         the_partition = Partition([{1, 2}, {3, 4}])
@@ -65,9 +64,20 @@ class TestChoiceSetsGeneration(unittest.TestCase):
 
         df = pd.read_csv(self.test_file)
         expected_columns = [
-            'choice', 'age', 'alt_id_0', 'cost_0', '_log_proba_0', 'alt_id_1',
-            'cost_1', '_log_proba_1', 'MEV_alt_id_0', 'MEV_cost_0',
-            'MEV__mev_weight_0', 'MEV_alt_id_1', 'MEV_cost_1', 'MEV__mev_weight_1'
+            'choice',
+            'age',
+            'alt_id_0',
+            'cost_0',
+            '_log_proba_0',
+            'alt_id_1',
+            'cost_1',
+            '_log_proba_1',
+            '_MEV_alt_id_0',
+            '_MEV_cost_0',
+            '_MEV__mev_weight_0',
+            '_MEV_alt_id_1',
+            '_MEV_cost_1',
+            '_MEV__mev_weight_1',
         ]
         self.assertListEqual(sorted(expected_columns), sorted(df.columns))
         os.remove(self.test_file)  # cleanup

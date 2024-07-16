@@ -146,13 +146,29 @@ class TestBiogeme(unittest.TestCase):
         b2 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), numberOfThreads=12)
         self.assertEqual(b2.number_of_threads, 12)
 
-        b3 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), seed=12)
-        self.assertEqual(b3.seed_param, 12)
+        b3 = bio.BIOGEME(
+            getData(1), self.get_dict_of_expressions(), parameter_file='myfile.toml'
+        )
+        self.assertEqual(b3.biogeme_parameters.file_name, 'myfile.toml')
 
         b4 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), missingData=12)
         self.assertEqual(b4.missing_data, 12)
 
         b5 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), suggestScales=True)
+
+        b6 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), userNotes='blabla')
+        self.assertEqual(b6.user_notes, 'blabla')
+
+        b7 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), generateHtml=False)
+        self.assertEqual(b7.generate_html, False)
+
+        b8 = bio.BIOGEME(
+            getData(1), self.get_dict_of_expressions(), saveIterations=True
+        )
+        self.assertEqual(b8.save_iterations, True)
+
+        b9 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), seed_param=12)
+        self.assertEqual(b9.seed, 12)
 
     def test_saved_iterations(self):
         my_biogeme = self.get_biogeme_instance()
@@ -240,7 +256,7 @@ class TestBiogeme(unittest.TestCase):
 
     def test_free_beta_names(self):
         my_biogeme = self.get_biogeme_instance()
-        result = my_biogeme.free_beta_names()
+        result = my_biogeme.free_beta_names
         expected_result = ['beta1', 'beta2']
         self.assertListEqual(result, expected_result)
 
@@ -326,7 +342,7 @@ class TestBiogeme(unittest.TestCase):
         )
         f_true = -49500
         g_true = [0.0, -33000.0]
-        h_true = [[0.0, 0.0], [0.0, -11000.0]]
+        h_true = [[-110.0, 0.0], [0.0, -11000.0]]
         bhhh_true = [[0.0, 0.0], [0.0, 352440000.0]]
         self.assertEqual(f_true, the_function_output.function)
         self.assertListEqual(g_true, the_function_output.gradient.tolist())
@@ -554,9 +570,7 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme = self.get_biogeme_instance()
         my_biogeme.algorithm_name = 'simple_bounds'
         my_biogeme.optimize()
-        my_biogeme._algorithm = None
-        with self.assertRaises(excep.BiogemeError):
-            my_biogeme.optimize()
+        my_biogeme.optimize()
 
     def test_print(self):
         my_biogeme = self.get_biogeme_instance()

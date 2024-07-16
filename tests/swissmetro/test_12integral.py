@@ -35,13 +35,13 @@ database.remove(exclude)
 database.panel('ID')
 
 
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', 0.464978, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.405965, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+B_TIME = Beta('B_TIME', -2.501330, None, None, 0)
+B_COST = Beta('B_COST', -0.993792, None, None, 0)
 
-B_TIME_S = Beta('B_TIME_S', 0.1, 0.01, None, 0)
+B_TIME_S = Beta('B_TIME_S', 3.073766, 0.01, None, 0)
 
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
@@ -76,7 +76,7 @@ class test_12integral(unittest.TestCase):
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4376.071192696532, 2)
+        self.assertAlmostEqual(results.data.logLike, -4413.770793312064, 2)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch, Mock
 
+import numpy as np
 import pandas as pd
 
 from biogeme.database import Database
@@ -66,6 +67,14 @@ class ConcreteMdcev(Mdcev):
     ) -> float:
         """Analytical calculation of the optimal consumption if the dual variable is known."""
         return dual_variable
+
+    def lower_bound_dual_variable(
+        self,
+        chosen_alternatives: set[int],
+        one_observation: Database,
+        epsilon: np.ndarray,
+    ) -> float:
+        return 0.0
 
 
 class TestConcreteMdcev(unittest.TestCase):
@@ -141,9 +150,18 @@ class TestConcreteMdcev(unittest.TestCase):
         # Assuming two observations
         database = Mock(spec=Database)
         database.data = pd.DataFrame({'Column1': [1, 2], 'Column2': [1, 2]})
+        number_of_draws = 10
+        epsilons = [
+            np.random.gumbel(
+                loc=0,
+                scale=1,
+                size=(number_of_draws, 2),
+            )
+            for _ in range(2)
+        ]
 
         total_budget = 100
-        number_of_draws = 10
+
         brute_force = False
         tolerance_dual = 1e-4
         tolerance_budget = 1e-4
@@ -154,7 +172,7 @@ class TestConcreteMdcev(unittest.TestCase):
             results = self.instance.forecast(
                 database,
                 total_budget,
-                number_of_draws,
+                epsilons,
                 brute_force,
                 tolerance_dual,
                 tolerance_budget,
@@ -213,6 +231,7 @@ class TestUpdateParametersInExpressions(unittest.TestCase):
     def test_update_parameters(self):
         # Mock estimation_results to simulate get_beta_values
         # alpha1 is omitted on purpose.
+
         estimation_results = {
             'beta1': 1,
             'beta2': 2,
@@ -221,10 +240,10 @@ class TestUpdateParametersInExpressions(unittest.TestCase):
             'scale': 5,
             'any_parameter': 6,
         }
-        self.model.estimation_results = MagicMock()
-
-        self.model.estimation_results.get_beta_values.return_value = estimation_results
+        self.model._estimation_results = MagicMock()
+        self.model._estimation_results.get_beta_values.return_value = estimation_results
         self.model._update_parameters_in_expressions()
+
         self.assertEqual(
             self.model.baseline_utilities[1].get_value(),
             estimation_results['beta1'],
@@ -241,6 +260,7 @@ class TestUpdateParametersInExpressions(unittest.TestCase):
             self.model.alpha_parameters[1].get_value(),
             0,
         )
+
         self.assertEqual(
             self.model.alpha_parameters[2].get_value(),
             estimation_results['alpha2'],

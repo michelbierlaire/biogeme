@@ -75,7 +75,11 @@ class TestPiecewiseVariables(unittest.TestCase):
             bioMax(0.0, (Variable('x') - 20.0)),
         ]
         self.assertEqual(len(result), expected_number_of_variables)
-        self.assertListEqual(result, expected_result)
+        for expected, obtained in zip(expected_result, result):
+            self.assertEqual(
+                repr(expected),
+                repr(obtained),
+            )
 
     def test_all_none_thresholds(self):
         variable = "x"
