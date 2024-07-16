@@ -539,11 +539,11 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme = self.get_biogeme_instance()
         my_biogeme.bootstrap_samples = 100
         results = my_biogeme.estimate(run_bootstrap=True)
-        drawsFromBetas = results.get_betas_for_sensitivity_analysis(
+        draws_from_betas = results.get_betas_for_sensitivity_analysis(
             my_biogeme.id_manager.free_betas.names
         )
         s = my_biogeme.simulate(results.get_beta_values())
-        left, right = my_biogeme.confidence_intervals(drawsFromBetas)
+        left, right = my_biogeme.confidence_intervals(draws_from_betas)
         self.assertLessEqual(left.loc[0, 'log_like'], s.loc[0, 'log_like'])
         self.assertGreaterEqual(right.loc[0, 'log_like'], s.loc[0, 'log_like'])
 
