@@ -396,3 +396,4 @@ docs/examples/swissmetro/*.html
 docs/examples/swissmetro/*.tex
 
 docs/examples/swissmetro/*.pareto
+tests/functions/biogemeModelDefaultName.html
