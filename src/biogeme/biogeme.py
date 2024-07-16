@@ -1386,6 +1386,7 @@ class BIOGEME:
             # Temporarily stop reporting log messages
             logger.setLevel(logging.WARNING)
             for b in range(self.bootstrap_samples):
+                print(f'---> Bootstrap {b} / {self.bootstrap_samples}')
                 if self.database.is_panel():
                     sample = self.database.sample_individual_map_with_replacement()
                     self.theC.setDataMap(sample)
