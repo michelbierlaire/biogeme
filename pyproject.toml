@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=42", "wheel", "cython"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "biogeme"
+dynamic = ["version"]
+description = "Estimation and application of discrete choice models"
+readme = { file = "README.md", content-type = "text/markdown" }
+authors = [
+    { name = "Michel Bierlaire", email = "michel.bierlaire@epfl.ch" }
+]
+
+classifiers = [
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: C++",
+    "Programming Language :: Cython",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython"
+]
+
+dependencies = [
+    "pandas>=2.2.2, <3",
+    "scipy>=1.14.0, <2",
+    "tqdm>=4.66.4",
+    "tomlkit>=0.12.5",
+    "python-levenshtein>=0.25.1",
+    "fuzzywuzzy>=0.18.0",
+    "cythonbiogeme==1.0.3",
+    "biogeme_optimization==0.0.7",
+    "matplotlib>=3.9.0, <4",
+    "numpy>=2.0.0, <3",
+    "ipython>=8.25.0"
+]
+
+[project.optional-dependencies]
+testing = [
+    "pytest >= 7.2.0",
+    "pytest-cov >= 4.0.0",
+    "tox >= 3.27.1"
+]
+
+[project.urls]
+Homepage = "https://biogeme.epfl.ch/sphinx/index.html"
+Documentation = "https://biogeme.epfl.ch/sphinx/index.html"
+Code = "https://github.com/michelbierlaire/biogeme"
+
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.dynamic]
+version = {attr = "biogeme.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
+
+[tool.setuptools.package-data]
+biogeme = ["data/data/*.dat"]
+
+[tool.setuptools.exclude-package-data]
+biogeme = ["*/__pycache__", "*/__pycache__/*", "*/*.pyc", "__pycache__", "*.pyc"]
