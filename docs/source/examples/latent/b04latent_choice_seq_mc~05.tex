@@ -1,0 +1,117 @@
+%% This file is designed to be included into a LaTeX document
+%% See http://www.latex-project.org for information about LaTeX
+%% b04latent_choice_seq_mc - Report from biogeme 3.2.14a0 [2024-04-11]
+%% biogeme 3.2.14a0 [2024-04-11]
+%% Version entirely written in Python
+%% Home page: http://biogeme.epfl.ch
+%% Submit questions to https://groups.google.com/d/forum/biogeme
+%% Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
+
+%% File b04latent_choice_seq_mc~05.tex
+
+%% This file has automatically been generated on 2024-04-11 17:04:12.313650</p>
+
+%%Database name: optima
+
+%% General statistics
+\section{General statistics}
+\begin{tabular}{ll}
+Number of estimated parameters & 11 \\
+Sample size & 1906 \\
+Excluded observations & 359 \\
+Init log likelihood & -2093.955 \\
+Final log likelihood & -1179.153 \\
+Likelihood ratio test for the init. model & 1829.604 \\
+Rho-square for the init. model & 0.437 \\
+Rho-square-bar for the init. model & 0.432 \\
+Akaike Information Criterion & 2380.306 \\
+Bayesian Information Criterion & 2441.387 \\
+Final gradient norm & 1.2345E+01 \\
+Number of draws & 100 \\
+Draws generation time & 0:00:00.186655 \\
+Types of draws & ['EC: NORMAL_MLHS'] \\
+Nbr of threads & 12 \\
+Algorithm & \verb$Hybrid Newton [10.0%] with trust region for simple bound constraints$ \\
+Cause of termination & \verb$Maximum number of iterations reached: 100$ \\
+Number of iterations & \verb$100$ \\
+Proportion of Hessian calculation & \verb$6/56 = 10.7%$ \\
+Optimization time & \verb$0:01:23.984279$ \\
+\end{tabular}
+
+%%Parameter estimates
+\section{Parameter estimates}
+\begin{tabular}{lrrrr}
+ & Value & Rob. Std err & Rob. t-test & Rob. p-value \\
+ASC_CAR & 0.773 & 0.132 & 5.87 & 4.41e-09 \\
+ASC_SM & 0.202 & 0.303 & 0.668 & 0.504 \\
+BETA_COST_HWH & -1.63 & 0.517 & -3.16 & 0.0016 \\
+BETA_COST_OTHER & -1.18 & 0.704 & -1.68 & 0.0931 \\
+BETA_DIST & -1.27 & 0.294 & -4.32 & 1.53e-05 \\
+BETA_TIME_CAR_CL & -0.533 & 0.211 & -2.52 & 0.0116 \\
+BETA_TIME_CAR_REF & -9.52 & 2.35 & -4.04 & 5.24e-05 \\
+BETA_TIME_PT_CL & 1.05 & 0.688 & 1.53 & 0.127 \\
+BETA_TIME_PT_REF & -1.17 & 1.22 & -0.964 & 0.335 \\
+BETA_WAITING_TIME & -0.0584 & 0.0227 & -2.57 & 0.01 \\
+sigma_s & 0.997 & 0.253 & 3.94 & 8e-05.0 \\
+\end{tabular}
+
+%%Correlation
+\section{Correlation}
+\begin{tabular}{lrrrrrrrr}
+ & Covariance & Correlation & t-test & p-value & Rob. cov. & Rob. corr. & Rob. t-test & Rob. p-value \\
+ASC_SM-ASC_CAR & 0.017 & 0.604 & -3.57 & 0.00036 & 0.0105 & 0.263 & -1.92 & 0.0544 \\
+BETA_COST_HWH-ASC_CAR & 0.000152 & 0.0036 & -7.31 & 2.63e-13 & -0.00642 & -0.0944 & -4.41 & 1.04e-05 \\
+BETA_COST_HWH-ASC_SM & 0.00148 & 0.0251 & -5.19 & 2.06e-07 & -0.0153 & -0.0977 & -2.94 & 0.00329 \\
+BETA_COST_OTHER-ASC_CAR & -0.00225 & -0.0494 & -5.49 & 4.03e-08 & -0.0206 & -0.223 & -2.63 & 0.00864 \\
+BETA_COST_OTHER-ASC_SM & 0.00173 & 0.0273 & -3.73 & 0.000194 & -0.0356 & -0.167 & -1.71 & 0.0879 \\
+BETA_COST_OTHER-BETA_COST_HWH & 0.0397 & 0.418 & 1.35 & 0.177 & 0.212 & 0.583 & 0.773 & 0.44 \\
+BETA_DIST-ASC_CAR & 9.79e-05 & 0.00625 & -11.4 & 0.0 & 0.00174 & 0.045 & -6.45 & 1.09e-10 \\
+BETA_DIST-ASC_SM & -0.0105 & -0.481 & -5.47 & 4.49e-08 & -0.0739 & -0.831 & -2.58 & 0.00983 \\
+BETA_DIST-BETA_COST_HWH & 0.00642 & 0.196 & 1.22 & 0.224 & 0.0386 & 0.254 & 0.684 & 0.494 \\
+BETA_DIST-BETA_COST_OTHER & 0.00722 & 0.205 & -0.284 & 0.777 & 0.0662 & 0.32 & -0.134 & 0.894 \\
+BETA_TIME_CAR_CL-ASC_CAR & -0.0061 & -0.243 & -5.18 & 2.28e-07 & -0.0024 & -0.0865 & -5.05 & 4.31e-07 \\
+BETA_TIME_CAR_CL-ASC_SM & -0.00779 & -0.222 & -2.5 & 0.0123 & 0.0104 & 0.163 & -2.17 & 0.0304 \\
+BETA_TIME_CAR_CL-BETA_COST_HWH & 0.0041 & 0.0782 & 3.29 & 0.000988 & -0.00148 & -0.0136 & 1.96 & 0.0502 \\
+BETA_TIME_CAR_CL-BETA_COST_OTHER & -0.0022 & -0.039 & 1.75 & 0.0803 & -0.0243 & -0.163 & 0.846 & 0.397 \\
+BETA_TIME_CAR_CL-BETA_DIST & -0.00399 & -0.205 & 3.26 & 0.00111 & -0.027 & -0.435 & 1.72 & 0.0859 \\
+BETA_TIME_CAR_REF-ASC_CAR & 0.0214 & 0.0946 & -6.5 & 7.94e-11 & 0.0167 & 0.0538 & -4.38 & 1.19e-05 \\
+BETA_TIME_CAR_REF-ASC_SM & 0.0447 & 0.142 & -6.18 & 6.6e-10 & -0.215 & -0.301 & -3.95 & 7.85e-05 \\
+BETA_TIME_CAR_REF-BETA_COST_HWH & -0.000793 & -0.00168 & -4.88 & 1.09e-06 & 0.0346 & 0.0284 & -3.29 & 0.000991 \\
+BETA_TIME_CAR_REF-BETA_COST_OTHER & -0.0141 & -0.0278 & -5.11 & 3.16e-07 & -0.0894 & -0.054 & -3.34 & 0.000824 \\
+BETA_TIME_CAR_REF-BETA_DIST & 0.0658 & 0.376 & -5.31 & 1.07e-07 & 0.399 & 0.577 & -3.75 & 0.000174 \\
+BETA_TIME_CAR_REF-BETA_TIME_CAR_CL & -0.169 & -0.603 & -5.28 & 1.3e-07 & -0.342 & -0.688 & -3.59 & 0.000331 \\
+BETA_TIME_PT_CL-ASC_CAR & 0.0114 & 0.253 & 0.892 & 0.372 & 0.0322 & 0.355 & 0.427 & 0.67 \\
+BETA_TIME_PT_CL-ASC_SM & 0.00861 & 0.137 & 2.43 & 0.0151 & 0.0101 & 0.0487 & 1.15 & 0.25 \\
+BETA_TIME_PT_CL-BETA_COST_HWH & -0.014 & -0.149 & 5.77 & 7.85e-09 & -0.143 & -0.402 & 2.65 & 0.0081 \\
+BETA_TIME_PT_CL-BETA_COST_OTHER & -0.0581 & -0.575 & 3.96 & 7.52e-05 & -0.406 & -0.839 & 1.67 & 0.0943 \\
+BETA_TIME_PT_CL-BETA_DIST & 0.00149 & 0.0427 & 7.03 & 2.02e-12 & -0.00925 & -0.0457 & 3.05 & 0.00225 \\
+BETA_TIME_PT_CL-BETA_TIME_CAR_CL & -0.0106 & -0.189 & 4.06 & 4.91e-05 & -0.000682 & -0.0047 & 2.2 & 0.0279 \\
+BETA_TIME_PT_CL-BETA_TIME_CAR_REF & 0.14 & 0.278 & 6.9 & 5.32e-12 & 0.478 & 0.295 & 4.7 & 2.59e-06 \\
+BETA_TIME_PT_REF-ASC_CAR & 0.0475 & 0.488 & -3.1 & 0.00193 & 0.0686 & 0.428 & -1.67 & 0.0952 \\
+BETA_TIME_PT_REF-ASC_SM & 0.0444 & 0.327 & -2.12 & 0.0337 & -0.00438 & -0.0119 & -1.09 & 0.274 \\
+BETA_TIME_PT_REF-BETA_COST_HWH & -0.0373 & -0.183 & 0.578 & 0.563 & -0.248 & -0.395 & 0.307 & 0.759 \\
+BETA_TIME_PT_REF-BETA_COST_OTHER & -0.104 & -0.474 & 0.0114 & 0.991 & -0.653 & -0.763 & 0.00555 & 0.996 \\
+BETA_TIME_PT_REF-BETA_DIST & 0.0121 & 0.16 & 0.148 & 0.883 & 0.0459 & 0.128 & 0.0822 & 0.935 \\
+BETA_TIME_PT_REF-BETA_TIME_CAR_CL & -0.0537 & -0.445 & -0.82 & 0.412 & -0.0592 & -0.231 & -0.499 & 0.618 \\
+BETA_TIME_PT_REF-BETA_TIME_CAR_REF & 0.712 & 0.655 & 6.66 & 2.79e-11 & 1.59 & 0.557 & 4.26 & 2.01e-05 \\
+BETA_TIME_PT_REF-BETA_TIME_PT_CL & 0.171 & 0.79 & -4.67 & 2.97e-06 & 0.777 & 0.928 & -3.52 & 0.000426 \\
+BETA_WAITING_TIME-ASC_CAR & -0.000533 & -0.289 & -5.67 & 1.4e-08 & -0.00107 & -0.358 & -5.88 & 4.16e-09 \\
+BETA_WAITING_TIME-ASC_SM & -0.000427 & -0.166 & -1.3 & 0.195 & -0.00148 & -0.215 & -0.845 & 0.398 \\
+BETA_WAITING_TIME-BETA_COST_HWH & 0.000894 & 0.233 & 5.35 & 8.95e-08 & 0.0057 & 0.486 & 3.11 & 0.00189 \\
+BETA_WAITING_TIME-BETA_COST_OTHER & 0.00174 & 0.42 & 3.58 & 0.000349 & 0.0117 & 0.735 & 1.63 & 0.102 \\
+BETA_WAITING_TIME-BETA_DIST & 0.000246 & 0.173 & 11.2 & 0.0 & 0.00202 & 0.303 & 4.21 & 2.52e-05 \\
+BETA_WAITING_TIME-BETA_TIME_CAR_CL & 0.00022 & 0.0961 & 2.7 & 0.00698 & -0.000707 & -0.148 & 2.2 & 0.0277 \\
+BETA_WAITING_TIME-BETA_TIME_CAR_REF & 0.00192 & 0.093 & 5.95 & 2.61e-09 & 0.00781 & 0.146 & 4.03 & 5.69e-05 \\
+BETA_WAITING_TIME-BETA_TIME_PT_CL & -0.00183 & -0.447 & -3.44 & 0.000572 & -0.0112 & -0.715 & -1.58 & 0.115 \\
+BETA_WAITING_TIME-BETA_TIME_PT_REF & -0.00417 & -0.47 & 1.61 & 0.107 & -0.0176 & -0.639 & 0.905 & 0.365 \\
+sigma_s-ASC_CAR & 0.00185 & 0.0764 & 1.05 & 0.293 & 0.00753 & 0.226 & 0.873 & 0.383 \\
+sigma_s-ASC_SM & 0.000159 & 0.0047 & 3.05 & 0.00232 & 0.0138 & 0.181 & 2.22 & 0.0262 \\
+sigma_s-BETA_COST_HWH & -0.0164 & -0.323 & 6.79 & 1.13e-11 & -0.0714 & -0.546 & 3.82 & 0.000134 \\
+sigma_s-BETA_COST_OTHER & -0.0288 & -0.53 & 5.02 & 5.28e-07 & -0.145 & -0.817 & 2.36 & 0.0181 \\
+sigma_s-BETA_DIST & -0.00313 & -0.167 & 10.4 & 0.0 & -0.0246 & -0.331 & 5.08 & 3.8e-07 \\
+sigma_s-BETA_TIME_CAR_CL & 0.0138 & 0.459 & 8.47 & 0.0 & 0.0249 & 0.467 & 6.32 & 2.62e-10 \\
+sigma_s-BETA_TIME_CAR_REF & 0.00167 & 0.00616 & 6.58 & 4.69e-11 & -0.0215 & -0.0361 & 4.43 & 9.61e-06 \\
+sigma_s-BETA_TIME_PT_CL & 0.0021 & 0.039 & -0.152 & 0.879 & 0.11 & 0.631 & -0.0955 & 0.924 \\
+sigma_s-BETA_TIME_PT_REF & 0.0237 & 0.203 & 3.23 & 0.00122 & 0.182 & 0.592 & 2.0 & 0.0456 \\
+sigma_s-BETA_WAITING_TIME & -0.000641 & -0.29 & 6.05 & 1.48e-09 & -0.00359 & -0.626 & 3.94 & 7.99e-05 \\
+\end{tabular}

@@ -1,0 +1,95 @@
+%% This file is designed to be included into a LaTeX document
+%% See http://www.latex-project.org for information about LaTeX
+%% b01logit_bis - Report from biogeme 3.2.14a0 [2024-04-09]
+%% biogeme 3.2.14a0 [2024-04-09]
+%% Version entirely written in Python
+%% Home page: http://biogeme.epfl.ch
+%% Submit questions to https://groups.google.com/d/forum/biogeme
+%% Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
+
+%% File b01logit_bis~03.tex
+
+%% This file has automatically been generated on 2024-04-09 22:57:50.839377</p>
+
+%%Database name: swissmetro
+
+%%Example of a logit model with three alternatives: Train, Car and Swissmetro. Same as 01logit and introducing some options and features. In particular, bioLinearUtility, and automatic segmentation of parameters.
+
+%% General statistics
+\section{General statistics}
+\begin{tabular}{ll}
+Number of estimated parameters & 8 \\
+Sample size & 6768 \\
+Excluded observations & 3960 \\
+Null log likelihood & -6964.663 \\
+Init log likelihood & -5533.155 \\
+Final log likelihood & -4943.895 \\
+Likelihood ratio test for the null model & 4041.535 \\
+Rho-square for the null model & 0.29 \\
+Rho-square-bar for the null model & 0.289 \\
+Likelihood ratio test for the init. model & 1178.519 \\
+Rho-square for the init. model & 0.106 \\
+Rho-square-bar for the init. model & 0.105 \\
+Akaike Information Criterion & 9903.791 \\
+Bayesian Information Criterion & 9958.351 \\
+Final gradient norm & 3.7476E-02 \\
+Bootstrapping time & 0:00:36.135724 \\
+Nbr of threads & 12 \\
+Relative gradient & \verb$3.835525402372942e-06$ \\
+Cause of termination & \verb$Relative gradient = 3.8e-06 <= 6.1e-06$ \\
+Number of function evaluations & \verb$49$ \\
+Number of gradient evaluations & \verb$36$ \\
+Number of hessian evaluations & \verb$0$ \\
+Algorithm & \verb$BFGS with trust region for simple bound constraints$ \\
+Number of iterations & \verb$48$ \\
+Proportion of Hessian calculation & \verb$0/35 = 0.0%$ \\
+Optimization time & \verb$0:00:00.314113$ \\
+\end{tabular}
+
+%%Parameter estimates
+\section{Parameter estimates}
+\begin{tabular}{lrrrr}
+ & Value & Rob. Std err & Rob. t-test & Rob. p-value \\
+ASC_CAR & -0.613 & 0.098 & -6.26 & 3.94e-10 \\
+ASC_CAR_male & 0.408 & 0.102 & 3.98 & 6.76e-05 \\
+ASC_CAR_with_ga & -0.415 & 0.199 & -2.09 & 0.0369 \\
+ASC_TRAIN & -0.534 & 0.103 & -5.19 & 2.09e-07 \\
+ASC_TRAIN_male & -1.1 & 0.0854 & -12.9 & 0.0 \\
+ASC_TRAIN_with_ga & 1.89 & 0.0916 & 20.6 & 0.0 \\
+B_COST & -1.09 & 0.0724 & -15.0 & 0.0 \\
+B_TIME & -1.17 & 0.106 & -11.0 & 0.0 \\
+\end{tabular}
+
+%%Correlation
+\section{Correlation}
+\begin{tabular}{lrrrrrrrrrrrr}
+ & Covariance & Correlation & t-test & p-value & Rob. cov. & Rob. corr. & Rob. t-test & Rob. p-value & Boot. cov. & Boot. corr. & Boot. t-test & Boot. p-value \\
+ASC_CAR_male-ASC_CAR & -0.00781 & -0.869 & 5.57 & 2.55e-08 & -0.00773 & -0.77 & 5.42 & 6.12e-08 & -0.0086 & -0.789 & 5.17 & 2.34e-07 \\
+ASC_CAR_with_ga-ASC_CAR & -0.00194 & -0.11 & 0.903 & 0.367 & 0.00167 & 0.0859 & 0.925 & 0.355 & 0.000865 & 0.0469 & 0.982 & 0.326 \\
+ASC_CAR_with_ga-ASC_CAR_male & -0.000351 & -0.0194 & -3.86 & 0.000113 & -0.00567 & -0.279 & -3.32 & 0.000895 & -0.00567 & -0.303 & -3.54 & 0.0004 \\
+ASC_TRAIN-ASC_CAR & 0.00217 & 0.286 & 0.75 & 0.453 & 0.00364 & 0.361 & 0.692 & 0.489 & 0.00454 & 0.39 & 0.658 & 0.511 \\
+ASC_TRAIN-ASC_CAR_male & -0.000828 & -0.106 & -7.12 & 1.07e-12 & 0.000612 & 0.0581 & -6.69 & 2.27e-11 & 0.000216 & 0.0183 & -6.18 & 6.42e-10 \\
+ASC_TRAIN-ASC_CAR_with_ga & -0.00145 & -0.0948 & -0.563 & 0.574 & -0.00341 & -0.167 & -0.5 & 0.617 & -0.00259 & -0.129 & -0.537 & 0.591 \\
+ASC_TRAIN_male-ASC_CAR & -0.00101 & -0.129 & -3.68 & 0.00023 & -0.000788 & -0.0942 & -3.61 & 0.000305 & -0.000595 & -0.0675 & -3.54 & 0.000395 \\
+ASC_TRAIN_male-ASC_CAR_male & 0.00138 & 0.172 & -13.0 & 0.0 & 0.00148 & 0.169 & -12.4 & 0.0 & 0.00156 & 0.175 & -12.3 & 0.0 \\
+ASC_TRAIN_male-ASC_CAR_with_ga & 0.000515 & 0.0327 & -3.38 & 0.000719 & 0.0017 & 0.1 & -3.3 & 0.000954 & -0.00108 & -0.0717 & -3.4 & 0.000676 \\
+ASC_TRAIN_male-ASC_TRAIN & -0.00409 & -0.601 & -3.86 & 0.000115 & -0.00403 & -0.458 & -3.53 & 0.000409 & -0.00446 & -0.467 & -3.35 & 0.000794 \\
+ASC_TRAIN_with_ga-ASC_CAR & -0.000822 & -0.1 & 18.6 & 0.0 & -0.00142 & -0.158 & 17.3 & 0.0 & -0.00195 & -0.192 & 16.1 & 0.0 \\
+ASC_TRAIN_with_ga-ASC_CAR_male & 0.000262 & 0.0309 & 11.5 & 0.0 & 0.000279 & 0.0298 & 10.9 & 0.0 & 0.000916 & 0.0889 & 10.8 & 0.0 \\
+ASC_TRAIN_with_ga-ASC_CAR_with_ga & 0.00296 & 0.178 & 11.9 & 0.0 & 0.00287 & 0.158 & 11.2 & 0.0 & 0.00221 & 0.127 & 12.0 & 0.0 \\
+ASC_TRAIN_with_ga-ASC_TRAIN & -0.00271 & -0.379 & 17.2 & 0.0 & -0.00354 & -0.376 & 15.0 & 0.0 & -0.00447 & -0.406 & 13.7 & 0.0 \\
+ASC_TRAIN_with_ga-ASC_TRAIN_male & -9.2e-05 & -0.0125 & 24.5 & 0.0 & 0.000143 & 0.0183 & 24.1 & 0.0 & 0.000758 & 0.0909 & 24.2 & 0.0 \\
+B_COST-ASC_CAR & 0.000762 & 0.149 & -4.72 & 2.31e-06 & 0.000661 & 0.0932 & -4.1 & 4.1e-05 & -0.000247 & -0.0351 & -3.79 & 0.000152 \\
+B_COST-ASC_CAR_male & 3.37e-05 & 0.0064 & -13.6 & 0.0 & 7.96e-05 & 0.0107 & -12.0 & 0.0 & 5.52e-05 & 0.00773 & -12.0 & 0.0 \\
+B_COST-ASC_CAR_with_ga & -0.00269 & -0.261 & -3.22 & 0.00127 & -0.00393 & -0.273 & -2.94 & 0.00327 & -0.00145 & -0.12 & -3.41 & 0.000647 \\
+B_COST-ASC_TRAIN & 0.000206 & 0.0463 & -5.8 & 6.71e-09 & -0.000353 & -0.0473 & -4.32 & 1.57e-05 & -0.00136 & -0.179 & -3.93 & 8.46e-05 \\
+B_COST-ASC_TRAIN_male & 1.42e-06 & 0.000311 & 0.137 & 0.891 & 8.02e-05 & 0.013 & 0.123 & 0.902 & 0.00079 & 0.137 & 0.135 & 0.892 \\
+B_COST-ASC_TRAIN_with_ga & -0.000482 & -0.1 & -27.5 & 0.0 & -0.000716 & -0.108 & -24.3 & 0.0 & -3.63e-05 & -0.00545 & -24.9 & 0.0 \\
+B_TIME-ASC_CAR & -0.00113 & -0.21 & -4.69 & 2.75e-06 & -0.00308 & -0.296 & -3.41 & 0.000661 & -0.00401 & -0.339 & -3.14 & 0.00168 \\
+B_TIME-ASC_CAR_male & -0.000505 & -0.0915 & -13.6 & 0.0 & -0.0027 & -0.248 & -9.59 & 0.0 & -0.00251 & -0.209 & -9.27 & 0.0 \\
+B_TIME-ASC_CAR_with_ga & 0.000548 & 0.0506 & -3.91 & 9.4e-05 & 0.00212 & 0.1 & -3.51 & 0.000445 & 0.00458 & 0.226 & -4.02 & 5.73e-05 \\
+B_TIME-ASC_TRAIN & -0.00221 & -0.475 & -5.34 & 9.43e-08 & -0.00766 & -0.7 & -3.31 & 0.000929 & -0.00858 & -0.669 & -3.09 & 0.00202 \\
+B_TIME-ASC_TRAIN_male & -0.000208 & -0.0433 & -0.671 & 0.502 & -0.000757 & -0.0834 & -0.49 & 0.624 & -0.000938 & -0.0967 & -0.467 & 0.64 \\
+B_TIME-ASC_TRAIN_with_ga & 0.000298 & 0.0589 & -30.0 & 0.0 & 0.00125 & 0.128 & -23.3 & 0.0 & 0.000922 & 0.0825 & -21.2 & 0.0 \\
+B_TIME-B_COST & 0.000441 & 0.14 & -1.13 & 0.258 & 0.00168 & 0.218 & -0.724 & 0.469 & 0.00249 & 0.322 & -0.74 & 0.459 \\
+\end{tabular}

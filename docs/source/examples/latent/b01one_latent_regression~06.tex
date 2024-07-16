@@ -1,0 +1,613 @@
+%% This file is designed to be included into a LaTeX document
+%% See http://www.latex-project.org for information about LaTeX
+%% b01one_latent_regression - Report from biogeme 3.2.14a1 [2024-05-17]
+%% biogeme 3.2.14a1 [2024-05-17]
+%% Version entirely written in Python
+%% Home page: http://biogeme.epfl.ch
+%% Submit questions to https://groups.google.com/d/forum/biogeme
+%% Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
+
+%% File b01one_latent_regression~06.tex
+
+%% This file has automatically been generated on 2024-05-17 14:10:25.177719</p>
+
+%%Database name: optima
+
+%% General statistics
+\section{General statistics}
+\begin{tabular}{ll}
+Number of estimated parameters & 33 \\
+Sample size & 1906 \\
+Excluded observations & 359 \\
+Init log likelihood & -82119.42 \\
+Final log likelihood & -18658.15 \\
+Likelihood ratio test for the init. model & 126922.5 \\
+Rho-square for the init. model & 0.773 \\
+Rho-square-bar for the init. model & 0.772 \\
+Akaike Information Criterion & 37382.3 \\
+Bayesian Information Criterion & 37565.55 \\
+Final gradient norm & 7.4522E-02 \\
+Nbr of threads & 12 \\
+Relative gradient & \verb$9.019292894536203e-07$ \\
+Cause of termination & \verb$Relative gradient = 9e-07 <= 6.1e-06$ \\
+Number of function evaluations & \verb$53$ \\
+Number of gradient evaluations & \verb$26$ \\
+Number of hessian evaluations & \verb$25$ \\
+Algorithm & \verb$Newton with trust region for simple bound constraints$ \\
+Number of iterations & \verb$52$ \\
+Proportion of Hessian calculation & \verb$25/25 = 100.0%$ \\
+Optimization time & \verb$0:00:05.187796$ \\
+\end{tabular}
+
+%%Parameter estimates
+\section{Parameter estimates}
+\begin{tabular}{lrrrr}
+ & Value & Rob. Std err & Rob. t-test & Rob. p-value \\
+B_Envir02_F1 & -0.496 & 0.0578 & -8.59 & 0.0 \\
+B_Envir03_F1 & 0.671 & 0.0601 & 11.2 & 0.0 \\
+B_Mobil11_F1 & 0.563 & 0.0589 & 9.55 & 0.0 \\
+B_Mobil14_F1 & 0.705 & 0.0596 & 11.8 & 0.0 \\
+B_Mobil16_F1 & 0.54 & 0.0612 & 8.82 & 0.0 \\
+B_Mobil17_F1 & 0.432 & 0.06 & 7.2 & 6.01e-13 \\
+INTER_Envir02 & 2.01 & 0.153 & 13.1 & 0.0 \\
+INTER_Envir03 & 4.57 & 0.158 & 28.8 & 0.0 \\
+INTER_Mobil11 & 5.14 & 0.151 & 34.0 & 0.0 \\
+INTER_Mobil14 & 4.91 & 0.158 & 31.2 & 0.0 \\
+INTER_Mobil16 & 4.8 & 0.158 & 30.3 & 0.0 \\
+INTER_Mobil17 & 4.5 & 0.157 & 28.6 & 0.0 \\
+SIGMA_STAR_Envir01 & 1.25 & 0.0161 & 77.3 & 0.0 \\
+SIGMA_STAR_Envir02 & 1.12 & 0.0149 & 75.0 & 0.0 \\
+SIGMA_STAR_Envir03 & 1.07 & 0.0155 & 68.9 & 0.0 \\
+SIGMA_STAR_Mobil11 & 1.08 & 0.0163 & 66.4 & 0.0 \\
+SIGMA_STAR_Mobil14 & 1.05 & 0.0141 & 74.6 & 0.0 \\
+SIGMA_STAR_Mobil16 & 1.1 & 0.0151 & 72.6 & 0.0 \\
+SIGMA_STAR_Mobil17 & 1.11 & 0.0155 & 71.7 & 0.0 \\
+beta_ScaledIncome_10_inf & 0.103 & 0.036 & 2.86 & 0.00424 \\
+beta_ScaledIncome_4_6 & -0.252 & 0.108 & -2.33 & 0.0198 \\
+beta_ScaledIncome_6_8 & 0.3 & 0.13 & 2.31 & 0.0209 \\
+beta_ScaledIncome_8_10 & -0.621 & 0.15 & -4.13 & 3.65e-05 \\
+beta_ScaledIncome_minus_inf_4 & 0.103 & 0.0633 & 1.63 & 0.104 \\
+coef_age_65_more & 0.103 & 0.0732 & 1.41 & 0.159 \\
+coef_haveChildren & -0.0454 & 0.0542 & -0.837 & 0.402 \\
+coef_haveGA & -0.689 & 0.0861 & -8.0 & 1.33e-15 \\
+coef_highEducation & -0.298 & 0.0612 & -4.87 & 1.12e-06 \\
+coef_individualHouse & -0.11 & 0.054 & -2.04 & 0.0416 \\
+coef_intercept & -2.5 & 0.183 & -13.7 & 0.0 \\
+coef_male & 0.0716 & 0.0506 & 1.41 & 0.157 \\
+coef_moreThanOneBike & -0.328 & 0.062 & -5.28 & 1.29e-07 \\
+coef_moreThanOneCar & 0.624 & 0.0581 & 10.7 & 0.0 \\
+\end{tabular}
+
+%%Correlation
+\section{Correlation}
+\begin{tabular}{lrrrrrrrr}
+ & Covariance & Correlation & t-test & p-value & Rob. cov. & Rob. corr. & Rob. t-test & Rob. p-value \\
+B_Envir03_F1-B_Envir02_F1 & -0.00133 & -0.301 & 10.9 & 0.0 & -0.000533 & -0.153 & 13.0 & 0.0 \\
+B_Mobil11_F1-B_Envir02_F1 & -0.00101 & -0.246 & 10.5 & 0.0 & -3.57e-05 & -0.0105 & 12.8 & 0.0 \\
+B_Mobil11_F1-B_Envir03_F1 & 0.00148 & 0.336 & -1.41 & 0.159 & 0.000954 & 0.269 & -1.5 & 0.133 \\
+B_Mobil14_F1-B_Envir02_F1 & -0.00141 & -0.315 & 11.1 & 0.0 & -0.000912 & -0.265 & 12.9 & 0.0 \\
+B_Mobil14_F1-B_Envir03_F1 & 0.00187 & 0.39 & 0.45 & 0.653 & 0.000999 & 0.278 & 0.478 & 0.632 \\
+B_Mobil14_F1-B_Mobil11_F1 & 0.00152 & 0.339 & 1.84 & 0.0652 & 0.00083 & 0.236 & 1.94 & 0.0518 \\
+B_Mobil16_F1-B_Envir02_F1 & -0.00105 & -0.255 & 10.2 & 0.0 & -0.000815 & -0.23 & 11.1 & 0.0 \\
+B_Mobil16_F1-B_Envir03_F1 & 0.0014 & 0.317 & -1.69 & 0.092 & 0.000807 & 0.219 & -1.73 & 0.0842 \\
+B_Mobil16_F1-B_Mobil11_F1 & 0.00115 & 0.277 & -0.297 & 0.767 & 0.000981 & 0.272 & -0.316 & 0.752 \\
+B_Mobil16_F1-B_Mobil14_F1 & 0.00147 & 0.328 & -2.13 & 0.0336 & 0.00106 & 0.29 & -2.3 & 0.0217 \\
+B_Mobil17_F1-B_Envir02_F1 & -0.000753 & -0.184 & 9.42 & 0.0 & 0.000221 & 0.0639 & 11.5 & 0.0 \\
+B_Mobil17_F1-B_Envir03_F1 & 0.00105 & 0.239 & -2.92 & 0.00348 & 0.000389 & 0.108 & -2.98 & 0.00287 \\
+B_Mobil17_F1-B_Mobil11_F1 & 0.000949 & 0.231 & -1.65 & 0.0991 & 0.000857 & 0.243 & -1.79 & 0.0731 \\
+B_Mobil17_F1-B_Mobil14_F1 & 0.00115 & 0.257 & -3.35 & 0.000807 & 0.000475 & 0.133 & -3.47 & 0.000513 \\
+B_Mobil17_F1-B_Mobil16_F1 & 0.000893 & 0.218 & -1.35 & 0.177 & 0.000912 & 0.248 & -1.46 & 0.145 \\
+INTER_Envir02-B_Envir02_F1 & 0.0106 & 0.984 & 23.6 & 0.0 & 0.00873 & 0.986 & 25.9 & 0.0 \\
+INTER_Envir02-B_Envir03_F1 & -0.00343 & -0.296 & 6.69 & 2.29e-11 & -0.00138 & -0.15 & 7.74 & 1.02e-14 \\
+INTER_Envir02-B_Mobil11_F1 & -0.00263 & -0.242 & 7.43 & 1.06e-13 & -8.55e-05 & -0.00947 & 8.77 & 0.0 \\
+INTER_Envir02-B_Mobil14_F1 & -0.00365 & -0.309 & 6.47 & 1.01e-10 & -0.00242 & -0.265 & 7.3 & 2.96e-13 \\
+INTER_Envir02-B_Mobil16_F1 & -0.00271 & -0.25 & 7.53 & 4.91e-14 & -0.00215 & -0.23 & 8.27 & 2.22e-16 \\
+INTER_Envir02-B_Mobil17_F1 & -0.00195 & -0.181 & 8.26 & 2.22e-16 & 0.000568 & 0.0618 & 9.79 & 0.0 \\
+INTER_Envir03-B_Envir02_F1 & -0.00343 & -0.297 & 24.2 & 0.0 & -0.00136 & -0.149 & 28.7 & 0.0 \\
+INTER_Envir03-B_Envir03_F1 & 0.0122 & 0.984 & 34.2 & 0.0 & 0.00937 & 0.984 & 39.1 & 0.0 \\
+INTER_Envir03-B_Mobil11_F1 & 0.00384 & 0.331 & 23.5 & 0.0 & 0.00239 & 0.256 & 26.0 & 0.0 \\
+INTER_Envir03-B_Mobil14_F1 & 0.00484 & 0.383 & 23.1 & 0.0 & 0.00257 & 0.272 & 25.2 & 0.0 \\
+INTER_Envir03-B_Mobil16_F1 & 0.00362 & 0.312 & 23.4 & 0.0 & 0.00206 & 0.213 & 25.6 & 0.0 \\
+INTER_Envir03-B_Mobil17_F1 & 0.00271 & 0.235 & 23.4 & 0.0 & 0.000999 & 0.105 & 25.3 & 0.0 \\
+INTER_Envir03-INTER_Envir02 & -0.00918 & -0.301 & 9.08 & 0.0 & -0.00363 & -0.15 & 10.8 & 0.0 \\
+INTER_Mobil11-B_Envir02_F1 & -0.00262 & -0.242 & 28.9 & 0.0 & -8.09e-05 & -0.00926 & 34.7 & 0.0 \\
+INTER_Mobil11-B_Envir03_F1 & 0.00384 & 0.33 & 27.9 & 0.0 & 0.00238 & 0.262 & 30.4 & 0.0 \\
+INTER_Mobil11-B_Mobil11_F1 & 0.0107 & 0.984 & 42.9 & 0.0 & 0.00876 & 0.984 & 48.8 & 0.0 \\
+INTER_Mobil11-B_Mobil14_F1 & 0.00394 & 0.333 & 27.7 & 0.0 & 0.00218 & 0.242 & 29.9 & 0.0 \\
+INTER_Mobil11-B_Mobil16_F1 & 0.00296 & 0.272 & 28.1 & 0.0 & 0.00248 & 0.268 & 31.3 & 0.0 \\
+INTER_Mobil11-B_Mobil17_F1 & 0.00246 & 0.227 & 28.2 & 0.0 & 0.0022 & 0.243 & 31.7 & 0.0 \\
+INTER_Mobil11-INTER_Envir02 & -0.00704 & -0.247 & 11.8 & 0.0 & -0.00025 & -0.0108 & 14.5 & 0.0 \\
+INTER_Mobil11-INTER_Envir03 & 0.0103 & 0.336 & 2.86 & 0.00417 & 0.00618 & 0.258 & 3.07 & 0.00216 \\
+INTER_Mobil14-B_Envir02_F1 & -0.00364 & -0.31 & 25.5 & 0.0 & -0.00235 & -0.258 & 29.9 & 0.0 \\
+INTER_Mobil14-B_Envir03_F1 & 0.00484 & 0.384 & 25.0 & 0.0 & 0.00255 & 0.269 & 27.8 & 0.0 \\
+INTER_Mobil14-B_Mobil11_F1 & 0.00394 & 0.334 & 25.2 & 0.0 & 0.00219 & 0.236 & 28.2 & 0.0 \\
+INTER_Mobil14-B_Mobil14_F1 & 0.0126 & 0.984 & 36.5 & 0.0 & 0.00925 & 0.985 & 42.4 & 0.0 \\
+INTER_Mobil14-B_Mobil16_F1 & 0.00381 & 0.324 & 25.2 & 0.0 & 0.00274 & 0.284 & 28.8 & 0.0 \\
+INTER_Mobil14-B_Mobil17_F1 & 0.00297 & 0.253 & 25.1 & 0.0 & 0.00126 & 0.133 & 27.9 & 0.0 \\
+INTER_Mobil14-INTER_Envir02 & -0.00975 & -0.315 & 10.2 & 0.0 & -0.00635 & -0.263 & 11.8 & 0.0 \\
+INTER_Mobil14-INTER_Envir03 & 0.0129 & 0.391 & 1.74 & 0.0822 & 0.0068 & 0.273 & 1.83 & 0.0665 \\
+INTER_Mobil14-INTER_Mobil11 & 0.0106 & 0.34 & -1.13 & 0.26 & 0.00598 & 0.251 & -1.21 & 0.226 \\
+INTER_Mobil16-B_Envir02_F1 & -0.00271 & -0.25 & 27.1 & 0.0 & -0.00215 & -0.235 & 29.3 & 0.0 \\
+INTER_Mobil16-B_Envir03_F1 & 0.00362 & 0.312 & 25.6 & 0.0 & 0.00206 & 0.216 & 26.3 & 0.0 \\
+INTER_Mobil16-B_Mobil11_F1 & 0.00297 & 0.273 & 25.9 & 0.0 & 0.0025 & 0.268 & 27.6 & 0.0 \\
+INTER_Mobil16-B_Mobil14_F1 & 0.00382 & 0.323 & 25.5 & 0.0 & 0.00277 & 0.293 & 26.9 & 0.0 \\
+INTER_Mobil16-B_Mobil16_F1 & 0.0107 & 0.984 & 40.0 & 0.0 & 0.00956 & 0.985 & 43.1 & 0.0 \\
+INTER_Mobil16-B_Mobil17_F1 & 0.00231 & 0.214 & 26.1 & 0.0 & 0.00235 & 0.248 & 28.2 & 0.0 \\
+INTER_Mobil16-INTER_Envir02 & -0.00725 & -0.254 & 10.4 & 0.0 & -0.00584 & -0.24 & 11.4 & 0.0 \\
+INTER_Mobil16-INTER_Envir03 & 0.00968 & 0.317 & 1.13 & 0.257 & 0.00548 & 0.218 & 1.17 & 0.241 \\
+INTER_Mobil16-INTER_Mobil11 & 0.00794 & 0.277 & -1.7 & 0.0887 & 0.00658 & 0.275 & -1.86 & 0.0634 \\
+INTER_Mobil16-INTER_Mobil14 & 0.0102 & 0.329 & -0.574 & 0.566 & 0.00743 & 0.298 & -0.627 & 0.531 \\
+INTER_Mobil17-B_Envir02_F1 & -0.00195 & -0.18 & 26.1 & 0.0 & 0.000557 & 0.0613 & 30.5 & 0.0 \\
+INTER_Mobil17-B_Envir03_F1 & 0.00271 & 0.233 & 22.9 & 0.0 & 0.00101 & 0.106 & 23.6 & 0.0 \\
+INTER_Mobil17-B_Mobil11_F1 & 0.00246 & 0.226 & 23.6 & 0.0 & 0.0022 & 0.238 & 25.5 & 0.0 \\
+INTER_Mobil17-B_Mobil14_F1 & 0.00298 & 0.252 & 22.9 & 0.0 & 0.00127 & 0.136 & 23.7 & 0.0 \\
+INTER_Mobil17-B_Mobil16_F1 & 0.00231 & 0.213 & 23.6 & 0.0 & 0.00234 & 0.243 & 25.7 & 0.0 \\
+INTER_Mobil17-B_Mobil17_F1 & 0.0106 & 0.984 & 38.0 & 0.0 & 0.00928 & 0.985 & 41.2 & 0.0 \\
+INTER_Mobil17-INTER_Envir02 & -0.00523 & -0.183 & 9.59 & 0.0 & 0.00142 & 0.0592 & 11.7 & 0.0 \\
+INTER_Mobil17-INTER_Envir03 & 0.00727 & 0.238 & -0.301 & 0.763 & 0.00272 & 0.109 & -0.309 & 0.757 \\
+INTER_Mobil17-INTER_Mobil11 & 0.00658 & 0.229 & -3.06 & 0.0022 & 0.00589 & 0.248 & -3.4 & 0.000668 \\
+INTER_Mobil17-INTER_Mobil14 & 0.00797 & 0.257 & -1.92 & 0.0543 & 0.00355 & 0.144 & -2.01 & 0.0441 \\
+INTER_Mobil17-INTER_Mobil16 & 0.00619 & 0.216 & -1.4 & 0.161 & 0.00627 & 0.252 & -1.54 & 0.124 \\
+SIGMA_STAR_Envir01-B_Envir02_F1 & -7.84e-06 & -0.00583 & 25.8 & 0.0 & -9.74e-05 & -0.104 & 28.3 & 0.0 \\
+SIGMA_STAR_Envir01-B_Envir03_F1 & 1.48e-05 & 0.0102 & 8.07 & 6.66e-16 & 0.000159 & 0.163 & 9.68 & 0.0 \\
+SIGMA_STAR_Envir01-B_Mobil11_F1 & 3.56e-06 & 0.00264 & 10.1 & 0.0 & 0.000157 & 0.165 & 11.7 & 0.0 \\
+SIGMA_STAR_Envir01-B_Mobil14_F1 & 1.48e-05 & 0.0101 & 7.46 & 8.48e-14 & 0.000215 & 0.224 & 9.33 & 0.0 \\
+SIGMA_STAR_Envir01-B_Mobil16_F1 & 6.34e-06 & 0.0047 & 10.5 & 0.0 & 0.00011 & 0.111 & 11.5 & 0.0 \\
+SIGMA_STAR_Envir01-B_Mobil17_F1 & -1.68e-06 & -0.00125 & 12.1 & 0.0 & 5.12e-05 & 0.0529 & 13.3 & 0.0 \\
+SIGMA_STAR_Envir01-INTER_Envir02 & -2.04e-05 & -0.00575 & -4.47 & 7.85e-06 & -0.00028 & -0.113 & -4.87 & 1.1e-06 \\
+SIGMA_STAR_Envir01-INTER_Envir03 & 3.83e-05 & 0.0101 & -18.3 & 0.0 & 0.000462 & 0.181 & -21.2 & 0.0 \\
+SIGMA_STAR_Envir01-INTER_Mobil11 & 9.29e-06 & 0.00261 & -22.8 & 0.0 & 0.000445 & 0.182 & -26.1 & 0.0 \\
+SIGMA_STAR_Envir01-INTER_Mobil14 & 3.84e-05 & 0.00995 & -19.9 & 0.0 & 0.000641 & 0.252 & -23.8 & 0.0 \\
+SIGMA_STAR_Envir01-INTER_Mobil16 & 1.65e-05 & 0.00463 & -20.8 & 0.0 & 0.000358 & 0.14 & -22.6 & 0.0 \\
+SIGMA_STAR_Envir01-INTER_Mobil17 & -4.24e-06 & -0.00119 & -19.1 & 0.0 & 0.000189 & 0.0746 & -20.7 & 0.0 \\
+SIGMA_STAR_Envir02-B_Envir02_F1 & 1.16e-05 & 0.00967 & 24.3 & 0.0 & 0.000125 & 0.145 & 28.1 & 0.0 \\
+SIGMA_STAR_Envir02-B_Envir03_F1 & -1.56e-06 & -0.00121 & 6.31 & 2.76e-10 & 2.39e-06 & 0.00266 & 7.25 & 4.03e-13 \\
+SIGMA_STAR_Envir02-B_Mobil11_F1 & 6.3e-06 & 0.00523 & 8.33 & 0.0 & 1.22e-05 & 0.0138 & 9.2 & 0.0 \\
+SIGMA_STAR_Envir02-B_Mobil14_F1 & -3.48e-06 & -0.00266 & 5.73 & 1.01e-08 & 1.37e-05 & 0.0154 & 6.77 & 1.28e-11 \\
+SIGMA_STAR_Envir02-B_Mobil16_F1 & -1.07e-06 & -0.000891 & 8.67 & 0.0 & -5.25e-05 & -0.0575 & 9.08 & 0.0 \\
+SIGMA_STAR_Envir02-B_Mobil17_F1 & 5.91e-06 & 0.00493 & 10.3 & 0.0 & 4.56e-05 & 0.0509 & 11.3 & 0.0 \\
+SIGMA_STAR_Envir02-INTER_Envir02 & 3e-05.0 & 0.0095 & -5.24 & 1.6e-07 & 0.000245 & 0.107 & -5.83 & 5.62e-09 \\
+SIGMA_STAR_Envir02-INTER_Envir03 & -4.05e-06 & -0.0012 & -19.0 & 0.0 & 6.93e-06 & 0.00293 & -21.7 & 0.0 \\
+SIGMA_STAR_Envir02-INTER_Mobil11 & 1.63e-05 & 0.00513 & -23.6 & 0.0 & 4.92e-05 & 0.0218 & -26.5 & 0.0 \\
+SIGMA_STAR_Envir02-INTER_Mobil14 & -8.96e-06 & -0.0026 & -20.6 & 0.0 & 3.59e-05 & 0.0153 & -24.0 & 0.0 \\
+SIGMA_STAR_Envir02-INTER_Mobil16 & -2.7e-06 & -0.000853 & -21.6 & 0.0 & -0.000108 & -0.0456 & -23.0 & 0.0 \\
+SIGMA_STAR_Envir02-INTER_Mobil17 & 1.55e-05 & 0.00488 & -19.9 & 0.0 & 0.000137 & 0.0582 & -21.5 & 0.0 \\
+SIGMA_STAR_Envir02-SIGMA_STAR_Envir01 & -2.61e-07 & -0.000663 & -4.55 & 5.33e-06 & 3.23e-05 & 0.134 & -6.26 & 3.74e-10 \\
+SIGMA_STAR_Envir03-B_Envir02_F1 & 4.21e-06 & 0.00362 & 23.5 & 0.0 & -4.82e-06 & -0.00537 & 26.1 & 0.0 \\
+SIGMA_STAR_Envir03-B_Envir03_F1 & -2.11e-05 & -0.0169 & 5.59 & 2.27e-08 & -0.000195 & -0.209 & 6.12 & 9.62e-10 \\
+SIGMA_STAR_Envir03-B_Mobil11_F1 & -4.69e-06 & -0.00402 & 7.58 & 3.57e-14 & -4.66e-05 & -0.0509 & 8.21 & 2.22e-16 \\
+SIGMA_STAR_Envir03-B_Mobil14_F1 & -1.45e-06 & -0.00115 & 5.04 & 4.59e-07 & -2.92e-06 & -0.00315 & 5.9 & 3.56e-09 \\
+SIGMA_STAR_Envir03-B_Mobil16_F1 & 1.11e-06 & 0.000949 & 7.94 & 2e-15.0 & 3.87e-05 & 0.0407 & 8.46 & 0.0 \\
+SIGMA_STAR_Envir03-B_Mobil17_F1 & 7.38e-06 & 0.00636 & 9.61 & 0.0 & 1.74e-05 & 0.0187 & 10.3 & 0.0 \\
+SIGMA_STAR_Envir03-INTER_Envir02 & 1.09e-05 & 0.00356 & -5.54 & 3.06e-08 & -1.25e-05 & -0.00526 & -6.09 & 1.13e-09 \\
+SIGMA_STAR_Envir03-INTER_Envir03 & -5.45e-05 & -0.0166 & -19.2 & 0.0 & -0.00045 & -0.183 & -21.6 & 0.0 \\
+SIGMA_STAR_Envir03-INTER_Mobil11 & -1.22e-05 & -0.00396 & -23.9 & 0.0 & -0.00011 & -0.0469 & -26.7 & 0.0 \\
+SIGMA_STAR_Envir03-INTER_Mobil14 & -4e-06.0 & -0.0012 & -20.8 & 0.0 & 6.65e-06 & 0.00272 & -24.3 & 0.0 \\
+SIGMA_STAR_Envir03-INTER_Mobil16 & 2.89e-06 & 0.000941 & -21.9 & 0.0 & 0.000105 & 0.0426 & -23.5 & 0.0 \\
+SIGMA_STAR_Envir03-INTER_Mobil17 & 1.92e-05 & 0.00625 & -20.2 & 0.0 & 5.76e-05 & 0.0236 & -21.8 & 0.0 \\
+SIGMA_STAR_Envir03-SIGMA_STAR_Envir01 & -1.12e-06 & -0.00294 & -6.43 & 1.26e-10 & 5.04e-05 & 0.201 & -8.93 & 0.0 \\
+SIGMA_STAR_Envir03-SIGMA_STAR_Envir02 & 9.85e-08 & 0.00029 & -1.94 & 0.0522 & 2.88e-05 & 0.124 & -2.51 & 0.012 \\
+SIGMA_STAR_Mobil11-B_Envir02_F1 & -8.97e-06 & -0.00771 & 23.7 & 0.0 & -2.01e-05 & -0.0214 & 26.2 & 0.0 \\
+SIGMA_STAR_Mobil11-B_Envir03_F1 & 3.34e-07 & 0.000268 & 5.8 & 6.52e-09 & 2.01e-05 & 0.0205 & 6.65 & 3e-11.0 \\
+SIGMA_STAR_Mobil11-B_Mobil11_F1 & -7.06e-06 & -0.00604 & 7.77 & 7.77e-15 & -9.34e-05 & -0.0973 & 8.3 & 0.0 \\
+SIGMA_STAR_Mobil11-B_Mobil14_F1 & 4.48e-06 & 0.00353 & 5.23 & 1.66e-07 & -1.58e-05 & -0.0162 & 6.08 & 1.2e-09 \\
+SIGMA_STAR_Mobil11-B_Mobil16_F1 & 3.83e-06 & 0.00328 & 8.14 & 4.44e-16 & -1.2e-05 & -0.012 & 8.54 & 0.0 \\
+SIGMA_STAR_Mobil11-B_Mobil17_F1 & -3.45e-06 & -0.00297 & 9.79 & 0.0 & -6.59e-05 & -0.0674 & 10.3 & 0.0 \\
+SIGMA_STAR_Mobil11-INTER_Envir02 & -2.32e-05 & -0.00756 & -5.45 & 4.98e-08 & -3.97e-05 & -0.0159 & -5.99 & 2.06e-09 \\
+SIGMA_STAR_Mobil11-INTER_Envir03 & 8.89e-07 & 0.000271 & -19.2 & 0.0 & 6.59e-05 & 0.0255 & -21.9 & 0.0 \\
+SIGMA_STAR_Mobil11-INTER_Mobil11 & -1.83e-05 & -0.00594 & -23.8 & 0.0 & -0.000421 & -0.171 & -26.2 & 0.0 \\
+SIGMA_STAR_Mobil11-INTER_Mobil14 & 1.15e-05 & 0.00344 & -20.8 & 0.0 & -2.44e-05 & -0.0095 & -24.2 & 0.0 \\
+SIGMA_STAR_Mobil11-INTER_Mobil16 & 9.84e-06 & 0.0032 & -21.9 & 0.0 & -5.56e-05 & -0.0215 & -23.3 & 0.0 \\
+SIGMA_STAR_Mobil11-INTER_Mobil17 & -9.09e-06 & -0.00296 & -20.1 & 0.0 & -0.000181 & -0.0705 & -21.5 & 0.0 \\
+SIGMA_STAR_Mobil11-SIGMA_STAR_Envir01 & 3.03e-07 & 0.000795 & -5.96 & 2.56e-09 & 3.99e-05 & 0.152 & -7.83 & 5.11e-15 \\
+SIGMA_STAR_Mobil11-SIGMA_STAR_Envir02 & -8.49e-07 & -0.00249 & -1.42 & 0.154 & 3.35e-06 & 0.0138 & -1.7 & 0.09 \\
+SIGMA_STAR_Mobil11-SIGMA_STAR_Envir03 & 1.18e-07 & 0.000359 & 0.523 & 0.601 & 1.98e-05 & 0.0782 & 0.621 & 0.535 \\
+SIGMA_STAR_Mobil14-B_Envir02_F1 & 6.15e-06 & 0.00537 & 23.3 & 0.0 & 3.57e-05 & 0.0438 & 26.3 & 0.0 \\
+SIGMA_STAR_Mobil14-B_Envir03_F1 & -8.25e-07 & -0.000672 & 5.35 & 8.64e-08 & -2.37e-05 & -0.028 & 6.11 & 9.9e-10 \\
+SIGMA_STAR_Mobil14-B_Mobil11_F1 & 9.03e-07 & 0.000785 & 7.31 & 2.64e-13 & -1.39e-05 & -0.0167 & 8.02 & 1.11e-15 \\
+SIGMA_STAR_Mobil14-B_Mobil14_F1 & -1.85e-05 & -0.0148 & 4.77 & 1.83e-06 & -0.000177 & -0.211 & 5.39 & 7.18e-08 \\
+SIGMA_STAR_Mobil14-B_Mobil16_F1 & 3.22e-07 & 0.000281 & 7.66 & 1.82e-14 & -3.29e-05 & -0.0382 & 8.06 & 6.66e-16 \\
+SIGMA_STAR_Mobil14-B_Mobil17_F1 & 1.15e-06 & 0.00101 & 9.33 & 0.0 & -2.06e-05 & -0.0244 & 9.99 & 0.0 \\
+SIGMA_STAR_Mobil14-INTER_Envir02 & 1.61e-05 & 0.00532 & -5.65 & 1.6e-08 & 0.000111 & 0.0515 & -6.25 & 4.09e-10 \\
+SIGMA_STAR_Mobil14-INTER_Envir03 & -2.36e-06 & -0.000731 & -19.4 & 0.0 & -8.2e-05 & -0.0368 & -22.0 & 0.0 \\
+SIGMA_STAR_Mobil14-INTER_Mobil11 & 2.17e-06 & 0.000716 & -24.0 & 0.0 & -2.86e-05 & -0.0134 & -26.9 & 0.0 \\
+SIGMA_STAR_Mobil14-INTER_Mobil14 & -4.8e-05 & -0.0146 & -20.9 & 0.0 & -0.000445 & -0.2 & -24.0 & 0.0 \\
+SIGMA_STAR_Mobil14-INTER_Mobil16 & 6.98e-07 & 0.000231 & -22.0 & 0.0 & -9.03e-05 & -0.0405 & -23.5 & 0.0 \\
+SIGMA_STAR_Mobil14-INTER_Mobil17 & 2.77e-06 & 0.000916 & -20.3 & 0.0 & -3.73e-05 & -0.0168 & -21.8 & 0.0 \\
+SIGMA_STAR_Mobil14-SIGMA_STAR_Envir01 & -1.02e-06 & -0.00272 & -7.15 & 8.43e-13 & 1.28e-05 & 0.0562 & -9.49 & 0.0 \\
+SIGMA_STAR_Mobil14-SIGMA_STAR_Envir02 & 3.48e-07 & 0.00104 & -2.68 & 0.00732 & 2.37e-05 & 0.113 & -3.59 & 0.000327 \\
+SIGMA_STAR_Mobil14-SIGMA_STAR_Envir03 & -4.38e-07 & -0.00135 & -0.737 & 0.461 & 1e-05.0 & 0.046 & -0.918 & 0.358 \\
+SIGMA_STAR_Mobil14-SIGMA_STAR_Mobil11 & -4.99e-07 & -0.00153 & -1.26 & 0.207 & 2.92e-05 & 0.127 & -1.6 & 0.11 \\
+SIGMA_STAR_Mobil16-B_Envir02_F1 & 4.61e-07 & 0.000392 & 23.9 & 0.0 & 5.9e-05 & 0.0676 & 27.1 & 0.0 \\
+SIGMA_STAR_Mobil16-B_Envir03_F1 & 3.05e-06 & 0.00242 & 5.99 & 2.13e-09 & 1.07e-05 & 0.0117 & 6.88 & 6.15e-12 \\
+SIGMA_STAR_Mobil16-B_Mobil11_F1 & 2.75e-06 & 0.00233 & 7.98 & 1.55e-15 & -2.69e-05 & -0.0302 & 8.7 & 0.0 \\
+SIGMA_STAR_Mobil16-B_Mobil14_F1 & 2.42e-06 & 0.00189 & 5.41 & 6.26e-08 & 6.29e-06 & 0.00698 & 6.36 & 2.01e-10 \\
+SIGMA_STAR_Mobil16-B_Mobil16_F1 & -1.04e-05 & -0.0088 & 8.31 & 0.0 & -0.00016 & -0.173 & 8.48 & 0.0 \\
+SIGMA_STAR_Mobil16-B_Mobil17_F1 & -1.01e-06 & -0.000861 & 9.99 & 0.0 & -3.48e-05 & -0.0384 & 10.6 & 0.0 \\
+SIGMA_STAR_Mobil16-INTER_Envir02 & 1.15e-06 & 0.000371 & -5.38 & 7.52e-08 & 0.000163 & 0.0702 & -5.96 & 2.47e-09 \\
+SIGMA_STAR_Mobil16-INTER_Envir03 & 7.97e-06 & 0.00241 & -19.1 & 0.0 & 2.06e-05 & 0.0086 & -21.8 & 0.0 \\
+SIGMA_STAR_Mobil16-INTER_Mobil11 & 7.26e-06 & 0.00233 & -23.8 & 0.0 & -5.16e-05 & -0.0226 & -26.6 & 0.0 \\
+SIGMA_STAR_Mobil16-INTER_Mobil14 & 6.49e-06 & 0.00193 & -20.7 & 0.0 & 2.7e-05 & 0.0114 & -24.2 & 0.0 \\
+SIGMA_STAR_Mobil16-INTER_Mobil16 & -2.67e-05 & -0.00862 & -21.7 & 0.0 & -0.000505 & -0.211 & -22.8 & 0.0 \\
+SIGMA_STAR_Mobil16-INTER_Mobil17 & -2.52e-06 & -0.000812 & -20.0 & 0.0 & -8.45e-05 & -0.0356 & -21.5 & 0.0 \\
+SIGMA_STAR_Mobil16-SIGMA_STAR_Envir01 & -7.65e-08 & -0.000198 & -5.46 & 4.83e-08 & 3.05e-05 & 0.125 & -7.36 & 1.84e-13 \\
+SIGMA_STAR_Mobil16-SIGMA_STAR_Envir02 & 4.18e-08 & 0.000122 & -0.917 & 0.359 & 4.46e-05 & 0.198 & -1.26 & 0.206 \\
+SIGMA_STAR_Mobil16-SIGMA_STAR_Envir03 & -4.97e-07 & -0.00149 & 1.03 & 0.303 & 1.62e-05 & 0.0689 & 1.27 & 0.203 \\
+SIGMA_STAR_Mobil16-SIGMA_STAR_Mobil11 & -3.38e-07 & -0.00101 & 0.51 & 0.61 & 4.04e-05 & 0.164 & 0.648 & 0.517 \\
+SIGMA_STAR_Mobil16-SIGMA_STAR_Mobil14 & -3.75e-07 & -0.00114 & 1.77 & 0.0766 & 4.25e-05 & 0.2 & 2.46 & 0.014 \\
+SIGMA_STAR_Mobil17-B_Envir02_F1 & -7.11e-06 & -0.0057 & 23.9 & 0.0 & -9.35e-06 & -0.0105 & 26.8 & 0.0 \\
+SIGMA_STAR_Mobil17-B_Envir03_F1 & 8.14e-06 & 0.00609 & 6.15 & 7.71e-10 & -2.44e-05 & -0.0262 & 7.01 & 2.35e-12 \\
+SIGMA_STAR_Mobil17-B_Mobil11_F1 & -1.15e-06 & -0.000919 & 8.13 & 4.44e-16 & -4.53e-05 & -0.0497 & 8.86 & 0.0 \\
+SIGMA_STAR_Mobil17-B_Mobil14_F1 & 4.34e-06 & 0.00319 & 5.57 & 2.54e-08 & -2.26e-05 & -0.0245 & 6.51 & 7.38e-11 \\
+SIGMA_STAR_Mobil17-B_Mobil16_F1 & 8.08e-07 & 0.000647 & 8.48 & 0.0 & 1.26e-05 & 0.0133 & 9.04 & 0.0 \\
+SIGMA_STAR_Mobil17-B_Mobil17_F1 & -9.3e-06 & -0.00748 & 10.1 & 0.0 & -0.000101 & -0.109 & 10.7 & 0.0 \\
+SIGMA_STAR_Mobil17-INTER_Envir02 & -1.84e-05 & -0.00562 & -5.29 & 1.19e-07 & -1.4e-05 & -0.0059 & -5.83 & 5.42e-09 \\
+SIGMA_STAR_Mobil17-INTER_Envir03 & 2.11e-05 & 0.00599 & -19.0 & 0.0 & -5.58e-05 & -0.0228 & -21.7 & 0.0 \\
+SIGMA_STAR_Mobil17-INTER_Mobil11 & -2.95e-06 & -0.000894 & -23.7 & 0.0 & -0.000123 & -0.0525 & -26.4 & 0.0 \\
+SIGMA_STAR_Mobil17-INTER_Mobil14 & 1.14e-05 & 0.0032 & -20.6 & 0.0 & -6.6e-05 & -0.0271 & -24.0 & 0.0 \\
+SIGMA_STAR_Mobil17-INTER_Mobil16 & 2.06e-06 & 0.000627 & -21.7 & 0.0 & 1.34e-05 & 0.00549 & -23.2 & 0.0 \\
+SIGMA_STAR_Mobil17-INTER_Mobil17 & -2.42e-05 & -0.00734 & -19.9 & 0.0 & -0.000367 & -0.151 & -21.2 & 0.0 \\
+SIGMA_STAR_Mobil17-SIGMA_STAR_Envir01 & 5.55e-07 & 0.00136 & -4.87 & 1.13e-06 & 2.37e-05 & 0.095 & -6.55 & 5.72e-11 \\
+SIGMA_STAR_Mobil17-SIGMA_STAR_Envir02 & -5.65e-07 & -0.00155 & -0.411 & 0.681 & 1.99e-05 & 0.0861 & -0.541 & 0.589 \\
+SIGMA_STAR_Mobil17-SIGMA_STAR_Envir03 & -8.85e-07 & -0.0025 & 1.48 & 0.138 & 1.86e-05 & 0.0777 & 1.88 & 0.0601 \\
+SIGMA_STAR_Mobil17-SIGMA_STAR_Mobil11 & 3.57e-07 & 0.00101 & 0.982 & 0.326 & 5.78e-05 & 0.229 & 1.32 & 0.186 \\
+SIGMA_STAR_Mobil17-SIGMA_STAR_Mobil14 & -3.5e-07 & -0.00101 & 2.21 & 0.0273 & 4.69e-05 & 0.216 & 3.15 & 0.00164 \\
+SIGMA_STAR_Mobil17-SIGMA_STAR_Mobil16 & 9.04e-08 & 0.000253 & 0.484 & 0.628 & 5.59e-05 & 0.239 & 0.686 & 0.492 \\
+beta_ScaledIncome_10_inf-B_Envir02_F1 & 0.000219 & 0.14 & 9.18 & 0.0 & 3.96e-05 & 0.019 & 8.88 & 0.0 \\
+beta_ScaledIncome_10_inf-B_Envir03_F1 & -0.000411 & -0.245 & -7.25 & 4.05e-13 & -0.000594 & -0.274 & -7.27 & 3.56e-13 \\
+beta_ScaledIncome_10_inf-B_Mobil11_F1 & -0.000218 & -0.139 & -6.4 & 1.57e-10 & -6.46e-05 & -0.0305 & -6.57 & 4.96e-11 \\
+beta_ScaledIncome_10_inf-B_Mobil14_F1 & -0.000253 & -0.148 & -7.79 & 6.88e-15 & -5.61e-05 & -0.0261 & -8.55 & 0.0 \\
+beta_ScaledIncome_10_inf-B_Mobil16_F1 & -0.000134 & -0.0853 & -6.19 & 6.15e-10 & 0.000146 & 0.0664 & -6.34 & 2.34e-10 \\
+beta_ScaledIncome_10_inf-B_Mobil17_F1 & -0.000157 & -0.101 & -4.65 & 3.3e-06 & -2.17e-05 & -0.01 & -4.68 & 2.87e-06 \\
+beta_ScaledIncome_10_inf-INTER_Envir02 & 0.000565 & 0.137 & -11.4 & 0.0 & 6.89e-05 & 0.0125 & -12.1 & 0.0 \\
+beta_ScaledIncome_10_inf-INTER_Envir03 & -0.00106 & -0.241 & -23.7 & 0.0 & -0.00155 & -0.271 & -26.0 & 0.0 \\
+beta_ScaledIncome_10_inf-INTER_Mobil11 & -0.000566 & -0.137 & -28.9 & 0.0 & -0.00019 & -0.035 & -32.2 & 0.0 \\
+beta_ScaledIncome_10_inf-INTER_Mobil14 & -0.000659 & -0.147 & -25.5 & 0.0 & -0.000146 & -0.0258 & -29.6 & 0.0 \\
+beta_ScaledIncome_10_inf-INTER_Mobil16 & -0.000348 & -0.0841 & -27.2 & 0.0 & 0.000382 & 0.067 & -29.3 & 0.0 \\
+beta_ScaledIncome_10_inf-INTER_Mobil17 & -0.000406 & -0.0983 & -25.4 & 0.0 & -6.1e-05 & -0.0108 & -27.2 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Envir01 & -3.17e-06 & -0.00618 & -35.4 & 0.0 & -4.77e-05 & -0.082 & -28.2 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Envir02 & 1.3e-06 & 0.00283 & -33.1 & 0.0 & -1.17e-06 & -0.00218 & -26.1 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Envir03 & 1.99e-05 & 0.0448 & -32.5 & 0.0 & 5.92e-05 & 0.106 & -25.7 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Mobil11 & -1.75e-06 & -0.00394 & -32.1 & 0.0 & 2.09e-05 & 0.0356 & -25.1 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Mobil14 & -5.57e-06 & -0.0127 & -31.1 & 0.0 & -5.71e-06 & -0.0113 & -24.4 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Mobil16 & -9.98e-06 & -0.0223 & -32.2 & 0.0 & -2.46e-05 & -0.0453 & -25.0 & 0.0 \\
+beta_ScaledIncome_10_inf-SIGMA_STAR_Mobil17 & -1.13e-06 & -0.00237 & -32.2 & 0.0 & -1.58e-05 & -0.0284 & -25.4 & 0.0 \\
+beta_ScaledIncome_4_6-B_Envir02_F1 & -0.000607 & -0.126 & 2.33 & 0.02 & -0.000449 & -0.0718 & 1.93 & 0.0532 \\
+beta_ScaledIncome_4_6-B_Envir03_F1 & 0.0011 & 0.213 & -10.2 & 0.0 & 0.00165 & 0.253 & -8.42 & 0.0 \\
+beta_ScaledIncome_4_6-B_Mobil11_F1 & 0.000611 & 0.126 & -8.79 & 0.0 & 0.000595 & 0.0934 & -6.89 & 5.47e-12 \\
+beta_ScaledIncome_4_6-B_Mobil14_F1 & 0.000409 & 0.0777 & -9.7 & 0.0 & -0.000357 & -0.0554 & -7.58 & 3.55e-14 \\
+beta_ScaledIncome_4_6-B_Mobil16_F1 & 0.000526 & 0.109 & -8.46 & 0.0 & 0.000224 & 0.0339 & -6.47 & 1e-10.0 \\
+beta_ScaledIncome_4_6-B_Mobil17_F1 & 0.000467 & 0.097 & -7.28 & 3.44e-13 & 0.000231 & 0.0356 & -5.62 & 1.96e-08 \\
+beta_ScaledIncome_4_6-INTER_Envir02 & -0.00156 & -0.123 & -11.7 & 0.0 & -0.00108 & -0.0653 & -11.7 & 0.0 \\
+beta_ScaledIncome_4_6-INTER_Envir03 & 0.00285 & 0.209 & -26.7 & 0.0 & 0.0042 & 0.245 & -28.6 & 0.0 \\
+beta_ScaledIncome_4_6-INTER_Mobil11 & 0.00158 & 0.124 & -30.5 & 0.0 & 0.00151 & 0.0925 & -30.4 & 0.0 \\
+beta_ScaledIncome_4_6-INTER_Mobil14 & 0.00106 & 0.0766 & -26.8 & 0.0 & -0.001 & -0.0589 & -26.3 & 0.0 \\
+beta_ScaledIncome_4_6-INTER_Mobil16 & 0.00136 & 0.107 & -28.4 & 0.0 & 0.0005 & 0.0291 & -26.7 & 0.0 \\
+beta_ScaledIncome_4_6-INTER_Mobil17 & 0.0012 & 0.0943 & -26.6 & 0.0 & 0.000571 & 0.0336 & -25.3 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Envir01 & 1.66e-05 & 0.0105 & -19.2 & 0.0 & 6.2e-05 & 0.0355 & -13.8 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Envir02 & -8.75e-06 & -0.00619 & -17.6 & 0.0 & -2.93e-05 & -0.0182 & -12.5 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Envir03 & -5.9e-05 & -0.0431 & -16.9 & 0.0 & -0.000183 & -0.109 & -11.9 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Mobil11 & -2.51e-06 & -0.00183 & -17.2 & 0.0 & -0.000122 & -0.0694 & -12.1 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Mobil14 & 5.34e-05 & 0.0396 & -17.0 & 0.0 & 7.16e-05 & 0.047 & -12.0 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Mobil16 & 4.57e-06 & 0.0033 & -17.4 & 0.0 & 3.5e-05 & 0.0214 & -12.4 & 0.0 \\
+beta_ScaledIncome_4_6-SIGMA_STAR_Mobil17 & -3.27e-06 & -0.00223 & -17.5 & 0.0 & 9.65e-07 & 0.000577 & -12.5 & 0.0 \\
+beta_ScaledIncome_4_6-beta_ScaledIncome_10_inf & -0.00109 & -0.593 & -3.86 & 0.000114 & -0.00235 & -0.604 & -2.67 & 0.0076 \\
+beta_ScaledIncome_6_8-B_Envir02_F1 & 0.000726 & 0.129 & 7.8 & 6.22e-15 & 0.000452 & 0.0602 & 5.73 & 9.95e-09 \\
+beta_ScaledIncome_6_8-B_Envir03_F1 & -0.00118 & -0.195 & -3.05 & 0.00232 & -0.0016 & -0.205 & -2.41 & 0.0159 \\
+beta_ScaledIncome_6_8-B_Mobil11_F1 & -0.000693 & -0.122 & -2.28 & 0.0225 & -0.000665 & -0.087 & -1.79 & 0.0739 \\
+beta_ScaledIncome_6_8-B_Mobil14_F1 & -0.00067 & -0.109 & -3.43 & 0.000608 & 3.62e-05 & 0.00468 & -2.84 & 0.00447 \\
+beta_ScaledIncome_6_8-B_Mobil16_F1 & -0.000298 & -0.0526 & -2.15 & 0.0317 & 0.00088 & 0.111 & -1.75 & 0.0804 \\
+beta_ScaledIncome_6_8-B_Mobil17_F1 & -0.000532 & -0.0945 & -1.16 & 0.246 & -0.000246 & -0.0315 & -0.911 & 0.362 \\
+beta_ScaledIncome_6_8-INTER_Envir02 & 0.00187 & 0.126 & -9.48 & 0.0 & 0.00107 & 0.0539 & -8.74 & 0.0 \\
+beta_ScaledIncome_6_8-INTER_Envir03 & -0.00305 & -0.191 & -19.8 & 0.0 & -0.00415 & -0.202 & -19.0 & 0.0 \\
+beta_ScaledIncome_6_8-INTER_Mobil11 & -0.0018 & -0.121 & -24.2 & 0.0 & -0.00174 & -0.0885 & -23.3 & 0.0 \\
+beta_ScaledIncome_6_8-INTER_Mobil14 & -0.00174 & -0.108 & -21.8 & 0.0 & 0.000211 & 0.0103 & -22.7 & 0.0 \\
+beta_ScaledIncome_6_8-INTER_Mobil16 & -0.000775 & -0.052 & -23.1 & 0.0 & 0.00228 & 0.111 & -23.3 & 0.0 \\
+beta_ScaledIncome_6_8-INTER_Mobil17 & -0.00138 & -0.0923 & -21.2 & 0.0 & -0.000677 & -0.0332 & -20.3 & 0.0 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Envir01 & -8.64e-06 & -0.00467 & -10.5 & 0.0 & -0.000121 & -0.0579 & -7.2 & 6.07e-13 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Envir02 & 1.35e-05 & 0.00818 & -9.12 & 0.0 & -1.53e-05 & -0.0079 & -6.27 & 3.58e-10 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Envir03 & 5.66e-05 & 0.0354 & -8.61 & 0.0 & 0.000216 & 0.107 & -5.96 & 2.49e-09 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Mobil11 & 2.41e-06 & 0.0015 & -8.7 & 0.0 & 0.000152 & 0.0717 & -6.04 & 1.56e-09 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Mobil14 & -2.87e-05 & -0.0182 & -8.32 & 0.0 & -3.44e-05 & -0.0188 & -5.74 & 9.58e-09 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Mobil16 & -3.88e-05 & -0.024 & -8.8 & 0.0 & -9.38e-05 & -0.0478 & -6.06 & 1.37e-09 \\
+beta_ScaledIncome_6_8-SIGMA_STAR_Mobil17 & 3.51e-06 & 0.00205 & -8.97 & 0.0 & 3.99e-05 & 0.0199 & -6.2 & 5.52e-10 \\
+beta_ScaledIncome_6_8-beta_ScaledIncome_10_inf & 0.00158 & 0.732 & 2.73 & 0.00639 & 0.00348 & 0.744 & 1.86 & 0.0628 \\
+beta_ScaledIncome_6_8-beta_ScaledIncome_4_6 & -0.00585 & -0.88 & 3.48 & 0.0005 & -0.0123 & -0.876 & 2.39 & 0.0167 \\
+beta_ScaledIncome_8_10-B_Envir02_F1 & -0.00129 & -0.194 & -0.944 & 0.345 & -0.000363 & -0.0418 & -0.763 & 0.445 \\
+beta_ScaledIncome_8_10-B_Envir03_F1 & 0.00212 & 0.298 & -12.2 & 0.0 & 0.00243 & 0.269 & -8.84 & 0.0 \\
+beta_ScaledIncome_8_10-B_Mobil11_F1 & 0.00137 & 0.206 & -10.7 & 0.0 & 0.000863 & 0.0974 & -7.58 & 3.33e-14 \\
+beta_ScaledIncome_8_10-B_Mobil14_F1 & 0.00158 & 0.217 & -11.9 & 0.0 & 0.000413 & 0.0461 & -8.33 & 0.0 \\
+beta_ScaledIncome_8_10-B_Mobil16_F1 & 0.000862 & 0.129 & -10.1 & 0.0 & -0.00088 & -0.0956 & -6.92 & 4.46e-12 \\
+beta_ScaledIncome_8_10-B_Mobil17_F1 & 0.00102 & 0.154 & -9.3 & 0.0 & 0.000194 & 0.0215 & -6.55 & 5.73e-11 \\
+beta_ScaledIncome_8_10-INTER_Envir02 & -0.00333 & -0.19 & -12.3 & 0.0 & -0.000763 & -0.0331 & -12.0 & 0.0 \\
+beta_ScaledIncome_8_10-INTER_Envir03 & 0.00549 & 0.293 & -28.8 & 0.0 & 0.00631 & 0.265 & -27.7 & 0.0 \\
+beta_ScaledIncome_8_10-INTER_Mobil11 & 0.00356 & 0.203 & -32.1 & 0.0 & 0.00224 & 0.0987 & -28.5 & 0.0 \\
+beta_ScaledIncome_8_10-INTER_Mobil14 & 0.00409 & 0.215 & -29.1 & 0.0 & 0.00101 & 0.0426 & -26.0 & 0.0 \\
+beta_ScaledIncome_8_10-INTER_Mobil16 & 0.00224 & 0.128 & -29.0 & 0.0 & -0.00233 & -0.0979 & -23.7 & 0.0 \\
+beta_ScaledIncome_8_10-INTER_Mobil17 & 0.00265 & 0.151 & -27.7 & 0.0 & 0.000558 & 0.0236 & -23.8 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Envir01 & 9.93e-06 & 0.00456 & -17.7 & 0.0 & 0.000264 & 0.109 & -12.5 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Envir02 & -7.94e-06 & -0.00408 & -16.5 & 0.0 & 2.48e-05 & 0.0111 & -11.5 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Envir03 & -7.31e-05 & -0.0388 & -15.9 & 0.0 & -0.000229 & -0.0982 & -11.1 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Mobil11 & -4.63e-07 & -0.000245 & -16.2 & 0.0 & -0.000123 & -0.0501 & -11.2 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Mobil14 & 2.23e-05 & 0.012 & -15.9 & 0.0 & 3.49e-05 & 0.0165 & -11.1 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Mobil16 & 5.06e-05 & 0.0266 & -16.4 & 0.0 & 0.000165 & 0.0725 & -11.4 & 0.0 \\
+beta_ScaledIncome_8_10-SIGMA_STAR_Mobil17 & -4.29e-07 & -0.000212 & -16.4 & 0.0 & 2.49e-05 & 0.0107 & -11.5 & 0.0 \\
+beta_ScaledIncome_8_10-beta_ScaledIncome_10_inf & -0.00231 & -0.912 & -5.73 & 1.03e-08 & -0.00495 & -0.915 & -3.94 & 8.28e-05 \\
+beta_ScaledIncome_8_10-beta_ScaledIncome_4_6 & 0.00567 & 0.725 & -5.16 & 2.49e-07 & 0.0118 & 0.727 & -3.57 & 0.000356 \\
+beta_ScaledIncome_8_10-beta_ScaledIncome_6_8 & -0.00814 & -0.89 & -4.94 & 7.99e-07 & -0.0176 & -0.899 & -3.37 & 0.000747 \\
+beta_ScaledIncome_minus_inf_4-B_Envir02_F1 & 0.000221 & 0.0781 & 7.99 & 1.33e-15 & 0.000126 & 0.0345 & 7.11 & 1.13e-12 \\
+beta_ScaledIncome_minus_inf_4-B_Envir03_F1 & -0.000516 & -0.17 & -6.47 & 9.79e-11 & -0.000803 & -0.211 & -5.91 & 3.41e-09 \\
+beta_ScaledIncome_minus_inf_4-B_Mobil11_F1 & -0.000278 & -0.0977 & -5.64 & 1.71e-08 & -0.00017 & -0.0455 & -5.2 & 1.99e-07 \\
+beta_ScaledIncome_minus_inf_4-B_Mobil14_F1 & -0.000227 & -0.0732 & -7.05 & 1.76e-12 & -2.88e-05 & -0.00763 & -6.9 & 5.29e-12 \\
+beta_ScaledIncome_minus_inf_4-B_Mobil16_F1 & -0.000311 & -0.109 & -5.34 & 9.54e-08 & -0.000351 & -0.0905 & -4.75 & 2.04e-06 \\
+beta_ScaledIncome_minus_inf_4-B_Mobil17_F1 & -0.000185 & -0.0654 & -4.1 & 4.06e-05 & -4.39e-05 & -0.0116 & -3.75 & 0.000179 \\
+beta_ScaledIncome_minus_inf_4-INTER_Envir02 & 0.000567 & 0.076 & -11.1 & 0.0 & 0.000301 & 0.031 & -11.6 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-INTER_Envir03 & -0.00133 & -0.166 & -23.1 & 0.0 & -0.00199 & -0.198 & -24.5 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-INTER_Mobil11 & -0.000715 & -0.0954 & -28.1 & 0.0 & -0.000393 & -0.041 & -30.3 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-INTER_Mobil14 & -0.000588 & -0.0723 & -25.1 & 0.0 & -1.24e-06 & -0.000125 & -28.3 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-INTER_Mobil16 & -0.000801 & -0.107 & -26.2 & 0.0 & -0.000823 & -0.082 & -26.8 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-INTER_Mobil17 & -0.000476 & -0.0635 & -24.8 & 0.0 & -2.8e-05 & -0.00282 & -25.9 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Envir01 & -1.54e-05 & -0.0166 & -23.2 & 0.0 & 2.39e-06 & 0.00234 & -17.5 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Envir02 & -1.58e-06 & -0.00191 & -21.1 & 0.0 & 1.33e-05 & 0.014 & -15.7 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Envir03 & 2.89e-05 & 0.036 & -20.5 & 0.0 & 8.19e-05 & 0.0833 & -15.1 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Mobil11 & 9.28e-07 & 0.00115 & -20.5 & 0.0 & 4.22e-05 & 0.0408 & -15.1 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Mobil14 & -1.91e-05 & -0.0241 & -19.7 & 0.0 & -3.25e-05 & -0.0365 & -14.5 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Mobil16 & 5.94e-06 & 0.00731 & -20.8 & 0.0 & -3.8e-05 & -0.0397 & -15.1 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-SIGMA_STAR_Mobil17 & -1.7e-06 & -0.00197 & -20.8 & 0.0 & -2.37e-05 & -0.0243 & -15.3 & 0.0 \\
+beta_ScaledIncome_minus_inf_4-beta_ScaledIncome_10_inf & 0.000375 & 0.346 & 0.00186 & 0.999 & 0.00077 & 0.338 & 0.00129 & 0.999 \\
+beta_ScaledIncome_minus_inf_4-beta_ScaledIncome_4_6 & -0.00233 & -0.698 & 3.2 & 0.00136 & -0.00464 & -0.677 & 2.25 & 0.0247 \\
+beta_ScaledIncome_minus_inf_4-beta_ScaledIncome_6_8 & 0.00196 & 0.503 & -2.58 & 0.00979 & 0.00397 & 0.483 & -1.73 & 0.0833 \\
+beta_ScaledIncome_minus_inf_4-beta_ScaledIncome_8_10 & -0.00192 & -0.418 & 5.63 & 1.85e-08 & -0.00379 & -0.398 & 3.91 & 9.08e-05 \\
+coef_age_65_more-B_Envir02_F1 & 0.000197 & 0.0635 & 7.7 & 1.33e-14 & 0.000479 & 0.113 & 6.81 & 9.43e-12 \\
+coef_age_65_more-B_Envir03_F1 & 0.000215 & 0.0647 & -6.97 & 3.06e-12 & 0.0011 & 0.25 & -6.9 & 5.16e-12 \\
+coef_age_65_more-B_Mobil11_F1 & 3.38e-05 & 0.0109 & -5.74 & 9.4e-09 & 0.000405 & 0.0939 & -5.14 & 2.82e-07 \\
+coef_age_65_more-B_Mobil14_F1 & -0.000211 & -0.0623 & -6.89 & 5.77e-12 & -0.000221 & -0.0507 & -6.23 & 4.76e-10 \\
+coef_age_65_more-B_Mobil16_F1 & -0.000312 & -0.1 & -5.19 & 2.15e-07 & -0.000694 & -0.155 & -4.26 & 2e-05.0 \\
+coef_age_65_more-B_Mobil17_F1 & -0.000269 & -0.087 & -3.94 & 8.27e-05 & -0.000565 & -0.129 & -3.27 & 0.00106 \\
+coef_age_65_more-INTER_Envir02 & 0.000506 & 0.062 & -11.0 & 0.0 & 0.00122 & 0.108 & -11.7 & 0.0 \\
+coef_age_65_more-INTER_Envir03 & 0.000555 & 0.0635 & -24.2 & 0.0 & 0.00288 & 0.248 & -28.4 & 0.0 \\
+coef_age_65_more-INTER_Mobil11 & 8.93e-05 & 0.0109 & -28.7 & 0.0 & 0.00101 & 0.0916 & -31.2 & 0.0 \\
+coef_age_65_more-INTER_Mobil14 & -0.000541 & -0.0608 & -25.0 & 0.0 & -0.000579 & -0.0502 & -27.2 & 0.0 \\
+coef_age_65_more-INTER_Mobil16 & -0.000809 & -0.0988 & -26.0 & 0.0 & -0.00185 & -0.159 & -25.4 & 0.0 \\
+coef_age_65_more-INTER_Mobil17 & -0.000695 & -0.0848 & -24.4 & 0.0 & -0.00148 & -0.129 & -24.2 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Envir01 & 2.87e-05 & 0.0282 & -21.9 & 0.0 & 7.96e-05 & 0.0674 & -15.5 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Envir02 & 8.71e-06 & 0.00959 & -19.6 & 0.0 & 3.45e-05 & 0.0316 & -13.7 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Envir03 & -5.58e-05 & -0.0634 & -18.3 & 0.0 & -9.21e-05 & -0.0811 & -12.7 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Mobil11 & -1.9e-05 & -0.0216 & -18.8 & 0.0 & 1.99e-05 & 0.0167 & -13.1 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Mobil14 & 6.96e-06 & 0.00803 & -18.4 & 0.0 & -4.02e-06 & -0.0039 & -12.7 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Mobil16 & 2.07e-05 & 0.0233 & -19.3 & 0.0 & 0.000159 & 0.144 & -13.7 & 0.0 \\
+coef_age_65_more-SIGMA_STAR_Mobil17 & 1.52e-05 & 0.0162 & -19.4 & 0.0 & 6.04e-05 & 0.0534 & -13.6 & 0.0 \\
+coef_age_65_more-beta_ScaledIncome_10_inf & -0.000104 & -0.088 & 0.00288 & 0.998 & -0.000444 & -0.168 & 0.00186 & 0.999 \\
+coef_age_65_more-beta_ScaledIncome_4_6 & 0.000399 & 0.109 & 4.18 & 2.95e-05 & 0.00136 & 0.172 & 2.97 & 0.00301 \\
+coef_age_65_more-beta_ScaledIncome_6_8 & -0.00027 & -0.0632 & -1.91 & 0.0566 & -0.00147 & -0.155 & -1.24 & 0.215 \\
+coef_age_65_more-beta_ScaledIncome_8_10 & 0.000457 & 0.0909 & 6.56 & 5.49e-11 & 0.00234 & 0.213 & 4.75 & 2.08e-06 \\
+coef_age_65_more-beta_ScaledIncome_minus_inf_4 & -0.000207 & -0.0966 & 0.0012 & 0.999 & -0.000611 & -0.132 & 0.0008 & 0.999 \\
+coef_haveChildren-B_Envir02_F1 & -9.61e-06 & -0.00421 & 6.14 & 8.36e-10 & 0.000349 & 0.112 & 6.04 & 1.55e-09 \\
+coef_haveChildren-B_Envir03_F1 & 8.57e-05 & 0.035 & -9.39 & 0.0 & 3.78e-06 & 0.00116 & -8.86 & 0.0 \\
+coef_haveChildren-B_Mobil11_F1 & 0.000159 & 0.0694 & -8.53 & 0.0 & 0.000348 & 0.109 & -8.05 & 8.88e-16 \\
+coef_haveChildren-B_Mobil14_F1 & 8.2e-05 & 0.0329 & -9.7 & 0.0 & -9.98e-05 & -0.0309 & -9.18 & 0.0 \\
+coef_haveChildren-B_Mobil16_F1 & -0.000107 & -0.0469 & -7.81 & 5.55e-15 & -0.00056 & -0.169 & -6.63 & 3.47e-11 \\
+coef_haveChildren-B_Mobil17_F1 & 0.000139 & 0.0608 & -6.69 & 2.18e-11 & 0.000212 & 0.0654 & -6.11 & 1.02e-09 \\
+coef_haveChildren-INTER_Envir02 & -2.39e-05 & -0.00397 & -11.9 & 0.0 & 0.000891 & 0.107 & -13.1 & 0.0 \\
+coef_haveChildren-INTER_Envir03 & 0.000223 & 0.0346 & -25.2 & 0.0 & -1.35e-05 & -0.00158 & -27.5 & 0.0 \\
+coef_haveChildren-INTER_Mobil11 & 0.000412 & 0.0681 & -30.4 & 0.0 & 0.00089 & 0.109 & -33.5 & 0.0 \\
+coef_haveChildren-INTER_Mobil14 & 0.000208 & 0.0318 & -26.7 & 0.0 & -0.000228 & -0.0267 & -29.5 & 0.0 \\
+coef_haveChildren-INTER_Mobil16 & -0.000279 & -0.0462 & -27.8 & 0.0 & -0.00143 & -0.166 & -27.5 & 0.0 \\
+coef_haveChildren-INTER_Mobil17 & 0.000357 & 0.0591 & -26.6 & 0.0 & 0.000488 & 0.0573 & -27.8 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Envir01 & -1.09e-05 & -0.0145 & -31.1 & 0.0 & 3.09e-05 & 0.0354 & -23.1 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Envir02 & 5.11e-06 & 0.00764 & -29.0 & 0.0 & 6.38e-05 & 0.079 & -21.2 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Envir03 & -1.29e-06 & -0.00199 & -27.8 & 0.0 & -1.78e-05 & -0.0212 & -19.7 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Mobil11 & -1.1e-05 & -0.0169 & -28.0 & 0.0 & -1.95e-05 & -0.0221 & -19.8 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Mobil14 & 3.22e-06 & 0.00505 & -27.5 & 0.0 & -9.46e-06 & -0.0124 & -19.5 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Mobil16 & 1.99e-05 & 0.0304 & -28.8 & 0.0 & 4.58e-05 & 0.056 & -20.6 & 0.0 \\
+coef_haveChildren-SIGMA_STAR_Mobil17 & -7.14e-06 & -0.0103 & -28.3 & 0.0 & 2.29e-05 & 0.0274 & -20.6 & 0.0 \\
+coef_haveChildren-beta_ScaledIncome_10_inf & -5.72e-05 & -0.0656 & -3.33 & 0.000869 & -8.05e-05 & -0.0413 & -2.24 & 0.0252 \\
+coef_haveChildren-beta_ScaledIncome_4_6 & 9.18e-05 & 0.0341 & 2.51 & 0.012 & 3.28e-05 & 0.0056 & 1.71 & 0.0867 \\
+coef_haveChildren-beta_ScaledIncome_6_8 & -0.000262 & -0.0834 & -3.53 & 0.000416 & -0.00071 & -0.101 & -2.37 & 0.0178 \\
+coef_haveChildren-beta_ScaledIncome_8_10 & 0.000329 & 0.0889 & 5.4 & 6.81e-08 & 0.000748 & 0.0918 & 3.71 & 0.000207 \\
+coef_haveChildren-beta_ScaledIncome_minus_inf_4 & -5.29e-05 & -0.0335 & -2.57 & 0.0102 & -1.52e-05 & -0.00443 & -1.78 & 0.0755 \\
+coef_haveChildren-coef_age_65_more & 0.000313 & 0.181 & -2.71 & 0.00664 & 0.000888 & 0.224 & -1.84 & 0.0657 \\
+coef_haveGA-B_Envir02_F1 & -0.000988 & -0.24 & -1.91 & 0.0567 & -0.000166 & -0.0333 & -1.83 & 0.0673 \\
+coef_haveGA-B_Envir03_F1 & 0.00177 & 0.401 & -18.7 & 0.0 & 0.000991 & 0.191 & -14.3 & 0.0 \\
+coef_haveGA-B_Mobil11_F1 & 0.00155 & 0.375 & -17.4 & 0.0 & 0.000933 & 0.184 & -13.2 & 0.0 \\
+coef_haveGA-B_Mobil14_F1 & 0.00151 & 0.336 & -18.0 & 0.0 & 0.000134 & 0.0262 & -13.5 & 0.0 \\
+coef_haveGA-B_Mobil16_F1 & 0.0013 & 0.316 & -16.3 & 0.0 & 0.00084 & 0.159 & -12.6 & 0.0 \\
+coef_haveGA-B_Mobil17_F1 & 0.00104 & 0.254 & -14.3 & 0.0 & 0.000302 & 0.0584 & -11.0 & 0.0 \\
+coef_haveGA-INTER_Envir02 & -0.00256 & -0.236 & -13.9 & 0.0 & -0.000265 & -0.0201 & -15.2 & 0.0 \\
+coef_haveGA-INTER_Envir03 & 0.00458 & 0.395 & -31.6 & 0.0 & 0.00255 & 0.187 & -31.8 & 0.0 \\
+coef_haveGA-INTER_Mobil11 & 0.00401 & 0.368 & -37.0 & 0.0 & 0.00241 & 0.185 & -36.6 & 0.0 \\
+coef_haveGA-INTER_Mobil14 & 0.00392 & 0.332 & -32.4 & 0.0 & 0.000335 & 0.0247 & -31.5 & 0.0 \\
+coef_haveGA-INTER_Mobil16 & 0.00338 & 0.311 & -34.0 & 0.0 & 0.002 & 0.147 & -32.5 & 0.0 \\
+coef_haveGA-INTER_Mobil17 & 0.0027 & 0.248 & -31.4 & 0.0 & 0.000743 & 0.0549 & -29.7 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Envir01 & -2.91e-05 & -0.0215 & -28.4 & 0.0 & 0.000186 & 0.134 & -22.7 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Envir02 & 2.46e-05 & 0.0204 & -27.1 & 0.0 & 5.72e-05 & 0.0445 & -20.9 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Envir03 & -1.64e-05 & -0.014 & -26.2 & 0.0 & -6.23e-07 & -0.000466 & -20.1 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Mobil11 & -1.84e-05 & -0.0157 & -26.4 & 0.0 & -3.3e-05 & -0.0235 & -20.1 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Mobil14 & 2.99e-05 & 0.026 & -26.2 & 0.0 & 7.17e-05 & 0.0591 & -20.1 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Mobil16 & 3.27e-06 & 0.00277 & -26.7 & 0.0 & 4.61e-05 & 0.0354 & -20.5 & 0.0 \\
+coef_haveGA-SIGMA_STAR_Mobil17 & 3.02e-06 & 0.00241 & -26.8 & 0.0 & 5.07e-05 & 0.0381 & -20.7 & 0.0 \\
+coef_haveGA-beta_ScaledIncome_10_inf & -0.000253 & -0.161 & -10.9 & 0.0 & -0.000297 & -0.0959 & -8.21 & 2.22e-16 \\
+coef_haveGA-beta_ScaledIncome_4_6 & 0.000496 & 0.102 & -4.65 & 3.36e-06 & 0.000235 & 0.0252 & -3.2 & 0.00138 \\
+coef_haveGA-beta_ScaledIncome_6_8 & -0.000505 & -0.0891 & -8.7 & 0.0 & -0.00036 & -0.0322 & -6.25 & 3.98e-10 \\
+coef_haveGA-beta_ScaledIncome_8_10 & 0.00114 & 0.17 & -0.605 & 0.545 & 0.000981 & 0.0758 & -0.406 & 0.685 \\
+coef_haveGA-beta_ScaledIncome_minus_inf_4 & -0.000263 & -0.0922 & -9.73 & 0.0 & -0.000224 & -0.0411 & -7.27 & 3.65e-13 \\
+coef_haveGA-coef_age_65_more & 1.71e-05 & 0.00549 & -9.86 & 0.0 & 0.000942 & 0.149 & -7.59 & 3.15e-14 \\
+coef_haveGA-coef_haveChildren & 0.000177 & 0.0771 & -9.05 & 0.0 & 0.000354 & 0.0758 & -6.55 & 5.6e-11 \\
+coef_highEducation-B_Envir02_F1 & -0.000493 & -0.186 & 2.4 & 0.0162 & -6.21e-07 & -0.000176 & 2.35 & 0.0186 \\
+coef_highEducation-B_Envir03_F1 & 0.000815 & 0.287 & -14.0 & 0.0 & 0.000555 & 0.151 & -12.3 & 0.0 \\
+coef_highEducation-B_Mobil11_F1 & 0.000758 & 0.286 & -13.1 & 0.0 & 0.000886 & 0.246 & -11.7 & 0.0 \\
+coef_highEducation-B_Mobil14_F1 & 0.00107 & 0.371 & -15.0 & 0.0 & 0.00133 & 0.363 & -14.7 & 0.0 \\
+coef_highEducation-B_Mobil16_F1 & 0.000746 & 0.281 & -12.7 & 0.0 & 0.00083 & 0.221 & -11.0 & 0.0 \\
+coef_highEducation-B_Mobil17_F1 & 0.000679 & 0.257 & -11.0 & 0.0 & 0.00092 & 0.251 & -9.84 & 0.0 \\
+coef_highEducation-INTER_Envir02 & -0.00128 & -0.184 & -12.8 & 0.0 & -4.59e-05 & -0.0049 & -14.0 & 0.0 \\
+coef_highEducation-INTER_Envir03 & 0.00211 & 0.283 & -28.0 & 0.0 & 0.00144 & 0.149 & -30.2 & 0.0 \\
+coef_highEducation-INTER_Mobil11 & 0.00196 & 0.281 & -33.4 & 0.0 & 0.00228 & 0.247 & -36.7 & 0.0 \\
+coef_highEducation-INTER_Mobil14 & 0.00277 & 0.365 & -30.2 & 0.0 & 0.00339 & 0.351 & -35.3 & 0.0 \\
+coef_highEducation-INTER_Mobil16 & 0.00193 & 0.277 & -31.3 & 0.0 & 0.00217 & 0.224 & -32.5 & 0.0 \\
+coef_highEducation-INTER_Mobil17 & 0.00177 & 0.253 & -29.3 & 0.0 & 0.00242 & 0.252 & -31.2 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Envir01 & 2.7e-05 & 0.0311 & -33.8 & 0.0 & 0.00018 & 0.182 & -25.6 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Envir02 & 1.45e-05 & 0.0187 & -31.5 & 0.0 & 5.27e-05 & 0.0577 & -22.8 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Envir03 & 6.7e-06 & 0.00893 & -30.4 & 0.0 & 4.64e-05 & 0.0489 & -21.9 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Mobil11 & -4.14e-06 & -0.00552 & -30.5 & 0.0 & 1.1e-05 & 0.011 & -21.9 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Mobil14 & -2.39e-05 & -0.0323 & -29.6 & 0.0 & -3.89e-05 & -0.0451 & -21.3 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Mobil16 & -6.22e-06 & -0.0082 & -30.8 & 0.0 & -6.59e-05 & -0.0713 & -21.8 & 0.0 \\
+coef_highEducation-SIGMA_STAR_Mobil17 & -1.09e-05 & -0.0135 & -30.7 & 0.0 & -3.87e-05 & -0.0409 & -22.1 & 0.0 \\
+coef_highEducation-beta_ScaledIncome_10_inf & -4.73e-05 & -0.0469 & -8.19 & 2.22e-16 & 9.63e-05 & 0.0437 & -5.76 & 8.5e-09 \\
+coef_highEducation-beta_ScaledIncome_4_6 & 5.35e-05 & 0.0172 & -0.538 & 0.59 & -0.00025 & -0.0377 & -0.364 & 0.716 \\
+coef_highEducation-beta_ScaledIncome_6_8 & -7.89e-05 & -0.0217 & -6.09 & 1.11e-09 & 0.000295 & 0.0371 & -4.23 & 2.37e-05 \\
+coef_highEducation-beta_ScaledIncome_8_10 & 0.000107 & 0.025 & 2.92 & 0.00354 & -0.000788 & -0.0856 & 1.93 & 0.0534 \\
+coef_highEducation-beta_ScaledIncome_minus_inf_4 & -0.000109 & -0.0598 & -6.44 & 1.23e-10 & -0.000145 & -0.0375 & -4.47 & 7.77e-06 \\
+coef_highEducation-coef_age_65_more & -0.000124 & -0.0621 & -6.12 & 9.51e-10 & -0.000287 & -0.0641 & -4.08 & 4.52e-05 \\
+coef_highEducation-coef_haveChildren & -8.17e-05 & -0.0554 & -4.51 & 6.55e-06 & -0.000332 & -0.1 & -2.95 & 0.00319 \\
+coef_highEducation-coef_haveGA & 0.000549 & 0.207 & 5.67 & 1.41e-08 & 0.000222 & 0.0421 & 3.77 & 0.00016 \\
+coef_individualHouse-B_Envir02_F1 & -0.000328 & -0.139 & 4.94 & 7.87e-07 & -0.000512 & -0.164 & 4.53 & 5.95e-06 \\
+coef_individualHouse-B_Envir03_F1 & 0.000424 & 0.167 & -10.8 & 0.0 & 0.000636 & 0.196 & -10.8 & 0.0 \\
+coef_individualHouse-B_Mobil11_F1 & 0.00021 & 0.0888 & -9.45 & 0.0 & 0.000109 & 0.0342 & -8.57 & 0.0 \\
+coef_individualHouse-B_Mobil14_F1 & 0.000508 & 0.197 & -11.3 & 0.0 & 0.000797 & 0.247 & -11.7 & 0.0 \\
+coef_individualHouse-B_Mobil16_F1 & 0.000211 & 0.0891 & -9.14 & 0.0 & 0.000138 & 0.0418 & -8.13 & 4.44e-16 \\
+coef_individualHouse-B_Mobil17_F1 & 0.000154 & 0.0654 & -7.56 & 4.04e-14 & -8.59e-06 & -0.00266 & -6.71 & 2e-11.0 \\
+coef_individualHouse-INTER_Envir02 & -0.000849 & -0.137 & -11.9 & 0.0 & -0.00138 & -0.166 & -12.4 & 0.0 \\
+coef_individualHouse-INTER_Envir03 & 0.0011 & 0.165 & -26.2 & 0.0 & 0.00165 & 0.193 & -29.8 & 0.0 \\
+coef_individualHouse-INTER_Mobil11 & 0.000546 & 0.0875 & -30.9 & 0.0 & 0.00029 & 0.0355 & -33.1 & 0.0 \\
+coef_individualHouse-INTER_Mobil14 & 0.00132 & 0.195 & -27.9 & 0.0 & 0.002 & 0.235 & -32.6 & 0.0 \\
+coef_individualHouse-INTER_Mobil16 & 0.000548 & 0.088 & -28.9 & 0.0 & 0.000412 & 0.0482 & -29.8 & 0.0 \\
+coef_individualHouse-INTER_Mobil17 & 0.000399 & 0.0639 & -27.0 & 0.0 & -2.02e-05 & -0.00239 & -27.7 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Envir01 & 1.83e-05 & 0.0236 & -32.4 & 0.0 & 7.84e-05 & 0.09 & -24.7 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Envir02 & -7.4e-06 & -0.0107 & -29.6 & 0.0 & -1.09e-05 & -0.0135 & -21.9 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Envir03 & -1.07e-05 & -0.016 & -28.5 & 0.0 & 2.56e-05 & 0.0306 & -21.2 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Mobil11 & 9.54e-06 & 0.0143 & -29.2 & 0.0 & 7.94e-06 & 0.00902 & -21.2 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Mobil14 & -2.05e-05 & -0.0311 & -28.0 & 0.0 & -2.38e-05 & -0.0313 & -20.7 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Mobil16 & 7.69e-06 & 0.0114 & -29.4 & 0.0 & 1.22e-05 & 0.0149 & -21.6 & 0.0 \\
+coef_individualHouse-SIGMA_STAR_Mobil17 & 6.14e-06 & 0.00856 & -29.4 & 0.0 & -1.71e-06 & -0.00204 & -21.7 & 0.0 \\
+coef_individualHouse-beta_ScaledIncome_10_inf & -9.31e-05 & -0.103 & -4.6 & 4.21e-06 & -0.000206 & -0.106 & -3.13 & 0.00174 \\
+coef_individualHouse-beta_ScaledIncome_4_6 & 0.000219 & 0.0789 & 1.75 & 0.0802 & 0.000623 & 0.107 & 1.23 & 0.219 \\
+coef_individualHouse-beta_ScaledIncome_6_8 & -0.000325 & -0.1 & -4.14 & 3.41e-05 & -0.000776 & -0.111 & -2.81 & 0.005 \\
+coef_individualHouse-beta_ScaledIncome_8_10 & 0.000429 & 0.112 & 4.82 & 1.47e-06 & 0.000812 & 0.1 & 3.3 & 0.000951 \\
+coef_individualHouse-beta_ScaledIncome_minus_inf_4 & -0.000137 & -0.0842 & -3.55 & 0.00038 & -0.000391 & -0.114 & -2.43 & 0.0152 \\
+coef_individualHouse-coef_age_65_more & -0.000233 & -0.13 & -3.3 & 0.000967 & -0.000766 & -0.194 & -2.15 & 0.0313 \\
+coef_individualHouse-coef_haveChildren & -8.89e-05 & -0.0676 & -1.22 & 0.223 & -0.00035 & -0.12 & -0.798 & 0.425 \\
+coef_individualHouse-coef_haveGA & 7.75e-05 & 0.0327 & 7.92 & 2.44e-15 & -0.000208 & -0.0448 & 5.59 & 2.33e-08 \\
+coef_individualHouse-coef_highEducation & 0.00017 & 0.112 & 3.6 & 0.000314 & 0.000382 & 0.116 & 2.45 & 0.0143 \\
+coef_intercept-B_Envir02_F1 & 0.000299 & 0.0361 & -14.1 & 0.0 & 0.000332 & 0.0314 & -10.5 & 0.0 \\
+coef_intercept-B_Envir03_F1 & 9.17e-05 & 0.0103 & -21.7 & 0.0 & 0.000658 & 0.0598 & -16.8 & 0.0 \\
+coef_intercept-B_Mobil11_F1 & -1.2e-05 & -0.00145 & -21.2 & 0.0 & 0.000108 & 0.01 & -16.0 & 0.0 \\
+coef_intercept-B_Mobil14_F1 & -0.000384 & -0.0425 & -21.4 & 0.0 & -0.000351 & -0.0322 & -16.5 & 0.0 \\
+coef_intercept-B_Mobil16_F1 & 2.41e-05 & 0.0029 & -21.1 & 0.0 & 0.000416 & 0.0372 & -15.9 & 0.0 \\
+coef_intercept-B_Mobil17_F1 & -0.000159 & -0.0193 & -20.1 & 0.0 & -8.52e-05 & -0.00778 & -15.2 & 0.0 \\
+coef_intercept-INTER_Envir02 & 0.00122 & 0.0561 & -21.8 & 0.0 & 0.00108 & 0.0384 & -19.3 & 0.0 \\
+coef_intercept-INTER_Envir03 & -0.000371 & -0.0159 & -31.6 & 0.0 & 0.00105 & 0.0362 & -29.7 & 0.0 \\
+coef_intercept-INTER_Mobil11 & -0.000539 & -0.0246 & -35.4 & 0.0 & -0.000152 & -0.0055 & -32.1 & 0.0 \\
+coef_intercept-INTER_Mobil14 & -0.0016 & -0.0674 & -32.0 & 0.0 & -0.0014 & -0.0486 & -30.0 & 0.0 \\
+coef_intercept-INTER_Mobil16 & -0.000421 & -0.0192 & -34.0 & 0.0 & 0.000576 & 0.0199 & -30.5 & 0.0 \\
+coef_intercept-INTER_Mobil17 & -0.000794 & -0.0363 & -32.3 & 0.0 & -0.000684 & -0.0238 & -28.7 & 0.0 \\
+coef_intercept-SIGMA_STAR_Envir01 & 1.62e-05 & 0.00597 & -28.6 & 0.0 & -0.000297 & -0.101 & -20.2 & 0.0 \\
+coef_intercept-SIGMA_STAR_Envir02 & 1.8e-05 & 0.00741 & -27.7 & 0.0 & -9.36e-06 & -0.00343 & -19.7 & 0.0 \\
+coef_intercept-SIGMA_STAR_Envir03 & -3.88e-05 & -0.0165 & -27.2 & 0.0 & -0.000196 & -0.069 & -19.3 & 0.0 \\
+coef_intercept-SIGMA_STAR_Mobil11 & -1.59e-05 & -0.00678 & -27.4 & 0.0 & -0.000123 & -0.0411 & -19.4 & 0.0 \\
+coef_intercept-SIGMA_STAR_Mobil14 & 3.61e-05 & 0.0156 & -27.2 & 0.0 & 2.94e-05 & 0.0114 & -19.4 & 0.0 \\
+coef_intercept-SIGMA_STAR_Mobil16 & -1.8e-05 & -0.00759 & -27.5 & 0.0 & 2.85e-05 & 0.0103 & -19.6 & 0.0 \\
+coef_intercept-SIGMA_STAR_Mobil17 & 5.03e-06 & 0.002 & -27.6 & 0.0 & 4.45e-05 & 0.0158 & -19.7 & 0.0 \\
+coef_intercept-beta_ScaledIncome_10_inf & -0.000535 & -0.169 & -19.2 & 0.0 & -0.00117 & -0.178 & -13.5 & 0.0 \\
+coef_intercept-beta_ScaledIncome_4_6 & 0.00391 & 0.401 & -18.6 & 0.0 & 0.0077 & 0.39 & -13.0 & 0.0 \\
+coef_intercept-beta_ScaledIncome_6_8 & -0.0031 & -0.272 & -16.0 & 0.0 & -0.00631 & -0.266 & -11.2 & 0.0 \\
+coef_intercept-beta_ScaledIncome_8_10 & 0.00281 & 0.21 & -12.7 & 0.0 & 0.00596 & 0.217 & -8.93 & 0.0 \\
+coef_intercept-beta_ScaledIncome_minus_inf_4 & -0.00496 & -0.866 & -15.4 & 0.0 & -0.0103 & -0.886 & -10.8 & 0.0 \\
+coef_intercept-coef_age_65_more & -0.000181 & -0.0289 & -18.7 & 0.0 & -0.000214 & -0.016 & -13.1 & 0.0 \\
+coef_intercept-coef_haveChildren & -1.91e-06 & -0.000413 & -18.3 & 0.0 & 1.56e-05 & 0.00157 & -12.9 & 0.0 \\
+coef_intercept-coef_haveGA & -7.73e-05 & -0.00929 & -12.5 & 0.0 & 0.000265 & 0.0168 & -9.01 & 0.0 \\
+coef_intercept-coef_highEducation & -0.000218 & -0.0407 & -16.0 & 0.0 & -5.1e-05 & -0.00455 & -11.4 & 0.0 \\
+coef_intercept-coef_individualHouse & -0.000335 & -0.0702 & -17.4 & 0.0 & -0.000201 & -0.0204 & -12.5 & 0.0 \\
+coef_male-B_Envir02_F1 & -6.39e-05 & -0.0302 & 7.78 & 7.11e-15 & -0.000686 & -0.235 & 6.66 & 2.79e-11 \\
+coef_male-B_Envir03_F1 & -0.000121 & -0.0533 & -7.71 & 1.27e-14 & 7.46e-05 & 0.0245 & -7.72 & 1.18e-14 \\
+coef_male-B_Mobil11_F1 & -0.000313 & -0.147 & -6.42 & 1.35e-10 & -0.00069 & -0.231 & -5.71 & 1.16e-08 \\
+coef_male-B_Mobil14_F1 & -5.01e-05 & -0.0217 & -8.13 & 4.44e-16 & 0.000227 & 0.0751 & -8.42 & 0.0 \\
+coef_male-B_Mobil16_F1 & -5.33e-05 & -0.0251 & -6.42 & 1.37e-10 & 0.000274 & 0.0884 & -6.17 & 6.93e-10 \\
+coef_male-B_Mobil17_F1 & -0.000266 & -0.126 & -4.77 & 1.87e-06 & -0.000614 & -0.202 & -4.19 & 2.78e-05 \\
+coef_male-INTER_Envir02 & -0.000164 & -0.0294 & -11.2 & 0.0 & -0.00181 & -0.234 & -11.2 & 0.0 \\
+coef_male-INTER_Envir03 & -0.000312 & -0.0522 & -24.2 & 0.0 & 0.000195 & 0.0243 & -27.2 & 0.0 \\
+coef_male-INTER_Mobil11 & -0.00081 & -0.145 & -28.6 & 0.0 & -0.00179 & -0.234 & -29.8 & 0.0 \\
+coef_male-INTER_Mobil14 & -0.000134 & -0.0222 & -25.9 & 0.0 & 0.000541 & 0.0679 & -29.9 & 0.0 \\
+coef_male-INTER_Mobil16 & -0.000139 & -0.0249 & -27.3 & 0.0 & 0.000665 & 0.0828 & -29.1 & 0.0 \\
+coef_male-INTER_Mobil17 & -0.000693 & -0.124 & -25.1 & 0.0 & -0.00154 & -0.194 & -25.4 & 0.0 \\
+coef_male-SIGMA_STAR_Envir01 & 8.86e-06 & 0.0128 & -30.2 & 0.0 & -3.83e-05 & -0.0469 & -21.9 & 0.0 \\
+coef_male-SIGMA_STAR_Envir02 & -1.8e-05 & -0.0291 & -27.3 & 0.0 & -1.6e-05 & -0.0212 & -19.8 & 0.0 \\
+coef_male-SIGMA_STAR_Envir03 & -3.65e-06 & -0.00609 & -26.4 & 0.0 & -1.15e-05 & -0.0146 & -18.8 & 0.0 \\
+coef_male-SIGMA_STAR_Mobil11 & 2.3e-05 & 0.0384 & -27.3 & 0.0 & 2.98e-05 & 0.0361 & -19.2 & 0.0 \\
+coef_male-SIGMA_STAR_Mobil14 & -1.59e-05 & -0.0269 & -25.8 & 0.0 & -8.4e-06 & -0.0118 & -18.6 & 0.0 \\
+coef_male-SIGMA_STAR_Mobil16 & -7.53e-06 & -0.0124 & -27.0 & 0.0 & -8.06e-06 & -0.0105 & -19.3 & 0.0 \\
+coef_male-SIGMA_STAR_Mobil17 & 1.56e-05 & 0.0242 & -27.3 & 0.0 & 2.72e-05 & 0.0348 & -19.8 & 0.0 \\
+coef_male-beta_ScaledIncome_10_inf & 3.37e-05 & 0.0417 & -0.779 & 0.436 & 1.16e-05 & 0.00638 & -0.506 & 0.613 \\
+coef_male-beta_ScaledIncome_4_6 & -0.000147 & -0.059 & 3.85 & 0.000118 & 5.68e-05 & 0.0104 & 2.72 & 0.0065 \\
+coef_male-beta_ScaledIncome_6_8 & 0.000127 & 0.0437 & -2.46 & 0.0139 & 1.84e-05 & 0.00281 & -1.64 & 0.101 \\
+coef_male-beta_ScaledIncome_8_10 & -0.000234 & -0.0684 & 6.24 & 4.41e-10 & -0.000284 & -0.0373 & 4.32 & 1.59e-05 \\
+coef_male-beta_ScaledIncome_minus_inf_4 & -2.57e-05 & -0.0176 & -0.565 & 0.572 & -0.000167 & -0.0522 & -0.378 & 0.705 \\
+coef_male-coef_age_65_more & -0.000297 & -0.185 & -0.497 & 0.619 & -0.000899 & -0.243 & -0.32 & 0.749 \\
+coef_male-coef_haveChildren & -3.69e-05 & -0.0313 & 2.37 & 0.0179 & -0.000326 & -0.119 & 1.49 & 0.136 \\
+coef_male-coef_haveGA & -0.000218 & -0.103 & 10.1 & 0.0 & -0.000457 & -0.105 & 7.29 & 3.18e-13 \\
+coef_male-coef_highEducation & -0.000137 & -0.101 & 6.67 & 2.58e-11 & -0.00043 & -0.139 & 4.37 & 1.27e-05 \\
+coef_male-coef_individualHouse & -3.16e-05 & -0.0259 & 3.62 & 0.000293 & -3.12e-05 & -0.0114 & 2.44 & 0.0147 \\
+coef_male-coef_intercept & -0.000116 & -0.0272 & 19.1 & 0.0 & -0.000195 & -0.0211 & 13.5 & 0.0 \\
+coef_moreThanOneBike-B_Envir02_F1 & -0.000835 & -0.295 & 1.92 & 0.0552 & -0.000828 & -0.231 & 1.79 & 0.0731 \\
+coef_moreThanOneBike-B_Envir03_F1 & 0.00088 & 0.29 & -14.3 & 0.0 & 0.000552 & 0.148 & -12.5 & 0.0 \\
+coef_moreThanOneBike-B_Mobil11_F1 & 0.000599 & 0.211 & -12.7 & 0.0 & -6.26e-05 & -0.0171 & -10.3 & 0.0 \\
+coef_moreThanOneBike-B_Mobil14_F1 & 0.000956 & 0.309 & -14.7 & 0.0 & 0.000781 & 0.211 & -13.5 & 0.0 \\
+coef_moreThanOneBike-B_Mobil16_F1 & 0.000729 & 0.257 & -12.8 & 0.0 & 0.000438 & 0.115 & -10.6 & 0.0 \\
+coef_moreThanOneBike-B_Mobil17_F1 & 0.0005 & 0.177 & -10.7 & 0.0 & -2.46e-05 & -0.0066 & -8.77 & 0.0 \\
+coef_moreThanOneBike-INTER_Envir02 & -0.00216 & -0.29 & -12.5 & 0.0 & -0.0021 & -0.221 & -13.2 & 0.0 \\
+coef_moreThanOneBike-INTER_Envir03 & 0.00228 & 0.285 & -28.2 & 0.0 & 0.00139 & 0.142 & -30.3 & 0.0 \\
+coef_moreThanOneBike-INTER_Mobil11 & 0.00155 & 0.207 & -33.0 & 0.0 & -0.000161 & -0.0172 & -33.3 & 0.0 \\
+coef_moreThanOneBike-INTER_Mobil14 & 0.00247 & 0.305 & -29.9 & 0.0 & 0.00188 & 0.193 & -33.2 & 0.0 \\
+coef_moreThanOneBike-INTER_Mobil16 & 0.00188 & 0.252 & -31.3 & 0.0 & 0.00108 & 0.11 & -31.3 & 0.0 \\
+coef_moreThanOneBike-INTER_Mobil17 & 0.0013 & 0.173 & -28.9 & 0.0 & -6.09e-05 & -0.00624 & -28.5 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Envir01 & 1.08e-05 & 0.0116 & -32.3 & 0.0 & 4.6e-05 & 0.0459 & -24.9 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Envir02 & -1.97e-05 & -0.0238 & -29.9 & 0.0 & -4.5e-05 & -0.0486 & -22.4 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Envir03 & -1.88e-06 & -0.00234 & -29.2 & 0.0 & -1.9e-06 & -0.00197 & -21.8 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Mobil11 & 1.67e-05 & 0.0208 & -29.7 & 0.0 & 5.61e-07 & 0.000555 & -22.0 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Mobil14 & -6.31e-06 & -0.00797 & -28.8 & 0.0 & -2.52e-05 & -0.0288 & -21.5 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Mobil16 & -3.31e-06 & -0.00408 & -29.7 & 0.0 & 2.74e-05 & 0.0292 & -22.4 & 0.0 \\
+coef_moreThanOneBike-SIGMA_STAR_Mobil17 & 5.2e-06 & 0.00604 & -29.8 & 0.0 & -5.87e-05 & -0.0612 & -22.2 & 0.0 \\
+coef_moreThanOneBike-beta_ScaledIncome_10_inf & -7.76e-05 & -0.0718 & -8.27 & 2.22e-16 & 5.73e-05 & 0.0256 & -6.07 & 1.28e-09 \\
+coef_moreThanOneBike-beta_ScaledIncome_4_6 & 0.000219 & 0.0657 & -0.89 & 0.373 & 4.13e-06 & 0.000616 & -0.606 & 0.545 \\
+coef_moreThanOneBike-beta_ScaledIncome_6_8 & -0.000341 & -0.0875 & -6.15 & 7.71e-10 & -9.31e-05 & -0.0116 & -4.34 & 1.41e-05 \\
+coef_moreThanOneBike-beta_ScaledIncome_8_10 & 0.000512 & 0.112 & 2.71 & 0.00669 & -0.000177 & -0.019 & 1.79 & 0.0734 \\
+coef_moreThanOneBike-beta_ScaledIncome_minus_inf_4 & -0.000214 & -0.109 & -6.53 & 6.39e-11 & -0.000443 & -0.113 & -4.61 & 4.11e-06 \\
+coef_moreThanOneBike-coef_age_65_more & 0.000274 & 0.128 & -7.03 & 2.07e-12 & 0.000712 & 0.157 & -4.88 & 1.04e-06 \\
+coef_moreThanOneBike-coef_haveChildren & -0.000414 & -0.262 & -4.43 & 9.35e-06 & -0.00102 & -0.302 & -3.01 & 0.00264 \\
+coef_moreThanOneBike-coef_haveGA & 0.000371 & 0.13 & 4.94 & 7.95e-07 & -0.000467 & -0.0874 & 3.27 & 0.00107 \\
+coef_moreThanOneBike-coef_highEducation & 0.000405 & 0.222 & -0.554 & 0.58 & 0.00049 & 0.129 & -0.364 & 0.716 \\
+coef_moreThanOneBike-coef_individualHouse & -7.89e-06 & -0.00484 & -3.77 & 0.000162 & -2.13e-05 & -0.00635 & -2.64 & 0.00832 \\
+coef_moreThanOneBike-coef_intercept & -0.000412 & -0.072 & 15.5 & 0.0 & -0.000266 & -0.0234 & 11.2 & 0.0 \\
+coef_moreThanOneBike-coef_male & -2.2e-05 & -0.015 & -7.18 & 7.03e-13 & 0.000212 & 0.0674 & -5.16 & 2.49e-07 \\
+coef_moreThanOneCar-B_Envir02_F1 & 0.00141 & 0.456 & 18.6 & 0.0 & 0.00113 & 0.336 & 16.8 & 0.0 \\
+coef_moreThanOneCar-B_Envir03_F1 & -0.0017 & -0.512 & -0.455 & 0.649 & -0.0012 & -0.344 & -0.48 & 0.631 \\
+coef_moreThanOneCar-B_Mobil11_F1 & -0.00132 & -0.423 & 0.645 & 0.519 & -0.000721 & -0.21 & 0.676 & 0.499 \\
+coef_moreThanOneCar-B_Mobil14_F1 & -0.00182 & -0.54 & -0.777 & 0.437 & -0.00148 & -0.427 & -0.813 & 0.416 \\
+coef_moreThanOneCar-B_Mobil16_F1 & -0.00134 & -0.433 & 0.883 & 0.377 & -0.000833 & -0.234 & 0.901 & 0.368 \\
+coef_moreThanOneCar-B_Mobil17_F1 & -0.000862 & -0.279 & 2.13 & 0.0328 & 0.000195 & 0.056 & 2.37 & 0.0176 \\
+coef_moreThanOneCar-INTER_Envir02 & 0.00365 & 0.448 & -9.04 & 0.0 & 0.00289 & 0.325 & -9.53 & 0.0 \\
+coef_moreThanOneCar-INTER_Envir03 & -0.0044 & -0.504 & -18.8 & 0.0 & -0.00304 & -0.331 & -21.2 & 0.0 \\
+coef_moreThanOneCar-INTER_Mobil11 & -0.00341 & -0.416 & -23.2 & 0.0 & -0.00182 & -0.207 & -26.2 & 0.0 \\
+coef_moreThanOneCar-INTER_Mobil14 & -0.00472 & -0.532 & -20.1 & 0.0 & -0.0038 & -0.414 & -22.7 & 0.0 \\
+coef_moreThanOneCar-INTER_Mobil16 & -0.00348 & -0.426 & -21.4 & 0.0 & -0.00209 & -0.227 & -23.1 & 0.0 \\
+coef_moreThanOneCar-INTER_Mobil17 & -0.00223 & -0.272 & -20.6 & 0.0 & 0.000492 & 0.0538 & -23.5 & 0.0 \\
+coef_moreThanOneCar-SIGMA_STAR_Envir01 & -1.55e-05 & -0.0153 & -11.8 & 0.0 & -0.000199 & -0.212 & -9.82 & 0.0 \\
+coef_moreThanOneCar-SIGMA_STAR_Envir02 & 1.92e-05 & 0.0212 & -9.63 & 0.0 & 5.49e-05 & 0.0632 & -8.39 & 0.0 \\
+coef_moreThanOneCar-SIGMA_STAR_Envir03 & 6.48e-06 & 0.00738 & -8.64 & 0.0 & 2.02e-05 & 0.0224 & -7.44 & 1.02e-13 \\
+coef_moreThanOneCar-SIGMA_STAR_Mobil11 & -8.18e-06 & -0.00932 & -8.85 & 0.0 & -5.19e-06 & -0.00548 & -7.58 & 3.38e-14 \\
+coef_moreThanOneCar-SIGMA_STAR_Mobil14 & 1.09e-05 & 0.0126 & -8.31 & 0.0 & 6.77e-05 & 0.0827 & -7.27 & 3.72e-13 \\
+coef_moreThanOneCar-SIGMA_STAR_Mobil16 & 1.47e-06 & 0.00166 & -9.13 & 0.0 & 2.03e-05 & 0.0231 & -7.9 & 2.89e-15 \\
+coef_moreThanOneCar-SIGMA_STAR_Mobil17 & -1.79e-05 & -0.019 & -9.24 & 0.0 & 2.15e-06 & 0.00239 & -8.06 & 6.66e-16 \\
+coef_moreThanOneCar-beta_ScaledIncome_10_inf & 0.000148 & 0.125 & 10.2 & 0.0 & 1.08e-05 & 0.00516 & 7.64 & 2.13e-14 \\
+coef_moreThanOneCar-beta_ScaledIncome_4_6 & -0.00057 & -0.156 & 9.16 & 0.0 & -0.00034 & -0.054 & 6.98 & 2.9e-12 \\
+coef_moreThanOneCar-beta_ScaledIncome_6_8 & 0.000507 & 0.119 & 3.4 & 0.000665 & 8.26e-05 & 0.011 & 2.29 & 0.022 \\
+coef_moreThanOneCar-beta_ScaledIncome_8_10 & -0.00112 & -0.223 & 10.1 & 0.0 & -0.000458 & -0.0523 & 7.59 & 3.18e-14 \\
+coef_moreThanOneCar-beta_ScaledIncome_minus_inf_4 & 0.000248 & 0.116 & 8.46 & 0.0 & 0.000134 & 0.0365 & 6.18 & 6.47e-10 \\
+coef_moreThanOneCar-coef_age_65_more & 0.000222 & 0.0949 & 8.01 & 1.11e-15 & 0.000333 & 0.0782 & 5.8 & 6.48e-09 \\
+coef_moreThanOneCar-coef_haveChildren & -5.06e-05 & -0.0294 & 11.0 & 0.0 & 0.000268 & 0.0852 & 8.81 & 0.0 \\
+coef_moreThanOneCar-coef_haveGA & -0.000904 & -0.291 & 14.4 & 0.0 & 0.000238 & 0.0476 & 12.9 & 0.0 \\
+coef_moreThanOneCar-coef_highEducation & -0.000488 & -0.245 & 13.0 & 0.0 & -0.000376 & -0.106 & 10.4 & 0.0 \\
+coef_moreThanOneCar-coef_individualHouse & -0.000447 & -0.251 & 10.8 & 0.0 & -0.000932 & -0.297 & 8.13 & 4.44e-16 \\
+coef_moreThanOneCar-coef_intercept & -6.8e-05 & -0.0109 & 22.5 & 0.0 & -0.000295 & -0.0278 & 16.1 & 0.0 \\
+coef_moreThanOneCar-coef_male & 4.9e-05 & 0.0307 & 9.58 & 0.0 & -0.000151 & -0.0514 & 7.0 & 2.65e-12 \\
+coef_moreThanOneCar-coef_moreThanOneBike & -0.000791 & -0.37 & 12.4 & 0.0 & -0.00083 & -0.23 & 10.1 & 0.0 \\
+\end{tabular}

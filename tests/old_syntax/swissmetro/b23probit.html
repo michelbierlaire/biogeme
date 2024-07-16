@@ -1,0 +1,84 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>b23probit - Report from biogeme 3.2.14a0 [2024-05-14]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.2.14a0 [2024-05-14]">
+<meta name="author" content="{bv.author}">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<p>biogeme 3.2.14a0 [2024-05-14]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2024-05-14 10:16:48.053797</p>
+<table>
+<tr class=biostyle><td align=right><strong>Report file</strong>:	</td><td>b23probit.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>swissmetro</td></tr>
+</table>
+<h1>Estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Number of estimated parameters</strong>: </td> <td>5</td></tr>
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>2678</td></tr>
+<tr class=biostyle><td align=right ><strong>Excluded observations</strong>: </td> <td>8050</td></tr>
+<tr class=biostyle><td align=right ><strong>Init log likelihood</strong>: </td> <td>-1547.105</td></tr>
+<tr class=biostyle><td align=right ><strong>Final log likelihood</strong>: </td> <td>-906.9459</td></tr>
+<tr class=biostyle><td align=right ><strong>Likelihood ratio test for the init. model</strong>: </td> <td>1280.317</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square for the init. model</strong>: </td> <td>0.414</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square-bar for the init. model</strong>: </td> <td>0.411</td></tr>
+<tr class=biostyle><td align=right ><strong>Akaike Information Criterion</strong>: </td> <td>1823.892</td></tr>
+<tr class=biostyle><td align=right ><strong>Bayesian Information Criterion</strong>: </td> <td>1853.356</td></tr>
+<tr class=biostyle><td align=right ><strong>Final gradient norm</strong>: </td> <td>1.8777E-07</td></tr>
+<tr class=biostyle><td align=right ><strong>Nbr of threads</strong>: </td> <td>12</td></tr>
+<tr class=biostyle><td align=right ><strong>Relative gradient</strong>: </td> <td>7.855305839051362e-11</td></tr>
+<tr class=biostyle><td align=right ><strong>Cause of termination</strong>: </td> <td>Relative gradient = 7.9e-11 <= 6.1e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of function evaluations</strong>: </td> <td>6</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of gradient evaluations</strong>: </td> <td>6</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of hessian evaluations</strong>: </td> <td>5</td></tr>
+<tr class=biostyle><td align=right ><strong>Algorithm</strong>: </td> <td>Newton with trust region for simple bound constraints</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of iterations</strong>: </td> <td>5</td></tr>
+<tr class=biostyle><td align=right ><strong>Proportion of Hessian calculation</strong>: </td> <td>5/5 = 100.0%</td></tr>
+<tr class=biostyle><td align=right ><strong>Optimization time</strong>: </td> <td>0:00:00.015375</td></tr>
+</table>
+<h1>Estimated parameters</h1>
+<table border="1">
+<tr class=biostyle><th>Name</th><th>Value</th><th>Rob. Std err</th><th>Rob. t-test</th><th>Rob. p-value</th></tr>
+<tr class=biostyle><td>ASC_CAR</td><td>-0.353</td><td>0.108</td><td>-3.27</td><td>0.00107</td></tr>
+<tr class=biostyle><td>B_COST_CAR</td><td>-0.531</td><td>0.136</td><td>-3.9</td><td>9.6e-05</td></tr>
+<tr class=biostyle><td>B_COST_TRAIN</td><td>-0.98</td><td>0.147</td><td>-6.67</td><td>2.59e-11</td></tr>
+<tr class=biostyle><td>B_TIME_CAR</td><td>-0.184</td><td>0.0757</td><td>-2.43</td><td>0.015</td></tr>
+<tr class=biostyle><td>B_TIME_TRAIN</td><td>-0.65</td><td>0.0953</td><td>-6.82</td><td>9.37e-12</td></tr>
+</table>
+<h2>Correlation of coefficients</h2>
+<table border="1">
+<tr class=biostyle><th>Coefficient1</th><th>Coefficient2</th><th>Covariance</th><th>Correlation</th><th>t-test</th><th>p-value</th><th>Rob. cov.</th><th>Rob. corr.</th><th>Rob. t-test</th><th>Rob. p-value</th></tr>
+<tr class=biostyle><td>B_COST_CAR</td><td>ASC_CAR</td><td>-0.000785</td><td>-0.0805</td><td>-1.22</td><td>0.223</td><td>0.000218</td><td>0.0148</td><td>-1.03</td><td>0.304</td></tr>
+<tr class=biostyle><td>B_COST_TRAIN</td><td>ASC_CAR</td><td>0.0011</td><td>0.183</td><td>-6.09</td><td>1.16e-09</td><td>0.00745</td><td>0.469</td><td>-4.63</td><td>3.73e-06</td></tr>
+<tr class=biostyle><td>B_COST_TRAIN</td><td>B_COST_CAR</td><td>0.00164</td><td>0.242</td><td>-4.12</td><td>3.85e-05</td><td>0.00533</td><td>0.267</td><td>-2.62</td><td>0.00878</td></tr>
+<tr class=biostyle><td>B_TIME_CAR</td><td>ASC_CAR</td><td>-0.000177</td><td>-0.0441</td><td>1.63</td><td>0.104</td><td>-0.000475</td><td>-0.0582</td><td>1.25</td><td>0.212</td></tr>
+<tr class=biostyle><td>B_TIME_CAR</td><td>B_COST_CAR</td><td>-0.000174</td><td>-0.0385</td><td>3.01</td><td>0.00259</td><td>-0.00161</td><td>-0.156</td><td>2.09</td><td>0.0365</td></tr>
+<tr class=biostyle><td>B_TIME_CAR</td><td>B_COST_TRAIN</td><td>-3.94e-05</td><td>-0.0141</td><td>10.2</td><td>0</td><td>6.93e-05</td><td>0.00623</td><td>4.83</td><td>1.38e-06</td></tr>
+<tr class=biostyle><td>B_TIME_TRAIN</td><td>ASC_CAR</td><td>0.00393</td><td>0.535</td><td>-3.54</td><td>0.000405</td><td>0.00355</td><td>0.345</td><td>-2.54</td><td>0.0111</td></tr>
+<tr class=biostyle><td>B_TIME_TRAIN</td><td>B_COST_CAR</td><td>0.00428</td><td>0.515</td><td>-1.27</td><td>0.203</td><td>0.00587</td><td>0.453</td><td>-0.946</td><td>0.344</td></tr>
+<tr class=biostyle><td>B_TIME_TRAIN</td><td>B_COST_TRAIN</td><td>-0.000565</td><td>-0.11</td><td>3.07</td><td>0.00215</td><td>-0.00225</td><td>-0.16</td><td>1.76</td><td>0.078</td></tr>
+<tr class=biostyle><td>B_TIME_TRAIN</td><td>B_TIME_CAR</td><td>0.00134</td><td>0.391</td><td>-6.3</td><td>2.98e-10</td><td>0.0033</td><td>0.458</td><td>-5.14</td><td>2.77e-07</td></tr>
+</table>
+<p>Smallest eigenvalue: 70.5657</p>
+<p>Largest eigenvalue: 5966.7</p>
+<p>Condition number: 84.5552</p>
+</html>
