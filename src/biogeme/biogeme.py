@@ -1373,7 +1373,6 @@ class BIOGEME:
         #        - K is the number pf parameters to estimate
         self.bootstrap_results = None
         if run_bootstrap:
-            # Temporarily stop reporting log messages
             start_time = datetime.now()
 
             logger.info(
@@ -1384,6 +1383,7 @@ class BIOGEME:
                 shape=[self.bootstrap_samples, len(xstar)]
             )
             current_logger_level = logger.level
+            # Temporarily stop reporting log messages
             logger.setLevel(logging.WARNING)
             for b in range(self.bootstrap_samples):
                 if self.database.is_panel():
