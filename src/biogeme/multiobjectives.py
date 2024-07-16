@@ -12,6 +12,8 @@ returned.
 
 """
 
+import numpy as np
+
 from biogeme.deprecated import deprecated
 from biogeme.results import bioResults
 
@@ -23,6 +25,8 @@ def loglikelihood_dimension(results: bioResults) -> list[float]:
     :param results: estimation results
     :type results: biogeme.results.bioResults
     """
+    if results.data is None:
+        return [float(np.finfo(np.float32).max), float(np.finfo(np.float32).max)]
     return [-results.data.logLike, results.data.nparam]
 
 
@@ -33,9 +37,16 @@ def aic_bic_dimension(results: bioResults) -> list[float]:
     :param results: estimation results
     :type results: biogeme.results.bioResults
     """
+    if results.data is None:
+        return [
+            float(np.finfo(np.float32).max),
+            float(np.finfo(np.float32).max),
+            float(np.finfo(np.float32).max),
+        ]
+
     return [results.data.akaike, results.data.bayesian, results.data.nparam]
 
 
-@deprecated
+@deprecated(new_func=aic_bic_dimension)
 def AIC_BIC_dimension(results: bioResults) -> list[float]:
     pass

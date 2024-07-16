@@ -116,6 +116,12 @@ class Parameters:
             {name_section.section for name_section in self.all_parameters_dict.keys()}
         )
 
+    @property
+    def parameter_names(self) -> list[str]:
+        return sorted(
+            {name_section.name for name_section in self.all_parameters_dict.keys()}
+        )
+
     def add_parameter(self, parameter_tuple: ParameterTuple):
         """Add one parameter
 
@@ -128,6 +134,8 @@ class Parameters:
         ok, messages = self.check_parameter_value(parameter_tuple)
         if not ok:
             raise excep.BiogemeError(messages)
+
+        already_there = self.all_parameters_dict.get(key)
         self.all_parameters_dict[key] = parameter_tuple
 
     def read_file(self, file_name: str):
@@ -148,16 +156,18 @@ class Parameters:
         self.file_name = DEFAULT_FILE_NAME if file_name is None else file_name
 
         try:
+
             with open(self.file_name, 'r', encoding='utf-8') as f:
                 logger.debug(f'Parameter file: {os.path.abspath(self.file_name)}')
                 content = f.read()
                 self.document = tk.parse(content)
                 self.import_document()
-                logger.info(f'File {self.file_name} has been parsed.')
+                logger.info(f'Biogeme parameters read from {self.file_name}.')
 
         except FileNotFoundError:
+            info_msg = f'Default values of the Biogeme parameters are used.'
+            logger.info(info_msg)
             self.dump_file(self.file_name)
-            logger.info(f'File {self.file_name} has been created.')
 
     def parameters_in_section(self, section_name: str) -> list[ParameterTuple]:
         """Returns the parameters in a section
@@ -345,7 +355,7 @@ class Parameters:
 
     def get_value(self, name: str, section: str | None = None) -> ParameterValue:
         """Get the value of a parameter. If the parameter appears in
-        only one section, the name of the section can be ommitted.
+        only one section, the name of the section can be omitted.
 
         :param name: name of the parameter
         :type name: str

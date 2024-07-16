@@ -3,6 +3,7 @@ from typing import Callable
 
 import numpy as np
 
+from icecream import ic
 from biogeme.deprecated import deprecated
 from biogeme.function_output import FunctionOutput
 
@@ -42,6 +43,7 @@ def findiff_g(
         xp[i] = xi + s
         fp = the_function(xp).function
         g[i] = (fp - f) / s
+        ic(g[i])
     return g
 
 

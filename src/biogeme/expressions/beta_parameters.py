@@ -182,8 +182,14 @@ class Beta(Elementary):
         :type betas: dict(string:float)
         """
 
-        if self.name in betas:
-            self.initValue = betas[self.name]
+        value = betas.get(self.name)
+        if value is not None and value != self.initValue:
+            if self.status != 0:
+                warning_msg = (
+                    f'Parameter {self.name} is fixed, but its value '
+                    f'is changed from {self.initValue} to {value}.'
+                )
+            self.initValue = value
 
     def get_signature(self) -> list[bytes]:
         """The signature of a string characterizing an expression.

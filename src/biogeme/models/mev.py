@@ -12,6 +12,7 @@ from biogeme.expressions import (
     _bioLogLogitFullChoiceSet,
     _bioLogLogit,
 )
+from biogeme.deprecated import deprecated
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ def mev(
               calculated.
     :type choice: biogeme.expressions.expr.Expression
 
-    :return: Choice probability of the MEV model, given by
+    :return: Choice probability of the   MEV model, given by
 
     .. math:: \\frac{e^{V_i + \\ln G_i(e^{V_1},
               \\ldots,e^{V_J})}}{\\sum_j e^{V_j +
@@ -168,6 +169,17 @@ def logmev_endogenous_sampling(
     return log_p
 
 
+@deprecated(new_func=logmev_endogenous_sampling)
+def logmev_endogenousSampling(
+    util: dict[int, ExpressionOrNumeric],
+    log_gi: dict[int, Expression],
+    av: dict[int, ExpressionOrNumeric] | None,
+    correction: dict[int, ExpressionOrNumeric],
+    choice: ExpressionOrNumeric,
+):
+    pass
+
+
 def mev_endogenous_sampling(
     util: dict[int, ExpressionOrNumeric],
     log_gi: dict[int, Expression],
@@ -226,3 +238,14 @@ def mev_endogenous_sampling(
 
     """
     return exp(logmev_endogenous_sampling(util, log_gi, av, correction, choice))
+
+
+@deprecated(new_func=mev_endogenous_sampling)
+def mev_endogenousSampling(
+    util: dict[int, ExpressionOrNumeric],
+    log_gi: dict[int, Expression],
+    av: dict[int, ExpressionOrNumeric] | None,
+    correction: dict[int, ExpressionOrNumeric],
+    choice: ExpressionOrNumeric,
+):
+    pass

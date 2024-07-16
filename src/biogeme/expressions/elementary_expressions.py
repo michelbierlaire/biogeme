@@ -227,7 +227,10 @@ class bioDraws(Elementary):
         :param the_type: the type of expression
         :type  the_type: TypeOfElementaryExpression
         """
+
         if the_type == TypeOfElementaryExpression.DRAWS:
+            # Until version 3.2.13, this function returned the following:
+            # return {self.name: self.drawType}
             return {self.name: self}
         return {}
 
@@ -380,11 +383,10 @@ class Variable(Elementary):
 
 
 class DefineVariable(Variable):
-    """Expression that defines a new variable and add a column in the database.
-
-    This expression allows the use to define a new variable that
-    will be added to the database. It avoids that it is
-    recalculated each time it is needed.
+    """
+    .. warning:: This expression is obsolete.  Replace
+         `new_var = DefineVariable('NEW_VAR', expression, database)` by
+         `new_var = database.DefineVariable('NEW_VAR', expression)`
     """
 
     def __init__(self, name: str, expression: Expression, database: Database):

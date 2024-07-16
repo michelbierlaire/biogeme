@@ -4,12 +4,18 @@ Michel Bierlaire
 Tue Apr 9 09:12:55 2024
 """
 
+import logging
+
 import numpy as np
 
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, log, Numeric, exp
 from biogeme.mdcev.mdcev import Mdcev
+
+logger = logging.getLogger(__name__)
+
+MAX_EXP_ARGUMENT = np.log(np.finfo(dtype=float).max)
 
 
 class Translated(Mdcev):
@@ -51,7 +57,7 @@ class Translated(Mdcev):
 
         alpha_parameter = self.alpha_parameters[the_id]
 
-        gamma = self.gamma_parameters[the_id]
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return (
                 baseline_utility
@@ -79,7 +85,7 @@ class Translated(Mdcev):
                 f'Alternative id {the_id} is invalid. Valid ids: {self.alternatives}'
             )
             raise BiogemeError(error_msg)
-        gamma = self.gamma_parameters[the_id]
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return log(Numeric(1) - self.alpha_parameters[the_id]) - log(consumption)
         return log(Numeric(1) - self.alpha_parameters[the_id]) - log(
@@ -100,7 +106,7 @@ class Translated(Mdcev):
                 f'Alternative id {the_id} is invalid. Valid ids: {self.alternatives}'
             )
             raise BiogemeError(error_msg)
-        gamma = self.gamma_parameters[the_id]
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return consumption / (Numeric(1) - self.alpha_parameters[the_id])
         return (consumption + gamma) / (Numeric(1) - self.alpha_parameters[the_id])
@@ -121,8 +127,10 @@ class Translated(Mdcev):
         alpha: Expression = self.alpha_parameters[the_id]
         gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
-            return exp(baseline_utility + epsilon) * the_consumption**alpha
-        return exp(baseline_utility + epsilon) * (the_consumption + gamma) ** alpha
+            log_result = baseline_utility + epsilon + alpha * log(the_consumption)
+            return exp(log_result)
+        log_result = baseline_utility + epsilon + alpha * log(the_consumption + gamma)
+        return exp(log_result)
 
     def utility_one_alternative(
         self,
@@ -138,31 +146,18 @@ class Translated(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         alpha = self.alpha_parameters[the_id].get_value()
-        gamma = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
-            return np.exp(baseline_utility + epsilon) * the_consumption**alpha
-        return np.exp(baseline_utility + epsilon) * (the_consumption + gamma) ** alpha
-
-    def sorting_utility_one_alternative(
-        self,
-        alternative_id: int,
-        epsilon: float,
-        one_observation: Database,
-    ) -> float:
-        """Utility used to sort the alternatives. Used in the forecasting algorithm to identify chosen and non chpsen
-        alternatives"""
-
-        baseline_utility = self.calculate_baseline_utility(
-            alternative_id=alternative_id, one_observation=one_observation
+            if the_consumption == 0.0:
+                return 0.0
+            log_result = baseline_utility + epsilon + alpha * np.log(the_consumption)
+            return np.exp(log_result)
+        log_result = (
+            baseline_utility
+            + epsilon
+            + alpha * np.log(the_consumption + gamma.get_value())
         )
-        if self.scale_parameter is not None:
-            epsilon /= self.scale_parameter.get_value()
-
-        alpha = self.alpha_parameters[alternative_id].get_value()
-        gamma = self.gamma_parameters[alternative_id].get_value()
-        if gamma is None:
-            return baseline_utility + epsilon + np.log(alpha)
-        return baseline_utility + epsilon + np.log(alpha) + (alpha - 1) * np.log(gamma)
+        return np.exp(log_result)
 
     def derivative_utility_one_alternative(
         self,
@@ -178,18 +173,26 @@ class Translated(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         alpha = self.alpha_parameters[the_id].get_value()
-        gamma = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
-            return (
-                np.exp(baseline_utility + epsilon)
-                * alpha
-                * the_consumption ** (alpha - 1.0)
+            log_result = (
+                (
+                    baseline_utility
+                    + epsilon
+                    + np.log(alpha)
+                    + (alpha - 1) * np.log(the_consumption)
+                )
+                if the_consumption != 0.0
+                else 0.0
             )
-        return (
-            np.exp(baseline_utility + epsilon)
-            * alpha
-            * (the_consumption + gamma) ** (alpha - 1.0)
+            return np.exp(log_result)
+        log_result = (
+            baseline_utility
+            + epsilon
+            + np.log(alpha)
+            + (alpha - 1) * np.log(the_consumption + gamma.get_value())
         )
+        return np.exp(log_result)
 
     def optimal_consumption_one_alternative(
         self,
@@ -205,14 +208,34 @@ class Translated(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         alpha = self.alpha_parameters[the_id].get_value()
-        gamma = self.gamma_parameters[the_id].get_value()
-        numerator = dual_variable
-        denominator = np.exp(baseline_utility + epsilon) * alpha
-        ratio = numerator / denominator
+        if np.isclose(alpha, 0) or np.isclose(alpha, 1.0):
+            error_msg = f'Parameter alpha[{the_id}] must be strictly below 0 and 1: alpha[{the_id}={alpha:.3g}'
+            raise BiogemeError(error_msg)
+        gamma: Expression | None = self.gamma_parameters[the_id]
+        if dual_variable == 0.0:
+            return 0.0
+        log_ratio = np.log(dual_variable) - baseline_utility - epsilon - np.log(alpha)
+        log_result = min(log_ratio / (alpha - 1), MAX_EXP_ARGUMENT)
         if gamma is None:
-            return ratio ** (1.0 / (alpha - 1))
+            return np.exp(log_result)
+        return np.exp(log_result) - gamma.get_value()
 
-        return ratio ** (1.0 / (alpha - 1)) - gamma
+    def lower_bound_dual_variable(
+        self,
+        chosen_alternatives: set[int],
+        one_observation: Database,
+        epsilon: np.ndarray,
+    ) -> float:
+        """Method providing model specific bounds on the dual variable. It not overloaded,
+        default values are used.
+
+        :param chosen_alternatives: list of alternatives that are chosen at the optimal solution
+        :param one_observation: data for one observation.
+        :param epsilon: draws from the error term.
+        :return: a lower bound on the dual variable, such that the expenditure calculated for any larger value is
+        well-defined and non negative.
+        """
+        return 0.0
 
     def _list_of_expressions(self) -> list[Expression]:
         """Extract the list of expressions involved in the model"""

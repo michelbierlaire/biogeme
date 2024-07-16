@@ -7,17 +7,18 @@ Sun Apr 7 16:52:33 2024
 from __future__ import annotations
 
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Iterable
 from functools import lru_cache
+from typing import Any, Iterable
 
 import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from biogeme.biogeme import BIOGEME, Parameters
+from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, Elem, bioMultSum, log, exp, Beta, Numeric
@@ -27,9 +28,11 @@ from biogeme.tools.checks import validate_dict_types
 
 logger = logging.getLogger(__name__)
 
+SMALLEST_NON_ZERO_NUMBER = 1.0e-6
+
 
 @dataclass(frozen=True)
-class Configuration:
+class MdcevConfiguration:
     """Identify various configurations of the model"""
 
     gamma_is_none: bool
@@ -83,6 +86,15 @@ class Mdcev(ABC):
                 error_msg = f'Alpha parameters: {", ".join(error_messages)}'
                 raise BiogemeError(error_msg)
 
+        # Check if there is an outside good. It correspond to a gamma parameter set to None.
+        none_keys = [
+            key for key, value in self.gamma_parameters.items() if value is None
+        ]
+        if len(none_keys) > 1:
+            error_msg = f'Only one outside good is allowed, not {len(none_keys)}'
+            raise BiogemeError(error_msg)
+        self.outside_good_key = none_keys[0] if len(none_keys) != 0 else None
+
         validate_dict_types(self.baseline_utilities, 'baseline_utilities', Expression)
         validate_dict_types(self.gamma_parameters, 'gamma_parameters', Expression)
         if self.alpha_parameters is not None:
@@ -91,6 +103,13 @@ class Mdcev(ABC):
             if not isinstance(self.scale_parameter, Expression):
                 error_msg = f'Expecting a Biogeme expression and not {type(self.scale_parameter)}'
                 raise BiogemeError(error_msg)
+
+    @property
+    def outside_good_index(self) -> int | None:
+        """Obtain  the index of the outside good."""
+        if self.outside_good_key is None:
+            return None
+        return self.key_to_index[self.outside_good_key]
 
     @property
     def estimation_results(self) -> bioResults | None:
@@ -224,8 +243,8 @@ class Mdcev(ABC):
     ) -> Expression:
         """Generate the Biogeme formula for the log probability of the MDCEV model
 
-        :param number_of_chosen_alternatives: see the module documentation :mod:`biogeme.mdcev`
-        :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev`
+        :param number_of_chosen_alternatives: see the module documentation :mod:`biogeme.mdcev_no_outside_good`
+        :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev_no_outside_good`
 
         A detailed explanation is provided in the technical report
         "Estimating the MDCEV model with Biogeme"
@@ -286,17 +305,15 @@ class Mdcev(ABC):
         database: Database,
         number_of_chosen_alternatives: Expression,
         consumed_quantities: dict[int, Expression],
-        user_notes: str | None = None,
-        biogeme_parameters: str | Parameters | None = None,
+        **kwargs,
     ) -> bioResults:
         """Generate the Biogeme formula for the log probability of the MDCEV model
 
         :param database: data needed for the estimation of the parameters, in Biogeme format.
-        :param number_of_chosen_alternatives: see the module documentation :mod:`biogeme.mdcev`
-        :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev`
-        :param user_notes: notes to include in Biogeme's estimation report.
-        :param biogeme_parameters: parameters controlling the run of Biogeme. The TOML filename or the Parameter
-        object should be provided.
+        :param number_of_chosen_alternatives: see the module documentation :mod:`biogeme.mdcev_no_outside_good`
+        :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev_no_outside_good`
+        :param **kwargs: additional parameters that are transmitted as such to the constructor of the Biogeme object.
+
 
         A detailed explanation is provided in the technical report
         "Estimating the MDCEV model with Biogeme":
@@ -308,12 +325,10 @@ class Mdcev(ABC):
 
         # Create the Biogeme object
         if self.weights is None:
-            the_biogeme = BIOGEME(database, logprob)
+            the_biogeme = BIOGEME(database, logprob, **kwargs)
         else:
             formulas = {'log_like': logprob, 'weight': self.weights}
-            the_biogeme = BIOGEME(
-                database, formulas, userNotes=user_notes, parameters=biogeme_parameters
-            )
+            the_biogeme = BIOGEME(database, formulas, **kwargs)
         the_biogeme.modelName = self.model_name
         self.estimation_results = the_biogeme.estimate()
         return self.estimation_results
@@ -321,7 +336,7 @@ class Mdcev(ABC):
     @abstractmethod
     def _list_of_expressions(self) -> list[Expression]:
         """Extract the list of expressions involved in the model"""
-        pass
+        raise NotImplementedError
 
     def _update_parameters_in_expressions(self) -> None:
         """Update the value of the unknown parameters in expression, after estimation"""
@@ -330,15 +345,18 @@ class Mdcev(ABC):
             raise BiogemeError(error_msg)
 
         betas = self._estimation_results.get_beta_values()
-
         all_expressions = [
             expression
             for group in [
                 self.baseline_utilities.values(),
                 self.gamma_parameters.values(),
-                self.alpha_parameters.values() if self.alpha_parameters else [],
-                [self.scale_parameter] if self.scale_parameter else [],
-                [self.weights] if self.weights else [],
+                (
+                    self.alpha_parameters.values()
+                    if self.alpha_parameters is not None
+                    else []
+                ),
+                [self.scale_parameter] if self.scale_parameter is not None else [],
+                [self.weights] if self.weights is not None else [],
             ]
             for expression in group
             if expression is not None
@@ -360,7 +378,7 @@ class Mdcev(ABC):
         one_observation: Database,
     ) -> float:
         """Utility needed for forecasting"""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def utility_expression_one_alternative(
@@ -370,66 +388,121 @@ class Mdcev(ABC):
         unscaled_epsilon: Expression,
     ) -> Expression:
         """Utility expression. Used only for code validation."""
-        pass
+        raise NotImplementedError
 
     def sum_of_utilities(
         self, consumptions: np.ndarray, epsilon: np.ndarray, data_row: Database
     ) -> float:
         """Calculates the sum of all utilities. Used for forecasting."""
-        utilities = [
-            self.utility_one_alternative(
-                the_id=key,
-                the_consumption=float(consumptions[index]),
-                epsilon=float(epsilon[index]),
-                one_observation=data_row,
-            )
-            for index, key in enumerate(self.index_to_key)
-        ]
+        try:
+            utilities = [
+                self.utility_one_alternative(
+                    the_id=key,
+                    the_consumption=float(consumptions[index]),
+                    epsilon=float(epsilon[index]),
+                    one_observation=data_row,
+                )
+                for index, key in enumerate(self.index_to_key)
+            ]
+        except IndexError as e:
+            raise e
 
         return np.sum(utilities)
 
     def forecast_bruteforce_one_draw(
-        self, database: Database, total_budget: float, epsilon: np.ndarray
-    ) -> dict[int, float]:
-        """Forecast the optimal expenditures given a budget and one realization of epsilon for each alternative"""
+        self, one_row_database: Database, total_budget: float, epsilon: np.ndarray
+    ) -> dict[int, float] | None:
+        """Forecast the optimal expenditures given a budget and one realization of epsilon for each alternative.
+        If there is an issue with the optimization algorithm, None is returned.
+        """
 
-        assert len(database.data) == 1
-        self.database = database
+        if len(epsilon) != self.number_of_alternatives:
+            error_msg = f'epsilon must be a vector of size {self.number_of_alternatives}, not {epsilon.shape}'
+            raise BiogemeError(error_msg)
+
+        if len(one_row_database.data) != 1:
+            error_msg = f'Expecting exactly one row, not {len(one_row_database.data)}'
+            raise BiogemeError(error_msg)
+
+        self.database = one_row_database
+
+        # If there is an outside good, we need to impose that the corresponding consumption is not zero.
+        # To do that, we impose that it is equal to the exponential of a new variable.
+
+        outside_good = self.outside_good_key is not None
 
         def objective_function(x: np.ndarray) -> float:
+            """Objective function. The number of variables is the number of
+            alternatives"""
             result = self.sum_of_utilities(
-                consumptions=x, epsilon=epsilon, data_row=database
+                consumptions=x, epsilon=epsilon, data_row=one_row_database
             )
-
             return -result
 
         def budget_constraint(x: np.ndarray) -> float:
+            """Budget constraint when there is no outside good. The number of variables is the number of
+            alternatives"""
             return total_budget - x.sum()
 
-        constraints = {
-            'type': 'eq',
-            'fun': budget_constraint,
-        }
+        def opposite_budget_constraint(x: np.ndarray) -> float:
+            """Budget constraint when there is no outside good. The number of variables is the number of
+            alternatives"""
+            return x.sum() - total_budget
 
-        number_of_variables = len(self.alternatives)
-        bounds = [(0, None) for _ in range(number_of_variables)]
-        initial_guess = np.array([10] * number_of_variables)
+        constraints = [
+            {
+                'type': 'ineq',
+                'fun': budget_constraint,
+            },
+            {
+                'type': 'ineq',
+                'fun': opposite_budget_constraint,
+            },
+        ]
 
-        optimization_result = minimize(
-            objective_function,
-            initial_guess,
-            method='SLSQP',
-            bounds=bounds,
-            constraints=constraints,
+        number_of_alternatives = len(self.alternatives)
+
+        # Bounds
+        bounds: list[tuple[float | None, float | None]] = [
+            (0, total_budget) for _ in range(number_of_alternatives)
+        ]
+
+        if self.outside_good_index is not None:
+            bounds[self.outside_good_index] = (SMALLEST_NON_ZERO_NUMBER, total_budget)
+
+        # Starting point
+        # We split the budget equally across alternatives
+        initial_consumption = total_budget / number_of_alternatives
+        # We split equally across alternatives
+        initial_guess = np.array([initial_consumption] * number_of_alternatives)
+
+        # There is a bug in the minimize function. It generates a warning that crashes the script.
+        # We are converting this warning into an exception in order to catch it.
+        # Convert specific warnings to exceptions
+        warnings.filterwarnings(
+            'error',
+            message='Values in x were outside bounds during a minimize step, clipping to bounds',
         )
-        optimal_consumption = {
-            self.index_to_key[index]: optimization_result.x[index]
-            for index in range(number_of_variables)
-        }
-        for alternative in self.alternatives:
-            if alternative not in optimal_consumption:
-                optimal_consumption[alternative] = 0
-        return optimal_consumption
+
+        try:
+            optimization_result = minimize(
+                objective_function,
+                initial_guess,
+                method='SLSQP',
+                bounds=bounds,
+                constraints=constraints,
+            )
+            optimal_consumption = {
+                self.index_to_key[index]: optimization_result.x[index]
+                for index in range(number_of_alternatives)
+            }
+            for alternative in self.alternatives:
+                if alternative not in optimal_consumption:
+                    optimal_consumption[alternative] = 0
+            return optimal_consumption
+        except RuntimeWarning as e:
+            logger.warning(e)
+            return None
 
     @abstractmethod
     def derivative_utility_one_alternative(
@@ -440,7 +513,7 @@ class Mdcev(ABC):
         one_observation: Database,
     ) -> float:
         """Used in the optimization problem solved for forecasting tp calculate the dual variable."""
-        pass
+        raise NotImplementedError
 
     def optimal_consumption(
         self,
@@ -450,16 +523,18 @@ class Mdcev(ABC):
         one_observation: Database,
     ) -> dict[int, float]:
         """Analytical calculation of the optimal consumption if the dual variable is known."""
-
-        result = {
-            alt_id: self.optimal_consumption_one_alternative(
-                the_id=alt_id,
-                dual_variable=dual_variable,
-                epsilon=float(epsilon[self.key_to_index[alt_id]]),
-                one_observation=one_observation,
-            )
-            for alt_id in chosen_alternatives
-        }
+        try:
+            result = {
+                alt_id: self.optimal_consumption_one_alternative(
+                    the_id=alt_id,
+                    dual_variable=dual_variable,
+                    epsilon=float(epsilon[self.key_to_index[alt_id]]),
+                    one_observation=one_observation,
+                )
+                for alt_id in chosen_alternatives
+            }
+        except KeyError as e:
+            raise e
         return result
 
     @abstractmethod
@@ -471,8 +546,9 @@ class Mdcev(ABC):
         one_observation: Database,
     ) -> float:
         """Analytical calculation of the optimal consumption if the dual variable is known."""
-        pass
+        raise NotImplementedError
 
+    @abstractmethod
     def lower_bound_dual_variable(
         self,
         chosen_alternatives: set[int],
@@ -488,7 +564,7 @@ class Mdcev(ABC):
         :return: a lower bound on the dual variable, such that the expenditure calculated for any larger value is
         well-defined and non negative.
         """
-        return 0.0
+        raise NotImplementedError
 
     def is_next_alternative_chosen(
         self,
@@ -499,6 +575,7 @@ class Mdcev(ABC):
         total_budget: float,
         epsilon: np.ndarray,
     ) -> tuple[bool, float | None]:
+        # If the candidate alternative is the outside good, it is in the choice set by definition.
         model_lower_bound = self.lower_bound_dual_variable(
             chosen_alternatives=chosen_alternatives,
             one_observation=database,
@@ -538,7 +615,6 @@ class Mdcev(ABC):
         :param epsilon: vector of draws from the error term.
         :return: the set of chosen alternatives, as well as a lower and an upper bound on the dual variable.
         """
-
         the_unsorted_w: dict[int, float] = {
             alt_id: self.derivative_utility_one_alternative(
                 the_id=alt_id,
@@ -547,9 +623,11 @@ class Mdcev(ABC):
                 epsilon=float(epsilon[self.key_to_index[alt_id]]),
             )
             for alt_id in self.alternatives
+            if alt_id != self.outside_good_key
         }
 
         # Sort the dictionary by values (descending order)
+
         ordered_alternatives: list[int] = [
             alt_id
             for alt_id, _ in sorted(
@@ -557,7 +635,9 @@ class Mdcev(ABC):
             )
         ]
 
-        chosen_alternatives: set[int] = set()
+        chosen_alternatives: set[int] = (
+            set() if self.outside_good_key is None else {self.outside_good_key}
+        )
 
         last_chosen_alternative = None
         for candidate_alternative_id in ordered_alternatives:
@@ -597,16 +677,15 @@ class Mdcev(ABC):
 
     def forecast_bisection_one_draw(
         self,
-        database: Database,
+        one_row_of_database: Database,
         total_budget: float,
         epsilon: np.ndarray,
-        tolerance_dual=1.0e-4,
-        tolerance_budget=1.0e-4,
+        tolerance_dual=1.0e-13,
+        tolerance_budget=1.0e-13,
     ) -> dict[int, float]:
-
         chosen_alternatives, lower_bound, upper_bound = (
             self.identification_chosen_alternatives(
-                database=database, total_budget=total_budget, epsilon=epsilon
+                database=one_row_of_database, total_budget=total_budget, epsilon=epsilon
             )
         )
 
@@ -620,7 +699,7 @@ class Mdcev(ABC):
         # Estimate the dual variable by bisection
         total_consumption = 0
         continue_iterations = True
-        for _ in range(1000):
+        for _ in range(5000):
             if not continue_iterations:
                 break
             dual_variable = (lower_bound + upper_bound) / 2
@@ -628,7 +707,7 @@ class Mdcev(ABC):
                 chosen_alternatives=chosen_alternatives,
                 dual_variable=dual_variable,
                 epsilon=epsilon,
-                one_observation=database,
+                one_observation=one_row_of_database,
             )
             negative_consumption = any(
                 value < 0 for value in optimal_consumption.values()
@@ -657,7 +736,7 @@ class Mdcev(ABC):
             chosen_alternatives=chosen_alternatives,
             dual_variable=dual_variable,
             epsilon=epsilon,
-            one_observation=database,
+            one_observation=one_row_of_database,
         )
         for alternative in self.alternatives:
             if alternative not in optimal_consumption:
@@ -768,24 +847,22 @@ class Mdcev(ABC):
         self,
         database: Database,
         total_budget: float,
-        number_of_draws=100,
+        epsilons: list[np.ndarray],
         brute_force: bool = False,
-        tolerance_dual: float = 1.0e-4,
-        tolerance_budget: float = 1.0e-4,
-        user_defined_epsilon: list[np.ndarray] | None = None,
+        tolerance_dual: float = 1.0e-10,
+        tolerance_budget: float = 1.0e-10,
     ) -> list[pd.DataFrame]:
         """Forecast the optimal expenditures given a budget and one realization of epsilon for each alternative
 
         :param database: database containing the values of the explanatory variables.
         :param total_budget: total budget.
-        :param number_of_draws: number of draws for the error terms.
+        :param epsilons: draws from the error terms provided by the user. Each entry of the list corresponds
+             to an observation in the database, and consists of a data frame of
+             size=(number_of_draws, self.number_of_alternatives).
         :param brute_force: if True, the brute force algorithm is applied. It solves each optimization problem using
             the scipy optimization algorithm. If False, the method proposed by Pinjari and Bhat (2021) is used.
         :param tolerance_dual: convergence criterion for the estimate of the dual variable.
         :param tolerance_budget: convergence criterion for the estimate of the total budget.
-        :param user_defined_epsilon: draws from the error terms provided by the user. Each entry of the list corresponds
-             to an observation in the database, and consists of a data frame of
-             size=(number_of_draws, self.number_of_alternatives). If None, it is generated automatically.
         :return: a list of data frames, each containing the results for each draw
 
         .. [PinjBhat21] A. R. Pinjari, C. Bhat, Computationally efficient forecasting procedures for Kuhn-Tucker
@@ -801,39 +878,34 @@ class Mdcev(ABC):
             error_msg = 'Empty database'
             raise BiogemeError(error_msg)
 
-        if user_defined_epsilon is not None:
-            if len(user_defined_epsilon) != len(rows_of_database):
-                error_msg = (
-                    f'User provided draws have {len(user_defined_epsilon)} entries while there are '
-                    f'{len(rows_of_database)} observations in the sample.'
-                )
-                raise BiogemeError(error_msg)
+        if len(epsilons) != len(rows_of_database):
+            error_msg = (
+                f'User provided draws have {len(epsilons)} entries while there are '
+                f'{len(rows_of_database)} observations in the sample.'
+            )
+            raise BiogemeError(error_msg)
 
-            for index, epsilon in enumerate(user_defined_epsilon):
-                if epsilon.shape[0] != number_of_draws:
-                    error_msg = (
-                        f'User defined draws for obs. {index} contains {epsilon.shape[0]} '
-                        f'draws instead of {number_of_draws}'
-                    )
-                    raise error_msg
-                if epsilon.shape[1] != self.number_of_alternatives:
-                    error_msg = (
-                        f'User defined draws for obs. {index} contains {epsilon.shape[1]} '
-                        f'alternatives instead of {self.number_of_alternatives}'
-                    )
-                    raise error_msg
+        number_of_draws = None
+        for index, epsilon in enumerate(epsilons):
+            if number_of_draws is None:
+                number_of_draws = epsilon.shape[0]
+            elif epsilon.shape[0] != number_of_draws:
+                error_msg = (
+                    f'User defined draws for obs. {index} contains {epsilon.shape[0]} '
+                    f'draws instead of {number_of_draws}'
+                )
+                raise error_msg
+            if epsilon.shape[1] != self.number_of_alternatives:
+                error_msg = (
+                    f'User defined draws for obs. {index} contains {epsilon.shape[1]} '
+                    f'alternatives instead of {self.number_of_alternatives}'
+                )
+                raise error_msg
 
         all_results = []
         for index, row in enumerate(rows_of_database):
             logger.info(
                 f'Forecasting observation {index} / {len(rows_of_database)} [{number_of_draws} draws]'
-            )
-            epsilons = (
-                user_defined_epsilon[index]
-                if user_defined_epsilon is not None
-                else np.random.gumbel(
-                    loc=0, scale=1, size=(number_of_draws, self.number_of_alternatives)
-                )
             )
 
             # Forecasting
@@ -841,20 +913,20 @@ class Mdcev(ABC):
             optimal_expenditures = (
                 [
                     self.forecast_bruteforce_one_draw(
-                        database=row, total_budget=total_budget, epsilon=epsilon
+                        one_row_database=row, total_budget=total_budget, epsilon=epsilon
                     )
-                    for epsilon in epsilons
+                    for epsilon in epsilons[index]
                 ]
                 if brute_force
                 else [
                     self.forecast_bisection_one_draw(
-                        database=row,
+                        one_row_of_database=row,
                         total_budget=total_budget,
                         epsilon=epsilon,
                         tolerance_budget=tolerance_budget,
                         tolerance_dual=tolerance_dual,
                     )
-                    for epsilon in epsilons
+                    for epsilon in epsilons[index]
                 ]
             )
 
@@ -862,8 +934,205 @@ class Mdcev(ABC):
 
             # Collecting values for each key
             for optimal_solution in optimal_expenditures:
-                for key, value in optimal_solution.items():
-                    gather_data[key].append(value)
+                if optimal_solution is not None:
+                    for key, value in optimal_solution.items():
+                        gather_data[key].append(value)
 
             all_results.append(pd.DataFrame(gather_data).sort_index(axis='columns'))
         return all_results
+
+    def forecast_comparison_one_draw(
+        self,
+        one_row_of_database: Database,
+        total_budget: float,
+        epsilon: np.array,
+        tolerance_dual: float = 1.0e-10,
+        tolerance_budget: float = 1.0e-10,
+    ) -> dict[int, float] | None:
+        """Compares the results from each of the two forecasting algorithms.
+        :param one_row_of_database: list of rows from the database containing the values of the explanatory variables.
+        :param total_budget: total budget.
+        :param epsilon: draws from the error terms provided by the user. Length: self.number_of_alternatives.
+        :param tolerance_dual: convergence criterion for the estimate of the dual variable.
+        :param tolerance_budget: convergence criterion for the estimate of the total budget.
+        :return: None. Warning are triggered if discrepancies are observed.
+        """
+        if len(epsilon) != self.number_of_alternatives:
+            error_msg = f'There are {self.number_of_alternatives} alternatives and {len(epsilon)} epsilons'
+            raise BiogemeError(error_msg)
+
+        logger.info('============ Comparison ===================')
+        brute_force: dict[int, float] | None = self.forecast_bruteforce_one_draw(
+            one_row_database=one_row_of_database,
+            total_budget=total_budget,
+            epsilon=epsilon,
+        )
+
+        consumption_brute_force = (
+            np.array([value for key, value in sorted(brute_force.items())])
+            if brute_force is not None
+            else None
+        )
+        obj_brute_force = (
+            self.sum_of_utilities(
+                consumptions=consumption_brute_force,
+                epsilon=epsilon,
+                data_row=one_row_of_database,
+            )
+            if brute_force is not None
+            else None
+        )
+        constraint_brute_force = (
+            sum(consumption_brute_force) if brute_force is not None else None
+        )
+        choice_set_brute_force: set[int] | None = None
+        if brute_force is None:
+            logger.info('Brute force algorithm failed')
+        else:
+            choice_set_brute_force = set(
+                [key for key, value in brute_force.items() if not np.isclose(value, 0)]
+            )
+            formatted_brute_force = {
+                k: f'{value:.3g}' for k, value in brute_force.items()
+            }
+            logger.info(
+                f'Brute force: {formatted_brute_force} objective {obj_brute_force:.3g}, constraint {constraint_brute_force:.3g}, choice set {choice_set_brute_force}'
+            )
+        analytical = self.forecast_bisection_one_draw(
+            one_row_of_database=one_row_of_database,
+            total_budget=total_budget,
+            epsilon=epsilon,
+            tolerance_budget=tolerance_budget,
+            tolerance_dual=tolerance_dual,
+        )
+        choice_set_analytical: set[int] = set(
+            [key for key, value in analytical.items() if not np.isclose(value, 0)]
+        )
+        consumption_analytical = (
+            np.array([value for key, value in sorted(analytical.items())])
+            if analytical is not None
+            else None
+        )
+        try:
+            obj_analytical = (
+                self.sum_of_utilities(
+                    consumptions=consumption_analytical,
+                    epsilon=epsilon,
+                    data_row=one_row_of_database,
+                )
+                if analytical is not None
+                else None
+            )
+        except RuntimeWarning as e:
+            logger.warning(f'{analytical=}')
+            logger.warning(f'{consumption_analytical=}')
+            raise e
+
+        constraint_analytical = (
+            sum(consumption_analytical) if analytical is not None else None
+        )
+        if analytical is None:
+            logger.info('Analytical algorithm failed')
+        else:
+            formatted_analytical = {
+                k: f'{value:.3g}' for k, value in analytical.items()
+            }
+            logger.info(
+                f'Analytical:  {formatted_analytical} objective {obj_analytical:.3g}, constraint {constraint_analytical:.3g}, choice set {choice_set_analytical}'
+            )
+        if brute_force is None and analytical is None:
+            logger.warning('Both algorithms failed.')
+            return
+        if brute_force is None:
+            logger.warning('Brute force algorithm failed.')
+            return
+        if analytical is None:
+            logger.warning('Analytical algorithm failed.')
+            return
+        if (
+            choice_set_brute_force != choice_set_analytical
+            and choice_set_brute_force is not None
+        ):
+            logger.warning(
+                f'Different optimal choice sets: analytical {choice_set_analytical}, brute force {choice_set_brute_force}'
+            )
+        if not np.isclose(obj_analytical, obj_brute_force):
+            logger.warning(
+                f'Difference between optimal utility with analytical [{obj_analytical}] and brute '
+                f'force [{obj_brute_force}] algorithms.'
+            )
+            logger.warning(f'Solution with brute force: {brute_force}')
+            logger.warning(f'Solution with analytical: {analytical}')
+        if not np.isclose(constraint_analytical, constraint_brute_force):
+            logger.warning(
+                f'Difference between constraint with analytical [{constraint_analytical}] and brute force '
+                f'[{constraint_brute_force}] algorithms.'
+            )
+
+    def generate_epsilons(
+        self, number_of_observations: int, number_of_draws: int
+    ) -> list[np.ndarray]:
+        """Generate draws for the error terms.
+
+        :param number_of_observations: number of entries in the database.
+        :param number_of_draws: number of draws to generate
+        :return: a list of length "number_of_observations". Each element is a
+        number_of_draws x self.number_of_alternatives array.
+        """
+        return [
+            np.random.gumbel(
+                loc=0, scale=1, size=(number_of_draws, self.number_of_alternatives)
+            )
+            for _ in range(number_of_observations)
+        ]
+
+    def validate_forecast(
+        self,
+        database: Database,
+        total_budget: float,
+        epsilons: list[np.ndarray],
+        tolerance_dual: float = 1.0e-13,
+        tolerance_budget: float = 1.0e-13,
+    ) -> None:
+        """Compare the two algorithms to forecast the optimal expenditures given a budget and one realization of
+        epsilon for each alternative
+
+        :param database: database containing the values of the explanatory variables.
+        :param total_budget: total budget.
+        :param epsilons: draws from the error terms. Each entry of the list corresponds
+             to an observation in the database, and consists of a data frame of
+             size=(number_of_draws, self.number_of_alternatives).
+        :param tolerance_dual: convergence criterion for the estimate of the dual variable.
+        :param tolerance_budget: convergence criterion for the estimate of the total budget.
+
+        :return: None. Warning are triggered if discrepancies are observed
+
+        """
+
+        rows_of_database = database.mdcev_row_split()
+        if len(rows_of_database) == 0:
+            error_msg = 'Empty database'
+            raise BiogemeError(error_msg)
+
+        if len(epsilons) != len(rows_of_database):
+            error_msg = (
+                f'User provided draws have {len(epsilons)} entries while there are '
+                f'{len(rows_of_database)} observations in the sample.'
+            )
+            raise BiogemeError(error_msg)
+
+        number_of_draws = len(epsilons[0])
+        for index, row in enumerate(rows_of_database):
+            logger.info(
+                f'Forecasting observation {index} / {len(rows_of_database)} [{number_of_draws} draws]'
+            )
+
+            # Forecasting
+            for epsilon in epsilons[index]:
+                self.forecast_comparison_one_draw(
+                    total_budget=total_budget,
+                    one_row_of_database=row,
+                    epsilon=epsilon,
+                    tolerance_budget=tolerance_budget,
+                    tolerance_dual=tolerance_dual,
+                )

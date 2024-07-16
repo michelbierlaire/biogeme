@@ -321,3 +321,24 @@ class _bioLogLogitFullChoiceSet(LogLogit):
        formulas for the utilities. It uses only the C++ implementation.
 
     """
+
+    def __init__(
+        self, util: dict[int, ExpressionOrNumeric], choice: ExpressionOrNumeric
+    ):
+        """Constructor
+
+        :param util: dictionary where the keys are the identifiers of
+                     the alternatives, and the elements are objects
+                     defining the utility functions.
+
+        :type util: dict(int:biogeme.expressions.Expression)
+
+        :param choice: formula to obtain the alternative for which the
+                       logit probability must be calculated.
+        :type choice: biogeme.expressions.Expression
+
+        :raise BiogemeError: if one of the expressions is invalid, that is
+            neither a numeric value nor a
+            biogeme.expressions.Expression object.
+        """
+        super().__init__(util=util, av=None, choice=choice)

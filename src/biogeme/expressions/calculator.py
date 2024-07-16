@@ -9,11 +9,14 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 import cythonbiogeme.cythonbiogeme as ee
+
 from biogeme.exceptions import BiogemeError
 
 from biogeme.function_output import (
     BiogemeFunctionOutput,
     BiogemeDisaggregateFunctionOutput,
+    BiogemeFunctionOutputSmartOutputProxy,
+    BiogemeDisaggregateFunctionOutputSmartOutputProxy,
 )
 
 if TYPE_CHECKING:
@@ -30,7 +33,10 @@ def calculate_function_and_derivatives(
     calculate_hessian: bool,
     calculate_bhhh: bool,
     aggregation: bool,
-) -> BiogemeFunctionOutput | BiogemeDisaggregateFunctionOutput:
+) -> (
+    BiogemeFunctionOutputSmartOutputProxy
+    | BiogemeDisaggregateFunctionOutputSmartOutputProxy
+):
     """Interface with the C++ implementation calculating the expression
 
     :param the_expression: expression to calculate for each entry in the database.
@@ -84,12 +90,24 @@ def calculate_function_and_derivatives(
     hres = h if calculate_hessian else None
     bhhhres = b if calculate_bhhh else None
     if aggregation:
-        return BiogemeFunctionOutput(
+        result = BiogemeFunctionOutput(
             function=f[0],
             gradient=None if gres is None else g[0],
             hessian=None if hres is None else h[0],
             bhhh=None if bhhhres is None else b[0],
         )
-    return BiogemeDisaggregateFunctionOutput(
+        return BiogemeFunctionOutputSmartOutputProxy(result)
+    disaggregate_result = BiogemeDisaggregateFunctionOutput(
         functions=f, gradients=gres, hessians=hres, bhhhs=bhhhres
     )
+    if database is not None:
+        return BiogemeDisaggregateFunctionOutputSmartOutputProxy(disaggregate_result)
+
+    # If database is None, only one value is calculated
+    result = disaggregate_result.unique_entry()
+    if result is None:
+        error_msg = (
+            f'Incorrect number of entries: {len(disaggregate_result)}. Expected 1.'
+        )
+        raise BiogemeError(error_msg)
+    return BiogemeFunctionOutputSmartOutputProxy(result)

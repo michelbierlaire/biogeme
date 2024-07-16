@@ -11,7 +11,7 @@ import numpy as np
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, log, Numeric, exp
-from biogeme.mdcev.mdcev import Mdcev, Configuration
+from biogeme.mdcev.mdcev import Mdcev, MdcevConfiguration
 from biogeme.tools.checks import validate_dict_types
 
 
@@ -86,17 +86,23 @@ class Generalized(Mdcev):
             )
 
         dict_of_configurations: dict[
-            Configuration, Callable[[], Expression | float]
+            MdcevConfiguration, Callable[[], Expression | float]
         ] = {
-            Configuration(gamma_is_none=True, price_is_none=True): no_gamma_no_price,
-            Configuration(gamma_is_none=True, price_is_none=False): no_gamma_yes_price,
-            Configuration(gamma_is_none=False, price_is_none=True): yes_gamma_no_price,
-            Configuration(
+            MdcevConfiguration(
+                gamma_is_none=True, price_is_none=True
+            ): no_gamma_no_price,
+            MdcevConfiguration(
+                gamma_is_none=True, price_is_none=False
+            ): no_gamma_yes_price,
+            MdcevConfiguration(
+                gamma_is_none=False, price_is_none=True
+            ): yes_gamma_no_price,
+            MdcevConfiguration(
                 gamma_is_none=False, price_is_none=False
             ): yes_gamma_yes_price,
         }
 
-        current_configuration = Configuration(
+        current_configuration = MdcevConfiguration(
             gamma_is_none=gamma is None, price_is_none=price is None
         )
 
@@ -192,15 +198,20 @@ class Generalized(Mdcev):
             epsilon /= self.scale_parameter.get_value()
         price: float = 1 if self.prices is None else self.prices[the_id].get_value()
         alpha: float = self.alpha_parameters[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return (
                 np.exp(baseline_utility + epsilon)
                 * (the_consumption / price) ** alpha
                 / alpha
             )
-        the_term = (1 + the_consumption / (price * gamma)) ** alpha
-        return np.exp(baseline_utility + epsilon) * gamma * (the_term - 1) / alpha
+        the_term = (1 + the_consumption / (price * gamma.get_value())) ** alpha
+        return (
+            np.exp(baseline_utility + epsilon)
+            * gamma.get_value()
+            * (the_term - 1)
+            / alpha
+        )
 
     def sorting_utility_one_alternative(
         self,
@@ -236,7 +247,7 @@ class Generalized(Mdcev):
             epsilon /= self.scale_parameter.get_value()
         price: float = 1.0 if self.prices is None else self.prices[the_id].get_value()
         alpha: float = self.alpha_parameters[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return (
                 np.exp(baseline_utility + epsilon)
@@ -245,7 +256,7 @@ class Generalized(Mdcev):
             )
         return (
             np.exp(baseline_utility + epsilon)
-            * (1 + the_consumption / (price * gamma)) ** (alpha - 1)
+            * (1 + the_consumption / (price * gamma.get_value())) ** (alpha - 1)
             / price
         )
 
@@ -264,14 +275,31 @@ class Generalized(Mdcev):
             epsilon /= self.scale_parameter.get_value()
         price: float = 1.0 if self.prices is None else self.prices[the_id].get_value()
         alpha: float = self.alpha_parameters[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         numerator = price * dual_variable
         denominator = np.exp(baseline_utility + epsilon)
         ratio = numerator / denominator
         exponent = 1 / (alpha - 1)
         if gamma is None:
             return price * ratio**exponent
-        return price * gamma * (ratio**exponent - 1)
+        return price * gamma.get_value() * (ratio**exponent - 1)
+
+    def lower_bound_dual_variable(
+        self,
+        chosen_alternatives: set[int],
+        one_observation: Database,
+        epsilon: np.ndarray,
+    ) -> float:
+        """Method providing model specific bounds on the dual variable. It not overloaded,
+        default values are used.
+
+        :param chosen_alternatives: list of alternatives that are chosen at the optimal solution
+        :param one_observation: data for one observation.
+        :param epsilon: draws from the error term.
+        :return: a lower bound on the dual variable, such that the expenditure calculated for any larger value is
+        well-defined and non negative.
+        """
+        return 0.0
 
     def _list_of_expressions(self) -> list[Expression]:
         """Extract the list of expressions involved in the model"""

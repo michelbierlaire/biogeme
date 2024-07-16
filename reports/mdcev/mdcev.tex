@@ -8,6 +8,10 @@
 \usepackage{varioref}
 \usepackage{amsthm}
 \newtheorem{lemma}{Lemma}
+\usepackage{longtable}
+\usepackage{caption}
+
+
 \newtheorem{property}{Property}
 \newtheorem{corollary}{Corollary}
 
@@ -107,19 +111,22 @@ $J_n$ items in total. Given a total budget of $E_n$, this individual
 decides on purchasing a quantity $y_{in}$ of each item. This decision
 must verify the following budget constraint:
 \[
-\sum_{i \in \mathcal{C}_n} e_{in} = \sum_{i \in \mathcal{C}_n} p_{in} y_{in} \leq E_n,
+\sum_{i \in \mathcal{C}_n} e_{in} = \sum_{i \in \mathcal{C}_n} p_{in} y_{in} = E_n,
 \]
 where:
 \begin{itemize}
     \item $p_{in} > 0$ is the price per unit of item $i$ for the individual $n$.
     \item $e_{in} = p_{in} y_{in}$ represents the total expenditure by individual $n$ on item $i$.
 \end{itemize}
-We assume that at least one item is consumed. Note that it is mathematically equivalent
+There is no upper bound on what can be consumed for each item or, if there is, it is beyond the total budget $E_n$, so that
+it does not generate any binding constraint.
+Note that it is mathematically equivalent
 to write the problem in terms of expenditures $e$ or in terms of quantities $y$. We adopt the former.
 
 
 Each item $i$ is associated with a utility $U_{in}(x_{in}, e_{in}, \varepsilon_{in}; \theta)$, where $x_{in}$ are explanatory variables,
 $e_{in}$ is the expenditure of individual $n$ for alternative $i$, $\varepsilon_{in}$ is an error term independent from $x_{in}$ and $e_{in}$, and $\theta$ is a vector of parameters, to be estimated from data.
+The error terms $\varepsilon_{in}$ are assumed to be independent and identically distributed, following an extreme value distribution.
 We identify two
 properties that the utility functions must have. Both are relatively
 weak conditions. The first one is related to the optimality
@@ -143,53 +150,55 @@ The expenditure decisions $e_{1n}, \ldots, e_{J_n, n}$ are assumed to be the sol
 \end{equation}
 subject to
 \begin{align}
-  \sum_{i \in \mathcal{C}_n} e_{in} & \leq E_n,\label{eq:budget_constraint}\\
+  \sum_{i \in \mathcal{C}_n} e_{in} & = E_n,\label{eq:budget_constraint}\\
  e_{in} &\geq 0. \label{eq:non_negativity}
 \end{align}
-The optimality conditions can be derived from the Lagrangian of the problem. We introduce a Lagrange multiplier $\lambda \geq 0$
-associated with constraint \req{eq:budget_constraint} and a Lagrange multiplier $\mu_i \geq 0$ for each constraint \req{eq:non_negativity}. The Lagrangian is defined as
+The optimality conditions can be derived from the Lagrangian of the problem. We introduce a Lagrange multiplier $\lambda \in \R$
+associated with constraint \req{eq:budget_constraint} and a Lagrange multiplier $\eta_i \geq 0$ for each constraint \req{eq:non_negativity}. The Lagrangian is defined as
 \begin{equation}
-  \L(e;\lambda, \mu) = -\sum_{i \in \C_n} U_{in} + \lambda\left(\sum_{i \in \mathcal{C}_n} e_{i}-E_n\right) - \sum_{i \in \C_n} \mu_i e_i.
+  \L(e_n;\lambda_n, \eta_n) = -\sum_{i \in \C_n} U_{in} + \lambda_n\left(\sum_{i \in \mathcal{C}_n} e_{in}-E_n\right) - \sum_{i \in \C_n} \eta_{in} e_{in}.
 \end{equation}
 The first order optimality conditions state that
 \begin{equation}
   \label{eq:optimality}
-\frac{\partial \L}{\partial e_i} = - \frac{\partial U_{in}}{\partial e_i} + \lambda - \mu_i  = 0, \text{ and } \mu_i e_i = 0, \; \forall i \in \C_n.
+\frac{\partial \L}{\partial e_{in}} = - \frac{\partial U_{in}}{\partial e_{in}} + \lambda_n - \eta_{in}  = 0, \text{ and } \eta_{in} e_{in} = 0, \; \forall i \in \C_n.
 \end{equation}
 Note that we assume that the second order optimality conditions are also verified. This is the case if the utility functions are concave, for instance.
 
-At least one item is consumed. We assume without loss of generality that it is item 1. Therefore $e_{1n} > 0$ and $\mu_1=0$. Consequently, \req{eq:optimality} can be written
+At least one item is consumed. We assume without loss of generality that it is item 1. Therefore $e_{1n} > 0$ and $\eta_{1n}=0$. Consequently, \req{eq:optimality} can be written
 \begin{equation}
     \label{eq:optimality_one}
-\lambda = \frac{\partial U_{1n}}{\partial e_1}.
+\lambda_n = \frac{\partial U_{1n}}{\partial e_{1n}}.
 \end{equation}
 
 Consider a chosen alternative $i\neq 1$ such that $e_{in} > 0$. Using the same argument, we can write
 \begin{equation}
     \label{eq:optimality_i}
-\frac{\partial U_{in}}{\partial e_i} = \lambda= \frac{\partial U_{1n}}{\partial e_1}.
+\frac{\partial U_{in}}{\partial e_{in}} = \lambda_n= \frac{\partial U_{1n}}{\partial e_{1n}}.
 \end{equation}
 
-Therefore, if the dual variable $\lambda$ is known, the optimal expenditure for a chosen alternative $i$ can be obtained by solving
+Therefore, if the dual variable $\lambda_n$ is known, the optimal expenditure for a chosen alternative $i$ can be obtained by solving
 Equation~\req{eq:optimality_i}, analytically, or numerically. This quantity is denoted
 \begin{equation}
     \label{eq:optimal_consumption}
-    e_{in}(x_{in}; \lambda, \theta),
+    e_{in}(x_{in}; \lambda_n, \theta),
 \end{equation}
 and is such that
 \[
-   \frac{\partial U_{in}}{\partial e_i}\left(e_{in}(x_{in}; \lambda, \theta)\right) = \lambda.
+   \frac{\partial U_{in}}{\partial e_{in}}\left(e_{in}(x_{in}; \lambda_n, \theta)\right) = \lambda_n.
 \]
 
-Consider an alternative $i$ such that $e_{in} = 0$. In this case, $\mu_i=  \lambda- \frac{\partial U_{in}}{\partial e_i} \geq 0$ and
+Consider an alternative $i$ such that $e_{in} = 0$. In this case, $\eta_{in}=  \lambda_n- \frac{\partial U_{in}}{\partial e_{in}} \geq 0$ and
 \begin{equation}
 \label{eq:unchosen}
-\frac{\partial U_{in}}{\partial e_i}  \leq \lambda = \frac{\partial U_{1n}}{\partial e_1}.
+\frac{\partial U_{in}}{\partial e_{in}}  \leq \lambda_n = \frac{\partial U_{1n}}{\partial e_{1n}}.
 \end{equation}
-Note that we can transform the utility functions $U_{in}$ with any order preserving function $F$ without changing the solution of the problem. An order preserving function is a strictly increasing function $F$ of one variable such that $F'(u) > 0$. In that case,
+Note that we can transform the utility functions $U_{in}$ with any order preserving function $\phi$
+without changing the solution of the problem. An order preserving function is a strictly increasing
+function $\phi$ of one variable such that $\phi'(u) > 0$. In that case,
 \begin{equation}
 \label{eq:phi_transform}
-\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) \leq \phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) \Longleftrightarrow
+\phi\left(\frac{\partial U_{in}}{\partial e_{in}}\right) \leq \phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) \Longleftrightarrow
 \frac{\partial U_{in}}{\partial e_i}  \leq \frac{\partial U_{1n}}{\partial e_1}.
 \end{equation}
 
@@ -218,43 +227,48 @@ be forecast. The procedure to calculate this forecast is described in Section~\r
 \label{sec:likelihood}
 
 We assume that we have observed a sample of individuals. For each individual $n$, we have access to the explanatory
-variables and the expenditures for each alternative: $x_{in}$, $e_{in}$, for $i \in \C_n$. The objective is to infer the
-value of the unknown parameters $\theta$ from this sample.
+variables and the expenditures for each alternative: $x_{i}$, $e_{in}$, for $i \in \C_n$. The objective is to infer the
+value of the unknown parameters $\theta$ from this sample. In the following, we drop the index $n$ of the decision-maker
+for notational convenience.
 
 In order to calculate the (log)-likelihood of observed expenditures, we are interested in the distribution of the vector $e_n$
 provided by the model. We have
 established that it is a function of the vector of disturbances
-$\varepsilon_n$: $e_n = H(\varepsilon_n)$.  Consequently, if we assume
-a distribution for $\varepsilon_n$, characterized by a probability
+$\varepsilon$: $e = H(\varepsilon)$.  Consequently, if we assume
+a distribution for $\varepsilon$, characterized by a probability
 density function (pdf) $f_\varepsilon$ and a cumulative distribution
-function (CDF) $F_\varepsilon$, we can characterize the distribution of $e_n$.
+function (CDF) $F_\varepsilon$, we can characterize the distribution of $e$.
 
-We start by assuming that $e_{1n}$, the consumed quantity of item 1 is
-known and non zero. Consequently, the value of $\varepsilon_{1n}$ is known as
+We start by assuming that $e_{1}$, the consumed quantity of item 1 is
+known and non zero. Consequently, the value of $\varepsilon_{1}$ is known as
 well. In order to derive the pdf evaluated at $e$, we split the vector $e$ into its positive entries $e^+$ and its
-zero entries $e^0$, alternative 1 being excluded. In an analogous way, we denote $\C^+$ and $\C^0$ the corresponding sets of indices, of size $J^+$ and $J^0$, respectively.
+zero entries $e^0$, alternative 1 being excluded. In an analogous way, we denote $\C^+=\{2, \ldots, J^+ +1\}$ and
+$\C^0=\{J^{+}+2, \ldots, J\}$
+the corresponding sets of indices, of size $J^+$ and $J^0$, respectively, so that $J=J^+ + J^0 + 1$.
 
 For each $i \in \C^+$, we can use \req{eq:non_zero}
-to define $\varepsilon_n = H^{-1}(e_n)$, where $H^{-1}:\R^{J^+-1}\to\R^{J^+-1}$ is defined as
+to define a function  $H^{-1}:\R^{J^+-1}\to\R^{J^+-1}$  as
 \begin{equation}
   \label{eq:change_variable}
-H_i^{-1}(e) = \varepsilon_{i+1,n}   =   V_{1n}(e_1) - V_{i+1,n}(e_{i+1}) + \varepsilon_{1n}.
+\varepsilon_{i} = H_i^{-1}(e) = V_{1}(e_{1}) - V_{i}(e_{i}) + \varepsilon_{1}.
 \end{equation}
-Therefore, the density function can be decomposed as
+Therefore, the density function can be written as
 \begin{align*}
-  f_e(e^+, e^0 | e_1) &= f_e(e^+ | e^0, e_1) \prob(e^0 |e_1) \\
-                     &= f_\varepsilon(\varepsilon^+ | \varepsilon^0, \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right)  \prob(e^0 |e_1),
+  f_e(e^+, e^0 | \varepsilon_1)  &= f_\varepsilon(\varepsilon^+ , \varepsilon^0| \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right),\\
+     &= f_\varepsilon(V_1-V_2+\varepsilon_1, \ldots, V_1-V_{{J^+}+1} + \varepsilon_1, \varepsilon_{J^+ +2}, \ldots, \varepsilon_J | \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right).
 \end{align*}
-where
+Therefore, we can write the conditional likelihood function as
 \begin{align*}
-  \prob(e^0 |e_1) &= \prob(V_{in} + \varepsilon_{in}  \leq V_{1n} + \varepsilon_{1n},\; \forall i\in\C^0) \\
-  &= \prob(\varepsilon_{in}  \leq V_{1n} -V_{in} + \varepsilon_{1n},\; \forall i\in\C^0) \\
-  &= F_\varepsilon(\varepsilon_{1n}, 1, \ldots, 1, (V_{1n} -V_{in} + \varepsilon_{1n})_{i\in \C^0}).
+    f_e(e^+, e^0=0 | \varepsilon_1) =&  \det \left( \frac{\partial H^{-1}}{\partial e}\right)\\
+    &\int_{\varepsilon_{J^+ +2}}^{V_1-V_{J^+ +2}+ \varepsilon_1}\ldots  \int_{\varepsilon_{J}}^{V_1-V_{J}+ \varepsilon_1} \\
+    &f_\varepsilon(\varepsilon_1, V_1-V_2+\varepsilon_1, \ldots, V_1-V_{{J^+}+1} + \varepsilon_1, \varepsilon_{J^+ +2}, \ldots, \varepsilon_J ) \\
+    &d\varepsilon_J\ldots d\varepsilon_{_{J^+ +2}}.
 \end{align*}
+
 From \req{eq:change_variable}, we can calculate the entries of the Jacobian $\partial H^{-1}/\partial e$. Indeed,
 \begin{align*}
-  \frac{\partial H_i^{-1}(e)}{\partial e_k} &= \frac{\partial V_{1n}}{\partial e_1}\frac{\partial e_1}{\partial e_k}  & \text{if } k \neq i+1, \\
-  &= \frac{\partial V_{1n}}{\partial e_1}\frac{\partial e_1}{\partial e_k} - \frac{\partial V_{i+1,n}}{\partial e_{i+1}}& \text{if } k = i+1.
+  \frac{\partial H_i^{-1}(e)}{\partial e_k} &= \frac{\partial V_{1}}{\partial e_1}\frac{\partial e_1}{\partial e_k}  & \text{if } k \neq i+1, \\
+  &= \frac{\partial V_{1}}{\partial e_1}\frac{\partial e_1}{\partial e_k} - \frac{\partial V_{i+1}}{\partial e_{i+1}}& \text{if } k = i+1.
 \end{align*}
 From \req{eq:budget_constraint}, we have
 \[
@@ -290,25 +304,27 @@ Therefore, the determinant is equal to
 \]
 Note that this determinant depends only on the utility function, not on the distribution of the $\varepsilon_n$.
 
-Therefore, the density function of the expenditures is given by
+Therefore, the (unconditional) likelihood function  is given by
 \begin{equation}
   \label{eq:density}
-f_e(e^+, e^0) =   \left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\int_{\varepsilon_1=-\infty}^{+\infty}  f_\varepsilon(\varepsilon^+ | \varepsilon^0, \varepsilon_1) F_\varepsilon(\varepsilon_{1n}, \ldots)f_\varepsilon(\varepsilon_1) d\varepsilon_1,
-\end{equation}
-where $f_\varepsilon(\varepsilon_1)$ is the marginal distribution of $\varepsilon_1$, and
-\[
-F_\varepsilon(\varepsilon_{1n}, \ldots) = F_\varepsilon(\varepsilon_{1n}, 1, \ldots, 1, (V_{1n} -V_{in} + \varepsilon_{1n})_{i\in \C^0}).
-\]
+  \begin{aligned}
+    f_e(e^+, e^0=0)  =&  \left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\\
+    &\int_{\varepsilon_1}\int_{\varepsilon_{J^+ +2}}^{V_1-V_{J^+ +2}+ \varepsilon_1}\ldots  \int_{\varepsilon_{J^+ +2}}^{V_1-V_{J}+ \varepsilon_1} \\
+    &f_\varepsilon(\varepsilon_1, V_1-V_2+\varepsilon_1, \ldots, V_1-V_{{J^+}+1} + \varepsilon_1, \varepsilon_{J^+ +2}, \ldots, \varepsilon_J) \\
+    &d\varepsilon_J\ldots d\varepsilon_{_{J^+ +2}}d\varepsilon_1.
+\end{aligned}
+ \end{equation}
+
 
 Equation \req{eq:density} corresponds to Equation~11 in \citeasnoun{BHAT2008274}.
 
-If we assume that the $\varepsilon_{in}$ are independent, we obtain the MDCEV model introduced by \citeasnoun{BHAT2005679}. In that case,  the density \req{eq:density} is
+If we use the assumption that the $\varepsilon_{i}$ are extreme value distributed, we obtain the MDCEV model introduced by \citeasnoun{BHAT2005679}. In that case,  the likelihood function \req{eq:density} is
 \begin{equation}
-  f_e(e^+, e^0) = \mu^{J^+-1}\left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right) \left( \frac{\prod_{i \in \C^+} e^{\mu V_{in}}}{(\sum_{i\in\C_n} e^{\mu V_{in}})^{J^+}} \right) (J^+-1)!,
+  f_e(e^+, e^0=0) = \mu^{J^+-1}\left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right) \left( \frac{\prod_{i \in \C^+} e^{\mu V_{in}}}{(\sum_{i\in\C_n} e^{\mu V_{in}})^{J^+}} \right) (J^+-1)!,
 \end{equation}
 where the derivation is available in \citeasnoun{BHAT2008274}. Therefore, the contribution of observation $n$ to the log likelihood is
 \begin{align*}
-  \ln  f_e(e^+, e^0) =& (J^+-1) \ln \mu \\
+  \ln  f_e(e^+, e^0=0) =& (J^+-1) \ln \mu \\
   &+ \sum_{i=1}^{J^+} \ln c_i \\
   &+ \ln\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\\
   &+ \mu \sum_{i \in \C^+} V_{in} \\
@@ -321,7 +337,7 @@ Note that the last term is a constant, and is ignored by Biogeme.
 \label{sec:forecasting}
 We assume that we have  a sample of individuals, either directly observed, or coming from a scenario. For each individual $n$, we have access to the explanatory
 variables for each alternative: $x_{in}$, for $i \in \C_n$. We also assume that an estimation of the unknown parameters $\theta$ is available. The objective is to forecast the
-distribution of expenditures $e_{n}$ for each individual $n$ in the sample.
+distribution of expenditures $e_{n}$ for each individual $n$ in the sample, given a total budget $E_n$.
 
 This involves generating $R$ draws $\varepsilon^r_i$, $r=1, \ldots, R$, from the error terms $\varepsilon_{i}$ and, for each draw $r$, solving the
 optimization problem defined in equations \req{eq:obj}--\req{eq:non_negativity}:
@@ -330,7 +346,7 @@ optimization problem defined in equations \req{eq:obj}--\req{eq:non_negativity}:
 \]
 subject to
 \begin{align*}
-  \sum_{i \in \mathcal{C}} e_{i} &\leq E,\\
+  \sum_{i \in \mathcal{C}} e_{i} &= E,\\
  e_{i} &\geq 0.
 \end{align*}
 For the sake of notational clarity, we have dropped the index $n$ representing the individual. We denote by $e_r^*$ and $\lambda_r^*$
@@ -373,7 +389,7 @@ solution, that is, all alternatives such that the optimal expenditure is non zer
     \end{property}
 \begin{property}
     \label{prop:three}
-    For each chosen alternative $i\in\C^*$, there exists  a lower bound $\lambda^\ell_i \geq 0$ such that
+    For each chosen alternative $i\in\C^*$, there exists  a lower bound $\lambda^\ell_i$ such that
     \[
             \lambda^\ell_i \leq \lambda^*,
     \]
@@ -390,7 +406,7 @@ of $\frac{\partial \lambda}{\partial e_i}$. And, from the optimality condition \
 \]
 
 As discussed later, all models implemented in the current version of Biogeme have those properties. Therefore, the
-bisection algorithm can be applied.
+analytical algorithm can be applied.
 
 We first derive some immediate corollaries of the above properties that are exploited in the design of the algorithm.
 
@@ -448,37 +464,62 @@ The next result provides a condition to verify if an alternative is in the optim
     Let's assume that the numbering of the alternatives is organized in decreasing order of $W_i$,
 and that we have already established that alternatives $1,\ldots, M$ are chosen. We define
     \[
-        \lambda^{\ell}_{\C} = \max_{i=1, \ldots, M}\lambda^\ell_i,
+        \lambda^{\ell}_{\C_{M+1}} = \max_{i=1, \ldots, M+1}\lambda^\ell_i,
     \]
-    where $\lambda^\ell_i$ is the lower bound defined by Property~\ref{prop:three}.
-    Then, alternative $M+1$ is chosen in the optimal solution if and only if $\lambda^\ell_{\C} \leq W_{M+1}$ and $E(W_{M+1})< E$.
+    where $\lambda^\ell_i$ is the lower bound defined by Property~\ref{prop:three}, and the set $\C=\{1,\ldots, M+1\}$.
+    Then, alternative $M+1$ is chosen in the optimal solution if and only if $\lambda^\ell_{\C_{M+1}} \leq W_{M+1}$ and $E(W_{M+1})< E$.
 \end{lemma}
 \begin{proof}
-    First, note that the condition $\lambda^\ell_{\C} \leq W_{M+1}$ guarantees that $E(W_{M+1})$ is well defined and non negative.
-    Using  Equation~\req{eq:check_total_budget}, $E(W_{M+1})< E$ is equivalent to $E(W_{M+1})< E(\lambda^*)$. From Corollary~\ref{cor:total_consumption},
-    it is equivalent to establish that alternative $M+1$ is chosen in the optimal solution if and only if
-    $W_{M+1} \geq \lambda^\ell_{\C}$ and $W_{M+1} > \lambda^*$.
-    To show that, we consider both possibilities: whether $M+1$ is included in the choice set or not.
+    We consider both possibilities: whether $M+1$ is included in the choice set or not.
     \begin{itemize}
         \item If $M+1$ is chosen in the optimal solution, Property~\ref{prop:one} guarantees that
          \[
-        \lambda^* < W_{M+1},
+        \lambda^* < W_{M+1}.
          \]
-        and Property~\ref{prop:three} guarantees that $\lambda^\ell_{\C} \leq \lambda^*$ (as all alternatives in $\C$ are chosen), so that
+        From Corollary~\ref{cor:total_consumption}, it means that
         \[
-        \lambda^\ell_{\C} < W_{M+1},
+            E(W_{M+1}) < E(\lambda^*) = E.
+        \]
+        Also, Property~\ref{prop:three} guarantees that $\lambda^\ell_{\C_{M+1}} \leq \lambda^*$ (as all alternatives in $\C_{M+1}$ are chosen), so that
+        \[
+        \lambda^\ell_{\C_{M+1}} < W_{M+1},
          \]
          thereby confirming the sufficient condition.
         \item For the necessary condition, we prove the contrapositive: if  $M+1$ is not chosen in the optimal solution, than,
-        $W_{M+1} < \lambda^\ell_\C$ or $W_{M+1} \leq \lambda^*$.
+        $\lambda^\ell_{\C_{M+1}} > W_{M+1}$ or $E(W_{M+1}) \geq E$.
         If $M+1$ is not chosen, then $e^*_{M+1}=0$ is optimal. From the optimality condition \req{eq:unchosen},
     \[
-        \lambda^* \geq \frac{\partial U_{M+1}}{\partial e_{M+1}}(e_{M+1}=0) = W_{M+1},
+        \lambda^* \geq \frac{\partial U_{M+1}}{\partial e_{M+1}}(e_{M+1}=0) = W_{M+1}.
     \]
-        which is true irrespectively if $W_{M+1} < \lambda^\ell_{M+1}$ is true or not.
+        From Corollary~\ref{cor:total_consumption}, it means that
+        \[
+            E( W_{M+1}) \geq E(\lambda^*) = E,
+        \]
+
+        which is true irrespectively if $\lambda^\ell_{\C_{M+1}} > W_{M+1}$ is true or not.
     \end{itemize}
 \end{proof}
 
+\begin{lemma}
+    \label{lemma:monotonic}
+    If the utility function is monotonic in one of the expenditures, that is, if
+    \[
+        \exists i \in \C_n \text{ such that } \frac{\partial U_{in}}{\partial e_{in}} \geq 0,
+    \]
+    then $\lambda^* \geq 0$.
+\end{lemma}
+\begin{proof}
+    Suppose that alternative $i$ is consumed at the optimal solution. In that case Eq. \req{eq:optimality_i} states that
+    \[
+      \lambda^* =  \frac{\partial U_{in}}{\partial e_{in}} \geq 0,
+    \]
+    and the result holds.
+    Suppose that alternative $i$ is not consumed at the optimal solution. In that case Eq. \req{eq:unchosen} states that
+    \[
+      \lambda^* \geq  \frac{\partial U_{in}}{\partial e_{in}} \geq 0,
+    \]
+    and the result holds as well.
+\end{proof}
 
 \subsection{The analytical algorithm}
 
@@ -499,7 +540,7 @@ are exploited in order to identify the optimal set of chosen alternatives.
 In order to identify the chosen alternatives, Corollary~\ref{cor:bounds_lambda} suggests to sort the alternatives in decreasing
 order of $W_i$. For each alternative in this sequence, we check whether it is chosen using Lemma~\ref{lemma:next_alt}. If it is, we proceed to the next
 one; if not, we have identified all chosen alternatives, and we can terminate the process.
-It is described in Algorithm~\ref{algo:chosen}, where we use $\lambda^\ell_0 = 0$.
+It is described in Algorithm~\ref{algo:chosen}:
 
 \begin{algorithm}[htb]
 \caption{\label{algo:chosen}Identification of the chosen alternatives}
@@ -509,8 +550,8 @@ It is described in Algorithm~\ref{algo:chosen}, where we use $\lambda^\ell_0 = 0
 \BlankLine
 
 $M \leftarrow 0$.\;
-$\lambda_\ell \leftarrow 0$.\;
-\While{$\lambda^\ell \leq W_{M+1}$ and $E(W_{M+1})< E$}{
+$\lambda_\ell \leftarrow -\infty$.\;
+\While{$\lambda_\ell \leq W_{M+1}$ and $E(W_{M+1})< E$}{
     $M \leftarrow M + 1$,\;
     $\lambda_{\ell} \leftarrow \max(\lambda_{\ell}, \lambda^\ell_{M})$.
 }
@@ -528,7 +569,7 @@ The initialization is based on Property~\ref{prop:three} and \req{eq:bounds_lamb
 $W_M$ is an upper bound on $\lambda^*$.
 If all alternatives are chosen, that is, if $M=J$, we use Property~\ref{prop:three} and define
 \[
-   \lambda^\ell_{\C^*} =  \max_{i\in \C^*} \lambda^\ell_{M}
+   \lambda^\ell_{\C^*} =  \max_{i\in \C^*} \lambda^\ell_i
 \]
 as a lower bound.
 If $M < J$, \req{eq:bounds_lambda} suggests also $W_{M+1}$ as a lower bound. Therefore, we use the best one:\[
@@ -556,9 +597,8 @@ optimal expenditures.
 \DontPrintSemicolon
 \KwIn{$E$, $\C^*= \{1,\ldots, M \}$, $\delta_\lambda$, $\delta_E$.}
 \KwOut{$\lambda^*$.}
-\KwOut{$\lambda^*$.}
 \BlankLine
-$\lambda_\ell \leftarrow \max(\lambda^\ell_{M}, W_{M+1})$, where $W_{M+1}=0$ if $M=J$.\;
+$\lambda_\ell \leftarrow \max(\lambda^\ell_{M}, W_{M+1})$, where $W_{M+1}=-\infty$ if $M=J$.\;
 $\lambda_u \leftarrow W_M$.\;
 \Repeat{$\lambda_u - \lambda_{\ell} \leq \delta_{\lambda}$ \textbf{or} $\left| E(\widehat{\lambda}) - E \right| \leq \delta_E$.}{
     $\widehat{\lambda} = (\lambda_{\ell} + \lambda_u) / 2.$\;
@@ -587,8 +627,8 @@ For forecasting, it is needed to first check if each specification comply with  
 If so, the analytical algorithm can be used. It requires the implementation of the following functions:
 \begin{itemize}
     \item a function calculating the value of the utility function $U_{in}$,
-    \item a function calculating calculating the derivatives of the utility functions $\partial U_{in}/\partial e_i$,
-    \item a function calculating the optimal expenditure \req{eq:optimal_consumption} as a function of the dual variable.
+    \item a function calculating the derivatives of the utility functions $\partial U_{in}/\partial e_i$,
+    \item a function calculating the optimal expenditures \req{eq:optimal_consumption} as a function of the dual variable.
 \end{itemize}
 
 
@@ -620,6 +660,7 @@ We can calculate
 \begin{equation}
 \frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i(e_i + \gamma_i)^{\alpha_i-1}.
 \end{equation}
+Note that these quantities are always positive, so that the utility functions are all monotonic.
 Evaluated at zero expenditure, we obtain
 \begin{equation}
 W_{in} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i \gamma_i^{\alpha_i-1}.
@@ -671,7 +712,7 @@ Consider a chosen alternative $i$. From the optimality KKT conditions, we have t
 \begin{align*}
    \ln \lambda^* &= \beta^T x_{in}+ \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_{in} + \gamma_i) \\
     &= \beta^T x_{in}+ \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (\frac{e_{in}}{\gamma_i}+1) +  (\alpha_i-1) \ln \gamma_i \\
-    &= W_{in} +  (\alpha_i-1) \ln (\frac{e_i}{\gamma_i}+1),
+    &= \ln W_{in} +  (\alpha_i-1) \ln (\frac{e_{in}}{\gamma_i}+1),
 \end{align*}
 where $\lambda^*$ is the optimal dual variable associated with the budget constraint.
 Property~\ref{prop:one} follows from the fact that
@@ -685,11 +726,13 @@ Property~\ref{prop:one} follows from the fact that
     \frac{\partial^2 U_{in}}{\partial e_i^2} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i(\alpha_i-1)(e_i + \gamma_i)^{\alpha_i-2}.
 \]
 The strict concavity comes from the fact that $0 <\alpha_i < 1$.
-\item Finally, for Property~\ref{prop:three}, \req{eq:translated_optimal} is well defined for any $\lambda \geq 0$. Moreover,
-    $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$. Therefore,
-\[
+\item Finally, for Property~\ref{prop:three}, we use \[
               \lambda^\ell_i = 0.
 \]
+ It is indeed a lower bound thanks to the monotonicity
+of the utility function, and Lemma~\ref{lemma:monotonic}. Moreover,
+\req{eq:translated_optimal} is well defined for any $\lambda \geq 0$. Finally,
+    $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$.
 
 
 \end{enumerate}
@@ -719,6 +762,7 @@ and
 \begin{equation}
   \frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1}.
 \end{equation}
+Note that these quantities are always positive, so that the utility functions are all monotonic.
 Evaluated at zero expenditure, we obtain
 \[
     W_{in} =  \frac{1}{p_i} \exp(\beta^T x_{in} + \varepsilon_{in}).
@@ -782,7 +826,7 @@ Therefore,
 \]
 Consider a chosen alternative $i$. From the optimality KKT conditions, we have that
 \[
-   \ln \lambda^* =W_{in}+ (\alpha_i-1) \ln\left(\frac{e_i}{p_i \gamma_i}+1\right),
+   \ln \lambda^* =\ln W_{in}+ (\alpha_i-1) \ln\left(\frac{e_{in}}{p_i \gamma_i}+1\right),
 \]
 and
 \[
@@ -803,11 +847,13 @@ For the outside good,
    \frac{\partial^2 U_{in}}{\partial e_i^2} = (\alpha_i-1)\frac{1}{p_i\gamma_i}\exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-2}
 \]
 The strict concavity comes from the fact that $0 <\alpha_i < 1$.
-\item Finally, for Property~\ref{prop:three}, \req{eq:generalized_optimal_outside} and \req{eq:generalized_optimal} are well defined for any $\lambda \geq 0$. Moreover,
-    if $i>1$, $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$. Therefore,
-\[
+\item Finally, for Property~\ref{prop:three}, we use \[
               \lambda^\ell_i = 0.
 \]
+ It is indeed a lower bound thanks to the monotonicity
+of the utility function, and Lemma~\ref{lemma:monotonic}.  Moreover, \req{eq:generalized_optimal_outside} and
+\req{eq:generalized_optimal} are well defined for any $\lambda \geq 0$. Finally,
+    if $i>1$, $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$.
 \end{enumerate}
 
 
@@ -835,9 +881,14 @@ and
 \[
 \frac{\partial U_{in}}{\partial e_i} =  \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{e_i + p_i \gamma_i}.
 \]
+Note that these quantities are always positive, so that the utility functions are all monotonic.
 Evaluated at zero expenditure, we obtain
 \[
-    W_{in} =  \frac{1}{p_i}\exp(\beta^T x_{in} + \varepsilon_{in}).
+    W_{in} =  \frac{1}{p_i}\exp(\beta^T x_{in} + \varepsilon_{in}),
+\]
+except for the outside good, where we define
+\[
+    W_{1n} = +\infty.
 \]
 
 For forecasting purposes, as described in Section~\ref{sec:forecasting}, we need to obtain $e_i(\lambda)$, the solution of the equation
@@ -919,15 +970,17 @@ and
     \frac{\partial^2 U_{in}}{\partial e_i^2} = -\exp(\beta^T x_{in} + \varepsilon_{in}) \gamma_i(e_i + p_i \gamma_i)^{-2},
 \]
 and the strict concavity is verified as $\gamma_i > 0$.
-\item Finally, for Property~\ref{prop:three}, \req{eq:gamma_optimal_outside} and \req{eq:gamma_optimal} are well defined for any $\lambda > 0$. Moreover,
-    if $i>1$, $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$. Therefore,
-\[
+\item Finally, for Property~\ref{prop:three}, we use \[
               \lambda^\ell_i = 0.
 \]
+ It is indeed a lower bound thanks to the monotonicity
+of the utility function, and Lemma~\ref{lemma:monotonic}. Moreover, \req{eq:gamma_optimal_outside} and
+\req{eq:gamma_optimal} are well defined for any $\lambda > 0$. Finally,
+    if $i>1$, $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$.
 \end{enumerate}
 \subsection{The non-monotonic model}
 
-\citeasnoun{Wang:2023aa} introduce the following specification in order to accommodate non-monotonic preferences, motivated in the context of time consumption. With our notations, the specification is
+\citeasnoun{WangYe24} and \citeasnoun{Wang:2023aa} introduce the following specification in order to accommodate non-monotonic preferences, motivated in the context of time consumption. With our notations, the specification is
 \[
 U_{1n}(e_1) =  \frac{1}{\alpha_1}e^{\beta^T x_{in}}e_1^{\alpha_1}+(\theta^T z_{in} + \varepsilon_{in}) e_1.
 \]
@@ -951,6 +1004,8 @@ and
 \[
 \frac{\partial U_{in}}{\partial e_i} = e^{\beta^T x_{in}}  \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-1} + \theta^T z_{in} + \varepsilon_{in}.
 \]
+Note that the sign of the derivatives cannot be predetermined, meaning that the utility functions are not necessarily
+monotonic, like for the other models.
 Evaluated at zero expenditure, we obtain
 \[
     W_{in} = e^{\beta^T x_{in}} + \theta^T z_{in} + \varepsilon_{in}.
@@ -968,11 +1023,12 @@ and
     \label{eq:expenditure_from_lambda}
   e_i(\lambda) = \gamma_i\left[\left(e^{-\beta^T x_{in}}(\lambda -\theta^T z_{in} - \varepsilon_{in}) \right)^{\frac{1}{\alpha_i-1}}-1\right].
  \end{equation}
-Note that this formula is valid is
+Note that these formulas are valid is
 \[
     \lambda \geq \theta^T z_{in}+\varepsilon_{in}.
 \]
-Also, $e_i(\lambda) \geq 0$ if
+Note also that  $e_1(\lambda) \geq 0$, and,
+ for $i>1$, $e_i(\lambda) \geq 0$ if
 \[
     \lambda \leq W_{in}.
 \]
@@ -1062,7 +1118,7 @@ and the strict concavity is verified as $0 < \alpha_i < 1$.
     \[
         \lambda \geq \theta^T z_{in} + \varepsilon_{in}.
     \]
-    and the expenditure is non negative if $\lambda \leq W_i$, which is guaranteed by Property~\ref{prop:one}. Therefore,
+    and, for $i>1$, the expenditure is non negative if $\lambda \leq W_i$, which is guaranteed by Property~\ref{prop:one}. Therefore,
     \[
         \lambda^{\ell}_i = \theta^T z_{in} + \varepsilon_{in}.
     \]
@@ -1072,7 +1128,202 @@ and the strict concavity is verified as $0 < \alpha_i < 1$.
 
 \subsection{Data}
 
-\note{MENGYI: please provide a description of the data here.}
+We use as data the 2019 American Time Use Survey (ATUS). The description of the variables is available below,
+as well as some descriptive statistics in Table~\vref{tab:stats}.
+
+SEE ALSO \citeasnoun{WangYe24}
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.7\textwidth}|}
+  \hline
+  \textbf{Variables} & \textbf{Description} \\
+  \hline
+  \endfirsthead
+
+  \hline
+   \textbf{Variables} & \textbf{Description} \\
+  \hline
+  \endhead
+
+  \hline
+  \endfoot
+
+  \hline
+  \endlastfoot
+
+\textbf{PERSONID} &
+
+Respondent identifier\\
+
+\textbf{WEIGHT} &
+
+Weight variable for each respondent \\
+
+\textbf{HHSIZE} &
+
+Number of people living in respondent's household \\
+
+\textbf{CHILDNUM} &
+
+Number of household children $<$18 \\
+
+\textbf{FAMINC} &
+
+Family annual income (1:Less than \$5,000; 2:\$5,000 to \$7,499; 3:\$7,500 to \$9,999; 4:\$10,000 to \$12,499;
+  5:\$12,500 to \$14,999; 6:\$15,000 to \$19,999; 7:\$20,000 to \$24,999; 8:\$25,000 to \$29,999; 9:\$30,000
+  to \$34,999; 10:\$35,000 to \$39,999; 11:\$40,000 to \$49,999; 12:\$50,000 to \$59,999; 13:\$60,000 to
+  \$74,999; 14:\$75,000 to \$99,999; 15:\$100,000 to \$149,999; 16:\$150,000 and over) \\
+
+\textbf{FAMINC25K} &
+
+Family annual income $<$\$25,000(0 = no, 1 = yes) \\
+
+\textbf{INCOME} &
+
+Median value of the corresponding segment of variable FAMINC \\
+
+\textbf{EMPLOYED} &
+
+Whether the respondent is employed (0 = no, 1 = yes) \\
+
+\textbf{FULLTIME} &
+
+Whether the respondent is full time employed (0 = no, 1 = yes) \\
+
+\textbf{SPOUSEPR} &
+
+Whether the respondent has spouse or unmarried partner in the household (0 = no, 1 = yes) \\
+
+\textbf{SPOUSEMP} &
+
+Whether the respondent has employed spouse or unmarried partner in the household (0 = no, 1 = yes) \\
+
+\textbf{MALE} &
+
+Whether the respondent is male (0 = no, 1 = yes) \\
+
+\textbf{MARRIED} &
+
+Whether the respondent is married (0 = no, 1 = yes) \\
+
+\textbf{AGE} &
+
+Age of the respondent \\
+
+\textbf{AGE2} &
+
+Age squared of the respondent \\
+
+\textbf{AGE15\_40} &
+
+Whether the age of the respondent is in [15, 40] (0 = no, 1 = yes) \\
+
+\textbf{AGE41\_60} &
+
+Whether the age of the respondent is in [41, 60] (0 = no, 1 = yes) \\
+
+\textbf{AGE61\_85} &
+
+Whether the age of the respondent is in [61, 85] (0 = no, 1 = yes) \\
+
+\textbf{BACHIGHER} &
+
+Whether the highest degree of the respondent is a bachelor's or above (0 = no, 1 = yes) \\
+
+\textbf{WHITE} &
+
+Whether the respondent is white (0 = no, 1 = yes) \\
+
+\textbf{METRO} &
+
+Whether the respondent is from metropolitan area (0 = no, 1 = yes) \\
+
+\textbf{DIARYDAY} &
+
+Day of the week of diary day (1 = Sunday, 7 = Saturday) \\
+
+\textbf{SUNDAY} &
+
+Whether the diary day is Sunday (0 = no, 1 = yes) \\
+
+\textbf{HOLIDAY} &
+
+Whether the diary day is Holiday (0 = no, 1 = yes) \\
+
+\textbf{WEEKEARN} &
+
+Weekly earnings at main job (-1 = not available) \\
+
+\textbf{WEEKWORDUR} &
+
+Weekly work hours at main job (-1 = not available) \\
+
+\textbf{HHCHILD} &
+
+Presence of household children $<$ 18 (0 = no, 1 = yes) \\
+
+\textbf{OHHCHILD} &
+
+Presence of own household children $<$ 18 (0 = no, 1 = yes) \\
+
+\textbf{t1} &
+
+Time consumption of shopping activities (min) \\
+
+\textbf{t2} &
+
+Time consumption of socializing activities (min) \\
+
+\textbf{t3} &
+
+Time consumption of recreational activities (min) \\
+
+\textbf{t4} &
+
+Time consumption of personal and household affairs activities (min) \\
+
+\end{longtable}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l l l l l}
+\textbf{Variable} & \textbf{Min} & \textbf{Max} & \textbf{Mean} & \textbf{St.Dev.} \\
+\hline
+\textbf{WEIGHT} & 0.08 & 3.72 & 0.56 & 0.39 \\
+\textbf{HHSIZE} & 1 & 10 & 2.61 & 1.49 \\
+\textbf{CHILDNUM} & 0 & 7 & 0.71 & 1.08 \\
+\textbf{FAMINC} & 1 & 16 & 11.54 & 3.90 \\
+\textbf{FAMINC25K} & 0 & 1 & 0.18 & 0.39 \\
+\textbf{INCOME} & 2.50 & 150.00 & 72.34 & 47.08 \\
+\textbf{EMPLOYED} & 0 & 1 & 0.62 & 0.49 \\
+\textbf{FULLTIME} & 0 & 1 & 0.49 & 0.50 \\
+\textbf{SPOUSEPR} & 0 & 1 & 0.54 & 0.50 \\
+\textbf{SPOUSEMP} & 0 & 1 & 0.37 & 0.48 \\
+\textbf{MALE} & 0 & 1 & 0.45 & 0.50 \\
+\textbf{MARRIED} & 0 & 1 & 0.50 & 0.50 \\
+\textbf{AGE} & 15 & 85 & 50.54 & 18.25 \\
+\textbf{AGE2} & 225 & 7225 & 2887.74 & 1873.69 \\
+\textbf{AGE15\_40} & 0 & 1 & 0.34 & 0.47 \\
+\textbf{AGE41\_60} & 0 & 1 & 0.33 & 0.47 \\
+\textbf{AGE61\_85} & 0 & 1 & 0.34 & 0.47 \\
+\textbf{BACHIGHER} & 0 & 1 & 0.40 & 0.49 \\
+\textbf{WHITE} & 0 & 1 & 0.81 & 0.39 \\
+\textbf{METRO} & 0 & 1 & 0.84 & 0.36 \\
+\textbf{DIARYDAY} & 1 & 7 & 3.87 & 2.997 \\
+\textbf{SUNDAY} & 0 & 1 & 0.52 & 0.50 \\
+\textbf{HOLIDAY} & 0 & 1 & 0.01 & 0.11 \\
+\textbf{WEEKEARN} & -1 & 2884.61 & 604.64 & 783.26 \\
+\textbf{WEEKWORDUR} & -1 & 144 & 22.74 & 22.61 \\
+\textbf{HHCHILD} & 0 & 1 & 0.38 & 0.49 \\
+\textbf{OHHCHILD} & 0 & 1 & 0.30 & 0.46 \\
+\textbf{t1} & 0 & 640 & 30.03 & 54.66 \\
+\textbf{t2} & 0 & 905 & 114.67 & 139.76 \\
+\textbf{t3} & 0 & 900 & 51.11 & 108.96 \\
+\textbf{t4} & 0 & 773 & 58.22 & 61.05 \\
+\end{tabular}
+
+\caption{\label{tab:stats}Descriptive statistics}
+\end{center}
+    \end{table}
 
 In terms of implementation, the data preparation is the same as for any regular Biogeme model. In particular,
 it involves the following steps.
@@ -1095,7 +1346,7 @@ weight = Variable('weight')
 
 \subsection{Baseline utilities}
 
-The baseline utilities are defined in the exact same way as for regular Biogeme models, in the form of a dictoinary associating
+The baseline utilities are defined in the exact same way as for regular Biogeme models, in the form of a dictionary associating
 the identifier of each alternative with the specification of the utility function.
 
 \begin{lstlisting}
@@ -1382,6 +1633,11 @@ The result is a list of data frames, one per entry in the database (two, in this
 the forecasting results for each realization of the error term. Note that the parameter \lstinline{brute_force} selecting the forecasting algorithm is
 optional and set to \lstinline{False} by default. It means that the analytical algorithm is used.
 
+\section{Ackowledgments}
+
+The authors would like to thank Chandra Bhat and Angela Haddad for sharing estimation results for validation purposes.
+The comments and suggestions of Jason Hawkins about an earlier version of this report and the estimation code have been really useful.
+The second author was funded by the China Scholarship Council.
 
 \bibliographystyle{dcu}
 \bibliography{transpor}

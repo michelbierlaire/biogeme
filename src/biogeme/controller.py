@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import logging
 import random
-from functools import partial, reduce
+from functools import reduce
 from itertools import product
 from typing import TYPE_CHECKING, Iterable, Callable
 
+import biogeme
 from biogeme.configuration import (
     SelectionTuple,
     Configuration,
@@ -26,7 +27,10 @@ if TYPE_CHECKING:
     from biogeme.expressions import Expression
     from biogeme.catalog import Catalog
 
-ControllerOperator = Callable[[Configuration, int], tuple[Configuration, int]]
+ControllerOperator = Callable[
+    [biogeme.configuration.Configuration, int],
+    tuple[biogeme.configuration.Configuration, int],
+]
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +236,9 @@ class CentralController:
         )
         return Configuration(selections)
 
-    def set_configuration(self, configuration: Configuration) -> None:
+    def set_configuration(
+        self, configuration: biogeme.configuration.Configuration
+    ) -> None:
         """Apply a configuration to the controllers
 
         :param configuration: the configuration to be applied
@@ -242,7 +248,7 @@ class CentralController:
             controller.controller_name: False for controller in self.controllers
         }
         for selection in configuration.selections:
-            controller = self.dict_of_controllers.get(selection.controller)
+            controller: Controller = self.dict_of_controllers.get(selection.controller)
             if controller is None:
                 error_msg = (
                     f"Wrong configuration: {configuration}. Controller "
@@ -287,8 +293,11 @@ class CentralController:
         the_controller.set_index(index)
 
     def increased_controller(
-        self, controller_name: str, current_config: Configuration, step: int
-    ) -> tuple[Configuration, int]:
+        self,
+        controller_name: str,
+        current_config: biogeme.configuration.Configuration,
+        step: int,
+    ) -> tuple[biogeme.configuration.Configuration, int]:
         """Increase the selection of one controller by "step"
 
         :param controller_name: name of the controller to modify
@@ -314,8 +323,8 @@ class CentralController:
     ) -> ControllerOperator:
 
         def operator_increased_controller(
-            current_config: Configuration, step: int
-        ) -> tuple[Configuration, int]:
+            current_config: biogeme.configuration.Configuration, step: int
+        ) -> tuple[biogeme.configuration.Configuration, int]:
             return self.increased_controller(
                 controller_name=controller_name,
                 current_config=current_config,
@@ -325,21 +334,17 @@ class CentralController:
         return operator_increased_controller
 
     def decreased_controller(
-        self, controller_name: str, current_config: Configuration, step: int
-    ) -> tuple[Configuration, int]:
+        self,
+        controller_name: str,
+        current_config: biogeme.configuration.Configuration,
+        step: int,
+    ) -> tuple[biogeme.configuration.Configuration, int]:
         """Decrease the selection of one controller by "step"
 
         :param controller_name: name of the controller to modify
-        :type controller_name: str
-
         :param current_config: current configuration
-        :type current_config: str
-
         :param step: number of steps to perform
-        :type step: int
-
         :return: ID of the new configuration and number of steps performed.
-        :rtype: tuple(Configuration, int)
         """
         self.set_configuration(current_config)
         the_controller = self.dict_of_controllers.get(controller_name)
@@ -355,8 +360,8 @@ class CentralController:
     ) -> ControllerOperator:
 
         def operator_decreased_controller(
-            current_config: Configuration, step: int
-        ) -> tuple[Configuration, int]:
+            current_config: biogeme.configuration.Configuration, step: int
+        ) -> tuple[biogeme.configuration.Configuration, int]:
             return self.decreased_controller(
                 controller_name=controller_name,
                 current_config=current_config,
@@ -370,9 +375,9 @@ class CentralController:
         first_controller_name: str,
         second_controller_name: str,
         direction: str,
-        current_config: Configuration,
+        current_config: biogeme.configuration.Configuration,
         step: int,
-    ) -> tuple[Configuration, int]:
+    ) -> tuple[biogeme.configuration.Configuration, int]:
         """Modification of two controllers. Meaning of direction:
 
         - NE (North-East): first controller increased by "step", second
@@ -388,19 +393,10 @@ class CentralController:
         :type first_controller_name: str
 
         :param second_controller_name: name of the second_controller to modify
-        :type second_controller_name: str
-
         :param direction: direction based on the compass rose. Must be NE, NW, SE or SW
-        :type direction: str
-
         :param current_config: current configuration
-        :type current_config: str
-
         :param step: number of steps to perform
-        :type step: int
-
         :return: ID of the new configuration and number of steps performed.
-        :rtype: tuple(str, int)
 
         """
         if direction not in ["NE", "NW", "SE", "SW"]:
@@ -429,8 +425,8 @@ class CentralController:
     ) -> ControllerOperator:
 
         def operator_two_controller(
-            current_config: Configuration, step: int
-        ) -> tuple[Configuration, int]:
+            current_config: biogeme.configuration.Configuration, step: int
+        ) -> tuple[biogeme.configuration.Configuration, int]:
             return self.two_controllers(
                 first_controller_name=first_controller_name,
                 second_controller_name=second_controller_name,
@@ -444,20 +440,15 @@ class CentralController:
     def modify_random_controllers(
         self,
         increase: bool,
-        current_config: Configuration,
+        current_config: biogeme.configuration.Configuration,
         step: int,
-    ) -> tuple[Configuration, int]:
+    ) -> tuple[biogeme.configuration.Configuration, int]:
         """Increase the selection of "step" controllers by 1
 
         :param increase: If True, the indices are increased . If
             False, they are decreased.
-        :type increase: bool
-
         :param current_config: current configuration
-        :type current_config: str
-
         :param step: number of steps to perform
-        :type step: int
 
         """
         self.set_configuration(current_config)
@@ -479,8 +470,8 @@ class CentralController:
     ) -> ControllerOperator:
 
         def operator_modify_random_controller(
-            current_config: Configuration, step: int
-        ) -> tuple[Configuration, int]:
+            current_config: biogeme.configuration.Configuration, step: int
+        ) -> tuple[biogeme.configuration.Configuration, int]:
             return self.modify_random_controllers(
                 increase=increase,
                 current_config=current_config,

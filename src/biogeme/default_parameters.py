@@ -14,6 +14,7 @@ from typing import NamedTuple, Type, Callable
 
 import numpy as np
 
+from biogeme.version import get_version
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
 
@@ -91,7 +92,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='number_of_draws',
-            value=20000,
+            value=100,
             type=int,
             section='MonteCarlo',
             description='int: Number of draws for Monte-Carlo integration.',
@@ -130,6 +131,17 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_integer, cp.is_non_negative),
         ),
         ParameterTuple(
+            name='large_data_set',
+            value=100_000,
+            type=int,
+            section='Estimation',
+            description=(
+                'If the number of observations is larger than this value, the data set is deemed large, and the '
+                'default estimation algorithm will not use second derivatives.'
+            ),
+            check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
             name='max_number_parameters_to_report',
             value=15,
             type=int,
@@ -161,7 +173,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             type=int,
             section='Estimation',
             description=(
-                'If the expression contrains catalogs, the parameter sets an '
+                'If the expression contains catalogs, the parameter sets an '
                 'upper bound of the total number of possible combinations '
                 'that can be estimated in the same loop.'
             ),
@@ -172,12 +184,12 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='optimization_algorithm',
-            value='simple_bounds',
+            value='automatic',
             type=str,
             section='Estimation',
             description=(
                 f'str: optimization algorithm to be used for estimation. '
-                f'Valid values: {list(opt.algorithms.keys())}'
+                f'Valid values: {["automatic"]+list(opt.algorithms.keys())}'
             ),
             check=(cp.check_algo_name,),
         ),
@@ -194,7 +206,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='tolerance',
-            value=np.finfo(np.float64).eps ** 0.3333,
+            value=np.finfo(np.float64).eps ** 0.25,
             type=float,
             section='SimpleBounds',
             description='float: the algorithm stops when this precision is reached',
@@ -202,7 +214,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='max_iterations',
-            value=100,
+            value=1000,
             type=int,
             section='SimpleBounds',
             description='int: maximum number of iterations',
@@ -308,5 +320,13 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
                 'successful or not.'
             ),
             check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='version',
+            value=get_version(),
+            type=str,
+            section='Biogeme',
+            description='Version of Biogeme that created the TOML file. Do not modify this value.',
+            check=(),
         ),
     )

@@ -143,19 +143,23 @@ class GammaProfile(Mdcev):
         one_observation: Database,
     ) -> float:
         """Utility used in the optimization problem solved for forecasting."""
+        gamma: Expression | None = self.gamma_parameters[the_id]
+        if gamma is None and np.isclose(the_consumption, 0.0):
+            error_msg = f'Alternative {the_id} is the outside good. Its consumption cannot be zero.'
+            raise BiogemeError(error_msg)
         baseline_utility = self.calculate_baseline_utility(
             alternative_id=the_id, one_observation=one_observation
         )
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         price: float = 1 if self.prices is None else self.prices[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+
         if gamma is None:
             return np.exp(baseline_utility + epsilon) * np.log(the_consumption / price)
         return (
             np.exp(baseline_utility + epsilon)
-            * gamma
-            * np.log(1 + the_consumption / (price * gamma))
+            * gamma.get_value()
+            * np.log(1 + the_consumption / (price * gamma.get_value()))
         )
 
     def derivative_utility_one_alternative(
@@ -165,20 +169,25 @@ class GammaProfile(Mdcev):
         epsilon: float,
         one_observation: Database,
     ) -> float:
-        """Used in the optimization problem solved for forecasting tp calculate the dual variable."""
+        """Used in the optimization problem solved for forecasting to calculate the dual variable."""
+
+        # For the outside good, the value at zero  consumption is +infinity.
+        if the_id == self.outside_good_index and the_consumption == 0.0:
+            return np.inf
+
         baseline_utility = self.calculate_baseline_utility(
             alternative_id=the_id, one_observation=one_observation
         )
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         price: float = 1 if self.prices is None else self.prices[the_id].get_value()
-        gamma: float | None = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return np.exp(baseline_utility + epsilon) / the_consumption
         return (
             np.exp(baseline_utility + epsilon)
-            * gamma
-            / (the_consumption + price * gamma)
+            * gamma.get_value()
+            / (the_consumption + price * gamma.get_value())
         )
 
     def optimal_consumption_one_alternative(
@@ -195,33 +204,30 @@ class GammaProfile(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         price: float = 1 if self.prices is None else self.prices[the_id].get_value()
-        gamma: float | None = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return np.exp(baseline_utility + epsilon) / dual_variable
         return (
-            np.exp(baseline_utility + epsilon) * gamma / dual_variable - price * gamma
+            np.exp(baseline_utility + epsilon) * gamma.get_value() / dual_variable
+            - price * gamma.get_value()
         )
 
-    def sorting_utility_one_alternative(
+    def lower_bound_dual_variable(
         self,
-        alternative_id: int,
-        epsilon: float,
+        chosen_alternatives: set[int],
         one_observation: Database,
+        epsilon: np.ndarray,
     ) -> float:
-        """Utility used to sort the alternatives. Used in the forecasting algorithm to identify chosen and non-chpsen
-        alternatives"""
-        baseline_utility = self.calculate_baseline_utility(
-            alternative_id=alternative_id, one_observation=one_observation
-        )
-        if self.scale_parameter is not None:
-            epsilon /= self.scale_parameter.get_value()
-        price: float = (
-            1 if self.prices is None else self.prices[alternative_id].get_value()
-        )
+        """Method providing model specific bounds on the dual variable. It not overloaded,
+        default values are used.
 
-        if self.prices:
-            return baseline_utility + epsilon - np.log(self.prices[alternative_id])
-        return baseline_utility + epsilon
+        :param chosen_alternatives: list of alternatives that are chosen at the optimal solution
+        :param one_observation: data for one observation.
+        :param epsilon: draws from the error term.
+        :return: a lower bound on the dual variable, such that the expenditure calculated for any larger value is
+        well-defined and non negative.
+        """
+        return 0.0
 
     def _list_of_expressions(self) -> list[Expression]:
         """Extract the list of expressions involved in the model"""

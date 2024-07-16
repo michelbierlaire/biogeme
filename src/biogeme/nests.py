@@ -242,7 +242,7 @@ class NestsForNestedLogit(Nests):
 
     def correlation(
         self,
-        parameters: dict[str, float],
+        parameters: dict[str, float] | None = None,
         alternatives_names: dict[int, str] | None = None,
         mu: float = 1.0,
     ) -> pd.DataFrame:
@@ -264,7 +264,8 @@ class NestsForNestedLogit(Nests):
         correlation = np.identity(nbr_of_alternatives)
         for m in self.tuple_of_nests:
             if isinstance(m.nest_param, Expression):
-                m.nest_param.set_estimated_values(parameters)
+                if parameters:
+                    m.nest_param.change_init_values(parameters)
                 mu_m = m.nest_param.get_value_c(prepare_ids=True)
             else:
                 mu_m = m.nest_param
@@ -366,6 +367,19 @@ class NestsForCrossNestedLogit(Nests):
         }
         return alphas
 
+    def get_alpha_values(self, alternative_id: int) -> dict[str, float]:
+        """Generates a dict mapping each nest with the value of the alpha
+        parameters, for a given alternative
+
+        :param alternative_id: identifier of the alternative
+        :return: a dict mapping the name of a nest and the value of the alpha expression
+        """
+        alpha_dict = self.get_alpha_dict(alternative_id=alternative_id)
+        alpha_values = {
+            key: expression.get_value() for key, expression in alpha_dict.items()
+        }
+        return alpha_values
+
     def check_validity(self) -> tuple[bool, str]:
         """Verifies if the cross-nested logit specification is valid
 
@@ -378,7 +392,7 @@ class NestsForCrossNestedLogit(Nests):
         for nest in self.tuple_of_nests:
             alpha = nest.dict_of_alpha
             for i, a in alpha.items():
-                if a != 0.0:
+                if a.get_value() != 0.0:
                     alt[i].append(a)
             number += 1
 
@@ -396,7 +410,9 @@ class NestsForCrossNestedLogit(Nests):
 
         return ok, message
 
-    def covariance(self, i: int, j: int, parameters: dict[str, float]) -> float:
+    def covariance(
+        self, i: int, j: int, parameters: dict[str, float] | None = None
+    ) -> float:
         """Calculate the covariance between the error terms of two
         alternatives of a cross-nested logit model. It is assumed that
         the homogeneity parameter mu of the model has been normalized
@@ -447,7 +463,8 @@ class NestsForCrossNestedLogit(Nests):
             gij_sum = 0.0
             for m in self.tuple_of_nests:
                 if isinstance(m.nest_param, Expression):
-                    m.nest_param.set_estimated_values(parameters)
+                    if parameters:
+                        m.nest_param.change_init_values(parameters)
                     mu_m = m.nest_param.get_value_c(prepare_ids=True)
                 else:
                     mu_m = m.nest_param
@@ -488,17 +505,15 @@ class NestsForCrossNestedLogit(Nests):
 
     def correlation(
         self,
-        parameters: dict[str, float],
+        parameters: dict[str, float] | None = None,
         alternatives_names: dict[int, str] | None = None,
     ) -> pd.DataFrame:
         """Calculate the correlation matrix of the error terms of all
-        alternatives of cross-nested logit model.
+            alternatives of cross-nested logit model.
 
         :param parameters: values of the parameters.
-
         :param alternatives_names: names of the alternative, for
-        better reporting. If not provided, the number are used.
-
+            better reporting. If not provided, the number are used.
         :return: correlation matrix
 
         """

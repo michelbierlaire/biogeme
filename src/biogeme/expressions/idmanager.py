@@ -61,14 +61,15 @@ def expressions_names_indices(dict_of_elements: dict[str, Type[T]]) -> ElementsT
 
     :param dict_of_elements: dictionary of expressions. The keys
         are the names.
-    :type dict_of_elements: dict(str: biogeme.expressions.Expression)
 
     :return: a tuple with the original dictionary, the indices,
         and the sorted names.
     :rtype: ElementsTuple
     """
+
     indices = {}
     names = sorted(dict_of_elements)
+
     for i, v in enumerate(names):
         indices[v] = i
 
@@ -304,7 +305,7 @@ class IdManager:
         for f in self.expressions:
             f.cpp.set_data_map(sample)
 
-    @deprecated
+    @deprecated(new_func=set_data_map)
     def setDataMap(self, sample: pd.DataFrame):
         pass
 
@@ -319,6 +320,6 @@ class IdManager:
         for f in self.expressions:
             f.cpp.set_data(sample)
 
-    @deprecated
+    @deprecated(new_func=set_data)
     def setData(self, sample: pd.DataFrame):
         pass

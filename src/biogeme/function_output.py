@@ -44,6 +44,35 @@ class BiogemeFunctionOutput(FunctionOutput):
     bhhh: np.ndarray | None = None
 
 
+class SmartOutputProxy:
+    """Backward compatibility allowing to unpack the results into a tuple"""
+
+    def __init__(self, data):
+        self.data = data
+        self._iterated = False
+
+    def __getattr__(self, name):
+        # Allow direct attribute access to the underlying data object
+        return getattr(self.data, name)
+
+
+class BiogemeFunctionOutputSmartOutputProxy(SmartOutputProxy):
+    def __iter__(self):
+        # Only allow iteration to happen once, mimicking tuple unpacking behavior
+        warning_msg = (
+            f'Deprecated usage. The function returns an object of type '
+            f'BiogemeFunctionOutput, not a tuple anymore.'
+        )
+        if self._iterated:
+            raise TypeError('Multiple unpacking not allowed.')
+        self._iterated = True
+        # Define the order of attributes for unpacking
+        yield self.data.function
+        yield self.data.gradient
+        yield self.data.hessian
+        yield self.data.bhhh
+
+
 @dataclass
 class BiogemeDisaggregateFunctionOutput:
     """Output of a function calculation"""
@@ -52,6 +81,40 @@ class BiogemeDisaggregateFunctionOutput:
     gradients: np.ndarray | None = None
     hessians: np.ndarray | None = None
     bhhhs: np.ndarray | None = None
+
+    def __len__(self):
+        return len(self.functions)
+
+    def unique_entry(self) -> BiogemeFunctionOutput | None:
+        """When there is only one entry, we generate the BiogemeFunctionOutput object"""
+        if len(self) == 1:
+            return BiogemeFunctionOutput(
+                function=float(self.functions[0]),
+                gradient=self.gradients[0] if self.gradients else None,
+                hessian=self.hessians[0] if self.hessians else None,
+                bhhh=self.bhhhs[0] if self.bhhhs else None,
+            )
+        return None
+
+
+class BiogemeDisaggregateFunctionOutputSmartOutputProxy(SmartOutputProxy):
+    def __len__(self):
+        return len(self.data)
+
+    def __iter__(self):
+        # Only allow iteration to happen once, mimicking tuple unpacking behavior
+        warning_msg = (
+            f'Deprecated usage. The function returns an object of type '
+            f'BiogemeDisaggregateFunctionOutput, not a tuple anymore.'
+        )
+        if self._iterated:
+            raise TypeError('Multiple unpacking not allowed.')
+        self._iterated = True
+        # Define the order of attributes for unpacking
+        yield self.data.functions
+        yield self.data.gradients
+        yield self.data.hessians
+        yield self.data.bhhhs
 
 
 class NamedFunctionOutput:
@@ -65,6 +128,8 @@ class NamedFunctionOutput:
         :param function_output: function output stored as numpy parray.
         :param mapping: dict mapping the names with their index in the sequence.
         """
+        self._mapping = mapping
+        self.function_output = function_output
         self.function: float = function_output.function
         self.gradient: dict[str, float] | None = (
             None
@@ -79,6 +144,10 @@ class NamedFunctionOutput:
                 mapping,
             )
         )
+
+    @property
+    def mapping(self):
+        return self._mapping
 
     def __repr__(self):
         """"""
@@ -113,6 +182,8 @@ class NamedBiogemeDisaggregateFunctionOutput:
         function_output: BiogemeDisaggregateFunctionOutput,
         mapping: dict[str, int],
     ) -> None:
+        self.function_output = function_output
+        self.mapping = mapping
         self.functions: list[float] = [value for value in function_output.functions]
         self.gradients: list[dict[str, float]] | None = (
             None

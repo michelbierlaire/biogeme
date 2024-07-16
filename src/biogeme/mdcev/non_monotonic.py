@@ -192,16 +192,16 @@ class NonMonotonic(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         alpha: float = self.alpha_parameters[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return (
                 np.exp(baseline_utility) * (the_consumption**alpha) / alpha
                 + (mu_utility + epsilon) * the_consumption
             )
         return (
-            gamma
+            gamma.get_value()
             * np.exp(baseline_utility)
-            * ((1 + the_consumption / gamma) ** alpha - 1)
+            * ((1 + the_consumption / gamma.get_value()) ** alpha - 1)
             / alpha
             + (mu_utility + epsilon) * the_consumption
         )
@@ -223,7 +223,7 @@ class NonMonotonic(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         alpha: float = self.alpha_parameters[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         if gamma is None:
             return (
                 np.exp(baseline_utility) * (the_consumption ** (alpha - 1.0))
@@ -231,7 +231,8 @@ class NonMonotonic(Mdcev):
                 + epsilon
             )
         return (
-            np.exp(baseline_utility) * (1.0 + the_consumption / gamma) ** (alpha - 1.0)
+            np.exp(baseline_utility)
+            * (1.0 + the_consumption / gamma.get_value()) ** (alpha - 1.0)
             + mu_utility
             + epsilon
         )
@@ -254,13 +255,13 @@ class NonMonotonic(Mdcev):
         if self.scale_parameter is not None:
             epsilon /= self.scale_parameter.get_value()
         alpha: float = self.alpha_parameters[the_id].get_value()
-        gamma: float = self.gamma_parameters[the_id].get_value()
+        gamma: Expression | None = self.gamma_parameters[the_id]
         base = (dual_variable - mu_utility - epsilon) * np.exp(-baseline_utility)
 
         exponent = 1.0 / (alpha - 1.0)
         if gamma is None:
             return base**exponent
-        result = gamma * (base**exponent - 1)
+        result = gamma.get_value() * (base**exponent - 1)
         return result
 
     def _list_of_expressions(self) -> list[Expression]:
@@ -280,7 +281,7 @@ class NonMonotonic(Mdcev):
         :param epsilon: draws from the error term.
         :return: a lower bound and upper bound on the dual variable
         """
-        lower_bound = 0.0
+        lower_bound = -np.inf
         for alternative_id in chosen_alternatives:
             epsilon_alternative = epsilon[self.key_to_index[alternative_id]]
             if self.scale_parameter is not None:

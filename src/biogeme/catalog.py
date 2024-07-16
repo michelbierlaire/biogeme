@@ -180,23 +180,16 @@ class Catalog(MultipleExpression):
 
 def segmentation_catalogs(
     generic_name: str,
-    beta_parameters: list[Beta],
+    beta_parameters: list[biogeme.expressions.Beta],
     potential_segmentations: tuple[seg.DiscreteSegmentationTuple, ...],
-    maximum_number,
+    maximum_number: int,
 ):
     """Generate catalogs for potential segmentations of a parameter
 
     :param generic_name: name used for the definition of the group of catalogs
-    :type generic_name: str
-
     :param beta_parameters: list of parameters to be segmented
-    :type beta_parameters: list(biogeme.expressions.Beta)
-
     :param potential_segmentations: tuple of potential segmentations
-    :type potential_segmentations: tuple(biogeme.segmentation.DiscreteSegmentationTuple)
-
     :param maximum_number: maximum number of segmentations to consider
-    :type maximum_number: int
 
     """
 
@@ -328,7 +321,7 @@ class SegmentedParameters:
 def generic_alt_specific_catalogs(
     generic_name: str,
     beta_parameters: list[Beta],
-    alternatives: tuple[str],
+    alternatives: tuple[str, ...],
     potential_segmentations: tuple[seg.DiscreteSegmentationTuple, ...] | None = None,
     maximum_number=5,
 ):

@@ -96,7 +96,7 @@ def piecewise_variables(
     return results
 
 
-@deprecated
+@deprecated(new_func=piecewise_variables)
 def piecewiseVariables(
     variable: Expression | str, thresholds: list[float]
 ) -> list[Expression]:
@@ -198,7 +198,7 @@ def piecewise_formula(
     return bioMultSum(terms)
 
 
-@deprecated
+@deprecated(new_func=piecewise_formula)
 def piecewiseFormula(
     variable: str | Variable, thresholds: list[float], betas: list[Beta] | None = None
 ) -> Expression:
@@ -378,6 +378,6 @@ def piecewise_function(x: float, thresholds: list[float], betas: list[float]) ->
     return total
 
 
-@deprecated
+@deprecated(new_func=piecewise_function)
 def piecewiseFunction(x: float, thresholds: list[float], betas: list[float]) -> float:
     pass

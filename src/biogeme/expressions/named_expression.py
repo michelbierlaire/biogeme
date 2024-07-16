@@ -4,7 +4,6 @@
 :date: Sat Apr 20 08:06:54 2024
 """
 
-import numpy as np
 from functools import wraps
 
 from biogeme.exceptions import BiogemeError

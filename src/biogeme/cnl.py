@@ -14,6 +14,7 @@ import numpy as np
 from biogeme.expressions import get_dict_values
 from biogeme.function_output import FunctionOutput
 from biogeme.nests import NestsForCrossNestedLogit
+from biogeme.deprecated import deprecated
 
 
 def cnl_g(
@@ -90,6 +91,13 @@ def cnl_g(
     return g_and_deriv
 
 
+@deprecated(new_func=cnl_g)
+def cnl_G(
+    alternatives: list[int], nests: NestsForCrossNestedLogit
+) -> Callable[[np.ndarray], FunctionOutput]:
+    pass
+
+
 def cnl_cdf(
     alternatives: list[int], nests: NestsForCrossNestedLogit
 ) -> Callable[[np.ndarray], FunctionOutput]:
@@ -142,3 +150,10 @@ def cnl_cdf(
         return FunctionOutput(function=f, gradient=f_i, hessian=f_ij)
 
     return f_and_deriv
+
+
+@deprecated(new_func=cnl_cdf)
+def cnl_CDF(
+    alternatives: list[int], nests: NestsForCrossNestedLogit
+) -> Callable[[np.ndarray], FunctionOutput]:
+    pass

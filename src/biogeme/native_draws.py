@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import NamedTuple, Callable
 
 import numpy as np
@@ -10,6 +11,29 @@ RandomNumberGenerator = Callable[[int, int], np.ndarray]
 class RandomNumberGeneratorTuple(NamedTuple):
     generator: RandomNumberGenerator
     description: str
+
+    @classmethod
+    def from_tuple(
+        cls, the_tuple: [RandomNumberGenerator, str]
+    ) -> RandomNumberGeneratorTuple:
+        """For backward compatibility, this constructor accepts a regular tuple as input"""
+        return cls(*the_tuple)
+
+
+def convert_random_generator_tuple(
+    the_tuple: RandomNumberGeneratorTuple | tuple[RandomNumberGenerator, str]
+) -> RandomNumberGeneratorTuple:
+    """Generates an object of the correct type. Designed for backward compatibility
+
+    :param the_tuple: the tuple in the old or new format.
+    :return: the tuple in the new format
+    """
+    if isinstance(the_tuple, RandomNumberGeneratorTuple):
+        return the_tuple
+    if not isinstance(the_tuple, tuple):
+        raise TypeError('Expecting a tuple, not a {type(the_tuple)}')
+
+    return RandomNumberGeneratorTuple.from_tuple(the_tuple)
 
 
 def uniform_antithetic(sample_size: int, number_of_draws: int) -> np.ndarray:

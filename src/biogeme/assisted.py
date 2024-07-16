@@ -75,7 +75,7 @@ class ParetoPostProcessing:
                 config_id=config_id,
                 expression=self.expression,
                 database=self.database,
-                parameter_file=self.biogeme_object.parameter_file,
+                parameters=self.biogeme_object.biogeme_parameters,
             )
             _ = Configuration.from_string(config_id)
             the_biogeme.modelName = self.model_names(config_id)
@@ -136,7 +136,7 @@ class AssistedSpecification(Neighborhood):
     def __init__(
         self,
         biogeme_object: BIOGEME,
-        multi_objectives: Callable[[bioResults], list[float]],
+        multi_objectives: Callable[[bioResults | None], list[float]],
         pareto_file_name: str,
         validity: Callable[[bioResults], bool] | None = None,
         parameter_file: str | None = None,
@@ -144,19 +144,11 @@ class AssistedSpecification(Neighborhood):
         """Ctor
 
         :param biogeme_object: object containing the loglikelihood and the database
-        :type biogeme_object: biogeme.biogeme.BIOGEME
-
         :param multi_objectives: function calculating the objectives to minimize
-        :type multi_objectives: fct(biogeme.results.bioResults) --> list[float]
-
         :param pareto_file_name: file where to read and write the Pareto solutions
-        :type pareto_file_name: str
-
         :param validity: function verifying that the estimation
             results are valid. It must return a bool and an explanation
             why if it is invalid, or None otherwise
-
-        :type validity: fct(biogeme.results.bioResults) --> Validity
 
         """
         self.biogeme_parameters: Parameters = Parameters()
@@ -186,6 +178,7 @@ class AssistedSpecification(Neighborhood):
             error_msg = 'No log likelihood function is defined'
             raise BiogemeError(error_msg)
         self.database = biogeme_object.database
+        Specification.biogeme_parameters = self.biogeme_parameters
         Specification.expression = self.expression
         Specification.database = self.database
         self.operators = {

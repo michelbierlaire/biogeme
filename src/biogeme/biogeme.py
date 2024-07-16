@@ -17,7 +17,6 @@ import pickle
 from datetime import datetime
 from typing import NamedTuple
 
-from fuzzywuzzy import fuzz
 import cythonbiogeme.cythonbiogeme as cb
 import numpy as np
 import pandas as pd
@@ -30,7 +29,11 @@ import biogeme.results as res
 import biogeme.tools.derivatives
 import biogeme.tools.unique_ids
 from biogeme.configuration import Configuration
-from biogeme.deprecated import deprecated
+from biogeme.deprecated import (
+    deprecated,
+    deprecated_parameters,
+)
+from biogeme.dict_of_formulas import check_validity, get_expression
 from biogeme.exceptions import BiogemeError, ValueOutOfRange
 from biogeme.expressions import (
     IdManager,
@@ -40,7 +43,11 @@ from biogeme.expressions import (
     bioMultSum,
     SelectedExpressionsIterator,
 )
-from biogeme.function_output import FunctionOutput, BiogemeFunctionOutput
+from biogeme.function_output import (
+    FunctionOutput,
+    BiogemeFunctionOutput,
+    BiogemeFunctionOutputSmartOutputProxy,
+)
 from biogeme.negative_likelihood import NegativeLikelihood
 from biogeme.parameters import (
     Parameters,
@@ -65,6 +72,21 @@ class BIOGEME:
 
     """
 
+    properties_initialized = False
+
+    @deprecated_parameters(
+        obsolete_params={
+            'suggestScales': None,
+            'numberOfThreads': 'number_of_threads',
+            'numberOfDraws': 'number_of_draws',
+            'missingData': 'missing_data',
+            'parameter_file': 'parameters',
+            'userNotes': 'user_notes',
+            'generateHtml': 'generate_html',
+            'saveIterations': 'save_iterations',
+            'seed_param': 'seed',
+        }
+    )
     def __init__(
         self,
         database: db.Database,
@@ -105,15 +127,8 @@ class BIOGEME:
            exception is raised.
 
         """
-        value = kwargs.get('parameter_file')
-        if value is not None:
-            warning_msg = (
-                f'Argument "parameter_file={value}" has been replaced by "parameters={value}", that can be either '
-                f'a file name as before, or an object of the class "Parameters".'
-            )
-            logger.warning(warning_msg)
-
         if isinstance(parameters, Parameters):
+            logger.info('Biogeme parameters provided by the user.')
             self.biogeme_parameters: Parameters = parameters
         else:
             self.biogeme_parameters: Parameters = Parameters()
@@ -121,8 +136,7 @@ class BIOGEME:
                 self.biogeme_parameters.read_file(parameters)
             else:
                 if parameters is None:
-                    info_msg = f'Default values of the Biogeme parameters are used.'
-                    logger.info(info_msg)
+                    self.biogeme_parameters.read_file(DEFAULT_PARAMETER_FILE_NAME)
                 else:
                     error_msg = (
                         f'Argument "parameters" is of wrong type: {type(parameters)}'
@@ -131,51 +145,22 @@ class BIOGEME:
 
         self.parameter_file: str = self.biogeme_parameters.file_name
 
-        logger.debug(f'Ctor Biogeme: {self.algorithm_name=}')
+        # We allow the values of the parameters to be set with arguments
+        for name, value in list(kwargs.items()):
+            if name in self.biogeme_parameters.parameter_names:
+                self.biogeme_parameters.set_value(name=name, value=value)
+
+        # Check for name clashes and create properties dynamically
+        properties_to_define_automatically = set(
+            self.biogeme_parameters.parameter_names
+        ) - {'number_of_threads'}
+
+        if not BIOGEME.properties_initialized:
+            self.initialize_properties(properties_to_define_automatically)
+            BIOGEME.properties_initialized = True
 
         self.skip_audit = skip_audit
 
-        # Code for the transition period to inform the user of the
-        # change of parameter management scheme
-        old_params = (
-            OldNewParamTuple(
-                old="numberOfThreads",
-                new="number_of_threads",
-                section="MultiThreading",
-            ),
-            OldNewParamTuple(
-                old="numberOfDraws",
-                new="number_of_draws",
-                section="MonteCarlo",
-            ),
-            OldNewParamTuple(old="seed", new="seed", section="MonteCarlo"),
-            OldNewParamTuple(
-                old="missingData", new="missing_data", section="Specification"
-            ),
-        )
-
-        logger.debug('TREAT OBSOLETE PARAMETERS')
-        for the_param in old_params:
-            value = kwargs.get(the_param.old)
-            if value is not None:
-                logger.debug(f'{the_param=}')
-                BIOGEME.argument_warning(old_new_tuple=the_param)
-                self.biogeme_parameters.set_value(
-                    the_param.new,
-                    value,
-                    the_param.section,
-                )
-        obsolete = ('suggestScales', 'parameter_file')
-        for the_param in obsolete:
-            value = kwargs.get(the_param)
-            if value is not None:
-                warning_msg = f"Parameter {the_param} is obsolete and ignored."
-                logger.warning(warning_msg)
-                if the_param == 'parameter_file':
-                    raise BiogemeError(warning_msg)
-
-        self._algorithm = opt.algorithms.get(self.algorithm_name)
-        self.algo_parameters = None
         self.function_parameters = None
 
         if not self.skip_audit:
@@ -187,13 +172,17 @@ class BIOGEME:
                 logger.warning("\n".join(list_of_errors))
                 raise BiogemeError("\n".join(list_of_errors))
 
-        self.log_like_name = "log_like"
-        """ Keyword used for the name of the loglikelihood formula.
+        self.log_like_name: str = 'log_like'
+        """ Keywords used for the name of the loglikelihood formula.
         Default: 'log_like'"""
 
-        self.weight_name = "weight"
+        self.log_like_valid_names: list[str] = ['log_like', 'loglike']
+
+        self.weight_name = 'weight'
         """Keyword used for the name of the weight formula. Default: 'weight'
         """
+
+        self.weight_valid_names = ['weight', 'weights']
 
         self.modelName = DEFAULT_MODEL_NAME
         """Name of the model. Default: 'biogemeModelDefaultName'
@@ -203,8 +192,8 @@ class BIOGEME:
         Monte-Carlo integration.
         """
 
-        if self.seed_param != 0:
-            np.random.seed(self.seed_param)
+        if self.seed != 0:
+            np.random.seed(self.seed)
 
         self.database = database
 
@@ -217,7 +206,7 @@ class BIOGEME:
                     f"It is of type {type(formulas)}"
                 )
 
-            self.log_like = formulas
+            self.log_like: Expression = formulas
             """ Object of type :class:`biogeme.expressions.Expression`
             calculating the formula for the loglikelihood
             """
@@ -253,35 +242,18 @@ class BIOGEME:
         else:
             self.formulas = formulas
             # Verify the validity of the formulas
-            for k, f in formulas.items():
-                if not isinstance(f, Expression):
-                    raise BiogemeError(
-                        f'Expression for "{k}" is not of type '
-                        f"biogeme.expressions.Expression. "
-                        f"It is of type {type(f)}"
-                    )
-            self.log_like = formulas.get(self.log_like_name)
-            if self.log_like is None:
-                for key in formulas:
-                    if fuzz.ratio(self.log_like_name, key) >= 80:
-                        warning_msg = f'In the formulas, one key is "{key}". Should it be "{self.log_like_name}" instead?'
-                        logger.warning(warning_msg)
-            self.weight = formulas.get(self.weight_name)
-            if self.weight is None:
-                for key in formulas:
-                    if fuzz.ratio(self.weight_name, key) >= 80:
-                        warning_msg = f'In the formulas, one key is "{key}". Should it be "{self.weight_name}" instead?'
-                        logger.warning(warning_msg)
+            check_validity(self.formulas)
+            self.log_like: Expression = get_expression(
+                dict_of_formulas=formulas, valid_keywords=self.log_like_valid_names
+            )
+            self.weight = get_expression(
+                dict_of_formulas=formulas, valid_keywords=self.weight_valid_names
+            )
 
         for f in self.formulas.values():
-            f.missingData = self.missingData
+            f.missing_data = self.missing_data
 
-        old_value = kwargs.get('userNotes')
-        if old_value:
-            warning_msg = f'Parameter userNotes must be spelled user_notes'
-            logger.warning(warning_msg)
-            user_notes = old_value
-        self.userNotes = user_notes  #: User notes
+        self.user_notes = user_notes  #: User notes
 
         self.lastSample = None
         """ keeps track of the sample of data used to calculate the
@@ -305,7 +277,7 @@ class BIOGEME:
             self.theC.setDataMap(self.database.individualMap)
         # Transfer the data to the C++ formula
         self.theC.setData(self.database.data)
-        self.theC.setMissingData(self.missingData)
+        self.theC.setMissingData(self.missing_data)
 
         start_time = datetime.now()
         self._generate_draws(self.number_of_draws)
@@ -354,7 +326,7 @@ class BIOGEME:
         expression: ExpressionOrNumeric,
         database: db.Database,
         user_notes: str | None = None,
-        parameter_file: str | None = None,
+        parameters: str | Parameters | None = None,
         skip_audit: bool = False,
     ) -> BIOGEME:
         """Obtain the Biogeme object corresponding to the
@@ -404,9 +376,18 @@ class BIOGEME:
             database=database,
             formulas=expression,
             user_notes=user_notes,
-            parameter_file=parameter_file,
+            parameters=parameters,
             skip_audit=skip_audit,
         )
+
+    def is_model_complex(self) -> bool:
+        """Check if the model is potentially complex to estimate"""
+        if self.log_like.requires_draws():
+            return True
+        if self.log_like.embed_expression('Integrate'):
+            return True
+
+        return False
 
     @staticmethod
     def argument_warning(old_new_tuple: OldNewParamTuple):
@@ -423,164 +404,51 @@ class BIOGEME:
         logger.warning(warning_msg)
 
     @property
-    def bootstrap_samples(self) -> int:
-        """Number of re-estimation for bootstrap samples"""
-        return self.biogeme_parameters.get_value(
-            name="bootstrap_samples", section="Estimation"
-        )
+    def loglike(self) -> float:
+        """For backward compatibility"""
+        return self.log_like
 
-    @bootstrap_samples.setter
-    def bootstrap_samples(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="bootstrap_samples",
-            value=value,
-            section="Estimation",
-        )
+    @classmethod
+    def initialize_properties(cls, properties):
+        for param in properties:
+            if hasattr(cls, param):
+                raise AttributeError(f"The name '{param}' already exists in the class.")
+            setattr(
+                cls, param, property(cls.make_getter(param), cls.make_setter(param))
+            )
 
-    @property
-    def max_number_parameters_to_report(self) -> int:
-        """Maximum number of parameters to report."""
-        return self.biogeme_parameters.get_value(
-            name="max_number_parameters_to_report", section="Estimation"
-        )
+    @staticmethod
+    def make_getter(param_name):
+        def getter(self):
+            return self.biogeme_parameters.get_value(name=param_name)
 
-    @max_number_parameters_to_report.setter
-    def max_number_parameters_to_report(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="max_number_parameters_to_report",
-            value=value,
-            section="Estimation",
-        )
-        Expression.max_number_parameters_to_report = value
+        return getter
 
-    @property
-    def maximum_number_catalog_expressions(self) -> int:
-        """Maximum number of multiple expressions when Catalog's are used."""
-        return self.biogeme_parameters.get_value(
-            name="maximum_number_catalog_expressions", section="Estimation"
-        )
+    @staticmethod
+    def make_setter(param_name):
+        def setter(self, value):
+            self.biogeme_parameters.set_value(name=param_name, value=value)
+            setattr(self, f'_{param_name}', value)
 
-    @maximum_number_catalog_expressions.setter
-    def maximum_number_catalog_expressions(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="maximum_number_catalog_expressions",
-            value=value,
-            section="Estimation",
-        )
-        Expression.maximum_number_of_configurations = value
-
-    @property
-    def algorithm_name(self) -> str:
-        """Name of the optimization algorithm"""
-        return self.biogeme_parameters.get_value(
-            name="optimization_algorithm", section="Estimation"
-        )
-
-    @algorithm_name.setter
-    def algorithm_name(self, value: str) -> None:
-        self.biogeme_parameters.set_value(
-            name="optimization_algorithm",
-            value=value,
-            section="Estimation",
-        )
-        self._algorithm = opt.algorithms.get(self.algorithm_name)
-
-    @property
-    def identification_threshold(self) -> float:
-        """Threshold for the eigenvalue to trigger an identification warning"""
-        return self.biogeme_parameters.get_value(
-            name="identification_threshold", section="Output"
-        )
-
-    @identification_threshold.setter
-    def identification_threshold(self, value: float) -> None:
-        self.biogeme_parameters.set_value(
-            name="identification_threshold",
-            value=value,
-            section="Output",
-        )
-
-    @property
-    def seed_param(self) -> int:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value("seed")
-
-    @seed_param.setter
-    def seed_param(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="seed", value=value, section="MonteCarlo"
-        )
-
-    @property
-    def saveIterations(self) -> bool:
-        """If True, the current iterate is saved after each iteration, in a
-        file named ``__[modelName].iter``, where ``[modelName]`` is the
-        name given to the model. If such a file exists, the starting
-        values for the estimation are replaced by the values saved in
-        the file.
-        """
-        return self.biogeme_parameters.get_value(
-            name="save_iterations", section="Estimation"
-        )
-
-    @saveIterations.setter
-    def saveIterations(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="save_iterations", value=value, section="Estimation"
-        )
-
-    @property
-    def save_iterations(self) -> bool:
-        """Same as saveIterations, with another syntax"""
-        return self.biogeme_parameters.get_value(
-            name="save_iterations", section="Estimation"
-        )
-
-    @save_iterations.setter
-    def save_iterations(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="save_iterations", value=value, section="Estimation"
-        )
-
-    @property
-    def missingData(self) -> int:
-        """Code for missing data"""
-        return self.biogeme_parameters.get_value(
-            name="missing_data", section="Specification"
-        )
-
-    @missingData.setter
-    def missingData(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="missing_data", value=value, section="Specification"
-        )
-
-    @property
-    def missing_data(self) -> int:
-        """Code for missing data"""
-        return self.biogeme_parameters.get_value(
-            name="missing_data", section="Specification"
-        )
-
-    @missing_data.setter
-    def missing_data(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="missing_data", value=value, section="Specification"
-        )
+        return setter
 
     @property
     def numberOfThreads(self) -> int:
         """Number of threads used for parallel computing. Default: the number
         of available CPU.
+        Maintained for backward compatibility.
         """
-        nbr_threads = self.biogeme_parameters.get_value("number_of_threads")
-        return mp.cpu_count() if nbr_threads == 0 else nbr_threads
+        logger.warning(
+            "Obsolete syntax. Use number_of_threads instead of numberOfThreads"
+        )
+        return self.number_of_threads
 
     @numberOfThreads.setter
     def numberOfThreads(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="number_of_threads", value=value, section="MultiThreading"
+        logger.warning(
+            "Obsolete syntax. Use number_of_threads instead of numberOfThreads"
         )
+        self.number_of_threads = value
 
     @property
     def number_of_threads(self) -> int:
@@ -599,66 +467,14 @@ class BIOGEME:
     @property
     def numberOfDraws(self) -> int:
         """Number of draws for Monte-Carlo integration."""
-        return self.biogeme_parameters.get_value("number_of_draws")
+        logger.warning("Obsolete syntax. Use number_of_draws instead of numberOfDraws")
+
+        return self.number_of_draws
 
     @numberOfDraws.setter
     def numberOfDraws(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="number_of_draws", value=value, section="MonteCarlo"
-        )
-
-    @property
-    def number_of_draws(self) -> int:
-        """Number of draws for Monte-Carlo integration."""
-        return self.biogeme_parameters.get_value("number_of_draws")
-
-    @number_of_draws.setter
-    def number_of_draws(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="number_of_draws", value=value, section="MonteCarlo"
-        )
-
-    @property
-    def only_robust_stats(self) -> bool:
-        """True if only the robust statistics need to be reported. If
-        False, the statistics from the Rao-Cramer bound are also reported.
-
-        """
-        return self.biogeme_parameters.get_value("only_robust_stats")
-
-    @only_robust_stats.setter
-    def only_robust_stats(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="only_robust_stats", value=value, section="Output"
-        )
-
-    @property
-    def generateHtml(self) -> bool:
-        """Boolean variable, True if the HTML file with the results must
-        be generated.
-        """
-        logger.warning("Obsolete syntax. Use generate_html instead of generateHtml")
-        return self.biogeme_parameters.get_value("generate_html")
-
-    @generateHtml.setter
-    def generateHtml(self, value: bool) -> None:
-        logger.warning("Obsolete syntax. Use generate_html instead of generateHtml")
-        self.biogeme_parameters.set_value(
-            name="generate_html", value=value, section="Output"
-        )
-
-    @property
-    def generate_html(self) -> bool:
-        """Boolean variable, True if the HTML file with the results must
-        be generated.
-        """
-        return self.biogeme_parameters.get_value("generate_html")
-
-    @generate_html.setter
-    def generate_html(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="generate_html", value=value, section="Output"
-        )
+        logger.warning("Obsolete syntax. Use number_of_draws instead of numberOfDraws")
+        self.number_of_draws = value
 
     @property
     def generatePickle(self) -> bool:
@@ -673,119 +489,6 @@ class BIOGEME:
         logger.warning("Obsolete syntax. Use generate_pickle instead of generatePickle")
         self.biogeme_parameters.set_value(
             name="generate_pickle", value=value, section="Output"
-        )
-
-    @property
-    def generate_pickle(self) -> bool:
-        """Boolean variable, True if the PICKLE file with the results must
-        be generated.
-        """
-        return self.biogeme_parameters.get_value("generate_pickle")
-
-    @generate_pickle.setter
-    def generate_pickle(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="generate_pickle", value=value, section="Output"
-        )
-
-    @property
-    def tolerance(self) -> float:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(
-            name="tolerance", section="SimpleBounds"
-        )
-
-    @tolerance.setter
-    def tolerance(self, value: float) -> None:
-        self.biogeme_parameters.set_value(
-            name="tolerance", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def second_derivatives(self) -> float:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(
-            name="second_derivatives", section="SimpleBounds"
-        )
-
-    @second_derivatives.setter
-    def second_derivatives(self, value: float) -> None:
-        self.biogeme_parameters.set_value(
-            name="second_derivatives", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def infeasible_cg(self) -> bool:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(
-            name="infeasible_cg", section="SimpleBounds"
-        )
-
-    @infeasible_cg.setter
-    def infeasible_cg(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="infeasible_cg", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def initial_radius(self) -> float:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(
-            name="initial_radius", section="SimpleBounds"
-        )
-
-    @initial_radius.setter
-    def initial_radius(self, value: float) -> None:
-        self.biogeme_parameters.set_value(
-            name="initial_radius", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def steptol(self) -> float:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(name="steptol", section="SimpleBounds")
-
-    @steptol.setter
-    def steptol(self, value: float) -> None:
-        self.biogeme_parameters.set_value(
-            name="steptol", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def enlarging_factor(self) -> float:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(
-            name="enlarging_factor", section="SimpleBounds"
-        )
-
-    @enlarging_factor.setter
-    def enlarging_factor(self, value: float) -> None:
-        self.biogeme_parameters.set_value(
-            name="enlarging_factor", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def maxiter(self) -> int:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(
-            name="max_iterations", section="SimpleBounds"
-        )
-
-    @maxiter.setter
-    def maxiter(self, value: int) -> None:
-        self.biogeme_parameters.set_value(
-            name="max_iterations", value=value, section="SimpleBounds"
-        )
-
-    @property
-    def dogleg(self) -> bool:
-        """getter for the parameter"""
-        return self.biogeme_parameters.get_value(name="dogleg", section="TrustRegion")
-
-    @dogleg.setter
-    def dogleg(self, value: bool) -> None:
-        self.biogeme_parameters.set_value(
-            name="dogleg", value=value, section="TrustRegion"
         )
 
     def reset_id_manager(self) -> None:
@@ -811,33 +514,67 @@ class BIOGEME:
 
     def _set_algorithm_parameters(self) -> None:
         """Prepare the parameters for the algorithms"""
-        if self.algorithm_name == "simple_bounds":
+        if self.optimization_algorithm == 'automatic':
+            if self.is_model_complex():
+                info_msg = (
+                    f'As the model is rather complex, we cancel the calculation of second derivatives. If you want '
+                    f'to control the parameters, change the name of the algorithm in the TOML file from '
+                    f'"automatic" to "simple_bounds"'
+                )
+                logger.info(info_msg)
+                self.algo_parameters = {
+                    "proportionAnalyticalHessian": 0,
+                    "infeasibleConjugateGradient": self.infeasible_cg,
+                    "radius": self.initial_radius,
+                    "enlargingFactor": self.enlarging_factor,
+                    "maxiter": self.max_iterations,
+                }
+            else:
+                info_msg = (
+                    f'As the model is not too complex, we activate the calculation of second derivatives. If you want '
+                    f'to change it, change the name of the algorithm in the TOML file from '
+                    f'"automatic" to "simple_bounds"'
+                )
+                logger.info(info_msg)
+                self.algo_parameters = {
+                    "proportionAnalyticalHessian": 1,
+                    "infeasibleConjugateGradient": self.infeasible_cg,
+                    "radius": self.initial_radius,
+                    "enlargingFactor": self.enlarging_factor,
+                    "maxiter": self.max_iterations,
+                }
+            return
+
+        if self.optimization_algorithm == "simple_bounds":
             self.algo_parameters = {
                 "proportionAnalyticalHessian": self.second_derivatives,
                 "infeasibleConjugateGradient": self.infeasible_cg,
                 "radius": self.initial_radius,
                 "enlargingFactor": self.enlarging_factor,
-                "maxiter": self.maxiter,
+                "maxiter": self.max_iterations,
             }
             return
-        if self.algorithm_name in ["simple_bounds_newton", "simple_bounds_BFGS"]:
+        if self.optimization_algorithm in [
+            "simple_bounds_newton",
+            "simple_bounds_BFGS",
+        ]:
             self.algo_parameters = {
                 "infeasibleConjugateGradient": self.infeasible_cg,
                 "radius": self.initial_radius,
                 "enlargingFactor": self.enlarging_factor,
-                "maxiter": self.maxiter,
+                "maxiter": self.max_iterations,
             }
             return
-        if self.algorithm_name in ["TR-newton", "TR-BFGS"]:
+        if self.optimization_algorithm in ["TR-newton", "TR-BFGS"]:
             self.algo_parameters = {
                 "dogleg": self.dogleg,
                 "radius": self.initial_radius,
-                "maxiter": self.maxiter,
+                "maxiter": self.max_iterations,
             }
             return
-        if self.algorithm_name in ["LS-newton", "LS-BFGS"]:
+        if self.optimization_algorithm in ["LS-newton", "LS-BFGS"]:
             self.algo_parameters = {
-                "maxiter": self.maxiter,
+                "maxiter": self.max_iterations,
             }
             return
         self.algo_parameters = None
@@ -920,6 +657,7 @@ class BIOGEME:
         if self.database.is_panel():
             self.database.build_panel_map()
 
+    @property
     def free_beta_names(self) -> list[str]:
         """Returns the names of the parameters that must be estimated
 
@@ -928,9 +666,10 @@ class BIOGEME:
         """
         return self.id_manager.free_betas.names
 
-    @deprecated(free_beta_names)
+    @property
     def freeBetaNames(self) -> list[str]:
-        pass
+        logger.warning("Obsolete syntax. Use free_beta_names instead of freeBetaNames")
+        return self.id_manager.free_betas.names
 
     def number_unknown_parameters(self) -> int:
         """Returns the number of parameters that must be estimated
@@ -948,10 +687,10 @@ class BIOGEME:
         :rtype: dict(str: float)
         """
         all_betas = {}
-        if self.log_like:
+        if self.log_like is not None:
             all_betas.update(self.log_like.get_beta_values())
 
-        if self.weight:
+        if self.weight is not None:
             all_betas.update(self.weight.get_beta_values())
 
         for formula in self.formulas.values():
@@ -1092,7 +831,7 @@ class BIOGEME:
         """
         length = min(array.size, self.max_number_parameters_to_report)
         if with_names:
-            names = self.free_beta_names()
+            names = self.free_beta_names
             report = ", ".join(
                 [
                     f"{name}={value:.2g}"
@@ -1110,7 +849,7 @@ class BIOGEME:
         hessian: bool = False,
         bhhh: bool = False,
         batch: float | None = None,
-    ) -> BiogemeFunctionOutput:
+    ) -> BiogemeFunctionOutputSmartOutputProxy:
         """Calculate the value of the log likelihood function
         and its derivatives.
 
@@ -1197,7 +936,7 @@ class BIOGEME:
             )
             logger.warning(error_msg)
 
-        elif self.saveIterations:
+        elif self.save_iterations:
             if self.bestIteration is None:
                 self.bestIteration = f
             if f >= self.bestIteration:
@@ -1217,18 +956,20 @@ class BIOGEME:
             if sample_size == 0:
                 raise BiogemeError(f"Sample size is {sample_size}")
 
-            return BiogemeFunctionOutput(
+            result = BiogemeFunctionOutput(
                 function=f / sample_size,
                 gradient=np.asarray(g) / sample_size,
                 hessian=np.asarray(h) / sample_size,
                 bhhh=np.asarray(bh) / sample_size,
             )
-        return BiogemeFunctionOutput(
+            return BiogemeFunctionOutputSmartOutputProxy(result)
+        result = BiogemeFunctionOutput(
             function=f,
             gradient=np.asarray(g),
             hessian=np.asarray(h),
             bhhh=np.asarray(bh),
         )
+        return BiogemeFunctionOutputSmartOutputProxy(result)
 
     @deprecated(calculate_likelihood_and_derivatives)
     def calculateLikelihoodAndDerivatives(
@@ -1461,6 +1202,15 @@ class BIOGEME:
 
         return configurations
 
+    def recycled_estimation(
+        self,
+        run_bootstrap: bool = False,
+        **kwargs,
+    ) -> res.bioResults:
+
+        return self.estimate(recycle=True, run_bootstrap=run_bootstrap, **kwargs)
+
+    @deprecated_parameters(obsolete_params={'bootstrap': 'run_bootstrap'})
     def estimate(
         self,
         recycle: bool = False,
@@ -1571,7 +1321,7 @@ class BIOGEME:
                 f" in the formula: {self.log_like}."
             )
 
-        if self.saveIterations:
+        if self.save_iterations:
             logger.info(
                 f"*** Initial values of the parameters are "
                 f"obtained from the file {self._save_iterations_file_name()}"
@@ -1856,6 +1606,10 @@ class BIOGEME:
 
         :raises BiogemeError: an error is raised if no algorithm is specified.
         """
+        if self.log_like.requires_draws() and self.number_of_draws <= 1000:
+            warning_msg = f'The number of draws ({self.number_of_draws}) is low. The results may not be meaningful.'
+            logger.warning(warning_msg)
+        self._set_algorithm_parameters()
         the_function = NegativeLikelihood(
             dimension=self.id_manager.number_of_free_betas,
             like=self.calculate_likelihood,
@@ -1866,21 +1620,24 @@ class BIOGEME:
         if starting_values is None:
             starting_values = np.array(self.id_manager.free_betas_values)
 
-        if self._algorithm is None:
-            err = (
-                "An algorithm must be specified. The CFSQP algorithm "
-                "is not available anymore."
-            )
+        algorithm_name = (
+            'simple_bounds'
+            if self.optimization_algorithm == 'automatic'
+            else self.optimization_algorithm
+        )
+        the_algorithm = opt.algorithms.get(algorithm_name)
+        if the_algorithm is None:
+            err = f'Algorithm {self.optimization_algorithm} is not found in the optimization package'
             raise BiogemeError(err)
 
         # logger.debug(''.join(traceback.format_stack()))
         variable_names = (
-            self.free_beta_names()
+            self.free_beta_names
             if len(starting_values) <= self.max_number_parameters_to_report
             else None
         )
 
-        results = self._algorithm(
+        results = the_algorithm(
             fct=the_function,
             init_betas=starting_values,
             bounds=self.id_manager.bounds,
@@ -1928,7 +1685,8 @@ class BIOGEME:
             beta_list.append(v)
         return beta_list
 
-    def simulate(self, the_beta_values: dict[str, float]) -> pd.DataFrame:
+    @deprecated_parameters(obsolete_params={'theBetaValues': 'the_beta_values'})
+    def simulate(self, the_beta_values: dict[str, float] | None) -> pd.DataFrame:
         """Applies the formulas to each row of the database.
 
         :param the_beta_values: values of the parameters to be used in
@@ -1955,11 +1713,12 @@ class BIOGEME:
         """
 
         if the_beta_values is None:
+            current_beta_values = self.get_beta_values()
             err = (
-                "Contrarily to previous versions of Biogeme, "
-                "the values of Beta must "
-                "now be explicitly mentioned. They can be obtained from "
-                "results.getBetaValues()"
+                f'Contrarily to previous versions of Biogeme, '
+                f'the values of Beta must '
+                f'now be explicitly mentioned. If they have been estimated, they can be obtained from '
+                f'results.getBetaValues(). If not, used the default values: {current_beta_values}'
             )
             raise BiogemeError(err)
 
