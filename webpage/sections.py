@@ -15,6 +15,11 @@ resources = {}
 # ] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
 # special['Other special'] = 'Other special as well'
 
+special['ChatGPT'] = (
+    'Try the Biogeme Assistant <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" '
+    'target="_blank">[Click here]</a> (credits: Yousef Maknoon)'
+)
+
 about['Biogeme'] = (
     """
 Biogeme is a open
@@ -67,7 +72,7 @@ algorithms have been relocated to a separate package named
 
 about['Conditions of use'] = (
     """
-BIOGEME is distributed free of charge. We ask each user
+<p>BIOGEME is distributed free of charge. We ask each user
 <ul>
 <li>to register
 to <a href="https://groups.google.com/d/forum/biogeme"
@@ -79,7 +84,25 @@ target="_blank">Bierlaire, M. (2023). A
 short introduction to
 Biogeme. Technical report TRANSP-OR
 230620. Transport and Mobility Laboratory,
-ENAC, EPFL.</a>
+ENAC, EPFL.</a></p></li></ul>
+""",
+)
+
+about['Disclaimer'] = (
+    """
+<p><strong>Disclaimer</strong> This software is provided free of charge and "AS
+IS" WITHOUT ANY WARRANTY of any kind. The implied
+warranties of merchantability, fitness for a
+particular purpose and non-infringement are expressly
+disclaimed. In no event will the
+author (Michel Bierlaire) or his employer (EPFL) be
+liable to any party for any direct, indirect, special
+or other consequential damages for any use of the
+code including, without limitation, any lost
+profits, business interruption, loss of programs or
+other data on your information handling system or
+otherwise, even if we are expressly advised of the
+possibility of such damages.</p>
 """,
 )
 
@@ -107,15 +130,16 @@ certainly not complete, and I apologize for those who are omitted:
 	    John Bates,
 	    Denis Bolduc,
 	    David Bunch,
-            Pedro Camargo,
+        Pedro Camargo,
 	    Andrew Daly,
-            Nicolas Dubois,
+        Nicolas Dubois,
 	    Anna Fernandez Antolin,
 	    Mamy Fetiarison,
 	    Mogens Fosgerau,
 	    Emma Frejinger,
 	    Carmine Gioia,
 	    Marie-H&eacute;l&egrave;ne Godbout,
+        Jason Hawkins,
 	    Stephane Hess,
 	    Tim Hillel,
 	    Richard Hurni,
@@ -124,6 +148,7 @@ certainly not complete, and I apologize for those who are omitted:
 	    Xinjun Lai,
 	    Gael Lederrey,
 	    Virginie Lurkin,
+	    Yousef Maknoon,
 	    Nicholas Molyneaux,
 	    Nicola Ortelli,
 	    Carolina Osorio,
@@ -133,7 +158,8 @@ certainly not complete, and I apologize for those who are omitted:
 	    Matteo Sorci,
 	    Ewout ter Hoeven,
 	    Michael Th&eacute;mans,
-	    Joan Walker.
+	    Joan Walker,
+        Mengyi Wang.
 """,
     """
 I would like to give special thanks to Moshe Ben-Akiva
