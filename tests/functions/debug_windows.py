@@ -30,7 +30,7 @@ simul = (beta1 + 2 * beta2) / Variable1 + (beta2 + 2 * beta1) / Variable2
 # }
 
 dict_of_expressions = {
-    'beta1': beta1,
+    'log_like': likelihood,
 }
 data = Database(f'test_1', df1)
 my_biogeme = BIOGEME(data, dict_of_expressions)
