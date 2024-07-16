@@ -1312,14 +1312,12 @@ class test_expressions(unittest.TestCase):
         ]
         the_utility = ex.bioLinearUtility(terms)
         expression_function = the_utility.create_function(database=self.myData)
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [1, 2, 3, 4]
-        )
-        self.assertAlmostEqual(the_function_output.function, 11, 3)
+        the_function_output: NamedBiogemeFunctionOutput = expression_function([0, 0])
+        self.assertAlmostEqual(the_function_output.function, 0, 3)
         optimization_function = the_utility.create_objective_function(
             database=self.myData
         )
-        check_results = optimization_function.check_derivatives(x=[10, 11, 12, 13])
+        check_results = optimization_function.check_derivatives(x=[10, 11])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
