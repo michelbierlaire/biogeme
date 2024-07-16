@@ -35,7 +35,8 @@ dict_of_expressions = {
 data = Database(f'test_1', df1)
 my_biogeme = BIOGEME(data, dict_of_expressions)
 my_biogeme.bootstrap_samples = 100
-results = my_biogeme.estimate(run_bootstrap=True)
+#results = my_biogeme.estimate(run_bootstrap=True)
+results = my_biogeme.estimate(run_bootstrap=False)
 draws_from_betas = results.get_betas_for_sensitivity_analysis(
     my_biogeme.id_manager.free_betas.names
 )
