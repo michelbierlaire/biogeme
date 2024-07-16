@@ -20,7 +20,6 @@ from typing import NamedTuple
 import cythonbiogeme.cythonbiogeme as cb
 import numpy as np
 import pandas as pd
-import tqdm
 
 import biogeme.database as db
 import biogeme.filenames as bf
@@ -192,6 +191,7 @@ class BIOGEME:
         Monte-Carlo integration.
         """
 
+        self.seed = self.biogeme_parameters.get_value(name='seed')
         if self.seed != 0:
             np.random.seed(self.seed)
 
@@ -250,6 +250,7 @@ class BIOGEME:
                 dict_of_formulas=formulas, valid_keywords=self.weight_valid_names
             )
 
+        self.missing_data = self.biogeme_parameters.get_value(name='missing_data')
         for f in self.formulas.values():
             f.missing_data = self.missing_data
 
@@ -344,8 +345,7 @@ class BIOGEME:
         :param user_notes: these notes will be included in the report file.
         :type user_notes: str
 
-        :param parameter_file: name of the TOML file with the parameters
-        :type parameter_file: str
+        :param parameters: object with the parameters
 
         :param skip_audit: if True, no auditing is performed.
         :type skip_audit: bool
@@ -404,7 +404,7 @@ class BIOGEME:
         logger.warning(warning_msg)
 
     @property
-    def loglike(self) -> float:
+    def loglike(self) -> Expression:
         """For backward compatibility"""
         return self.log_like
 
@@ -1385,7 +1385,7 @@ class BIOGEME:
             )
             current_logger_level = logger.level
             logger.setLevel(logging.WARNING)
-            for b in tqdm.tqdm(range(self.bootstrap_samples), disable=False):
+            for b in range(self.bootstrap_samples):
                 if self.database.is_panel():
                     sample = self.database.sample_individual_map_with_replacement()
                     self.theC.setDataMap(sample)
