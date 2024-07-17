@@ -15,7 +15,6 @@ import logging
 import multiprocessing as mp
 import pickle
 from datetime import datetime
-from enum import Enum, auto
 from typing import NamedTuple
 
 import cythonbiogeme.cythonbiogeme as cb
@@ -56,12 +55,6 @@ from biogeme.parameters import (
 
 DEFAULT_MODEL_NAME = 'biogemeModelDefaultName'
 logger = logging.getLogger(__name__)
-
-
-class BiogemeMode(Enum):
-    ESTIMATION = auto()
-    SIMULATION = auto()
-    TBD = auto()
 
 
 class OldNewParamTuple(NamedTuple):
@@ -133,7 +126,6 @@ class BIOGEME:
            exception is raised.
 
         """
-        self.biogeme_mode: BiogemeMode = BiogemeMode.TBD
         if isinstance(parameters, Parameters):
             logger.info('Biogeme parameters provided by the user.')
             self.biogeme_parameters: Parameters = parameters
@@ -1252,10 +1244,9 @@ class BIOGEME:
             likelihood
 
         """
-        if self.biogeme_mode == BiogemeMode.SIMULATION:
-            error_msg = 'This version of Biogeme has been dedicated to simulation. Generate another instance for estimation'
-            raise BiogemeError(error_msg)
-        self.biogeme_mode = BiogemeMode.ESTIMATION
+        if self.log_like is None:
+            raise BiogemeError("No log likelihood function has been specified")
+
         if kwargs.get("bootstrap") is not None:
             error_msg = (
                 'Parameter "bootstrap" is deprecated. In order to perform '
@@ -1325,8 +1316,6 @@ class BIOGEME:
                 return results
             warning_msg = "Recycling was requested, but no pickle file was found"
             logger.warning(warning_msg)
-        if self.log_like is None:
-            raise BiogemeError("No log likelihood function has been specified")
         if len(self.id_manager.free_betas.names) == 0:
             raise BiogemeError(
                 f"There is no parameter to estimate"
@@ -1460,10 +1449,9 @@ class BIOGEME:
             likelihood
 
         """
-        if self.biogeme_mode == BiogemeMode.SIMULATION:
-            error_msg = 'This version of Biogeme has been dedicated to simulation. Generate another instance for estimation'
-            raise BiogemeError(error_msg)
-        self.biogeme_mode = BiogemeMode.ESTIMATION
+        if self.log_like is None:
+            raise BiogemeError("No log likelihood function has been specified")
+
         if kwargs.get("algorithm") is not None:
             error_msg = (
                 'The parameter "algorithm" is deprecated. Instead, define the '
@@ -1490,8 +1478,6 @@ class BIOGEME:
             )
             raise BiogemeError(error_msg)
 
-        if self.log_like is None:
-            raise BiogemeError("No log likelihood function has been specified")
         if len(self.id_manager.free_betas.names) == 0:
             raise BiogemeError(
                 f"There is no parameter to estimate"
@@ -1728,10 +1714,6 @@ class BIOGEME:
 
         :raises BiogemeError: if theBetaValues is None.
         """
-        if self.biogeme_mode == BiogemeMode.ESTIMATION:
-            error_msg = 'This version of Biogeme has been dedicated to estimation. Generate another instance for simulation'
-            raise BiogemeError(error_msg)
-        self.biogeme_mode = BiogemeMode.SIMULATION
         if the_beta_values is None:
             current_beta_values = self.get_beta_values()
             err = (
