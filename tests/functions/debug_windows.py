@@ -33,10 +33,12 @@ dict_of_expressions = {
     'log_like': likelihood,
 }
 data = Database(f'test_1', df1)
+
 my_biogeme = BIOGEME(data, dict_of_expressions)
-my_biogeme.bootstrap_samples = 100
-results = my_biogeme.estimate(run_bootstrap=True)
-print('**********************************')
+results = my_biogeme.estimate()
+my_biosim = BIOGEME(data, dict_of_expressions)
+s = my_biosim.simulate(results.get_beta_values())
+print('******** DONE **************************')
 # draws_from_betas = results.get_betas_for_sensitivity_analysis(
 #    my_biogeme.id_manager.free_betas.names
 # )
