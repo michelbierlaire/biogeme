@@ -34,10 +34,10 @@ dict_of_expressions = {
 }
 data = Database(f'test_1', df1)
 
-my_biogeme = BIOGEME(data, dict_of_expressions)
+my_biogeme = BIOGEME(data, dict_of_expressions, number_of_threads=1)
 results = my_biogeme.estimate()
 print('******** DONE WITH ESTIMATION **************************')
-my_biosim = BIOGEME(data, dict_of_expressions)
+my_biosim = BIOGEME(data, dict_of_expressions, number_of_threads=1)
 s = my_biosim.simulate(results.get_beta_values())
 print('******** DONE **************************')
 # draws_from_betas = results.get_betas_for_sensitivity_analysis(
