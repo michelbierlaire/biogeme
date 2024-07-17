@@ -503,13 +503,13 @@ class TestBiogeme(unittest.TestCase):
         results = my_biogeme.estimate()
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.simulate(the_beta_values=None)
-
-        s = my_biogeme.simulate(results.get_beta_values())
+        my_biosim = self.get_biogeme_instance()
+        s = my_biosim.simulate(results.get_beta_values())
         self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
         the_betas = results.get_beta_values()
         the_betas['any_beta'] = 0.1
-        s = my_biogeme.simulate(the_betas)
+        s = my_biosim.simulate(the_betas)
         self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
         with self.assertRaises(excep.BiogemeError):
@@ -542,8 +542,9 @@ class TestBiogeme(unittest.TestCase):
         draws_from_betas = results.get_betas_for_sensitivity_analysis(
             my_biogeme.id_manager.free_betas.names
         )
-        s = my_biogeme.simulate(results.get_beta_values())
-        left, right = my_biogeme.confidence_intervals(draws_from_betas)
+        my_biosim = self.get_biogeme_instance()
+        s = my_biosim.simulate(results.get_beta_values())
+        left, right = my_biosim.confidence_intervals(draws_from_betas)
         self.assertLessEqual(left.loc[0, 'log_like'], s.loc[0, 'log_like'])
         self.assertGreaterEqual(right.loc[0, 'log_like'], s.loc[0, 'log_like'])
 
