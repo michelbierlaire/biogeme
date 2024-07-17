@@ -36,6 +36,7 @@ data = Database(f'test_1', df1)
 
 my_biogeme = BIOGEME(data, dict_of_expressions)
 results = my_biogeme.estimate()
+print('******** DONE WITH ESTIMATION **************************')
 my_biosim = BIOGEME(data, dict_of_expressions)
 s = my_biosim.simulate(results.get_beta_values())
 print('******** DONE **************************')
