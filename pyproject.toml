@@ -34,7 +34,7 @@ dependencies = [
     "python-levenshtein>=0.25.1",
     "fuzzywuzzy>=0.18.0",
     "cythonbiogeme==1.0.3",
-    "biogeme_optimization==0.0.7",
+    "biogeme_optimization==0.0.8",
     "matplotlib>=3.9.0, <4",
     "numpy>=2.0.0, <3",
     "ipython>=8.25.0"
