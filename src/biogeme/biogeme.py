@@ -20,6 +20,7 @@ from typing import NamedTuple
 import cythonbiogeme.cythonbiogeme as cb
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 import biogeme.database as db
 import biogeme.filenames as bf
@@ -1386,8 +1387,7 @@ class BIOGEME:
             current_logger_level = logger.level
             # Temporarily stop reporting log messages
             logger.setLevel(logging.WARNING)
-            for b in range(self.bootstrap_samples):
-                print(f'---> Bootstrap {b} / {self.bootstrap_samples}')
+            for b in tqdm(range(self.bootstrap_samples)):
                 if self.database.is_panel():
                     sample = self.database.sample_individual_map_with_replacement()
                     self.theC.setDataMap(sample)
