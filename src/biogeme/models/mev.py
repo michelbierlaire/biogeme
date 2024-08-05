@@ -54,7 +54,7 @@ def logmev(
     """
     h = {i: v + log_gi[i] for i, v in util.items()}
     if av is None:
-        log_p = _bioLogLogitFullChoiceSet(h, av=None, choice=choice)
+        log_p = _bioLogLogitFullChoiceSet(h, choice=choice)
     else:
         log_p = _bioLogLogit(h, av, choice)
     return log_p
