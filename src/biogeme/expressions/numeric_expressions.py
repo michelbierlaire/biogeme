@@ -6,14 +6,11 @@
 
 from __future__ import annotations
 import logging
-from typing import TYPE_CHECKING
+
 
 from .base_expressions import Expression
-from .numeric_tools import validate
 from ..deprecated import deprecated
 
-if TYPE_CHECKING:
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +27,7 @@ class Numeric(Expression):
         :type value: float
         """
         Expression.__init__(self)
-        the_value = validate(value, modify=False)
-        self.value = float(the_value)  #: numeric value
+        self.value = float(value)  #: numeric value
 
     def __str__(self) -> str:
         return '`' + str(self.value) + '`'
