@@ -524,8 +524,11 @@ my_data.data
 # **Do not use chaining comparison expressions with Biogeme. Not only
 # it does not provide the expected expression, but it does not
 # trigger a warning or an exception.**
-my_expression = 200 <= Variable2 <= 400
-print(my_expression)
+try:
+    my_expression = 200 <= Variable2 <= 400
+except excep.BiogemeError as e:
+    print(e)
+
 
 # %%
 # The reason is that Python executes `200 <= Variable2 <= 400` as
@@ -648,7 +651,7 @@ the_function([10, -2])
 
 # %%
 # We can use it to check the derivatives.
-biogeme.tools.derivatives.check_derivatives(the_function, [1, 2], logg=True)
+biogeme.tools.derivatives.check_derivatives(the_function, np.array([1, 2]), logg=True)
 
 # %%
 # And it is possible to also obtain the BHHH matrix.
