@@ -26,7 +26,7 @@ V, nests, Choice, _ = scenario()
 # %%
 # The choice model is a nested logit, with availability conditions
 # For estimation, we need the log of the probability.
-logprob = models.lognested(V, None, nests, Choice)
+logprob = models.lognested(util=V, availability=None, nests=nests, choice=Choice)
 
 # %%
 # Get the database
