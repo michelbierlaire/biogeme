@@ -14,7 +14,7 @@ from biogeme.exceptions import BiogemeError
 
 RAISE_EXCEPTION = False
 
-if os.environ.get('TOX_ENV_NAME') is not None:
+if os.environ.get('TOX_ENV_NAME') is not None and RAISE_EXCEPTION:
     raise Exception(
         "Exception raised during testing with tox. Remove the exception raised by the deprecated functions"
     )
