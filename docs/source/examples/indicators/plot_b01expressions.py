@@ -13,7 +13,7 @@ derivatives.
 
 import numpy as np
 
-from biogeme.function_output import BiogemeFunctionOutput
+from biogeme.function_output import BiogemeFunctionOutput, NamedFunctionOutput
 
 try:
     import matplotlib.pyplot as plt
@@ -61,18 +61,19 @@ fct = expression.create_function()
 
 # %%
 # We can use the function for different values of the parameter
-beta = 2
-the_function_output = fct(beta)
-print(f'f({beta}) = {the_function_output.function}')
-print(f'g({beta}) = {the_function_output.gradient}')
-print(f'h({beta}) = {the_function_output.hessian}')
+beta = 2.0
+the_named_function_output: NamedFunctionOutput = fct(beta)
+print(f'f({beta}) = {the_named_function_output.function}')
+print(f'g({beta}) = {the_named_function_output.gradient}')
+print(f'h({beta}) = {the_named_function_output.hessian}')
 
 # %%
-beta = 3
-the_function_output = fct(beta)
-print(f'f({beta}) = {the_function_output.function}')
-print(f'g({beta}) = {the_function_output.gradient}')
-print(f'h({beta}) = {the_function_output.hessian}')
+beta = 3.0
+the_named_function_output = fct(beta)
+print(f'f({beta}) = {the_named_function_output.function}')
+print(f'g({beta}) = {the_named_function_output.gradient}')
+print(f'h({beta}) = {the_named_function_output.hessian}')
+
 
 # %%
 if can_plot:
@@ -84,11 +85,12 @@ if can_plot:
 
     # The gradient is element [1]. As it contains only one entry [0],
     # we convert it into float.
-    g = [float(fct([xx]).gradient[0]) for xx in x]
+
+    g = [float(fct([xx]).gradient['b']) for xx in x]
 
     # The hessian is element [2]. As it contains only one entry
     # [0][0], we convert it into float.
-    h = [float(fct([xx]).hessian[0][0]) for xx in x]
+    h = [float(fct([xx]).hessian['b']['b']) for xx in x]
 
     ax = plt.gca()
     ax.plot(x, f, label="f(x)")
