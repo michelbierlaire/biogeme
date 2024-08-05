@@ -20,7 +20,7 @@ from biogeme.expressions import Beta
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
-from specification import V, combined_variables
+from specification_sampling import V, combined_variables
 from compare import compare
 from alternatives import (
     alternatives,
