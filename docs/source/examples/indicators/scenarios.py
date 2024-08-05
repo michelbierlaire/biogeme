@@ -102,7 +102,7 @@ def scenario(
     # Definition of the nests:
     # 1: nests parameter
     # 2: list of alternatives
-    mu_nocar = Beta('mu_nocar', 1.0, 1.0, None, 0)
+    mu_nocar = Beta('mu_nocar', 1, 1, 2, 0)
 
     no_car_nest = OneNestForNestedLogit(
         nest_param=mu_nocar, list_of_alternatives=[0, 2], name='no_car'
