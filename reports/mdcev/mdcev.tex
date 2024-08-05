@@ -58,9 +58,9 @@
   \epsfig{figure=transp-or.eps,height=2cm}
   \hfill
   \epsfig{figure=epfl,height=1.5cm}   \\*[-0.5cm]
-  \mbox{}\hrulefill\mbox{} \\*[3cm] Estimating the MDCEV model with Biogeme}
+  \mbox{}\hrulefill\mbox{} \\*[3cm] The MDCEV model with Biogeme: estimation and forecasting}
 \author{Michel Bierlaire \and Mengyi Wang}
-\date{\today}
+\date{July 21, 2024}
 
 
 \begin{document}
@@ -84,8 +84,8 @@
 %In this case, use the template of the journal, or simply comment out the next lines.
 
 \begin{center}
-  DRAFT
-\small Report TRANSP-OR 24xxxx \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+
+\small Report TRANSP-OR 240721 \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
 \end{center}
 
 
@@ -94,16 +94,19 @@
 
 \section*{Abstract}
 
-The abstract...
+This document presents the multiple discrete-continuous extreme value (MDCEV) model as implemented in Biogeme. We outline the mathematical foundations of the various model variants available in the package. Additionally, we discuss the procedures for parameter estimation and the application of the model for forecasting. A step-by-step walkthrough of a concrete example is also provided to illustrate the model's practical use.
+
 \section{The MDCEV model}
 
 The multiple discrete-continuous extreme value model (MDCEV) is a
 choice model where the choice of multiple alternatives can occur
 simultaneously. It has been introduced by \citeasnoun{BHAT2005679},
-building on the Karush-Kuhn-Tucker multiple discrete-continuous economic
-model proposed by \citeasnoun{wales1983estimation}. In this document, we introduce a generalization of the model,
-where the derivation is performed for a generic utility function. This is motivated by the need to obtain an
-implementation that is easily extendible to new models in the future.
+building on the Karush-Kuhn-Tucker multiple discrete-continuous
+economic model proposed by \citeasnoun{wales1983estimation}. In this
+document, we introduce a generalization of the model, where the
+derivation is performed for a generic utility function. This is
+motivated by the need to obtain an implementation that is easily
+extendible to new models in the future.
 
 Consider an individual, denoted as $n$, who is presented with a
 distinct set of items, represented as $\mathcal{C}_n$, containing
@@ -127,13 +130,7 @@ to write the problem in terms of expenditures $e$ or in terms of quantities $y$.
 Each item $i$ is associated with a utility $U_{in}(x_{in}, e_{in}, \varepsilon_{in}; \theta)$, where $x_{in}$ are explanatory variables,
 $e_{in}$ is the expenditure of individual $n$ for alternative $i$, $\varepsilon_{in}$ is an error term independent from $x_{in}$ and $e_{in}$, and $\theta$ is a vector of parameters, to be estimated from data.
 The error terms $\varepsilon_{in}$ are assumed to be independent and identically distributed, following an extreme value distribution.
-We identify two
-properties that the utility functions must have. Both are relatively
-weak conditions. The first one is related to the optimality
-conditions, and are verified if the functions are concave, or
-quasi-concave. The second one is related to the specification of the
-error terms, needed for the derivation of the econometric model.
-It is assumed that there exists an order preserving function $\phi$ such that the random utility can be expressed in additive form, that is such that
+It is also assumed that there exists an order preserving function $\phi$ such that the random utility can be expressed in additive form, that is such that
 \begin{equation}
     \label{eq:phi}
 \phi\left(\frac{\partial U_{in}}{\partial e_{in}}\right) = V_{in} + \varepsilon_{in},
@@ -336,13 +333,13 @@ Note that the last term is a constant, and is ignored by Biogeme.
 \section{Forecasting}
 \label{sec:forecasting}
 We assume that we have  a sample of individuals, either directly observed, or coming from a scenario. For each individual $n$, we have access to the explanatory
-variables for each alternative: $x_{in}$, for $i \in \C_n$. We also assume that an estimation of the unknown parameters $\theta$ is available. The objective is to forecast the
+variables for each alternative: $x_{in}$, for $i \in \C_n$. We also assume that an estimation $\widehat{\theta}$ of the unknown parameters $\theta$ is available. The objective is to forecast the
 distribution of expenditures $e_{n}$ for each individual $n$ in the sample, given a total budget $E_n$.
 
 This involves generating $R$ draws $\varepsilon^r_i$, $r=1, \ldots, R$, from the error terms $\varepsilon_{i}$ and, for each draw $r$, solving the
 optimization problem defined in equations \req{eq:obj}--\req{eq:non_negativity}:
 \[
-\max_{e} \sum_{i \in \C} U_{i}(x_{i}, e_{i}, \varepsilon^r_i; \theta)
+\max_{e} \sum_{i \in \C} U_{i}(x_{i}, e_{i}, \varepsilon^r_i; \widehat{\theta})
 \]
 subject to
 \begin{align*}
@@ -1128,204 +1125,7 @@ and the strict concavity is verified as $0 < \alpha_i < 1$.
 
 \subsection{Data}
 
-We use as data the 2019 American Time Use Survey (ATUS). The description of the variables is available below,
-as well as some descriptive statistics in Table~\vref{tab:stats}.
-
-SEE ALSO \citeasnoun{WangYe24}
-
-\begin{longtable}{|p{0.3\textwidth}|p{0.7\textwidth}|}
-  \hline
-  \textbf{Variables} & \textbf{Description} \\
-  \hline
-  \endfirsthead
-
-  \hline
-   \textbf{Variables} & \textbf{Description} \\
-  \hline
-  \endhead
-
-  \hline
-  \endfoot
-
-  \hline
-  \endlastfoot
-
-\textbf{PERSONID} &
-
-Respondent identifier\\
-
-\textbf{WEIGHT} &
-
-Weight variable for each respondent \\
-
-\textbf{HHSIZE} &
-
-Number of people living in respondent's household \\
-
-\textbf{CHILDNUM} &
-
-Number of household children $<$18 \\
-
-\textbf{FAMINC} &
-
-Family annual income (1:Less than \$5,000; 2:\$5,000 to \$7,499; 3:\$7,500 to \$9,999; 4:\$10,000 to \$12,499;
-  5:\$12,500 to \$14,999; 6:\$15,000 to \$19,999; 7:\$20,000 to \$24,999; 8:\$25,000 to \$29,999; 9:\$30,000
-  to \$34,999; 10:\$35,000 to \$39,999; 11:\$40,000 to \$49,999; 12:\$50,000 to \$59,999; 13:\$60,000 to
-  \$74,999; 14:\$75,000 to \$99,999; 15:\$100,000 to \$149,999; 16:\$150,000 and over) \\
-
-\textbf{FAMINC25K} &
-
-Family annual income $<$\$25,000(0 = no, 1 = yes) \\
-
-\textbf{INCOME} &
-
-Median value of the corresponding segment of variable FAMINC \\
-
-\textbf{EMPLOYED} &
-
-Whether the respondent is employed (0 = no, 1 = yes) \\
-
-\textbf{FULLTIME} &
-
-Whether the respondent is full time employed (0 = no, 1 = yes) \\
-
-\textbf{SPOUSEPR} &
-
-Whether the respondent has spouse or unmarried partner in the household (0 = no, 1 = yes) \\
-
-\textbf{SPOUSEMP} &
-
-Whether the respondent has employed spouse or unmarried partner in the household (0 = no, 1 = yes) \\
-
-\textbf{MALE} &
-
-Whether the respondent is male (0 = no, 1 = yes) \\
-
-\textbf{MARRIED} &
-
-Whether the respondent is married (0 = no, 1 = yes) \\
-
-\textbf{AGE} &
-
-Age of the respondent \\
-
-\textbf{AGE2} &
-
-Age squared of the respondent \\
-
-\textbf{AGE15\_40} &
-
-Whether the age of the respondent is in [15, 40] (0 = no, 1 = yes) \\
-
-\textbf{AGE41\_60} &
-
-Whether the age of the respondent is in [41, 60] (0 = no, 1 = yes) \\
-
-\textbf{AGE61\_85} &
-
-Whether the age of the respondent is in [61, 85] (0 = no, 1 = yes) \\
-
-\textbf{BACHIGHER} &
-
-Whether the highest degree of the respondent is a bachelor's or above (0 = no, 1 = yes) \\
-
-\textbf{WHITE} &
-
-Whether the respondent is white (0 = no, 1 = yes) \\
-
-\textbf{METRO} &
-
-Whether the respondent is from metropolitan area (0 = no, 1 = yes) \\
-
-\textbf{DIARYDAY} &
-
-Day of the week of diary day (1 = Sunday, 7 = Saturday) \\
-
-\textbf{SUNDAY} &
-
-Whether the diary day is Sunday (0 = no, 1 = yes) \\
-
-\textbf{HOLIDAY} &
-
-Whether the diary day is Holiday (0 = no, 1 = yes) \\
-
-\textbf{WEEKEARN} &
-
-Weekly earnings at main job (-1 = not available) \\
-
-\textbf{WEEKWORDUR} &
-
-Weekly work hours at main job (-1 = not available) \\
-
-\textbf{HHCHILD} &
-
-Presence of household children $<$ 18 (0 = no, 1 = yes) \\
-
-\textbf{OHHCHILD} &
-
-Presence of own household children $<$ 18 (0 = no, 1 = yes) \\
-
-\textbf{t1} &
-
-Time consumption of shopping activities (min) \\
-
-\textbf{t2} &
-
-Time consumption of socializing activities (min) \\
-
-\textbf{t3} &
-
-Time consumption of recreational activities (min) \\
-
-\textbf{t4} &
-
-Time consumption of personal and household affairs activities (min) \\
-
-\end{longtable}
-
-\begin{table}
-\begin{center}
-\begin{tabular}{l l l l l}
-\textbf{Variable} & \textbf{Min} & \textbf{Max} & \textbf{Mean} & \textbf{St.Dev.} \\
-\hline
-\textbf{WEIGHT} & 0.08 & 3.72 & 0.56 & 0.39 \\
-\textbf{HHSIZE} & 1 & 10 & 2.61 & 1.49 \\
-\textbf{CHILDNUM} & 0 & 7 & 0.71 & 1.08 \\
-\textbf{FAMINC} & 1 & 16 & 11.54 & 3.90 \\
-\textbf{FAMINC25K} & 0 & 1 & 0.18 & 0.39 \\
-\textbf{INCOME} & 2.50 & 150.00 & 72.34 & 47.08 \\
-\textbf{EMPLOYED} & 0 & 1 & 0.62 & 0.49 \\
-\textbf{FULLTIME} & 0 & 1 & 0.49 & 0.50 \\
-\textbf{SPOUSEPR} & 0 & 1 & 0.54 & 0.50 \\
-\textbf{SPOUSEMP} & 0 & 1 & 0.37 & 0.48 \\
-\textbf{MALE} & 0 & 1 & 0.45 & 0.50 \\
-\textbf{MARRIED} & 0 & 1 & 0.50 & 0.50 \\
-\textbf{AGE} & 15 & 85 & 50.54 & 18.25 \\
-\textbf{AGE2} & 225 & 7225 & 2887.74 & 1873.69 \\
-\textbf{AGE15\_40} & 0 & 1 & 0.34 & 0.47 \\
-\textbf{AGE41\_60} & 0 & 1 & 0.33 & 0.47 \\
-\textbf{AGE61\_85} & 0 & 1 & 0.34 & 0.47 \\
-\textbf{BACHIGHER} & 0 & 1 & 0.40 & 0.49 \\
-\textbf{WHITE} & 0 & 1 & 0.81 & 0.39 \\
-\textbf{METRO} & 0 & 1 & 0.84 & 0.36 \\
-\textbf{DIARYDAY} & 1 & 7 & 3.87 & 2.997 \\
-\textbf{SUNDAY} & 0 & 1 & 0.52 & 0.50 \\
-\textbf{HOLIDAY} & 0 & 1 & 0.01 & 0.11 \\
-\textbf{WEEKEARN} & -1 & 2884.61 & 604.64 & 783.26 \\
-\textbf{WEEKWORDUR} & -1 & 144 & 22.74 & 22.61 \\
-\textbf{HHCHILD} & 0 & 1 & 0.38 & 0.49 \\
-\textbf{OHHCHILD} & 0 & 1 & 0.30 & 0.46 \\
-\textbf{t1} & 0 & 640 & 30.03 & 54.66 \\
-\textbf{t2} & 0 & 905 & 114.67 & 139.76 \\
-\textbf{t3} & 0 & 900 & 51.11 & 108.96 \\
-\textbf{t4} & 0 & 773 & 58.22 & 61.05 \\
-\end{tabular}
-
-\caption{\label{tab:stats}Descriptive statistics}
-\end{center}
-    \end{table}
-
-In terms of implementation, the data preparation is the same as for any regular Biogeme model. In particular,
+We use as data the 2019 American Time Use Survey (ATUS), described in Appendix~\ref{sec:appendix}. In terms of implementation, the data preparation is the same as for any regular Biogeme model. In particular,
 it involves the following steps.
 \begin{enumerate}
     \item The data is stored in a Pandas data frame, typically read from a file:
@@ -1555,10 +1355,41 @@ the_gamma_profile = GammaProfile(
          \end{lstlisting}
      \end{center}
     \item[The non-monotonic model] On top of the baseline utilities, the non-monotonic model involves also another component of
-    utility, called the $\mu$-utilities. In this illustration, we use the same specification for both.
+      utility, called the $\mu$-utilities:
+      \begin{center}
+        \begin{lstlisting}
+cte_shopping_mu = Beta('cte_shopping_mu', 0, None, None, 0)
+holiday_shopping_mu = Beta('holiday_shopping_mu', 0, None, None, 0)
+
+cte_social_mu = Beta('cte_social_mu', 0, None, None, 0)
+metro_social_mu = Beta('metro_social_mu', 0, None, None, 0)
+
+cte_recreation_mu = Beta('cte_recreation_mu', 0, None, None, 0)
+holiday_recreation_mu = Beta('holiday_recreation_mu', 0, None, None, 0)
+
+age_15_40_personal_mu = Beta('age_15_40_personal_mu', 0, None, None, 0)
+male_personal_mu = Beta('male_personal_mu', 0, None, None, 0)
+
+
+shopping_mu = holiday_shopping_mu * holiday
+socializing_mu = metro_social_mu * metro
+recreation_mu = holiday_recreation_mu * holiday
+personal_mu = male_personal_mu * male
+
+mu_utilities = {
+    1: shopping_mu,
+    2: socializing_mu,
+    3: recreation_mu,
+    4: personal_mu,
+}
+        \end{lstlisting}
+      \end{center}
+
+ All the ingredients can be gathered as follows.
     \begin{center}
          \begin{lstlisting}
 from biogeme.mdcev import NonMonotonic
+
 lowest_positive_value = 0.0001
 gamma_shopping = Beta('gamma_shopping', 1, lowest_positive_value, None, 0)
 gamma_socializing = Beta('gamma_socializing', 1, lowest_positive_value, None, 0)
@@ -1602,7 +1433,7 @@ the_non_monotonic = NonMonotonic(
 
 \subsection{Estimation of the parameters}
 
-Once the object characterizing the model has been created, the estimation of the parameters is simply done as follows for the $\gamma$ profile:
+Once the object characterizing the model has been created, the estimation of the parameters is simply done by calling the function ``\lstinline@estimate_parameters@''. As an example, here is the syntax  for the $\gamma$ profile:
 \begin{center}
          \begin{lstlisting}
 results = the_gamma_profile.estimate_parameters(
@@ -1639,8 +1470,212 @@ The authors would like to thank Chandra Bhat and Angela Haddad for sharing estim
 The comments and suggestions of Jason Hawkins about an earlier version of this report and the estimation code have been really useful.
 The second author was funded by the China Scholarship Council.
 
+
 \bibliographystyle{dcu}
 \bibliography{transpor}
+
+\appendix
+
+\section{Description of the data}
+\label{sec:appendix}
+
+The data set is the 2019 American Time Use Survey (ATUS). The
+description of the variables is available below, as well as some
+descriptive statistics in Table~\vref{tab:stats} (see also  \cite{WangYe24} for a discussion and analysis of this data).
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.7\textwidth}|}
+  \hline
+  \textbf{Variables} & \textbf{Description} \\
+  \hline
+  \endfirsthead
+
+  \hline
+   \textbf{Variables} & \textbf{Description} \\
+  \hline
+  \endhead
+
+  \hline
+  \endfoot
+
+  \hline
+  \endlastfoot
+
+\textbf{PERSONID} &
+
+Respondent identifier\\
+
+\textbf{WEIGHT} &
+
+Weight variable for each respondent \\
+
+\textbf{HHSIZE} &
+
+Number of people living in respondent's household \\
+
+\textbf{CHILDNUM} &
+
+Number of household children $<$18 \\
+
+\textbf{FAMINC} &
+
+Family annual income (1:Less than \$5,000; 2:\$5,000 to \$7,499; 3:\$7,500 to \$9,999; 4:\$10,000 to \$12,499;
+  5:\$12,500 to \$14,999; 6:\$15,000 to \$19,999; 7:\$20,000 to \$24,999; 8:\$25,000 to \$29,999; 9:\$30,000
+  to \$34,999; 10:\$35,000 to \$39,999; 11:\$40,000 to \$49,999; 12:\$50,000 to \$59,999; 13:\$60,000 to
+  \$74,999; 14:\$75,000 to \$99,999; 15:\$100,000 to \$149,999; 16:\$150,000 and over) \\
+
+\textbf{FAMINC25K} &
+
+Family annual income $<$\$25,000(0 = no, 1 = yes) \\
+
+\textbf{INCOME} &
+
+Median value of the corresponding segment of variable FAMINC \\
+
+\textbf{EMPLOYED} &
+
+Whether the respondent is employed (0 = no, 1 = yes) \\
+
+\textbf{FULLTIME} &
+
+Whether the respondent is full time employed (0 = no, 1 = yes) \\
+
+\textbf{SPOUSEPR} &
+
+Whether the respondent has spouse or unmarried partner in the household (0 = no, 1 = yes) \\
+
+\textbf{SPOUSEMP} &
+
+Whether the respondent has employed spouse or unmarried partner in the household (0 = no, 1 = yes) \\
+
+\textbf{MALE} &
+
+Whether the respondent is male (0 = no, 1 = yes) \\
+
+\textbf{MARRIED} &
+
+Whether the respondent is married (0 = no, 1 = yes) \\
+
+\textbf{AGE} &
+
+Age of the respondent \\
+
+\textbf{AGE2} &
+
+Age squared of the respondent \\
+
+\textbf{AGE15\_40} &
+
+Whether the age of the respondent is in [15, 40] (0 = no, 1 = yes) \\
+
+\textbf{AGE41\_60} &
+
+Whether the age of the respondent is in [41, 60] (0 = no, 1 = yes) \\
+
+\textbf{AGE61\_85} &
+
+Whether the age of the respondent is in [61, 85] (0 = no, 1 = yes) \\
+
+\textbf{BACHIGHER} &
+
+Whether the highest degree of the respondent is a bachelor's or above (0 = no, 1 = yes) \\
+
+\textbf{WHITE} &
+
+Whether the respondent is white (0 = no, 1 = yes) \\
+
+\textbf{METRO} &
+
+Whether the respondent is from metropolitan area (0 = no, 1 = yes) \\
+
+\textbf{DIARYDAY} &
+
+Day of the week of diary day (1 = Sunday, 7 = Saturday) \\
+
+\textbf{SUNDAY} &
+
+Whether the diary day is Sunday (0 = no, 1 = yes) \\
+
+\textbf{HOLIDAY} &
+
+Whether the diary day is Holiday (0 = no, 1 = yes) \\
+
+\textbf{WEEKEARN} &
+
+Weekly earnings at main job (-1 = not available) \\
+
+\textbf{WEEKWORDUR} &
+
+Weekly work hours at main job (-1 = not available) \\
+
+\textbf{HHCHILD} &
+
+Presence of household children $<$ 18 (0 = no, 1 = yes) \\
+
+\textbf{OHHCHILD} &
+
+Presence of own household children $<$ 18 (0 = no, 1 = yes) \\
+
+\textbf{t1} &
+
+Time consumption of shopping activities (min) \\
+
+\textbf{t2} &
+
+Time consumption of socializing activities (min) \\
+
+\textbf{t3} &
+
+Time consumption of recreational activities (min) \\
+
+\textbf{t4} &
+
+Time consumption of personal and household affairs activities (min) \\
+
+\end{longtable}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l l l l l}
+\textbf{Variable} & \textbf{Min} & \textbf{Max} & \textbf{Mean} & \textbf{St.Dev.} \\
+\hline
+\textbf{WEIGHT} & 0.08 & 3.72 & 0.56 & 0.39 \\
+\textbf{HHSIZE} & 1 & 10 & 2.61 & 1.49 \\
+\textbf{CHILDNUM} & 0 & 7 & 0.71 & 1.08 \\
+\textbf{FAMINC} & 1 & 16 & 11.54 & 3.90 \\
+\textbf{FAMINC25K} & 0 & 1 & 0.18 & 0.39 \\
+\textbf{INCOME} & 2.50 & 150.00 & 72.34 & 47.08 \\
+\textbf{EMPLOYED} & 0 & 1 & 0.62 & 0.49 \\
+\textbf{FULLTIME} & 0 & 1 & 0.49 & 0.50 \\
+\textbf{SPOUSEPR} & 0 & 1 & 0.54 & 0.50 \\
+\textbf{SPOUSEMP} & 0 & 1 & 0.37 & 0.48 \\
+\textbf{MALE} & 0 & 1 & 0.45 & 0.50 \\
+\textbf{MARRIED} & 0 & 1 & 0.50 & 0.50 \\
+\textbf{AGE} & 15 & 85 & 50.54 & 18.25 \\
+\textbf{AGE2} & 225 & 7225 & 2887.74 & 1873.69 \\
+\textbf{AGE15\_40} & 0 & 1 & 0.34 & 0.47 \\
+\textbf{AGE41\_60} & 0 & 1 & 0.33 & 0.47 \\
+\textbf{AGE61\_85} & 0 & 1 & 0.34 & 0.47 \\
+\textbf{BACHIGHER} & 0 & 1 & 0.40 & 0.49 \\
+\textbf{WHITE} & 0 & 1 & 0.81 & 0.39 \\
+\textbf{METRO} & 0 & 1 & 0.84 & 0.36 \\
+\textbf{DIARYDAY} & 1 & 7 & 3.87 & 2.997 \\
+\textbf{SUNDAY} & 0 & 1 & 0.52 & 0.50 \\
+\textbf{HOLIDAY} & 0 & 1 & 0.01 & 0.11 \\
+\textbf{WEEKEARN} & -1 & 2884.61 & 604.64 & 783.26 \\
+\textbf{WEEKWORDUR} & -1 & 144 & 22.74 & 22.61 \\
+\textbf{HHCHILD} & 0 & 1 & 0.38 & 0.49 \\
+\textbf{OHHCHILD} & 0 & 1 & 0.30 & 0.46 \\
+\textbf{t1} & 0 & 640 & 30.03 & 54.66 \\
+\textbf{t2} & 0 & 905 & 114.67 & 139.76 \\
+\textbf{t3} & 0 & 900 & 51.11 & 108.96 \\
+\textbf{t4} & 0 & 773 & 58.22 & 61.05 \\
+\end{tabular}
+
+\caption{\label{tab:stats}Descriptive statistics}
+\end{center}
+    \end{table}
+
+
 
 
 
