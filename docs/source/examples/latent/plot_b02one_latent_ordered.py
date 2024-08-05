@@ -102,13 +102,13 @@ MODEL_Mobil17 = INTER_Mobil17 + B_Mobil17_F1 * CARLOVERS
 
 # %%
 # Scale parameters.
-SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 1, 1.0e-5, None, 1)
-SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 1, 1.0e-5, None, 0)
-SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 1, 1.0e-5, None, 0)
+SIGMA_STAR_Envir01 = Beta('SIGMA_STAR_Envir01', 10, 1.0e-5, None, 1)
+SIGMA_STAR_Envir02 = Beta('SIGMA_STAR_Envir02', 10, 1.0e-5, None, 0)
+SIGMA_STAR_Envir03 = Beta('SIGMA_STAR_Envir03', 10, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil11 = Beta('SIGMA_STAR_Mobil11', 10, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil14 = Beta('SIGMA_STAR_Mobil14', 10, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil16 = Beta('SIGMA_STAR_Mobil16', 10, 1.0e-5, None, 0)
+SIGMA_STAR_Mobil17 = Beta('SIGMA_STAR_Mobil17', 10, 1.0e-5, None, 0)
 
 # %%
 # Symmetric thresholds.
