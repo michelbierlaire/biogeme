@@ -86,7 +86,9 @@ class test_11(unittest.TestCase):
         self.assertAlmostEqual(results.data.logLike, -5214.049, 2)
         biosim = bio.BIOGEME(database, simulate)
         simresults = biosim.simulate(results.get_beta_values())
-        self.assertAlmostEqual(sum(simresults['Prob. train']), 888.3883902853023, 1)
+        self.assertAlmostEqual(
+            sum(simresults['Prob. train']), 888.3883902853023, delta=1
+        )
 
 
 if __name__ == '__main__':
