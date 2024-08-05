@@ -1058,11 +1058,17 @@ class Mdcev(ABC):
             )
         if not np.isclose(obj_analytical, obj_brute_force):
             logger.warning(
-                f'Difference between optimal utility with analytical [{obj_analytical}] and brute '
-                f'force [{obj_brute_force}] algorithms.'
+                f'Difference between optimal utility with analytical [{obj_analytical:.4g}] and brute '
+                f'force [{obj_brute_force:.4g}] algorithms.'
             )
-            logger.warning(f'Solution with brute force: {brute_force}')
-            logger.warning(f'Solution with analytical: {analytical}')
+            brute_force_results = ', '.join(
+                [f'{key}: {value:.3g}' for key, value in brute_force.items()]
+            )
+            analytical_results = ', '.join(
+                [f'{key}: {value:.3g}' for key, value in analytical.items()]
+            )
+            logger.warning(f'Solution with brute force: {brute_force_results}')
+            logger.warning(f'Solution with analytical: {analytical_results}')
         if not np.isclose(constraint_analytical, constraint_brute_force):
             logger.warning(
                 f'Difference between constraint with analytical [{constraint_analytical}] and brute force '
