@@ -186,7 +186,7 @@ class TestTools(unittest.TestCase):
         with biogeme.tools.files.TemporaryFile() as filename:
             with open(filename, 'w', encoding='utf-8') as f:
                 f.write(content)
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, encoding='utf-8') as f:
                 check = f.read()
             self.assertEqual(content, check)
 

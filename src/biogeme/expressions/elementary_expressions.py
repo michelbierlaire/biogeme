@@ -135,7 +135,7 @@ class bioDraws(Elementary):
         """
         return {self.name}
 
-    def set_id_manager(self, id_manager: 'IdManager | None' = None):
+    def set_id_manager(self, id_manager: IdManager | None = None):
         """The ID manager contains the IDs of the elementary expressions.
 
         It is externally created, as it may need to coordinate the
@@ -260,7 +260,7 @@ class Variable(Elementary):
         """
         return {self.name}
 
-    def set_id_manager(self, id_manager: 'IdManager | None' = None):
+    def set_id_manager(self, id_manager: IdManager | None = None):
         """The ID manager contains the IDs of the elementary expressions.
 
         It is externally created, as it may need to coordinate the
@@ -292,7 +292,7 @@ class Variable(Elementary):
             return {self.name: self}
         return {}
 
-    def audit(self, database: 'Database | None' = None) -> tuple[list[str], list[str]]:
+    def audit(self, database: Database | None = None) -> tuple[list[str], list[str]]:
         """Performs various checks on the expressions.
 
         :param database: database object
@@ -431,7 +431,7 @@ class RandomVariable(Elementary):
         """
         return {self.name}
 
-    def set_id_manager(self, id_manager: 'IdManager | None' = None):
+    def set_id_manager(self, id_manager: IdManager | None = None):
         """The ID manager contains the IDs of the elementary expressions.
 
         It is externally created, as it may need to coordinate the
@@ -527,3 +527,4 @@ class RandomVariable(Elementary):
         signature += f"{{{self.get_id()}}}"
         signature += f'"{self.name}",{self.elementaryIndex},{self.rvId}'
         return [signature.encode()]
+

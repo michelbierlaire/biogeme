@@ -1073,7 +1073,7 @@ class BIOGEME:
                     betas[ell[0].strip()] = float(ell[1])
             self.change_init_values(betas)
             logger.info(f"Parameter values restored from {filename}")
-        except IOError:
+        except OSError:
             logger.info(f"Cannot read file {filename}. Statement is ignored.")
 
     def set_random_init_values(self, default_bound: float = 100.0) -> None:

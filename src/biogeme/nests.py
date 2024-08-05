@@ -76,6 +76,7 @@ class OneNestForCrossNestedLogit:
 
     nest_param: ExpressionOrNumeric
     dict_of_alpha: dict[int, ExpressionOrNumeric]
+
     name: str | None = None
 
     @classmethod
@@ -176,9 +177,9 @@ class Nests:
 
         # Union Check: The union of all lists should be equal to choice_set
 
-        union_of_lists = set(
+        union_of_lists = {
             i for nest in self.tuple_of_nests for i in nest.list_of_alternatives
-        )
+        }
         union_of_lists |= set(self.alone)
         if union_of_lists != set(self.choice_set):
             missing_values = set(self.choice_set) - union_of_lists  # set difference
@@ -374,6 +375,7 @@ class NestsForCrossNestedLogit(Nests):
         :param alternative_id: identifier of the alternative
         :return: a dict mapping the name of a nest and the value of the alpha expression
         """
+
         alpha_dict = self.get_alpha_dict(alternative_id=alternative_id)
         alpha_values = {
             key: expression.get_value() for key, expression in alpha_dict.items()

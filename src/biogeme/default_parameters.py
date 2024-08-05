@@ -10,9 +10,9 @@ See https://www.w3schools.com/python/gloss_python_tuple_one_item.asp
 """
 
 from __future__ import annotations
-from typing import NamedTuple, Type, Callable
 
 import numpy as np
+from typing import NamedTuple, Callable
 
 from biogeme.version import get_version
 import biogeme.check_parameters as cp
@@ -24,7 +24,7 @@ ParameterValue = bool | int | float | str
 class ParameterTuple(NamedTuple):
     name: str
     value: ParameterValue
-    type: Type
+    type: type
     section: str
     description: str
     check: tuple[Callable[[ParameterValue], tuple[bool, str | None]], ...]
