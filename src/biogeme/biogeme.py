@@ -1493,6 +1493,7 @@ class BIOGEME:
         #        yep.stop()
 
         output = self.optimize(np.array(self.id_manager.free_betas_values))
+
         xstar, optimization_messages, convergence = output
         # Running time of the optimization algorithm
         optimization_messages["Optimization time"] = datetime.now() - start_time
