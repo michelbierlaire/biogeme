@@ -1,7 +1,5 @@
 # deprecated_extension.py
-from icecream import ic
 from sphinx.application import Sphinx
-from sphinx.ext.autodoc import between
 
 
 def process_docstring(app, what, name, obj, options, lines):
