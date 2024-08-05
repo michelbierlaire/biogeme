@@ -28,13 +28,13 @@ data_file_path = os.path.join(module_dir, 'data', 'optima.dat')
 def read_data() -> db.Database:
     """Read the data from file"""
     df = pd.read_csv(data_file_path, sep='\t')
+    # Exclude observations such that the chosen alternative is -1
+    df.drop(df[df['Choice'] == -1].index, inplace=True)
     # Normalize the weights
     sum_weight = df['Weight'].sum()
     number_of_rows = df.shape[0]
     df['normalized_weight'] = df['Weight'] * number_of_rows / sum_weight
     database = db.Database(name=data_file_path, pandas_database=df)
-    # Exclude observations such that the chosen alternative is -1
-    database.remove(Choice == -1.0)
     _ = database.define_variable('ScaledIncome', CalculatedIncome / 1000)
     _ = database.define_variable('age_65_more', age >= 65)
     _ = database.define_variable('moreThanOneCar', NbCar > 1)
