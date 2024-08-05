@@ -18,6 +18,8 @@ Illustration of a common estimation problem
 
 """
 
+import sys
+
 import biogeme.biogeme_logging as blog
 from biogeme.models import piecewise_formula
 import biogeme.biogeme as bio
@@ -270,15 +272,10 @@ the_biogeme = bio.BIOGEME(database, loglike)
 the_biogeme.modelName = 'b07problem'
 
 # %%
-# Estimate the parameters
-results = the_biogeme.estimate()
-
-# %%
-print(f'Estimated betas: {len(results.data.betaValues)}')
-print(f'final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
-results.write_latex()
-print(f'LaTeX file: {results.data.latexFileName}')
-
-# %%
-results.get_estimated_parameters()
+# Estimate the parameters. As the estimation will fail, we are catching the exception
+try:
+    results = the_biogeme.estimate()
+except ValueError as e:
+    print(
+        'Impossible to estimate the model. There must be an issue with the initial values of the parameters.'
+    )
