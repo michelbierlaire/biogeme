@@ -93,9 +93,9 @@ class TestGenerateModel(unittest.TestCase):
         self.assertIsInstance(utility, Expression)
         utility_str = str(utility)
         expected = (
-            "((Beta('beta_cost', 0, -1.3407807929942596e+154, 1.3407807929942596e+154, "
+            "((Beta('beta_cost', 0, None, None, "
             "0) * prefix_travel_cost_suffix) + (Beta('beta_age_time', 0, "
-            "-1.3407807929942596e+154, 1.3407807929942596e+154, 0) * "
+            "None, None, 0) * "
             "prefix_age_time_suffix))"
         )
         self.assertEqual(utility_str, expected)
