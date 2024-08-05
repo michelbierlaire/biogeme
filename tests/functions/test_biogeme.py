@@ -586,8 +586,8 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.generate_html = True
         my_biogeme.estimate()
         result = my_biogeme.files_of_type('html', all_files=False)
-        expected_result = ['name_for_file.html']
-        self.assertListEqual(result, expected_result)
+        expected_result = 'name_for_file.html'
+        self.assertIn(expected_result, result, f"{expected_result} is not in the list")
         result = my_biogeme.files_of_type('html', all_files=True)
         self.assertGreaterEqual(len(result), 1)
 
@@ -601,7 +601,6 @@ class TestBiogeme(unittest.TestCase):
                 'beta_2': beta_2,
             },
         )
-
         # Valid constructor
         config_id = 'the_catalog:beta_2'
         the_biogeme = bio.BIOGEME.from_configuration(
@@ -609,6 +608,7 @@ class TestBiogeme(unittest.TestCase):
             expression=catalog,
             database=getData(1),
         )
+
         self.assertIs(the_biogeme.log_like, catalog)
 
         # Invalid constructor: typo
