@@ -13,7 +13,7 @@ from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import TypeOfElementaryExpression
 from biogeme.expressions.elementary_expressions import Elementary
-from biogeme.expressions.numeric_tools import validate, MAX_VALUE
+
 
 logger = logging.getLogger(__name__)
 
@@ -60,18 +60,9 @@ class Beta(Elementary):
             )
             raise BiogemeError(error_msg)
         Elementary.__init__(self, name)
-        the_value = validate(value, modify=False)
-        self.initValue = the_value
-        if lowerbound is not None:
-            the_lowerbound = validate(lowerbound, modify=False)
-            self.lb = the_lowerbound
-        else:
-            self.lb = -MAX_VALUE
-        if upperbound is not None:
-            the_upperbound = validate(upperbound, modify=False)
-            self.ub = the_upperbound
-        else:
-            self.ub = MAX_VALUE
+        self.initValue = value
+        self.lb = lowerbound
+        self.ub = upperbound
         self.status = status
         self.betaId = None
 
@@ -189,6 +180,7 @@ class Beta(Elementary):
                     f'Parameter {self.name} is fixed, but its value '
                     f'is changed from {self.initValue} to {value}.'
                 )
+                logger.warning(warning_msg)
             self.initValue = value
 
     def get_signature(self) -> list[bytes]:
