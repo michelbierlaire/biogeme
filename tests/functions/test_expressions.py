@@ -24,16 +24,13 @@ from biogeme.expressions import (
     Expression,
 )
 
-EPSILON: float = np.finfo(np.float64).eps
 
-# Assuming the module name is expressions.py and the necessary classes are imported
 from biogeme.expressions import (
     validate_and_convert,
     expression_to_value,
     get_dict_values,
     get_dict_expressions,
 )
-from biogeme.expressions.numeric_tools import validate, MAX_VALUE
 from biogeme.function_output import (
     BiogemeDisaggregateFunctionOutput,
     BiogemeFunctionOutput,
@@ -41,6 +38,8 @@ from biogeme.function_output import (
     NamedBiogemeFunctionOutput,
 )
 from test_data import getData
+
+EPSILON: float = np.finfo(np.float64).eps
 
 
 class test_expressions(unittest.TestCase):
@@ -175,13 +174,14 @@ class test_expressions(unittest.TestCase):
 
         # exp of a large number
         check_results = optimization_function.check_derivatives(x=[800.0])
-        self.assertAlmostEqual(
-            check_results.analytical.function, 1.3407807929942596e154
+        self.assertTrue(
+            np.isinf(check_results.analytical.function), 'The value is not infinity'
         )
         for a_grad in check_results.analytical.gradient:
-            self.assertAlmostEqual(a_grad, 1.3407807929942596e154)
+            self.assertTrue(np.isinf(a_grad), 'The value is not infinity')
+
         for a_hess in np.nditer(check_results.analytical.hessian):
-            self.assertAlmostEqual(a_hess, 1.3407807929942596e154)
+            self.assertTrue(np.isinf(a_hess), 'The value is not infinity')
 
     def test_loglogit(self):
         V1 = Beta('V1', 2, None, None, 0)
@@ -330,8 +330,9 @@ class test_expressions(unittest.TestCase):
         # Test a negative argument and an integer
         the_power = x**-2.5
         expression_function = the_power.create_function()
-        with self.assertRaises(RuntimeError):
-            _ = expression_function([-2.0])
+
+        negative_number = expression_function([-2.0])
+        self.assertTrue(np.isnan(negative_number.function), 'The value is not NaN')
 
     def test_power(self):
         x = Beta('x', 2, None, None, 0)
@@ -409,15 +410,12 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # Log of a negative number
-        with self.assertRaises(RuntimeError):
-            _ = expression_function([-10.0])
+        log_negative = expression_function([-10.0])
+        self.assertTrue(np.isnan(log_negative.function), 'The value is not NaN')
 
         # Log of zero
         log_of_zero = expression_function([0.0])
-        self.assertEqual(
-            -1.3407807929942596e154,
-            log_of_zero.function,
-        )
+        self.assertTrue(np.isinf(log_of_zero.function), 'The value is not infinity')
 
         # Log of a number close to zero
         log_small_number = expression_function([EPSILON])
@@ -428,10 +426,7 @@ class test_expressions(unittest.TestCase):
 
         # Log of a number very close to zero
         log_small_number = expression_function([EPSILON / 2])
-        self.assertEqual(
-            -6.703903964971298e153,
-            log_small_number.function,
-        )
+        self.assertEqual(np.log(EPSILON / 2), log_small_number.function)
 
     def test_logzero(self):
         argument = Beta('argument', 2, None, None, 0)
@@ -452,8 +447,8 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # Log of a negative number
-        with self.assertRaises(RuntimeError):
-            _ = expression_function([-10.0])
+        log_negative = expression_function([-10.0])
+        self.assertTrue(np.isnan(log_negative.function), 'The value is not NaN')
 
         # Log of zero
         log_of_zero = expression_function([0.0])
@@ -471,10 +466,7 @@ class test_expressions(unittest.TestCase):
 
         # Log of a number very close to zero
         log_small_number = expression_function([EPSILON / 2])
-        self.assertEqual(
-            -6.703903964971298e153,
-            log_small_number.function,
-        )
+        self.assertEqual(np.log(EPSILON / 2), log_small_number.function)
 
     def test_div(self):
         result = self.Variable1 / self.Variable2
@@ -541,19 +533,21 @@ class test_expressions(unittest.TestCase):
         the_function_output: NamedBiogemeFunctionOutput = expression_function(
             [2.0, 1.0e-18]
         )
-        self.assertAlmostEqual(the_function_output.function, 1.3347424531145451e154, 3)
+        self.assertAlmostEqual(the_function_output.function, 2e18, delta=1e12)
         # Here, no way to verify the derivatives with finite difference, due to the numerical difficulties.
 
-        # Special case where denominator is close to zero
+        # Special case where denominator is zero
         the_function_output: NamedBiogemeFunctionOutput = expression_function([2, 0])
-        self.assertAlmostEqual(the_function_output.function, 1.3407807929942596e154, 3)
+        self.assertTrue(
+            np.isinf(the_function_output.function), 'The value is not infinity'
+        )
         # Here, no way to verify the derivatives with finite difference, due to the numerical difficulties.
 
         # Special case where denominator is close to zero
         the_function_output: NamedBiogemeFunctionOutput = expression_function(
             [2.0, -1.0e-18]
         )
-        self.assertAlmostEqual(the_function_output.function, -1.3347424531145451e154, 3)
+        self.assertAlmostEqual(the_function_output.function, -2e18, delta=1e12)
         # Here, no way to verify the derivatives with finite difference, due to the numerical difficulties.
 
         result = self.Variable1 / 1
@@ -1514,39 +1508,6 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(result.get_value(), 1)
         result = false_expr_1 | false_expr_2
         self.assertEqual(result.get_value(), 0)
-
-
-class TestValidateFunction(unittest.TestCase):
-    def setUp(self):
-        self.outside_up = np.nextafter(MAX_VALUE, np.inf)
-        self.inside_up = np.nextafter(MAX_VALUE, -np.inf)
-        self.outside_low = np.nextafter(-MAX_VALUE, -np.inf)
-        self.inside_low = np.nextafter(-MAX_VALUE, np.inf)
-
-    def test_value_within_range(self):
-        self.assertEqual(validate(0), 0)
-        self.assertEqual(validate(self.inside_up), self.inside_up)
-        self.assertEqual(validate(self.inside_low), self.inside_low)
-
-    def test_value_exceeds_max_with_modify(self):
-        self.assertEqual(validate(self.outside_up, modify=True), MAX_VALUE)
-
-    def test_value_exceeds_max_without_modify(self):
-        with self.assertRaises(BiogemeError):
-            validate(self.outside_up, modify=False)
-
-    def test_value_less_than_min_with_modify(self):
-        self.assertEqual(validate(self.outside_low, modify=True), -MAX_VALUE)
-
-    def test_value_less_than_min_without_modify(self):
-        with self.assertRaises(BiogemeError):
-            validate(self.outside_low, modify=False)
-
-    def test_edge_case_max_value(self):
-        self.assertEqual(validate(MAX_VALUE), MAX_VALUE)
-
-    def test_edge_case_min_value(self):
-        self.assertEqual(validate(-MAX_VALUE), -MAX_VALUE)
 
 
 class TestExpressionConversion(unittest.TestCase):
