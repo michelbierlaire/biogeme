@@ -71,7 +71,7 @@ coef_highEducation = Beta('coef_highEducation', 0.0, None, None, 0)
 # for numerical integration.
 omega = RandomVariable('omega')
 density = dist.normalpdf(omega)
-sigma_s = Beta('sigma_s', 1, None, None, 0)
+sigma_s = Beta('sigma_s', 1, -1, 1, 0)
 
 thresholds = [None, 4, 6, 8, 10, None]
 formula_income = models.piecewise_formula(variable=ScaledIncome, thresholds=thresholds)
