@@ -99,7 +99,7 @@ print(
 # %%
 # We now investigate how the revenues vary with the multiplicative factor
 
-factors = np.arange(0.0, 5.0, 0.05)
+factors = np.arange(0.0, 5.0, 0.1)
 plot_revenues = [revenues(s) for s in tqdm(factors)]
 zipped = zip(*plot_revenues)
 rev = next(zipped)
