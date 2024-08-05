@@ -31,7 +31,7 @@ def clean_directory(directory):
     remove_files(directory, ['*.iter'])
     remove_files(
         directory,
-        ['*.html', '*.pickle', '*.pareto', '*.tex'],
+        ['*.html', '*.pickle', '*.pareto', '*.tex', 'test*.dat'],
         exclude_dir='saved_results',
     )
 
