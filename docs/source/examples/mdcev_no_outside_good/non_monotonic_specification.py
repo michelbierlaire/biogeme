@@ -34,10 +34,18 @@ gamma_personal = Beta('gamma_personal', 1, lowest_positive_value, None, 0)
 
 # %
 # alpha parameters. Must be between 0 and 1
-alpha_shopping = Beta('alpha_shopping', 0.5, lowest_positive_value, 1, 0)
-alpha_socializing = Beta('alpha_socializing', 0.5, lowest_positive_value, 1, 0)
-alpha_recreation = Beta('alpha_recreation', 0.5, lowest_positive_value, 1, 0)
-alpha_personal = Beta('alpha_personal', 0.5, lowest_positive_value, 1, 0)
+alpha_shopping = Beta(
+    'alpha_shopping', 0.5, lowest_positive_value, 1 - lowest_positive_value, 0
+)
+alpha_socializing = Beta(
+    'alpha_socializing', 0.5, lowest_positive_value, 1 - lowest_positive_value, 0
+)
+alpha_recreation = Beta(
+    'alpha_recreation', 0.5, lowest_positive_value, 1 - lowest_positive_value, 0
+)
+alpha_personal = Beta(
+    'alpha_personal', 0.5, lowest_positive_value, 1 - lowest_positive_value, 0
+)
 
 scale_parameter = Beta('scale', 1, lowest_positive_value, None, 0)
 
