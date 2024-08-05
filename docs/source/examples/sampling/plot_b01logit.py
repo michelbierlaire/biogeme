@@ -19,7 +19,7 @@ from biogeme.sampling_of_alternatives import (
 import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
 from compare import compare
-from specification import V, combined_variables
+from specification_sampling import V, combined_variables
 from alternatives import (
     alternatives,
     ID_COLUMN,
