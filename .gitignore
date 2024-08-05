@@ -404,3 +404,4 @@ docs/source/sg_execution_times.rst
 tests/functions/myfile.toml
 tests/old_syntax/swissmetro/b01logit_bis.toml
 tests/old_syntax/swissmetro/few_draws.toml
+docs/source/examples/assisted/b07everything_assisted.pareto
