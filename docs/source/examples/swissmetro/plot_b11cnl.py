@@ -47,8 +47,8 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
 # %% Nest parameters.
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, 10, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, 10, 0)
+MU_EXISTING = Beta('MU_EXISTING', 1, 1, 5, 0)
+MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, 5, 0)
 
 # %%
 # Nest membership parameters.
