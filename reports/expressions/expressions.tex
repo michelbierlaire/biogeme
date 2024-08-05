@@ -38,10 +38,15 @@
 \usepackage{fancyhdr}
 
 
+\title{
+  \vspace{-3cm}
+  \epsfig{figure=transp-or.eps,height=2cm}
+  \hfill
+  \epsfig{figure=epfl,height=1.5cm}   \\*[-0.5cm]
+  \mbox{}\hrulefill\mbox{} \\*[3cm] Arithmetic expressions in Biogeme}
 
-\title{Arithmetic expressions in Biogeme}
 \author{Michel Bierlaire}
-\date{\today}
+\date{August 5, 2024}
 
 
 \begin{document}
@@ -54,7 +59,7 @@
   \vspace{2cm}
 
   \begin{center}
-    \small Report TRANSP-OR 24xxxx \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+    \small Report TRANSP-OR 240805 \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
     \begin{center}
       \textsc{Series on Biogeme}
     \end{center}
@@ -72,8 +77,8 @@ models.
 
 This document describes how Biogeme handles arithmetic expressions and
 deals with potential numerical issues. The concepts have been
-implemented in  \lstinline+cythonbiogeme 1.0.xxx+, used by
-\lstinline+biogeme 3.2.xxx+.
+implemented in  \lstinline+cythonbiogeme 1.0.4+, used by
+\lstinline+biogeme 3.2.14+.
 
 
 \section{Introduction}\label{eq:intro}
@@ -140,7 +145,10 @@ arithmetic operations are not necessarily an exact duplicate of their
 mathematical equivalent, that considers a continuous space of real
 numbers, that can take any value.
 
-The objective of this document is to describe how each arithmetic expression is handled by Biogeme. 
+The objective of this document is to describe how each arithmetic expression is handled by Biogeme.
+Note that, by default, Biogeme follows the IEEE standard (\cite{IEEE:2019aa}) that specify formats and operations for floating-point arithmetic, including the definition of exception conditions
+and the handling of these conditions. For instance,  the calculation of $\ln(0)$  results in
+$-\infty$, and the calculation of $\ln(-1)$ results in NaN (Not a Number). Those standards are not reviewed in this document.
 
 \section{Numerical limits}
 
@@ -170,11 +178,9 @@ smallest_normal = 2.2250738585072014e-308   smallest_subnormal = 4.9406564584124
 ---------------------------------------------------------------  
 \end{lstlisting}
 
-In this document, we consider two of those limits. We denote $u$ the largest value that can be represented, that is
-\[
-u \approx 10^{308}.
-\]
-We also consider $\varepsilon$, the ``machine epsilon'', that is the difference between 1.0 and the next smallest representable float larger than 1.0. It is an important value, because it means that, for each $x < \varepsilon$, adding $x$ to 1 will provide 1 as a result:
+
+
+In this document, we consider $\varepsilon$, the ``machine epsilon'', that is the difference between 1.0 and the next smallest representable float larger than 1.0. It is an important value, because it means that, for each $x < \varepsilon$, adding $x$ to 1 will provide 1 as a result:
 \[
 1 + x = 1.
 \]
@@ -190,35 +196,17 @@ while 1.0 + epsilon != 1.0:
 epsilon *= 2.0
 \end{lstlisting}
 
+In Biogeme, we consider 
+  \[
+  \xi = \sqrt{\varepsilon}
+  \]
+to determine if a value is sufficiently close to zero.  Specifically,
+Biogeme applies special handling to any value $x$ such that $-\xi
+\leq x \leq 0$. For instance, $\ln(-10^{-10})$ is treated as $\ln(0)=-\infty$ in Biogeme, whereas  the IEEE standard would produce NaN.
+es
 \section{Expressions}
 
-Arithmetic expressions in Biogeme are based on the following principles.
-\begin{itemize}
-\item A \emph{valid} value is a value $-U \leq x \leq U$, where $U$ is defined as
-  \begin{equation}
-    U = \sqrt{u} \approx 10^{154}.
-  \end{equation}
-\item Each arithmetic expression takes as input one or several valid values, and returns a valid value or raises an exception.
-\item A value $x$ such that $x \leq \xi$,  is considered to be ``too close to'' zero, and will be treated separately when needed (for instance, when dividing by $x$). In the current implementation of Biogeme, it is simply  defined as
-  \[
-  \xi = \varepsilon.
-  \]
-\end{itemize}
-
-Suppose that we have an expression $y$.
-In order to make values valid in the sense described above, we define a projection function $v$ as follows:
-\begin{equation}
-\label{eq:validation}
-v(y) = \left\{
-\begin{array}{ll}
-  U & \text{if } y \geq U, \\ 
-  -U & \text{if } y \leq -U, \\
-  y & \text{otherwise}.
-\end{array}
-\right.
-\end{equation}
-
-Based on those principles, we explicitly characterize how each
+We explicitly characterize how each
 arithmetic expression is implemented in Biogeme. Each expression in
 Biogeme is represented by an object of generic type
 \lstinline+Expression+.
@@ -247,21 +235,11 @@ The elementary expressions are the building blocks of any expression. They corre
     Numeric(x)
   \end{lstlisting}
   where \lstinline+x+ is the value. In most cases, the user does not need to use this syntax, as Biogeme tries to identify them automatically.
-  If the value $x$ is not valid, in the sense defined above, an exception is triggered.
 \item[Variables] Variables are referring to the columns of the data set:
   \begin{lstlisting}
     Variable('name_of_the_variable')
   \end{lstlisting}
-  This expression simply returns the value of the corresponding variable for the current row. No specific validity check is performed for the sake of computational efficiency.
-\item[Parameters] Parameters must be estimated from data. Their first values is defined by the user. There are two categories of parameters. Free parameters are updated by the optimization algorithm.
-  Fixed parameters are not.
-  The syntax for parameters is
-  \begin{lstlisting}
-    Beta('name_of_the_parameter', x_0, ell, u, fixed)
-  \end{lstlisting}
-  where \lstinline+x_0+ is the initial value of the parameter,
-  \lstinline+ell+ is the lower bound on the parameter, \lstinline+u+ is the upper bound on the parameter, and \lstinline+fixed+ specifies if the parameter must be fixed (\lstinline+fixed=1+) of free (\lstinline+fixed=0+).
-  If the value \lstinline+x_0+, \lstinline+ell+ or \lstinline+u+  is not valid, in the sense defined above, an exception is triggered.
+  This expression simply returns the value of the corresponding variable for the current row. 
 \item[Random variable] A random variable is used in the context of numerical integration.
   The syntax is
   \begin{lstlisting}
@@ -276,9 +254,17 @@ The elementary expressions are the building blocks of any expression. They corre
   \begin{lstlisting}
 'UNIFORM', 'UNIFORM_ANTI', 'UNIFORM_HALTON2', 'UNIFORM_HALTON3', 'UNIFORM_HALTON5', 'UNIFORM_MLHS', 'UNIFORM_MLHS_ANTI', 'UNIFORMSYM', 'UNIFORMSYM_ANTI', 'UNIFORMSYM_HALTON2', 'UNIFORMSYM_HALTON3', 'UNIFORMSYM_HALTON5', 'UNIFORMSYM_MLHS', 'UNIFORMSYM_MLHS_ANTI', 'NORMAL', 'NORMAL_ANTI', 'NORMAL_HALTON2', 'NORMAL_HALTON3', 'NORMAL_HALTON5', 'NORMAL_MLHS', 'NORMAL_MLHS_ANTI'
   \end{lstlisting}
+\item[Parameters] Parameters must be estimated from data. Their first values is defined by the user. There are two categories of parameters. Free parameters are updated by the optimization algorithm.
+  Fixed parameters are not.
+  The syntax for parameters is
+  \begin{lstlisting}
+    Beta('name_of_the_parameter', x_0, ell, u, fixed)
+  \end{lstlisting}
+  where \lstinline+x_0+ is the initial value of the parameter,
+  \lstinline+ell+ is the lower bound on the parameter, \lstinline+u+ is the upper bound on the parameter, and \lstinline+fixed+ specifies if the parameter must be fixed (\lstinline+fixed=1+) of free (\lstinline+fixed=0+).
 \end{description}
 
-Biogeme calculates derivatives with respects to the \lstinline+Beta+ parameters, that is, variables and parameters. In the following, we denote by $\beta_i$ and $\beta_j$ the literals that are involved in the derivatives.
+Biogeme calculates derivatives with respects to the \lstinline+Beta+ parameters. In the following, we denote by $\beta_i$ and $\beta_j$ the literals that are involved in the derivatives.
 Obviously, we have
 \[
 \frac{\partial \beta_i}{\partial \beta_i}=1, \;
@@ -300,7 +286,7 @@ Unary expressions take one value as input. Like any expression, they return a va
     -y
   \end{lstlisting}
   If $y$ is the input value, it returns $f(y)=-y$. 
-  As $y$ is a valid value, so is $f(y)$. The derivatives are:
+  The derivatives are:
   \[
   \frac{\partial f}{\partial \beta_i} = - \frac{\partial y}{\partial \beta_i}
   \]
@@ -314,95 +300,37 @@ Unary expressions take one value as input. Like any expression, they return a va
   \end{lstlisting}
   Let $y$ be the input value.
   \begin{align*}
-    f(y)& =v\left(e^y\right), \\
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(e^y \frac{\partial y}{\partial \beta_i}\right), \\
-    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= v\left(e^y \left(\frac{\partial y}{\partial \beta_i}\frac{\partial y}{\partial \beta_j} + \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}\right)\right),
+    f(y)&= e^y, \\
+    \frac{\partial f(y)}{\partial \beta_i} &= e^y \frac{\partial y}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= e^y \frac{\partial y}{\partial \beta_i}\frac{\partial y}{\partial \beta_j} + \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
   \end{align*}
-    where $v$ is the projection function \req{eq:validation}.
 
 \item[Logarithm] If \lstinline+y+ is the input value, the syntax is
   \begin{lstlisting}
     log(y)
   \end{lstlisting}
-  In order to attenuate numerical issues, Biogeme does not take the logarithm when the argument is too close to zero. Instead, it assumes that
+  
+  Biogeme considers a negative $y$ that is close to zero to be 0:
   \[
-\lim_{y \to 0^+} \ln(y) = -U.
+  y \leftarrow 0, \text{ if } y < 0 \text{ and } y \geq -\xi.
   \]
-Then, it interpolates linearly this values at zero with the value at  $U$.
-This is illustrated in Figure~\vref{fig:log} (not to scale).
-
-  \begin{figure}[htb]
-  \begin{center}
-\begin{tikzpicture}
-  % Define the variables
-  \pgfmathsetmacro{\eps}{1}
-  \pgfmathsetmacro{\u}{25}
-  \pgfmathsetmacro{\xmin}{0}
-  \pgfmathsetmacro{\xmax}{4}
-  \pgfmathsetmacro{\u}{25}
-  \pgfmathsetmacro{\sqrtEps}{sqrt(\eps)}
-  \pgfmathsetmacro{\sqrtU}{sqrt(\u)}
-  \pgfmathsetmacro{\ymin}{-\sqrtU}
-  \pgfmathsetmacro{\ymax}{ln(\xmax)}
-
-  \begin{axis}[
-      axis lines=middle,
-      xmin=\xmin, xmax=\xmax,
-      ymin=\ymin, ymax=\ymax,
-      xlabel=$y$,
-      ylabel=$\ln(y)$,
-      xtick={0, \sqrtEps},
-      xticklabels={ $0$, $\xi$},
-      ytick={-\sqrtU},
-      yticklabels={-$U$},
-      domain=\xmin:\xmax,
-      samples=100,
-      no markers
-    ]
-
-    \addplot[domain=0:\sqrtEps, thick, red] {
-      (\sqrtU + 0.5*ln(\eps)) * x / \sqrtEps-\sqrtU };
-
-    \addplot[domain=\sqrtEps:\xmax, thick, blue] {ln(x)};
-
-
-
-    % Add vertical dashed lines at x = -sqrt(epsilon) and x = sqrt(epsilon)
-    \addplot[dashed, gray] coordinates {(-\sqrtEps,-6) (-\sqrtEps,6)};
-    \addplot[dashed, gray] coordinates {(\sqrtEps,-6) (\sqrtEps,6)};
-    
-  \end{axis}
-\end{tikzpicture}
-  \end{center}
-  \caption{\label{fig:log}Division when the denominator is close too zero}
-  \end{figure}
-
-  Let $y$ be the input value.
-  \begin{itemize}
-  \item If $y < 0$, an exception is raised.
-  \item If $0 \leq y < \xi$, we define
-    \begin{align*}
-      f(y) &=  \frac{\ln(\xi)}{\xi}  y -U \left(1 - \frac{y}{\xi}\right)\\
-      \frac{\partial f(y)}{\partial \beta_i} &= \frac{\ln(\xi) + U}{\xi} \frac{\partial y}{\partial \beta_i},\\
-      \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &=  \frac{\ln(\xi) + U}{\xi} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j},\\
-    \end{align*}
-
-  \item If $y \geq \xi$, we define
+  Let $y$ be the input value, processed as described above.
     \begin{align*}
     f(y)& =\ln(y), \\ 
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(\frac{1}{y} \frac{\partial y}{\partial \beta_i}\right), \\
+    \frac{\partial f(y)}{\partial \beta_i} &= \frac{1}{y} \frac{\partial y}{\partial \beta_i}, \\
     \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &=
-    v\left(-\frac{1}{y^{2}}
+    -\frac{1}{y^{2}}
     \frac{\partial y}{\partial \beta_i}
     \frac{\partial y}{\partial \beta_j }
     + \frac{1}{y}
-    \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}
-      \right).
+    \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
     \end{align*}
-  \end{itemize}
 
 
-\item[Logarithm or zero] This expression is the same as the logarithm, except that if the argument is exactly zero, it returns 0. For any value different from zero, it returns the same as for the log expression. It is designed as a shortcut for the expression
+\item[Logarithm or zero] This expression is the same as the logarithm,
+  except that if the argument is exactly zero, it returns 0. For any
+  value different from zero, it returns the same as for the log
+  expression. It is designed as a shortcut for the expression
   \begin{lstlisting}
     Elem({1: 0, 0: log(x)}, x == 0).
   \end{lstlisting}
@@ -411,35 +339,27 @@ This is illustrated in Figure~\vref{fig:log} (not to scale).
   \begin{lstlisting}
     logzero(y)
   \end{lstlisting}
-    Let $y$ be the input value.
-  \begin{itemize}
-  \item If $y < 0$, an exception is raised.
-  \item If $0 < y < \xi$, we define
+  Biogeme considers a negative $y$ that is close to zero to be 0:
+  \[
+  y \leftarrow 0, \text{ if } y < 0 \text{ and } y \geq -\xi.
+  \]
+  Let $y$ be the input value, processed as described above.
     \begin{align*}
-      f(y) &=  \frac{\ln(\xi)}{\xi}  y -U \left(1 - \frac{y}{\xi}\right)\\
-      \frac{\partial f(y)}{\partial \beta_i} &= \frac{\ln(\xi) + U}{\xi} \frac{\partial y}{\partial \beta_i},\\
-      \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &=  \frac{\ln(\xi) + U}{\xi} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j},\\
-    \end{align*}
-
-  \item If $y \geq \xi$, we define
-    \begin{align*}
-    f(y)& =\ln(y), \\ 
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(\frac{1}{y} \frac{\partial y}{\partial \beta_i}\right), \\
-    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &=
-    v\left(-\frac{1}{y^{2}}
-    \frac{\partial y}{\partial \beta_i}
-    \frac{\partial y}{\partial \beta_j }
-    + \frac{1}{y}
-    \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}
-      \right).
-    \end{align*}
-  \item If $y = 0$, we define
-    \begin{align*}
-      f(y) &= 0, \\
+      f(y) &=  0,\\
       \frac{\partial f(y)}{\partial \beta_i} &= 0,\\
       \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &= 0.\\
     \end{align*}
-  \end{itemize}
+  \item If $y > 0$, we define
+    \begin{align*}
+    f(y)& =\ln(y), \\ 
+    \frac{\partial f(y)}{\partial \beta_i} &= \frac{1}{y} \frac{\partial y}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &=
+    -\frac{1}{y^{2}}
+    \frac{\partial y}{\partial \beta_i}
+    \frac{\partial y}{\partial \beta_j }
+    + \frac{1}{y}
+    \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
+    \end{align*}
 
 
 
@@ -474,7 +394,7 @@ This is illustrated in Figure~\vref{fig:log} (not to scale).
   \end{lstlisting}
   Let $y$ be the input value. Then,
   \[
-  f(y) = v\left(\frac{\partial y}{\partial \beta}\right).
+  f(y) = \frac{\partial y}{\partial \beta}.
   \]
   The derivatives of this expression are not evaluated by Biogeme. It is meant to be used in simulation mode only.
 
@@ -489,9 +409,9 @@ If takes as argument an expression
   \end{lstlisting}
   Let $y$ be the input value. We define
   \begin{align*}
-    f(y) &= v\left(\int_{-\infty}^{+\infty} y(\omega) d\omega\right), \\
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(\int_{-\infty}^{+\infty} \frac{\partial y(\omega)}{\partial \beta_i} d\omega\right),\\
-    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &= v\left( \int_{-\infty}^{+\infty} \frac{\partial^2 y(\omega)}{\partial \beta_i \partial \beta_j} d\omega\right).\\
+    f(y) &= \int_{-\infty}^{+\infty} y(\omega) d\omega, \\
+    \frac{\partial f(y)}{\partial \beta_i} &= \int_{-\infty}^{+\infty} \frac{\partial y(\omega)}{\partial \beta_i} d\omega,\\
+    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &=  \int_{-\infty}^{+\infty} \frac{\partial^2 y(\omega)}{\partial \beta_i \partial \beta_j} d\omega.\\
   \end{align*}
 
   
@@ -504,9 +424,9 @@ The syntax is
   \end{lstlisting}
   Let $y$ be the input value. We define
   \begin{align*}
-    f(y) &= v\left(\frac{1}{R}\sum_{r=1}^R y(\xi_r)\right), \\
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(\frac{1}{R}\sum_{r=1}^R \frac{\partial y(\xi_r)}{\partial \beta_i}\right), \\
-    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &= v\left(\frac{1}{R}\sum_{r=1}^R \frac{\partial^2 y(\xi_r)}{\partial \beta_i \partial \beta_j}\right), \\
+    f(y) &= \frac{1}{R}\sum_{r=1}^R y(\xi_r), \\
+    \frac{\partial f(y)}{\partial \beta_i} &= \frac{1}{R}\sum_{r=1}^R \frac{\partial y(\xi_r)}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &= \frac{1}{R}\sum_{r=1}^R \frac{\partial^2 y(\xi_r)}{\partial \beta_i \partial \beta_j}, \\
   \end{align*}
   where $R$ is a parameter defining the number of draws to be used, and $\xi_r$ are the values of the draws.
   
@@ -553,13 +473,13 @@ If \lstinline+y+ is the input, the syntax is
 \begin{lstlisting}
   PanelLikelihoodTrajectory(y)
 \end{lstlisting}
-We denote by $y_t$ the value of the input expression for observation $t$. Those values must be positive. If not, an exception is raised.
+We denote by $y_t$ the value of the input expression for observation $t$. Those values must be positive. If not, a \texttt{NaN} will be generated.
 
 Then, we define
   \begin{align*}
-    f(y) &= v\left(\prod_{t=1}^T y_t\right), \\
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(f(y)\sum_{t=1}^T \frac{1}{y_t} \frac{\partial y_t}{\partial \beta_i}\right),\\
-    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &= v\left(\frac{1}{f(y)}\frac{\partial f(y)}{\partial \beta_i}\frac{\partial f(y)}{\partial \beta_j} + f \sum_{t=1}^T\left[\frac{1}{y_t}\frac{\partial^2 y_t}{\partial \beta_i \partial \beta_j } - \frac{1}{y_t^2} \frac{\partial y_t}{\partial \beta_i}\frac{\partial y_t}{\partial \beta_j} \right]\right).\\
+    f(y) &= \prod_{t=1}^T y_t, \\
+    \frac{\partial f(y)}{\partial \beta_i} &= f(y)\sum_{t=1}^T \frac{1}{y_t} \frac{\partial y_t}{\partial \beta_i},\\
+    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &= \frac{1}{f(y)}\frac{\partial f(y)}{\partial \beta_i}\frac{\partial f(y)}{\partial \beta_j} + f \sum_{t=1}^T\left[\frac{1}{y_t}\frac{\partial^2 y_t}{\partial \beta_i \partial \beta_j } - \frac{1}{y_t^2} \frac{\partial y_t}{\partial \beta_i}\frac{\partial y_t}{\partial \beta_j} \right].\\
   \end{align*}
 
   \item[PowerConstant] This expression raises the input to a power. If \lstinline+y+ is the input, the syntax is
@@ -571,45 +491,38 @@ or
   y ** 2
 \end{lstlisting}
 Let $y$ be the input value and $p$ the exponent, which is a constant.
-\begin{itemize}
-\item If $y < 0$ and $p$ is not integer, an exception is raised.
+  When $p$ is not an integer, Biogeme considers a negative $y$ that is close to zero to be 0:
+  \[
+  y \leftarrow 0, \text{ if } p \notin \mathbb{Z}, \text{ and } y < 0 \text{ and } y \geq -\xi.
+  \]
+  Let $y$ be the input value, processed as described above.
+
+
+  \begin{itemize}
 \item If $p=0$, we have
  \begin{align*}
     f(y)& = 1, \\ 
     \frac{\partial f(y)}{\partial \beta_i} &= 0, \\
     \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= 0.
       \end{align*}
-
-\item If $y \geq \xi$ or $p$ is integer, or $p > 2$, we define
+\item If $p = 1$, we have
       \begin{align*}
-    f(y)& = y^p, \\ 
-    \frac{\partial f(y)}{\partial \beta_i} &= p y^{p-1} \frac{\partial y}{\partial \beta_i}, \\
-    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= p (p-1) y^{p-2} \frac{\partial y}{\partial \beta_i} \frac{\partial y}{\partial \beta_j} +  p y^{p-1} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
-     \end{align*}
-\item If $0 \leq y < \xi$ and $p = 2$, we have also
+    f(y)& = y, \\ 
+    \frac{\partial f(y)}{\partial \beta_i} &= \frac{\partial y}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &=   \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
+      \end{align*}
+\item If $p = 2$, we have
       \begin{align*}
     f(y)& = y^2, \\ 
     \frac{\partial f(y)}{\partial \beta_i} &= 2 y \frac{\partial y}{\partial \beta_i}, \\
     \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= 2  \frac{\partial y}{\partial \beta_i} \frac{\partial y}{\partial \beta_j} +  2 \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
     \end{align*}
-\item If $0 \leq y < \xi$ and $0 < p  \leq 2$, in order to attenuate numerical issues with the derivatives, Biogeme approximates the function, and interpolates linearly this values at zero with the value at  $\xi$.
-This is exactly the same idea as for the logarithm,  illustrated in Figure~\vref{fig:log}.
+\item Otherwise, we define
       \begin{align*}
-    f(y)& = \xi^{p-1} y, \\ 
-    \frac{\partial f(y)}{\partial \beta_i} &= \xi^{p-1} \frac{\partial y}{\partial \beta_i}, \\
-    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= \xi^{p-1} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
-    \end{align*}
-    \item If $0 \leq y < \xi$ and $p < 0$, we assume that
-  \[
-   \lim_{y \to 0^+} y^p = U.
-  \]
-   In order to attenuate numerical issues with the derivatives, Biogeme interpolates linearly this values at zero with the value at  $\xi$.
-This is again the same idea as for the logarithm,  illustrated in Figure~\vref{fig:log}.
-      \begin{align*}
-    f(y)& = \left( \frac{\xi^p - U}{\xi} \right) y + U = \xi^{p-1} y + U \left(1 - \frac{y}{\xi}\right),\\ 
-    \frac{\partial f(y)}{\partial \beta_i} &=  \left( \frac{\xi^p - U}{\xi} \right) \frac{\partial y }{\partial \beta_i}, \\
-    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &=  \left( \frac{\xi^p - U}{\xi} \right) \frac{\partial^2 y }{\partial \beta_i\partial \beta_j}.
-    \end{align*}
+    f(y)& = y^p, \\ 
+    \frac{\partial f(y)}{\partial \beta_i} &= p y^{p-1} \frac{\partial y}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y)}{\partial \beta_i \partial \beta_j} &= p (p-1) y^{p-2} \frac{\partial y}{\partial \beta_i} \frac{\partial y}{\partial \beta_j} +  p y^{p-1} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.
+      \end{align*}
 
 \end{itemize}
 
@@ -671,10 +584,10 @@ Binary expression expects two expressions as argument.
   \end{lstlisting}
   If $y$ and $z$ are the input expressions, we define
   \begin{align*}
-    f(y) &= v\left(y + z \right), \\
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(\frac{\partial y}{\partial \beta_i} + \frac{\partial z}{\partial \beta_i} \right), \\
-    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &=
-    v\left(\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} + \frac{\partial^2 z}{\partial \beta_i \partial \beta_j} \right).
+    f(y, z) &= y + z, \\
+    \frac{\partial f(y, z)}{\partial \beta_i} &= \frac{\partial y}{\partial \beta_i} + \frac{\partial z}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y, z)}{\partial \beta_i\partial \beta_j} &=
+    \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} + \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
   \end{align*}
 \item[Minus] This expression returns the difference of the two arguments. The syntax is: 
   \begin{lstlisting}
@@ -682,10 +595,10 @@ Binary expression expects two expressions as argument.
   \end{lstlisting}
   If $y$ and $z$ are the input expressions, we define
   \begin{align*}
-    f(y) &= v\left(y - z \right), \\
-    \frac{\partial f(y)}{\partial \beta_i} &= v\left(\frac{\partial y}{\partial \beta_i} - \frac{\partial z}{\partial \beta_i} \right), \\
-    \frac{\partial^2 f(y)}{\partial \beta_i\partial \beta_j} &=
-    v\left(\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} - \frac{\partial^2 z}{\partial \beta_i \partial \beta_j} \right).
+    f(y, z) &= y - z, \\
+    \frac{\partial f(y, z)}{\partial \beta_i} &= \frac{\partial y}{\partial \beta_i} - \frac{\partial z}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y, z)}{\partial \beta_i\partial \beta_j} &=
+    \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} - \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
   \end{align*}
 \item[Times] This expression returns the product of the two arguments. The syntax is: 
   \begin{lstlisting}
@@ -693,141 +606,49 @@ Binary expression expects two expressions as argument.
   \end{lstlisting}
   If $y$ and $z$ are the input expressions, we define
   \begin{align*}
-    f(y, z) &= v\left(y \cdot z \right), \\
-    \frac{\partial f(y, z)}{\partial \beta_i} &= v\left(\frac{\partial y}{\partial \beta_i} \cdot z + y \cdot \frac{\partial z}{\partial \beta_i} \right), \\
-    \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} &= v\left(\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} \cdot z + \frac{\partial y}{\partial \beta_i} \cdot \frac{\partial z}{\partial \beta_j} + \frac{\partial y}{\partial \beta_j} \cdot \frac{\partial z}{\partial \beta_i} + y \cdot \frac{\partial^2 z}{\partial \beta_i \partial \beta_j} \right).
+    f(y, z) &= y \cdot z, \\
+    \frac{\partial f(y, z)}{\partial \beta_i} &= \frac{\partial y}{\partial \beta_i} \cdot z + y \cdot \frac{\partial z}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} &= \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} \cdot z + \frac{\partial y}{\partial \beta_i} \cdot \frac{\partial z}{\partial \beta_j} + \frac{\partial y}{\partial \beta_j} \cdot \frac{\partial z}{\partial \beta_i} + y \cdot \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
   \end{align*}
 \item[Divide] This expression returns the quotient of the two arguments. The syntax is: 
   \begin{lstlisting}
     y / z
   \end{lstlisting}
 
- We first treat the case when the denominator is sufficiently away from zero.        If $y$ and $z$ are the input expressions, and
-  \[
-  |z| \geq \xi,
-  \]
-  we have
+    If $y$ and $z$ are the input expressions, we define
   \begin{align*}
-    f(y, z) =& v\left(\frac{y}{z}\right), \\
-    \frac{\partial f(y, z)}{\partial \beta_i} =& v\left(\frac{1}{z}\frac{\partial y}{\partial \beta_i}   - \frac{y}{z^2}  \frac{\partial z}{\partial \beta_i}\right), \\
+    f(y, z) =& \frac{y}{z}, \\
+    \frac{\partial f(y, z)}{\partial \beta_i} =& \frac{1}{z}\frac{\partial y}{\partial \beta_i}   - \frac{y}{z^2}  \frac{\partial z}{\partial \beta_i}, \\
     \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} =&
-    v\left( \frac{1}{z}\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} 
+     \frac{1}{z}\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} 
     -   \frac{1}{z^2} \frac{\partial y}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
-    - \frac{1}{z^2}  \frac{\partial y}{\partial \beta_j}  \frac{\partial z}{\partial \beta_i}\right. \\
- & \left.  + 2 \frac{y}{z^3}  \frac{\partial z}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
-    - \frac{y}{z^2}  \frac{\partial^2 z}{\partial \beta_i \partial \beta_j} \right).
+    - \frac{1}{z^2}  \frac{\partial y}{\partial \beta_j}  \frac{\partial z}{\partial \beta_i}. \\
+ &  + 2 \frac{y}{z^3}  \frac{\partial z}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
+    - \frac{y}{z^2}  \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
 \end{align*}
   We treat the case $y=0$ explicitly to save calculation time:
   \begin{align*}
-    f(y, z) =& 0, \\
-    \frac{\partial f(y, z)}{\partial \beta_i} =& v\left(\frac{1}{z}\frac{\partial y}{\partial \beta_i}  \right), \\
-    \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} =&
-    v\left( \frac{1}{z}\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} 
+    f(y=0, z) =& 0, \\
+    \frac{\partial f(y=0, z)}{\partial \beta_i} =& \frac{1}{z}\frac{\partial y}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y=0, z)}{\partial \beta_i \partial \beta_j} =&
+    \frac{1}{z}\frac{\partial^2 y}{\partial \beta_i \partial \beta_j} 
     -   \frac{1}{z^2} \frac{\partial y}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
-    - \frac{1}{z^2}  \frac{\partial y}{\partial \beta_j}  \frac{\partial z}{\partial \beta_i}\right). \\
+    - \frac{1}{z^2}  \frac{\partial y}{\partial \beta_j}  \frac{\partial z}{\partial \beta_i}. \\
 \end{align*}
 
 
   We also treat the case $z=1$ specifically:
    \begin{align*}
     f(y, z=1) =& y, \\
-    \frac{\partial f(y, z)}{\partial \beta_i} =& v\left(\frac{\partial y}{\partial \beta_i}   - y \frac{\partial z}{\partial \beta_i}\right), \\
-    \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} =&
-    v\left( \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} 
+    \frac{\partial f(y, z=1)}{\partial \beta_i} =& \frac{\partial y}{\partial \beta_i}   - y \frac{\partial z}{\partial \beta_i}, \\
+    \frac{\partial^2 f(y, z=1 )}{\partial \beta_i \partial \beta_j} =&
+     \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} 
     -   \frac{\partial y}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
-    -  \frac{\partial y}{\partial \beta_j}  \frac{\partial z}{\partial \beta_i}\right. \\
- & \left.  + 2 y  \frac{\partial z}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
-    - y  \frac{\partial^2 z}{\partial \beta_i \partial \beta_j} \right).
+    -  \frac{\partial y}{\partial \beta_j}  \frac{\partial z}{\partial \beta_i}. \\
+ &   + 2 y  \frac{\partial z}{\partial \beta_i}  \frac{\partial z}{\partial \beta_j}
+    - y  \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
    \end{align*}
    
-   
-
-  
-  
-Then, in order to attenuate numerical issues, Biogeme does not divide by the denominator when it is too close to zero. Instead, when $y \neq 0$, it assumes that
-  \[
-\lim_{z \to 0^+} \frac{y}{z} = U,
-  \]
-  and
-  \[
-\lim_{z \to 0^-} \frac{y}{z} = -U.
-\]
-Then, it interpolates linearly these values at zero with the value at $-\xi$ and  $\xi$.
-This is illustrated in Figure~\vref{fig:quotient} (not to scale).
-
-  \begin{figure}[htb]
-  \begin{center}
-\begin{tikzpicture}
-  % Define the variables
-  \pgfmathsetmacro{\eps}{1}
-  \pgfmathsetmacro{\u}{25}
-  \pgfmathsetmacro{\xmin}{-4}
-  \pgfmathsetmacro{\xmax}{4}
-  \pgfmathsetmacro{\u}{25}
-  \pgfmathsetmacro{\sqrtEps}{sqrt(\eps)}
-  \pgfmathsetmacro{\sqrtU}{sqrt(\u)}
-  \pgfmathsetmacro{\ymin}{-\sqrtU}
-  \pgfmathsetmacro{\ymax}{\sqrtU}
-
-  \begin{axis}[
-      axis lines=middle,
-      xmin=\xmin, xmax=\xmax,
-      ymin=\ymin, ymax=\ymax,
-      xlabel=$z$,
-      ylabel=$y/z$,
-      xtick={-\sqrtEps, 0, \sqrtEps},
-      xticklabels={$-\xi$, $0$, $\xi$},
-      ytick={-\sqrtU, \sqrtU},
-      yticklabels={$-U$, $U$},
-      domain=\xmin:\xmax,
-      samples=100,
-      no markers
-    ]
-
-    % Plot first part of the function: -4 to -sqrt(epsilon)
-    \addplot[domain=\xmin:-\sqrtEps, thick, blue] {1/x};
-
-    % Plot third part of the function: sqrt(epsilon) to 4
-    \addplot[domain=\sqrtEps:\xmax, thick, blue] {1/x};
-    
-    % Plot second part of the function: -sqrt(epsilon) to sqrt(epsilon)
-    \addplot[domain=-\sqrtEps:0, thick, red] {
-      (1.0 - \sqrtU*\sqrtEps) * x / \eps-\sqrtU };
-    \addplot[domain=0:\sqrtEps, thick, red] {
-      (1.0 - \sqrtU*\sqrtEps) * x / \eps+\sqrtU };
-
-
-    % Add vertical dashed lines at x = -sqrt(epsilon) and x = sqrt(epsilon)
-    \addplot[dashed, gray] coordinates {(-\sqrtEps,-6) (-\sqrtEps,6)};
-    \addplot[dashed, gray] coordinates {(\sqrtEps,-6) (\sqrtEps,6)};
-    
-  \end{axis}
-\end{tikzpicture}
-  \end{center}
-  \caption{\label{fig:quotient}Division when the denominator is close too zero}
-  \end{figure}
-
-
-
-  If $0 \leq z < \xi$, we assume that the function is linear in $z$, with $f(y, 0) = U$, and $f(y,  \xi)= y/\xi$. Therefore,
-
-  \begin{align*}
-    f(y, z) &=\frac{y}{\xi^2} z + U \left(1 - \frac{z}{\xi}\right),  \\
-    \frac{\partial f(y, z)}{\partial \beta_i} &= \frac{z}{\xi^2} \frac{\partial y}{\partial \beta_i} + \frac{y}{\xi^2} \frac{\partial z}{\partial \beta_i} -\frac{ U}{\xi} \frac{\partial z}{\partial \beta_i},   \\
-    \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} &=
-    \frac{1}{\xi^2} \left( \frac{\partial y}{\partial \beta_i} \frac{\partial z}{\partial \beta_j}
-    + \frac{\partial y}{\partial \beta_j} \frac{\partial z}{\partial \beta_i} +z \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} + y \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}\right) - \frac{U}{\xi}\frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
-  \end{align*}
-
-
-  If $-\xi < z < 0$, we assume that the function is linear in $z$, with $f(y, 0) = -U$, and $f(y,  -\xi)= -y/\xi$. Therefore,
-  \begin{align*}
-    f(y, z) &=\frac{y}{\xi^2} z - U \left(1 + \frac{z}{\xi}\right),  \\
-    \frac{\partial f(y, z)}{\partial \beta_i} &= \frac{z}{\xi^2} \frac{\partial y}{\partial \beta_i} + \frac{y}{\xi^2} \frac{\partial z}{\partial \beta_i} -\frac{ U}{\xi} \frac{\partial z}{\partial \beta_i},    \\
-    \frac{\partial^2 f(y, z)}{\partial \beta_i \partial \beta_j} &=
-    \frac{1}{\xi^2} \left( \frac{\partial y}{\partial \beta_i} \frac{\partial z}{\partial \beta_j}
-    + \frac{\partial y}{\partial \beta_j} \frac{\partial z}{\partial \beta_i} +z \frac{\partial^2 y}{\partial \beta_i \partial \beta_j} + y \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}\right) - \frac{U}{\xi}\frac{\partial^2 z}{\partial \beta_i \partial \beta_j}.
-  \end{align*}
 
 \item[Power] It implements the exponentiation, where the first argument is the base, and the second the exponent. 
     If \lstinline+y+ and \lstinline+z+ is the input, the syntax is
@@ -838,11 +659,11 @@ or
 \begin{lstlisting}
   y ** z
 \end{lstlisting}
-Let $y$ be the base and $z$ the exponent.
-If $z$ is a constant, that is, if $\partial z/\partial \beta_i=0$ for any parameter $\beta_i$, then the implementation is exactly the same as \lstinline+PowerConst+. Otherwise, it is the following implementation.
-\begin{itemize}
-\item If $y < 0$, an exception is raised.
-\item If $y \geq \xi$, we define
+  Biogeme considers a negative $y$ that is close to zero to be 0:
+  \[
+  y \leftarrow 0, \text{ if } y < 0 \text{ and } y \geq -\xi.
+  \]
+Let $y$ be the base, processed as described before, and $z$ the exponent.
       \begin{align*}
     f(y, z)=& y^z, \\ 
     \ln f(y, z) =& z \ln(y), \\
@@ -858,41 +679,6 @@ If $z$ is a constant, that is, if $\partial z/\partial \beta_i=0$ for any parame
     +\frac{z}{y}\frac{\partial^2 y}{\partial \beta_i\partial \beta_j}
     \right).
      \end{align*}
-\item If $0 \leq y < \xi$ and $z \geq 0$, in order to attenuate numerical issues with the derivatives, Biogeme approximates the function, and interpolates linearly this values at zero with the value at  $\xi$.
-  This is exactly the same idea as for the logarithm,  illustrated in Figure~\vref{fig:log}.
-  
-      \begin{align}
-    f^+(y,z)=& \xi^{z-1} y, \label{eq:fplus}\\ 
-    \ln f^+(y,z)& = (z-1)\ln\xi+\ln(y), \\
-    \frac{\partial \ln f^+(y,z)}{\partial \beta_i} =&
-    \ln \xi \frac{\partial z}{\partial \beta_i} +
-    \frac{1}{y}\frac{\partial y}{\partial \beta_i}, \nonumber \\
-    \frac{\partial f^+(y,z)}{\partial \beta_i} =& \xi^{z-1} y\ln \xi \frac{\partial z}{\partial \beta_i} +
-    \xi^{z-1} \frac{\partial y}{\partial \beta_i}, \nonumber\\
-    \frac{\partial ^2 f^+(y,z)}{\partial \beta_i \partial \beta_j} =&
-    \frac{\partial f^+}{\partial \beta_j} y\ln \xi \frac{\partial z}{\partial \beta_i} +
-    \xi^{z-1} \frac{\partial y}{\partial \beta_j}\ln \xi \frac{\partial z}{\partial \beta_i} +
-    \xi^{z-1} y\ln \xi \frac{\partial^2 z}{\partial \beta_i \partial \beta_j}\nonumber \\ &+
-        \frac{\partial f^+}{\partial \beta_j} \frac{\partial y}{\partial \beta_i} +
-        \xi^{z-1} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j}.\nonumber
-    \end{align}
-    \item If $0 \leq y < \xi$ and $z < 0$, we assume that
-  \[
-   \lim_{y \to 0^+} y^z = U.
-  \]
-   In order to attenuate numerical issues with the derivatives, Biogeme interpolates linearly this values at zero with the value at  $\xi$.
-This is again the same idea as for the logarithm,  illustrated in Figure~\vref{fig:log}.
-      \begin{align*}
-        f^-(y, z)& = \left( \frac{\xi^z - U}{\xi} \right) y + U \\&= \xi^{z-1} y + U \left(1 - \frac{y}{\xi}\right) \\
-&= f^+(y, z) +  U \left(1 - \frac{y}{\xi}\right),\\ 
-        \frac{\partial f^-(y)}{\partial \beta_i} &=
-  \frac{\partial f^+(y, z)}{\partial \beta_i} - \frac{U}{\xi} \frac{\partial y}{\partial \beta_i},
-        \\
-        \frac{\partial^2 f^-(y)}{\partial \beta_i \partial \beta_j} &=
-        \frac{\partial^2 f^+(y, z)}{\partial \beta_i \partial \beta_j} - \frac{U}{\xi} \frac{\partial^2 y}{\partial \beta_i \partial \beta_j},
-      \end{align*}
-      where $f^+$ is defined by \req{eq:fplus}.
-\end{itemize}
   
 \item[bioMin]  This expression returns the minimum of the two arguments. The syntax is: 
   \begin{lstlisting}
@@ -943,8 +729,8 @@ This is again the same idea as for the logarithm,  illustrated in Figure~\vref{f
     \[
     f(y, z) = \left\{
     \begin{aligned}
-      0 & \text{ if } y = 0 \text{ or } z = 0, \\
-      1 & \text{ otherwise.}
+      1 & \text{ if } y \neq 0 \text{ and } z \neq 0, \\
+      0 & \text{ otherwise.}
     \end{aligned}
     \right.
     \]
@@ -961,8 +747,8 @@ This is again the same idea as for the logarithm,  illustrated in Figure~\vref{f
     \[
     f(y, z) = \left\{
     \begin{aligned}
-      0 & \text{ if } y = 0 \text{ or } z = 0, \\
-      1 & \text{ otherwise.}
+      1 & \text{ if } y \neq 0 \text{ or } z \neq 0, \\
+      0 & \text{ otherwise.}
     \end{aligned}
     \right.
     \]
@@ -1049,7 +835,7 @@ f((y_\ell)_{\ell\in K}, z) &= \sum_{\ell \in K} y_\ell \delta(z = k), \\
   \]
   which is coded as follows:
   \begin{lstlisting}
-    Elem({1: y_1, 0: y_2}, z >= 0).!
+    Elem({1: y_1, 0: y_2}, z >= 0).
   \end{lstlisting}
 
 \item[bioLinearUtility] This expression is designed to code the specification of a linear utility function.  One term of the utility is defined using the following syntax:
@@ -1070,7 +856,9 @@ f((y_\ell)_{\ell\in K}, z) &= \sum_{\ell \in K} y_\ell \delta(z = k), \\
   
 \end{description}
 \subsection{Logit expressions}
-These expressions calculate the logarithm of the logit formula. There are two of them
+These expressions calculate the logarithm of the logit formula. We include them here for the sake of completeness, but they should not be used directly. Instead, it is advised to use the \lstinline+logit+ and \lstinline+loglogit+ functions available in the \lstinline+models+ module.
+
+There are two of them
 \begin{description}
 \item[LogLogit] It has the following syntax:
     \begin{lstlisting}
@@ -1158,16 +946,13 @@ K_{ij} = \frac{\partial K_i}{\partial \beta_j} = \sum_\ell \exp(V_\ell-c) \left(
 
 
 
+\section{Conclusion}
 
-%%% Investigate where these functions are used, if at all.
-%bioExprNormalPdf.h
-%bioExprSum.h
-
+The expressions described above are coded in C++ and distributed via the 
 
 
 
-
-\bibliographystyle{dcu}
+\bibliographystyle{dcudoi}
 \bibliography{transpor}
 
 
