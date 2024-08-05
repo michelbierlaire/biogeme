@@ -7,7 +7,7 @@ faq[
 <dt>MDCEV</dt>
 <dd>The Multiple Discrete Continuous Extreme Value model has been implemented. The code is still experimental, and the documentation is not ready yet.
 </dd>
-<dt>Local-sensitivy hashing</dt>
+<dt>Local-sensitivity hashing</dt>
 <dd>The data reduction method introduced by <a href='https://transp-or.epfl.ch/documents/technicalReports/OrteLappBier2023.pdf'>Ortelli et al. (2023)</a> has been implemented. It has not yet been integrated in the optimization framework.</dd>
 <dt>Nests definition</dt>
 <dd>The definition of the nests for the nested logit and the cross-nested logit models has been improved, using specific objects. See <a href="sphinx/nests.html">the module documentation.</a> The calculation of the correlation structure among the alternatives is now performed by those objects, and not anymore by the <samp>bioResults</samp> object as in previous versions.</dd>
@@ -21,7 +21,7 @@ faq[
 <dd>The logging module has been renamed from <code>biogeme.logging</code> into <code>biogeme.biogeme_logging.py</code>. It was necessary because of the ambiguity with the <code>logging</code> module from Python.
 </dd>
 <dt>File organization</dt>
-<dd>Several scripts have bben reorganized into modules. This improves the code readability and should be transparent for the user.</dd>
+<dd>Several scripts have been reorganized into modules. This improves the code readability and should be transparent for the user.</dd>
 
 
 </dl>
@@ -289,7 +289,7 @@ faq[
 Python, the syntax to import the variable names from the data
 file has been modified since version 3.2.5. The file
 <code>headers.py</code> is not generated anymore.
-The best practice is to declare every variable explicity:
+The best practice is to declare every variable explicitly:
 </p>
 <p>
 <pre>
@@ -333,7 +333,7 @@ following syntax</p>
 <p>  <code>
 from biogeme.expressions import *
 </code></p>
-<p>  although this is not a good Python programming practice. </p>
+<p>  although this is not recommended. </p>
 """
 faq[
     'What initial values should I select for the parameters?'
@@ -370,8 +370,9 @@ value, such as 10. See Section 7 in the report
 <a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf" target="_blank">
 Estimating choice models  with latent variables
 with PandasBiogeme</a> for a detailed discussion. </li>
-
 </ul>
+Note that if a file <code>__mymodel.iter</code> exists, where <code>mymodel</code> is the name of the model
+to be estimated, the initial values of the parameters are read from this file. 
 """
 faq[
     'Can I save intermediate iterations during the estimation?'
@@ -381,8 +382,9 @@ Yes. It is actually the default behavior. At each
 iteration, Biogeme creates a
 file <code>__myModel.iter</code>. This file will be read the
 next time Biogeme tries to estimate the same model. If you want to turn this
-feature off, set the BIOGEME class
-variable <code>saveIterations</code> to <code>False</code>.
+feature off, set the parameter <code>save_iterations</code> to <code>False</code> in the <code>biogeme.toml</code>
+file. See <a href="file:///Users/bierlair/Library/CloudStorage/OneDrive-epfl.ch/github/biogeme/webpage/website/sphinx/code/toml.html">
+the documentation</a> for details.
 </p>
 """
 faq[
@@ -390,29 +392,24 @@ faq[
 ] = """
 <p>
 Yes.  See
-example <code><a href="https://github.com/michelbierlaire/biogeme/blob/master/examples/swissmetro/b04validation.py">b04validation.py</a> on Github.
+<a href="sphinx/auto_examples/swissmetro/plot_b04validation.html#sphx-glr-auto-examples-swissmetro-plot-b04validation-py">this example</a>.
 """
 
 faq[
-    'The init loglikelihood is <code>-1.797693e+308</code> and '
+    'The init loglikelihood is <code>-inf</code> and '
     'no iteration is performed. What should I do?'
 ] = """
 <p>If the model returns a probability 0 for the chosen
 alternative for at least one observation in the sample, then
 the likelihood is 0, and the log likelihood is minus
-infinity. For the sake of robustness, Biogeme assigns the
-value <code>-1.797693e+308</code> to the log likelihood in
-this context. 
+infinity.  
 </p>
 <p>A possible reason is when the initial value of a scale
 parameter is too close to zero. 
 </p>
-<p>But there are many other possible reasons. The best way
-to investigate the source of the problem is to use Biogeme
-in simulation mode, and report the probability of the chosen
-alternative for each observation. Once you have identified
-the problematic entries, it is easier to investigate the
-reason why the model returns a probability of zero.
+<p>There may be several other reasons for the issue. The most effective method to identify the problem’s source is to 
+use Biogeme in simulation mode and report the probability of the chosen alternative for each observation. Once the 
+problematic entries are identified, it becomes easier to investigate why the model returns a probability of zero.
 </p>
 """
 
@@ -444,44 +441,42 @@ __ZNSt15__exception_ptr13exception_ptrD1Ev
 <p>It
 is likely to be due to a conflict of versions of Python
 packages. The
-best way to deal with it is to reinstall Biogeme using the
+best way to deal with it is to reinstall Biogeme in a clean environment using the
 following steps:
 <ul>
-<li>First, make sure that you have the latest version of pip:
+<li>Leave the current environment by typing <code>deactivate</code>.</li>
+<li>Create a new environment:
+<pre>
+virtualenv -p python3.12 env_biogeme
+</pre>
+</li>
+<li>Activate the new environment. On MacOSx:
+<pre>
+source env_biogeme/bin/activate
+</pre>
+On Windows: 
+<pre>
+.\\env_biogeme\\Scripts\\activate
+</pre>
+</li>
+<li>Make sure that you have the latest version of pip:
 <pre>
 pip install --upgrade pip
 </pre>
-</li>
-<li>Uninstall biogeme:
+or 
 <pre>
-pip uninstall biogeme
+python -m pip install --upgrade pip
 </pre>
 </li>
-<li>Install cython:
+<li>Install biogeme:
 <pre>
-pip install —-upgrade cython
-</pre>
-</li>
-<li>Reinstall biogeme, without using the cache:
-<pre>
-pip install biogeme -—no-cache-dir
-</pre>
-</ul>
-If it does not work, try first to install gcc:
-<pre>
-conda install gcc
-</pre>
-If it does not work, try creating a new conda environment: 
-<pre>
-conda create -n python310 python=3.10 pip
-conda activate python310
 pip install biogeme
 </pre>
-If it does not work... I don't know :-(
+</ul>
 """
 
 faq[
-    'Why is it trying to compile during installation?'
+    'Why is it trying to compile during installation when installing CythonBiogeme?'
 ] = """
 On Mac OSX and Windows, the procedure is designed to install
 from binaries, not sources. If you get messages that look like the
@@ -504,21 +499,18 @@ running install
 It means that there is no binaries available for your version of
 Python. To check which versions are supported, go to the repository
 <p>
-<a href="https://pypi.org/project/biogeme/">pypi.org/project/biogeme/</a>
+<a href="https://pypi.org/project/cythonbiogeme/">pypi.org/project/cythonbiogeme/</a>
 </p>
-<p>For instance, the following .py are available for version 3.2.10:
-<pre>biogeme-3.2.10.tar.gz</pre>
-<pre>biogeme-3.2.10-cp310-cp310-win_amd64.whl</pre>
-<pre>biogeme-3.2.10-cp310-cp310-macosx_10_9_x86_64.whl</pre>
-<pre>biogeme-3.2.10-cp39-cp39-win_amd64.whl</pre>
-<pre>biogeme-3.2.10-cp39-cp39-macosx_10_9_x86_64.whl</pre>
-<pre>biogeme-3.2.10-cp38-cp38-win_amd64.whl</pre>
-<pre>biogeme-3.2.10-cp38-cp38-macosx_10_9_x86_64.whl</pre>
-<pre>biogeme-3.2.10-cp37-cp37m-win_amd64.whl</pre>
-<pre>biogeme-3.2.10-cp37-cp37m-macosx_10_9_x86_64.whl</pre>
-<pre>biogeme-3.2.10-cp36-cp36m-macosx_10_9_x86_64.whl</pre>
+<p>For instance, the following files are available for CythonBiogeme 1.0.4:
+
+<pre>cythonbiogeme-1.0.4.tar.gz</pre>
+<pre>cythonbiogeme-1.0.4-cp312-cp312-win_amd64.whl</pre>
+<pre>cythonbiogeme-1.0.4-cp312-cp312-macosx_10_9_universal2.whl</pre>
+<pre>cythonbiogeme-1.0.4-cp311-cp311-win_amd64.whl</pre>
+<pre>cythonbiogeme-1.0.4-cp311-cp311-macosx_10_9_universal2.whl</pre>
+<pre>cythonbiogeme-1.0.4-cp310-cp310-win_amd64.whl</pre>
+<pre>cythonbiogeme-1.0.4-cp310-cp310-macosx_10_9_universal2.whl</pre>
 </ul>
-  It means that you can use Python 3.7, 3.8 and 3.9 on both platforms,
-while the version for Python 3.6 is only available on MacOSX.
+  It means that you can use Python 3.10, 3.11 and 3.12 on both platforms.
 </p>
 """
