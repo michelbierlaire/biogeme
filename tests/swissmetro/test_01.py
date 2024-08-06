@@ -1,12 +1,7 @@
-import os
-import shutil
-import tempfile
 import unittest
 
 import biogeme.biogeme as bio
 from biogeme import models
-from biogeme.expressions import Beta
-
 from biogeme.data.swissmetro import (
     read_data,
     PURPOSE,
@@ -24,6 +19,8 @@ from biogeme.data.swissmetro import (
     TRAIN_AV_SP,
     CAR_AV_SP,
 )
+from biogeme.expressions import Beta
+from biogeme.parameters import Parameters
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -56,36 +53,35 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 class test_01(unittest.TestCase):
     def setUp(self) -> None:
         """Create the configuration .py"""
-        # Create a temporary directory
-        self.test_dir = tempfile.mkdtemp()
-        self.scipy_file = os.path.join(self.test_dir, 'scipy.toml')
-        with open(self.scipy_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "scipy"', file=f)
-            print('[MonteCarlo]', file=f)
-            print('seed = 10', file=f)
-        self.ls_file = os.path.join(self.test_dir, 'line_search.toml')
-        with open(self.ls_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "LS-newton"', file=f)
-            print('[MonteCarlo]', file=f)
-            print('seed = 10', file=f)
-        self.tr_file = os.path.join(self.test_dir, 'trust_region.toml')
-        with open(self.tr_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "TR-newton"', file=f)
-            print('[MonteCarlo]', file=f)
-            print('seed = 10', file=f)
-        self.simple_bounds_file = os.path.join(self.test_dir, 'simple_bounds.toml')
-        with open(self.simple_bounds_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "simple_bounds"', file=f)
-            print('[MonteCarlo]', file=f)
-            print('seed = 10', file=f)
+        self.scipy_configuration = Parameters()
+        self.scipy_configuration.set_value(
+            name='optimization_algorithm', value='scipy', section='Estimation'
+        )
+        self.scipy_configuration.set_value(name='seed', value=10, section='MonteCarlo')
+
+        self.ls_configuration = Parameters()
+        self.ls_configuration.set_value(
+            name='optimization_algorithm', value='LS-newton', section='Estimation'
+        )
+        self.ls_configuration.set_value(name='seed', value=10, section='MonteCarlo')
+
+        self.tr_configuration = Parameters()
+        self.tr_configuration.set_value(
+            name='optimization_algorithm', value='TR-newton', section='Estimation'
+        )
+        self.tr_configuration.set_value(name='seed', value=10, section='MonteCarlo')
+
+        self.simple_bounds_configuration = Parameters()
+        self.simple_bounds_configuration.set_value(
+            name='optimization_algorithm', value='simple_bounds', section='Estimation'
+        )
+        self.simple_bounds_configuration.set_value(
+            name='seed', value=10, section='MonteCarlo'
+        )
 
     def testEstimationScipy(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameter_file=self.scipy_file)
+        biogeme = bio.BIOGEME(database, logprob, parameters=self.scipy_configuration)
         biogeme.modelName = 'test_01'
         biogeme.generate_html = False
         biogeme.generate_pickle = False
@@ -96,7 +92,7 @@ class test_01(unittest.TestCase):
 
     def testEstimationLineSearch(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameter_file=self.ls_file)
+        biogeme = bio.BIOGEME(database, logprob, parameters=self.ls_configuration)
         biogeme.modelName = 'test_01'
         biogeme.generate_html = False
         biogeme.generate_pickle = False
@@ -107,7 +103,7 @@ class test_01(unittest.TestCase):
 
     def testEstimationTrustRegion(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameter_file=self.tr_file)
+        biogeme = bio.BIOGEME(database, logprob, parameters=self.tr_configuration)
         biogeme.modelName = 'test_01'
         biogeme.generate_html = False
         biogeme.generate_pickle = False
@@ -115,10 +111,6 @@ class test_01(unittest.TestCase):
         biogeme.bootstrap_samples = 10
         results = biogeme.estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
-
-    def tearDown(self):
-        # Remove the directory after the test
-        shutil.rmtree(self.test_dir)
 
 
 if __name__ == '__main__':

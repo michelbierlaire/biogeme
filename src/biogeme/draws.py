@@ -12,7 +12,7 @@ from typing import Callable
 
 import numpy as np
 import biogeme.exceptions as excep
-from biogeme.deprecated import deprecated
+from biogeme.deprecated import deprecated, deprecated_parameters
 
 
 def get_uniform(
@@ -81,6 +81,7 @@ def getUniform(sample_size: int, number_of_draws: int, symmetric: bool = False):
     pass
 
 
+@deprecated_parameters(obsolete_params={'uniformNumbers': 'uniform_numbers'})
 def get_latin_hypercube_draws(
     sample_size: int,
     number_of_draws: int,
@@ -314,6 +315,7 @@ def getAntithetic(
     pass
 
 
+@deprecated_parameters(obsolete_params={'uniformNumbers': 'uniform_numbers'})
 def get_normal_wichura_draws(
     sample_size: int,
     number_of_draws: int,

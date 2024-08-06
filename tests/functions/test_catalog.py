@@ -102,7 +102,7 @@ class TestCatalog(unittest.TestCase):
 
     def test_selected_expression(self):
         selected_expression = self.catalog.selected_expression()
-        self.assertEqual(selected_expression, self.expression1)
+        self.assertEqual(repr(selected_expression), repr(self.expression1))
 
     def test_selected_name(self):
         selected_name = self.catalog.selected_name()
@@ -272,7 +272,9 @@ class TestGenericAltSpecificCatalog(unittest.TestCase):
             self.assertIsInstance(catalog, Catalog)
             for named_expression in catalog.named_expressions:
                 if named_expression.name == 'generic':
-                    self.assertEqual(named_expression.expression, coefficient)
+                    self.assertEqual(
+                        repr(named_expression.expression), repr(coefficient)
+                    )
                 elif named_expression.name == 'altspec':
                     beta = named_expression.expression
                     self.assertIsInstance(beta, Beta)

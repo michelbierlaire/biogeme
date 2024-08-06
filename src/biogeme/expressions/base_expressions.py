@@ -11,21 +11,25 @@ from itertools import chain
 from typing import TYPE_CHECKING, Callable, Iterable
 
 from biogeme.configuration import Configuration
-from biogeme.deprecated import deprecated
 from biogeme.controller import CentralController, Controller
-from .catalog_iterator import SelectedExpressionsIterator
+from biogeme.deprecated import deprecated, deprecated_parameters
 from biogeme.function_output import (
     BiogemeFunctionOutput,
     BiogemeDisaggregateFunctionOutput,
+    BiogemeFunctionOutputSmartOutputProxy,
     FunctionOutput,
+    NamedBiogemeDisaggregateFunctionOutput,
+    NamedBiogemeFunctionOutput,
+    BiogemeDisaggregateFunctionOutputSmartOutputProxy,
+    NamedFunctionOutput,
 )
+from .catalog_iterator import SelectedExpressionsIterator
 
 if TYPE_CHECKING:
     from biogeme.database import Database
     from biogeme.catalog import Catalog
     from .elementary_expressions import Elementary
-    from . import MultipleExpression
-
+    from . import MultipleExpression, Numeric
 
 import numpy as np
 from biogeme.exceptions import BiogemeError, NotImplementedError
@@ -70,6 +74,10 @@ class Expression:
         self.central_controller = None
         """ Central controller for the multiple expressions
         """
+
+    def __bool__(self):
+        error_msg = f'Expression {str(self)} cannot be used in a boolean expression. Use & for "and" and | for "or"'
+        raise BiogemeError(error_msg)
 
     def __iter__(self) -> SelectedExpressionsIterator:
         the_set = self.set_of_configurations()
@@ -122,12 +130,14 @@ class Expression:
             without_id.update(no)
         return with_id, without_id
 
-    @deprecated
+    @deprecated(new_func=get_status_id_manager)
     def getStatusIdManager(self) -> tuple[set[str], set[str]]:
         """Kept for backward compatibility"""
         pass
 
-    def prepare(self, database: Database, number_of_draws: int) -> None:
+    @deprecated_parameters(obsolete_params={'numberOfDraws': 'number_of_draws'})
+    def prepare(self, database: "Database", number_of_draws: int) -> None:
+
         """Prepare the expression to be evaluated
 
         :param database: Biogeme database
@@ -155,7 +165,7 @@ class Expression:
         for e in self.get_children():
             e.set_id_manager(id_manager)
 
-    @deprecated
+    @deprecated(new_func=set_id_manager)
     def setIdManager(self, id_manager: IdManager | None) -> None:
         """Kept for backward compatibility"""
         pass
@@ -412,11 +422,24 @@ class Expression:
             biogeme.expressions.Expression object.
 
         """
-        if not (is_numeric(other) or isinstance(other, Expression)):
-            raise BiogemeError(f"This is not a valid expression: {other}")
-        from .binary_expressions import Power
+        if is_numeric(other):
+            from .unary_expressions import PowerConstant
 
-        return Power(self, other)
+            return PowerConstant(child=self, exponent=float(other))
+
+        from . import Numeric
+
+        if isinstance(other, Numeric):
+            from .unary_expressions import PowerConstant
+
+            return PowerConstant(self, other.get_value())
+
+        if isinstance(other, Expression):
+            from .binary_expressions import Power
+
+            return Power(self, other)
+
+        raise BiogemeError(f"This is not a valid expression: {other}")
 
     def __rpow__(self, other: ExpressionOrNumeric) -> Expression:
         """
@@ -638,6 +661,7 @@ class Expression:
 
         return Greater(self, other)
 
+    @deprecated_parameters(obsolete_params={'numberOfDraws': 'number_of_draws'})
     def create_function(
         self,
         database: Database | None = None,
@@ -647,7 +671,7 @@ class Expression:
         bhhh: bool = False,
     ) -> Callable[
         [np.ndarray],
-        BiogemeFunctionOutput,
+        NamedBiogemeFunctionOutput,
     ]:
         """Create a function based on the expression. The function takes as
         argument an array for the free parameters, and return the
@@ -701,10 +725,11 @@ class Expression:
 
         def my_function(
             x: np.ndarray,
-        ) -> float | BiogemeFunctionOutput:
+        ) -> float | NamedBiogemeFunctionOutput:
             """Wrapper presenting the expression and its derivatives as a function"""
             if isinstance(x, (float, int, np.float64)):
                 x = [float(x)]
+
             if len(x) != len(self.id_manager.free_betas_values):
                 the_error_msg = (
                     f"Function is expecting an array of length "
@@ -721,6 +746,7 @@ class Expression:
                 bhhh=bhhh,
                 aggregation=True,
                 prepare_ids=False,
+                named_results=True,
             )
 
         return my_function
@@ -740,6 +766,7 @@ class Expression:
         """Kept for backward compatibility"""
         pass
 
+    @deprecated_parameters(obsolete_params={'numberOfDraws': 'number_of_draws'})
     def create_objective_function(
         self,
         database: Database | None = None,
@@ -778,13 +805,17 @@ class Expression:
 
         :raise BiogemeError: if gradient is False and hessian or BHHH is True.
         """
-        expression_function = self.create_function(
-            database,
-            number_of_draws,
-            gradient=False,
-            hessian=False,
-            bhhh=False,
-        )
+        try:
+            expression_function = self.create_function(
+                database,
+                number_of_draws,
+                gradient=False,
+                hessian=False,
+                bhhh=False,
+            )
+        except BiogemeError as e:
+            raise e
+
         expression_function_gradient = self.create_function(
             database,
             number_of_draws,
@@ -811,13 +842,15 @@ class Expression:
 
             def _f(self) -> float:
 
-                the_function_output: FunctionOutput = expression_function(self.x)
+                the_function_output: FunctionOutput = expression_function(
+                    self.x
+                ).function_output
                 return the_function_output.function
 
             def _f_g(self) -> FunctionData:
                 the_function_output: FunctionOutput = expression_function_gradient(
                     self.x
-                )
+                ).function_output
                 return FunctionData(
                     function=the_function_output.function,
                     gradient=the_function_output.gradient,
@@ -827,7 +860,7 @@ class Expression:
             def _f_g_h(self) -> FunctionData:
                 the_function_output: FunctionOutput = (
                     expression_function_gradient_hessian(self.x)
-                )
+                ).function_output
                 return FunctionData(
                     function=the_function_output.function,
                     gradient=the_function_output.gradient,
@@ -842,7 +875,7 @@ class Expression:
     def get_value(self) -> float:
         """Abstract method"""
         raise NotImplementedError(
-            "getValue method undefined at this level. Each expression must implement it."
+            f'getValue method undefined at this level: {type(self)}. Each expression must implement it.'
         )
 
     @deprecated(get_value)
@@ -850,6 +883,12 @@ class Expression:
         """Kept for backward compatibility"""
         pass
 
+    @deprecated_parameters(
+        obsolete_params={
+            'numberOfDraws': 'number_of_draws',
+            'prepareIds': 'prepare_ids',
+        }
+    )
     def get_value_c(
         self,
         database: Database | None = None,
@@ -894,8 +933,8 @@ class Expression:
         """
         if self.requires_draws() and database is None:
             error_msg = (
-                "An expression involving MonteCarlo integration "
-                "must be associated with a database."
+                'An expression involving MonteCarlo integration '
+                'must be associated with a database.'
             )
             raise BiogemeError(error_msg)
 
@@ -911,7 +950,8 @@ class Expression:
             aggregation=aggregation,
             prepare_ids=prepare_ids,
         )
-        if aggregation:
+
+        if aggregation or database is None:
             return the_function_output.function
         return the_function_output.functions
 
@@ -927,6 +967,12 @@ class Expression:
         """Kept for backward compatibility"""
         pass
 
+    @deprecated_parameters(
+        obsolete_params={
+            'numberOfDraws': 'number_of_draws',
+            'prepareIds': 'prepare_ids',
+        }
+    )
     def get_value_and_derivatives(
         self,
         betas: dict[str, float] | None = None,
@@ -937,7 +983,13 @@ class Expression:
         bhhh: bool = True,
         aggregation: bool = True,
         prepare_ids: bool = False,
-    ) -> BiogemeDisaggregateFunctionOutput | BiogemeFunctionOutput:
+        named_results: bool = False,
+    ) -> (
+        BiogemeDisaggregateFunctionOutput
+        | BiogemeFunctionOutput
+        | NamedBiogemeDisaggregateFunctionOutput
+        | NamedBiogemeFunctionOutput
+    ):
         """Evaluation of the expression
 
         In Biogeme the complexity of some expressions requires a
@@ -977,6 +1029,9 @@ class Expression:
             the expression.
         :type prepare_ids: bool
 
+        :param named_results: if True, the gradients, hessians, etc. are reported as dicts associating the names of
+            the variables with their corresponding entry.
+
         :return: if a database is provided, a list where each entry is
             the result of applying the expression on one entry of the
             database. It returns a float, a vector, and a matrix,
@@ -999,7 +1054,7 @@ class Expression:
             self.keep_id_manager = self.id_manager
             self.prepare(database, number_of_draws)
         elif self.id_manager is None:
-            error_msg = "Expression evaluated out of context. Set prepare_ids to True."
+            error_msg = 'Expression evaluated out of context. Set prepare_ids to True.'
             raise BiogemeError(error_msg)
 
         errors, warnings = self.audit(database)
@@ -1045,7 +1100,6 @@ class Expression:
                 )
                 for x in self.id_manager.fixed_betas.names
             ]
-
         results = calculate_function_and_derivatives(
             the_expression=self,
             database=database,
@@ -1054,6 +1108,22 @@ class Expression:
             calculate_bhhh=bhhh,
             aggregation=aggregation,
         )
+        if named_results:
+            if isinstance(results, BiogemeFunctionOutput) or isinstance(
+                results, BiogemeFunctionOutputSmartOutputProxy
+            ):
+                results = NamedBiogemeFunctionOutput(
+                    function_output=results, mapping=self.id_manager.free_betas.indices
+                )
+            elif isinstance(results, BiogemeDisaggregateFunctionOutput) or isinstance(
+                results, BiogemeDisaggregateFunctionOutputSmartOutputProxy
+            ):
+                results = NamedBiogemeDisaggregateFunctionOutput(
+                    function_output=results, mapping=self.id_manager.free_betas.indices
+                )
+            else:
+                error_msg = f'Unknown type: {type(results)}'
+                raise BiogemeError(error_msg)
 
         # Now, if we had to set the IDS, we reset them as they cannot
         # be used in another context.
@@ -1326,6 +1396,7 @@ class Expression:
     @deprecated(count_panel_trajectory_expressions)
     def countPanelTrajectoryExpressions(self) -> int:
         """Kept for backward compatibility"""
+
         pass
 
     def audit(self, database: Database | None = None):
@@ -1363,16 +1434,6 @@ class Expression:
 
         for e in self.get_children():
             e.change_init_values(betas)
-
-    def set_estimated_values(self, betas: dict[str, float]):
-        """Set the estimated values of Beta
-
-        :param betas: dictionary where the keys are the names of the
-                      parameters, and the values are the new value for
-                      the parameters.
-        """
-        for e in self.get_children():
-            e.set_estimated_values(betas)
 
     def dict_of_catalogs(
         self, ignore_synchronized: bool = False

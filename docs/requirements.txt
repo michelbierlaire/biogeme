@@ -1,0 +1,5 @@
+sphinx
+sphinx_gallery
+sphinx_autodoc_typehints
+sphinx_rtd_theme
+factor_analyzer

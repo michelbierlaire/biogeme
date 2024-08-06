@@ -1,5 +1,6 @@
 import unittest
 
+from biogeme.results import bioResults
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
@@ -26,6 +27,7 @@ from biogeme.expressions import (
     MonteCarlo,
     PanelLikelihoodTrajectory,
 )
+from biogeme.parameters import Parameters
 from biogeme.tools import TemporaryFile
 
 database = read_data()
@@ -34,17 +36,17 @@ exclude = ((PURPOSE != 1) * (PURPOSE != 3)) > 0
 database.remove(exclude)
 database.panel('ID')
 
-ASC_CAR = Beta('ASC_CAR', 0.136, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', -1, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', -0.039775, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.739801, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', -6.3, None, 0, 0)
-B_COST = Beta('B_COST', -3.29, None, 0, 0)
+B_TIME = Beta('B_TIME', -6.131332, None, 0, 0)
+B_COST = Beta('B_COST', -2.955561, None, 0, 0)
 
-SIGMA_CAR = Beta('SIGMA_CAR', 3.7, None, None, 0)
-SIGMA_SM = Beta('SIGMA_SM', 0.759, None, None, 0)
-SIGMA_TRAIN = Beta('SIGMA_TRAIN', 3.02, None, None, 0)
+SIGMA_CAR = Beta('SIGMA_CAR', 3.830629, None, None, 0)
+SIGMA_SM = Beta('SIGMA_SM', 0.936053, None, None, 0)
+SIGMA_TRAIN = Beta('SIGMA_TRAIN', 2.898149, None, None, 0)
 
-# Define a random parameter, normally distirbuted, designed to be used
+# Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
 EC_CAR = SIGMA_CAR * bioDraws('EC_CAR', 'NORMAL')
 EC_SM = SIGMA_SM * bioDraws('EC_SM', 'NORMAL')
@@ -54,14 +56,14 @@ SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
 
-# For latent class 1, whete the time coefficient is zero
+# For latent class 1, where the time coefficient is zero
 V11 = ASC_TRAIN + B_COST * TRAIN_COST_SCALED + EC_TRAIN
 V12 = ASC_SM + B_COST * SM_COST_SCALED + EC_SM
 V13 = ASC_CAR + B_COST * CAR_CO_SCALED + EC_CAR
 
 V1 = {1: V11, 2: V12, 3: V13}
 
-# For latent class 2, whete the time coefficient is estimated
+# For latent class 2, where the time coefficient is estimated
 V21 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED + EC_TRAIN
 V22 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED + EC_SM
 V23 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED + EC_CAR
@@ -73,7 +75,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 
 # Class membership model
-W_OTHER = Beta('W_OTHER', 0.798, 0, 1, 0)
+W_OTHER = Beta('W_OTHER', 0.803059, 0, 1, 0)
 probClass1 = 1 - W_OTHER
 probClass2 = W_OTHER
 
@@ -86,16 +88,12 @@ logprob = log(MonteCarlo(probIndiv))
 
 class test_15(unittest.TestCase):
     def testEstimation(self):
-        with TemporaryFile() as parameter_file:
-            parameters = '[MonteCarlo]\nnumber_of_draws = 5\nseed = 10'
-            with open(parameter_file, 'w') as f:
-                print(parameters, file=f)
-            biogeme = bio.BIOGEME(database, logprob, parameter_file=parameter_file)
+        biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1111)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
-        results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4074.4822049451564, 2)
+        results: bioResults = biogeme.estimate()
+        self.assertAlmostEqual(results.data.logLike, -3639.6577652986966, 2)
 
 
 if __name__ == '__main__':

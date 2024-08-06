@@ -15,19 +15,15 @@ Test the optimization module
 # pylint: disable=missing-function-docstring, missing-class-docstring
 
 
-import os
-import shutil
-import unittest
 import random as rnd
+import unittest
 
 import numpy as np
-import tempfile
 
 import biogeme.biogeme as bio
 from biogeme import models
-import biogeme.optimization as opt
-import biogeme.exceptions as excep
 from biogeme.expressions import Variable, Beta
+from biogeme.parameters import Parameters
 from test_data import getData
 
 
@@ -47,32 +43,26 @@ class test_optimization(unittest.TestCase):
 
         self.likelihood = models.loglogit(V, av=None, i=Choice)
 
-        # Create a temporary directory
-        self.test_dir = tempfile.mkdtemp()
-        self.scipy_file = os.path.join(self.test_dir, 'scipy.toml')
-        with open(self.scipy_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "scipy"', file=f)
-        self.ls_file = os.path.join(self.test_dir, 'line_search.toml')
-        with open(self.ls_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "LS-newton"', file=f)
-        self.tr_file = os.path.join(self.test_dir, 'trust_region.toml')
-        with open(self.tr_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "TR-newton"', file=f)
-        self.simple_bounds_file = os.path.join(self.test_dir, 'simple_bounds.toml')
-        with open(self.simple_bounds_file, 'w', encoding='utf-8') as f:
-            print('[Estimation]', file=f)
-            print('optimization_algorithm = "simple_bounds"', file=f)
-
-    def tearDown(self):
-        # Remove the directory after the test
-        shutil.rmtree(self.test_dir)
+        self.scipy_configuration = Parameters()
+        self.scipy_configuration.set_value(
+            name='optimization_algorithm', value='scipy', section='Estimation'
+        )
+        self.ls_configuration = Parameters()
+        self.ls_configuration.set_value(
+            name='optimization_algorithm', value='LS-newton', section='Estimation'
+        )
+        self.tr_configuration = Parameters()
+        self.tr_configuration.set_value(
+            name='optimization_algorithm', value='TR-newton', section='Estimation'
+        )
+        self.simple_bounds_configuration = Parameters()
+        self.simple_bounds_configuration.set_value(
+            name='optimization_algorithm', value='simple_bounds', section='Estimation'
+        )
 
     def testBioScipy(self):
         my_biogeme = bio.BIOGEME(
-            getData(1), self.likelihood, parameter_file=self.scipy_file
+            getData(1), self.likelihood, parameters=self.scipy_configuration
         )
         my_biogeme.modelName = 'simpleExample'
         my_biogeme.generate_html = False
@@ -85,7 +75,7 @@ class test_optimization(unittest.TestCase):
 
     def testBioNewtonLineSearch(self):
         my_biogeme = bio.BIOGEME(
-            getData(1), self.likelihood, parameter_file=self.ls_file
+            getData(1), self.likelihood, parameters=self.ls_configuration
         )
         my_biogeme.modelName = 'simpleExample'
         my_biogeme.generate_html = False
@@ -98,7 +88,7 @@ class test_optimization(unittest.TestCase):
 
     def testBioNewtonTrustRegion(self):
         my_biogeme = bio.BIOGEME(
-            getData(1), self.likelihood, parameter_file=self.tr_file
+            getData(1), self.likelihood, parameters=self.tr_configuration
         )
         my_biogeme.modelName = 'simpleExample'
         my_biogeme.generate_html = False
@@ -111,7 +101,7 @@ class test_optimization(unittest.TestCase):
 
     def testBioNewtonSimpleBounds(self):
         my_biogeme = bio.BIOGEME(
-            getData(1), self.likelihood, parameter_file=self.simple_bounds_file
+            getData(1), self.likelihood, parameters=self.simple_bounds_configuration
         )
         my_biogeme.modelName = 'simpleExample'
         my_biogeme.generate_html = False

@@ -4,7 +4,7 @@ from typing import Callable
 import numpy as np
 
 from biogeme.deprecated import deprecated
-from biogeme.function_output import FunctionOutput
+from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,10 @@ def findiff_g(
 
 
 def findiff_h(
-    the_function: Callable[[np.ndarray], FunctionOutput],
+    the_function: (
+        Callable[[np.ndarray], FunctionOutput]
+        | Callable[[np.ndarray], NamedFunctionOutput]
+    ),
     x: np.ndarray,
 ) -> np.ndarray:
     """Calculates the hessian of a function :math:`f` using finite differences
@@ -66,7 +69,10 @@ def findiff_h(
     tau = 1.0e-7
     n = len(x)
     h = np.zeros((n, n))
-    g = the_function(x).gradient
+    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
+    if isinstance(the_function_output, NamedFunctionOutput):
+        the_function_output = the_function_output.function_output
+    g = the_function_output.gradient
     eye = np.eye(n, n)
     for i in range(n):
         xi = x.item(i)
@@ -77,7 +83,12 @@ def findiff_h(
         else:
             s = -tau
         ei = eye[i]
-        gp = the_function(x + s * ei).gradient
+        the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
+            x + s * ei
+        )
+        if isinstance(the_function_output, NamedFunctionOutput):
+            the_function_output = the_function_output.function_output
+        gp = the_function_output.gradient
         h[:, i] = (gp - g).flatten() / s
     return h
 
@@ -90,7 +101,10 @@ def findiff_H(
 
 
 def check_derivatives(
-    the_function: Callable[[np.ndarray], FunctionOutput],
+    the_function: (
+        Callable[[np.ndarray], FunctionOutput]
+        | Callable[[np.ndarray], NamedFunctionOutput]
+    ),
     x: np.ndarray,
     names: list[str] | None = None,
     logg: bool | None = False,
@@ -124,7 +138,9 @@ def check_derivatives(
 
     """
     x = np.array(x, dtype=float)
-    the_function_output: FunctionOutput = the_function(x)
+    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
+    if isinstance(the_function_output, NamedFunctionOutput):
+        the_function_output = the_function_output.function_output
     g_num = findiff_g(the_function, x)
     gdiff = the_function_output.gradient - g_num
     if logg:

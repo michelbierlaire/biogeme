@@ -1,119 +1,27 @@
-Expressions
-===========
-The code for the various arithmetic expressions is organized into submodules.
+biogeme.expressions module
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+Module managing the arithmetic expressions.
 
-Submodules
-----------
+.. toctree::
+  :maxdepth: 2
+  :caption: Arithmetic expressions
 
-biogeme.expressions.base\_expressions module
---------------------------------------------
+  base_expressions.rst
+  numeric_expressions.rst
+  beta_parameters.rst
+  elementary_types.rst
+  elementary_expressions.rst
+  unary_expressions.rst
+  binary_expressions.rst
+  comparison_expressions.rst
+  nary_expressions.rst
+  logit_expressions.rst
+  multiple_expressions.rst
+  catalog_iterator.rst
+  calculator.rst
+  named_expression.rst
+  convert.rst
 
-.. automodule:: biogeme.expressions.base_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
+  idmanager.rst
 
-biogeme.expressions.binary\_expressions module
-----------------------------------------------
-
-.. automodule:: biogeme.expressions.binary_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.calculator module
--------------------------------------
-
-.. automodule:: biogeme.expressions.calculator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.catalog\_iterator module
---------------------------------------------
-
-.. automodule:: biogeme.expressions.catalog_iterator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.comparison\_expressions module
---------------------------------------------------
-
-.. automodule:: biogeme.expressions.comparison_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.elementary\_expressions module
---------------------------------------------------
-
-.. automodule:: biogeme.expressions.elementary_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.elementary\_types module
---------------------------------------------
-
-.. automodule:: biogeme.expressions.elementary_types
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.idmanager module
-------------------------------------
-
-.. automodule:: biogeme.expressions.idmanager
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.logit\_expressions module
----------------------------------------------
-
-.. automodule:: biogeme.expressions.logit_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.multiple\_expressions module
-------------------------------------------------
-
-.. automodule:: biogeme.expressions.multiple_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.nary\_expressions module
---------------------------------------------
-
-.. automodule:: biogeme.expressions.nary_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.numeric\_expressions module
------------------------------------------------
-
-.. automodule:: biogeme.expressions.numeric_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.numeric\_tools module
------------------------------------------
-
-.. automodule:: biogeme.expressions.numeric_tools
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-biogeme.expressions.unary\_expressions module
----------------------------------------------
-
-.. automodule:: biogeme.expressions.unary_expressions
-   :members:
-   :undoc-members:
-   :show-inheritance:
 

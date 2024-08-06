@@ -57,7 +57,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 class test_03(unittest.TestCase):
     def testEstimation(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameter_file='')
+        biogeme = bio.BIOGEME(database, logprob, parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_èickle = False

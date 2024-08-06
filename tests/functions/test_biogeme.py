@@ -6,15 +6,6 @@ Test the biogeme module
 
 """
 
-# Bug in pylint
-# pylint: disable=no-member
-#
-# Too constraining
-# pylint: disable=invalid-name, too-many-instance-attributes
-#
-# Not needed in test
-# pylint: disable=missing-function-docstring, missing-class-docstring
-
 import biogeme.biogeme_logging as blog
 
 import os
@@ -155,13 +146,29 @@ class TestBiogeme(unittest.TestCase):
         b2 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), numberOfThreads=12)
         self.assertEqual(b2.number_of_threads, 12)
 
-        b3 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), seed=12)
-        self.assertEqual(b3.seed_param, 12)
+        b3 = bio.BIOGEME(
+            getData(1), self.get_dict_of_expressions(), parameter_file='myfile.toml'
+        )
+        self.assertEqual(b3.biogeme_parameters.file_name, 'myfile.toml')
 
         b4 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), missingData=12)
         self.assertEqual(b4.missing_data, 12)
 
         b5 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), suggestScales=True)
+
+        b6 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), userNotes='blabla')
+        self.assertEqual(b6.user_notes, 'blabla')
+
+        b7 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), generateHtml=False)
+        self.assertEqual(b7.generate_html, False)
+
+        b8 = bio.BIOGEME(
+            getData(1), self.get_dict_of_expressions(), saveIterations=True
+        )
+        self.assertEqual(b8.save_iterations, True)
+
+        b9 = bio.BIOGEME(getData(1), self.get_dict_of_expressions(), seed_param=12)
+        self.assertEqual(b9.seed, 12)
 
     def test_saved_iterations(self):
         my_biogeme = self.get_biogeme_instance()
@@ -249,9 +256,15 @@ class TestBiogeme(unittest.TestCase):
 
     def test_free_beta_names(self):
         my_biogeme = self.get_biogeme_instance()
-        result = my_biogeme.free_beta_names()
+        result = my_biogeme.free_beta_names
         expected_result = ['beta1', 'beta2']
         self.assertListEqual(result, expected_result)
+
+    def test_get_beta_values(self):
+        my_biogeme = self.get_biogeme_instance()
+        result = my_biogeme.get_beta_values()
+        expected_result = {'beta1': -1.0, 'beta2': 2.0}
+        self.assertDictEqual(result, expected_result)
 
     def test_bounds_on_beta(self):
         my_biogeme = self.get_biogeme_instance()
@@ -329,7 +342,7 @@ class TestBiogeme(unittest.TestCase):
         )
         f_true = -49500
         g_true = [0.0, -33000.0]
-        h_true = [[0.0, 0.0], [0.0, -11000.0]]
+        h_true = [[-110.0, 0.0], [0.0, -11000.0]]
         bhhh_true = [[0.0, 0.0], [0.0, 352440000.0]]
         self.assertEqual(f_true, the_function_output.function)
         self.assertListEqual(g_true, the_function_output.gradient.tolist())
@@ -490,13 +503,13 @@ class TestBiogeme(unittest.TestCase):
         results = my_biogeme.estimate()
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.simulate(the_beta_values=None)
-
-        s = my_biogeme.simulate(results.get_beta_values())
+        my_biosim = self.get_biogeme_instance()
+        s = my_biosim.simulate(results.get_beta_values())
         self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
         the_betas = results.get_beta_values()
         the_betas['any_beta'] = 0.1
-        s = my_biogeme.simulate(the_betas)
+        s = my_biosim.simulate(the_betas)
         self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
         with self.assertRaises(excep.BiogemeError):
@@ -526,11 +539,12 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme = self.get_biogeme_instance()
         my_biogeme.bootstrap_samples = 100
         results = my_biogeme.estimate(run_bootstrap=True)
-        drawsFromBetas = results.get_betas_for_sensitivity_analysis(
+        draws_from_betas = results.get_betas_for_sensitivity_analysis(
             my_biogeme.id_manager.free_betas.names
         )
-        s = my_biogeme.simulate(results.get_beta_values())
-        left, right = my_biogeme.confidence_intervals(drawsFromBetas)
+        my_biosim = self.get_biogeme_instance()
+        s = my_biosim.simulate(results.get_beta_values())
+        left, right = my_biosim.confidence_intervals(draws_from_betas)
         self.assertLessEqual(left.loc[0, 'log_like'], s.loc[0, 'log_like'])
         self.assertGreaterEqual(right.loc[0, 'log_like'], s.loc[0, 'log_like'])
 
@@ -557,9 +571,7 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme = self.get_biogeme_instance()
         my_biogeme.algorithm_name = 'simple_bounds'
         my_biogeme.optimize()
-        my_biogeme._algorithm = None
-        with self.assertRaises(excep.BiogemeError):
-            my_biogeme.optimize()
+        my_biogeme.optimize()
 
     def test_print(self):
         my_biogeme = self.get_biogeme_instance()
@@ -574,8 +586,8 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.generate_html = True
         my_biogeme.estimate()
         result = my_biogeme.files_of_type('html', all_files=False)
-        expected_result = ['name_for_file.html']
-        self.assertListEqual(result, expected_result)
+        expected_result = 'name_for_file.html'
+        self.assertIn(expected_result, result, f"{expected_result} is not in the list")
         result = my_biogeme.files_of_type('html', all_files=True)
         self.assertGreaterEqual(len(result), 1)
 
@@ -589,7 +601,6 @@ class TestBiogeme(unittest.TestCase):
                 'beta_2': beta_2,
             },
         )
-
         # Valid constructor
         config_id = 'the_catalog:beta_2'
         the_biogeme = bio.BIOGEME.from_configuration(
@@ -597,6 +608,7 @@ class TestBiogeme(unittest.TestCase):
             expression=catalog,
             database=getData(1),
         )
+
         self.assertIs(the_biogeme.log_like, catalog)
 
         # Invalid constructor: typo
@@ -617,6 +629,32 @@ class TestBiogeme(unittest.TestCase):
                 database=getData(1),
             )
 
+    def test_report_array(self):
+        my_biogeme = self.get_biogeme_instance()
+        array = np.array([12, 45])
+        result = my_biogeme.report_array(array)
+        expected_result = 'beta1=12, beta2=45'
+        self.assertEqual(result, expected_result)
+        result = my_biogeme.report_array(array, with_names=False)
+        expected_result = '12, 45'
+        self.assertEqual(result, expected_result)
+
+    def test_beta_values_dict_to_list(self):
+        my_biogeme = self.get_biogeme_instance()
+        result = my_biogeme.beta_values_dict_to_list()
+        expected_result = [-1.0, 2.0]
+        self.assertEqual(expected_result, result)
+        beta_dict = {'beta1': 1.0, 'beta2': 2.0}
+        result = my_biogeme.beta_values_dict_to_list(beta_dict=beta_dict)
+        expected_result = [1.0, 2.0]
+        self.assertEqual(expected_result, result)
+        with self.assertRaises(excep.BiogemeError):
+            _ = my_biogeme.beta_values_dict_to_list(beta_dict=3)
+        beta_dict = {'beta1': 1.0}
+        with self.assertRaises(excep.BiogemeError):
+            _ = my_biogeme.beta_values_dict_to_list(beta_dict=beta_dict)
+
 
 if __name__ == '__main__':
+
     unittest.main()

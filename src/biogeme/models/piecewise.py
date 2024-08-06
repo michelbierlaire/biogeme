@@ -54,6 +54,9 @@ def piecewise_variables(
 
     """
     eye = len(thresholds)
+    if eye == 0:
+        error_msg = 'No threshold has been provided.'
+        raise BiogemeError(error_msg)
     if all(t is None for t in thresholds):
         error_msg = (
             'All thresholds for the piecewise linear specification are set to None.'
@@ -69,6 +72,9 @@ def piecewise_variables(
     # If the name of the variable is given, we transform it into an expression.
     if isinstance(variable, str):
         variable = Variable(variable)
+    if not isinstance(variable, Variable):
+        error_msg = f'Expression of type Variable expected, not {type(variable)}'
+        raise BiogemeError(error_msg)
 
     # First variable
     if thresholds[0] is None:
@@ -90,7 +96,7 @@ def piecewise_variables(
     return results
 
 
-@deprecated
+@deprecated(new_func=piecewise_variables)
 def piecewiseVariables(
     variable: Expression | str, thresholds: list[float]
 ) -> list[Expression]:
@@ -192,7 +198,7 @@ def piecewise_formula(
     return bioMultSum(terms)
 
 
-@deprecated
+@deprecated(new_func=piecewise_formula)
 def piecewiseFormula(
     variable: str | Variable, thresholds: list[float], betas: list[Beta] | None = None
 ) -> Expression:
@@ -372,6 +378,6 @@ def piecewise_function(x: float, thresholds: list[float], betas: list[float]) ->
     return total
 
 
-@deprecated
+@deprecated(new_func=piecewise_function)
 def piecewiseFunction(x: float, thresholds: list[float], betas: list[float]) -> float:
     pass

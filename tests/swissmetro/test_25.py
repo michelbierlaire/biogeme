@@ -23,7 +23,7 @@ from biogeme.data.swissmetro import (
 )
 from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
 from biogeme.native_draws import RandomNumberGeneratorTuple
-from biogeme.tools import TemporaryFile
+from biogeme.parameters import Parameters
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -84,16 +84,15 @@ logprob = log(MonteCarlo(prob))
 
 class test_25(unittest.TestCase):
     def testEstimation(self):
-        with TemporaryFile() as parameter_file:
-            parameters = '[MonteCarlo]\nnumber_of_draws = 5\nseed = 10'
-            with open(parameter_file, 'w') as f:
-                print(parameters, file=f)
-            biogeme = bio.BIOGEME(database, logprob, parameter_file=parameter_file)
+        parameters = Parameters()
+        parameters.set_value(section='MonteCarlo', name='number_of_draws', value=5)
+        parameters.set_value(section='MonteCarlo', name='seed', value=10)
+        biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -5312.7204284279305, 2)
+        self.assertAlmostEqual(results.data.logLike, -5315.91, 2)
 
 
 if __name__ == '__main__':

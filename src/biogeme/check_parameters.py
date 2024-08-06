@@ -82,7 +82,7 @@ def check_algo_name(x: ParameterValue) -> tuple[bool, str | None]:
     """
     if not isinstance(x, str):
         return False, f'Parameter must be a string: {x}'
-    possibilities = list(opt.algorithms.keys())
+    possibilities = ['automatic'] + list(opt.algorithms.keys())
     if x in possibilities:
         return True, None
     return False, f'Value must be in: {possibilities}'

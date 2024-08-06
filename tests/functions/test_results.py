@@ -18,7 +18,7 @@ import unittest
 import pandas as pd
 import biogeme.biogeme as bio
 import biogeme.database as db
-import biogeme.results as res
+from biogeme.results import bioResults, calc_p_value, Beta as BetaResult
 from biogeme.expressions import Beta, Variable, exp
 
 
@@ -58,14 +58,64 @@ class TestResults(unittest.TestCase):
         self.results = my_biogeme.estimate(run_bootstrap=True)
 
     def test_calcPValue(self):
-        p = res.calc_p_value(1.96)
+        p = calc_p_value(1.96)
         self.assertAlmostEqual(p, 0.05, 2)
 
     def test_isBoundActive(self):
-        beta1 = res.Beta('beta1', -1, (-1, 1))
+        beta1 = BetaResult('beta1', -1, (-1, 1))
         self.assertTrue(beta1.is_bound_active())
-        beta2 = res.Beta('beta2', 0, (-1, 1))
+        beta2 = BetaResult('beta2', 0, (-1, 1))
         self.assertFalse(beta2.is_bound_active())
+
+
+class TestBioResultsWithoutData(unittest.TestCase):
+    def test_no_data_provided(self):
+        # Test that no data is provided and the object is created successfully
+        result = bioResults()
+        self.assertIsNone(
+            result.data, "Expected 'data' to be None when no data is provided"
+        )
+
+    def test_warning_logged_no_data(self):
+        with self.assertLogs('biogeme.results', level='WARNING') as log:
+            bioResults()
+            self.assertIn(
+                'WARNING:biogeme.results:Results: no data provided', log.output
+            )
+
+    def test_algorithm_has_not_converged(self):
+        result = bioResults()
+        self.assertFalse(
+            result.algorithm_has_converged(),
+            "Expected algorithm_has_converged to be False",
+        )
+
+    def test_variance_covariance_missing(self):
+        result = bioResults()
+        self.assertTrue(
+            result.variance_covariance_missing(),
+            "Expected variance_covariance_missing to be True",
+        )
+
+    def test_write_pickle_without_data(self):
+        result = bioResults()
+        with self.assertRaises(AttributeError):
+            result.write_pickle()
+
+    def test_short_summary_without_data(self):
+        result = bioResults()
+        summary = result.short_summary()
+        self.assertIn('No estimation result is available', summary)
+
+    def test_get_latex_without_data(self):
+        result = bioResults()
+        latex = result.get_latex()
+        self.assertIn('No estimation result is available', latex)
+
+    def test_get_html_without_data(self):
+        result = bioResults()
+        html = result.get_html()
+        self.assertIn('No estimation result is available', html)
 
 
 if __name__ == '__main__':

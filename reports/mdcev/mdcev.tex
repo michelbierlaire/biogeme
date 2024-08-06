@@ -4,6 +4,17 @@
 \usepackage[latin9]{inputenc}
 \usepackage{epsfig}
 \usepackage{michel}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{varioref}
+\usepackage{amsthm}
+\newtheorem{lemma}{Lemma}
+\usepackage{longtable}
+\usepackage{caption}
+
+
+\newtheorem{property}{Property}
+\newtheorem{corollary}{Corollary}
+
 
 \usepackage[dcucite,abbr]{harvard}
 \harvardparenthesis{none}
@@ -47,9 +58,9 @@
   \epsfig{figure=transp-or.eps,height=2cm}
   \hfill
   \epsfig{figure=epfl,height=1.5cm}   \\*[-0.5cm]
-  \mbox{}\hrulefill\mbox{} \\*[3cm] Estimating the MDCEV model with Biogeme}
+  \mbox{}\hrulefill\mbox{} \\*[3cm] The MDCEV model with Biogeme: estimation and forecasting}
 \author{Michel Bierlaire \and Mengyi Wang}
-\date{\today}
+\date{July 21, 2024}
 
 
 \begin{document}
@@ -73,8 +84,8 @@
 %In this case, use the template of the journal, or simply comment out the next lines.
 
 \begin{center}
-  DRAFT
-\small Report TRANSP-OR 24xxxx \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+
+\small Report TRANSP-OR 240721 \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
 \end{center}
 
 
@@ -83,14 +94,19 @@
 
 \section*{Abstract}
 
-The abstract...
+This document presents the multiple discrete-continuous extreme value (MDCEV) model as implemented in Biogeme. We outline the mathematical foundations of the various model variants available in the package. Additionally, we discuss the procedures for parameter estimation and the application of the model for forecasting. A step-by-step walkthrough of a concrete example is also provided to illustrate the model's practical use.
+
 \section{The MDCEV model}
 
 The multiple discrete-continuous extreme value model (MDCEV) is a
 choice model where the choice of multiple alternatives can occur
 simultaneously. It has been introduced by \citeasnoun{BHAT2005679},
-building on the Karush-Kuhn-Tucker multiple discrete-continuous economic
-model proposed by \citeasnoun{wales1983estimation}. In this document, we introduce a generalization of the model, where the derivation is performed for a generic utility function. This is motivated by the need to obtain an implementation that is easily extendible to new models in the future.
+building on the Karush-Kuhn-Tucker multiple discrete-continuous
+economic model proposed by \citeasnoun{wales1983estimation}. In this
+document, we introduce a generalization of the model, where the
+derivation is performed for a generic utility function. This is
+motivated by the need to obtain an implementation that is easily
+extendible to new models in the future.
 
 Consider an individual, denoted as $n$, who is presented with a
 distinct set of items, represented as $\mathcal{C}_n$, containing
@@ -105,281 +121,88 @@ where:
     \item $p_{in} > 0$ is the price per unit of item $i$ for the individual $n$.
     \item $e_{in} = p_{in} y_{in}$ represents the total expenditure by individual $n$ on item $i$.
 \end{itemize}
-We assume that the entire budget is spent, and that at least one item is consumed.
+There is no upper bound on what can be consumed for each item or, if there is, it is beyond the total budget $E_n$, so that
+it does not generate any binding constraint.
+Note that it is mathematically equivalent
+to write the problem in terms of expenditures $e$ or in terms of quantities $y$. We adopt the former.
 
-Each item $i$ is associated with a utility $U_{in}(y)$, that depends
-on the consumed quantity $y$.  We identify two
-properties that the utility functions must have. Both are relatively
-weak conditions. The first one is related to the optimality
-conditions, and are verified if the functions are concave, or
-quasi-concave. The second one is related to the specification of the
-error terms, needed for the derivation of the econometric model.
-It is assumed that there exists an order preserving function $\phi$ such that the random utility can be expressed in additive form, that is such that
+
+Each item $i$ is associated with a utility $U_{in}(x_{in}, e_{in}, \varepsilon_{in}; \theta)$, where $x_{in}$ are explanatory variables,
+$e_{in}$ is the expenditure of individual $n$ for alternative $i$, $\varepsilon_{in}$ is an error term independent from $x_{in}$ and $e_{in}$, and $\theta$ is a vector of parameters, to be estimated from data.
+The error terms $\varepsilon_{in}$ are assumed to be independent and identically distributed, following an extreme value distribution.
+It is also assumed that there exists an order preserving function $\phi$ such that the random utility can be expressed in additive form, that is such that
 \begin{equation}
-\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = V_{in} + \varepsilon_{in},
+    \label{eq:phi}
+\phi\left(\frac{\partial U_{in}}{\partial e_{in}}\right) = V_{in} + \varepsilon_{in},
 \end{equation}
-where $V_{in}$ is the deterministic part, and $\varepsilon_{in}$ is a random disturbance.
+where $V_{in}$ is the deterministic part, and $\varepsilon_{in}$ is the error term.
 On
 top of this, the specification of the utility functions should be
 associated with specific behavioral assumptions. This aspect is not discussed in this document, in order to keep the model as general as possible. 
 
-The purchase decisions $y_{1n}, \ldots, y_{J_n, n}$ are assumed to be the solution of the following optimization problem:
+The expenditure decisions $e_{1n}, \ldots, e_{J_n, n}$ are assumed to be the solution of the following optimization problem:
 \begin{equation}
-\max_{y} \sum_{i \in \C_n} U_{in}(y_i)
+\label{eq:obj}
+\max_{e_n} \sum_{i \in \C_n} U_{in}(x_{in}, e_{in}, \varepsilon_{in}; \theta)
 \end{equation}
 subject to
 \begin{align}
-  \sum_{i \in \mathcal{C}_n} p_{in} y_{i} &= E_n,\\
- y_{i} &\geq 0,
+  \sum_{i \in \mathcal{C}_n} e_{in} & = E_n,\label{eq:budget_constraint}\\
+ e_{in} &\geq 0. \label{eq:non_negativity}
 \end{align}
-We refer the reader to Appendix~\ref{eq:derivation}, where the model is derived from first principles.
-
-\section{Model specifications}
-
-Biogeme implements the following specifications for the utility functionx.
-
-\subsection{Translated utility function}
-In the context of a time use model, \citeasnoun{BHAT2005679} uses the translated utility function introduced by \citeasnoun[Eq. (1)]{Jaehwan-Kim:2002aa}:
+The optimality conditions can be derived from the Lagrangian of the problem. We introduce a Lagrange multiplier $\lambda \in \R$
+associated with constraint \req{eq:budget_constraint} and a Lagrange multiplier $\eta_i \geq 0$ for each constraint \req{eq:non_negativity}. The Lagrangian is defined as
 \begin{equation}
-  \label{eq:orig_u}
-U_{in}(e_i) = \exp(\beta^T x_{in} + \varepsilon_{in})(e_i + \gamma_i)^{\alpha_i},
-\end{equation}
-where $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
-estimated. Note that there is no price involved in this specification,
-as it models time and not goods. It is equivalent to set $p_i=1$, for all $i$ in the model
-described above. Note also that,
-\citeasnoun{Jaehwan-Kim:2002aa} and \citeasnoun{BHAT2005679} impose
-the following restriction on $\alpha_i$: $0 < \alpha_i \leq
-1$. However, in the context of this implementation, $\alpha_i=1$ would
-create a singularity.
-
-We can calculate
-\begin{equation}
-\frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i(e_i + \gamma)^{\alpha_i-1}.
-\end{equation}
-In this context, we use the logarithm as the order preserving function to obtain the following specification:
-\[
-\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_i + \gamma_i),
-\]
-so that
-\[
-V_{in} = \beta^T x_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_i + \gamma_i),
-\]
-and
-\[
-c_{in} = -\frac{\partial V_{in}}{\partial e_i} = \frac{1-\alpha_i}{e_i + \gamma_i}.
-\]
-In Biogeme, this model is referred to as
-\lstinline@translated@.
-
-
-\section{Generalized translated utility function}
-
-\citeasnoun{BHAT2008274} generalizes the above formulation and introduces the following specification, where the utility functions $U_{in}$ are defined as
-\begin{equation}
-  \label{eq:generalized_utility_outside}
-U_{1n} =\exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{\alpha_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1},
-\end{equation}
-for the ``outside good'' that is always consumed and, for $i > 1$,
-\begin{equation}
-  \label{eq:generalized_utility}
-U_{in} =\exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{\alpha_i} \left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right],
-\end{equation}
-where $\beta$, $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
-estimated. We can calculate
-\begin{equation}
-\frac{\partial U_{1n}}{\partial e_1} =\exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{p_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1-1},
-\end{equation}
-and
-\begin{equation}
-  \frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1}.
-\end{equation}
-We use again the logarithm as the order preserving function to obtain the following specification:
-\[
-\phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) = \beta^T x_{1n} + \varepsilon_{1n} + (\alpha_1-1) \ln e_1 - \alpha_1 \ln p_1,
-\]
-and
-\[
-\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = \beta^T x_{in} + \varepsilon_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right),
-\]
-so that
-\[
-V_{1n} = \beta^T x_{1n} + (\alpha_1-1) \ln e_1 - \alpha_1 \ln p_1,
-\]
-and
-\[
-V_{in} = \beta^T x_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right).
-\]
-Finally, we have
-\[
-c_{1n} = -\frac{\partial V_{1n}}{\partial e_1} = \frac{1-\alpha_1}{e_1},
-\]
-and
-\[
-c_{in} = -\frac{\partial V_{in}}{\partial e_i} =\frac{1-\alpha_i}{e_i + p_i \gamma_i}.
-\]
-In Biogeme, this model is referred to as \lstinline@generalized@.
-
-\subsection{The $\gamma$-profile}
-If $\alpha_i \to 0$, \req{eq:generalized_utility} collapses to the linear expenditure system (LES) form, defined as follows:
-\begin{equation}
-  \label{eq:u_les_outside}
-U_{1n}(e_{1})= \exp(\beta^T x_{1n} + \varepsilon_{1n}) \ln \left(\frac{e_1}{p_1} \right),
-\end{equation}
-and
-\begin{equation}
-  \label{eq:u_les}
-U_{in}(e_{i})= \exp(\beta^T x_{in} + \varepsilon_{in}) \gamma_i \ln \left(\frac{e_i}{p_i \gamma_i}+1 \right),
-\end{equation}
-where $\beta$, $\gamma_i > 0$ is a  parameter to be
-estimated. We can calculate
-\[
-\frac{\partial U_{1n}}{\partial e_1} =  \exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{e_1},
-\]
-and
-\[
-\frac{\partial U_{in}}{\partial e_i} =  \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{e_i + p_i \gamma_i}.
-\]
-Taking again the logarithm, we have
-\[
-\phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) =\beta^T x_{1n} + \varepsilon_{1n} - \ln e_1,
-\]
-and
-\[
-\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in}) + \ln \gamma_i - \ln(e_i + p_i \gamma_i),
-\]
-so that
-\[
-V_{1n} = \beta^T x_{1n}  - \ln e_i,
-\]
-and
-\[
-V_{in} = \beta^T x_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i).
-\]
-Finally, we have
-\[
-c_{1n} = \frac{1}{e_1},
-\]
-and
-\[
-c_{in} = \frac{1}{e_i + p_i \gamma_i}.
-\]
-In Biogeme, this model is referred to as \lstinline@gamma_profile@.
-
-\subsection{The non-monotonic model}
-
-\citeasnoun{Wang:2023aa} introduce the following specification in order to accommodate non-monotonic preferences, motivated in the context of time consumption. With our notations, the specification is
-\[
-U_{1n}(e_1) =  \frac{1}{\alpha_1}e^{\beta^T x_{in}}\left(\frac{e_1}{p_1}\right)^{\alpha_1}+(\gamma^T z_{in} + \varepsilon_{in}) e_i.
-\]
-for the outside good, and
-\[
-U_{in}(e_i) = \frac{\gamma_i}{\alpha_i} e^{\beta^T x_{in}}\left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right]+(\gamma^T z_{in} + \varepsilon_{in}) e_i.
-\]
-where $\beta$, $\gamma$, $0 < \alpha_i < 1$, and $\gamma_i > 0$  are parameters to be
-estimated. In the original paper, the model has been derived using $p_i=1$, for all $i$.
-We have
-\[
-\frac{\partial U_{1n}}{\partial e_1} = \frac{1}{p_1} e^{\beta^T x_{1n}}  \left(\frac{e_1}{p_1}\right)^{\alpha_1-1} + \gamma^T z_{1n} + \varepsilon_{1n},
-\]
-and
-\[
-\frac{\partial U_{in}}{\partial e_i} = \frac{1}{p_i} e^{\beta^T x_{in}}  \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1} + \gamma^T z_{in} + \varepsilon_{in}.
-\]
-Here, we do not need to apply an order preserving function, so that
-\[
-V_{1n} = \frac{1}{p_1} e^{\beta^T x_{1n}}  \left(\frac{e_1}{p_1}\right)^{\alpha_1-1} + \gamma^T z_{1n}.
-\]
-and
-\[
-V_{in} = \frac{1}{p_i} e^{\beta^T x_{in}}  \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1} + \gamma^T z_{in}.
-\]
-We have
-\[
-c_{1n} = -\frac{\partial V_{1n}}{\partial e_1} =  \frac{1}{p^2_1} e^{\beta^T x_{1n}} (1-\alpha_1)\left(\frac{e_1}{p_1}\right)^{\alpha_1-2},
-\]
-and
-\[
-c_{in} = -\frac{\partial V_{in}}{\partial e_i} =  \frac{1}{p^2_i} e^{\beta^T x_{in}} \frac{1-\alpha_i}{\gamma_i}\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-2}.
-\]
-For the outside good, we have
-\[
-\ln c_{1n} =  \beta^T x_{1n} + \ln (1-\alpha_1) +(\alpha_i-2) \ln e_1 - \alpha_1 \ln p_1,
-\]
-and
-\[
-\frac{1}{c_{1n}} =  p^2_1 e^{-\beta^T x_{1n}} \frac{1}{1-\alpha_1}\left(\frac{e_1}{p_1}\right)^{2-\alpha_1}.
-\]
-For the other goods, we have
-\[
-\ln c_{in} = -2\ln p_i + \beta^T x_{in} + \ln (1-\alpha_i) -\ln \gamma_i +(\alpha_i-2) \ln\left(\frac{e_i}{p_i \gamma_i}+1\right).
-\]
-and
-\[
-\frac{1}{c_{in}} =  p^2_i e^{-\beta^T x_{in}} \frac{\gamma_i}{1-\alpha_i}\left(\frac{e_i}{p_i \gamma_i}+1\right)^{2-\alpha_i}.
-\]
-
-In Biogeme, this model is referred to as \lstinline@non_monotonic@.
-
-
-%\subsection{Outside good}
-%
-%
-%Note that, if there is an outside good (see \cite[Section 5]{BHAT2008274}), label it alternative one, and define $\psi_{in}=\exp(\varepsilon_{in})$, and
-%\begin{equation}
-%U_{1n}(e_1) = \frac{1}{\alpha_1} e_1^{\alpha_i}.
-%\end{equation}
-
-\bibliographystyle{dcu}
-\bibliography{transpor}
-
-
-\appendix
-\section{Derivation of the model}
-\label{eq:derivation}
-To simplify the derivation that follows, we write the
-optimization problem as an equivalent minimization problem, in terms
-of expenditures instead of quantities:
-\begin{equation}
-\min_{e} -\sum_{i \in \C_n} U_{in}(e_i)
-\end{equation}
-subject to
-\begin{align}
-  \sum_{i \in \mathcal{C}_n} e_i &= E_n, \label{eq:budget_constraint}\\
- e_{i} &\geq 0. \label{eq:non_negativity}
-\end{align}
-
-The optimality conditions can be derived from the Lagrangian of the problem. We introduce a Lagrange multiplier $\lambda$ associated with constraint \req{eq:budget_constraint} and a Lagrange multiplier $\mu_i \geq 0$ for each constraint \req{eq:non_negativity}. The Lagrangian is defined as
-\begin{equation}
-  \L(y;\lambda, \mu) = -\sum_{i \in \C_n} U_{in}(e_i) + \lambda\left(E_n -  \sum_{i \in \mathcal{C}_n} e_{i}\right) - \sum_{i \in \C_n} \mu_i e_i.
+  \L(e_n;\lambda_n, \eta_n) = -\sum_{i \in \C_n} U_{in} + \lambda_n\left(\sum_{i \in \mathcal{C}_n} e_{in}-E_n\right) - \sum_{i \in \C_n} \eta_{in} e_{in}.
 \end{equation}
 The first order optimality conditions state that
 \begin{equation}
   \label{eq:optimality}
-\frac{\partial \L}{\partial e_i} = - \frac{\partial U_{in}}{\partial e_i} - \lambda - \mu_i  = 0, \text{ and } \mu_i e_i = 0, \; \forall i \in \C_n.
+\frac{\partial \L}{\partial e_{in}} = - \frac{\partial U_{in}}{\partial e_{in}} + \lambda_n - \eta_{in}  = 0, \text{ and } \eta_{in} e_{in} = 0, \; \forall i \in \C_n.
 \end{equation}
-Note that we assume that the second order optimization conditions are also verified. This is the case if the utility functions are concave, for instance.
+Note that we assume that the second order optimality conditions are also verified. This is the case if the utility functions are concave, for instance.
 
-At least one item is consumed. We assume without loss of generality that it is item 1. Therefore $e_{1n} > 0$ and $\mu_1=0$. Consequently, \req{eq:optimality} can be written
-\[
-\lambda = - \frac{\partial U_{1n}}{\partial e_1}.
-\]
-Consider an alternative $j\neq 1$ such that $e_{jn} > 0$. Using the same argument, we can write
-\[
-\frac{\partial U_{jn}}{\partial e_j} = \frac{\partial U_{1n}}{\partial e_1}.
-\]
-Consider an alternative $j$ such that $e_{jn} = 0$. In this case, $\mu_j \geq 0$ and
-\[
-\frac{\partial U_{in}}{\partial e_i}  \leq \frac{\partial U_{1n}}{\partial e_1}.
-\]
-Note that we can transform the utility functions $U_{in}$ with any order preserving function $F$ without changing the solution of the problem. An order preserving function is a strictly increasing function $F$ of one variable such that $F'(u) > 0$. In that case,
-\[
-\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) \leq \phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) \Longleftrightarrow
-\frac{\partial U_{in}}{\partial e_i}  \leq \frac{\partial U_{1n}}{\partial e_1}.
-\]
-
-We now assume that the utility function is a random variable, that can be written in an additive way. More specifically, we assume that there exists an order preserving transform of the utility functions such that
+At least one item is consumed. We assume without loss of generality that it is item 1. Therefore $e_{1n} > 0$ and $\eta_{1n}=0$. Consequently, \req{eq:optimality} can be written
 \begin{equation}
+    \label{eq:optimality_one}
+\lambda_n = \frac{\partial U_{1n}}{\partial e_{1n}}.
+\end{equation}
+
+Consider a chosen alternative $i\neq 1$ such that $e_{in} > 0$. Using the same argument, we can write
+\begin{equation}
+    \label{eq:optimality_i}
+\frac{\partial U_{in}}{\partial e_{in}} = \lambda_n= \frac{\partial U_{1n}}{\partial e_{1n}}.
+\end{equation}
+
+Therefore, if the dual variable $\lambda_n$ is known, the optimal expenditure for a chosen alternative $i$ can be obtained by solving
+Equation~\req{eq:optimality_i}, analytically, or numerically. This quantity is denoted
+\begin{equation}
+    \label{eq:optimal_consumption}
+    e_{in}(x_{in}; \lambda_n, \theta),
+\end{equation}
+and is such that
+\[
+   \frac{\partial U_{in}}{\partial e_{in}}\left(e_{in}(x_{in}; \lambda_n, \theta)\right) = \lambda_n.
+\]
+
+Consider an alternative $i$ such that $e_{in} = 0$. In this case, $\eta_{in}=  \lambda_n- \frac{\partial U_{in}}{\partial e_{in}} \geq 0$ and
+\begin{equation}
+\label{eq:unchosen}
+\frac{\partial U_{in}}{\partial e_{in}}  \leq \lambda_n = \frac{\partial U_{1n}}{\partial e_{1n}}.
+\end{equation}
+Note that we can transform the utility functions $U_{in}$ with any order preserving function $\phi$
+without changing the solution of the problem. An order preserving function is a strictly increasing
+function $\phi$ of one variable such that $\phi'(u) > 0$. In that case,
+\begin{equation}
+\label{eq:phi_transform}
+\phi\left(\frac{\partial U_{in}}{\partial e_{in}}\right) \leq \phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) \Longleftrightarrow
+\frac{\partial U_{in}}{\partial e_i}  \leq \frac{\partial U_{1n}}{\partial e_1}.
+\end{equation}
+
+As the analyst is not able to observe the actual utility function, we  assume that the utility function is a random variable.
+More specifically, we assume that there exists an order preserving transform $\phi$ of the utility functions such that
+\begin{equation}
+\label{eq:utility_def}
 \phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = V_{in} + \varepsilon_{in},
 \end{equation}
 where $V_{in}$ is the deterministic part, and $\varepsilon_{in}$ is a random disturbance. Therefore, the optimality conditions can be written as
@@ -391,40 +214,58 @@ We assume that the utility functions are defined in such a way that
 \req{eq:non_zero} defines a bijective relationship between $e_{in}$ and
 $\varepsilon_{in}$, for all $i\in\C_n$.
 
-\section{The distribution of expenditures}
+The above model is typically used in two modalities. For the estimation of the unknown parameters, the analyst needs
+the distribution of the expenditures given by the model in order to calculate the log-likelihood function
+for the observed expenditures. This distribution and the corresponding log-likelihood function are derived in
+Section~\ref{sec:likelihood}. For the application of the model, the parameters are known, and the expenditures must
+be forecast. The procedure to calculate this forecast is described in Section~\ref{sec:forecasting}.
 
-We are interested in the distribution of the vector $e_n$, and we have
+\section{Estimation of unknown parameters}
+\label{sec:likelihood}
+
+We assume that we have observed a sample of individuals. For each individual $n$, we have access to the explanatory
+variables and the expenditures for each alternative: $x_{i}$, $e_{in}$, for $i \in \C_n$. The objective is to infer the
+value of the unknown parameters $\theta$ from this sample. In the following, we drop the index $n$ of the decision-maker
+for notational convenience.
+
+In order to calculate the (log)-likelihood of observed expenditures, we are interested in the distribution of the vector $e_n$
+provided by the model. We have
 established that it is a function of the vector of disturbances
-$\varepsilon_n$: $e_n = H(\varepsilon_n)$.  Consequently, if we assume
-a distribution for $\varepsilon_n$, characterized by a probability
-density fonction (pdf) $f_\varepsilon$ and a cumulative distribution
-function (CDF) $F_\varepsilon$, we can characterize the distribution of $e_n$.
+$\varepsilon$: $e = H(\varepsilon)$.  Consequently, if we assume
+a distribution for $\varepsilon$, characterized by a probability
+density function (pdf) $f_\varepsilon$ and a cumulative distribution
+function (CDF) $F_\varepsilon$, we can characterize the distribution of $e$.
 
-We start by assuming that $e_{1n}$, the consumed quantity of item 1 is
-known and non zero. Consequently, the value of $\varepsilon_{1n}$ is known as
-well. In order to derive the pdf evaluated at $e$, we split the vector $e$ into its positive entries $e^+$ and its zero entries $e^0$, alternative 1 being excluded. In an analogous way, we denote $\C^+$ and $\C^0$ the corresponding sets of indices, of size $J^+$ and $J^0$, respectively. 
+We start by assuming that $e_{1}$, the consumed quantity of item 1 is
+known and non zero. Consequently, the value of $\varepsilon_{1}$ is known as
+well. In order to derive the pdf evaluated at $e$, we split the vector $e$ into its positive entries $e^+$ and its
+zero entries $e^0$, alternative 1 being excluded. In an analogous way, we denote $\C^+=\{2, \ldots, J^+ +1\}$ and
+$\C^0=\{J^{+}+2, \ldots, J\}$
+the corresponding sets of indices, of size $J^+$ and $J^0$, respectively, so that $J=J^+ + J^0 + 1$.
 
 For each $i \in \C^+$, we can use \req{eq:non_zero}
-to define $\varepsilon_n = H^{-1}(e_n)$, where $H^{-1}:\R^{J^+-1}\to\R^{J^+-1}$ is defined as  
+to define a function  $H^{-1}:\R^{J^+-1}\to\R^{J^+-1}$  as
 \begin{equation}
   \label{eq:change_variable}
-H_i^{-1}(e) = \varepsilon_{i+1,n}   =   V_{1n}(e_1) - V_{i+1,n}(e_{i+1}) + \varepsilon_{1n}.
+\varepsilon_{i} = H_i^{-1}(e) = V_{1}(e_{1}) - V_{i}(e_{i}) + \varepsilon_{1}.
 \end{equation}
-Therefore, the density function can be decomposed as
+Therefore, the density function can be written as
 \begin{align*}
-  f_e(e^+, e^0 | e_1) &= f_e(e^+ | e^0, e_1) \prob(e^0 |e_1) \\
-                     &= f_\varepsilon(\varepsilon^+ | \varepsilon^0, \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right)  \prob(e^0 |e_1)
+  f_e(e^+, e^0 | \varepsilon_1)  &= f_\varepsilon(\varepsilon^+ , \varepsilon^0| \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right),\\
+     &= f_\varepsilon(V_1-V_2+\varepsilon_1, \ldots, V_1-V_{{J^+}+1} + \varepsilon_1, \varepsilon_{J^+ +2}, \ldots, \varepsilon_J | \varepsilon_1) \det \left( \frac{\partial H^{-1}}{\partial e}\right).
 \end{align*}
-where
+Therefore, we can write the conditional likelihood function as
 \begin{align*}
-  \prob(e^0 |e_1) &= \prob(V_{in} + \varepsilon_{in}  \leq V_{1n} + \varepsilon_{1n},\; \forall i\in\C^0) \\
-  &= \prob(\varepsilon_{in}  \leq V_{1n} -V_{in} + \varepsilon_{1n},\; \forall i\in\C^0) \\
-  &= F_\varepsilon(\varepsilon_{1n}, 1, \ldots, 1, (V_{1n} -V_{in} + \varepsilon_{1n})_{i\in \C^0}).
+    f_e(e^+, e^0=0 | \varepsilon_1) =&  \det \left( \frac{\partial H^{-1}}{\partial e}\right)\\
+    &\int_{\varepsilon_{J^+ +2}}^{V_1-V_{J^+ +2}+ \varepsilon_1}\ldots  \int_{\varepsilon_{J}}^{V_1-V_{J}+ \varepsilon_1} \\
+    &f_\varepsilon(\varepsilon_1, V_1-V_2+\varepsilon_1, \ldots, V_1-V_{{J^+}+1} + \varepsilon_1, \varepsilon_{J^+ +2}, \ldots, \varepsilon_J ) \\
+    &d\varepsilon_J\ldots d\varepsilon_{_{J^+ +2}}.
 \end{align*}
+
 From \req{eq:change_variable}, we can calculate the entries of the Jacobian $\partial H^{-1}/\partial e$. Indeed,
 \begin{align*}
-  \frac{\partial H_i^{-1}(e)}{\partial e_k} &= \frac{\partial V_{1n}}{\partial e_1}\frac{\partial e_1}{\partial e_k}  & \text{if } k \neq i+1, \\
-  &= \frac{\partial V_{1n}}{\partial e_1}\frac{\partial e_1}{\partial e_k} - \frac{\partial V_{i+1,n}}{\partial e_{i+1}}& \text{if } k = i+1.
+  \frac{\partial H_i^{-1}(e)}{\partial e_k} &= \frac{\partial V_{1}}{\partial e_1}\frac{\partial e_1}{\partial e_k}  & \text{if } k \neq i+1, \\
+  &= \frac{\partial V_{1}}{\partial e_1}\frac{\partial e_1}{\partial e_k} - \frac{\partial V_{i+1}}{\partial e_{i+1}}& \text{if } k = i+1.
 \end{align*}
 From \req{eq:budget_constraint}, we have
 \[
@@ -441,7 +282,7 @@ Consequently,
 \end{align*}
 If we denote
 \begin{equation}
-c_i =  - \frac{\partial V_{in}}{\partial e_{i}}
+c_i =  - \frac{\partial V_{in}}{\partial e_{i}},
 \end{equation}
 the Jacobian has the following structure:
 \[
@@ -460,25 +301,27 @@ Therefore, the determinant is equal to
 \]
 Note that this determinant depends only on the utility function, not on the distribution of the $\varepsilon_n$.
 
-Therefore, the density function of the expenditures is given by
+Therefore, the (unconditional) likelihood function  is given by
 \begin{equation}
   \label{eq:density}
-f_e(e^+, e^0) =   \left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\int_{\varepsilon_1=-\infty}^{+\infty}  f_\varepsilon(\varepsilon^+ | \varepsilon^0, \varepsilon_1) F_\varepsilon(\varepsilon_{1n}, \ldots)f_\varepsilon(\varepsilon_1) d\varepsilon_1,
-\end{equation}
-where $f_\varepsilon(\varepsilon_1)$ is the marginal distribution of $\varepsilon_1$, and
-\[
-F_\varepsilon(\varepsilon_{1n}, \ldots) = F_\varepsilon(\varepsilon_{1n}, 1, \ldots, 1, (V_{1n} -V_{in} + \varepsilon_{1n})_{i\in \C^0}).
-\]
+  \begin{aligned}
+    f_e(e^+, e^0=0)  =&  \left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\\
+    &\int_{\varepsilon_1}\int_{\varepsilon_{J^+ +2}}^{V_1-V_{J^+ +2}+ \varepsilon_1}\ldots  \int_{\varepsilon_{J^+ +2}}^{V_1-V_{J}+ \varepsilon_1} \\
+    &f_\varepsilon(\varepsilon_1, V_1-V_2+\varepsilon_1, \ldots, V_1-V_{{J^+}+1} + \varepsilon_1, \varepsilon_{J^+ +2}, \ldots, \varepsilon_J) \\
+    &d\varepsilon_J\ldots d\varepsilon_{_{J^+ +2}}d\varepsilon_1.
+\end{aligned}
+ \end{equation}
+
 
 Equation \req{eq:density} corresponds to Equation~11 in \citeasnoun{BHAT2008274}.
 
-If we assume that the $\varepsilon_{in}$ are independent, we obtain the MDCEV model introduced by \citeasnoun{BHAT2005679}. In that case,  the density \req{eq:density} is 
+If we use the assumption that the $\varepsilon_{i}$ are extreme value distributed, we obtain the MDCEV model introduced by \citeasnoun{BHAT2005679}. In that case,  the likelihood function \req{eq:density} is
 \begin{equation}
-  f_e(e^+, e^0) = \mu^{J^+-1}\left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right) \left( \frac{\prod_{i \in \C^+} e^{\mu V_{in}}}{(\sum_{i\in\C_n} e^{\mu V_{in}})^{J^+}} \right) (J^+-1)!,
+  f_e(e^+, e^0=0) = \mu^{J^+-1}\left(\prod_{i=1}^{J^+} c_i\right)\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right) \left( \frac{\prod_{i \in \C^+} e^{\mu V_{in}}}{(\sum_{i\in\C_n} e^{\mu V_{in}})^{J^+}} \right) (J^+-1)!,
 \end{equation}
 where the derivation is available in \citeasnoun{BHAT2008274}. Therefore, the contribution of observation $n$ to the log likelihood is
 \begin{align*}
-  \ln  f_e(e^+, e^0) =& (J^+-1) \ln \mu \\
+  \ln  f_e(e^+, e^0=0) =& (J^+-1) \ln \mu \\
   &+ \sum_{i=1}^{J^+} \ln c_i \\
   &+ \ln\left(\sum_{i=1}^{J^+}\frac{1}{c_i}\right)\\
   &+ \mu \sum_{i \in \C^+} V_{in} \\
@@ -487,5 +330,1361 @@ where the derivation is available in \citeasnoun{BHAT2008274}. Therefore, the co
 \end{align*}
 Note that the last term is a constant, and is ignored by Biogeme.
 
+\section{Forecasting}
+\label{sec:forecasting}
+We assume that we have  a sample of individuals, either directly observed, or coming from a scenario. For each individual $n$, we have access to the explanatory
+variables for each alternative: $x_{in}$, for $i \in \C_n$. We also assume that an estimation $\widehat{\theta}$ of the unknown parameters $\theta$ is available. The objective is to forecast the
+distribution of expenditures $e_{n}$ for each individual $n$ in the sample, given a total budget $E_n$.
+
+This involves generating $R$ draws $\varepsilon^r_i$, $r=1, \ldots, R$, from the error terms $\varepsilon_{i}$ and, for each draw $r$, solving the
+optimization problem defined in equations \req{eq:obj}--\req{eq:non_negativity}:
+\[
+\max_{e} \sum_{i \in \C} U_{i}(x_{i}, e_{i}, \varepsilon^r_i; \widehat{\theta})
+\]
+subject to
+\begin{align*}
+  \sum_{i \in \mathcal{C}} e_{i} &= E,\\
+ e_{i} &\geq 0.
+\end{align*}
+For the sake of notational clarity, we have dropped the index $n$ representing the individual. We denote by $e_r^*$ and $\lambda_r^*$
+the optimal values of the expenditures and the dual variable, respectively. The distribution of $e$ is approximated by the empirical distribution
+of $e_r^*$, $r=1, \ldots, R$. In the rest of this section, we also drop the index $r$ for notational simplicity.
+It is sufficient to keep in mind that $\varepsilon_i$ must be interpreted as a value, a draw from the distribution.
+
+In Biogeme, solving the optimization problem is implemented in two ways. The \emph{``brute force''} algorithm
+    uses a generic solver from the package \texttt{scipy}. It does not exploit any information about the model specification.
+The second algorithm, the \emph{analytical} algorithm, is inspired by  \citeasnoun{Pinjari:2021aa}, and exploits some properties of the
+utility function in order to identify the optimal solution. We describe it here.
+
+\subsection{Properties}
+We first define $W_i$ as the
+derivative of the utility of alternative $i$ evaluated at zero expenditure:
+\begin{equation}
+    W_i = \frac{\partial U_i}{\partial e_i}(e_i = 0).
+\end{equation}
+It plays a central role in the algorithm.
+
+Then, we assume that the model verifies
+the following properties, where $\C^* = \{i | e_i^* > 0 \}$ is the set of alternatives that are chosen at the optimal
+solution, that is, all alternatives such that the optimal expenditure is non zero.
+
+
+
+\begin{property}
+    \label{prop:one}
+    For each chosen alternative $i \in \C^*$, we have
+    \[
+        \lambda^* < W_i.
+    \]
+\end{property}
+\begin{property}
+    \label{prop:two}
+    For each chosen alternative $i\in\C^*$, the optimal expenditure \req{eq:optimal_consumption} is a decreasing function of $\lambda$:
+    \[
+        \frac{\partial e_i}{\partial \lambda} < 0.
+    \]
+    \end{property}
+\begin{property}
+    \label{prop:three}
+    For each chosen alternative $i\in\C^*$, there exists  a lower bound $\lambda^\ell_i$ such that
+    \[
+            \lambda^\ell_i \leq \lambda^*,
+    \]
+    and $e_{in}(x_{in}; \lambda, \theta)$ is well defined, and non negative for each $\lambda$ such that
+    \[
+        \lambda^\ell_i \leq \lambda \leq W_i.
+    \]
+\end{property}
+
+Note that property~\ref{prop:two} is verified if the utility function is strictly concave. Indeed, the sign of $\frac{\partial e_i}{\partial \lambda}$ is the same as the sign
+of $\frac{\partial \lambda}{\partial e_i}$. And, from the optimality condition \req{eq:optimality_i},
+\[
+    \frac{\partial \lambda}{\partial e_i} = \frac{\partial^2 U_{in}}{\partial e_i^2}.
+\]
+
+As discussed later, all models implemented in the current version of Biogeme have those properties. Therefore, the
+analytical algorithm can be applied.
+
+We first derive some immediate corollaries of the above properties that are exploited in the design of the algorithm.
+
+\begin{corollary}
+    \label{cor:bounds_lambda}
+    Consider a chosen alternative $i \in  \C^*$ and a non chosen alternative $j \not\in\C^*$. Then,
+    \begin{equation}
+        \label{eq:bounds_lambda}
+        W_i > \lambda^* \geq W_j.
+    \end{equation}
+\end{corollary}
+\begin{proof}
+   Consider an unchosen alternative $j$. From the optimality condition \req{eq:unchosen}, we have
+    \[
+        \lambda^* \geq \frac{\partial U_j}{\partial e_j}(e^*_j) = \frac{\partial U_j}{\partial e_j}(e_j=0) = W_j.
+    \]
+    The result follows from Property~\ref{prop:one}.
+\end{proof}
+
+
+
+\begin{corollary}
+    \label{cor:total_consumption}
+    The total expenditure
+    \[
+        E(\lambda) = \sum_{i\in \C^*} e_i(\lambda)
+    \]
+    is  a decreasing function of $\lambda$:
+    \[
+        \frac{\partial E(\lambda)}{\partial \lambda} < 0.
+    \]
+    At the optimal value  $\lambda^*$, the constraints are verified and
+    \begin{equation}
+        \label{eq:check_total_budget}
+        E(\lambda^*) = \sum_{i\in \C^*} e_i(\lambda^*) = E.
+    \end{equation}
+    In particular, it means that
+    \[
+        \lambda < \lambda^* \iff E(\lambda) > E,
+    \]
+    and
+    \[
+        \lambda > \lambda^* \iff E(\lambda) < E.
+    \]
+\end{corollary}
+\begin{proof} This is an immediate consequence of  Property~\ref{prop:two}.
+\end{proof}
+
+
+The next result provides a condition to verify if an alternative is in the optimal choice set or not.
+
+
+\begin{lemma}
+    \label{lemma:next_alt}
+    Let's assume that the numbering of the alternatives is organized in decreasing order of $W_i$,
+and that we have already established that alternatives $1,\ldots, M$ are chosen. We define
+    \[
+        \lambda^{\ell}_{\C_{M+1}} = \max_{i=1, \ldots, M+1}\lambda^\ell_i,
+    \]
+    where $\lambda^\ell_i$ is the lower bound defined by Property~\ref{prop:three}, and the set $\C=\{1,\ldots, M+1\}$.
+    Then, alternative $M+1$ is chosen in the optimal solution if and only if $\lambda^\ell_{\C_{M+1}} \leq W_{M+1}$ and $E(W_{M+1})< E$.
+\end{lemma}
+\begin{proof}
+    We consider both possibilities: whether $M+1$ is included in the choice set or not.
+    \begin{itemize}
+        \item If $M+1$ is chosen in the optimal solution, Property~\ref{prop:one} guarantees that
+         \[
+        \lambda^* < W_{M+1}.
+         \]
+        From Corollary~\ref{cor:total_consumption}, it means that
+        \[
+            E(W_{M+1}) < E(\lambda^*) = E.
+        \]
+        Also, Property~\ref{prop:three} guarantees that $\lambda^\ell_{\C_{M+1}} \leq \lambda^*$ (as all alternatives in $\C_{M+1}$ are chosen), so that
+        \[
+        \lambda^\ell_{\C_{M+1}} < W_{M+1},
+         \]
+         thereby confirming the sufficient condition.
+        \item For the necessary condition, we prove the contrapositive: if  $M+1$ is not chosen in the optimal solution, than,
+        $\lambda^\ell_{\C_{M+1}} > W_{M+1}$ or $E(W_{M+1}) \geq E$.
+        If $M+1$ is not chosen, then $e^*_{M+1}=0$ is optimal. From the optimality condition \req{eq:unchosen},
+    \[
+        \lambda^* \geq \frac{\partial U_{M+1}}{\partial e_{M+1}}(e_{M+1}=0) = W_{M+1}.
+    \]
+        From Corollary~\ref{cor:total_consumption}, it means that
+        \[
+            E( W_{M+1}) \geq E(\lambda^*) = E,
+        \]
+
+        which is true irrespectively if $\lambda^\ell_{\C_{M+1}} > W_{M+1}$ is true or not.
+    \end{itemize}
+\end{proof}
+
+\begin{lemma}
+    \label{lemma:monotonic}
+    If the utility function is monotonic in one of the expenditures, that is, if
+    \[
+        \exists i \in \C_n \text{ such that } \frac{\partial U_{in}}{\partial e_{in}} \geq 0,
+    \]
+    then $\lambda^* \geq 0$.
+\end{lemma}
+\begin{proof}
+    Suppose that alternative $i$ is consumed at the optimal solution. In that case Eq. \req{eq:optimality_i} states that
+    \[
+      \lambda^* =  \frac{\partial U_{in}}{\partial e_{in}} \geq 0,
+    \]
+    and the result holds.
+    Suppose that alternative $i$ is not consumed at the optimal solution. In that case Eq. \req{eq:unchosen} states that
+    \[
+      \lambda^* \geq  \frac{\partial U_{in}}{\partial e_{in}} \geq 0,
+    \]
+    and the result holds as well.
+\end{proof}
+
+\subsection{The analytical algorithm}
+
+
+The  algorithm consists of two phases:
+\begin{itemize}
+    \item First, mathematical properties of the specific MDCEV model
+are exploited in order to identify the optimal set of chosen alternatives.
+    \item Once the set of chosen alternatives has been identified, the optimal value of the dual variable is calculated using a bisection method.
+\end{itemize}
+
+\subsubsection*{Identification of chosen alternatives}
+
+
+
+
+
+In order to identify the chosen alternatives, Corollary~\ref{cor:bounds_lambda} suggests to sort the alternatives in decreasing
+order of $W_i$. For each alternative in this sequence, we check whether it is chosen using Lemma~\ref{lemma:next_alt}. If it is, we proceed to the next
+one; if not, we have identified all chosen alternatives, and we can terminate the process.
+It is described in Algorithm~\ref{algo:chosen}:
+
+\begin{algorithm}[htb]
+\caption{\label{algo:chosen}Identification of the chosen alternatives}
+\DontPrintSemicolon
+\KwIn{$E$, $W_i$, $i=1,\ldots, J$, such that $W_j > W_{j+1}$. $i=1, \ldots, J-1 $.}
+\KwOut{Optimal choice set $\C^*$.}
+\BlankLine
+
+$M \leftarrow 0$.\;
+$\lambda_\ell \leftarrow -\infty$.\;
+\While{$\lambda_\ell \leq W_{M+1}$ and $E(W_{M+1})< E$}{
+    $M \leftarrow M + 1$,\;
+    $\lambda_{\ell} \leftarrow \max(\lambda_{\ell}, \lambda^\ell_{M})$.
+}
+
+    $\C^*= \{1,\ldots, M \}$ if $M>0$, $\emptyset$ otherwise.
+\end{algorithm}
+
+
+\subsubsection*{Bisection algorithm}
+
+Let $\mathcal{C}^*=\{1,\ldots, M \}$ be the set of chosen alternatives, where the alternatives are numbered in
+decreasing order of $W_i$, which is assumed not empty, without loss of generality. The bisection algorithm consists in evaluating the optimal value of the dual variable $\lambda^*$
+by updating a lower and an upper bound.
+The initialization is based on Property~\ref{prop:three} and \req{eq:bounds_lambda}. Indeed, as alternative $M$ is chosen,
+$W_M$ is an upper bound on $\lambda^*$.
+If all alternatives are chosen, that is, if $M=J$, we use Property~\ref{prop:three} and define
+\[
+   \lambda^\ell_{\C^*} =  \max_{i\in \C^*} \lambda^\ell_i
+\]
+as a lower bound.
+If $M < J$, \req{eq:bounds_lambda} suggests also $W_{M+1}$ as a lower bound. Therefore, we use the best one:\[
+    \lambda_{\ell}  =\left\{\begin{array}{ll}
+         \max(\lambda^\ell_{\C^*}, W_{M+1}) & \text{if } M < J, \\
+                       \lambda^\ell_{\C^*}  & \text{otherwise}, \\
+    \end{array}\right.
+    \]
+    and
+    \[
+         \lambda_{u} = W_{M}.
+    \]
+
+
+    The algorithm then exploits Corollary~\ref{cor:total_consumption} to update either the lower or the upper bound.
+Indeed, if $E(\widehat{\lambda}) < E$, it means that $\widehat{\lambda} > \lambda^*$, and we have a better upper bound.
+Similarly, if $E(\widehat{\lambda}) > E$, it means that $\widehat{\lambda} < \lambda^*$, and we have a better lower bound.
+Once we have a sufficiently precise approximation of $\lambda^*$, we use \req{eq:optimal_consumption} to obtain the
+optimal expenditures.
+
+
+
+\begin{algorithm}[htb]
+\caption{\label{algo:bisection}Find Optimal $\lambda^*$}
+\DontPrintSemicolon
+\KwIn{$E$, $\C^*= \{1,\ldots, M \}$, $\delta_\lambda$, $\delta_E$.}
+\KwOut{$\lambda^*$.}
+\BlankLine
+$\lambda_\ell \leftarrow \max(\lambda^\ell_{M}, W_{M+1})$, where $W_{M+1}=-\infty$ if $M=J$.\;
+$\lambda_u \leftarrow W_M$.\;
+\Repeat{$\lambda_u - \lambda_{\ell} \leq \delta_{\lambda}$ \textbf{or} $\left| E(\widehat{\lambda}) - E \right| \leq \delta_E$.}{
+    $\widehat{\lambda} = (\lambda_{\ell} + \lambda_u) / 2.$\;
+    \uIf{$E(\widehat{\lambda}) < E$}{
+        $\lambda_u \leftarrow \widehat{\lambda}$,\;
+    }
+    \uElseIf{$E(\widehat{\lambda}) > E$}{
+        $\lambda_{\ell} \leftarrow \widehat{\lambda}.$\;
+    }
+}
+$\lambda^* = (\lambda_{\ell} + \lambda_u) / 2$.\;
+\end{algorithm}
+
+
+\section{Model specifications}
+\label{sec:models}
+The theory above described so far is generic. In order to obtain an operational model, utility function and the
+order preserving function $\phi$ used in \req{eq:phi} must be specified.
+In terms of implementation, Biogeme uses the following functions for the estimation of the parameter:
+\begin{itemize}
+    \item a function that generates the Biogeme expression for the transformed utility $V_{in}$, and,
+    \item a function that generates the Biogeme expression for the entries of the Jacobian $c_{in}$ (
+     actually, one function calculates their logarithm $\ln c_{in}$, and another one their inverse, $1/c_{in}$).
+\end{itemize}
+For forecasting, it is needed to first check if each specification comply with  Properties~\ref{prop:one}--\ref{prop:three}.
+If so, the analytical algorithm can be used. It requires the implementation of the following functions:
+\begin{itemize}
+    \item a function calculating the value of the utility function $U_{in}$,
+    \item a function calculating the derivatives of the utility functions $\partial U_{in}/\partial e_i$,
+    \item a function calculating the optimal expenditures \req{eq:optimal_consumption} as a function of the dual variable.
+\end{itemize}
+
+
+We now develop these aspects for each model implemented in Biogeme.
+
+
+\subsection{Translated utility function}
+In the context of a time use model, \citeasnoun{BHAT2005679} uses the translated utility function introduced by
+\citeasnoun[Eq. (1)]{Jaehwan-Kim:2002aa}:
+\begin{equation}
+  \label{eq:orig_u}
+U_{in}(e_i) = \exp(\beta^T x_{in} + \varepsilon_{in})(e_i + \gamma_i)^{\alpha_i},
+\end{equation}
+where $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
+estimated. If there is an outside good $k$, the value of $\gamma_k$ is set to zero.
+Note that there is no price involved in this specification,
+as it models time and not goods. It is equivalent to set $p_i=1$, for all $i$ in the model
+described above. Note also that,
+\citeasnoun{Jaehwan-Kim:2002aa} and \citeasnoun{BHAT2005679} impose
+the following restriction on $\alpha_i$: $0 < \alpha_i \leq
+1$. However, in the context of this implementation, $\alpha_i=1$ would
+create a singularity.
+
+In Biogeme, this model is referred to as
+\lstinline@translated@.
+\subsubsection*{First order conditions}
+
+We can calculate
+\begin{equation}
+\frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i(e_i + \gamma_i)^{\alpha_i-1}.
+\end{equation}
+Note that these quantities are always positive, so that the utility functions are all monotonic.
+Evaluated at zero expenditure, we obtain
+\begin{equation}
+W_{in} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i \gamma_i^{\alpha_i-1}.
+\end{equation}
+
+For forecasting purposes, as described in Section~\ref{sec:forecasting}, we need to obtain $e_i^*(\lambda)$, the solution of the equation
+\[\lambda = \frac{\partial U_{in}}{\partial e_i}. \]
+Here, we have
+\begin{equation}
+    \label{eq:translated_optimal}
+ e_i^*(\lambda) = \left(\frac{\lambda}{\exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i}\right)^{\frac{1}{\alpha_i-1}} - \gamma_i
+\end{equation}
+
+\subsubsection*{Transformed utility}
+In this context, we use the logarithm as the order preserving function to obtain the following specification:
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_i + \gamma_i),
+\]
+so that
+\[
+V_{in} = \beta^T x_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_i + \gamma_i),
+\]
+
+\subsubsection*{Entries of the Jacobian}
+
+We have
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} = \frac{1-\alpha_i}{e_i + \gamma_i},
+\]
+so that
+\[
+\ln c_{in}  = \ln(1-\alpha_i) - \ln(e_i + \gamma_i),
+\]
+and
+\[
+    \frac{1}{c_{in}} = \frac{e_i + \gamma_i}{1-\alpha_i}.
+\]
+
+\subsubsection*{Properties}
+
+\begin{enumerate}
+
+\item In order to show that Property~\ref{prop:one} is verified, we consider
+\[
+   \ln(W_{in})  =\beta^T x_{in} + \varepsilon_{in} +\ln(\alpha_i) + (\alpha_i-1) \ln \gamma_i.
+\]
+
+Consider a chosen alternative $i$. From the optimality KKT conditions, we have that
+\begin{align*}
+   \ln \lambda^* &= \beta^T x_{in}+ \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (e_{in} + \gamma_i) \\
+    &= \beta^T x_{in}+ \varepsilon_{in} + \ln \alpha_i + (\alpha_i-1) \ln (\frac{e_{in}}{\gamma_i}+1) +  (\alpha_i-1) \ln \gamma_i \\
+    &= \ln W_{in} +  (\alpha_i-1) \ln (\frac{e_{in}}{\gamma_i}+1),
+\end{align*}
+where $\lambda^*$ is the optimal dual variable associated with the budget constraint.
+Property~\ref{prop:one} follows from the fact that
+\[
+   (\alpha_i-1) \ln (\frac{e_i}{\gamma_i}+1) < 0.
+\]
+
+
+\item For Property~\ref{prop:two}, as discussed earlier, it is sufficient to show that the utility function is strictly concave.
+\[
+    \frac{\partial^2 U_{in}}{\partial e_i^2} = \exp(\beta^T x_{in} + \varepsilon_{in})\alpha_i(\alpha_i-1)(e_i + \gamma_i)^{\alpha_i-2}.
+\]
+The strict concavity comes from the fact that $0 <\alpha_i < 1$.
+\item Finally, for Property~\ref{prop:three}, we use \[
+              \lambda^\ell_i = 0.
+\]
+ It is indeed a lower bound thanks to the monotonicity
+of the utility function, and Lemma~\ref{lemma:monotonic}. Moreover,
+\req{eq:translated_optimal} is well defined for any $\lambda \geq 0$. Finally,
+    $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$.
+
+
+\end{enumerate}
+\subsection{Generalized translated utility function}
+
+\citeasnoun{BHAT2008274} generalizes the above formulation and introduces the following specification, where the utility functions $U_{in}$ are defined as
+\begin{equation}
+  \label{eq:generalized_utility_outside}
+U_{1n} =\exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{\alpha_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1},
+\end{equation}
+for the ``outside good'' that is always consumed and, for $i > 1$,
+\begin{equation}
+  \label{eq:generalized_utility}
+U_{in} =\exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{\alpha_i} \left[\left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i}-1\right],
+\end{equation}
+where $\beta$, $0 < \alpha_i < 1$ and $\gamma_i > 0$ are parameters to be
+estimated. Note that this model introduces prices, so that $e_i/p_i$ is the quantity consumed.
+
+In Biogeme, this model is referred to as \lstinline@generalized@.
+\subsubsection*{First order conditions}
+
+We can calculate
+\begin{equation}
+\frac{\partial U_{1n}}{\partial e_1} =\exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{p_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1-1},
+\end{equation}
+and
+\begin{equation}
+  \frac{\partial U_{in}}{\partial e_i} = \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-1}.
+\end{equation}
+Note that these quantities are always positive, so that the utility functions are all monotonic.
+Evaluated at zero expenditure, we obtain
+\[
+    W_{in} =  \frac{1}{p_i} \exp(\beta^T x_{in} + \varepsilon_{in}).
+\]
+
+For forecasting purposes, as described in Section~\ref{sec:forecasting}, we need to obtain $e_i^*(\lambda)$, the solution of the equation
+\[\lambda = \frac{\partial U_{in}}{\partial e_i}. \]
+Here, we have
+
+\begin{equation}
+    \label{eq:generalized_optimal_outside}
+  e_1^*(\lambda) = p_1\left(\frac{p_1\lambda}{\exp(\beta^T x_{1n} + \varepsilon_{1n})}\right)^{\frac{1}{\alpha_1-1}},
+\end{equation}
+and
+\begin{equation}
+    \label{eq:generalized_optimal}
+ e_i^*(\lambda) =  p_i \gamma_i \left[\left(\frac{p_i\lambda}{\exp(\beta^T x_{in} + \varepsilon_{in})}\right)^{\frac{1}{\alpha_i-1}}-1\right].
+\end{equation}
+Note that these expressions correspond to Equations (11) in \citeasnoun{Pinjari:2021aa}.
+
+\subsubsection*{Transformed utility}
+We use again the logarithm as the order preserving function to obtain the following specification:
+\[
+\phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) = \beta^T x_{1n} + \varepsilon_{1n} + (\alpha_1-1) \ln e_1 - \alpha_1 \ln p_1,
+\]
+and
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) = \beta^T x_{in} + \varepsilon_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right),
+\]
+so that
+\[
+V_{1n} = \beta^T x_{1n} + (\alpha_1-1) \ln e_1 - \alpha_1 \ln p_1,
+\]
+and
+\[
+V_{in} = \beta^T x_{in} - \ln p_i + (\alpha_i-1) \ln \left(\frac{e_i}{p_i \gamma_i}+1\right).
+\]
+\subsubsection*{Entries of the Jacobian}
+We have
+\[
+c_{1n} = -\frac{\partial V_{1n}}{\partial e_1} = \frac{1-\alpha_1}{e_1},
+\]
+and
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} =\frac{1-\alpha_i}{e_i + p_i \gamma_i}.
+\]
+Therefore,
+\begin{align*}
+    \ln(c_{1n}) &= \ln(1-\alpha_1) - \ln(e_1), \\
+    \ln(c_{in}) &= \ln(1-\alpha_i) - \ln(e_i + p_i \gamma_i), \\
+    1/c_{1n} &= \frac{e_1}{1-\alpha_1}, \\
+    1/c_{in} &= \frac{e_i + p_i \gamma_i}{1-\alpha_i}.
+\end{align*}
+
+\subsubsection*{Properties}
+
+\begin{enumerate}
+\item In order to show that Property~\ref{prop:one} is verified, we consider
+\[
+    \ln W_{in}  =\beta^T x_{in} + \varepsilon_{in} -\ln(p_i).
+\]
+Consider a chosen alternative $i$. From the optimality KKT conditions, we have that
+\[
+   \ln \lambda^* =\ln W_{in}+ (\alpha_i-1) \ln\left(\frac{e_{in}}{p_i \gamma_i}+1\right),
+\]
+and
+\[
+    \ln W_{in} =
+    \ln \lambda^*  +(1-\alpha_i) \ln\left(\frac{e_i}{p_i \gamma_i}+1\right),
+\]
+where $\lambda$ is the dual variable associated with the budget constraint.
+Property~\ref{prop:one} follows from the fact that
+\[
+     (1-\alpha_i) \ln\left(\frac{e_i}{p_i \gamma_i}+1\right) \geq 0.
+\]
+\item For Property~2, it is sufficient to show that the utility is strictly concave.
+For the outside good,
+\[
+   \frac{\partial^2 U_{1n}}{\partial e_1^2} = (\alpha_1-1)\frac{1}{p_1} \exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{p_1} \left(\frac{e_1}{p_1}\right)^{\alpha_1-2},
+   \]
+\[
+   \frac{\partial^2 U_{in}}{\partial e_i^2} = (\alpha_i-1)\frac{1}{p_i\gamma_i}\exp(\beta^T x_{in} + \varepsilon_{in}) \frac{1}{p_i} \left(\frac{e_i}{p_i \gamma_i}+1\right)^{\alpha_i-2}
+\]
+The strict concavity comes from the fact that $0 <\alpha_i < 1$.
+\item Finally, for Property~\ref{prop:three}, we use \[
+              \lambda^\ell_i = 0.
+\]
+ It is indeed a lower bound thanks to the monotonicity
+of the utility function, and Lemma~\ref{lemma:monotonic}.  Moreover, \req{eq:generalized_optimal_outside} and
+\req{eq:generalized_optimal} are well defined for any $\lambda \geq 0$. Finally,
+    if $i>1$, $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$.
+\end{enumerate}
+
+
+\subsection{The $\gamma$-profile}
+If $\alpha_i \to 0$, \req{eq:generalized_utility} collapses to the linear expenditure system (LES) form, defined as follows:
+\begin{equation}
+  \label{eq:u_les_outside}
+U_{1n}(e_{1})= \exp(\beta^T x_{1n} + \varepsilon_{1n}) \ln \left(\frac{e_1}{p_1} \right),
+\end{equation}
+and
+\begin{equation}
+  \label{eq:u_les}
+U_{in}(e_{i})= \exp(\beta^T x_{in} + \varepsilon_{in}) \gamma_i \ln \left(\frac{e_i}{p_i \gamma_i}+1 \right),
+\end{equation}
+where $\beta$, $\gamma_i > 0$ is a  parameter to be
+estimated.
+
+In Biogeme, this model is referred to as \lstinline@gamma_profile@.
+\subsubsection*{First order conditions}
+We have
+\[
+\frac{\partial U_{1n}}{\partial e_1} =  \exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{e_1},
+\]
+and
+\[
+\frac{\partial U_{in}}{\partial e_i} =  \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{e_i + p_i \gamma_i}.
+\]
+Note that these quantities are always positive, so that the utility functions are all monotonic.
+Evaluated at zero expenditure, we obtain
+\[
+    W_{in} =  \frac{1}{p_i}\exp(\beta^T x_{in} + \varepsilon_{in}),
+\]
+except for the outside good, where we define
+\[
+    W_{1n} = +\infty.
+\]
+
+For forecasting purposes, as described in Section~\ref{sec:forecasting}, we need to obtain $e_i(\lambda)$, the solution of the equation
+\[\lambda = \frac{\partial U_{in}}{\partial e_i}. \]
+Here, we have
+\begin{equation}
+    \label{eq:gamma_optimal_outside}
+   e_1(\lambda) = \exp(\beta^T x_{1n} + \varepsilon_{1n}) \frac{1}{\lambda},
+\end{equation}
+and
+\begin{equation}
+    \label{eq:gamma_optimal}
+  e_i(\lambda) = \exp(\beta^T x_{in} + \varepsilon_{in}) \frac{\gamma_i}{\lambda } -p_i \gamma_i.
+ \end{equation}
+
+\subsubsection*{Transformed utility}
+Taking again the logarithm as the order preserving function, we have
+\[
+\phi\left(\frac{\partial U_{1n}}{\partial e_1}\right) =\beta^T x_{1n} + \varepsilon_{1n} - \ln e_1,
+\]
+and
+\[
+\phi\left(\frac{\partial U_{in}}{\partial e_i}\right) =\beta^T x_{in} + \varepsilon_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i),
+\]
+so that
+\[
+V_{1n} = \beta^T x_{1n}  - \ln e_i,
+\]
+and
+\[
+V_{in} = \beta^T x_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i).
+\]
+\subsubsection*{Entries of the Jacobian}
+Finally, we have
+\[
+c_{1n} = \frac{1}{e_1},
+\]
+and
+\[
+c_{in} = \frac{1}{e_i + p_i \gamma_i},
+\]
+so that
+\begin{align*}
+    \ln(c_{1n}) &= -\ln(e_1), \\
+    \ln(c_{in}) &= -\ln(e_i + p_i \gamma_i), \\
+    1/c_{1n} &= e_1, \\
+    1/c_{in} &= e_i + p_i \gamma_i.
+\end{align*}
+
+\subsubsection*{Properties}
+
+\begin{enumerate}
+\item In order to show that Property~\ref{prop:one} is verified, we consider
+\[
+    \ln W_{in}  =\beta^T x_{in} + \varepsilon_{in} -\ln(p_i).
+\]
+
+
+Consider a chosen alternative $i$. From the optimality KKT conditions, we have that
+\[
+   \ln \lambda =\beta^T x_{in}+ \varepsilon_{in} + \ln \gamma_i - \ln(e_i + p_i \gamma_i) = \ln W_{in}+\ln(p_i) +\ln \gamma_i - \ln(e_i + p_i \gamma_i)
+\]
+and
+\[
+    \ln W_{in} =\ln \lambda  -\ln(p_i) -\ln \gamma_i + \ln(e_i + p_i \gamma_i) = \ln \lambda + \ln\left(\frac{e_i}{p_i\gamma_i}+1\right),
+\]
+where $\lambda$ is the dual variable associated with the budget constraint.
+Property~\ref{prop:one} follows from the fact that
+\[
+     \ln\left(\frac{e_i}{p_i\gamma_i}+1\right)> 0.
+\]
+\item For Property~\ref{prop:two}, it is sufficient to show that the utility is strictly concave.
+We have
+\[
+    \frac{\partial^2 U_{1n}}{\partial e_1^2} = -\exp(\beta^T x_{1n} + \varepsilon_{1n}) e_1^{-2},
+\]
+and
+\[
+    \frac{\partial^2 U_{in}}{\partial e_i^2} = -\exp(\beta^T x_{in} + \varepsilon_{in}) \gamma_i(e_i + p_i \gamma_i)^{-2},
+\]
+and the strict concavity is verified as $\gamma_i > 0$.
+\item Finally, for Property~\ref{prop:three}, we use \[
+              \lambda^\ell_i = 0.
+\]
+ It is indeed a lower bound thanks to the monotonicity
+of the utility function, and Lemma~\ref{lemma:monotonic}. Moreover, \req{eq:gamma_optimal_outside} and
+\req{eq:gamma_optimal} are well defined for any $\lambda > 0$. Finally,
+    if $i>1$, $e_i^*(\lambda) \geq 0$ if $\lambda \leq W_i$.
+\end{enumerate}
+\subsection{The non-monotonic model}
+
+\citeasnoun{WangYe24} and \citeasnoun{Wang:2023aa} introduce the following specification in order to accommodate non-monotonic preferences, motivated in the context of time consumption. With our notations, the specification is
+\[
+U_{1n}(e_1) =  \frac{1}{\alpha_1}e^{\beta^T x_{in}}e_1^{\alpha_1}+(\theta^T z_{in} + \varepsilon_{in}) e_1.
+\]
+for the outside good, and
+\[
+U_{in}(e_i) = \frac{\gamma_i}{\alpha_i} e^{\beta^T x_{in}}\left[\left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i}-1\right]+(\theta^T z_{in} + \varepsilon_{in}) e_i.
+\]
+where $\beta$, $\theta$, $0 < \alpha_i < 1$, and $\gamma_i > 0$  are parameters to be
+estimated.
+
+In Biogeme, this model is referred to as \lstinline@non_monotonic@.
+Note that the prices must all be the same, so that the model is homoscedastic.
+
+\subsubsection*{First order conditions}
+
+We have
+\[
+\frac{\partial U_{1n}}{\partial e_1} = e^{\beta^T x_{1n}}  e_1^{\alpha_1-1} + \theta^T z_{1n} + \varepsilon_{1n},
+\]
+and
+\[
+\frac{\partial U_{in}}{\partial e_i} = e^{\beta^T x_{in}}  \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-1} + \theta^T z_{in} + \varepsilon_{in}.
+\]
+Note that the sign of the derivatives cannot be predetermined, meaning that the utility functions are not necessarily
+monotonic, like for the other models.
+Evaluated at zero expenditure, we obtain
+\[
+    W_{in} = e^{\beta^T x_{in}} + \theta^T z_{in} + \varepsilon_{in}.
+\]
+
+For forecasting purposes, as described in Section~\ref{sec:forecasting}, we need to obtain $e_i(\lambda)$, the solution of the equation
+\[\lambda = \frac{\partial U_{in}}{\partial e_i}. \]
+Here, we have
+\begin{equation}
+\label{eq:expenditure_from_lambda_outside}
+      e_1(\lambda) =\left(e^{-\beta^T x_{1n}}(\lambda - \theta^T z_{1n} - \varepsilon_{1n})\right)^{\frac{1}{\alpha_1-1}},
+\end{equation}
+and
+\begin{equation}
+    \label{eq:expenditure_from_lambda}
+  e_i(\lambda) = \gamma_i\left[\left(e^{-\beta^T x_{in}}(\lambda -\theta^T z_{in} - \varepsilon_{in}) \right)^{\frac{1}{\alpha_i-1}}-1\right].
+ \end{equation}
+Note that these formulas are valid is
+\[
+    \lambda \geq \theta^T z_{in}+\varepsilon_{in}.
+\]
+Note also that  $e_1(\lambda) \geq 0$, and,
+ for $i>1$, $e_i(\lambda) \geq 0$ if
+\[
+    \lambda \leq W_{in}.
+\]
+
+\subsubsection*{Transformed utility}
+
+In this case, no order preserving function is necessary, as the error term appear directly in the formulation.
+Therefore,
+\[
+V_{1n} = e^{\beta^T x_{1n}}  e_1^{\alpha_1-1} + \theta^T z_{1n}.
+\]
+and
+\[
+V_{in} = e^{\beta^T x_{in}}  \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-1} + \theta^T z_{in}.
+\]
+
+
+\subsubsection*{Entries of the Jacobian}
+We have
+\[
+c_{1n} = -\frac{\partial V_{1n}}{\partial e_1} =  e^{\beta^T x_{1n}} (1-\alpha_1)e_1^{\alpha_1-2},
+\]
+and
+\[
+c_{in} = -\frac{\partial V_{in}}{\partial e_i} =   e^{\beta^T x_{in}} \frac{1-\alpha_i}{\gamma_i}\left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-2}.
+\]
+For the outside good, we have
+\[
+\ln c_{1n} =  \beta^T x_{1n} + \ln (1-\alpha_1) +(\alpha_i-2) \ln e_1,
+\]
+and
+\[
+\frac{1}{c_{1n}} =  e^{-\beta^T x_{1n}} \frac{1}{1-\alpha_1}e_1^{2-\alpha_1}.
+\]
+For the other goods, we have
+\[
+\ln c_{in} =  \beta^T x_{in} + \ln (1-\alpha_i) -\ln \gamma_i +(\alpha_i-2) \ln\left(\frac{e_i}{\gamma_i}+1\right).
+\]
+and
+\[
+\frac{1}{c_{in}} =  e^{-\beta^T x_{in}} \frac{\gamma_i}{1-\alpha_i}\left(\frac{e_i}{ \gamma_i}+1\right)^{2-\alpha_i}.
+\]
+
+\subsubsection*{Properties}
+\begin{enumerate}
+    \item
+We consider
+\[
+    W_{in}  =\exp(\beta^T x_{in}) + \theta^T z_{in} + \varepsilon_{in}.
+\]
+Consider a chosen alternative $i$. From the optimality KKT conditions, we have that
+\begin{equation}
+    \label{eq:non_mon_opt}
+   \lambda^* =  e^{\beta^T x_{in}}  \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-1} + \theta^T z_{in} + \varepsilon_{in},
+\end{equation}
+and
+\[
+   \lambda^* - \theta^T z_{in} - \varepsilon_{in}=  e^{\beta^T x_{in}}  \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-1}.
+\]
+As
+\[
+     \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-1} < 1,
+\]
+we have
+\[
+     \lambda^* - \theta^T z_{in} - \varepsilon_{in} <  e^{\beta^T x_{in}},
+\]
+and
+\[
+    \lambda^* < W_{in},
+\]
+so that Property~\ref{prop:one} is verified.
+
+\item For Property~\ref{prop:two}, it is sufficient to show that the utility is strictly concave.
+We have
+\[
+    \frac{\partial^2 U_{1n}}{\partial e_1^2} = (\alpha_1-1)e^{\beta^T x_{1n}}  e_1^{\alpha_1-2},
+\]
+and
+\[
+    \frac{\partial^2 U_{in}}{\partial e_i^2} = (\alpha_i-1)\frac{1}{\gamma_i}e^{\beta^T x_{in}}  \left(\frac{e_i}{\gamma_i}+1\right)^{\alpha_i-2},
+\]
+and the strict concavity is verified as $0 < \alpha_i < 1$.
+
+\item For Property~\ref{prop:three},  as commented above, \req{eq:expenditure_from_lambda_outside} and \req{eq:expenditure_from_lambda} are
+    well defined if
+    \[
+        \lambda \geq \theta^T z_{in} + \varepsilon_{in}.
+    \]
+    and, for $i>1$, the expenditure is non negative if $\lambda \leq W_i$, which is guaranteed by Property~\ref{prop:one}. Therefore,
+    \[
+        \lambda^{\ell}_i = \theta^T z_{in} + \varepsilon_{in}.
+    \]
+\end{enumerate}
+
+\section{Model specification with Biogeme}
+
+\subsection{Data}
+
+We use as data the 2019 American Time Use Survey (ATUS), described in Appendix~\ref{sec:appendix}. In terms of implementation, the data preparation is the same as for any regular Biogeme model. In particular,
+it involves the following steps.
+\begin{enumerate}
+    \item The data is stored in a Pandas data frame, typically read from a file:
+\begin{lstlisting}
+df = pd.read_csv('data.csv')
+\end{lstlisting}
+\item It is converted into a Biogeme database object:
+\begin{lstlisting}
+database = db.Database('mdcev_example', df)
+\end{lstlisting}
+\item The name of each column is associated with a Python variable for subsequent use:
+\begin{lstlisting}
+PersonID = Variable('PersonID')
+weight = Variable('weight')
+...
+\end{lstlisting}
+\end{enumerate}
+
+\subsection{Baseline utilities}
+
+The baseline utilities are defined in the exact same way as for regular Biogeme models, in the form of a dictionary associating
+the identifier of each alternative with the specification of the utility function.
+
+\begin{lstlisting}
+
+shopping = (
+    cte_shopping
+    + metropolitan_shopping * metro
+    + male_shopping * male
+    + age_15_40_shopping * age15_40
+    + spouse_shopping * spousepr
+    + employed_shopping * employed
+)
+
+socializing = (
+    cte_socializing
+    + number_members_socializing * hhsize
+    + male_socializing * male
+    + age_41_60_socializing * age41_60
+    + bachelor_socializing * bachigher
+    + sunday_socializing * Sunday
+)
+
+recreation = (
+    cte_recreation
+    + number_members_recreation * hhsize
+    + male_recreation * male
+    + age_15_40_recreation * age15_40
+    + spouse_recreation * spousepr
+)
+
+personal = (
+    age_41_60_personal * age41_60
+    + bachelor_personal * bachigher
+    + white_personal * white
+    + sunday_personal * Sunday
+)
+
+baseline_utilities = {
+    1: shopping,
+    2: socializing,
+    3: recreation,
+    4: personal,
+}
+\end{lstlisting}
+
+A key difference with traditional Biogeme models is the dependent variable, which consists in an observed quantity for
+each alternative. This is also captured by a dictionary. In this example, the quantities correspond to an amount of time,
+expressed in minutes, and translated into hours.
+\begin{lstlisting}
+consumed_quantities = {
+    1: t1 / 60.0,
+    2: t2 / 60.0,
+    3: t3 / 60.0,
+    4: t4 / 60.0,
+}
+\end{lstlisting}
+
+\subsection{MDCEV model}
+
+Each model introduced in Section~\ref{sec:models} is associated with an object in Biogeme.
+
+\begin{description}
+    \item[Translated utility function]  We first import the corresponding Python class:
+     \begin{center}
+         \begin{lstlisting}
+from biogeme.mdcev import Translated
+        \end{lstlisting}
+     \end{center}
+    The  parameters are then defined. Note that most of them bust be positive. There are two ways to impose positivity.
+    The first (adopted in this example) is to impose a positive lower bound, such as $10^{-4}$. For example, the $\gamma$
+    parameters (see Section~\ref{sec:models} for their definition) can be defined as follows:
+    \begin{center}
+         \begin{lstlisting}
+# Gamma parameters. Must be positive.
+lowest_positive_value = 0.0001
+gamma_shopping = Beta('gamma_shopping', 1, lowest_positive_value, None, 0)
+gamma_socializing = Beta('gamma_socializing', 1, lowest_positive_value, None, 0)
+gamma_recreation = Beta('gamma_recreation', 1, lowest_positive_value, None, 0)
+gamma_personal = Beta('gamma_personal', 1, lowest_positive_value, None, 0)
+         \end{lstlisting}
+     \end{center}
+    Another option would be to estimate the logarithm of the parameters, as follows:
+    \begin{center}
+         \begin{lstlisting}
+# Gamma parameters. Must be positive.
+gamma_shopping = exp(Beta('log_gamma_shopping', 0, None, None, 0))
+gamma_socializing = exp(Beta('log_gamma_socializing', 0, None, None, 0))
+gamma_recreation = exp(Beta('log_gamma_recreation', 0, None, None, 0))
+gamma_personal = exp(Beta('log_gamma_personal', 0, None, None, 0))
+         \end{lstlisting}
+     \end{center}
+The $\alpha$ parameters are defined similarly, imposing that they lie between 0 and 1.
+\begin{center}
+         \begin{lstlisting}
+alpha_shopping = Beta('alpha_shopping', 0.5, lowest_positive_value, 1, 0)
+alpha_socializing = Beta('alpha_socializing', 0.5, lowest_positive_value, 1, 0)
+alpha_recreation = Beta('alpha_recreation', 0.5, lowest_positive_value, 1, 0)
+alpha_personal = Beta('alpha_personal', 0.5, lowest_positive_value, 1, 0)
+         \end{lstlisting}
+     \end{center}
+    Finally, the scale parameter of the error term:
+\begin{center}
+         \begin{lstlisting}
+scale_parameter = Beta('scale', 1, lowest_positive_value, None, 0)
+         \end{lstlisting}
+     \end{center}
+    Once they have been defined, they need to be associated with the alternative identifiers.
+    \begin{center}
+         \begin{lstlisting}
+gamma_parameters = {
+    1: gamma_shopping,
+    2: gamma_socializing,
+    3: gamma_recreation,
+    4: gamma_personal,
+}
+
+alpha_parameters = {
+    1: alpha_shopping,
+    2: alpha_socializing,
+    3: alpha_recreation,
+    4: alpha_personal,
+}
+         \end{lstlisting}
+     \end{center}
+    Once all the ingredients have been prepared, the object can be created:
+    \begin{center}
+         \begin{lstlisting}
+the_translated = Translated(
+    model_name='translated',
+    baseline_utilities=baseline_utilities,
+    gamma_parameters=gamma_parameters,
+    alpha_parameters=alpha_parameters,
+    scale_parameter=scale_parameter,
+    weights=weight,
+)
+         \end{lstlisting}
+     \end{center}
+    \item[Generalized translated utility function] The specification of this model is almost identical to the previous one.
+    \begin{center}
+         \begin{lstlisting}
+from biogeme.mdcev import Generalized
+
+lowest_positive_value = 0.0001
+gamma_shopping = Beta('gamma_shopping', 1, lowest_positive_value, None, 0)
+gamma_socializing = Beta('gamma_socializing', 1, lowest_positive_value, None, 0)
+gamma_recreation = Beta('gamma_recreation', 1, lowest_positive_value, None, 0)
+gamma_personal = Beta('gamma_personal', 1, lowest_positive_value, None, 0)
+
+alpha_shopping = Beta('alpha_shopping', 0.5, lowest_positive_value, 1, 0)
+alpha_socializing = Beta('alpha_socializing', 0.5, lowest_positive_value, 1, 0)
+alpha_recreation = Beta('alpha_recreation', 0.5, lowest_positive_value, 1, 0)
+alpha_personal = Beta('alpha_personal', 0.5, lowest_positive_value, 1, 0)
+
+scale_parameter = Beta('scale', 1, lowest_positive_value, None, 0)
+
+gamma_parameters = {
+    1: gamma_shopping,
+    2: gamma_socializing,
+    3: gamma_recreation,
+    4: gamma_personal,
+}
+
+alpha_parameters = {
+    1: alpha_shopping,
+    2: alpha_socializing,
+    3: alpha_recreation,
+    4: alpha_personal,
+}
+
+the_generalized = Generalized(
+    model_name='generalized',
+    baseline_utilities=baseline_utilities,
+    gamma_parameters=gamma_parameters,
+    alpha_parameters=alpha_parameters,
+    scale_parameter=scale_parameter,
+    weights=weight,
+)
+         \end{lstlisting}
+     \end{center}
+    \item [The $\gamma$-profile] This specification does not involve $\alpha$ parameters.
+    \begin{center}
+         \begin{lstlisting}
+from biogeme.mdcev import GammaProfile
+lowest_positive_value = 0.0001
+gamma_shopping = Beta('gamma_shopping', 1, lowest_positive_value, None, 0)
+gamma_socializing = Beta('gamma_socializing', 1, lowest_positive_value, None, 0)
+gamma_recreation = Beta('gamma_recreation', 1, lowest_positive_value, None, 0)
+gamma_personal = Beta('gamma_personal', 1, lowest_positive_value, None, 0)
+
+scale_parameter = Beta('scale', 1, lowest_positive_value, None, 0)
+
+gamma_parameters = {
+    1: gamma_shopping,
+    2: gamma_socializing,
+    3: gamma_recreation,
+    4: gamma_personal,
+}
+
+the_gamma_profile = GammaProfile(
+    model_name='gamma_profile',
+    baseline_utilities=baseline_utilities,
+    gamma_parameters=gamma_parameters,
+    scale_parameter=scale_parameter,
+    weights=weight,
+)
+         \end{lstlisting}
+     \end{center}
+    \item[The non-monotonic model] On top of the baseline utilities, the non-monotonic model involves also another component of
+      utility, called the $\mu$-utilities:
+      \begin{center}
+        \begin{lstlisting}
+cte_shopping_mu = Beta('cte_shopping_mu', 0, None, None, 0)
+holiday_shopping_mu = Beta('holiday_shopping_mu', 0, None, None, 0)
+
+cte_social_mu = Beta('cte_social_mu', 0, None, None, 0)
+metro_social_mu = Beta('metro_social_mu', 0, None, None, 0)
+
+cte_recreation_mu = Beta('cte_recreation_mu', 0, None, None, 0)
+holiday_recreation_mu = Beta('holiday_recreation_mu', 0, None, None, 0)
+
+age_15_40_personal_mu = Beta('age_15_40_personal_mu', 0, None, None, 0)
+male_personal_mu = Beta('male_personal_mu', 0, None, None, 0)
+
+
+shopping_mu = holiday_shopping_mu * holiday
+socializing_mu = metro_social_mu * metro
+recreation_mu = holiday_recreation_mu * holiday
+personal_mu = male_personal_mu * male
+
+mu_utilities = {
+    1: shopping_mu,
+    2: socializing_mu,
+    3: recreation_mu,
+    4: personal_mu,
+}
+        \end{lstlisting}
+      \end{center}
+
+ All the ingredients can be gathered as follows.
+    \begin{center}
+         \begin{lstlisting}
+from biogeme.mdcev import NonMonotonic
+
+lowest_positive_value = 0.0001
+gamma_shopping = Beta('gamma_shopping', 1, lowest_positive_value, None, 0)
+gamma_socializing = Beta('gamma_socializing', 1, lowest_positive_value, None, 0)
+gamma_recreation = Beta('gamma_recreation', 1, lowest_positive_value, None, 0)
+gamma_personal = Beta('gamma_personal', 1, lowest_positive_value, None, 0)
+
+alpha_shopping = Beta('alpha_shopping', 0.5, lowest_positive_value, 1, 0)
+alpha_socializing = Beta('alpha_socializing', 0.5, lowest_positive_value, 1, 0)
+alpha_recreation = Beta('alpha_recreation', 0.5, lowest_positive_value, 1, 0)
+alpha_personal = Beta('alpha_personal', 0.5, lowest_positive_value, 1, 0)
+
+scale_parameter = Beta('scale', 1, lowest_positive_value, None, 0)
+
+gamma_parameters = {
+    1: gamma_shopping,
+    2: gamma_socializing,
+    3: gamma_recreation,
+    4: gamma_personal,
+}
+
+alpha_parameters = {
+    1: alpha_shopping,
+    2: alpha_socializing,
+    3: alpha_recreation,
+    4: alpha_personal,
+}
+
+
+the_non_monotonic = NonMonotonic(
+    model_name='non_monotonic',
+    baseline_utilities=baseline_utilities,
+    mu_utilities=baseline_utilities,
+    gamma_parameters=gamma_parameters,
+    alpha_parameters=alpha_parameters,
+    scale_parameter=scale_parameter,
+    weights=weight,
+)
+         \end{lstlisting}
+     \end{center}
+\end{description}
+
+\subsection{Estimation of the parameters}
+
+Once the object characterizing the model has been created, the estimation of the parameters is simply done by calling the function ``\lstinline@estimate_parameters@''. As an example, here is the syntax  for the $\gamma$ profile:
+\begin{center}
+         \begin{lstlisting}
+results = the_gamma_profile.estimate_parameters(
+    database=database,
+    number_of_chosen_alternatives=number_chosen,
+    consumed_quantities=consumed_quantities,
+)
+          \end{lstlisting}
+     \end{center}
+
+\subsection{Forecasting}
+
+Finally, the forecasting is performed as follows. Here, we perform the forecast for two rows of the database.
+\begin{center}
+         \begin{lstlisting}
+two_rows_of_database: Database = database.extract_rows([0, 1])
+budget_in_hours = 500
+number_of_draws = 20000
+optimal_consumptions: list[pd.DataFrame] = the_gamma_profile.forecast(
+    database=two_rows_of_database,
+    total_budget=budget_in_hours,
+    number_of_draws=number_of_draws,
+    brute_force=False,
+)
+          \end{lstlisting}
+     \end{center}
+The result is a list of data frames, one per entry in the database (two, in this example). Each data frame contains
+the forecasting results for each realization of the error term. Note that the parameter \lstinline{brute_force} selecting the forecasting algorithm is
+optional and set to \lstinline{False} by default. It means that the analytical algorithm is used.
+
+\section{Ackowledgments}
+
+The authors would like to thank Chandra Bhat and Angela Haddad for sharing estimation results for validation purposes.
+The comments and suggestions of Jason Hawkins about an earlier version of this report and the estimation code have been really useful.
+The second author was funded by the China Scholarship Council.
+
+
+\bibliographystyle{dcu}
+\bibliography{transpor}
+
+\appendix
+
+\section{Description of the data}
+\label{sec:appendix}
+
+The data set is the 2019 American Time Use Survey (ATUS). The
+description of the variables is available below, as well as some
+descriptive statistics in Table~\vref{tab:stats} (see also  \cite{WangYe24} for a discussion and analysis of this data).
+
+\begin{longtable}{|p{0.3\textwidth}|p{0.7\textwidth}|}
+  \hline
+  \textbf{Variables} & \textbf{Description} \\
+  \hline
+  \endfirsthead
+
+  \hline
+   \textbf{Variables} & \textbf{Description} \\
+  \hline
+  \endhead
+
+  \hline
+  \endfoot
+
+  \hline
+  \endlastfoot
+
+\textbf{PERSONID} &
+
+Respondent identifier\\
+
+\textbf{WEIGHT} &
+
+Weight variable for each respondent \\
+
+\textbf{HHSIZE} &
+
+Number of people living in respondent's household \\
+
+\textbf{CHILDNUM} &
+
+Number of household children $<$18 \\
+
+\textbf{FAMINC} &
+
+Family annual income (1:Less than \$5,000; 2:\$5,000 to \$7,499; 3:\$7,500 to \$9,999; 4:\$10,000 to \$12,499;
+  5:\$12,500 to \$14,999; 6:\$15,000 to \$19,999; 7:\$20,000 to \$24,999; 8:\$25,000 to \$29,999; 9:\$30,000
+  to \$34,999; 10:\$35,000 to \$39,999; 11:\$40,000 to \$49,999; 12:\$50,000 to \$59,999; 13:\$60,000 to
+  \$74,999; 14:\$75,000 to \$99,999; 15:\$100,000 to \$149,999; 16:\$150,000 and over) \\
+
+\textbf{FAMINC25K} &
+
+Family annual income $<$\$25,000(0 = no, 1 = yes) \\
+
+\textbf{INCOME} &
+
+Median value of the corresponding segment of variable FAMINC \\
+
+\textbf{EMPLOYED} &
+
+Whether the respondent is employed (0 = no, 1 = yes) \\
+
+\textbf{FULLTIME} &
+
+Whether the respondent is full time employed (0 = no, 1 = yes) \\
+
+\textbf{SPOUSEPR} &
+
+Whether the respondent has spouse or unmarried partner in the household (0 = no, 1 = yes) \\
+
+\textbf{SPOUSEMP} &
+
+Whether the respondent has employed spouse or unmarried partner in the household (0 = no, 1 = yes) \\
+
+\textbf{MALE} &
+
+Whether the respondent is male (0 = no, 1 = yes) \\
+
+\textbf{MARRIED} &
+
+Whether the respondent is married (0 = no, 1 = yes) \\
+
+\textbf{AGE} &
+
+Age of the respondent \\
+
+\textbf{AGE2} &
+
+Age squared of the respondent \\
+
+\textbf{AGE15\_40} &
+
+Whether the age of the respondent is in [15, 40] (0 = no, 1 = yes) \\
+
+\textbf{AGE41\_60} &
+
+Whether the age of the respondent is in [41, 60] (0 = no, 1 = yes) \\
+
+\textbf{AGE61\_85} &
+
+Whether the age of the respondent is in [61, 85] (0 = no, 1 = yes) \\
+
+\textbf{BACHIGHER} &
+
+Whether the highest degree of the respondent is a bachelor's or above (0 = no, 1 = yes) \\
+
+\textbf{WHITE} &
+
+Whether the respondent is white (0 = no, 1 = yes) \\
+
+\textbf{METRO} &
+
+Whether the respondent is from metropolitan area (0 = no, 1 = yes) \\
+
+\textbf{DIARYDAY} &
+
+Day of the week of diary day (1 = Sunday, 7 = Saturday) \\
+
+\textbf{SUNDAY} &
+
+Whether the diary day is Sunday (0 = no, 1 = yes) \\
+
+\textbf{HOLIDAY} &
+
+Whether the diary day is Holiday (0 = no, 1 = yes) \\
+
+\textbf{WEEKEARN} &
+
+Weekly earnings at main job (-1 = not available) \\
+
+\textbf{WEEKWORDUR} &
+
+Weekly work hours at main job (-1 = not available) \\
+
+\textbf{HHCHILD} &
+
+Presence of household children $<$ 18 (0 = no, 1 = yes) \\
+
+\textbf{OHHCHILD} &
+
+Presence of own household children $<$ 18 (0 = no, 1 = yes) \\
+
+\textbf{t1} &
+
+Time consumption of shopping activities (min) \\
+
+\textbf{t2} &
+
+Time consumption of socializing activities (min) \\
+
+\textbf{t3} &
+
+Time consumption of recreational activities (min) \\
+
+\textbf{t4} &
+
+Time consumption of personal and household affairs activities (min) \\
+
+\end{longtable}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{l l l l l}
+\textbf{Variable} & \textbf{Min} & \textbf{Max} & \textbf{Mean} & \textbf{St.Dev.} \\
+\hline
+\textbf{WEIGHT} & 0.08 & 3.72 & 0.56 & 0.39 \\
+\textbf{HHSIZE} & 1 & 10 & 2.61 & 1.49 \\
+\textbf{CHILDNUM} & 0 & 7 & 0.71 & 1.08 \\
+\textbf{FAMINC} & 1 & 16 & 11.54 & 3.90 \\
+\textbf{FAMINC25K} & 0 & 1 & 0.18 & 0.39 \\
+\textbf{INCOME} & 2.50 & 150.00 & 72.34 & 47.08 \\
+\textbf{EMPLOYED} & 0 & 1 & 0.62 & 0.49 \\
+\textbf{FULLTIME} & 0 & 1 & 0.49 & 0.50 \\
+\textbf{SPOUSEPR} & 0 & 1 & 0.54 & 0.50 \\
+\textbf{SPOUSEMP} & 0 & 1 & 0.37 & 0.48 \\
+\textbf{MALE} & 0 & 1 & 0.45 & 0.50 \\
+\textbf{MARRIED} & 0 & 1 & 0.50 & 0.50 \\
+\textbf{AGE} & 15 & 85 & 50.54 & 18.25 \\
+\textbf{AGE2} & 225 & 7225 & 2887.74 & 1873.69 \\
+\textbf{AGE15\_40} & 0 & 1 & 0.34 & 0.47 \\
+\textbf{AGE41\_60} & 0 & 1 & 0.33 & 0.47 \\
+\textbf{AGE61\_85} & 0 & 1 & 0.34 & 0.47 \\
+\textbf{BACHIGHER} & 0 & 1 & 0.40 & 0.49 \\
+\textbf{WHITE} & 0 & 1 & 0.81 & 0.39 \\
+\textbf{METRO} & 0 & 1 & 0.84 & 0.36 \\
+\textbf{DIARYDAY} & 1 & 7 & 3.87 & 2.997 \\
+\textbf{SUNDAY} & 0 & 1 & 0.52 & 0.50 \\
+\textbf{HOLIDAY} & 0 & 1 & 0.01 & 0.11 \\
+\textbf{WEEKEARN} & -1 & 2884.61 & 604.64 & 783.26 \\
+\textbf{WEEKWORDUR} & -1 & 144 & 22.74 & 22.61 \\
+\textbf{HHCHILD} & 0 & 1 & 0.38 & 0.49 \\
+\textbf{OHHCHILD} & 0 & 1 & 0.30 & 0.46 \\
+\textbf{t1} & 0 & 640 & 30.03 & 54.66 \\
+\textbf{t2} & 0 & 905 & 114.67 & 139.76 \\
+\textbf{t3} & 0 & 900 & 51.11 & 108.96 \\
+\textbf{t4} & 0 & 773 & 58.22 & 61.05 \\
+\end{tabular}
+
+\caption{\label{tab:stats}Descriptive statistics}
+\end{center}
+    \end{table}
+
+
+
+
+
+
+
+
 
 \end{document}
+
+
+
+

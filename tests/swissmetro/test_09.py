@@ -66,7 +66,7 @@ logprob = models.lognested(V, av, nests, CHOICE)
 
 class Test09(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameter_file='')
+        biogeme = bio.BIOGEME(database, logprob, parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

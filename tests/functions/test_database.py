@@ -487,7 +487,9 @@ class TestGenerateSegmentation(unittest.TestCase):
         )
         # Verify the generated segmentation
         self.assertIsInstance(segmentation, DiscreteSegmentationTuple)
-        self.assertEqual(segmentation.variable, expected_segmentation.variable)
+        self.assertEqual(
+            repr(segmentation.variable), repr(expected_segmentation.variable)
+        )
         self.assertDictEqual(segmentation.mapping, expected_segmentation.mapping)
 
         segmentation = self.my_data.generate_segmentation(
@@ -499,7 +501,9 @@ class TestGenerateSegmentation(unittest.TestCase):
         )
         # Verify the generated segmentation
         self.assertIsInstance(segmentation, DiscreteSegmentationTuple)
-        self.assertEqual(segmentation.variable, expected_segmentation.variable)
+        self.assertEqual(
+            repr(segmentation.variable), repr(expected_segmentation.variable)
+        )
         self.assertDictEqual(segmentation.mapping, expected_segmentation.mapping)
         self.assertEqual(segmentation.reference, expected_segmentation.reference)
 
@@ -514,7 +518,9 @@ class TestGenerateSegmentation(unittest.TestCase):
         )
         # Verify the generated segmentation
         self.assertIsInstance(segmentation, DiscreteSegmentationTuple)
-        self.assertEqual(segmentation.variable, expected_segmentation.variable)
+        self.assertEqual(
+            repr(segmentation.variable), repr(expected_segmentation.variable)
+        )
         self.assertDictEqual(segmentation.mapping, expected_segmentation.mapping)
 
     def test_generate_segmentation_invalid_reference(self):

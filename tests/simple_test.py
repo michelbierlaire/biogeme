@@ -5,6 +5,7 @@ Simple estimation test from the Ben-Akiva and Lerman book
 :date: Wed Apr 29 18:43:34 2020
 
 """
+
 import unittest
 from os import path
 import shutil
@@ -55,7 +56,7 @@ class test_biogeme(unittest.TestCase):
 
         data = {
             'ID': pd.Series([i + 1 for i in range(21)]),
-            'AutoTime': pd.Series(
+            'auto_time': pd.Series(
                 [
                     52.9,
                     4.1,
@@ -80,7 +81,7 @@ class test_biogeme(unittest.TestCase):
                     41.6,
                 ]
             ),
-            'TransitTime': pd.Series(
+            'transit_time': pd.Series(
                 [
                     4.4,
                     28.5,
@@ -118,8 +119,8 @@ class test_biogeme(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     def testEstimation(self):
-        AutoTime = Variable('AutoTime')
-        TransitTime = Variable('TransitTime')
+        AutoTime = Variable('auto_time')
+        TransitTime = Variable('transit_time')
         Choice = Variable('Choice')
 
         ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -131,7 +132,7 @@ class test_biogeme(unittest.TestCase):
 
         logprob = models.loglogit(V, av, Choice)
 
-        biogeme = bio.BIOGEME(self.database, logprob, parameter_file=self.toml_file)
+        biogeme = bio.BIOGEME(self.database, logprob, parameters=self.toml_file)
         biogeme.modelName = 'test'
         biogeme.generate_html = False
         biogeme.generate_pickle = False

@@ -1,0 +1,56 @@
+[metadata]
+name = biogeme
+version = attr: biogeme.version.__version__
+description = Estimation and application of discrete choice models
+long_description = file: README.md
+long_description_content_type = text/markdown
+author = Michel Bierlaire
+author_email = michel.bierlaire@epfl.ch
+url = http://biogeme.epfl.ch
+download_urls = https://pypi.org/project/biogeme/
+project_urls =
+	Documentation = http://biogeme.epfl.ch/documents.html
+	Code = https://github.com/michelbierlaire/biogeme
+classifiers =
+	Intended Audience :: Education
+	Intended Audience :: Science/Research
+	Topic :: Scientific/Engineering
+	Topic :: Scientific/Engineering :: Mathematics
+	Natural Language :: English
+	Operating System :: OS Independent
+	Programming Language :: C++
+	Programming Language :: Cython
+	Programming Language :: Python
+	Programming Language :: Python :: 3
+	Programming Language :: Python :: 3 :: Only
+	Programming Language :: Python :: Implementation :: CPython
+
+[options]
+package_dir = =src
+packages = find:
+install_requires =
+    pandas >= 2.2.2
+    scipy >= 1.14.0
+    tqdm >= 4.66.4
+    tomlkit >= 0.12.5
+    python-levenshtein >= 0.25.1
+    fuzzywuzzy >= 0.18.0
+    cythonbiogeme == 1.0.3a0
+    biogeme_optimization == 0.0.7
+    matplotlib >= 3.9.0
+    numpy >= 2.0.0
+    ipython >= 8.25.0
+
+[options.packages.find]
+where=src
+
+[options.package_data]
+biogeme = data/data/*.dat
+
+[options.extras_require]
+testing = 
+    pytest >= 7.2.0
+    pytest-cov >= 4.0.0
+    tox >= 3.27.1
+        
+
