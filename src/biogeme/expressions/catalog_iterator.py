@@ -19,14 +19,15 @@ class SelectedExpressionsIterator:
     Catalog. This iterator loops on pre-specified configurations
     """
 
-    def __init__(self, the_expression: Expression, configurations: set[Configuration]):
+    def __init__(
+        self,
+        the_expression: Expression,
+        configurations: set[biogeme.configuration.Configuration],
+    ):
         """Ctor.
 
         :param the_expression: expression containing Catalogs
-        :type the_expression: Expression
-
         :param configurations: set of configurations
-        :type configurations: set(biogeme.configuration.Configuration)
         """
         self.the_expression = the_expression
         self.configurations = configurations

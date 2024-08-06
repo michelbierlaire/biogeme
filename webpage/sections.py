@@ -15,6 +15,11 @@ resources = {}
 # ] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
 # special['Other special'] = 'Other special as well'
 
+special['ChatGPT'] = (
+    'Try the Biogeme Assistant <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" '
+    'target="_blank">[Click here]</a> (credits: Yousef Maknoon)'
+)
+
 about['Biogeme'] = (
     """
 Biogeme is a open
@@ -54,20 +59,24 @@ about['Links'] = (
 """,
 )
 
-about['What\'s new in Biogeme 3.2.12?'] = (
+about['What\'s new in Biogeme 3.2.14?'] = (
     """
 <p>
 In this release, various improvements have been made, including code
-reorganization and bug fixes. Notably, the generic optimization
-algorithms have been relocated to a separate package named
-"biogeme_optimization".
+reorganization and documentation, bug fixes, and new functionalities. In particular, the name of several objects and functions have been modified for a better compliance with the Python recommendations. The old syntax has been maintained, but is tagged as deprecated.
 </p>
+<ul>
+    <li>The implementation of the arithmetic expressions (cythonbiogeme) has been optimized for better numerical stability. See the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier24.pdf">technical report</a> for details.</li>
+    <li>The management of the parameters has been simplified. Indeed, it can be done either using the <code>biogeme.toml</code> file, or directlywhen constructing the BIOGEME object.</li>
+    <li>The Multiple Discrete Continuous Extreme Value (MDCEV) model has been validated. It is possible to estimate its parameters, and to use the estimated model for forecasting. See the <a href="https://transp-or.epfl.ch/documents/technicalReports/BierWang24.pdf">technical report</a> for details.</li>
+    <li>The files preparing the data for Swissmetro, Optima and the MDCEV data set are included in the distribution.</li>
+</ul>
 """,
 )
 
 about['Conditions of use'] = (
     """
-BIOGEME is distributed free of charge. We ask each user
+<p>BIOGEME is distributed free of charge. We ask each user
 <ul>
 <li>to register
 to <a href="https://groups.google.com/d/forum/biogeme"
@@ -79,7 +88,25 @@ target="_blank">Bierlaire, M. (2023). A
 short introduction to
 Biogeme. Technical report TRANSP-OR
 230620. Transport and Mobility Laboratory,
-ENAC, EPFL.</a>
+ENAC, EPFL.</a></p></li></ul>
+""",
+)
+
+about['Disclaimer'] = (
+    """
+<p><strong>Disclaimer</strong> This software is provided free of charge and "AS
+IS" WITHOUT ANY WARRANTY of any kind. The implied
+warranties of merchantability, fitness for a
+particular purpose and non-infringement are expressly
+disclaimed. In no event will the
+author (Michel Bierlaire) or his employer (EPFL) be
+liable to any party for any direct, indirect, special
+or other consequential damages for any use of the
+code including, without limitation, any lost
+profits, business interruption, loss of programs or
+other data on your information handling system or
+otherwise, even if we are expressly advised of the
+possibility of such damages.</p>
 """,
 )
 
@@ -107,15 +134,16 @@ certainly not complete, and I apologize for those who are omitted:
 	    John Bates,
 	    Denis Bolduc,
 	    David Bunch,
-            Pedro Camargo,
+        Pedro Camargo,
 	    Andrew Daly,
-            Nicolas Dubois,
+        Nicolas Dubois,
 	    Anna Fernandez Antolin,
 	    Mamy Fetiarison,
 	    Mogens Fosgerau,
 	    Emma Frejinger,
 	    Carmine Gioia,
 	    Marie-H&eacute;l&egrave;ne Godbout,
+        Jason Hawkins,
 	    Stephane Hess,
 	    Tim Hillel,
 	    Richard Hurni,
@@ -124,6 +152,7 @@ certainly not complete, and I apologize for those who are omitted:
 	    Xinjun Lai,
 	    Gael Lederrey,
 	    Virginie Lurkin,
+	    Yousef Maknoon,
 	    Nicholas Molyneaux,
 	    Nicola Ortelli,
 	    Carolina Osorio,
@@ -133,7 +162,8 @@ certainly not complete, and I apologize for those who are omitted:
 	    Matteo Sorci,
 	    Ewout ter Hoeven,
 	    Michael Th&eacute;mans,
-	    Joan Walker.
+	    Joan Walker,
+        Mengyi Wang.
 """,
     """
 I would like to give special thanks to Moshe Ben-Akiva
@@ -195,7 +225,10 @@ pip install biogeme
 
 install['CythonBiogeme on Github'] = (
     """
-A significant part of Biogeme is coded in C++ for the sake of computational efficiciency. Since version 3.2.11, this part of the code has been isolated in a separate package called <samp>cythonbiogeme</samp>. Binaries for Mac OSX and Windowns are available for versions of Python ranging from 3.9 to 3.12. If, for some reasons, the binary distribution for your system is not available, pip will attempt to compile the package from sources.
+A significant part of Biogeme is coded in C++ for the sake of computational efficiency. Since version 3.2.11, this part
+of the code has been isolated in a separate package called <samp>cythonbiogeme</samp>. Binaries for Mac OSX and Windowns 
+are available for versions of Python ranging from 3.10 to 3.12. If, for some reasons, the binary distribution for your 
+system is not available, pip will attempt to compile the package from sources.
 In that case, it requires a proper
 environment to compile C++ code. In general, it is readily available on Linux, and
 MacOSX (if <a href="https://developer.apple.com/xcode/"
@@ -214,54 +247,19 @@ target="_blank">this one</a>.
 """,
     """
 The command to install CythonBiogeme from source is
-<pre>pip install -ve .</pre>
+<pre>pip install .</pre>
 """,
     """
-that must be executed in the directory containing the
-.py setup.cfg and setup.py.
+that must be executed in the root directory, containing the
+file setup.py.
 """,
     """
 Note that it requires a proper
 environment to compile C++ code. In general, it is readily available on Linux, and
 MacOSX (if <a href="https://developer.apple.com/xcode/"
 target="_blank">Xcode</a> has been
-installed).
-""",
-    """
-On Windows, here is one possibility.
-<ol>
-<li> Install <samp>mingw64</samp> from <a href="https://winlibs.com">winlibs.com</a>. Download the zip file, and unzip it into c:\\mingw64.</li>
-<li>Add c:\\mingw64\\bin in the Windows PATH. </li>
-<li>Edit the file <samp>setup.cfg</samp> and uncomment the lines dedicated to Windows:
-<p>
-<pre>
-[build]
-compiler=mingw32
-</pre>
-</p>
-and
-<p>
-<pre>
-extra_compile_args = -std=c++11 -DMS_WIN64
-extra_link_args = -static -std=c++11 -static-libstdc++ -static-libgcc -Bstatic -lpthread -mms-bitfields -mwindows -Wl,-Bstatic,--whole-archive -Wl,--no-whole-archive
-</pre>
-</p>
-<li> The compilation  requires the static version of the libraries <samp>vcruntime140.dll</samp> and <samp>python3x.dll</samp>, where <samp>3x</samp> corresponds to your version of Python. To generate them, the following "hack" must be performed:
-<ul>
-<li>Locate the DLL .py in your current environment. They may be located in <samp>AppData\\Local\\Programs\\Python\\Python3x\\</samp>
-<li>The static versions of the libraries can be created using the following commands. Make sure to replace "3x" by your version of Python ("311", "310", "39", etc.):
-<p>
-<pre>
-gendef python3x.dll
-dlltool -D python3x.dll -d python3x.def -l libpython3x.a
-gendef vcruntime140.dll
-dlltool -D vcruntime140.dll -d vcruntime140.def -l libvcruntime140.a
-</pre>
-</p>
-</ul>
-</li>
-<li>Install using the following command:
-<p><pre>pip install -ve .</pre></p></li>
+installed). On Windows, it is possible to compile cythonbiogeme with Microsoft Visual C++. 
+See the <a href="https://wiki.python.org/moin/WindowsCompilers">Python documentation</a>.
 """,
 )
 
@@ -279,14 +277,15 @@ target="_blank">this one</a>.
 """,
     """
 The command to install Biogeme from source is
-<pre>pip install -ve .</pre>
+<pre>pip install .</pre>
 """,
     """
-that must be executed in the directory containing the
-.py setup.cfg and setup.py.
+that must be executed in the root directory containing the
+pyproject.toml file.
 """,
     """
-Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment where Python and CythonBiogeme are properly installed.
+Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment 
+where Python and CythonBiogeme are properly installed.
 """,
 )
 
@@ -296,20 +295,28 @@ To verify if biogeme is correctly installed, you can print
 the version of Biogeme. To do so,  execute the
 following commands in Python:
 <ul>
-<li>Import the package: <pre>import biogeme.version as ver</pre></li>
-<li>Print the version information: <pre>print(ver.getText())</pre>
+<li>Import the package: <pre>from biogeme.version import get_text</pre></li>
+<li>Print the version information: <pre>print(get_text())</pre>
 </ul>
 The result should look like the following:
 <pre>
-Python 3.12.0 (v3.12.0:0fb18b02c8, Oct  2 2023, 09:45:56) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
+Python 3.12.4 (v3.12.4:8e8a4baf65, Jun  6 2024, 17:33:18) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
->>> import biogeme.version as ver
->>> print(ver.getText())
-biogeme 3.2.13 [2023-12-21]
+>>> from biogeme.version import get_text
+>>> print(get_text())
+biogeme 3.2.14 [2024-08-05]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
 </pre>
+""",
+)
+
+documentation['Code documentation'] = (
+    """
+<a href="sphinx/index.html" target="_blank">Click here for the online documentation</a>. It has been
+generated with the <a href="http://www.sphinx-doc.org"
+target="_blank">Python Documentation Generator Sphinx</a>.
 """,
 )
 
@@ -330,6 +337,8 @@ target="_blank">Estimating choice models with latent
 variables with PandasBiogeme.</a></li>
 <li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf" target="_blank">Assisted specification with Biogeme 3.2.12.</a></li>
 <li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierPasc23.pdf" target="_blank">Estimating MEV models with samples of alternatives.</a></li>
+<li><a href="https://transp-or.epfl.ch/documents/technicalReports/Bier24.pdf" target="_blank">Arithmetic expressions in Biogeme.</a></li>
+<li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierWang24.pdf" target="_blank">The MDCEV model with Biogeme: estimation and forecasting.</a></li>
 </ul>
 """,
 )
@@ -353,14 +362,6 @@ documentation['Estimating my first choice model with Biogeme'] = (
 """,
 )
 
-
-documentation['Code documentation'] = (
-    """
-<a href="sphinx/index.html" target="_blank">Click here for the documentation of the source of Biogeme</a>. It has been
-generated with the <a href="http://www.sphinx-doc.org"
-target="_blank">Python Documentation Generator Sphinx</a>.
-""",
-)
 
 resources['Videos'] = (
     """

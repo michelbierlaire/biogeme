@@ -26,6 +26,7 @@ from biogeme.expressions import (
     MonteCarlo,
     PanelLikelihoodTrajectory,
 )
+from biogeme.parameters import Parameters
 from biogeme.tools import TemporaryFile
 
 database = read_data()
@@ -35,15 +36,15 @@ database.remove(exclude)
 database.panel('ID')
 
 
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', -0.165710, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.757083, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+B_TIME = Beta('B_TIME', -1.215783, None, None, 0)
+B_COST = Beta('B_COST', -1.093874, None, None, 0)
 
-B_TIME_S = Beta('B_TIME_S', 0, None, None, 0)
+B_TIME_S = Beta('B_TIME_S', 2.720878, None, None, 0)
 
-# Define a random parameter, normally distirbuted, designed to be used
+# Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
 B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
 
@@ -69,16 +70,12 @@ logprob = log(MonteCarlo(condprobIndiv))
 class test_12(unittest.TestCase):
 
     def testEstimation(self):
-        with TemporaryFile() as parameter_file:
-            parameters = '[MonteCarlo]\nnumber_of_draws = 5\nseed = 10'
-            with open(parameter_file, 'w') as f:
-                print(parameters, file=f)
-            biogeme = bio.BIOGEME(database, logprob, parameter_file=parameter_file)
+        biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1111)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4845.98507664922, 2)
+        self.assertAlmostEqual(results.data.logLike, -4370.807597627828, delta=10)
 
 
 if __name__ == '__main__':

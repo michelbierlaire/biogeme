@@ -1,9 +1,6 @@
-Biogeme
-=======
-The core routines of Biogeme.
-
 biogeme.biogeme module
-----------------------
+%%%%%%%%%%%%%%%%%%%%%%
+The core routines of Biogeme.
 
 .. automodule:: biogeme.biogeme
    :members:

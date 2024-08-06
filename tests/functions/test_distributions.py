@@ -20,8 +20,8 @@ from biogeme.distributions import (
 class TestNormalPdf(unittest.TestCase):
     def test_normal_values(self):
         # Test with normal values
-        self.assertAlmostEqual(normalpdf(0), 0.3989422804)
-        self.assertAlmostEqual(normalpdf(1, 1, 1), 0.3989422804)
+        self.assertAlmostEqual(normalpdf(0).get_value(), 0.3989422804)
+        self.assertAlmostEqual(normalpdf(1, 1, 1).get_value(), 0.3989422804)
 
     def test_expression_inputs(self):
         expression = normalpdf(1, 1, 1)
@@ -45,24 +45,24 @@ class TestNormalPdf(unittest.TestCase):
 
     def test_mixed_inputs(self):
         # Test with mixed type inputs
-        self.assertAlmostEqual(normalpdf(0.0, Numeric(0), 1), 0.3989422804)
+        self.assertAlmostEqual(normalpdf(0.0, Numeric(0), 1).get_value(), 0.3989422804)
         # Add more mixed type tests here
 
     def test_large_values(self):
         # Test with very large values
-        self.assertAlmostEqual(normalpdf(1000, 0, 1), 0)
+        self.assertAlmostEqual(normalpdf(1000, 0, 1).get_value(), 0)
 
     def test_small_values(self):
         # Test with very small values
-        self.assertAlmostEqual(normalpdf(0, 0, 0.0001), 3989.422804)
+        self.assertAlmostEqual(normalpdf(0, 0, 0.0001).get_value(), 3989.4228034270454)
 
 
 class TestLognormalPdf(unittest.TestCase):
     def test_normal_values(self):
         # Test with normal values
-        self.assertAlmostEqual(lognormalpdf(1, 0, 1), 0.3989422804)
-        expected_value = 1
-        self.assertAlmostEqual(lognormalpdf(2, 3, 4), expected_value)
+        self.assertAlmostEqual(lognormalpdf(1, 0, 1).get_value(), 0.3989422804)
+        expected_value = 0.04222768901274423
+        self.assertAlmostEqual(lognormalpdf(2, 3, 4).get_value(), expected_value)
 
     def test_expression_inputs(self):
         expression = lognormalpdf(1, 0, 1)
@@ -96,20 +96,22 @@ class TestLognormalPdf(unittest.TestCase):
 
     def test_mixed_inputs(self):
         # Test with mixed type inputs
-        self.assertAlmostEqual(lognormalpdf(1.0, Numeric(0), 1), 0.3989422804)
+        self.assertAlmostEqual(
+            lognormalpdf(1.0, Numeric(0), 1).get_value(), 0.3989422804
+        )
         # Add more mixed type tests here
 
     def test_large_values(self):
         # Test with very large values
         self.assertAlmostEqual(
-            lognormalpdf(1000, 0, 1), 0
+            lognormalpdf(1000, 0, 1).get_value(), 0
         )  # Replace with actual expected value
 
     def test_small_values(self):
         # Test with very small but positive values
-        expected_value = 1
+        expected_value = 0
         self.assertAlmostEqual(
-            lognormalpdf(0.0001, 0, 1), expected_value
+            lognormalpdf(0.0001, 0, 1).get_value(), expected_value
         )  # Replace with actual expected value
 
 

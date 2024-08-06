@@ -6,27 +6,13 @@
 
 from __future__ import annotations
 import logging
-from typing import TYPE_CHECKING
+
 
 from .base_expressions import Expression
-from .numeric_tools import is_numeric, validate
 from ..deprecated import deprecated
 
-if TYPE_CHECKING:
-    from . import ExpressionOrNumeric
 
 logger = logging.getLogger(__name__)
-
-
-def validate_and_convert(expression: ExpressionOrNumeric) -> Expression:
-    """Validates the expression and returns the converted expression if necessary."""
-    if isinstance(expression, bool):
-        return Numeric(1) if expression else Numeric(0)
-    if is_numeric(expression):
-        return Numeric(expression)
-    if not isinstance(expression, Expression):
-        raise TypeError(f'This is not a valid expression: {expression}')
-    return expression
 
 
 class Numeric(Expression):
@@ -41,8 +27,7 @@ class Numeric(Expression):
         :type value: float
         """
         Expression.__init__(self)
-        the_value = validate(value, modify=False)
-        self.value = float(the_value)  #: numeric value
+        self.value = float(value)  #: numeric value
 
     def __str__(self) -> str:
         return '`' + str(self.value) + '`'

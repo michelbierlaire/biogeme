@@ -51,7 +51,7 @@ class test_02(unittest.TestCase):
         logprob = models.loglogit(V, av, CHOICE)
         weight = 8.890991e-01 * (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
         formulas = {'log_like': logprob, 'weight': weight}
-        biogeme = bio.BIOGEME(database, formulas, parameter_file='')
+        biogeme = bio.BIOGEME(database, formulas, parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

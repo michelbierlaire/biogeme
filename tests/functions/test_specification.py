@@ -54,13 +54,19 @@ class TestSpecification(unittest.TestCase):
         self.assertEqual(description, expected_result)
 
     @patch('biogeme.biogeme.BIOGEME.from_configuration')
-    def test_validity_for_excessive_parameters(self, mock_from_configuration):
+    @patch('biogeme.biogeme.Parameters')
+    def test_validity_for_excessive_parameters(
+        self, MockParameters, mock_from_configuration
+    ):
         """We use a mock Biogeme object instead of the real one"""
         mock_biogeme = MagicMock()
         mock_biogeme.number_unknown_parameters.return_value = 11
         mock_from_configuration.return_value = mock_biogeme
         config = MagicMock(spec=Configuration)
-        the_specification = Specification(config, maximum_number_of_parameters=10)
+        """We also use a mock parameter object"""
+        mock_parameters = MockParameters()
+        mock_parameters.get_value.return_value = 10
+        the_specification = Specification(config, biogeme_parameters=mock_parameters)
         self.assertFalse(the_specification.validity.status)
         self.assertIn('Too many parameters', the_specification.validity.reason)
 

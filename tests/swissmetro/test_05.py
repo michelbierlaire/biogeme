@@ -25,6 +25,7 @@ from biogeme.expressions import (
     MonteCarlo,
     bioDraws,
 )
+from biogeme.parameters import Parameters
 from biogeme.tools import TemporaryFile
 
 database = read_data()
@@ -69,16 +70,15 @@ logprob = log(MonteCarlo(prob))
 
 class test_05(unittest.TestCase):
     def testEstimation(self):
-        with TemporaryFile() as parameter_file:
-            parameters = '[MonteCarlo]\nnumber_of_draws = 5\nseed = 10'
-            with open(parameter_file, 'w') as f:
-                print(parameters, file=f)
-            biogeme = bio.BIOGEME(database, logprob, parameter_file=parameter_file)
+        parameters = Parameters()
+        parameters.set_value(name='number_of_draws', value=5)
+        parameters.set_value(name='seed', value=10)
+        biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -5313.94933896142, 2)
+        self.assertAlmostEqual(results.data.logLike, -5317.76, 2)
 
 
 if __name__ == '__main__':

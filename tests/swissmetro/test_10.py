@@ -67,7 +67,7 @@ logprob = models.lognested_mev_mu(V, av, nests, CHOICE, MU)
 
 class test_10(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameter_file='')
+        biogeme = bio.BIOGEME(database, logprob, parameters=None)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

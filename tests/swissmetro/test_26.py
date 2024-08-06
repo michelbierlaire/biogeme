@@ -29,7 +29,7 @@ from biogeme.expressions import (
     log,
 )
 from biogeme.native_draws import RandomNumberGeneratorTuple
-from biogeme.tools import TemporaryFile
+from biogeme.parameters import Parameters
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -40,15 +40,15 @@ database.panel('ID')
 
 #
 
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', -0.458093, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -1.110543, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+B_TIME = Beta('B_TIME', -0.710008, None, None, 0)
+B_COST = Beta('B_COST', -0.988997, None, None, 0)
 
-SIGMA_CAR = Beta('SIGMA_CAR', 0, None, None, 0)
-SIGMA_SM = Beta('SIGMA_SM', 0, None, None, 0)
-SIGMA_TRAIN = Beta('SIGMA_TRAIN', 0, None, None, 0)
+SIGMA_CAR = Beta('SIGMA_CAR', 0.130422, None, None, 0)
+SIGMA_SM = Beta('SIGMA_SM', 0.230524, None, None, 0)
+SIGMA_TRAIN = Beta('SIGMA_TRAIN', 0.168784, None, None, 0)
 
 
 # Provide my own random number generator to the database.
@@ -93,16 +93,12 @@ logprob = log(MonteCarlo(condprobIndiv))
 
 class test_26(unittest.TestCase):
     def testEstimation(self):
-        with TemporaryFile() as parameter_file:
-            parameters = '[MonteCarlo]\nnumber_of_draws = 5\nseed = 10'
-            with open(parameter_file, 'w') as f:
-                print(parameters, file=f)
-            biogeme = bio.BIOGEME(database, logprob, parameter_file=parameter_file)
+        biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1111)
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -4601.85730376285, 2)
+        self.assertAlmostEqual(results.data.logLike, -3902.730531755739, delta=10)
 
 
 if __name__ == '__main__':

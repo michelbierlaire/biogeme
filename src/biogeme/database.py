@@ -10,7 +10,7 @@ for specific services to Biogeme
 from __future__ import annotations
 
 import logging
-from typing import NamedTuple, TYPE_CHECKING
+from typing import NamedTuple, TYPE_CHECKING, Iterable
 
 import numpy as np
 import pandas as pd
@@ -28,6 +28,8 @@ from biogeme.native_draws import (
     RandomNumberGeneratorTuple,
     RandomNumberGenerator,
     native_random_number_generators,
+    convert_random_generator_tuple,
+    description_of_native_draws,
 )
 from biogeme.segmentation import DiscreteSegmentationTuple
 
@@ -196,7 +198,7 @@ class Database:
 
         return expression.get_value_c(database=self, prepare_ids=True)
 
-    @deprecated
+    @deprecated(values_from_database)
     def valuesFromDatabase(self, expression: Expression) -> pd.Series:
         pass
 
@@ -250,7 +252,7 @@ class Database:
                     )
                     raise BiogemeError(err_msg) from exc
 
-    @deprecated
+    @deprecated(check_availability_of_chosen_alt)
     def checkAvailabilityOfChosenAlt(
         self, avail: dict[int, Expression], choice: Expression
     ) -> pd.Series:
@@ -316,7 +318,7 @@ class Database:
         """
         self.data[column] *= scale
 
-    @deprecated
+    @deprecated(scale_column)
     def scaleColumn(self, column: str, scale: float):
         pass
 
@@ -373,7 +375,7 @@ class Database:
             df.drop(df[remove].index, inplace=True)
         return df
 
-    @deprecated
+    @deprecated(suggest_scaling)
     def suggestScaling(
         self, columns: list[str] | None = None, report_all: bool = False
     ):
@@ -398,7 +400,7 @@ class Database:
         sample = self.data.iloc[np.random.randint(0, len(self.data), size=size)]
         return sample
 
-    @deprecated
+    @deprecated(sample_with_replacement)
     def sampleWithReplacement(self, size: int | None = None) -> pd.DataFrame:
         pass
 
@@ -434,7 +436,7 @@ class Database:
         ]
         return sample
 
-    @deprecated
+    @deprecated(sample_individual_map_with_replacement)
     def sampleIndividualMapWithReplacement(
         self, size: int | None = None
     ) -> pd.DataFrame:
@@ -558,7 +560,7 @@ class Database:
         self.variables[column] = Variable(column)
         return self.data[column]
 
-    @deprecated
+    @deprecated(add_column)
     def addColumn(self, expression: Expression, column: str) -> pd.Series:
         pass
 
@@ -567,7 +569,7 @@ class Database:
         self.add_column(expression, name)
         return Variable(name)
 
-    @deprecated
+    @deprecated(define_variable)
     def DefineVariable(self, name: str, expression: Expression) -> Variable:
         pass
 
@@ -633,7 +635,7 @@ class Database:
         logger.info(f'File {data_file_name} has been created')
         return data_file_name
 
-    @deprecated
+    @deprecated(dump_on_file)
     def dumpOnFile(self) -> str:
         pass
 
@@ -679,9 +681,15 @@ class Database:
                 )
                 raise ValueError(error_msg)
 
-        self.userRandomNumberGenerators = rng
+        # Backward compatibility: if the tuple is a real tuple, we transform it into a RandomNumberGeneratorTuple
+        processed_rng = {
+            key: convert_random_generator_tuple(the_tuple=the_tuple)
+            for key, the_tuple in rng.items()
+        }
 
-    @deprecated
+        self.userRandomNumberGenerators = processed_rng
+
+    @deprecated(set_random_number_generators)
     def setRandomNumberGenerators(
         self, rng: dict[str, tuple[RandomNumberGenerator, str]]
     ):
@@ -742,7 +750,7 @@ class Database:
                         from Modified Latin Hypercube Sampling]
 
                       For an updated description of the native types, call the function
-                      :func:`~biogeme.database.Database.descriptionOfNativeDraws`.
+                      :func:`~biogeme.native_draws.description_of_native_draws`.
 
 
 
@@ -825,7 +833,7 @@ class Database:
         self.theDraws = np.moveaxis(self.theDraws, 0, -1)
         return self.theDraws
 
-    @deprecated
+    @deprecated(generate_draws)
     def generateDraws(
         self,
         types: dict[str, RandomNumberGeneratorTuple],
@@ -848,7 +856,7 @@ class Database:
         """
         return self.data.shape[0]
 
-    @deprecated
+    @deprecated(get_number_of_observations)
     def getNumberOfObservations(self) -> int:
         pass
 
@@ -867,10 +875,11 @@ class Database:
         """
         if self.is_panel():
             return self.individualMap.shape[0]
+            return self.individualMap.shape[0]
 
         return self.data.shape[0]
 
-    @deprecated
+    @deprecated(get_sample_size)
     def getSampleSize(self) -> int:
         pass
 
@@ -940,7 +949,7 @@ class Database:
         """
         return self.panelColumn is not None
 
-    @deprecated
+    @deprecated(is_panel)
     def isPanel(self) -> bool:
         pass
 
@@ -993,7 +1002,7 @@ class Database:
             self.individualMap = pd.DataFrame(local_map).T
             self.fullIndividualMap = self.individualMap
 
-    @deprecated
+    @deprecated(build_panel_map)
     def buildPanelMap(self) -> None:
         pass
 
@@ -1043,7 +1052,7 @@ class Database:
             logger.info(f'File {file_name} has been created.')
         return flat_data
 
-    @deprecated
+    @deprecated(generate_flat_panel_dataframe)
     def generateFlatPanelDataframe(
         self, save_on_file: bool = False, identical_columns: list[str] | None = None
     ) -> pd.DataFrame:
@@ -1103,6 +1112,24 @@ class Database:
 
         if error_msg_1 or error_msg_2:
             raise BiogemeError(f'{error_msg_1} {error_msg_2}')
+
+    def extract_rows(self, a_range: Iterable[int]) -> Database:
+        """
+        Create a database object using only some rows
+
+        :param a_range: specify the desired range of rows.
+        :return: the reduced dataabse
+        """
+
+        # Validate the provided range
+        max_index = len(self.data) - 1
+        if any(i < 0 or i > max_index for i in a_range):
+            raise IndexError(
+                'One or more indices in a_range are out of the valid range.'
+            )
+        reduced_data_frame = self.data.iloc[list(a_range)]
+
+        return Database(name=f'{self.name}_reduced', pandas_database=reduced_data_frame)
 
     def generate_segmentation(
         self,
@@ -1187,3 +1214,32 @@ class Database:
         self.data[new_column] = self.data[list_of_columns].apply(
             lambda x: (x != 0).sum(), axis=1
         )
+
+    def mdcev_row_split(self, a_range: Iterable[int] | None = None) -> list[Database]:
+        """
+        For the MDCEV model, we generate a list of Database objects, each of them associated with a different row of
+        the database,
+
+        :param a_range: specify the desired range of rows.
+        :return: list of rows, each in a Database format
+        """
+        if a_range is None:
+            the_range = range(len(self.data))
+        else:
+            # Validate the provided range
+            max_index = len(self.data) - 1
+            if any(i < 0 or i > max_index for i in a_range):
+                raise IndexError(
+                    'One or more indices in a_range are out of the valid range.'
+                )
+            the_range = a_range
+
+        rows_of_database = [
+            Database(name=f'row_{i}', pandas_database=self.data.iloc[[i]])
+            for i in the_range
+        ]
+        return rows_of_database
+
+    @deprecated(new_func=description_of_native_draws)
+    def descriptionOfNativeDraws():
+        pass

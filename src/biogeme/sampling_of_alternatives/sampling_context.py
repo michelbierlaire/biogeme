@@ -15,10 +15,10 @@ from biogeme.partition import Partition, Segment
 
 logger = logging.getLogger(__name__)
 
-MEV_PREFIX = 'MEV_'
+MEV_PREFIX = '_MEV_'
 LOG_PROBA_COL = '_log_proba'
 MEV_WEIGHT = '_mev_weight'
-CNL_PREFIX = 'CNL_'
+CNL_PREFIX = '_CNL_'
 
 
 class StratumTuple(NamedTuple):

@@ -9,8 +9,10 @@ from __future__ import annotations
 
 from typing import Iterable
 
+import biogeme.expressions
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioMultSum, Variable, Numeric, Expression
+from biogeme.deprecated import deprecated
 
 
 class DiscreteSegmentationTuple:
@@ -69,16 +71,19 @@ class DiscreteSegmentationTuple:
 class OneSegmentation:
     """Single segmentation of a parameter"""
 
-    def __init__(self, beta: Beta, segmentation_tuple: DiscreteSegmentationTuple):
+    def __init__(
+        self,
+        beta: biogeme.expressions.Beta,
+        segmentation_tuple: DiscreteSegmentationTuple,
+    ):
         """Ctor
 
         :param beta: parameter to be segmented
         :type beta: biogeme.expressions.Beta
 
         :param segmentation_tuple: characterization of the segmentation
-        :type segmentation_tuple: DiscreteSegmentationTuple
         """
-        self.beta: Beta = beta
+        self.beta: biogeme.expressions.Beta = beta
         self.variable: Variable = segmentation_tuple.variable
         self.reference: str = segmentation_tuple.reference
         self.mapping: dict[int, str] = {
@@ -105,7 +110,7 @@ class OneSegmentation:
             raise BiogemeError(error_msg)
         return f'{self.beta.name}_{category}'
 
-    def beta_expression(self, category: str) -> Beta:
+    def beta_expression(self, category: str) -> biogeme.expressions.Beta:
         """Constructs the expression for the parameter associated with
             a specific category
 
@@ -113,7 +118,7 @@ class OneSegmentation:
         :type category: str
 
         :return: expression of the parameter for the category
-        :rtype: biogeme.expressions.Beta
+
 
         """
         name = self.beta_name(category)
@@ -197,23 +202,18 @@ class Segmentation:
 
     def __init__(
         self,
-        beta: Beta,
+        beta: biogeme.expressions.Beta,
         segmentation_tuples: Iterable[DiscreteSegmentationTuple],
         prefix: str = 'segmented',
     ):
         """Ctor
 
         :param beta: parameter to be segmented
-        :type beta: biogeme.expressions.Beta
-
         :param segmentation_tuples: characterization of the segmentations
-        :type segmentation_tuples: list(DiscreteSegmentationTuple)
-
         :param prefix: prefix to be used to generated the name of the
             segmented parameter
-        :type prefix: str
         """
-        self.beta: Beta = beta
+        self.beta: biogeme.expressions.Beta = beta
         self.segmentations: tuple[OneSegmentation, ...] = tuple(
             OneSegmentation(beta, s) for s in segmentation_tuples
         )
@@ -280,26 +280,28 @@ class Segmentation:
 
 
 def segmented_beta(
-    beta: Beta,
+    beta: biogeme.expressions.Beta,
     segmentation_tuples: Iterable[DiscreteSegmentationTuple],
     prefix: str = 'segmented',
 ):
     """Obtain the segmented Beta from a unique function call
 
     :param beta: parameter to be segmented
-    :type beta: biogeme.expressions.Beta
-
     :param segmentation_tuples: characterization of the segmentations
-    :type segmentation_tuples: list(DiscreteSegmentationTuple)
-
     :param prefix: prefix to be used to generated the name of the
         segmented parameter
-    :type prefix: str
-
     :return: expression of the segmented Beta
-    :rtype: biogeme.expressions.Expression
     """
     the_segmentation = Segmentation(
         beta=beta, segmentation_tuples=segmentation_tuples, prefix=prefix
     )
     return the_segmentation.segmented_beta()
+
+
+@deprecated(new_func=segmented_beta)
+def segment_parameter(
+    beta: biogeme.expressions.Beta,
+    segmentation_tuples: Iterable[DiscreteSegmentationTuple],
+    prefix: str = 'segmented',
+):
+    pass

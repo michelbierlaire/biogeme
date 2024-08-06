@@ -53,6 +53,13 @@ def get_mev_generating_for_nested(
     where :math:`G` is the MEV generating function.
 
     """
+    if not isinstance(nests, NestsForNestedLogit):
+        logger.warning(
+            'It is recommended to define the nests of the nested logit model using '
+            'the objects OneNestForNestedLogit and NestsForNestedLogit defined '
+            'in biogeme.nests.'
+        )
+        nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
     ok, message = nests.check_partition()
     if not ok:
         raise excep.BiogemeError(message)
@@ -117,6 +124,14 @@ def get_mev_for_nested(
         and :math:`G` is the MEV generating function.
 
     """
+    if not isinstance(nests, NestsForNestedLogit):
+        logger.warning(
+            'It is recommended to define the nests of the nested logit model using '
+            'the objects OneNestForNestedLogit and NestsForNestedLogit defined '
+            'in biogeme.nests.'
+        )
+        nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
+
     ok, message = nests.check_partition()
     if not ok:
         raise excep.BiogemeError(message)
@@ -187,6 +202,13 @@ def get_mev_for_nested_mu(
         and :math:`G` is the MEV generating function.
 
     """
+    if not isinstance(nests, NestsForNestedLogit):
+        logger.warning(
+            'It is recommended to define the nests of the nested logit model using '
+            'the objects OneNestForNestedLogit and NestsForNestedLogit defined '
+            'in biogeme.nests.'
+        )
+        nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
     ok, message = nests.check_partition()
     if not ok:
         raise excep.BiogemeError(message)

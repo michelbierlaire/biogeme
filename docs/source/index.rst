@@ -1,66 +1,73 @@
 .. Biogeme documentation master file, created by
-   sphinx-quickstart on Tue Sep  3 10:10:23 2019.
+   sphinx-quickstart on Tue Jun 18 14:40:00 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 Welcome to Biogeme's documentation!
-***********************************
+===================================
+Biogeme is a open source Python package designed for the maximum likelihood estimation of parametric models in general,
+with a special emphasis on discrete choice models. It relies on the package Python Data Analysis Library called Pandas.
 
-Examples
-~~~~~~~~
+This webpage contains the documentation created by `Sphinx <https://www.sphinx-doc.org>`_ from the source code of
+Biogeme. If you do not find some
+information here, consult also the two following sources:
 
-For beginners, we recommend to look at the Swissmetro examples: :ref:`sphx_glr_auto_examples_swissmetro` 
+- `Biogeme's main webpage <http:biogeme.epfl.ch>`_
+- `ChatGPT Biogeme Assistant <https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant>`_
 
-
-.. toctree::
-  :maxdepth: 2
-  :caption: Examples:
-
-  auto_examples/index.rst
-  
-Source code
-~~~~~~~~~~~
-
+Installation instructions
+-------------------------
+This section provides detailed instructions on how to install Biogeme on various platforms.
 
 .. toctree::
   :maxdepth: 2
-  :caption: Contents:
 
-  assisted.rst
-  biogeme.rst
-  catalog.rst
-  check_parameters.rst
-  cnl.rst
-  configuration.rst
-  controller.rst
-  database.rst
-  default_parameters.rst
-  distributions.rst
-  draws.rst
-  exceptions.rst
-  expressions.rst
-  filenames.rst
-  lsh.rst
-  biogeme_logging.rst
-  loglikelihood.rst
-  mdcev.rst
-  models.rst
-  multiobjectives.rst
-  nests.rst
-  negative_likelihood.rst
-  optimization.rst
-  parameters.rst
-  partition.rst
-  results.rst
-  sampling_of_alternatives.rst
-  segmentation.rst
-  specification.rst
-  tools.rst
-  validity.rst
-  version.rst
+  install.rst
+
+Examples of usage
+-----------------
+This section contains various examples demonstrating how to use Biogeme for different purposes.
+
+.. toctree::
+  :maxdepth: 2
+
+  examples.rst
+
+TOML Configuration
+------------------
+This section describes the TOML configuration files used by Biogeme.
+
+.. toctree::
+  :maxdepth: 2
+
+  code/toml.rst
+
+Native Draws
+------------
+This section explains how to use native draws in Biogeme for Monte-Carlo simulation.
+
+.. toctree::
+  :maxdepth: 2
+
+  code/native_draws.rst
+
+Biogeme code
+------------
+This section provides detailed information about the code of Biogeme.
+
+.. toctree::
+  :maxdepth: 2
+
+  code/biogeme.rst
+
+
+
+
+
+
 
 Indices and tables
-~~~~~~~~~~~~~~~~~~
+==================
 
 * :ref:`genindex`
 * :ref:`modindex`

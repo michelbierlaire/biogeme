@@ -149,14 +149,14 @@ def get_mev_for_cross_nested(
             gi_terms[i] += [
                 a**m.nest_param
                 * exp((m.nest_param - 1) * (util[i]))
-                * biosum ** ((1.0 / m.nest_param) - 1.0)
+                * biosum ** ((1.0 - m.nest_param) / m.nest_param)
             ]
     for k, G in gi_terms.items():
         log_gi[k] = logzero(bioMultSum(G))
     return log_gi
 
 
-@deprecated
+@deprecated(new_func=get_mev_for_cross_nested)
 def getMevForCrossNested(
     util: dict[int, ExpressionOrNumeric],
     availability: dict[int, ExpressionOrNumeric] | None,
@@ -301,6 +301,16 @@ def get_mev_for_cross_nested_mu(
     for k, G in gi_terms.items():
         log_gi[k] = log(mu * bioMultSum(G))
     return log_gi
+
+
+@deprecated(get_mev_for_cross_nested_mu)
+def getMevForCrossNestedMu(
+    util: dict[int, ExpressionOrNumeric],
+    availability: dict[int, ExpressionOrNumeric] | None,
+    nests: NestsForCrossNestedLogit | OldNestsForCrossNestedLogit,
+    mu: ExpressionOrNumeric,
+) -> dict[int, Expression]:
+    pass
 
 
 def logcnlmu(

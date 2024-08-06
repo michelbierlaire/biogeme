@@ -1,5 +1,5 @@
 """
-Implementation of class contaning and processing the estimation results.
+Implementation of class containing and processing the estimation results.
 
 :author: Michel Bierlaire
 :date: Tue Mar 26 16:50:01 2019
@@ -30,8 +30,8 @@ import biogeme.tools.likelihood_ratio
 import biogeme.tools.unique_ids
 import biogeme.version as bv
 from biogeme.database import RandomNumberGeneratorTuple
-from biogeme.deprecated import deprecated
-from biogeme.function_output import FunctionOutput
+from biogeme.deprecated import deprecated, deprecated_parameters
+from biogeme.function_output import FunctionOutput, BiogemeFunctionOutput
 from biogeme.parameters import Parameters
 
 if TYPE_CHECKING:
@@ -207,7 +207,7 @@ class RawResults:
         self,
         the_model: BIOGEME,
         beta_values: list[float],
-        f_g_h_b: FunctionOutput,
+        f_g_h_b: BiogemeFunctionOutput,
         bootstrap: np.ndarray | None = None,
     ):
         """
@@ -237,7 +237,7 @@ class RawResults:
         """
         self.modelName: str = the_model.modelName  #: Name of the model
 
-        self.userNotes: str = the_model.userNotes  #: User notes
+        self.userNotes: str = the_model.user_notes  #: User notes
 
         self.nparam: int = len(beta_values)  #: Number of parameters
 
@@ -286,7 +286,7 @@ class RawResults:
         self.monte_carlo: bool = the_model.monte_carlo
         """True if the model involved Monte Carlo integration"""
 
-        self.numberOfDraws: int = the_model.numberOfDraws
+        self.numberOfDraws: int = the_model.number_of_draws
         """Number of draws for Monte Carlo integration"""
 
         self.typesOfDraws: dict[str, RandomNumberGeneratorTuple] = (
@@ -309,7 +309,7 @@ class RawResults:
         self.convergence: bool = the_model.convergence
         """Success of the optimization algorithm"""
 
-        self.numberOfThreads: int = the_model.numberOfThreads
+        self.numberOfThreads: int = the_model.number_of_threads
         """Number of threads used for parallel computing"""
 
         self.htmlFileName: str | None = None  #: Name of the HTML output file
@@ -340,6 +340,12 @@ class RawResults:
 class bioResults:
     """Class managing the estimation results"""
 
+    @deprecated_parameters(
+        obsolete_params={
+            'pickleFile': 'pickle_file',
+            'theRawResults': 'the_raw_results',
+        }
+    )
     def __init__(
         self,
         the_raw_results: RawResults | None = None,
@@ -371,7 +377,7 @@ class bioResults:
             self.identification_threshold = identification_threshold
         if the_raw_results is not None:
             self.data = the_raw_results
-            """Object of type :class:`biogeme.results.RawResults` contaning the
+            """Object of type :class:`biogeme.results.RawResults` containing the
             raw estimation results.
             """
         elif pickle_file is not None:
@@ -388,7 +394,8 @@ class bioResults:
                 raise excep.FileNotFound(error_msg) from e
 
         else:
-            raise excep.BiogemeError('No data provided.')
+            logger.warning('Results: no data provided')
+            self.data = None
 
         self._calculate_stats()
 
@@ -398,6 +405,8 @@ class bioResults:
         :return: True if the algorithm has converged.
         :rtype: bool
         """
+        if self.data is None:
+            return False
         return self.data.convergence
 
     def variance_covariance_missing(self) -> bool:
@@ -406,6 +415,8 @@ class bioResults:
         :return: True if missing.
         :rtype: bool
         """
+        if self.data is None:
+            return True
         return self.data.H is None
 
     def write_pickle(self) -> str:
@@ -458,6 +469,7 @@ class bioResults:
           models: :math:`-2(L_0-L^*)`
         - Rho square: :math:`1 - \\frac{L^*}{L^0}`
         - Rho bar square: :math:`1 - \\frac{L^* - K}{L^0}`
+        - Rho bar square: :math:`1 - \\frac{L^* - K}{L^0}`
         - AIC: :math:`2(K - L^*)`
         - BIC: :math:`-2 L^* + K  \\log(N)`
 
@@ -466,6 +478,8 @@ class bioResults:
         p value for the comparison of pairs of coefficients.
 
         """
+        if self.data is None:
+            return
         self.data.likelihoodRatioTestNull = (
             -2.0 * (self.data.nullLogLike - self.data.logLike)
             if self.data.nullLogLike is not None
@@ -640,6 +654,10 @@ class bioResults:
 
     def short_summary(self) -> str:
         """Provides a short summary of the estimation results"""
+        if self.data is None:
+            text = 'No estimation result is available'
+            return text
+
         text = ''
         text += f'Results for model {self.data.modelName}\n'
         text += f'Nbr of parameters:\t\t{self.data.nparam}\n'
@@ -666,6 +684,7 @@ class bioResults:
     @deprecated(short_summary)
     def shortSummary(self) -> str:
         """Provides a short summary of the estimation results. Old syntax"""
+
         pass
 
     def __str__(self) -> str:
@@ -725,6 +744,9 @@ class bioResults:
         header = ''
         header += '%% This file is designed to be included into a LaTeX document\n'
         header += '%% See http://www.latex-project.org for ' 'information about LaTeX\n'
+        if self.data is None:
+            header += 'No estimation result is available.'
+            return header
         header += (
             f'%% {self.data.modelName} - Report from '
             f'biogeme {bv.get_version()} '
@@ -734,6 +756,7 @@ class bioResults:
         header += bv.get_latex()
         return header
 
+    @deprecated_parameters(obsolete_params={'onlyRobust': 'only_robust'})
     def get_latex(self, only_robust: bool = True) -> str:
         """Get the results coded in LaTeX
 
@@ -745,6 +768,8 @@ class bioResults:
         """
         now = datetime.datetime.now()
         latex = self._get_latex_header()
+        if self.data is None:
+            return latex
         if self.data.latexFileName is not None:
             latex += '\n%% File ' + self.data.latexFileName + '\n'
         latex += f'\n%% This file has automatically been generated on {now}</p>\n'
@@ -800,6 +825,10 @@ class bioResults:
             latex += table.to_latex(float_format=formatting)
 
         return latex
+
+    @deprecated(new_func=get_latex)
+    def getLaTeX(self, onlyRobust=True):
+        pass
 
     def get_general_statistics(self) -> dict[str, GeneralStatistic]:
         """Format the results in a dict
@@ -940,6 +969,7 @@ class bioResults:
     def numberOfFreeParameters(self) -> int:
         pass
 
+    @deprecated_parameters(obsolete_params={'onlyRobust': 'only_robust'})
     def get_estimated_parameters(self, only_robust: bool = True) -> pd.DataFrame:
         """Gather the estimated parameters and the corresponding statistics in
         a Pandas dataframe.
@@ -1118,6 +1148,7 @@ class bioResults:
     def getCorrelationResults(self, subset: list[str] | None = None) -> pd.DataFrame:
         pass
 
+    @deprecated_parameters(obsolete_params={'onlyRobust': 'only_robust'})
     def get_html(self, only_robust: bool = True) -> str:
         """Get the results coded in HTML
 
@@ -1131,6 +1162,9 @@ class bioResults:
         html = self._get_html_header()
         html += bv.get_html()
         html += f'<p>This file has automatically been generated on {now}</p>\n'
+        if self.data is None:
+            html += '</html>'
+            return html
         html += '<table>\n'
         html += (
             f'<tr class=biostyle><td align=right>'
@@ -1255,6 +1289,7 @@ class bioResults:
     def getHtml(self, only_robust: bool = True) -> str:
         pass
 
+    @deprecated_parameters(obsolete_params={'myBetas': 'my_betas'})
     def get_beta_values(self, my_betas: list[str] | None = None) -> dict[str, float]:
         """Retrieve the values of the estimated parameters, by names.
 
@@ -1347,6 +1382,7 @@ class bioResults:
     def getBootstrapVarCovar(self) -> pd.DataFrame:
         pass
 
+    @deprecated_parameters(obsolete_params={'onlyRobust': 'only_robust'})
     def write_html(self, only_robust: bool = True) -> None:
         """Write the results in an HTML file."""
         self.data.htmlFileName = bf.get_new_file_name(self.data.modelName, 'html')
@@ -1385,6 +1421,9 @@ class bioResults:
         html += (
             '<meta http-equiv="Content-Type" content="text/html; ' 'charset=utf-8" />\n'
         )
+        if self.data is None:
+            html += '<p>No estimation result is available.</p>'
+            return html
         html += (
             f'<title>{self.data.modelName} - Report from '
             f'biogeme {bv.get_version()} '
@@ -1417,6 +1456,12 @@ class bioResults:
         html += '<body bgcolor="#ffffff">\n'
         return html
 
+    @deprecated_parameters(
+        obsolete_params={
+            'myBetas': 'my_betas',
+            'useBootstrap': 'use_bootstrap',
+        }
+    )
     def get_betas_for_sensitivity_analysis(
         self, my_betas: list[str], size: int = 100, use_bootstrap: bool = True
     ) -> list[dict[str, float]]:
@@ -1480,6 +1525,7 @@ class bioResults:
     ) -> list[dict[str, float]]:
         pass
 
+    @deprecated_parameters(obsolete_params={'robustStdErr': 'robust_std_err'})
     def get_f12(self, robust_std_err: bool = True) -> str:
         """F12 is a format used by the software ALOGIT to
         report estimation results.
@@ -1623,6 +1669,7 @@ class bioResults:
     def getF12(self, robust_std_err: bool = True) -> str:
         pass
 
+    @deprecated_parameters(obsolete_params={'robustStdErr': 'robust_std_err'})
     def write_f12(self, robust_std_err: bool = True) -> None:
         """Write the results in F12 file."""
         self.data.F12FileName = bf.get_new_file_name(self.data.modelName, 'F12')

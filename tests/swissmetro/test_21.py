@@ -33,9 +33,9 @@ exclude = (TRAIN_AV_SP == 0) + (CAR_AV_SP == 0) + (CHOICE == 2) + (
 database.remove(exclude)
 
 
-ASC_CAR = Beta('ASC_CAR', 1, None, None, 0)
-B_TIME = Beta('B_TIME', 1, None, None, 0)
-B_COST = Beta('B_COST', 1, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
+B_TIME = Beta('B_TIME', 0, None, None, 0)
+B_COST = Beta('B_COST', 0, None, None, 0)
 
 
 TRAIN_COST = TRAIN_CO * (GA == 0)
@@ -55,7 +55,7 @@ prob = Elem(P, CHOICE)
 
 class test_02(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, log(prob), parameter_file='')
+        biogeme = bio.BIOGEME(database, log(prob))
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False

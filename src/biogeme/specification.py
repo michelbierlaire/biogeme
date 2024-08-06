@@ -21,8 +21,9 @@ import biogeme.biogeme as bio
 import biogeme.tools.unique_ids
 from biogeme.configuration import Configuration
 from biogeme.exceptions import BiogemeError
-from biogeme.parameters import get_default_value
+from biogeme.parameters import get_default_value, Parameters
 from biogeme.validity import Validity
+from biogeme.results import bioResults
 
 if TYPE_CHECKING:
     from biogeme.results import bioResults
@@ -45,16 +46,16 @@ class Specification:
     function that checks the validity of the results
     """
     generic_name = 'default_name'  #: short name for file names
+    biogeme_parameters: Parameters | None = None
 
     def __init__(
         self,
-        configuration: Configuration,
-        maximum_number_of_parameters: int | None = None,
+        configuration: biogeme.configuration.Configuration,
+        biogeme_parameters: Parameters | None = None,
     ):
         """Creates a specification from a  configuration
 
         :param configuration: configuration of the multiple expression
-        :type configuration: biogeme.configuration.Configuration
         """
         if not isinstance(configuration, Configuration):
             error_msg = 'Ctor needs an object of type Configuration'
@@ -62,17 +63,25 @@ class Specification:
         self.configuration = configuration
         self.model_names = None
         self.validity = None
+        self.biogeme_parameters = biogeme_parameters
         self.maximum_number_parameters = (
             get_default_value(
                 name='maximum_number_parameters', section='AssistedSpecification'
             )
-            if maximum_number_of_parameters is None
-            else maximum_number_of_parameters
+            if biogeme_parameters is None
+            else biogeme_parameters.get_value(
+                name='maximum_number_parameters', section='AssistedSpecification'
+            )
         )
+        logger.debug(f'{self.maximum_number_parameters=}')
+
         self._estimate()
         assert (
             self.validity is not None
         ), 'Validity must be set by the _estimate function'
+        assert (
+            self.all_results.get(self.config_id) is not None
+        ), 'Results have not been generated'
 
     @classmethod
     def from_string_id(cls, configuration_id: str):
@@ -122,7 +131,6 @@ class Specification:
             self.model_names = biogeme.tools.unique_ids.ModelNames(
                 prefix=self.generic_name
             )
-
         if self.config_id in self.all_results:
             results = self.all_results.get(self.config_id)
         else:
@@ -133,8 +141,14 @@ class Specification:
                 database=self.database,
             )
             number_of_parameters = the_biogeme.number_unknown_parameters()
+            logger.info(
+                f'Model with {number_of_parameters} unknown parameters [max: {self.maximum_number_parameters}]'
+            )
 
             if number_of_parameters > self.maximum_number_parameters:
+                logger.info(
+                    f'Invalid as it exceeds the maximum number of parameters: {self.maximum_number_parameters}'
+                )
                 self.validity = Validity(
                     status=False,
                     reason=(
@@ -142,6 +156,7 @@ class Specification:
                         f'{self.maximum_number_parameters}'
                     ),
                 )
+                self.all_results[self.config_id] = bioResults()
                 return
             the_biogeme.modelName = self.model_names(self.config_id)
             logger.info(f'*** Estimate {the_biogeme.modelName}')
@@ -167,10 +182,12 @@ class Specification:
         :rtype: str
         """
         the_results = self.get_results()
+        if the_results is None:
+            return f'Invalid model: {self.validity.reason}'
         return f'{the_results.short_summary()}'
 
     def get_element(
-        self, multi_objectives: Callable[[bioResults], list[float]]
+        self, multi_objectives: Callable[[bioResults | None], list[float]]
     ) -> SetElement:
         """Obtains the element from the Pareto set corresponding to a specification
 

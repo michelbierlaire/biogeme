@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
     <meta name="description" content="" >
     <meta name="author" content="" >
-    <title>Biogeme 3.2.13</title>
+    <title>Biogeme 3.2.14</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" >
     <!-- Font Awesome icons (free version)-->
@@ -34,7 +34,7 @@
             <li class="nav-item"><a class="nav-link" href="#help">Help</a></li>
             <li class="nav-item"><a class="nav-link" href="#doc">Documentation</a></li>
             <li class="nav-item"><a class="nav-link"
-            href="sphinx/auto_examples/index.html"
+            href="sphinx/examples.html"
             target="_blank">Examples</a></li>
             <li class="nav-item"><a class="nav-link" href="#res">Resources</a></li>
             <li class="nav-item"><a class="nav-link" href="#archives">Archives</a></li>
@@ -90,6 +90,7 @@
               the <a href="https://youtu.be/lhbpra2dILA" target="_blank"> video on data</a>.</p>
             <p class="text-muted">Watch
               the <a href="https://youtu.be/jIAIsqh_g0E" target="_blank"> video on model specification</a>.</p>
+              <p class="text-muted">Use the <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" target="_blank"> Biogeme Assistant from ChatGPT</a>.</p>
           </div>
           <div class="col-md-3">
             <span class="fa-stack fa-4x">
@@ -97,7 +98,7 @@
               <i class="fas fa-code fa-stack-1x fa-inverse"></i>
             </span>
             <h4 class="my-3">Examples</h4>
-            <p class="text-muted">Examples are available <a href="sphinx/auto_examples/index.html" target="_blank">here</a></p>
+            <p class="text-muted">Examples are available <a href="sphinx/examples.html" target="_blank">here</a></p>
           </div>
           <div class="col-md-3">
             <span class="fa-stack fa-4x">
@@ -136,6 +137,22 @@
         <div class="row gx-4">
 	  <h1>Getting help</h1>
 	</div>
+		<div class="row gx-4 justify-content-center">
+	  <div class="col-lg-10">
+	    <div class="card bg-secondary text-white mb-3">
+	      <div class="card-body">
+		<h5 class="card-title">ChatGPT</h5>
+		<p class="card-text">
+		  It is still experimental, but there is an instance of ChatGPT dedicated to Biogeme:
+		</p>
+		<p class="card-text text-center"><a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant"
+					  target="_blank">Biogeme Assistant</a>
+		</p>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
 	<div class="row gx-4 justify-content-center">
 	  <div class="col-lg-10">
 	    <div class="card bg-secondary text-white mb-3">

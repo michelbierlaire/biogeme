@@ -44,7 +44,7 @@ def loglogit(
     """
 
     if av is None:
-        return _bioLogLogitFullChoiceSet(util, av=None, choice=i)
+        return _bioLogLogitFullChoiceSet(util, choice=i)
 
     return _bioLogLogit(util, av, i)
 
@@ -76,6 +76,6 @@ def logit(
 
     """
     if av is None:
-        return exp(_bioLogLogitFullChoiceSet(util, av=None, choice=i))
+        return exp(_bioLogLogitFullChoiceSet(util, choice=i))
 
     return exp(_bioLogLogit(util, av, i))
