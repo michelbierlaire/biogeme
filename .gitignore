@@ -399,7 +399,6 @@ docs/examples/swissmetro/*.pareto
 docs.keep/*
 docs/source/code/README.rst
 docs/source/code/toml.rst
-docs/source/examples/assisted/b07everything_assisted.pareto
 docs/source/sg_execution_times.rst
 tests/functions/biogemeModelDefaultName.html
 tests/functions/myfile.toml
