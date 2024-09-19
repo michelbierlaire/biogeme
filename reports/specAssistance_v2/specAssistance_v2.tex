@@ -1372,7 +1372,7 @@ The ``pareto file'' is the memory of the process. It stores all models that have
 \end{enumerate}
 If the file exists when the algorithm is started, its content is used to initialize the algorithm. This allows to interrupt the algorithm and to relaunch it without losing what has been found so far.
 
-Like the function calculating the indicators, the function verifying the validity of the results takes also estimation results as argument, as returns a tuple with two values:
+Like the function calculating the indicators, the function verifying the validity of the results also takes estimation results as argument, and returns a tuple with two values:
 \begin{enumerate}
 \item a boolean that is True if the results are valid, and False otherwise,
 \item a string explaining why the results are invalid, or None if they are valid.
