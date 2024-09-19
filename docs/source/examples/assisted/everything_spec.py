@@ -296,7 +296,7 @@ nests_public = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(public,))
 logprob_nested_public = models.lognested(V, av, nests_public, CHOICE)
 
 # %%
-# Catalo for models.
+# Catalog for models.
 model_catalog = Catalog.from_dict(
     catalog_name='model_catalog',
     dict_of_expressions={
