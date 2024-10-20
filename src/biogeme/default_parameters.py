@@ -78,6 +78,26 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_boolean,),
         ),
         ParameterTuple(
+            name='generate_yaml',
+            value=True,
+            type=bool,
+            section='Output',
+            description=(
+                'bool: "True" if the yaml file with the results must be generated.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='save_validation_results',
+            value=True,
+            type=bool,
+            section='Output',
+            description=(
+                'bool: "True" if the validation results are saved in CSV files.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
             name='number_of_threads',
             value=0,
             type=int,

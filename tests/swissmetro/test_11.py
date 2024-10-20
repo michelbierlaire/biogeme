@@ -83,7 +83,7 @@ class test_11(unittest.TestCase):
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -5214.049, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5214.049, 2)
         biosim = bio.BIOGEME(database, simulate)
         simresults = biosim.simulate(results.get_beta_values())
         self.assertAlmostEqual(

@@ -24,10 +24,10 @@ class TestGenerateModel(unittest.TestCase):
             'x'
         )
         self.mock_context.total_sample_size = 5
+        self.mock_context.total_mev_sample_size = 4
         self.mock_context.attributes = ['att1', 'att2']
         self.mock_context.mev_prefix = 'mev'
-        self.mock_context.second_partition = None
-        self.mock_context.second_sample_size = 4
+        self.mock_context.mev_partition = None
         self.mock_context.id_column = 'id'
 
         # Nests for nested logit tests

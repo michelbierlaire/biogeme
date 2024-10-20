@@ -65,9 +65,30 @@ class SamplingOfAlternatives:
 
         self.alternatives = context.alternatives
         self.id_column = context.id_column
-        self.partition = context.partition
-        self.second_partition = context.second_partition
+        self.partition = context.sampling_protocol
+        self.second_partition = context.mev_sampling_protocol
         self.cnl_nests = context.cnl_nests
+
+    def add_alphas(self, the_sample: pd.DataFrame) -> pd.DataFrame:
+        """Add the alpha parameters in the sampled database"""
+
+        if self.cnl_nests is None:
+            raise BiogemeError(
+                f'No nests have been defined for the cross-nested logit model'
+            )
+
+        # We add the alpha parameters in the sample
+        def get_alphas(alternative_id: int) -> pd.Series:
+            """Prepare the alphas for insertion in the data frame"""
+            assert self.cnl_nests is not None
+            the_dict = self.cnl_nests.get_alpha_values(alternative_id)
+            return pd.Series(the_dict)
+
+        new_columns = the_sample[self.id_column].apply(get_alphas)
+        new_columns = new_columns.rename(columns=lambda x: CNL_PREFIX + x)
+
+        the_sample = pd.concat([the_sample, new_columns], axis="columns")
+        return the_sample
 
     def sample_alternatives(self, chosen: int) -> pd.DataFrame:
         """Performing the sampling of alternatives
@@ -93,7 +114,7 @@ class SamplingOfAlternatives:
         results = []
 
         for stratum in self.partition:
-            # statum.subset is a set of int
+            # stratum.subset is a set of int
             # We create a copy because we'll have to drop the chosen alternative
             the_subset_of_alternatives = copy.deepcopy(stratum.subset)
             stratum_size = len(stratum.subset)
@@ -124,6 +145,8 @@ class SamplingOfAlternatives:
         the_sample = pd.concat(results, ignore_index=True)
         # Add the chosen alternative. By construction, it is not in the sample.
         the_sample = pd.concat([chosen_alternative, the_sample], ignore_index=True)
+        if self.cnl_nests:
+            self.add_alphas(the_sample)
         return the_sample
 
     def sample_mev_alternatives(self) -> pd.DataFrame:
@@ -152,16 +175,6 @@ class SamplingOfAlternatives:
         the_sample = pd.concat(results, ignore_index=True)
 
         if self.cnl_nests:
-            # We add the alpha parameters in the sample
-            def get_alphas(alternative_id: int) -> pd.Series:
-                """Prepare the alphas for insertion in the data frame"""
-                assert self.cnl_nests is not None
-                the_dict = self.cnl_nests.get_alpha_values(alternative_id)
-                return pd.Series(the_dict)
-
-            new_columns = the_sample[self.id_column].apply(get_alphas)
-            new_columns = new_columns.rename(columns=lambda x: CNL_PREFIX + x)
-
-            the_sample = pd.concat([the_sample, new_columns], axis="columns")
+            self.add_alphas(the_sample)
 
         return the_sample

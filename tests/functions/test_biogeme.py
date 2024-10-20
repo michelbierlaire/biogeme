@@ -44,6 +44,7 @@ class TestBiogeme(unittest.TestCase):
                 or file_name.endswith('.html')
                 or file_name.endswith('.iter')
                 or file_name.endswith('.log')
+                or file_name.endswith('.yaml')
             ):
                 os.remove(file_name)
 
@@ -385,24 +386,23 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.algorithm_name = 'simple_bounds'
         my_biogeme.bootstrap_samples = 10
         results = my_biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         panelBiogeme = bio.BIOGEME(getPanelData(1), self.get_dict_of_expressions())
         panelBiogeme.bootstrap_samples = 10
         results = panelBiogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
         my_biogeme.algorithm_name = 'scipy'
         my_biogeme.saveIterations = True
         results = my_biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         # We try to recycle, while there is no pickle file yet.
         results = my_biogeme.estimate(recycle=True)
         # We estimate the model twice to generate two pickle .py.
         my_biogeme.generate_pickle = True
         results = my_biogeme.estimate()
-        results = my_biogeme.estimate()
         results = my_biogeme.estimate(recycle=True)
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme.generate_pickle = False
 
         my_biogeme_without_bounds = self.get_biogeme_instance_without_bounds()
@@ -412,16 +412,16 @@ class TestBiogeme(unittest.TestCase):
 
         my_biogeme_without_bounds.algorithm_name = 'TR-newton'
         results = my_biogeme_without_bounds.estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'TR-BFGS'
         results = my_biogeme_without_bounds.estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'LS-newton'
         results = my_biogeme_without_bounds.estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'LS-BFGS'
         results = my_biogeme_without_bounds.estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.estimate(algorithm='any_algo')
@@ -446,16 +446,16 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.algorithm_name = 'simple_bounds'
         my_biogeme.bootstrap_samples = 10
         results = my_biogeme.quick_estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         panelBiogeme = bio.BIOGEME(getPanelData(1), self.get_dict_of_expressions())
         panelBiogeme.bootstrap_samples = 10
         results = panelBiogeme.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
         my_biogeme.algorithm_name = 'scipy'
         my_biogeme.saveIterations = True
         results = my_biogeme.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         # We try to recycle, while there is no pickle file yet.
         results = my_biogeme.quick_estimate(recycle=True)
         # We quickEstimate the model twice to generate two pickle .py.
@@ -463,7 +463,7 @@ class TestBiogeme(unittest.TestCase):
         results = my_biogeme.quick_estimate()
         results = my_biogeme.quick_estimate()
         results = my_biogeme.quick_estimate(recycle=True)
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme.generate_pickle = False
 
         my_biogeme_without_bounds = self.get_biogeme_instance_without_bounds()
@@ -473,16 +473,16 @@ class TestBiogeme(unittest.TestCase):
 
         my_biogeme_without_bounds.algorithm_name = 'TR-newton'
         results = my_biogeme_without_bounds.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'TR-BFGS'
         results = my_biogeme_without_bounds.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'LS-newton'
         results = my_biogeme_without_bounds.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
         my_biogeme_without_bounds.algorithm_name = 'LS-BFGS'
         results = my_biogeme_without_bounds.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
         with self.assertRaises(excep.BiogemeError):
             _ = my_biogeme.quick_estimate(algorithm='any_algo')

@@ -23,7 +23,7 @@ from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, Elem, bioMultSum, log, exp, Beta, Numeric
 from biogeme.function_output import FunctionOutput
-from biogeme.results import bioResults
+from biogeme.results_processing import EstimationResults
 from biogeme.tools.checks import validate_dict_types
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class Mdcev(ABC):
         self.alpha_parameters: dict[int, Expression] | None = alpha_parameters
         self.scale_parameter: Expression | None = scale_parameter
         self.weights: Expression | None = weights
-        self._estimation_results: bioResults | None = None
+        self._estimation_results: EstimationResults | None = None
         self.database: Database | None = None
         # Check the numbering
         self.alternatives: set[int] = set(self.baseline_utilities)
@@ -112,12 +112,12 @@ class Mdcev(ABC):
         return self.key_to_index[self.outside_good_key]
 
     @property
-    def estimation_results(self) -> bioResults | None:
+    def estimation_results(self) -> EstimationResults | None:
         """Property for the estimation results"""
         return self._estimation_results
 
     @estimation_results.setter
-    def estimation_results(self, the_results: bioResults):
+    def estimation_results(self, the_results: EstimationResults):
         self._estimation_results = the_results
         self._update_parameters_in_expressions()
 
@@ -306,7 +306,7 @@ class Mdcev(ABC):
         number_of_chosen_alternatives: Expression,
         consumed_quantities: dict[int, Expression],
         **kwargs,
-    ) -> bioResults:
+    ) -> EstimationResults:
         """Generate the Biogeme formula for the log probability of the MDCEV model
 
         :param database: data needed for the estimation of the parameters, in Biogeme format.

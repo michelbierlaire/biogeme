@@ -1,6 +1,5 @@
 import unittest
 
-from biogeme.results import bioResults
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
@@ -27,8 +26,7 @@ from biogeme.expressions import (
     MonteCarlo,
     PanelLikelihoodTrajectory,
 )
-from biogeme.parameters import Parameters
-from biogeme.tools import TemporaryFile
+from biogeme.results_processing import EstimationResults
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -92,8 +90,8 @@ class test_15(unittest.TestCase):
         biogeme.save_iterations = False
         biogeme.generate_html = False
         biogeme.generate_pickle = False
-        results: bioResults = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -3639.6577652986966, 2)
+        results: EstimationResults = biogeme.estimate()
+        self.assertAlmostEqual(results.final_log_likelihood, -3639.6577652986966, 2)
 
 
 if __name__ == '__main__':

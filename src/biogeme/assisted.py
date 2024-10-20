@@ -22,7 +22,7 @@ from biogeme.configuration import Configuration
 from biogeme.controller import ControllerOperator
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import Parameters
-from biogeme.results import bioResults
+from biogeme.results_processing import EstimationResults
 from biogeme.specification import Specification
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class ParetoPostProcessing:
         self.database = biogeme_object.database
         self.model_names = None
 
-    def reestimate(self, recycle: bool = False) -> dict[str, bioResults]:
+    def reestimate(self, recycle: bool = False) -> dict[str, EstimationResults]:
         """The assisted specification uses quickEstimate to estimate
         the models. A complete estimation is necessary to obtain the
         full estimation results.
@@ -136,9 +136,9 @@ class AssistedSpecification(Neighborhood):
     def __init__(
         self,
         biogeme_object: BIOGEME,
-        multi_objectives: Callable[[bioResults | None], list[float]],
+        multi_objectives: Callable[[EstimationResults | None], list[float]],
         pareto_file_name: str,
-        validity: Callable[[bioResults], bool] | None = None,
+        validity: Callable[[EstimationResults], bool] | None = None,
         parameter_file: str | None = None,
     ):
         """Ctor
@@ -230,7 +230,7 @@ class AssistedSpecification(Neighborhood):
         specification = Specification.from_string_id(element.element_id)
         return specification.validity
 
-    def run(self) -> dict[str, bioResults]:
+    def run(self) -> dict[str, EstimationResults]:
         """Runs the VNS algorithm
 
         :return: doct with the estimation results of the Pareto optimal models

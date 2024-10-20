@@ -20,7 +20,7 @@ URL_UNIVERSITY = 'http://www.epfl.ch'
 URL_BIOGEME = 'http://biogeme.epfl.ch'
 URL_FORUM = 'https://groups.google.com/d/forum/biogeme'
 
-__version__ = '3.2.14'
+__version__ = '3.2.15a01'
 
 
 def get_version() -> str:
@@ -103,7 +103,6 @@ def get_latex() -> str:
     :rtype: string
     """
     latex = f'%% biogeme {get_version()} [{versionDate}]\n'
-    latex += '%% Version entirely written in Python\n'
     latex += f'%% Home page: {URL_BIOGEME}\n'
     latex += f'%% Submit questions to {URL_FORUM}\n'
     latex += f'%% {AUTHOR}, {DEPARTMENT}, {UNIVERSITY}\n'

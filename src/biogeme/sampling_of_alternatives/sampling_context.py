@@ -5,8 +5,10 @@
 """
 
 import logging
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import NamedTuple, Optional, Iterable
+from typing import NamedTuple
+
 import pandas as pd
 from biogeme.expressions import Expression, TypeOfElementaryExpression
 from biogeme.nests import NestsForCrossNestedLogit
@@ -69,7 +71,7 @@ class SamplingContext:
     :param combined_variables: definition of interaction variables
 
     :param mev_partition: If a second choice set need to be sampled
-        for the MEV terms, the corresponding partitition is provided
+        for the MEV terms, the corresponding partition is provided
         here.
 
     """
@@ -83,9 +85,9 @@ class SamplingContext:
     biogeme_file_name: str
     utility_function: Expression
     combined_variables: list[CrossVariableTuple]
-    mev_partition: Optional[Partition] = None
-    mev_sample_sizes: Optional[Iterable[int]] = None
-    cnl_nests: Optional[NestsForCrossNestedLogit] = None
+    mev_partition: Partition | None = None
+    mev_sample_sizes: Iterable[int] | None = None
+    cnl_nests: NestsForCrossNestedLogit | None = None
 
     def check_expression(self, expression: Expression) -> None:
         """Verifies if the variables contained in the expression can be found in the databases"""
@@ -122,9 +124,8 @@ class SamplingContext:
             stratum size..
 
         """
-
         # Verify that all requested alternatives appear in the database of alternatives
-        for stratum in self.partition:
+        for stratum in self.sampling_protocol:
             n = len(stratum.subset)
             if n == 0:
                 error_msg = 'A stratum is empty'
@@ -234,25 +235,13 @@ class SamplingContext:
                 'DataFrames individuals or alternatives should not be empty.'
             )
 
-        # A previous implementation used a list of StratumTuple. We
-        # now perform the conversion.
-        self.partition = [
-            StratumTuple(subset=segment, sample_size=size)
-            for segment, size in zip(self.the_partition, self.sample_sizes)
-        ]
-
         self.check_partition()
         logger.debug('Check if there is a MEV partition')
         if self.mev_partition or self.mev_sample_sizes:
             logger.debug('Yes, there is a MEV partition')
             self.check_mev_partition()
-            self.second_partition = [
-                StratumTuple(subset=segment, sample_size=size)
-                for segment, size in zip(self.mev_partition, self.mev_sample_sizes)
-            ]
         else:
             logger.debug('No, there is no MEV partition')
-            self.second_partition = None
 
         # If CNL nests are defined, check that the alphas are all
         # fixed and that the nests have a name.
@@ -290,23 +279,53 @@ class SamplingContext:
                 f'Column {self.id_column} in alternatives should be of type int or float.'
             )
 
-        self.total_sample_size = sum(stratum.sample_size for stratum in self.partition)
-        self.second_sample_size = (
-            None
-            if self.second_partition is None
-            else sum(stratum.sample_size for stratum in self.second_partition)
-        )
         self.check_expression(self.utility_function)
         for cross_variable in self.combined_variables:
             self.check_expression(cross_variable.formula)
 
-        self.attributes = set(self.alternatives.columns) | {
+        self.include_cnl_alphas()
+
+    @property
+    def attributes(self) -> set[str]:
+        """List of attributes for the choice model"""
+        return set(self.alternatives.columns) | {
             combined_variable.name for combined_variable in self.combined_variables
         }
 
-        self.mev_prefix = '' if self.second_partition is None else MEV_PREFIX
+    @property
+    def mev_prefix(self) -> str:
+        """Build the prefix for the MEV columns"""
+        return '' if self.mev_partition is None else MEV_PREFIX
 
-        self.include_cnl_alphas()
+    @property
+    def sampling_protocol(self) -> list[StratumTuple]:
+        """Provides a list of strata characterizing the sampling"""
+        return [
+            StratumTuple(subset=segment, sample_size=size)
+            for segment, size in zip(self.the_partition, self.sample_sizes)
+        ]
+
+    @property
+    def mev_sampling_protocol(self) -> list[StratumTuple] | None:
+        """Provides a list of strata characterizing the MEV sampling"""
+        if self.mev_partition is None:
+            return None
+        return [
+            StratumTuple(subset=segment, sample_size=size)
+            for segment, size in zip(self.mev_partition, self.mev_sample_sizes)
+        ]
+
+    @property
+    def total_sample_size(self) -> int:
+        """Sample size"""
+        return sum(stratum.sample_size for stratum in self.sampling_protocol)
+
+    @property
+    def total_mev_sample_size(self) -> int:
+        """Sample size"""
+        if self.mev_partition is None:
+            return 0
+        return sum(stratum.sample_size for stratum in self.mev_sampling_protocol)
 
     def reporting(self) -> str:
         """Summarizes the configuration specified by the context object."""
@@ -322,7 +341,7 @@ class SamplingContext:
         result['Main sample'] += ', '.join(
             [
                 f'{stratum.sample_size}/{len(stratum.subset)}'
-                for stratum in self.partition
+                for stratum in self.sampling_protocol
             ]
         )
         if self.mev_partition:
@@ -331,11 +350,11 @@ class SamplingContext:
                 f'{self.mev_partition.number_of_segments()} segment(s) of size '
                 f'{", ".join([str(len(segment)) for segment in self.mev_partition])}'
             )
-            result['MEV sample'] = f'{self.second_sample_size}: '
+            result['MEV sample'] = f'{self.total_mev_sample_size}: '
             result['MEV sample'] += ', '.join(
                 [
                     f'{stratum.sample_size}/{len(stratum.subset)}'
-                    for stratum in self.second_partition
+                    for stratum in self.mev_sampling_protocol
                 ]
             )
 

@@ -79,7 +79,7 @@ class test_06(unittest.TestCase):
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertEqual(results.data.nparam, 5)
+        self.assertEqual(results.number_of_parameters, 5)
 
 
 if __name__ == '__main__':

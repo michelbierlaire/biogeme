@@ -218,7 +218,7 @@ def mev_endogenous_sampling(
     :type av: dict(int:biogeme.expressions.expr.Expression)
 
 
-    :param correction: a dict of expressions for the correstion terms
+    :param correction: a dict of expressions for the correction terms
                        of each alternative.
     :type correction: dict(int:biogeme.expressions.expr.Expression)
 

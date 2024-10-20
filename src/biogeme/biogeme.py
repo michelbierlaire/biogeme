@@ -23,9 +23,7 @@ import pandas as pd
 from tqdm import tqdm
 
 import biogeme.database as db
-import biogeme.filenames as bf
 import biogeme.optimization as opt
-import biogeme.results as res
 import biogeme.tools.derivatives
 import biogeme.tools.unique_ids
 from biogeme.configuration import Configuration
@@ -43,6 +41,7 @@ from biogeme.expressions import (
     bioMultSum,
     SelectedExpressionsIterator,
 )
+from biogeme.filenames import get_new_file_name
 from biogeme.function_output import (
     FunctionOutput,
     BiogemeFunctionOutput,
@@ -53,6 +52,11 @@ from biogeme.parameters import (
     Parameters,
     DEFAULT_FILE_NAME as DEFAULT_PARAMETER_FILE_NAME,
 )
+from biogeme.results_processing import (
+    RawEstimationResults,
+    generate_html_file,
+)
+from biogeme.results_processing.estimation_results import EstimationResults
 
 DEFAULT_MODEL_NAME = 'biogemeModelDefaultName'
 logger = logging.getLogger(__name__)
@@ -144,6 +148,8 @@ class BIOGEME:
                     raise AttributeError(error_msg)
 
         self.parameter_file: str = self.biogeme_parameters.file_name
+        self.html_filename: str | None = None
+        self.yaml_filename: str | None = None
 
         # We allow the values of the parameters to be set with arguments
         for name, value in list(kwargs.items()):
@@ -1125,7 +1131,7 @@ class BIOGEME:
         quick_estimate: bool = False,
         recycle: bool = False,
         run_bootstrap: bool = False,
-    ) -> dict[str, res.bioResults]:
+    ) -> dict[str, EstimationResults]:
         """Estimate all or selected versions of a model with Catalog's,
         corresponding to multiple specifications.
 
@@ -1146,7 +1152,6 @@ class BIOGEME:
         :return: object containing the estimation results associated
             with the name of each specification, as well as a
             description of each configuration
-        :rtype: dict(str: bioResults)
 
         """
         if self.short_names is None:
@@ -1194,6 +1199,7 @@ class BIOGEME:
             b.modelName = self.short_names(config_id)
             b.generate_html = self.generate_html
             b.generate_pickle = self.generate_pickle
+            b.generate_yaml = self.generate_yaml
             if quick_estimate:
                 results = b.quick_estimate(recycle=recycle)
             else:
@@ -1207,7 +1213,7 @@ class BIOGEME:
         self,
         run_bootstrap: bool = False,
         **kwargs,
-    ) -> res.bioResults:
+    ) -> EstimationResults:
 
         return self.estimate(recycle=True, run_bootstrap=run_bootstrap, **kwargs)
 
@@ -1217,10 +1223,10 @@ class BIOGEME:
         recycle: bool = False,
         run_bootstrap: bool = False,
         **kwargs,
-    ) -> res.bioResults:
+    ) -> EstimationResults:
         """Estimate the parameters of the model(s).
 
-        :param recycle: if True, the results are read from the pickle
+        :param recycle: if True, the results are read from the YAML
             file, if it exists. If False, the estimation is performed.
         :type recycle: bool
 
@@ -1285,7 +1291,7 @@ class BIOGEME:
         if self.modelName == DEFAULT_MODEL_NAME:
             logger.warning(
                 f"You have not defined a name for the model. "
-                f"The output .py are named from the model name. "
+                f"The output files are named from the model name. "
                 f"The default is [{DEFAULT_MODEL_NAME}]"
             )
 
@@ -1293,29 +1299,26 @@ class BIOGEME:
         self._set_algorithm_parameters()
 
         if recycle:
-            pickle_files = self.files_of_type("pickle")
-            pickle_files.sort()
-            if pickle_files:
-                pickle_to_read = pickle_files[-1]
-                if len(pickle_files) > 1:
+            yaml_files = self.files_of_type("yaml")
+            yaml_files.sort()
+            if yaml_files:
+                yaml_to_read = yaml_files[-1]
+                if len(yaml_files) > 1:
                     warning_msg = (
-                        f"Several pickle .py are available for "
-                        f"this model: {pickle_files}. "
-                        f"The file {pickle_to_read} "
+                        f"Several files .yaml are available for "
+                        f"this model: {yaml_files}. "
+                        f"The file {yaml_to_read} "
                         f"is used to load the results."
                     )
                     logger.warning(warning_msg)
-                results = res.bioResults(
-                    pickle_file=pickle_to_read,
-                    identification_threshold=self.identification_threshold,
-                )
+                results = EstimationResults.from_yaml_file(filename=yaml_to_read)
                 logger.warning(
-                    f"Estimation results read from {pickle_to_read}. "
-                    f"There is no guarantee that they correspond "
-                    f"to the specified model."
+                    f'Estimation results read from {yaml_to_read}. '
+                    f'There is no guarantee that they correspond '
+                    f'to the specified model.'
                 )
                 return results
-            warning_msg = "Recycling was requested, but no pickle file was found"
+            warning_msg = 'Recycling was requested, but no yaml file was found'
             logger.warning(warning_msg)
         if len(self.id_manager.free_betas.names) == 0:
             raise BiogemeError(
@@ -1400,33 +1403,76 @@ class BIOGEME:
             # Time needed to generate the bootstrap results
             self.bootstrap_time = datetime.now() - start_time
             logger.setLevel(current_logger_level)
-        raw_results = res.RawResults(
-            self, xstar, f_g_h_b, bootstrap=self.bootstrap_results
-        )
-        r = res.bioResults(
-            raw_results,
-            identification_threshold=self.identification_threshold,
-        )
 
-        estimated_betas = r.get_beta_values()
+        # Test the new estimation results object
+        clean_optimization_messages = {}
+        for key, value in self.optimizationMessages.items():
+            if isinstance(value, np.floating):
+                clean_optimization_messages[key] = float(value)
+            elif isinstance(value, np.ndarray):
+                clean_optimization_messages[key] = value.tolist()
+            else:
+                clean_optimization_messages[key] = value
+
+        null_log_likelihood = (
+            float(self.nullLogLike) if self.nullLogLike is not None else None
+        )
+        raw_estimation_results = RawEstimationResults(
+            model_name=self.modelName,
+            user_notes=self.user_notes,
+            beta_names=self.id_manager.free_betas.names,
+            beta_values=xstar.tolist(),
+            lower_bounds=[bound[0] for bound in self.id_manager.bounds],
+            upper_bounds=[bound[1] for bound in self.id_manager.bounds],
+            gradient=f_g_h_b.gradient.tolist(),
+            hessian=f_g_h_b.hessian.tolist(),
+            bhhh=f_g_h_b.bhhh.tolist(),
+            null_log_likelihood=null_log_likelihood,
+            initial_log_likelihood=self.initLogLike,
+            final_log_likelihood=f_g_h_b.function,
+            data_name=self.database.name,
+            sample_size=self.database.get_sample_size(),
+            number_of_observations=self.database.get_number_of_observations(),
+            monte_carlo=self.monte_carlo,
+            number_of_draws=int(self.number_of_draws),
+            types_of_draws=self.database.typesOfDraws,
+            number_of_excluded_data=self.database.excludedData,
+            draws_processing_time=self.drawsProcessingTime,
+            optimization_messages=clean_optimization_messages,
+            convergence=self.convergence,
+            number_of_threads=self.number_of_threads,
+            bootstrap=(
+                None
+                if self.bootstrap_results is None
+                else self.bootstrap_results.tolist()
+            ),
+            bootstrap_time=self.bootstrap_time,
+        )
+        estimation_results = EstimationResults(
+            raw_estimation_results=raw_estimation_results
+        )
+        estimated_betas = estimation_results.get_beta_values()
         for f in self.formulas.values():
             f.change_init_values(estimated_betas)
 
-        if not r.algorithm_has_converged():
+        if not estimation_results.algorithm_has_converged:
             logger.warning(
                 'It seems that the optimization algorithm did not converge. '
                 'Therefore, the results may not correspond to the maximum '
                 'likelihood estimator. Check the specification of the model, '
                 'or the criteria for convergence of the algorithm.'
             )
-
         if self.generate_html:
-            r.write_html(self.only_robust_stats)
-        if self.generate_pickle:
-            r.write_pickle()
-        return r
+            self.html_filename = get_new_file_name(self.modelName, 'html')
+            generate_html_file(
+                filename=self.html_filename, estimation_results=estimation_results
+            )
+        if self.generate_yaml:
+            self.yaml_filename = get_new_file_name(self.modelName, 'yaml')
+            estimation_results.dump_yaml_file(filename=self.yaml_filename)
+        return estimation_results
 
-    def quick_estimate(self, **kwargs) -> res.bioResults:
+    def quick_estimate(self, **kwargs) -> EstimationResults:
         """| Estimate the parameters of the model. Same as estimate, where any
              extra calculation is skipped (init loglikelihood,
              t-statistics, etc.)
@@ -1506,32 +1552,71 @@ class BIOGEME:
         f_g_h_b = BiogemeFunctionOutput(
             function=f, gradient=None, hessian=None, bhhh=None
         )
-        raw_results = res.RawResults(
-            self,
-            xstar,
-            f_g_h_b,
-            bootstrap=self.bootstrap_results,
+        clean_optimization_messages = {}
+        for key, value in self.optimizationMessages.items():
+            if isinstance(value, np.floating):
+                clean_optimization_messages[key] = float(value)
+            elif isinstance(value, np.ndarray):
+                clean_optimization_messages[key] = value.tolist()
+            else:
+                clean_optimization_messages[key] = value
+        null_log_likelihood = (
+            float(self.nullLogLike) if self.nullLogLike is not None else None
         )
-        r = res.bioResults(
-            raw_results,
-            identification_threshold=self.identification_threshold,
+        function = f_g_h_b.function
+        gradient = f_g_h_b.gradient.tolist() if f_g_h_b.gradient is not None else None
+        hessian = f_g_h_b.hessian.tolist() if f_g_h_b.hessian is not None else None
+        bhhh = f_g_h_b.bhhh.tolist() if f_g_h_b.bhhh is not None else None
+        raw_estimation_results = RawEstimationResults(
+            model_name=self.modelName,
+            user_notes=self.user_notes,
+            beta_names=self.id_manager.free_betas.names,
+            beta_values=xstar.tolist(),
+            lower_bounds=[bound[0] for bound in self.id_manager.bounds],
+            upper_bounds=[bound[1] for bound in self.id_manager.bounds],
+            gradient=gradient,
+            hessian=hessian,
+            bhhh=bhhh,
+            null_log_likelihood=null_log_likelihood,
+            initial_log_likelihood=self.initLogLike,
+            final_log_likelihood=function,
+            data_name=self.database.name,
+            sample_size=self.database.get_sample_size(),
+            number_of_observations=self.database.get_number_of_observations(),
+            monte_carlo=self.monte_carlo,
+            number_of_draws=int(self.number_of_draws),
+            types_of_draws=self.database.typesOfDraws,
+            number_of_excluded_data=self.database.excludedData,
+            draws_processing_time=self.drawsProcessingTime,
+            optimization_messages=clean_optimization_messages,
+            convergence=self.convergence,
+            number_of_threads=self.number_of_threads,
+            bootstrap=(
+                None
+                if self.bootstrap_results is None
+                else self.bootstrap_results.tolist()
+            ),
+            bootstrap_time=self.bootstrap_time,
         )
-        if not r.algorithm_has_converged():
+        estimation_results = EstimationResults(
+            raw_estimation_results=raw_estimation_results
+        )
+        if not estimation_results.algorithm_has_converged:
             logger.warning(
                 'It seems that the optimization algorithm did not converge. '
                 'Therefore, the results below may not correspond to the maximum '
                 'likelihood estimator. Check the specification of the model, '
                 'or the criteria for convergence of the algorithm.'
             )
-        return r
+        return estimation_results
 
     @deprecated(quick_estimate)
-    def quickEstimate(self, **kwargs) -> res.bioResults:
+    def quickEstimate(self, **kwargs) -> EstimationResults:
         pass
 
     def validate(
         self,
-        estimation_results: res.bioResults,
+        estimation_results: EstimationResults,
         validation_data: list[db.EstimationValidation],
     ) -> list[pd.DataFrame]:
         """Perform out-of-sample validation.
@@ -1583,12 +1668,14 @@ class BIOGEME:
             all_simulation_results.append(sim_result)
 
         self.database = keep_database
-        if self.generate_pickle:
+        if self.save_validation_results:
+            all_files = []
             fname = f'{self.modelName}_validation'
-            pickle_file_name = bf.get_new_file_name(fname, 'pickle')
-            with open(pickle_file_name, 'wb') as f:
-                pickle.dump(all_simulation_results, f)
-            logger.info(f"Simulation results saved in file {pickle_file_name}")
+            for index, data_frame in enumerate(all_simulation_results):
+                file_name = get_new_file_name(f'{fname}_{index:03d}', 'csv')
+                all_files.append(file_name)
+                data_frame.to_csv(file_name)
+            logger.info(f'Simulation results saved in files {all_files}')
 
         return all_simulation_results
 
@@ -1696,23 +1783,13 @@ class BIOGEME:
         :param the_beta_values: values of the parameters to be used in
                 the calculations. If None, the default values are
                 used. Default: None.
-        :type the_beta_values: dict(str, float)
-
         :return: a pandas data frame with the simulated value. Each
               row corresponds to a row in the database, and each
               column to a formula.
 
         :rtype: Pandas data frame
 
-        Example::
-
-              # Read the estimation results from a file
-              results = res.bioResults(pickle_file = 'myModel.pickle')
-              # Simulate the formulas using the nominal values
-              simulatedValues = biogeme.simulate(beta_values)
-
         :raises BiogemeError: if the number of parameters is incorrect
-
         :raises BiogemeError: if theBetaValues is None.
         """
         if the_beta_values is None:
@@ -1721,7 +1798,7 @@ class BIOGEME:
                 f'Contrarily to previous versions of Biogeme, '
                 f'the values of Beta must '
                 f'now be explicitly mentioned. If they have been estimated, they can be obtained from '
-                f'results.getBetaValues(). If not, used the default values: {current_beta_values}'
+                f'results.get_beta_values(). If not, used the default values: {current_beta_values}'
             )
             raise BiogemeError(err)
 
@@ -1793,7 +1870,7 @@ class BIOGEME:
             Example::
 
                 # Read the estimation results from a file
-                results = res.bioResults(pickle_file = 'myModel.pickle')
+                results = EstimationEResults.from_yaml_file(filename = 'my_model.yaml')
                 # Retrieve the names of the betas parameters that have been
                 # estimated
                 betas = biogeme.freeBetaNames
@@ -1832,19 +1909,19 @@ class BIOGEME:
         return r
 
     def files_of_type(self, extension: str, all_files: bool = False) -> list[str]:
-        """Identify the list of .py with a given extension in the
+        """Identify the list of files with a given extension in the
         local directory
 
-        :param extension: extension of the requested .py (without
-            the dot): 'pickle', or 'html'
+        :param extension: extension of the requested files (without
+            the dot): 'yaml', or 'html'
         :type extension: str
-        :param all_files: if all_files is False, only .py containing
+        :param all_files: if all_files is False, only files containing
             the name of the model are identified. If all_files is
-            True, all .py with the requested extension are
+            True, all files with the requested extension are
             identified.
         :type all_files: bool
 
-        :return: list of .py with the requested extension.
+        :return: list of files with the requested extension.
         :rtype: list(str)
         """
         if all_files:

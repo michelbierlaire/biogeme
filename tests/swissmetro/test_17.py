@@ -79,7 +79,7 @@ class test_17(unittest.TestCase):
         biogeme.generate_html = False
         biogeme.generate_pickle = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -5316.3758171905365, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5316.3758171905365, 2)
 
 
 if __name__ == '__main__':

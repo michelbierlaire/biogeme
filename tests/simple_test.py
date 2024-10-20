@@ -138,7 +138,7 @@ class test_biogeme(unittest.TestCase):
         biogeme.generate_pickle = False
         biogeme.saveIterations = False
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -6.166042, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -6.166042, 2)
 
 
 if __name__ == '__main__':

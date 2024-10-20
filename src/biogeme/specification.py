@@ -13,7 +13,7 @@ Implements a model specification in a multiple expression context (using Catalog
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable
+from typing import Callable
 
 from biogeme_optimization.pareto import SetElement
 
@@ -22,11 +22,8 @@ import biogeme.tools.unique_ids
 from biogeme.configuration import Configuration
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import get_default_value, Parameters
+from biogeme.results_processing import EstimationResults
 from biogeme.validity import Validity
-from biogeme.results import bioResults
-
-if TYPE_CHECKING:
-    from biogeme.results import bioResults
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +105,7 @@ class Specification:
     def config_id(self, value: str) -> None:
         self.configuration = Configuration.from_string(value)
 
-    def get_results(self) -> bioResults:
+    def get_results(self) -> EstimationResults:
         """Obtain the estimation results of the specification"""
         the_results = self.all_results.get(self.config_id)
         if the_results is None:
@@ -156,7 +153,9 @@ class Specification:
                         f'{self.maximum_number_parameters}'
                     ),
                 )
-                self.all_results[self.config_id] = bioResults()
+                self.all_results[self.config_id] = EstimationResults(
+                    raw_estimation_results=None
+                )
                 return
             the_biogeme.modelName = self.model_names(self.config_id)
             logger.info(f'*** Estimate {the_biogeme.modelName}')
@@ -164,7 +163,7 @@ class Specification:
             the_biogeme.generate_pickle = False
             results = the_biogeme.quick_estimate()
         self.all_results[self.config_id] = results
-        if not results.algorithm_has_converged():
+        if not results.algorithm_has_converged:
             self.validity = Validity(
                 status=False, reason=f'Optimization algorithm has not converged'
             )
@@ -187,7 +186,7 @@ class Specification:
         return f'{the_results.short_summary()}'
 
     def get_element(
-        self, multi_objectives: Callable[[bioResults | None], list[float]]
+        self, multi_objectives: Callable[[EstimationResults | None], list[float]]
     ) -> SetElement:
         """Obtains the element from the Pareto set corresponding to a specification
 

@@ -375,6 +375,13 @@ Note that if a file <code>__mymodel.iter</code> exists, where <code>mymodel</cod
 to be estimated, the initial values of the parameters are read from this file. 
 """
 faq[
+    'How do I cancel the calculation of second derivatives during estimation?'
+] = """
+<p>Change the optimization algorithm to '<code>simple_bounds_BFGS</code>'. It can be done in the .toml file, or
+in the biogeme object: </p>
+<p><code>biogeme.optimization_algorithm = 'simple_bounds_BFGS'</code></p>
+"""
+faq[
     'Can I save intermediate iterations during the estimation?'
 ] = """
 <p>

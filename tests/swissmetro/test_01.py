@@ -88,7 +88,7 @@ class test_01(unittest.TestCase):
         biogeme.saveIterations = False
         biogeme.bootstrap_samples = 10
         results = biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5331.252, 2)
 
     def testEstimationLineSearch(self):
         logprob = models.loglogit(V, av, CHOICE)
@@ -99,7 +99,7 @@ class test_01(unittest.TestCase):
         biogeme.saveIterations = False
         biogeme.bootstrap_samples = 10
         results = biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5331.252, 2)
 
     def testEstimationTrustRegion(self):
         logprob = models.loglogit(V, av, CHOICE)
@@ -110,7 +110,7 @@ class test_01(unittest.TestCase):
         biogeme.saveIterations = False
         biogeme.bootstrap_samples = 10
         results = biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5331.252, 2)
 
 
 if __name__ == '__main__':

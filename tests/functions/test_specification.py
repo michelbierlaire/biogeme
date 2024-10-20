@@ -6,9 +6,10 @@ Test the specification module
 """
 
 import unittest
+
+from biogeme.exceptions import BiogemeError
 from biogeme.specification import Specification
 from unittest.mock import MagicMock, patch
-import biogeme.exceptions as excep
 from biogeme.validity import Validity
 from biogeme.configuration import Configuration
 
@@ -30,21 +31,21 @@ class TestSpecification(unittest.TestCase):
         the_specification = Specification(config)
         the_results = the_specification.get_results()
         expected_loglike = -5331.252006916163
-        loglike = the_results.data.logLike
+        loglike = the_results.final_log_likelihood
         self.assertAlmostEqual(loglike, expected_loglike, 2)
 
     def test_from_string_id(self):
         the_specification = Specification.from_string_id(self.config_id_2)
         the_results = the_specification.get_results()
         expected_loglike = -5187.983411661233
-        loglike = the_results.data.logLike
+        loglike = the_results.final_log_likelihood
         self.assertAlmostEqual(loglike, expected_loglike, 2)
 
     def test_default_specification(self):
         the_specification = Specification.default_specification()
         the_results = the_specification.get_results()
         expected_loglike = -5331.252006916163
-        loglike = the_results.data.logLike
+        loglike = the_results.final_log_likelihood
         self.assertAlmostEqual(loglike, expected_loglike, 2)
 
     def test_describe(self):
@@ -59,13 +60,16 @@ class TestSpecification(unittest.TestCase):
         self, MockParameters, mock_from_configuration
     ):
         """We use a mock Biogeme object instead of the real one"""
+
         mock_biogeme = MagicMock()
         mock_biogeme.number_unknown_parameters.return_value = 11
         mock_from_configuration.return_value = mock_biogeme
+
         config = MagicMock(spec=Configuration)
         """We also use a mock parameter object"""
         mock_parameters = MockParameters()
         mock_parameters.get_value.return_value = 10
+
         the_specification = Specification(config, biogeme_parameters=mock_parameters)
         self.assertFalse(the_specification.validity.status)
         self.assertIn('Too many parameters', the_specification.validity.reason)
@@ -78,14 +82,15 @@ class TestSpecification(unittest.TestCase):
         mock_from_configuration.return_value = mock_biogeme
 
         mock_results = MagicMock()
-        mock_results.algorithm_has_converged.return_value = False
+        mock_results.algorithm_has_converged = False
         mock_biogeme.quick_estimate.return_value = mock_results
 
         config = MagicMock(spec=Configuration)
 
         the_specification = Specification(config)
-        self.assertFalse(the_specification.validity.status)
+        print(f'{the_specification.validity=}')
         print(f'{the_specification.validity.reason=}')
+        self.assertFalse(the_specification.validity.status)
         self.assertIn(
             'Optimization algorithm has not converged',
             the_specification.validity.reason,
@@ -107,7 +112,7 @@ class TestSpecification(unittest.TestCase):
         self.assertIn('Mock validity failure', the_specification.validity.reason)
 
     def test_invalid_configuration(self):
-        with self.assertRaises(excep.BiogemeError):
+        with self.assertRaises(BiogemeError):
             Specification("Invalid Configuration")
 
 

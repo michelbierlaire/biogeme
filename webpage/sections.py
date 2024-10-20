@@ -10,15 +10,15 @@ archives = {}
 resources = {}
 
 # special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
-# special[
-#    'EPFL Short Course'
-# ] = 'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. February 11-15, 2024 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
+special['EPFL Short Course'] = (
+    'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. January 26-30, 2025 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
+)
 # special['Other special'] = 'Other special as well'
 
-special['ChatGPT'] = (
-    'Try the Biogeme Assistant <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" '
-    'target="_blank">[Click here]</a> (credits: Yousef Maknoon)'
-)
+# special['ChatGPT'] = (
+#    'Try the Biogeme Assistant <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" '
+#    'target="_blank">[Click here]</a> (credits: Yousef Maknoon)'
+# )
 
 about['Biogeme'] = (
     """
