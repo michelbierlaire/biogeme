@@ -6,7 +6,7 @@ provides the name of the random variable associated with the draws, and the seco
 distribution of the random variable (see the :class:`~biogeme.expressions.elementary_expressions.bioDraws` documentation). 
 The draw type can either be a user-defined type 
 (see `Bierlaire (2019) <http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf>`_ for details)
-or native draws provided with Biogeme. The list if native doraws is provided in the following table.
+or native draws provided with Biogeme. The list of native draws is provided in the following table.
     
 
 .. list-table::
