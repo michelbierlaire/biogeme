@@ -3,7 +3,7 @@
 Estimation and simulation of a nested logit model
 =================================================
 
- We estimate a nested logit model and we perform simulation using the
+ We estimate a nested logit model, and we perform simulation using the
  estimated model.
 
 :author: Michel Bierlaire, EPFL
@@ -13,9 +13,10 @@ Estimation and simulation of a nested logit model
 
 from IPython.core.display_functions import display
 
-from biogeme import models
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import read_data
+from biogeme.models import lognested
+from biogeme.results_processing import get_pandas_estimated_parameters
 from scenarios import scenario
 
 # %%
@@ -26,14 +27,14 @@ V, nests, Choice, _ = scenario()
 # %%
 # The choice model is a nested logit, with availability conditions
 # For estimation, we need the log of the probability.
-logprob = models.lognested(util=V, availability=None, nests=nests, choice=Choice)
+logprob = lognested(util=V, availability=None, nests=nests, choice=Choice)
 
 # %%
 # Get the database
 database = read_data()
 # %%
 # Create the Biogeme object for estimation.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b02estimation'
 
 # %%
@@ -43,7 +44,7 @@ results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
 display(pandas_results)
 
 
@@ -60,5 +61,5 @@ loglikelihood = logprob.get_value_c(
     database=database,
     aggregation=True,
 )
-print(f'Final log likelihood:     {results.data.logLike}')
+print(f'Final log likelihood:     {results.final_log_likelihood}')
 print(f'Simulated log likelihood: {loglikelihood}')
