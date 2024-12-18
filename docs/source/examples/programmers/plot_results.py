@@ -1,7 +1,7 @@
 """
 
-biogeme.results
-===============
+biogeme.results_processing
+==========================
 
 Examples of use of several functions.
 
@@ -9,15 +9,21 @@ This is designed for programmers who need examples of use of the
 functions of the module. The examples are designed to illustrate the
 syntax. They do not correspond to any meaningful model.
 
-:author: Michel Bierlaire
-:date: Wed Nov 29 09:44:41 2023
+Michel Bierlaire
+Mon Oct 7 18:46:39 2024
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
+from biogeme.results_processing import (
+    EstimationResults,
+    calc_p_value,
+    compile_estimation_results,
+)
 from biogeme.version import get_text
-import biogeme.biogeme as bio
-import biogeme.database as db
-import biogeme.results as res
 from biogeme.expressions import Beta, Variable, exp
 
 
@@ -39,10 +45,10 @@ df = pd.DataFrame(
         'Av3': [0, 1, 1, 1, 1],
     }
 )
-df
+display(df)
 
 # %%
-my_data = db.Database('test', df)
+my_data = Database('test', df)
 
 # %%
 # Definition of various expressions
@@ -56,7 +62,7 @@ dict_of_expressions = {'log_like': likelihood, 'beta1': beta1, 'simul': simul}
 
 # %%
 # Creation of the BIOGEME object
-my_biogeme = bio.BIOGEME(my_data, dict_of_expressions)
+my_biogeme = BIOGEME(my_data, dict_of_expressions)
 my_biogeme.modelName = 'simple_example'
 my_biogeme.bootstrap_samples = 10
 results = my_biogeme.estimate(run_bootstrap=True)
@@ -64,12 +70,13 @@ print(results)
 
 # %%
 # Dump results on a file
-the_pickle_file = results.write_pickle()
-print(the_pickle_file)
+the_yaml_file = my_biogeme.yaml_filename
+results.dump_yaml_file(filename=the_yaml_file)
+print(the_yaml_file)
 
 # %%
 # Results can be imported from a file previously generated
-read_results = res.bioResults(pickle_file=the_pickle_file)
+read_results = EstimationResults.from_yaml_file(filename=the_yaml_file)
 print(read_results)
 
 # %%
@@ -83,7 +90,7 @@ print(read_results.get_html())
 # %%
 # General statistics, including a suggested format.
 statistics = read_results.get_general_statistics()
-statistics
+display(statistics)
 
 # %%
 # The suggested format can be used as follows
@@ -119,7 +126,7 @@ read_results.get_var_covar()
 read_results.get_robust_var_covar()
 
 # %%
-# Variance-covaraince matrix (bootstrap)
+# Variance-covariance matrix (bootstrap)
 read_results.get_bootstrap_var_covar()
 
 # %%
@@ -145,7 +152,7 @@ likelihood_constrained = (
     - exp(beta2_constrained * beta1) * Variable2
     - beta2_constrained**4
 )
-my_biogeme_constrained = bio.BIOGEME(my_data, likelihood_constrained)
+my_biogeme_constrained = BIOGEME(my_data, likelihood_constrained)
 my_biogeme_constrained.modelName = 'simple_example_constrained'
 results_constrained = my_biogeme_constrained.estimate()
 print(results_constrained.short_summary())
@@ -159,12 +166,12 @@ print(f'Threshold: {test_results.threshold}')
 
 # %%
 # Calculation of the :math:`p`-value
-res.calc_p_value(1.96)
+calc_p_value(1.96)
 
 # %%
 # Compilation of results
-dict_of_results = {'Model A': read_results, 'Model B': the_pickle_file}
+dict_of_results = {'Model A': read_results, 'Model B': the_yaml_file}
 
 # %%
-df = res.compile_estimation_results(dict_of_results)
-df
+df = compile_estimation_results(dict_of_results)
+display(df)

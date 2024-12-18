@@ -13,19 +13,21 @@ syntax. They do not correspond to any meaningful model.
 :date: Thu Nov 16 18:36:59 2023
 """
 
-import biogeme.version as ver
 import pandas as pd
 import numpy as np
-import biogeme.database as db
+from IPython.core.display_functions import display
+
+from biogeme.database import Database
 from biogeme.expressions import Variable, exp, bioDraws
 from biogeme.expressions import TypeOfElementaryExpression
 from biogeme.native_draws import description_of_native_draws, RandomNumberGeneratorTuple
 from biogeme.segmentation import DiscreteSegmentationTuple
 from biogeme.exceptions import BiogemeError
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
-print(ver.get_text())
+print(get_text())
 
 # %%
 # We set the seed so that the outcome of random operations is always the same.
@@ -45,7 +47,7 @@ df = pd.DataFrame(
         'Av3': [0, 1, 1, 1, 1],
     }
 )
-my_data = db.Database('test', df)
+my_data = Database('test', df)
 print(my_data)
 
 # %%
@@ -74,7 +76,7 @@ correct_segmentation = DiscreteSegmentationTuple(
 )
 
 # %%
-# If the segmentation is well defined, the function returns the size
+# If the segmentation is well-defined, the function returns the size
 # of each segment in the database.
 
 # %%
@@ -127,7 +129,7 @@ my_data.choice_availability_statistics(avail, Choice)
 # %%
 # Suggest a scaling of the variables in the database
 # %%
-my_data.data.columns
+display(my_data.data.columns)
 
 # %%
 my_data.suggest_scaling()
@@ -139,14 +141,14 @@ my_data.suggest_scaling(columns=['Variable1', 'Variable2'])
 # `scaleColumn`: divide an entire column by a scale value
 # %%
 # Before.
-my_data.data
+display(my_data.data)
 
 # %%
 my_data.scale_column('Variable2', 0.01)
 
 # %%
 # After.
-my_data.data
+display(my_data.data)
 
 # %%
 # `addColumn`: add a new column in the database, calculated from an expression.
@@ -159,7 +161,7 @@ result = my_data.add_column(expression, 'NewVariable')
 print(my_data.data['NewVariable'].tolist())
 
 # %%
-my_data.data
+display(my_data.data)
 
 # %%
 # `split`: shuffle the data, and split the data into slices. For each
@@ -192,7 +194,7 @@ my_data.count('Person', 1)
 # %%
 exclude = Variable('Exclude')
 my_data.remove(exclude)
-my_data.data
+display(my_data.data)
 
 # %%
 # `dumpOnFile`: dumps the database in a CSV formatted file.
@@ -238,11 +240,11 @@ print(types)
 the_draws_table = my_data.generate_draws(
     types, ['random_draws1', 'random_draws2', 'random_draws3'], 10
 )
-the_draws_table
+display(the_draws_table)
 
 # %%
 # `setRandomNumberGenerators`: defines user-defined random numbers
-# generators. It takes as argumentsa dictionary of generators. The
+# generators. It takes as argument a dictionary of generators. The
 # keys of the dictionary characterize the name of the generators, and
 # must be different from the pre-defined generators in Biogeme:
 # NORMAL, UNIFORM and UNIFORMSYM. The elements of the dictionary are
@@ -305,7 +307,7 @@ my_data.sample_with_replacement(6)
 # %%
 # `panel`: defines the data as panel data. Takes as argument the name
 # of the column that identifies individuals.
-my_panel_data = db.Database('test', df)
+my_panel_data = Database('test', df)
 
 # %%
 # Data is not considered panel yet

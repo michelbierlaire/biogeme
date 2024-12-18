@@ -16,16 +16,23 @@ syntax. They do not correspond to any meaningful model.
 # %%
 import numpy as np
 import pandas as pd
-import biogeme.version as ver
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.database as db
-import biogeme.loglikelihood as ll
-import biogeme.expressions as ex
-import biogeme.models as md
+from biogeme.database import Database
+from biogeme.expressions import Beta, bioDraws, MonteCarlo, Variable
+from biogeme.loglikelihood import (
+    loglikelihood,
+    mixedloglikelihood,
+    likelihoodregression,
+    loglikelihoodregression,
+)
+from biogeme.models import logit
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
-print(ver.get_text())
+print(get_text())
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -38,12 +45,12 @@ logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
 V1 = 0
-beta = ex.Beta('Beta', 0, None, None, 0)
-sigma = ex.Beta('sigma', 1, 0, None, 0)
-V2 = beta + sigma * ex.bioDraws('v2', 'NORMAL')
+beta = Beta('Beta', 0, None, None, 0)
+sigma = Beta('sigma', 1, 0, None, 0)
+V2 = beta + sigma * bioDraws('v2', 'NORMAL')
 V = {1: V1, 2: V2}
-condprob = md.logit(V, None, 0)
-prob = ex.MonteCarlo(condprob)
+condprob = logit(V, None, 0)
+prob = MonteCarlo(condprob)
 print(prob)
 
 # %%
@@ -51,7 +58,7 @@ print(prob)
 # observation.
 
 # %%
-loglike = ll.loglikelihood(prob)
+loglike = loglikelihood(prob)
 print(loglike)
 
 # %%
@@ -59,7 +66,7 @@ print(loglike)
 # simulation.
 
 # %%
-loglike = ll.mixedloglikelihood(condprob)
+loglike = mixedloglikelihood(condprob)
 print(loglike)
 
 # %%
@@ -67,11 +74,11 @@ print(loglike)
 # models. Consider the following model.
 
 # %%
-x = ex.Variable('x')
-y = ex.Variable('y')
-beta = ex.Beta('Beta', 1, None, None, 0)
-sigma = ex.Beta('sigma', 1, None, None, 0)
-intercept = ex.Beta('intercept', 0, None, None, 0)
+x = Variable('x')
+y = Variable('y')
+beta = Beta('Beta', 1, None, None, 0)
+sigma = Beta('sigma', 1, None, None, 0)
+intercept = Beta('intercept', 0, None, None, 0)
 model = intercept + beta * x
 
 # %%
@@ -80,7 +87,7 @@ model = intercept + beta * x
 #  .. math:: \frac{1}{\sigma} \phi\left( \frac{y-m}{\sigma} \right),
 #
 #  where :math:`\phi(\cdot)` is the pdf of the normal distribution.
-like = ll.likelihoodregression(y, model, sigma)
+like = likelihoodregression(y, model, sigma)
 print(like)
 
 # %%
@@ -89,7 +96,7 @@ print(like)
 #
 # .. math:: -\left( \frac{(y-m)^2}{2\sigma^2} \right) -
 #               \log(\sigma) - \frac{1}{2}\log(2\pi).
-loglike = ll.loglikelihoodregression(y, model, sigma)
+loglike = loglikelihoodregression(y, model, sigma)
 print(loglike)
 
 # %%
@@ -97,11 +104,11 @@ print(loglike)
 
 # %%
 df = pd.DataFrame({'x': [-2, -1, 0, 1, 2], 'y': [1, 1, 1, 1, 1]})
-my_data = db.Database('test', df)
+my_data = Database('test', df)
 
 # %%
 lr = like.get_value_c(my_data, prepare_ids=True)
-lr
+display(lr)
 
 # %%
 np.log(lr)

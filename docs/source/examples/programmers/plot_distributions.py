@@ -3,7 +3,7 @@
 biogeme.distributions
 =====================
 
-Example of usage of the distributions module.  This is for programmers who need
+Example of usage of the `distributions` module.  This is for programmers who need
 examples of use of the functions of the class. The examples are
 designed to illustrate the syntax.
 
@@ -11,11 +11,19 @@ designed to illustrate the syntax.
 :date: Fri Nov 17 08:27:24 2023
 """
 
-import biogeme.version as ver
-import biogeme.distributions as dist
-from biogeme.expressions import Beta
+from IPython.core.display_functions import display
 
-print(ver.get_text())
+from biogeme.distributions import (
+    normalpdf,
+    lognormalpdf,
+    uniformpdf,
+    triangularpdf,
+    logisticcdf,
+)
+from biogeme.expressions import Beta
+from biogeme.version import get_text
+
+print(get_text())
 
 # %%
 # pdf of the normal distributio: returns the biogeme expression of the
@@ -26,8 +34,8 @@ print(ver.get_text())
 
 # %%
 # Calculated for a numeric value.
-resulting_expression = dist.normalpdf(0)
-resulting_expression
+resulting_expression = normalpdf(0)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -39,8 +47,8 @@ mu = Beta('mu', 0, None, None, 1)
 sigma = Beta('sigma', 1, None, None, 1)
 
 # %%
-resulting_expression = dist.normalpdf(a_parameter, mu=mu, s=sigma)
-resulting_expression
+resulting_expression = normalpdf(a_parameter, mu=mu, s=sigma)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -54,8 +62,8 @@ resulting_expression.get_value()
 
 # %%
 # Calculated for a numeric value.
-resulting_expression = dist.lognormalpdf(1)
-resulting_expression
+resulting_expression = lognormalpdf(1)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -67,8 +75,8 @@ mu = Beta('mu', 0, None, None, 1)
 sigma = Beta('sigma', 1, None, None, 1)
 
 # %%
-resulting_expression = dist.lognormalpdf(a_parameter, mu=mu, s=sigma)
-resulting_expression
+resulting_expression = lognormalpdf(a_parameter, mu=mu, s=sigma)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -83,8 +91,8 @@ resulting_expression.get_value()
 
 # %%
 # Calculated for a numeric value
-resulting_expression = dist.uniformpdf(0)
-resulting_expression
+resulting_expression = uniformpdf(0)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -96,8 +104,8 @@ a = Beta('a', -1, None, None, 1)
 b = Beta('b', 1, None, None, 1)
 
 # %%
-resulting_expression = dist.uniformpdf(a_parameter, a=a, b=b)
-resulting_expression
+resulting_expression = uniformpdf(a_parameter, a=a, b=b)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -117,8 +125,8 @@ resulting_expression.get_value()
 
 # %%
 # Calculated for a numeric value.
-resulting_expression = dist.triangularpdf(0)
-resulting_expression
+resulting_expression = triangularpdf(0)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -131,8 +139,8 @@ b = Beta('b', 1, None, None, 1)
 c = Beta('c', 0, None, None, 1)
 
 # %%
-resulting_expression = dist.triangularpdf(a_parameter, a=a, b=b, c=c)
-resulting_expression
+resulting_expression = triangularpdf(a_parameter, a=a, b=b, c=c)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -148,8 +156,8 @@ resulting_expression.get_value()
 
 # %%
 # Calculated for a numeric value
-resulting_expression = dist.logisticcdf(0)
-resulting_expression
+resulting_expression = logisticcdf(0)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()
@@ -161,8 +169,8 @@ mu = Beta('mu', 0, None, None, 1)
 sigma = Beta('sigma', 1, None, None, 1)
 
 # %%
-resulting_expression = dist.logisticcdf(a_parameter, mu=mu, s=sigma)
-resulting_expression
+resulting_expression = logisticcdf(a_parameter, mu=mu, s=sigma)
+display(resulting_expression)
 
 # %%
 resulting_expression.get_value()

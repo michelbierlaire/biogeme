@@ -10,10 +10,13 @@ calculated using numerical integration.
 :date: Thu Apr 13 21:03:03 2023
 """
 
-import biogeme.biogeme as bio
-import biogeme.distributions as dist
-from biogeme import models
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.distributions import normalpdf
 from biogeme.expressions import Beta, RandomVariable, Integrate, log
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 from swissmetro import (
     database,
@@ -38,10 +41,10 @@ B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
 
 # %%
-# Define a random parameter, normally distirbuted, designed to be used
+# Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
 omega = RandomVariable('omega')
-density = dist.normalpdf(omega)
+density = normalpdf(omega)
 b_time_rnd = B_TIME + B_TIME_S * omega
 
 # %%
@@ -60,12 +63,12 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # The choice model is a logit, with availability conditions
-condprob = models.logit(util, av, CHOICE)
+condprob = logit(util, av, CHOICE)
 prob = Integrate(condprob * density, 'omega')
 logprob = log(prob)
 
 # %%
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = '06estimation_integral'
 
 # %%
@@ -75,5 +78,8 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)

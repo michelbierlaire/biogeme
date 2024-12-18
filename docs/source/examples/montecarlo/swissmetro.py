@@ -8,13 +8,15 @@ Reading data and defining variables.
 :author: Michel Bierlaire, EPFL
 :date: Thu Apr 13 20:51:58 2023
 """
+
 import pandas as pd
-import biogeme.database as db
+
+from biogeme.database import Database
 from biogeme.expressions import Variable
 
 # %%
 df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
+database = Database('swissmetro', df)
 
 # %%
 SM_CO = Variable('SM_CO')

@@ -15,12 +15,12 @@ syntax. They do not correspond to any meaningful model.
 
 # %%
 import os
-import biogeme.version as ver
 import biogeme.biogeme_logging as blog
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
-print(ver.get_text())
+print(get_text())
 
 # %%
 # In Python, the levels of reporting are:
@@ -36,7 +36,7 @@ print(ver.get_text())
 # %%
 # If we request a specific level, all message from this level and all
 # levels above are displayed. For example, if INFO is requested,
-# everything except DEBUG will be diplayed.
+# everything except DEBUG will be displayed.
 logger = blog.get_screen_logger(level=blog.INFO)
 
 

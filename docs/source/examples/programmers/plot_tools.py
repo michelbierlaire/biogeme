@@ -15,12 +15,20 @@ syntax. They do not correspond to any meaningful model.
 
 import numpy as np
 import pandas as pd
+from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-import biogeme.exceptions as excep
-import biogeme.tools.derivatives
-import biogeme.tools.primes
+from biogeme.exceptions import BiogemeError
 from biogeme.function_output import FunctionOutput
+from biogeme.tools import (
+    findiff_g,
+    findiff_h,
+    check_derivatives,
+    calculate_prime_numbers,
+    get_prime_numbers,
+    count_number_of_groups,
+    likelihood_ratio,
+)
 from biogeme.version import get_text
 
 # %%
@@ -67,7 +75,7 @@ x = np.array([1.1, 1.1])
 the_output = my_function(x)
 
 # %%
-the_output.function
+display(the_output.function)
 
 # %%
 # We use the `DataFrame` for a nicer display.
@@ -78,7 +86,7 @@ pd.DataFrame(the_output.hessian)
 
 # %%
 # Calculates an approximation of the gradient by finite differences.
-g_fd = biogeme.tools.derivatives.findiff_g(my_function, x)
+g_fd = findiff_g(my_function, x)
 
 # %%
 pd.DataFrame(g_fd)
@@ -89,7 +97,7 @@ pd.DataFrame(the_output.gradient - g_fd)
 
 # %%
 # Calculates an approximation of the Hessian by finite differences.
-h_fd = biogeme.tools.derivatives.findiff_h(my_function, x)
+h_fd = findiff_h(my_function, x)
 
 # %%
 pd.DataFrame(h_fd)
@@ -101,15 +109,13 @@ pd.DataFrame(the_output.hessian - h_fd)
 # %%
 # There is a function that checks the analytical derivatives by
 # comparing them to their finite difference approximation.
-f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
-    my_function, x, names=None, logg=True
-)
+f, g, h, gdiff, hdiff = check_derivatives(my_function, x, names=None, logg=True)
 
 # %%
 # To help reading the reporting, it is possible to give names to variables.
 
 # %%
-f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
+f, g, h, gdiff, hdiff = check_derivatives(
     my_function, x, names=['First', 'Second'], logg=True
 )
 
@@ -117,21 +123,21 @@ f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
 pd.DataFrame(gdiff)
 
 # %%
-hdiff
+display(hdiff)
 
 # %%
 # Prime numbers: calculate prime numbers lesser or equal to an upper bound.
-myprimes = biogeme.tools.primes.calculate_prime_numbers(10)
-myprimes
+my_primes = calculate_prime_numbers(10)
+display(my_primes)
 
 # %%
-myprimes = biogeme.tools.primes.calculate_prime_numbers(100)
-myprimes
+my_primes = calculate_prime_numbers(100)
+display(my_primes)
 
 # %%
 # Calculate a given number of prime numbers.
-myprimes = biogeme.tools.primes.get_prime_numbers(7)
-myprimes
+my_primes = get_prime_numbers(7)
+display(my_primes)
 
 # %%
 # Counting groups of data.
@@ -146,10 +152,10 @@ df = pd.DataFrame(
 )
 
 # %%
-biogeme.tools.count_number_of_groups(df, 'ID')
+count_number_of_groups(df, 'ID')
 
 # %%
-biogeme.tools.count_number_of_groups(df, 'value')
+count_number_of_groups(df, 'value')
 
 # %%
 # Likelihood ratio test.
@@ -159,17 +165,15 @@ model2 = (-1338.49, 7)
 # %%
 # A likelihood ratio test is performed. The function returns the
 # outcome of the test, the statistic, and the threshold.
-biogeme.tools.likelihood_ratio.likelihood_ratio_test(model1, model2)
+likelihood_ratio.likelihood_ratio_test(model1, model2)
 
 # %%
 # The default level of significance is 0.95. It can be changed.
-biogeme.tools.likelihood_ratio.likelihood_ratio_test(
-    model1, model2, significance_level=0.9
-)
+likelihood_ratio.likelihood_ratio_test(model1, model2, significance_level=0.9)
 
 # %%
 # The order in which the models are presented is irrelevant.
-biogeme.tools.likelihood_ratio.likelihood_ratio_test(model2, model1)
+likelihood_ratio.likelihood_ratio_test(model2, model1)
 
 # %%
 # But the unrestricted model must have a higher loglikelihood than the
@@ -179,6 +183,6 @@ model2 = (-1338.49, 5)
 
 # %%
 try:
-    biogeme.tools.likelihood_ratio.likelihood_ratio_test(model1, model2)
-except excep.BiogemeError as e:
+    likelihood_ratio.likelihood_ratio_test(model1, model2)
+except BiogemeError as e:
     print(e)

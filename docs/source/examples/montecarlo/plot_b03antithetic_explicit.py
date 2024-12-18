@@ -12,9 +12,11 @@ illustrates how to use antithetic draws, explicitly generated.
 
 import numpy as np
 import pandas as pd
-import biogeme.database as db
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
 from biogeme import draws
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
 from biogeme.expressions import exp, bioDraws, MonteCarlo
 from biogeme.native_draws import RandomNumberGeneratorTuple
 
@@ -26,7 +28,7 @@ R = 10000
 # the draws
 df = pd.DataFrame()
 df['FakeColumn'] = [1.0]
-database = db.Database('fake_database', df)
+database = Database('fake_database', df)
 
 
 # %%
@@ -90,12 +92,12 @@ simulate = {
 }
 
 # %%
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(database, simulate)
 biosim.modelName = 'b03antithetic_explicit'
 
 # %%
 results = biosim.simulate(the_beta_values={})
-results
+display(results)
 
 # %%
 print(f"Analytical integral: {results.iloc[0]['Analytical Integral']:.6f}")

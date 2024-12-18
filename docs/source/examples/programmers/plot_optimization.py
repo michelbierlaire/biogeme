@@ -14,10 +14,12 @@ syntax. They do not correspond to any meaningful model.
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
+from biogeme.models import loglogit
 from biogeme.version import get_text
-import biogeme.biogeme as bio
-import biogeme.database as db
-from biogeme import models
 from biogeme.expressions import Beta, Variable
 import biogeme.biogeme_logging as blog
 
@@ -43,10 +45,10 @@ df = pd.DataFrame(
         'Av3': [0, 1, 1, 1, 1],
     }
 )
-df
+display(df)
 
 # %%
-my_data = db.Database('test', df)
+my_data = Database('test', df)
 
 # %%
 # Variables.
@@ -61,8 +63,8 @@ V3 = 0
 V = {1: V1, 2: V2, 3: V3}
 
 # %%
-likelihood = models.loglogit(V, av=None, i=Choice)
-my_biogeme = bio.BIOGEME(my_data, likelihood)
+likelihood = loglogit(V, av=None, i=Choice)
+my_biogeme = BIOGEME(my_data, likelihood)
 my_biogeme.modelName = 'simpleExample'
 my_biogeme.save_iterations = False
 my_biogeme.generate_html = False

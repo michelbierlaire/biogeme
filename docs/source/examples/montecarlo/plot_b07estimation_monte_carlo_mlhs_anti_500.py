@@ -10,9 +10,12 @@ approximated using MonteCarlo integration with antithetic MLHS draws.
 :date: Thu Apr 13 23:40:02 2023
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
 from biogeme.expressions import bioDraws
 from b07estimation_specification import get_biogeme
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -31,5 +34,8 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)

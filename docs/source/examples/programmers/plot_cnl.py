@@ -14,11 +14,12 @@ designed to illustrate the syntax.
 
 import numpy as np
 import pandas as pd
-import biogeme.cnl as cnl
-import biogeme.tools as tools
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.tools.derivatives
+from biogeme.cnl import cnl_g, cnl_cdf
 from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
+from biogeme.tools import check_derivatives
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Logging on')
@@ -43,18 +44,16 @@ nests = NestsForCrossNestedLogit(choice_set=choice_set, tuple_of_nests=(nest_1, 
 # numerically the implementation of the derivatives.
 
 # %%
-G = cnl.cnl_g(choice_set, nests)
+G = cnl_g(choice_set, nests)
 
 # %%
 # Draw a random point where to evaluate the function.
 y = np.random.uniform(low=0.01, high=2, size=4)
-y
+display(y)
 
 # %%
-f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
-    G, y, names=None, logg=True
-)
-f
+f, g, h, gdiff, hdiff = check_derivatives(G, y, names=None, logg=True)
+display(f)
 
 # %%
 pd.DataFrame(g)
@@ -74,16 +73,14 @@ pd.DataFrame(hdiff)
 
 # %%
 xi = np.random.uniform(low=-10, high=10, size=4)
-xi
+display(xi)
 
 # %%
-F = cnl.cnl_cdf(choice_set, nests)
+F = cnl_cdf(choice_set, nests)
 
 # %%
-f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
-    F, y, names=None, logg=True
-)
-f
+f, g, h, gdiff, hdiff = check_derivatives(F, y, names=None, logg=True)
+display(f)
 
 # %%
 pd.DataFrame(g)

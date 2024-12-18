@@ -13,17 +13,19 @@ syntax. They do not correspond to any meaningful model.
 :date: Thu Nov 16 18:36:35 2023
 """
 
-import biogeme.version as ver
-import biogeme.biogeme as bio
-import biogeme.database as db
 import pandas as pd
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
 from biogeme.expressions import Beta, Variable, exp
 import biogeme.biogeme_logging as blog
 from biogeme.function_output import BiogemeFunctionOutput
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
-print(ver.get_text())
+print(get_text())
 
 
 # %%
@@ -46,11 +48,11 @@ df = pd.DataFrame(
         'Av3': [0, 1, 1, 1, 1],
     }
 )
-my_data = db.Database('test', df)
+my_data = Database('test', df)
 
 # %%
 # Data
-my_data.data
+display(my_data.data)
 
 
 # %%
@@ -65,13 +67,13 @@ dict_of_expressions = {'log_like': likelihood, 'beta1': beta1, 'simul': simul}
 
 # %%
 # Creation of the BIOGEME object.
-my_biogeme = bio.BIOGEME(my_data, dict_of_expressions)
+my_biogeme = BIOGEME(my_data, dict_of_expressions)
 my_biogeme.modelName = 'simple_example'
 print(my_biogeme)
 
 # %%
 # The data is stored in the Biogeme object.
-my_biogeme.database.data
+display(my_biogeme.database.data)
 
 # %%
 # Log likelihood with the initial values of the parameters.
@@ -79,7 +81,7 @@ my_biogeme.calculate_init_likelihood()
 
 # %%
 # Calculate the log-likelihood with a different value of the
-# parameters. We retieve the current value and add 1 to each of them.
+# parameters. We retrieve the current value and add 1 to each of them.
 x = my_biogeme.id_manager.free_betas_values
 xplus = [v + 1 for v in x]
 print(xplus)
@@ -183,7 +185,7 @@ recycled_results.get_estimated_parameters()
 simulation_with_default_betas = my_biogeme.simulate(
     my_biogeme.log_like.get_beta_values()
 )
-simulation_with_default_betas
+display(simulation_with_default_betas)
 
 # %%
 # Simulate with the estimated values for the parameters.
@@ -193,7 +195,7 @@ print(results.get_beta_values())
 
 # %%
 simulation_with_estimated_betas = my_biogeme.simulate(results.get_beta_values())
-simulation_with_estimated_betas
+display(simulation_with_estimated_betas)
 
 # %%
 # Confidence intervals.
@@ -208,10 +210,10 @@ for draw in draws_from_betas:
 # Then, we calculate the confidence intervals. The default interval
 # size is 0.9. Here, we use a different one.
 left, right = my_biogeme.confidence_intervals(draws_from_betas, interval_size=0.95)
-left
+display(left)
 
 # %%
-right
+display(right)
 
 # %%
 # Validation

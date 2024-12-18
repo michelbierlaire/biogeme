@@ -13,24 +13,24 @@ syntax. They do not correspond to any meaningful model.
 :date: Thu Dec  7 15:22:06 2023
 """
 
-import biogeme.version as ver
+from biogeme.version import get_version, get_text, get_html, get_latex, __version__
 
 # %%
 # Obtain the version number
-ver.get_version()
+get_version()
 
 # %%
 # Package information in text format.
-print(ver.get_text())
+print(get_text())
 
 # %%
 # Package information in HTML format
-print(ver.get_html())
+print(get_html())
 
 # %%
 # Package information in LaTeX format
-print(ver.get_latex())
+print(get_latex())
 
 # %%
 # Defines the `__version__` variable.
-print(ver.__version__)
+print(__version__)

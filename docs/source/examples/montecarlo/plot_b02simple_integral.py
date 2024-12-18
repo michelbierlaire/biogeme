@@ -14,9 +14,11 @@ available in Biogeme.
 
 import numpy as np
 import pandas as pd
-import biogeme.database as db
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
 from biogeme import draws
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
 from biogeme.expressions import exp, bioDraws, MonteCarlo
 from biogeme.native_draws import RandomNumberGeneratorTuple
 
@@ -25,7 +27,7 @@ from biogeme.native_draws import RandomNumberGeneratorTuple
 # to store the draws.
 df = pd.DataFrame()
 df['FakeColumn'] = [1.0]
-database = db.Database('fakeDatabase', df)
+database = Database('fakeDatabase', df)
 
 
 # %%
@@ -131,10 +133,10 @@ simulate = {
 }
 
 # %%
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(database, simulate)
 biosim.modelName = 'b02simple_integral'
 results = biosim.simulate(the_beta_values={})
-results
+display(results)
 
 # %%
 # Reorganize the results.

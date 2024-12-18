@@ -13,18 +13,20 @@ syntax. They do not correspond to any meaningful model.
 :date: Wed Nov 22 13:47:01 2023
 """
 
-# %%
-import biogeme.version as ver
-import biogeme.filenames as fl
+from IPython.core.display_functions import display
+
+from biogeme.filenames import get_new_file_name
+from biogeme.version import get_text
+
 
 # %%
 # Version of Biogeme.
-print(ver.get_text())
+print(get_text())
 
 # %%
 # The role of this function is to obtain the name of a file that does not exist.
-the_name = fl.get_new_file_name('test', 'dat')
-the_name
+the_name = get_new_file_name('test', 'dat')
+display(the_name)
 
 # %%
 # Now, let's create that file, and call the function again. A suffix
@@ -33,13 +35,13 @@ the_name
 open(the_name, 'a').close()
 
 # %%
-the_name = fl.get_new_file_name('test', 'dat')
-the_name
+the_name = get_new_file_name('test', 'dat')
+display(the_name)
 
 # %%
 # If we do it again, the number is incremented.
 open(the_name, 'a').close()
 
 # %%
-the_name = fl.get_new_file_name('test', 'dat')
-the_name
+the_name = get_new_file_name('test', 'dat')
+display(the_name)

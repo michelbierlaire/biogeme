@@ -10,10 +10,12 @@ calculated using numerical integration.
 :date: Thu Apr 13 20:51:32 2023
 """
 
-import biogeme.biogeme as bio
-import biogeme.distributions as dist
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.distributions import normalpdf
 from biogeme.expressions import RandomVariable, Integrate
-from biogeme import models
+from biogeme.models import logit
 
 from swissmetro_one import (
     database,
@@ -42,7 +44,7 @@ B_COST = -1.29
 # Define a random parameter, normally distributed,
 # designed to be used for integration
 omega = RandomVariable('omega')
-density = dist.normalpdf(omega)
+density = normalpdf(omega)
 b_time_rnd = B_TIME + B_TIME_S * omega
 
 # %%
@@ -61,18 +63,18 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # The choice model is a logit, with availability conditions
-integrand = models.logit(util, av, CHOICE)
+integrand = logit(util, av, CHOICE)
 numerical_integral = Integrate(integrand * density, 'omega')
 
 # %%
 simulate = {'Numerical': numerical_integral}
 
 # %%
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(database, simulate)
 
 # %%
 results = biosim.simulate(the_beta_values={})
-results
+display(results)
 
 # %%
 print('Mixture of logit - numerical integration: ', results.iloc[0]['Numerical'])

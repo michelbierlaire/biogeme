@@ -11,9 +11,10 @@ with various types of draws.
 :date: Thu Apr 13 20:58:50 2023
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
-import biogeme.distributions as dist
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.distributions import normalpdf
 from biogeme.expressions import (
     Expression,
     Integrate,
@@ -21,6 +22,7 @@ from biogeme.expressions import (
     MonteCarlo,
     bioDraws,
 )
+from biogeme.models import logit
 
 from swissmetro_one import (
     database,
@@ -51,7 +53,7 @@ B_COST = -1.29
 # %%
 # Generate several versions of the error component.
 omega = RandomVariable('omega')
-density = dist.normalpdf(omega)
+density = normalpdf(omega)
 b_time_rnd = B_TIME + B_TIME_S * omega
 b_time_rnd_normal = B_TIME + B_TIME_S * bioDraws('B_NORMAL', 'NORMAL')
 b_time_rnd_anti = B_TIME + B_TIME_S * bioDraws('B_ANTI', 'NORMAL_ANTI')
@@ -61,7 +63,7 @@ b_time_rnd_antimlhs = B_TIME + B_TIME_S * bioDraws('B_ANTIMLHS', 'NORMAL_MLHS_AN
 
 
 # %%
-def logit(the_b_time_rnd: Expression) -> Expression:
+def conditional_logit(the_b_time_rnd: Expression) -> Expression:
     """
     Calculate the conditional logit model for a given random parameter.
 
@@ -80,18 +82,18 @@ def logit(the_b_time_rnd: Expression) -> Expression:
     av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
     # The choice model is a logit, with availability conditions
-    integrand = models.logit(v, av, CHOICE)
+    integrand = logit(v, av, CHOICE)
     return integrand
 
 
 # %%
 # Generate each integral.
-numerical_integral = Integrate(logit(b_time_rnd) * density, 'omega')
-normal = MonteCarlo(logit(b_time_rnd_normal))
-anti = MonteCarlo(logit(b_time_rnd_anti))
-halton = MonteCarlo(logit(b_time_rnd_halton))
-mlhs = MonteCarlo(logit(b_time_rnd_mlhs))
-antimlhs = MonteCarlo(logit(b_time_rnd_antimlhs))
+numerical_integral = Integrate(conditional_logit(b_time_rnd) * density, 'omega')
+normal = MonteCarlo(conditional_logit(b_time_rnd_normal))
+anti = MonteCarlo(conditional_logit(b_time_rnd_anti))
+halton = MonteCarlo(conditional_logit(b_time_rnd_halton))
+mlhs = MonteCarlo(conditional_logit(b_time_rnd_mlhs))
+antimlhs = MonteCarlo(conditional_logit(b_time_rnd_antimlhs))
 
 # %%
 simulate = {
@@ -104,11 +106,11 @@ simulate = {
 }
 
 # %%
-biosim = bio.BIOGEME(database, simulate, number_of_draws=R)
+biosim = BIOGEME(database, simulate, number_of_draws=R)
 
 # %%
 results = biosim.simulate(the_beta_values={})
-results
+display(results)
 
 # %%
 print(f'Number of draws: {R}')

@@ -16,8 +16,15 @@ syntax. They do not correspond to any meaningful model.
 # %%
 import numpy as np
 import pandas as pd
+
+from biogeme.draws import (
+    get_uniform,
+    get_latin_hypercube_draws,
+    get_halton_draws,
+    get_antithetic,
+    get_normal_wichura_draws,
+)
 from biogeme.version import get_text
-import biogeme.draws as dr
 
 # %%
 # Version of Biogeme.
@@ -33,27 +40,27 @@ np.random.seed(90267)
 
 # %%
 # Uniform [0,1]. The output is transformed into a data frame just for the display.
-draws = dr.get_uniform(sample_size=3, number_of_draws=10, symmetric=False)
+draws = get_uniform(sample_size=3, number_of_draws=10, symmetric=False)
 pd.DataFrame(draws)
 
 # %%
-draws = dr.get_uniform(sample_size=3, number_of_draws=10, symmetric=True)
+draws = get_uniform(sample_size=3, number_of_draws=10, symmetric=True)
 pd.DataFrame(draws)
 
 # %%
-# LatinHypercube: the Modified Latin Hypercube Sampling (MLHS, Hess et al, 2006)
+# LatinHypercube: the Modified Latin Hypercube Sampling (MLHS, Hess et al., 2006)
 # provides U[0,1] draws from a perturbed grid, designed for
 # Monte-Carlo integration.
 
 # %%
-latin_hypercube = dr.get_latin_hypercube_draws(sample_size=3, number_of_draws=10)
+latin_hypercube = get_latin_hypercube_draws(sample_size=3, number_of_draws=10)
 pd.DataFrame(latin_hypercube)
 
 # %%
 # The same method can be used to generate draws from U[-1,1]
 
 # %%
-latin_hypercube = dr.get_latin_hypercube_draws(
+latin_hypercube = get_latin_hypercube_draws(
     sample_size=5, number_of_draws=10, symmetric=True
 )
 pd.DataFrame(latin_hypercube)
@@ -64,18 +71,18 @@ my_unif = np.random.uniform(size=30)
 pd.DataFrame(my_unif)
 
 # %%
-latin_hypercube = dr.get_latin_hypercube_draws(
+latin_hypercube = get_latin_hypercube_draws(
     sample_size=3, number_of_draws=10, symmetric=False, uniform_numbers=my_unif
 )
 pd.DataFrame(latin_hypercube)
 
 # %%
 # The uniform draws can also be arranged in a two-dimension array
-my_unif = dr.get_uniform(sample_size=3, number_of_draws=10)
+my_unif = get_uniform(sample_size=3, number_of_draws=10)
 pd.DataFrame(my_unif)
 
 # %%
-latin_hypercube = dr.get_latin_hypercube_draws(
+latin_hypercube = get_latin_hypercube_draws(
     sample_size=3, number_of_draws=10, uniform_numbers=my_unif
 )
 pd.DataFrame(latin_hypercube)
@@ -86,29 +93,29 @@ pd.DataFrame(latin_hypercube)
 
 # %%
 # One Halton sequence.
-halton = dr.get_halton_draws(sample_size=2, number_of_draws=10, base=3)
+halton = get_halton_draws(sample_size=2, number_of_draws=10, base=3)
 pd.DataFrame(halton)
 
 # %%
 # Several Halton sequences.
-halton = dr.get_halton_draws(sample_size=3, number_of_draws=10)
+halton = get_halton_draws(sample_size=3, number_of_draws=10)
 pd.DataFrame(halton)
 
 # %%
 # Shuffled Halton sequences.
-halton = dr.get_halton_draws(sample_size=3, number_of_draws=10, shuffled=True)
+halton = get_halton_draws(sample_size=3, number_of_draws=10, shuffled=True)
 pd.DataFrame(halton)
 
 # %%
 # The above sequences were generated using the default base: 2. It is
 # possible to generate sequences using different prime numbers.
-halton = dr.get_halton_draws(sample_size=1, number_of_draws=10, base=3)
+halton = get_halton_draws(sample_size=1, number_of_draws=10, base=3)
 pd.DataFrame(halton)
 
 # %%
 # It is also possible to skip the first items of the sequence. This is
 # desirable in the context of Monte-Carlo integration.
-halton = dr.get_halton_draws(sample_size=1, number_of_draws=10, base=3, skip=10)
+halton = get_halton_draws(sample_size=1, number_of_draws=10, base=3, skip=10)
 pd.DataFrame(halton)
 
 # %%
@@ -117,19 +124,17 @@ pd.DataFrame(halton)
 
 # %%
 # Antithetic draws can be generated from any function generating uniform draws.
-draws = dr.get_antithetic(dr.get_uniform, sample_size=3, number_of_draws=10)
+draws = get_antithetic(get_uniform, sample_size=3, number_of_draws=10)
 pd.DataFrame(draws)
 
 # %%
 # Antithetic MLHS
-draws = dr.get_antithetic(
-    dr.get_latin_hypercube_draws, sample_size=3, number_of_draws=10
-)
+draws = get_antithetic(get_latin_hypercube_draws, sample_size=3, number_of_draws=10)
 pd.DataFrame(draws)
 
 # %%
 # Antithetic Halton.
-draws = dr.get_antithetic(dr.get_halton_draws, sample_size=1, number_of_draws=10)
+draws = get_antithetic(get_halton_draws, sample_size=1, number_of_draws=10)
 pd.DataFrame(draws)
 
 
@@ -138,11 +143,11 @@ pd.DataFrame(draws)
 # skip the first draws.
 def uniform_halton(sample_size: int, number_of_draws: int) -> np.ndarray:
     """Function generating uniform draws for the antithetic draws"""
-    return dr.get_halton_draws(number_of_draws, sample_size, skip=100)
+    return get_halton_draws(number_of_draws, sample_size, skip=100)
 
 
 # %%
-draws = dr.get_antithetic(uniform_halton, sample_size=3, number_of_draws=10)
+draws = get_antithetic(uniform_halton, sample_size=3, number_of_draws=10)
 pd.DataFrame(draws)
 
 # %%
@@ -153,13 +158,13 @@ pd.DataFrame(draws)
 # Generate pseudo-random numbers from a normal distribution N(0,1)
 # using the Algorithm AS241 Appl. Statist. (1988) Vol. 37, No. 3 by
 # Wichura
-draws = dr.get_normal_wichura_draws(sample_size=3, number_of_draws=10)
+draws = get_normal_wichura_draws(sample_size=3, number_of_draws=10)
 pd.DataFrame(draws)
 
 # %%
 # The antithetic version actually generates half of the draws and
 # complete them with their antithetic version
-draws = dr.get_normal_wichura_draws(sample_size=3, number_of_draws=10, antithetic=True)
+draws = get_normal_wichura_draws(sample_size=3, number_of_draws=10, antithetic=True)
 pd.DataFrame(draws)
 
 # %%
@@ -167,22 +172,22 @@ pd.DataFrame(draws)
 # example, we use the MLHS procedure to generate these draws. Note
 # that, if the antithetic version is used, only half of the requested
 # draws must be provided.
-my_unif = dr.get_latin_hypercube_draws(sample_size=3, number_of_draws=5)
+my_unif = get_latin_hypercube_draws(sample_size=3, number_of_draws=5)
 pd.DataFrame(my_unif)
 
 # %%
-draws = dr.get_normal_wichura_draws(
+draws = get_normal_wichura_draws(
     sample_size=3, number_of_draws=10, uniform_numbers=my_unif, antithetic=True
 )
 pd.DataFrame(draws)
 
 # %%
 # The same with Halton draws.
-my_unif = dr.get_halton_draws(sample_size=2, number_of_draws=5, base=3, skip=10)
+my_unif = get_halton_draws(sample_size=2, number_of_draws=5, base=3, skip=10)
 pd.DataFrame(my_unif)
 
 # %%
-draws = dr.get_normal_wichura_draws(
+draws = get_normal_wichura_draws(
     number_of_draws=10, sample_size=2, uniform_numbers=my_unif, antithetic=True
 )
 pd.DataFrame(draws)

@@ -14,6 +14,8 @@ syntax. They do not correspond to any meaningful model.
 """
 
 import numpy as np
+from IPython.core.display_functions import display
+
 from biogeme.version import get_text
 from biogeme.nests import (
     OneNestForNestedLogit,
@@ -57,7 +59,7 @@ nests.covariance(i=1, j=2, parameters={})
 
 # %%
 # It is :math:`\pi^2/6`.
-np.pi**2 / 6
+display(np.pi**2 / 6)
 
 # %%
 # Second, a nested logit model
@@ -77,11 +79,11 @@ nests.correlation(parameters={})
 # %%
 # Theoretical value for the correlation
 correl_nest_1 = 1 - (1 / mu_nest_1**2)
-correl_nest_1
+display(correl_nest_1)
 
 # %%
 correl_nest_2 = 1 - (1 / mu_nest_2**2)
-correl_nest_2
+display(correl_nest_2)
 
 
 # %%
