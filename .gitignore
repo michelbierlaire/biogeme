@@ -406,3 +406,4 @@ tests/old_syntax/swissmetro/few_draws.toml
 docs/source/examples/assisted/b07everything_assisted.pareto
 dist/biogeme-3.2.14.tar.gz
 dist/biogeme-3.2.14-py3-none-any.whl
+docs/source/code/biogeme/results_keep.rst
