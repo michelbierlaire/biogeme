@@ -10,16 +10,19 @@ Example of a normal mixture of logit models, using numerical integration.
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-import biogeme.distributions as dist
-from biogeme import models
+from biogeme.biogeme import BIOGEME
+from biogeme.distributions import normalpdf
 from biogeme.expressions import (
     Beta,
     RandomVariable,
     log,
     Integrate,
 )
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -56,7 +59,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 omega = RandomVariable('omega')
-density = dist.normalpdf(omega)
+density = normalpdf(omega)
 B_TIME_RND = B_TIME + B_TIME_S * omega
 
 # %%
@@ -75,7 +78,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional on omega, we have a logit model (called the kernel).
-condprob = models.logit(V, av, CHOICE)
+condprob = logit(V, av, CHOICE)
 
 # %%
 # We integrate over omega using numerical integration
@@ -83,7 +86,7 @@ logprob = log(Integrate(condprob * density, 'omega'))
 
 # %%
 # Create the Biogeme object
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b05normal_mixture_integral'
 
 # %%
@@ -92,7 +95,6 @@ results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())
-
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

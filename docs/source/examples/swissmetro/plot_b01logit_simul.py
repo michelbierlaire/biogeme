@@ -11,9 +11,9 @@ Example of simulation with a logit model
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
+from biogeme.models import logit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -58,9 +58,9 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Choice probability.
 #
-prob1 = models.logit(V, av, 1)
-prob2 = models.logit(V, av, 2)
-prob3 = models.logit(V, av, 3)
+prob1 = logit(V, av, 1)
+prob2 = logit(V, av, 2)
+prob3 = logit(V, av, 3)
 
 # %%
 # Elasticities.
@@ -107,7 +107,7 @@ simulate = {
 #
 # As we simulate the probability for all aternatives, even when one of
 # them is not available, Biogeme may trigger some warnings.
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(database, simulate)
 biosim.modelName = 'b01logit_simul'
 
 # %%

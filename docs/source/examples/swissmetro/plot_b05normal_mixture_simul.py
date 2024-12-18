@@ -12,11 +12,12 @@ Simulation of the mixture model, with estimation of the integration error.
 
 import sys
 import numpy as np
-import biogeme.biogeme as bio
-from biogeme import models
-import biogeme.results as res
+
+from biogeme.biogeme import BIOGEME
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioDraws, MonteCarlo
+from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -77,16 +78,18 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # The estimation results are read from the pickle file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b05_estimation_results.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b05normal_mixture.yaml'
+    )
+except FileNotFoundError:
     print(
         'Run first the script 05normalMixture.py in order to generate the '
-        'file 05normalMixture.pickle.'
+        'file b05normal_mixture.yaml.'
     )
     sys.exit()
 # %%
 # Conditional to b_time_rnd, we have a logit model (called the kernel)
-prob = models.logit(V, av, CHOICE)
+prob = logit(V, av, CHOICE)
 
 # %%
 # We calculate the integration error. Note that this formula assumes
@@ -111,7 +114,7 @@ simulate = {
 
 # %%
 # Create the Biogeme object.
-biosim = bio.BIOGEME(database, simulate, number_or_draws=100)
+biosim = BIOGEME(database, simulate, number_or_draws=100)
 biosim.modelName = 'b05normal_mixture_simul'
 
 # %%

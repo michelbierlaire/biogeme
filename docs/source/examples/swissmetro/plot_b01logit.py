@@ -16,14 +16,13 @@ Estimation of a logit model
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
-
-logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b01logit_bis.py')
-
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -40,6 +39,10 @@ from swissmetro_data import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example b01logit_bis.py')
+
 
 # %%
 # Parameters to be estimated.
@@ -67,11 +70,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model.
 # This is the contribution of each observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b01logit'
 
 # %%
@@ -87,5 +90,7 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
-print(pandas_results)
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)

@@ -11,11 +11,14 @@ Example of a nested logit model where the normalization is done at the
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import lognested_mev_mu
 from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -82,11 +85,11 @@ nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
 # observation to the log likelihood function.
 # The choice model is a nested logit, with availability conditions,
 # where the scale parameter mu is explicitly involved.
-logprob = models.lognested_mev_mu(V, av, nests, CHOICE, MU)
+logprob = lognested_mev_mu(V, av, nests, CHOICE, MU)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b10nested_bottom'
 
 # %%
@@ -97,5 +100,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

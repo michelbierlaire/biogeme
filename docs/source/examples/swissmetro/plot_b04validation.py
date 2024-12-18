@@ -9,9 +9,10 @@ Example of the out-of-sample validation of a logit model.
 :date: Sun Apr  9 17:24:32 2023
 
 """
-import biogeme.biogeme as bio
-from biogeme import models
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import loglogit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -54,11 +55,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b04validation'
 
 # %%

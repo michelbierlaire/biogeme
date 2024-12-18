@@ -16,9 +16,9 @@ Assisted specification
 """
 
 import biogeme.biogeme_logging as blog
-from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.assisted import AssistedSpecification
+from biogeme.results_processing import compile_estimation_results
 from plot_b21multiple_models_spec import the_biogeme, PARETO_FILE_NAME
 
 logger = blog.get_screen_logger(blog.INFO)

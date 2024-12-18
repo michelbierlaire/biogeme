@@ -20,9 +20,9 @@ algorithm.
 """
 
 import biogeme.biogeme_logging as blog
-from biogeme.results import compile_estimation_results
 from biogeme.multiobjectives import aic_bic_dimension
 from biogeme.assisted import AssistedSpecification
+from biogeme.results_processing import compile_estimation_results
 from plot_b22multiple_models_spec import the_biogeme, PARETO_FILE_NAME
 
 
@@ -44,7 +44,7 @@ else:
 #    - the biogeme object containing the specifications and the
 #      database,
 #    - an object defining the objectives to minimize. Here, we use
-#      three objectives: AIC, BIC and numner of parameters.
+#      three objectives: AIC, BIC and number of parameters.
 #    - the name of the file where the estimated are saved, and
 #      organized into a Pareto set.
 assisted_specification = AssistedSpecification(

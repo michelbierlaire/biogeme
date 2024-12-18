@@ -15,9 +15,10 @@ Example of a mixture of logit models, using Monte-Carlo integration.
 """
 
 import numpy as np
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     Variable,
@@ -27,7 +28,8 @@ from biogeme.expressions import (
     exp,
     bioMultSum,
 )
-from biogeme.parameters import Parameters
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -118,7 +120,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # given by the logit model (called the kernel). The likelihood of all observations for
 # one individual (the trajectory) is the product of the likelihood of
 # each observation.
-obsprob = [models.loglogit(V[t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)]
+obsprob = [loglogit(V[t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)]
 condprobIndiv = exp(bioMultSum(obsprob))
 
 # %%
@@ -129,7 +131,7 @@ logprob = log(MonteCarlo(condprobIndiv))
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = bio.BIOGEME(flat_database, logprob, number_of_draws=100, seed=1223)
+the_biogeme = BIOGEME(flat_database, logprob, number_of_draws=100, seed=1223)
 the_biogeme.modelName = 'b12panel_flat'
 
 # %%
@@ -140,5 +142,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

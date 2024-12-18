@@ -10,11 +10,11 @@ Example of the estimation of several specifications of the model.
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, log
-from biogeme.results import compile_estimation_results, pareto_optimal
 from biogeme.catalog import Catalog, segmentation_catalogs
+from biogeme.models import loglogit
+from biogeme.results_processing import compile_estimation_results, pareto_optimal
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -101,10 +101,10 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b20multiple_models'
 
 # %%
@@ -113,7 +113,7 @@ dict_of_results = the_biogeme.estimate_catalog()
 # %%
 print(f'A total of {len(dict_of_results)} models have been estimated:')
 for config, res in dict_of_results.items():
-    print(f'{config}: LL={res.data.logLike:.2f} K={res.data.nparam}')
+    print(f'{config}: LL={res.final_log_likelihood:.2f} K={res.number_of_parameters}')
 
 # %%
 summary, description = compile_estimation_results(dict_of_results, use_short_names=True)

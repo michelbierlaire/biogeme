@@ -12,10 +12,10 @@ The datafile is organized as panel data.
 
 """
 
-import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from IPython.core.display_functions import display
 
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     Variable,
@@ -26,7 +26,8 @@ from biogeme.expressions import (
     bioMultSum,
     ExpressionOrNumeric,
 )
-from biogeme.parameters import Parameters
+from biogeme.models import loglogit, logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -146,9 +147,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # We calculate the conditional probability for each class.
 prob = [
     exp(
-        bioMultSum(
-            [models.loglogit(V[i][t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)]
-        )
+        bioMultSum([loglogit(V[i][t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)])
     )
     for i in range(NUMBER_OF_CLASSES)
 ]
@@ -156,22 +155,22 @@ prob = [
 # %%
 # Class membership model.
 W = CLASS_CTE + CLASS_INC * INCOME
-PROB_class0 = models.logit({0: W, 1: 0}, None, 0)
-PROB_class1 = models.logit({0: W, 1: 0}, None, 1)
+PROB_class0 = logit({0: W, 1: 0}, None, 0)
+PROB_class1 = logit({0: W, 1: 0}, None, 1)
 
 # %%
 # Conditional on the random variables, likelihood for the individual.
-probIndiv = PROB_class0 * prob[0] + PROB_class1 * prob[1]
+prob_individual = PROB_class0 * prob[0] + PROB_class1 * prob[1]
 
 # %%
 # We integrate over the random variables using Monte-Carlo
-logprob = log(MonteCarlo(probIndiv))
+logprob = log(MonteCarlo(prob_individual))
 
 # %%
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = bio.BIOGEME(flat_database, logprob, number_of_draws=100, seed=1223)
+the_biogeme = BIOGEME(flat_database, logprob, number_of_draws=100, seed=1223)
 the_biogeme.modelName = 'b16panel_discrete_socio_eco'
 
 # %%
@@ -182,5 +181,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

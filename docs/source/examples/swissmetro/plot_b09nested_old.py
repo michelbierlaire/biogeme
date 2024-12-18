@@ -11,10 +11,13 @@ Since biogeme 3.13, a new syntax, more explicit, has been adopted.
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import lognested
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -71,11 +74,11 @@ nests = existing, future
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
 # The choice model is a nested logit, with availability conditions.
-logprob = models.lognested(V, av, nests, CHOICE)
+logprob = lognested(V, av, nests, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = "b09nested_old"
 
 # %%
@@ -90,5 +93,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

@@ -15,10 +15,13 @@ There are two nests:
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import logcnl
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -80,11 +83,11 @@ nests = nest_existing, nest_public
 
 # %%
 # The choice model is a cross-nested logit, with availability conditions.
-logprob = models.logcnl(V, av, nests, CHOICE)
+logprob = logcnl(V, av, nests, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b11cnl_old'
 
 # %%
@@ -95,5 +98,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

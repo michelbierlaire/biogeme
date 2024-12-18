@@ -12,10 +12,10 @@ is imported by other scripts: :ref:`plot_b21multiple_models`, :ref:`plot_b21proc
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, logzero
 from biogeme.catalog import Catalog, segmentation_catalogs
+from biogeme.models import boxcox, loglogit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -105,7 +105,7 @@ cost_segmentations = (
 
 # %%
 # Parameter for Box-Cox transforms
-ell_time = Beta('lambda_time', 1, None, 10, 0)
+ell_time = Beta('lambda_time', 1, -10, 10, 0)
 
 # %%
 # Potential non-linear specifications of travel time.
@@ -114,7 +114,7 @@ TRAIN_TT_catalog = Catalog.from_dict(
     dict_of_expressions={
         'linear': TRAIN_TT_SCALED,
         'log': logzero(TRAIN_TT_SCALED),
-        'boxcox': models.boxcox(TRAIN_TT_SCALED, ell_time),
+        'boxcox': boxcox(TRAIN_TT_SCALED, ell_time),
     },
 )
 
@@ -123,7 +123,7 @@ SM_TT_catalog = Catalog.from_dict(
     dict_of_expressions={
         'linear': SM_TT_SCALED,
         'log': logzero(SM_TT_SCALED),
-        'boxcox': models.boxcox(SM_TT_SCALED, ell_time),
+        'boxcox': boxcox(SM_TT_SCALED, ell_time),
     },
     controlled_by=TRAIN_TT_catalog.controlled_by,
 )
@@ -133,7 +133,7 @@ CAR_TT_catalog = Catalog.from_dict(
     dict_of_expressions={
         'linear': CAR_TT_SCALED,
         'log': logzero(CAR_TT_SCALED),
-        'boxcox': models.boxcox(CAR_TT_SCALED, ell_time),
+        'boxcox': boxcox(CAR_TT_SCALED, ell_time),
     },
     controlled_by=TRAIN_TT_catalog.controlled_by,
 )
@@ -155,7 +155,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 print(
@@ -165,7 +165,7 @@ print(
 
 # %%
 # Create the biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b21multiple_models'
 
 # %%

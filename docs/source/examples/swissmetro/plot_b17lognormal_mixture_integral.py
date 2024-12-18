@@ -13,10 +13,11 @@ numerical integration instead of Monte-Carlo approximation.
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-import biogeme.distributions as dist
-from biogeme import models
+from biogeme.biogeme import BIOGEME
+from biogeme.distributions import normalpdf
 from biogeme.expressions import (
     Beta,
     RandomVariable,
@@ -24,6 +25,8 @@ from biogeme.expressions import (
     log,
     Integrate,
 )
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -65,7 +68,7 @@ B_TIME_S = Beta('B_TIME_S', 1, -2, 2, 0)
 # for numerical integration.
 omega = RandomVariable('omega')
 B_TIME_RND = -exp(B_TIME + B_TIME_S * omega)
-density = dist.normalpdf(omega)
+density = normalpdf(omega)
 
 # %%
 # Definition of the utility functions.
@@ -83,7 +86,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional to omega, we have a logit model (called the kernel).
-condprob = models.logit(V, av, CHOICE)
+condprob = logit(V, av, CHOICE)
 
 # %%
 # We integrate over omega using numerical integration.
@@ -91,7 +94,7 @@ logprob = log(Integrate(condprob * density, 'omega'))
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b17lognormal_mixture_integral'
 
 # %%
@@ -102,5 +105,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

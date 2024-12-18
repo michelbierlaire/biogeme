@@ -14,6 +14,7 @@ the Pareto optimal models. The catalog of specifications is defined in
 """
 
 import biogeme.biogeme_logging as blog
+from biogeme.results_processing import compile_estimation_results
 
 try:
     import matplotlib.pyplot as plt
@@ -23,7 +24,6 @@ except ModuleNotFoundError:
     can_plot = False
 from biogeme_optimization.exceptions import OptimizationError
 from biogeme.assisted import ParetoPostProcessing
-from biogeme.results import compile_estimation_results
 from plot_b21multiple_models_spec import the_biogeme
 
 PARETO_FILE_NAME = 'saved_results/b21multiple_models.pareto'

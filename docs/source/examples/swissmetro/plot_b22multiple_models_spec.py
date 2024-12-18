@@ -13,10 +13,10 @@ estimation. It is imported by other scripts:
 
 """
 
-from biogeme import models
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, logzero
 from biogeme.catalog import Catalog, segmentation_catalogs
+from biogeme.models import piecewise_formula, boxcox, loglogit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -88,7 +88,7 @@ SM_HEADWAY_catalog = Catalog.from_dict(
 
 # %%
 # Parameter for Box-Cox transforms.
-ell_TT = Beta('lambda_TT', 1, None, 10, 0)
+ell_TT = Beta('lambda_TT', 1, -10, 10, 0)
 
 # %%
 # Non-linear specification for travel time.
@@ -98,9 +98,9 @@ TRAIN_TT_catalog = Catalog.from_dict(
         'linear': TRAIN_TT_SCALED,
         'log': logzero(TRAIN_TT_SCALED),
         'sqrt': TRAIN_TT_SCALED**0.5,
-        'piecewise_1': models.piecewise_formula(TRAIN_TT_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewise_formula(TRAIN_TT_SCALED, [0, 0.25, None]),
-        'boxcox': models.boxcox(TRAIN_TT_SCALED, ell_TT),
+        'piecewise_1': piecewise_formula(TRAIN_TT_SCALED, [0, 0.1, None]),
+        'piecewise_2': piecewise_formula(TRAIN_TT_SCALED, [0, 0.25, None]),
+        'boxcox': boxcox(TRAIN_TT_SCALED, ell_TT),
     },
 )
 
@@ -110,9 +110,9 @@ SM_TT_catalog = Catalog.from_dict(
         'linear': SM_TT_SCALED,
         'log': logzero(SM_TT_SCALED),
         'sqrt': SM_TT_SCALED**0.5,
-        'piecewise_1': models.piecewise_formula(SM_TT_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewise_formula(SM_TT_SCALED, [0, 0.25, None]),
-        'boxcox': models.boxcox(SM_TT_SCALED, ell_TT),
+        'piecewise_1': piecewise_formula(SM_TT_SCALED, [0, 0.1, None]),
+        'piecewise_2': piecewise_formula(SM_TT_SCALED, [0, 0.25, None]),
+        'boxcox': boxcox(SM_TT_SCALED, ell_TT),
     },
     controlled_by=TRAIN_TT_catalog.controlled_by,
 )
@@ -123,16 +123,16 @@ CAR_TT_catalog = Catalog.from_dict(
         'linear': CAR_TT_SCALED,
         'log': logzero(CAR_TT_SCALED),
         'sqrt': CAR_TT_SCALED**0.5,
-        'piecewise_1': models.piecewise_formula(CAR_TT_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewise_formula(CAR_TT_SCALED, [0, 0.25, None]),
-        'boxcox': models.boxcox(CAR_TT_SCALED, ell_TT),
+        'piecewise_1': piecewise_formula(CAR_TT_SCALED, [0, 0.1, None]),
+        'piecewise_2': piecewise_formula(CAR_TT_SCALED, [0, 0.25, None]),
+        'boxcox': boxcox(CAR_TT_SCALED, ell_TT),
     },
     controlled_by=TRAIN_TT_catalog.controlled_by,
 )
 
 # %%
 # Parameter for Box-Cox transforms.
-ell_COST = Beta('lambda_COST', 1, None, 10, 0)
+ell_COST = Beta('lambda_COST', 1, -10, 10, 0)
 
 # %%
 # Nonlinear transformations for travel cost.
@@ -142,9 +142,9 @@ TRAIN_COST_catalog = Catalog.from_dict(
         'linear': TRAIN_COST_SCALED,
         'log': logzero(TRAIN_COST_SCALED),
         'sqrt': TRAIN_COST_SCALED**0.5,
-        'piecewise_1': models.piecewise_formula(TRAIN_COST_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewise_formula(TRAIN_COST_SCALED, [0, 0.25, None]),
-        'boxcox': models.boxcox(TRAIN_COST_SCALED, ell_COST),
+        'piecewise_1': piecewise_formula(TRAIN_COST_SCALED, [0, 0.1, None]),
+        'piecewise_2': piecewise_formula(TRAIN_COST_SCALED, [0, 0.25, None]),
+        'boxcox': boxcox(TRAIN_COST_SCALED, ell_COST),
     },
 )
 
@@ -154,9 +154,9 @@ SM_COST_catalog = Catalog.from_dict(
         'linear': SM_COST_SCALED,
         'log': logzero(SM_COST_SCALED),
         'sqrt': SM_COST_SCALED**0.5,
-        'piecewise_1': models.piecewise_formula(SM_COST_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewise_formula(SM_COST_SCALED, [0, 0.25, None]),
-        'boxcox': models.boxcox(SM_COST_SCALED, ell_COST),
+        'piecewise_1': piecewise_formula(SM_COST_SCALED, [0, 0.1, None]),
+        'piecewise_2': piecewise_formula(SM_COST_SCALED, [0, 0.25, None]),
+        'boxcox': boxcox(SM_COST_SCALED, ell_COST),
     },
     controlled_by=TRAIN_COST_catalog.controlled_by,
 )
@@ -167,9 +167,9 @@ CAR_COST_catalog = Catalog.from_dict(
         'linear': CAR_CO_SCALED,
         'log': logzero(CAR_CO_SCALED),
         'sqrt': CAR_CO_SCALED**0.5,
-        'piecewise_1': models.piecewise_formula(CAR_CO_SCALED, [0, 0.1, None]),
-        'piecewise_2': models.piecewise_formula(CAR_CO_SCALED, [0, 0.25, None]),
-        'boxcox': models.boxcox(CAR_CO_SCALED, ell_COST),
+        'piecewise_1': piecewise_formula(CAR_CO_SCALED, [0, 0.1, None]),
+        'piecewise_2': piecewise_formula(CAR_CO_SCALED, [0, 0.25, None]),
+        'boxcox': boxcox(CAR_CO_SCALED, ell_COST),
     },
     controlled_by=TRAIN_COST_catalog.controlled_by,
 )
@@ -197,10 +197,10 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b22multiple_models'
 
 # %%

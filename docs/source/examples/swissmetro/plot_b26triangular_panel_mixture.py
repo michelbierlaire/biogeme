@@ -13,9 +13,10 @@ Triangular mixture with panel data
 """
 
 import numpy as np
-import biogeme.biogeme as bio
-from biogeme import models
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     bioDraws,
@@ -23,8 +24,9 @@ from biogeme.expressions import (
     PanelLikelihoodTrajectory,
     log,
 )
+from biogeme.models import logit
 from biogeme.native_draws import RandomNumberGeneratorTuple
-from biogeme.parameters import Parameters
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -51,7 +53,7 @@ logger.info('Example b26triangular_panel_mixture.py')
 def the_triangular_generator(sample_size: int, number_of_draws: int) -> np.ndarray:
     """
     Provide my own random number generator to the database.
-    See the numpy.random documentation to obtain a list of other distributions.
+    See the `numpy.random` documentation to obtain a list of other distributions.
     """
     return np.random.triangular(-1, 0, 1, (sample_size, number_of_draws))
 
@@ -118,7 +120,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Conditional to the random parameters, the likelihood of one observation is
 # given by the logit model (called the kernel).
-obsprob = models.logit(V, av, CHOICE)
+obsprob = logit(V, av, CHOICE)
 
 # %%
 # Conditional on the random parameters, the likelihood of all observations for
@@ -134,7 +136,7 @@ logprob = log(MonteCarlo(condprobIndiv))
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1223)
+the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
 the_biogeme.modelName = 'b26triangular_panel_mixture'
 
 # %%
@@ -145,5 +147,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

@@ -11,15 +11,14 @@ Same model as b01logit, using bioLinearUtility, segmentations
 
 """
 
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.segmentation as seg
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, bioLinearUtility, LinearTermTuple
-
-logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b01logit.py')
-
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.segmentation import Segmentation
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -70,9 +69,9 @@ segmentations_for_asc = [
 
 # %%
 # Segmentation of the constants.
-ASC_TRAIN_segmentation = seg.Segmentation(ASC_TRAIN, segmentations_for_asc)
+ASC_TRAIN_segmentation = Segmentation(ASC_TRAIN, segmentations_for_asc)
 segmented_ASC_TRAIN = ASC_TRAIN_segmentation.segmented_beta()
-ASC_CAR_segmentation = seg.Segmentation(ASC_CAR, segmentations_for_asc)
+ASC_CAR_segmentation = Segmentation(ASC_CAR, segmentations_for_asc)
 segmented_ASC_CAR = ASC_CAR_segmentation.segmented_beta()
 
 # %%
@@ -108,7 +107,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 #
 # This is the contribution of each observation to the log likelihood
 # function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # User notes.
@@ -124,9 +123,7 @@ USER_NOTES = (
 
 # %%
 # Create the Biogeme object. We include users notes, and we ask not to calculate the second derivatives.
-the_biogeme = bio.BIOGEME(
-    database, logprob, user_notes=USER_NOTES, second_derivatives=0
-)
+the_biogeme = BIOGEME(database, logprob, user_notes=USER_NOTES, second_derivatives=0)
 
 # %%
 # Calculate the null log likelihood for reporting.
@@ -152,8 +149,8 @@ results = the_biogeme.estimate(run_bootstrap=True)
 #
 print('Parameters')
 print('----------')
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)
 
 # %%
 # Get general statistics.

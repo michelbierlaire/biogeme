@@ -13,9 +13,12 @@ in :ref:`plot_b05normal_mixture`.
 
 import os
 import pickle
-import biogeme.biogeme as bio
-from biogeme import models
+
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, bioDraws, MonteCarlo
+from biogeme.models import logit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -72,7 +75,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional on b_time_rnd, we have a logit model (called the kernel).
-prob_chosen = models.logit(V, av, CHOICE)
+prob_chosen = logit(V, av, CHOICE)
 
 # %%
 # Numerator and denominator of the formula for individual parameters.
@@ -89,16 +92,16 @@ simulate = {
 # %%
 # The results are saved in a picke file. The next time the script is
 # run, if the file exists, the results are simply loaded instead of
-# being re-calcuated.
+# being re-calculated.
 PICKLE_FILE = 'b19individual_level_parameters.pickle'
 if os.path.isfile(PICKLE_FILE):
     with open(PICKLE_FILE, 'rb') as f:
         sim = pickle.load(f)
 else:
-    biosim = bio.BIOGEME(database, simulate)
+    biosim = BIOGEME(database, simulate)
     sim = biosim.simulate(beta_values)
     sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
     with open(PICKLE_FILE, 'wb') as f:
         pickle.dump(sim, f)
 
-sim
+display(sim)

@@ -12,12 +12,12 @@ Example of the use of different algorithms to estimate the model.
 
 import itertools
 import pandas as pd
+from IPython.core.display_functions import display
 
-from biogeme.parameters import Parameters
+from biogeme.biogeme import BIOGEME
+from biogeme.models import logit
 from biogeme.tools import format_timedelta
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
 
@@ -73,7 +73,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional to b_time_rnd, we have a logit model (called the kernel)
-prob = models.logit(V, av, CHOICE)
+prob = logit(V, av, CHOICE)
 
 # %%
 # We integrate over b_time_rnd using Monte-Carlo
@@ -113,7 +113,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     infeasible_cg_values, initial_radius_values, second_derivatives_values
 ):
     # Create the Biogeme object
-    the_biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1223)
+    the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
     # We set the parameters of the optimization algorithm
     the_biogeme.infeasible_cg = infeasible_cg
     the_biogeme.initial_radius = initial_radius
@@ -166,7 +166,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     summary = pd.concat([summary, pd.DataFrame([result_data])], ignore_index=True)
 
 # %%
-summary
+display(summary)
 
 # %%
 SUMMARY_FILE = '05normalMixture_allAlgos.csv'

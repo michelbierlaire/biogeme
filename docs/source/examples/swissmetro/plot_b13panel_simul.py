@@ -13,11 +13,10 @@ simulation. We also calculate the individual parameters.
 
 import sys
 
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.exceptions as excep
-import biogeme.results as res
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     bioDraws,
@@ -25,7 +24,8 @@ from biogeme.expressions import (
     MonteCarlo,
     log,
 )
-from biogeme.parameters import Parameters
+from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -96,7 +96,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Conditional on the random parameters, the likelihood of one observation is
 # given by the logit model (called the kernel).
-obsprob = models.logit(V, av, CHOICE)
+obsprob = logit(V, av, CHOICE)
 
 # %%
 # Conditional on the random parameters, the likelihood of all observations for
@@ -111,12 +111,12 @@ logprob = log(MonteCarlo(condprobIndiv))
 # %%
 # We retrieve the parameters estimates.
 try:
-    results = res.bioResults(pickle_file='saved_results/b12panel.pickle')
-except excep.BiogemeError:
+    results = EstimationResults.from_yaml_file(filename='saved_results/b12panel.yaml')
+except FileNotFoundError:
     sys.exit(
         'Run first the script b12panel.py '
         'in order to generate the '
-        'file b12panel.pickle.'
+        'file b12panel.yaml and move it to the directory saved_results.'
     )
 
 # %%
@@ -145,10 +145,10 @@ simulate = {
 
 # %%
 # Creation of the Biogeme object.
-biosim = bio.BIOGEME(database, simulate, number_of_draws=NUMBER_OF_DRAWS, seed=1223)
+biosim = BIOGEME(database, simulate, number_of_draws=NUMBER_OF_DRAWS, seed=1223)
 
 # %%
-# Suimulation.
+# Simulation.
 sim = biosim.simulate(results.get_beta_values())
 
 # %%
@@ -158,4 +158,4 @@ sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
 print(f'{sim.shape=}')
 
 # %%
-sim
+display(sim)

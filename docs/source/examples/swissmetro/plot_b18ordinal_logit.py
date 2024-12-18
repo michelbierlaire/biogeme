@@ -12,10 +12,13 @@ sake of it, that the alternatives are ordered as 1->2->3
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
 from biogeme.models import ordered_logit
 from biogeme.expressions import Beta, log, Elem
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -76,7 +79,7 @@ logprob = log(the_chosen_proba)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b18ordinal_logit'
 
 # %%
@@ -87,5 +90,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

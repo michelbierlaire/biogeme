@@ -10,9 +10,12 @@ Example of a discrete mixture of logit (or latent class model).
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, log
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -71,14 +74,14 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # The choice model is a discrete mixture of logit, with availability conditions
-prob1 = models.logit(V1, av, CHOICE)
-prob2 = models.logit(V2, av, CHOICE)
+prob1 = logit(V1, av, CHOICE)
+prob2 = logit(V2, av, CHOICE)
 prob = PROB_CLASS1 * prob1 + PROB_CLASS2 * prob2
 logprob = log(prob)
 
 # %%
 # Create the Biogeme object
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b07discrete_mixture'
 
 # %%
@@ -89,5 +92,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

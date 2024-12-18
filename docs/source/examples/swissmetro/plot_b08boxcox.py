@@ -9,9 +9,12 @@ Example of a logit model, with a Box-Cox transform of variables.
 :date: Sun Apr  9 17:58:15 2023
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import boxcox, loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -40,13 +43,9 @@ LAMBDA = Beta('LAMBDA', 0, None, None, 0)
 
 # %%
 # Definition of the utility functions.
-V1 = (
-    ASC_TRAIN
-    + B_TIME * models.boxcox(TRAIN_TT_SCALED, LAMBDA)
-    + B_COST * TRAIN_COST_SCALED
-)
-V2 = ASC_SM + B_TIME * models.boxcox(SM_TT_SCALED, LAMBDA) + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * models.boxcox(CAR_TT_SCALED, LAMBDA) + B_COST * CAR_CO_SCALED
+V1 = ASC_TRAIN + B_TIME * boxcox(TRAIN_TT_SCALED, LAMBDA) + B_COST * TRAIN_COST_SCALED
+V2 = ASC_SM + B_TIME * boxcox(SM_TT_SCALED, LAMBDA) + B_COST * SM_COST_SCALED
+V3 = ASC_CAR + B_TIME * boxcox(CAR_TT_SCALED, LAMBDA) + B_COST * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
@@ -59,11 +58,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b08boxcox'
 
 # %%
@@ -78,5 +77,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

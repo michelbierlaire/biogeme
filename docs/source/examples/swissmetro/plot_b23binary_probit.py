@@ -11,8 +11,11 @@ Two alternatives: Train and Car.
 
 """
 
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, bioNormalCdf, Elem, log
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_binary`.
@@ -56,7 +59,7 @@ logprob = Elem(logP, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b23probit'
 
 # %%
@@ -67,5 +70,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

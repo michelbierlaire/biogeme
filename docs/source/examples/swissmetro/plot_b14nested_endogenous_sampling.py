@@ -17,11 +17,14 @@ This is illustrated in this example.
 """
 
 import numpy as np
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import get_mev_for_nested, logmev_endogenous_sampling
 from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -92,16 +95,16 @@ nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
 # %%
 # The choice model is a nested logit, with corrections for endogenous sampling
 # We first obtain the expression of the Gi function for nested logit.
-Gi = models.get_mev_for_nested(V, av, nests)
+Gi = get_mev_for_nested(V, av, nests)
 
 # %%
 # Then we calculate the MEV log probability, accounting for the correction.
-logprob = models.logmev_endogenous_sampling(V, Gi, av, correction, CHOICE)
+logprob = logmev_endogenous_sampling(V, Gi, av, correction, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b14nested_endogenous_eampling'
+the_biogeme = BIOGEME(database, logprob)
+the_biogeme.modelName = 'b14nested_endogenous_sampling'
 
 # %%
 # Estimate the parameters.
@@ -111,5 +114,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

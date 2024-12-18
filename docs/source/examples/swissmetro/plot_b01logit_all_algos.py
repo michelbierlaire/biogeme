@@ -11,14 +11,15 @@ Estimation of a logit model with several algorithms.
 """
 
 import itertools
-import pandas as pd
 
-from biogeme.parameters import Parameters
-from biogeme.tools import format_timedelta
-import biogeme.biogeme as bio
-from biogeme import models
-import biogeme.exceptions as excep
+import pandas as pd
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta
+from biogeme.models import loglogit
+from biogeme.tools import format_timedelta
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -61,7 +62,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Options for the optimization algorithm
@@ -98,7 +99,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     infeasible_cg_values, initial_radius_values, second_derivatives_values
 ):
     # Create the Biogeme object
-    the_biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1223)
+    the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
     # We set the parameters of the optimization algorithm
     the_biogeme.infeasible_cg = infeasible_cg
     the_biogeme.initial_radius = initial_radius
@@ -135,7 +136,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
             }
         )
 
-    except excep.BiogemeError as e:
+    except BiogemeError as e:
         print(e)
         result_data.update(
             {
@@ -151,7 +152,7 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     summary = pd.concat([summary, pd.DataFrame([result_data])], ignore_index=True)
 
 # %%
-summary
+display(summary)
 
 # %%
 SUMMARY_FILE = '01logit_all_algos.csv'

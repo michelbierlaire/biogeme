@@ -11,12 +11,16 @@ Illustration of the application of an estimated model.
 
 import sys
 
-import biogeme.biogeme as bio
-import biogeme.exceptions as excep
-import biogeme.results as res
-from biogeme import models
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
+from biogeme.models import cnl
 from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -89,13 +93,19 @@ nests = NestsForCrossNestedLogit(
 # %%
 # Read the estimation results from the pickle file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b11cnl.pickle')
-except excep.BiogemeError:
-    print('Run first the script b11cnl.py in order to generate the file 11cnl.pickle.')
+    results = EstimationResults.from_yaml_file(filename='saved_results/b11cnl.yaml')
+except FileNotFoundError:
+    print(
+        'Run first the script b11cnl.py in order to generate the file b11cnl.yaml, and move it to the directory '
+        'saved_results.'
+    )
     sys.exit()
 
+
 # %%
-print('Estimation results: ', results.get_estimated_parameters())
+print(
+    'Estimation results: ', get_pandas_estimated_parameters(estimation_results=results)
+)
 
 # %%
 print('Calculating correlation matrix. It may generate numerical warnings from scipy.')
@@ -107,9 +117,9 @@ corr
 
 # %%
 # The choice model is a cross-nested logit, with availability conditions.
-prob1 = models.cnl(V, av, nests, 1)
-prob2 = models.cnl(V, av, nests, 2)
-prob3 = models.cnl(V, av, nests, 3)
+prob1 = cnl(V, av, nests, 1)
+prob2 = cnl(V, av, nests, 2)
+prob3 = cnl(V, av, nests, 3)
 
 # %%
 # We calculate elasticities. It is important that the variables
@@ -132,7 +142,7 @@ simulate = {
 
 # %%
 # Create the Biogeme object.
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(database, simulate)
 biosim.modelName = 'b11cnl_simul'
 
 # %%
@@ -141,7 +151,7 @@ simresults = biosim.simulate(results.get_beta_values())
 
 # %%
 print('Simulation results')
-simresults
+display(simresults)
 
 # %%
 print(f'Aggregate share of train: {100*simresults["Prob. train"].mean():.1f}%')

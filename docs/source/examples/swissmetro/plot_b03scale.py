@@ -12,9 +12,12 @@ Heteroscedastic specification
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -65,7 +68,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # These notes will be included as such in the report file.
@@ -76,7 +79,7 @@ USER_NOTES = (
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob, user_notes=USER_NOTES)
+the_biogeme = BIOGEME(database, logprob, user_notes=USER_NOTES)
 the_biogeme.modelName = 'b03scale'
 
 # %%
@@ -88,5 +91,5 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)
