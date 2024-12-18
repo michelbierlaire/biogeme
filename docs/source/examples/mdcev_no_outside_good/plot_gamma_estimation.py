@@ -6,7 +6,10 @@
 Estimation of a MDCEV model with the "gamma_profile" specification.
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
+from biogeme.results_processing import get_pandas_estimated_parameters
 from gamma_specification import the_gamma_profile
 from specification import (
     database,
@@ -25,8 +28,12 @@ results = the_gamma_profile.estimate_parameters(
     consumed_quantities=consumed_quantities,
 )
 
-# %
+# %%
 print(results.short_summary())
 
-# %
-print(results.get_estimated_parameters())
+# %%
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)
