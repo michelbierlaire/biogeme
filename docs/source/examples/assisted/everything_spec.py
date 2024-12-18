@@ -51,8 +51,8 @@ See `Bierlaire and Ortelli (2023)
 """
 
 import numpy as np
-from biogeme import models
 from biogeme.expressions import Expression, Beta
+from biogeme.models import boxcox, loglogit, lognested
 from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
 from biogeme.catalog import (
     Catalog,
@@ -141,7 +141,7 @@ linear_train_tt = TRAIN_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_train_tt = models.boxcox(TRAIN_TT_SCALED, ell_travel_time)
+boxcox_train_tt = boxcox(TRAIN_TT_SCALED, ell_travel_time)
 
 # %%
 # Power series.
@@ -167,7 +167,7 @@ linear_sm_tt = SM_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_sm_tt = models.boxcox(SM_TT_SCALED, ell_travel_time)
+boxcox_sm_tt = boxcox(SM_TT_SCALED, ell_travel_time)
 
 # %%
 # Power series.
@@ -194,7 +194,7 @@ linear_car_tt = CAR_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_car_tt = models.boxcox(CAR_TT_SCALED, ell_travel_time)
+boxcox_car_tt = boxcox(CAR_TT_SCALED, ell_travel_time)
 
 # %%
 # Power series.
@@ -273,7 +273,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the logit model. This is the contribution of each
 # observation to the log likelihood function.
-logprob_logit = models.loglogit(V, av, CHOICE)
+logprob_logit = loglogit(V, av, CHOICE)
 
 # %%
 # Nested logit model: nest with existing alternatives.
@@ -283,7 +283,7 @@ existing = OneNestForNestedLogit(
 )
 
 nests_existing = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
-logprob_nested_existing = models.lognested(V, av, nests_existing, CHOICE)
+logprob_nested_existing = lognested(V, av, nests_existing, CHOICE)
 
 # %%
 # Nested logit model: nest with public transportation alternatives.
@@ -293,10 +293,10 @@ public = OneNestForNestedLogit(
 )
 
 nests_public = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(public,))
-logprob_nested_public = models.lognested(V, av, nests_public, CHOICE)
+logprob_nested_public = lognested(V, av, nests_public, CHOICE)
 
 # %%
-# Catalo for models.
+# Catalog for models.
 model_catalog = Catalog.from_dict(
     catalog_name='model_catalog',
     dict_of_expressions={
