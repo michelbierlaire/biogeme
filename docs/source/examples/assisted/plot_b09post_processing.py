@@ -4,7 +4,7 @@ Re-estimation of best models
 ============================
 
 After running the assisted specification algorithm for the 432
-specifications in :ref:`everything_spec_section`, we use post processing to
+specifications in :ref:`everything_spec_section`, we use post-processing to
 re-estimate all Pareto optimal models, and display some information
 about the algorithm.
 See `Bierlaire and Ortelli (2023)
@@ -15,6 +15,8 @@ See `Bierlaire and Ortelli (2023)
 
 """
 
+from biogeme.biogeme import BIOGEME
+
 try:
     import matplotlib.pyplot as plt
 
@@ -22,7 +24,6 @@ try:
 except ModuleNotFoundError:
     can_plot = False
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
 from biogeme.assisted import ParetoPostProcessing
 
 from everything_spec import model_catalog, database
@@ -34,11 +35,11 @@ PARETO_FILE_NAME = 'saved_results/b07everything_assisted.pareto'
 
 # %%
 # Create the biogeme object from the catalog.
-the_biogeme = bio.BIOGEME(database, model_catalog)
+the_biogeme = BIOGEME(database, model_catalog)
 the_biogeme.modelName = 'b09post_processing'
 
 # %%
-# Create the post processing object.
+# Create the post-processing object.
 post_processing = ParetoPostProcessing(
     biogeme_object=the_biogeme, pareto_file_name=PARETO_FILE_NAME
 )
