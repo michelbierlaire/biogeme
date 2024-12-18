@@ -20,16 +20,15 @@ import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
 
+from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import EstimationResults
+
 try:
     import matplotlib.pyplot as plt
 
     can_plot = True
 except ModuleNotFoundError:
     can_plot = False
-import biogeme.biogeme as bio
-from biogeme.exceptions import BiogemeError
-import biogeme.results as res
-
 from biogeme.expressions import Derive
 from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
@@ -61,16 +60,18 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 
 # %%
 # Read the estimation results from the file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
-        'the file b02estimation.pickle.'
+        'the file b02estimation.yaml.'
     )
 
 # %%
