@@ -10,6 +10,10 @@ Estimation of a cross-nested logit model using sampling of alternatives.
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import get_pandas_estimated_parameters
 from biogeme.sampling_of_alternatives import (
     SamplingContext,
     ChoiceSetsGeneration,
@@ -18,7 +22,6 @@ from biogeme.sampling_of_alternatives import (
 )
 from biogeme.expressions import Beta
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
 from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
 from specification_sampling import V, combined_variables
 from compare import compare
@@ -122,7 +125,7 @@ biogeme_database = the_data_generation.sample_and_merge(recycle=False)
 logprob = the_model_generation.get_cross_nested_logit()
 
 # %%
-the_biogeme = bio.BIOGEME(biogeme_database, logprob)
+the_biogeme = BIOGEME(biogeme_database, logprob)
 the_biogeme.modelName = MODEL_NAME
 
 # %%
@@ -139,8 +142,8 @@ results = the_biogeme.estimate(recycle=False)
 print(results.short_summary())
 
 # %%
-estimated_parameters = results.get_estimated_parameters()
-estimated_parameters
+estimated_parameters = get_pandas_estimated_parameters(estimation_results=results)
+display(estimated_parameters)
 
 # %%
 df, msg = compare(estimated_parameters)
