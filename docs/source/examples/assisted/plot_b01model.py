@@ -18,13 +18,12 @@ See `Bierlaire and Ortelli (2023)
 
 """
 
-import biogeme.biogeme as bio
 import biogeme.biogeme_logging as blog
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.catalog import Catalog
+from biogeme.models import loglogit, lognested
 from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
-from biogeme.results import compile_estimation_results, pareto_optimal
 from IPython.core.display_functions import display
 
 from biogeme.data.swissmetro import (
@@ -40,6 +39,7 @@ from biogeme.data.swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+from biogeme.results_processing import pareto_optimal, compile_estimation_results
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -67,7 +67,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the logit model. This is the contribution of each
 # observation to the log likelihood function.
-logprob_logit = models.loglogit(V, av, CHOICE)
+logprob_logit = loglogit(V, av, CHOICE)
 
 # %%
 # Nested logit model: nest with existing alternatives.
@@ -77,7 +77,7 @@ existing = OneNestForNestedLogit(
 )
 
 nests_existing = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
-logprob_nested_existing = models.lognested(V, av, nests_existing, CHOICE)
+logprob_nested_existing = lognested(V, av, nests_existing, CHOICE)
 
 # %%
 # Nested logit model: nest with public transportation alternatives.
@@ -87,7 +87,7 @@ public = OneNestForNestedLogit(
 )
 
 nests_public = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(public,))
-logprob_nested_public = models.lognested(V, av, nests_public, CHOICE)
+logprob_nested_public = lognested(V, av, nests_public, CHOICE)
 
 # %%
 # Catalog.
@@ -106,7 +106,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, model_catalog)
+the_biogeme = BIOGEME(database, model_catalog)
 the_biogeme.modelName = 'b01model'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
