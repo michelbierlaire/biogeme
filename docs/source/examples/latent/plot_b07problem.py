@@ -18,13 +18,8 @@ Illustration of a common estimation problem
 
 """
 
-import sys
-
 import biogeme.biogeme_logging as blog
-from biogeme.models import piecewise_formula
-import biogeme.biogeme as bio
-from biogeme.expressions import Beta, log, Elem, bioNormalCdf
-
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import (
     read_data,
     age_65_more,
@@ -44,6 +39,8 @@ from biogeme.data.optima import (
     Mobil16,
     Mobil17,
 )
+from biogeme.expressions import Beta, log, Elem, bioNormalCdf
+from biogeme.models import piecewise_formula
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b07problem.py')
@@ -268,7 +265,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object
-the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme = BIOGEME(database, loglike)
 the_biogeme.modelName = 'b07problem'
 
 # %%
