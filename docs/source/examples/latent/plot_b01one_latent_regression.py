@@ -9,8 +9,10 @@ It is actually a simple linear regression.
 :date: Thu Apr 13 16:42:02 2023
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
 from biogeme.models import piecewise_formula
 import biogeme.loglikelihood as ll
 from biogeme.expressions import Beta, Elem, bioMultSum
@@ -32,6 +34,10 @@ from biogeme.data.optima import (
     Mobil14,
     Mobil16,
     Mobil17,
+)
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -176,19 +182,18 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme = BIOGEME(database, loglike)
 the_biogeme.modelName = 'b01one_latent_regression'
 
 # %%
 # Estimate the parameters
-results = the_biogeme.estimate()
+results: EstimationResults = the_biogeme.estimate()
 
 # %%
-print(f'Estimated betas: {len(results.data.betaValues)}')
-print(f'final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
-results.write_latex()
-print(f'LaTeX file: {results.data.latexFileName}')
+print(f'Estimated betas: {results.number_of_parameters}')
+print(f'final log likelihood: {results.final_log_likelihood:.3f}')
+print(f'Output file: {the_biogeme.html_filename}')
 
 # %%
-results.get_estimated_parameters()
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)
