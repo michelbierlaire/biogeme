@@ -10,16 +10,22 @@ Choice model with latent variable. No measurement equation for the indicators.
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
 import biogeme.distributions as dist
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     RandomVariable,
     Integrate,
     exp,
     log,
+)
+from biogeme.models import piecewise_formula, logit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
 )
 
 from read_or_estimate import read_or_estimate
@@ -74,7 +80,7 @@ density = dist.normalpdf(omega)
 sigma_s = Beta('sigma_s', 1, -1, 1, 0)
 
 thresholds = [None, 4, 6, 8, 10, None]
-formula_income = models.piecewise_formula(variable=ScaledIncome, thresholds=thresholds)
+formula_income = piecewise_formula(variable=ScaledIncome, thresholds=thresholds)
 
 CARLOVERS = (
     coef_intercept
@@ -133,7 +139,7 @@ V = {0: V0, 1: V1, 2: V2}
 
 # %%
 # Conditional on  omega, we have a logit model (called the kernel).
-condprob = models.logit(V, None, Choice)
+condprob = logit(V, None, Choice)
 
 # %%
 # We integrate over omega using numerical integration.
@@ -145,18 +151,22 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme = BIOGEME(database, loglike)
 the_biogeme.modelName = 'b03choice_only'
 
 # %%
 # If estimation results are saved on file, we read them to speed up the process.
 # If not, we estimate the parameters.
-results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
+results: EstimationResults = read_or_estimate(
+    the_biogeme=the_biogeme, directory='saved_results'
+)
 
 # %%
-print(f'Estimated betas: {len(results.data.betaValues)}')
-print(f'Final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
+print(f'Estimated betas: {results.number_of_parameters}')
+print(f'final log likelihood: {results.final_log_likelihood:.3f}')
+print(f'Output file: {the_biogeme.html_filename}')
 
 # %%
-results.get_estimated_parameters()
+# %%
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)
