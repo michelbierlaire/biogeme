@@ -10,11 +10,13 @@ Script reading the list of alternatives and identifying subsets
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
+
 from biogeme.partition import Partition
 
 # %%
 alternatives = pd.read_csv('restaurants.dat')
-alternatives
+display(alternatives)
 
 # %%
 ID_COLUMN = 'ID'
