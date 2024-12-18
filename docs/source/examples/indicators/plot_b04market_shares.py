@@ -11,11 +11,11 @@ We use an estimated model to calculate market shares.
 """
 
 import sys
-from biogeme import models
-import biogeme.biogeme as bio
-from biogeme.exceptions import BiogemeError
-import biogeme.results as res
+
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import read_data, normalized_weight
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 from scenarios import scenario
 
 # %%
@@ -24,19 +24,21 @@ V, nests, _, _ = scenario()
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = models.nested(V, None, nests, 0)
-prob_CAR = models.nested(V, None, nests, 1)
-prob_SM = models.nested(V, None, nests, 2)
+prob_PT = nested(V, None, nests, 0)
+prob_CAR = nested(V, None, nests, 1)
+prob_SM = nested(V, None, nests, 2)
 
 # %%
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02simulation.py '
         'in order to generate the '
-        'file b02estimation.pickle.'
+        'file b02estimation.yaml.'
     )
 
 # %%
@@ -52,7 +54,7 @@ simulate = {
     'Prob. SM': prob_SM,
 }
 
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 simulated_values = the_biogeme.simulate(results.get_beta_values())
 
 # %%
