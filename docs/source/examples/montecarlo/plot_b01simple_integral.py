@@ -12,8 +12,8 @@ Calculation of a simple integral using Monte-Carlo integration.
 
 import pandas as pd
 
-import biogeme.biogeme as bio
-import biogeme.database as db
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
 from biogeme.expressions import exp, bioDraws, MonteCarlo
 
 # %%
@@ -21,7 +21,7 @@ from biogeme.expressions import exp, bioDraws, MonteCarlo
 # to store the draws
 df = pd.DataFrame()
 df['FakeColumn'] = [1.0]
-database = db.Database('fake_database', df)
+database = Database('fake_database', df)
 
 # %%
 integrand = exp(bioDraws('U', 'UNIFORM'))
@@ -49,7 +49,7 @@ simulate = {
     'Error             ': error,
 }
 
-biosim = bio.BIOGEME(database, simulate, number_of_draws=R)
+biosim = BIOGEME(database, simulate, number_of_draws=R)
 R = biosim.number_of_draws
 biosim.modelName = f'01simpleIntegral_{R}'
 results = biosim.simulate(the_beta_values={})
@@ -59,7 +59,7 @@ for c in results.columns:
 
 # %%
 # Change the number of draws
-biogeme2 = bio.BIOGEME(database, simulate, number_of_draws=R * MULTIPLIER)
+biogeme2 = BIOGEME(database, simulate, number_of_draws=R * MULTIPLIER)
 biogeme2.modelName = '01simpleIntegral_{multiplier*R}'
 results2 = biogeme2.simulate(the_beta_values={})
 print(f'Number of draws: {MULTIPLIER * R}')
