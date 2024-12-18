@@ -12,9 +12,8 @@ Illustration of the concept of catalog. See `Bierlaire and Ortelli (2023)
 """
 
 import numpy as np
-from biogeme import models
 from biogeme.expressions import Beta, Variable, Expression
-from biogeme.models import boxcox
+from biogeme.models import boxcox, loglogit, lognested
 from biogeme.catalog import (
     Catalog,
     generic_alt_specific_catalogs,
@@ -72,7 +71,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob_logit = models.loglogit(V, av, CHOICE)
+logprob_logit = loglogit(V, av, CHOICE)
 
 # %%
 # Nest definition.
@@ -83,7 +82,7 @@ nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
 
 # %%
 # Contribution to the log-likelihood.
-logprob_nested = models.lognested(V, av, nests, CHOICE)
+logprob_nested = lognested(V, av, nests, CHOICE)
 
 # %%
 # Definition of the catalog containing two models specifications:
@@ -114,7 +113,7 @@ for specification in model_catalog:
 # All configurations.
 print_all_configurations(model_catalog)
 
-# %% Non linear specifications.
+# %% Non-linear specifications.
 TRAIN_TT = Variable('TRAIN_TT')
 TRAIN_COST = Variable('TRAIN_COST')
 ell_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
@@ -165,7 +164,6 @@ print_all_configurations(dummy_expression)
 # %%
 # Synchronized catalogs.
 CAR_TT = Variable('CAR_TT')
-CAR_COST = Variable('CAR_COST')
 linear_car_tt = CAR_TT
 boxcox_car_tt = boxcox(CAR_TT, ell_travel_time)
 squared_car_tt = CAR_TT * CAR_TT
