@@ -3,7 +3,7 @@
 :author: Michel Bierlaire, EPFL
 :date: Sat Apr 20 18:36:50 2024
 
-Forecasting with a MDCEV model and the "non monotonic utility" specification.
+Forecasting with a MDCEV model and the "non-monotonic utility" specification.
 """
 
 import sys
@@ -11,25 +11,23 @@ import time
 
 import numpy as np
 import pandas as pd
-
 from IPython.display import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.database import Database
-from biogeme.exceptions import BiogemeError
-from biogeme.results import bioResults
+from biogeme.results_processing import EstimationResults
+from non_monotonic_specification import the_non_monotonic
 from specification import (
     database,
 )
-from non_monotonic_specification import the_non_monotonic
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example: non monotonic utility')
 
-result_file = 'saved_results/non_monotonic.pickle'
+result_file = 'saved_results/non_monotonic.yaml'
 try:
-    results = bioResults(pickle_file=result_file)
-except BiogemeError as e:
+    results = EstimationResults.from_yaml_file(filename=result_file)
+except FileNotFoundError as e:
     print(e)
     print(f'File {result_file} is missing.')
     sys.exit()
