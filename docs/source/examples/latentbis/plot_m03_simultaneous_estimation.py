@@ -13,12 +13,12 @@ Maximum likelihood (full information) estimation.
 
 import sys
 from functools import reduce
+
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-import biogeme.exceptions as excep
 import biogeme.distributions as dist
-import biogeme.results as res
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     Variable,
@@ -28,6 +28,11 @@ from biogeme.expressions import (
     Elem,
     bioNormalCdf,
     exp,
+)
+from biogeme.models import logit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
 )
 
 from read_or_estimate import read_or_estimate
@@ -59,11 +64,13 @@ logger.info('Example m03_simultaneous_estimation.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'm01_latent_variable'
 try:
-    struct_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
-except excep.BiogemeError:
+    struct_results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{MODELNAME}.yaml'
+    )
+except FileNotFoundError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
-        f'file {MODELNAME}.pickle, and move it to the directory saved_results'
+        f'file {MODELNAME}.yaml, and move it to the directory saved_results'
     )
     sys.exit()
 struct_betas = struct_results.get_beta_values()
@@ -189,11 +196,13 @@ prob_indicators = reduce(
 # them as starting values
 MODELNAME = 'm02_sequential_estimation'
 try:
-    choice_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
-except excep.BiogemeError:
+    choice_results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{MODELNAME}.yaml'
+    )
+except FileNotFoundError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
-        f'file {MODELNAME}.pickle, and move it to the directory saved_results'
+        f'file {MODELNAME}.yaml, and move it to the directory saved_results'
     )
     sys.exit()
 choice_betas = choice_results.get_beta_values()
@@ -251,7 +260,7 @@ V = {0: V0, 1: V1, 2: V2}
 # %%
 # Conditional on omega, we have a logit model (called the kernel) for
 # the choice
-condprob = models.logit(V, None, Choice)
+condprob = logit(V, None, Choice)
 
 # %%
 # Conditional on omega, we have the product of ordered probit for the
@@ -268,7 +277,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object
-the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme = BIOGEME(database, loglike)
 the_biogeme.modelName = 'm03_simultaneous_estimation'
 
 # %%
@@ -280,8 +289,8 @@ results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
 print(results.short_summary())
 
 # %%
-print(f'Final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
-
-# %%
-results.get_estimated_parameters()
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)
