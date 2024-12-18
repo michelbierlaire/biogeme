@@ -13,18 +13,23 @@ Sequential estimation.
 """
 
 import sys
+
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.exceptions as excep
-import biogeme.biogeme as bio
 import biogeme.distributions as dist
-import biogeme.results as res
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     RandomVariable,
     exp,
     log,
     Integrate,
+)
+from biogeme.models import logit
+from biogeme.results_processing import (
+    get_pandas_estimated_parameters,
+    EstimationResults,
 )
 
 from read_or_estimate import read_or_estimate
@@ -56,11 +61,13 @@ logger.info('Example m02_sequential_estimation.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'm01_latent_variable'
 try:
-    struct_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
-except excep.BiogemeError:
+    struct_results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{MODELNAME}.yaml'
+    )
+except FileNotFoundError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
-        f'file {MODELNAME}.pickle, and move it to the directory saved_results'
+        f'file {MODELNAME}.yaml, and move it to the directory saved_results'
     )
     sys.exit()
 struct_betas = struct_results.get_beta_values()
@@ -85,7 +92,7 @@ coef_child_suburb = struct_betas['coef_child_suburb']
 # for numerical integration
 omega = RandomVariable('omega')
 density = dist.normalpdf(omega)
-sigma_s = Beta('sigma_s', 1, None, None, 0)
+sigma_s = Beta('sigma_s', 5, None, None, 0)
 
 # %%
 ACTIVELIFE = (
@@ -110,7 +117,7 @@ BETA_COST_HWH = Beta('BETA_COST_HWH', -2.3, None, None, 0)
 BETA_COST_OTHER = Beta('BETA_COST_OTHER', -1.9, None, None, 0)
 BETA_DIST = Beta('BETA_DIST', -1.3, None, None, 0)
 BETA_TIME_CAR_REF = Beta('BETA_TIME_CAR_REF', -6.1, None, 0, 0)
-BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', 0, None, 0, 0)
+BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', -1, None, 0, 0)
 BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', -0.075, None, None, 0)
 
 # %%
@@ -147,7 +154,7 @@ V = {0: V0, 1: V1, 2: V2}
 
 # %%
 # Conditional on omega, we have a logit model (called the kernel)
-condprob = models.logit(V, None, Choice)
+condprob = logit(V, None, Choice)
 
 # %%
 # We integrate over omega using numerical integration
@@ -159,7 +166,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object
-the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme = BIOGEME(database, loglike)
 the_biogeme.modelName = 'm02_sequential_estimation'
 the_biogeme.maxiter = 1000
 
@@ -172,8 +179,8 @@ results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
 print(results.short_summary())
 
 # %%
-print(f'Final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
-
-# %%
-results.get_estimated_parameters()
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)
