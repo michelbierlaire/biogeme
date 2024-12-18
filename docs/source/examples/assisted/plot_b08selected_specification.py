@@ -13,8 +13,11 @@ See `Bierlaire and Ortelli (2023)
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import get_pandas_estimated_parameters
 from everything_spec import model_catalog, database, av
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -34,7 +37,7 @@ SPEC_ID = (
 
 # %% The biogeme object for the selected model can be obtained from
 # the spec_id, and used as usual.
-the_biogeme = bio.BIOGEME.from_configuration(
+the_biogeme = BIOGEME.from_configuration(
     config_id=SPEC_ID,
     expression=model_catalog,
     database=database,
@@ -54,7 +57,7 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
-
-# %%
-pandas_results
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)
