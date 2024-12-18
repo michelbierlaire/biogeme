@@ -15,20 +15,19 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.database import Database
-from biogeme.exceptions import BiogemeError
-from biogeme.results import bioResults
+from biogeme.results_processing import EstimationResults
+from gamma_specification import the_gamma_profile
 from specification import (
     database,
 )
-from gamma_specification import the_gamma_profile
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example: gamma profile utility')
 
-result_file = 'saved_results/gamma_profile.pickle'
+result_file = 'saved_results/gamma_profile.yaml'
 try:
-    results = bioResults(pickle_file=result_file)
-except BiogemeError as e:
+    results = EstimationResults.from_yaml_file(filename=result_file)
+except FileNotFoundError as e:
     print(e)
     print(f'File {result_file} is missing.')
     sys.exit()
