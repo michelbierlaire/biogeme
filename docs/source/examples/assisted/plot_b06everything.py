@@ -14,7 +14,8 @@ See `Bierlaire and Ortelli (2023)
 :date: Fri Jul 14 09:55:33 2023
 
 """
-import biogeme.biogeme as bio
+
+from biogeme.biogeme import BIOGEME
 from biogeme.exceptions import BiogemeError
 
 # %%
@@ -23,14 +24,14 @@ from everything_spec import model_catalog, database
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, model_catalog)
+the_biogeme = BIOGEME(database, model_catalog)
 the_biogeme.modelName = 'b06everything'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
 
 # %%
 # Estimate the parameters.
-# It does not work as there are two many specifications
+# It does not work as there are too many specifications
 try:
     dict_of_results = the_biogeme.estimate_catalog()
 except BiogemeError as e:
