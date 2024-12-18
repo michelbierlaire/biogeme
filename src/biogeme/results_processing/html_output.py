@@ -394,7 +394,7 @@ def get_html_correlation_results(
     involved_parameters: dict[str, str] | None = None,
     variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
 ) -> str:
-    """Get the correlation results in a HTML format
+    """Get the correlation results in an HTML format
 
     :param estimation_results: estimation results.
     :param variance_covariance_type: type of variance-covariance estimate to be used.
