@@ -10,8 +10,7 @@ Logit model.
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from IPython.core.display_functions import display
 
@@ -28,6 +27,8 @@ from biogeme.data.swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # Parameters to be estimated.
@@ -53,7 +54,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Read the data
@@ -61,7 +62,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b00logit'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
@@ -79,5 +80,5 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
 display(pandas_results)
