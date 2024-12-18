@@ -36,11 +36,9 @@ See `Bierlaire and Ortelli (2023)
 import numpy as np
 from IPython.core.display_functions import display
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.catalog import segmentation_catalogs, generic_alt_specific_catalogs
-from biogeme.results import compile_estimation_results, pareto_optimal
 
 from biogeme.data.swissmetro import (
     read_data,
@@ -55,6 +53,8 @@ from biogeme.data.swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+from biogeme.models import loglogit
+from biogeme.results_processing import pareto_optimal, compile_estimation_results
 
 # %%
 # Read the data
@@ -154,11 +154,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b05alt_spec_segmentation'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
