@@ -6,9 +6,11 @@ Mon Sep 30 17:50:30 2024
 """
 
 import logging
+from collections import Counter
 from datetime import datetime
 
 import numpy as np
+from icecream import ic
 
 from biogeme.version import get_version, versionDate, get_latex
 from .estimation_results import (
@@ -175,7 +177,7 @@ def get_latex_one_parameter(
     variance_covariance_type: EstimateVarianceCovariance,
     parameter_number=None,
     parameter_name=None,
-):
+) -> str:
     """Generate the LaTeX code for one row of the table of the estimated parameters.
 
     :param estimation_results: estimation results.
@@ -230,6 +232,41 @@ def get_latex_one_parameter(
     return output
 
 
+def rename_and_renumber(
+    names: list[str],
+    renumbering_parameters: dict[int, int] | None = None,
+    renaming_parameters: dict[str, str] | None = None,
+) -> dict[int, tuple[int, str]]:
+    """Rename and renumber parameters according to instructions from the user
+
+    :param names: list of existing names
+    :param renumbering_parameters: dict mapping old numbers to new numbers.
+    :param renaming_parameters: dict mapping old names to new names.
+    :return: dict mapping the original parameter index with the new number and the new name.
+    """
+    if renumbering_parameters is None:
+        renumbering_parameters = {}
+    if renaming_parameters is None:
+        renaming_parameters = {}
+
+    updated_items = {}
+    for old_key, name in enumerate(names):
+        new_key = renumbering_parameters.get(
+            old_key, old_key
+        )  # Default to original key
+        updated_items[old_key] = (new_key, renaming_parameters.get(name, name))
+
+    list_of_new_keys = [val[0] for val in updated_items.values()]
+    element_counts = Counter(list_of_new_keys)
+    repeated_elements = {
+        key: value for key, value in element_counts.items() if value > 1
+    }
+    if repeated_elements:
+        error_msg = f'The following new indices appear more than once: {repeated_elements.keys()}'
+        raise BiogemeError(error_msg)
+    return updated_items
+
+
 def get_latex_estimated_parameters(
     estimation_results: EstimationResults,
     variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
@@ -244,15 +281,23 @@ def get_latex_estimated_parameters(
     :param renaming_parameters: a dict that suggests new names for some or all parameters.
     :return: LaTeX code
     """
+
     if renumbering_parameters is not None:
-        # Verify that the numbering is well defined
+        # Verify that the numbering is well-defined
         number_values = list(renumbering_parameters.values())
+        if len(number_values) != len(estimation_results.beta_names):
+            error_msg = (
+                f'The new numbering involves {len(number_values)} values while there are '
+                f'{len(estimation_results.beta_names)} parameters'
+            )
+            raise BiogemeError(error_msg)
+
         if len(number_values) != len(set(number_values)):
             error_msg = f'The new numbering cannot assign the same number to two different parameters: {renumbering_parameters}'
             raise BiogemeError(error_msg)
 
     if renaming_parameters is not None:
-        # Verify that the renaming is well defined.
+        # Verify that the renaming is well-defined.
         name_values = list(renaming_parameters.values())
         if len(name_values) != len(set(name_values)):
             warning_msg = f'The new renaming assigns the same name for multiple parameters. It may not be the desired action: {renaming_parameters}'
@@ -269,31 +314,27 @@ def get_latex_estimated_parameters(
         else PARAMETERS_TABLE_HEADER
     )
     output = the_header.replace('__VARCOVAR__', covar_header[variance_covariance_type])
-    all_rows = {}
-    for parameter_index, parameter_name in enumerate(estimation_results.beta_names):
-        new_number = (
-            renumbering_parameters.get(parameter_index)
-            if renumbering_parameters is not None
-            else parameter_index
-        )
-        new_name = (
-            renaming_parameters.get(parameter_name)
-            if renaming_parameters is not None
-            else estimation_results.beta_names[parameter_index]
-        )
 
+    renamed_parameters = rename_and_renumber(
+        names=estimation_results.beta_names,
+        renumbering_parameters=renumbering_parameters,
+        renaming_parameters=renaming_parameters,
+    )
+    all_rows = {}
+    for old_index, user_defined in renamed_parameters.items():
+        new_index, new_name = user_defined
         the_row = (
             get_latex_one_parameter(
                 estimation_results=estimation_results,
-                parameter_index=parameter_index,
+                parameter_index=old_index,
                 variance_covariance_type=variance_covariance_type,
-                parameter_number=new_number,
+                parameter_number=new_index,
                 parameter_name=new_name,
             )
             + '\n'
         )
-        all_rows[new_number] = the_row
-
+        all_rows[new_index] = the_row
+    ic(len(all_rows))
     for a_row_number in sorted(all_rows):
         output += all_rows[a_row_number]
     output += PARAMETERS_TABLE_FOOTER
