@@ -427,3 +427,4 @@ reports/latent_revisited/latent_revisited.out
 reports/latent_revisited/latent_revisited.ps
 src/biogeme/data/data/.ipynb_checkpoints/Untitled-checkpoint.ipynb
 src/biogeme/data/data/Untitled.ipynb
+src/biogeme/results_keep.py
