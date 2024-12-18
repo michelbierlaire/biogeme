@@ -6,7 +6,10 @@
 Estimation of a MDCEV model with the "translated utility" specification.
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
+from biogeme.results_processing import get_pandas_estimated_parameters
 from translated_specification import the_translated
 from specification import (
     database,
@@ -27,8 +30,12 @@ results = the_translated.estimate_parameters(
     tolerance=5.0e-5,
 )
 
-# %
+# %%
 print(results.short_summary())
 
-# %
-print(results.get_estimated_parameters())
+# %%
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)
