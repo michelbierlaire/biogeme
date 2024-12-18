@@ -10,17 +10,16 @@ Function to estimate the parameters, or read them from a file, if available.
 """
 
 import logging
-from typing import Optional
+
 from biogeme.biogeme import BIOGEME
-from biogeme.results import bioResults
-import biogeme.exceptions as excep
+from biogeme.results_processing import EstimationResults
 
 logger = logging.getLogger(__name__)
 
 
 def read_or_estimate(
-    the_biogeme: BIOGEME, directory: Optional[str] = '.'
-) -> bioResults:
+    the_biogeme: BIOGEME, directory: str | None = '.'
+) -> EstimationResults:
     """
     Function to estimate the parameters, or read them from a file, if available.
 
@@ -30,10 +29,10 @@ def read_or_estimate(
     :return: estimation results.
     """
     try:
-        filename = f'{directory}/{the_biogeme.modelName}.pickle'
+        filename = f'{directory}/{the_biogeme.modelName}.yaml'
         logger.info('Results are read from the file {filename}.')
-        results = bioResults(pickle_file=filename)
-    except excep.FileNotFound:
+        results = EstimationResults.from_yaml_file(filename=filename)
+    except FileNotFoundError:
         logger.info('Parameters are estimated.')
         results = the_biogeme.estimate()
 
