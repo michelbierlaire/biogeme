@@ -6,7 +6,6 @@
 Specification of the "gamma_profile" MDCEV model.
 """
 
-import biogeme.biogeme_logging as blog
 from biogeme.expressions import Beta
 from biogeme.mdcev import GammaProfile
 from specification import (
