@@ -6,7 +6,6 @@
 Specification of the "generalized translated utility" MDCEV model.
 """
 
-import biogeme.biogeme_logging as blog
 from biogeme.expressions import Beta
 from biogeme.mdcev import Generalized
 from specification import (
