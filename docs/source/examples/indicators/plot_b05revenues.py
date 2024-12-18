@@ -11,7 +11,12 @@ We use an estimated model to calculate revenues.
 """
 
 import sys
+
 import numpy as np
+
+from biogeme.biogeme import BIOGEME
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 
 try:
     import matplotlib.pyplot as plt
@@ -20,22 +25,20 @@ try:
 except ModuleNotFoundError:
     can_plot = False
 from tqdm import tqdm
-from biogeme import models
-from biogeme.exceptions import BiogemeError
-import biogeme.biogeme as bio
-import biogeme.results as res
 from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
 
 # %%
 # Read the estimation results from the file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02simulation.py '
         'in order to generate the '
-        'file b02estimation.pickle.'
+        'file b02estimation.yaml.'
     )
 
 # %%
@@ -57,10 +60,10 @@ def revenues(factor: float) -> tuple[float, float, float]:
 
     """
     # Obtain the specification for the default scenario
-    V, nests, _, marginal_cost_scenario = scenario(factor=factor)
+    utilities, nests, _, marginal_cost_scenario = scenario(factor=factor)
 
     # Obtain the expression for the choice probability of each alternative
-    prob_pt = models.nested(V, None, nests, 0)
+    prob_pt = nested(utilities, None, nests, 0)
 
     # We now simulate the choice probabilities,the weight and the
     # price variable
@@ -70,7 +73,7 @@ def revenues(factor: float) -> tuple[float, float, float]:
         'Revenue public transportation': prob_pt * marginal_cost_scenario,
     }
 
-    the_biogeme = bio.BIOGEME(database, simulate)
+    the_biogeme = BIOGEME(database, simulate)
     simulated_values = the_biogeme.simulate(results.get_beta_values())
 
     # We also calculate confidence intervals for the calculated quantities
