@@ -15,20 +15,10 @@ Maximum likelihood (full information) estimation.
 
 import sys
 
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.results as res
-from biogeme import models
-from biogeme.exceptions import BiogemeError
-from biogeme.expressions import (
-    Beta,
-    bioDraws,
-    MonteCarlo,
-    Elem,
-    bioNormalCdf,
-    exp,
-    log,
-)
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import (
     read_data,
     age_65_more,
@@ -57,6 +47,20 @@ from biogeme.data.optima import (
     distance_km_scaled,
     ScaledIncome,
 )
+from biogeme.expressions import (
+    Beta,
+    bioDraws,
+    MonteCarlo,
+    Elem,
+    bioNormalCdf,
+    exp,
+    log,
+)
+from biogeme.models import piecewise_formula, logit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 from read_or_estimate import read_or_estimate
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -66,11 +70,13 @@ logger.info('Example b06serial_correlation.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'b05latent_choice_full'
 try:
-    struct_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
-except BiogemeError:
+    struct_results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{MODELNAME}.yaml'
+    )
+except FileNotFoundError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
-        f'file {MODELNAME}.pickle, and move it to the directory saved_results'
+        f'file {MODELNAME}.yaml, and move it to the directory saved_results'
     )
     sys.exit()
 betas = struct_results.get_beta_values()
@@ -150,7 +156,7 @@ betas_thresholds = [
     ),
 ]
 
-formula_income = models.piecewise_formula(
+formula_income = piecewise_formula(
     variable=ScaledIncome,
     thresholds=thresholds,
     betas=betas_thresholds,
@@ -403,7 +409,7 @@ V = {0: V0, 1: V1, 2: V2}
 # %%
 # Conditional on the random parameters, we have a logit model (called
 # the kernel) for the choice.
-condprob = models.logit(V, None, Choice)
+condprob = logit(V, None, Choice)
 
 # %%
 # Conditional on the random parameters, we have the product of ordered
@@ -431,7 +437,7 @@ database = read_data()
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws. Therefore, we first define the parameters.
-the_biogeme = bio.BIOGEME(database, loglike, number_of_draws=100, seed=1223)
+the_biogeme = BIOGEME(database, loglike, number_of_draws=100, seed=1223)
 the_biogeme.modelName = 'b06serial_correlation'
 
 # %%
@@ -440,8 +446,11 @@ the_biogeme.modelName = 'b06serial_correlation'
 results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
 
 # %%
-print(f'Final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
+print(f'Estimated betas: {results.number_of_parameters}')
+print(f'Final log likelihood: {results.final_log_likelihood:.3f}')
+print(f'Output file: {the_biogeme.html_filename}')
 
 # %%
-results.get_estimated_parameters()
+# %%
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)
