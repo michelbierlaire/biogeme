@@ -18,11 +18,10 @@ import sys
 
 from IPython.core.display_functions import display
 
-import biogeme.biogeme as bio
-from biogeme.exceptions import BiogemeError
-from biogeme import models
-import biogeme.results as res
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import read_data, normalized_weight
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 from scenarios import scenario
 
 # %%
@@ -32,13 +31,13 @@ V, nests, _, MarginalCostPT = scenario()
 
 # %%
 # Obtain the expression for the choice probability of the public transportation.
-prob_PT = models.nested(V, None, nests, 0)
+prob_PT = nested(V, None, nests, 0)
 
 # %%
 # We investigate a scenario where the price for public transportation
 # increases by 20%. We extract the corresponding scenario.
 V_after, _, _, MarginalCostPT_after = scenario(factor=1.2)
-prob_PT_after = models.nested(V_after, None, nests, 0)
+prob_PT_after = nested(V_after, None, nests, 0)
 
 # %%
 # Disaggregate elasticities
@@ -62,16 +61,18 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 
 # %%
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
-        'the file b02estimation.pickle.'
+        'the file b02estimation.yaml.'
     )
 
 # %%
