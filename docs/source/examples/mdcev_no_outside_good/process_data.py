@@ -8,7 +8,8 @@ Import and process the data to be used in Biogeme
 """
 
 import pandas as pd
-import biogeme.database as db
+
+from biogeme.database import Database
 from biogeme.expressions import Variable
 
 # %
@@ -17,7 +18,7 @@ df = pd.read_csv('data.csv')
 
 # %
 # Convert it to a Biogeme database.
-database = db.Database('mdcev_example', df)
+database = Database('mdcev_example', df)
 
 # %
 # Associate each column with a Biogeme variable.
