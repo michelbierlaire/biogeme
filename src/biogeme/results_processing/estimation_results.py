@@ -540,7 +540,7 @@ class EstimationResults:
         serialize_to_yaml(data=self.raw_estimation_results, filename=filename)
 
     @property
-    def monte_carlo(self) -> book:
+    def monte_carlo(self) -> bool:
         """Verifies if the model involves Monte-Carlo simulation"""
         if self.raw_estimation_results is None:
             return False
