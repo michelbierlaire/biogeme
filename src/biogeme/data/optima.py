@@ -14,6 +14,7 @@ Prepare data for the Optima case study.
 import os
 
 import pandas as pd
+
 import biogeme.database as db
 from biogeme.expressions import Variable
 
@@ -30,6 +31,12 @@ def read_data() -> db.Database:
     df = pd.read_csv(data_file_path, sep='\t')
     # Exclude observations such that the chosen alternative is -1
     df.drop(df[df['Choice'] == -1].index, inplace=True)
+
+    car_not_available = df['CarAvail'] == 3
+    car_is_chosen = df['Choice'] == 1
+    incompatible = car_is_chosen & car_not_available
+    df.drop(df[incompatible].index, inplace=True)
+
     # Normalize the weights
     sum_weight = df['Weight'].sum()
     number_of_rows = df.shape[0]
