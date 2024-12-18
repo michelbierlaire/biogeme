@@ -409,3 +409,11 @@ dist/biogeme-3.2.14-py3-none-any.whl
 docs/source/code/biogeme/results_keep.rst
 docs/source/examples/indicators/debug_optima.csv
 docs/source/examples/indicators/debug_optima-Michel’s MacBook Pro.csv
+docs/source/examples/sampling/cnl_10_63.dat
+docs/source/examples/sampling/logit_asian_10_alt.dat
+docs/source/examples/sampling/nested_downtown_20.dat
+docs/source/examples/programmers/simple_example_validation_000.csv
+docs/source/examples/programmers/simple_example_validation_001.csv
+docs/source/examples/programmers/simple_example_validation_002.csv
+docs/source/examples/programmers/simple_example_validation_003.csv
+docs/source/examples/programmers/simple_example_validation_004.csv
