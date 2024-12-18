@@ -14,13 +14,15 @@ See `Bierlaire and Ortelli (2023)
 :date: Sat Jul 15 15:02:20 2023
 
 """
-from typing import Optional
+
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
 from biogeme.assisted import AssistedSpecification
+from biogeme.biogeme import BIOGEME
 from biogeme.multiobjectives import loglikelihood_dimension
+from biogeme.results_processing import EstimationResults, compile_estimation_results
 from everything_spec import model_catalog, database
-from biogeme.results import bioResults, compile_estimation_results
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b07everything_assisted')
@@ -30,22 +32,23 @@ PARETO_FILE_NAME = 'b07everything_assisted.pareto'
 
 # %%
 # Function verifying that the estimation results are valid.
-def validity(results: bioResults) -> tuple[bool, Optional[str]]:
+def validity(results: EstimationResults) -> tuple[bool, str | None]:
     """Function verifying that the estimation results are valid.
 
-    The results are not valid if any of the time or cost coefficient is non negative.
+    The results are not valid if any of the time or cost coefficient is non-negative.
     """
-    for beta in results.data.betas:
-        if 'TIME' in beta.name and beta.value >= 0:
-            return False, f'{beta.name} = {beta.value}'
-        if 'COST' in beta.name and beta.value >= 0:
-            return False, f'{beta.name} = {beta.value}'
+    for parameter_index, parameter_name in enumerate(results.beta_names):
+        parameter_value = results.beta_values[parameter_index]
+        if 'TIME' in parameter_name and parameter_value >= 0:
+            return False, f'{parameter_name} = {parameter_value}'
+        if 'COST' in parameter_name and parameter_value >= 0:
+            return False, f'{parameter_name} = {parameter_value}'
     return True, None
 
 
 # %%
 # Create the Biogeme object
-the_biogeme = bio.BIOGEME(database, model_catalog)
+the_biogeme = BIOGEME(database, model_catalog)
 the_biogeme.modelName = 'b07everything'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
@@ -70,7 +73,7 @@ compiled_results, specs = compile_estimation_results(
 )
 
 # %%
-compiled_results
+display(compiled_results)
 
 # %%
 # Glossary
