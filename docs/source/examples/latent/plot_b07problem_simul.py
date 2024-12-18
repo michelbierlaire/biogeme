@@ -14,7 +14,7 @@ Investigation of the estimation problem
 
 from IPython.core.display_functions import display
 
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
 from biogeme.models import piecewise_formula
 import biogeme.biogeme_logging as blog
 from biogeme.expressions import Beta, Elem, bioNormalCdf
@@ -269,7 +269,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(database, simulate)
 biosim.modelName = '07problem_simul'
 
 # %%
