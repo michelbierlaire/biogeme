@@ -10,8 +10,7 @@ the integral is approximated using MonteCarlo integration.
 :date: Thu Apr 13 21:04:47 2023
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, MonteCarlo, log, bioDraws
 
 from biogeme.data.swissmetro import (
@@ -27,13 +26,14 @@ from biogeme.data.swissmetro import (
     CAR_AV_SP,
     CHOICE,
 )
+from biogeme.models import logit
 
 # %%
 R = 2000
 
 
 # %%
-def get_biogeme(the_draws: bioDraws, number_of_draws: int) -> bio.BIOGEME:
+def get_biogeme(the_draws: bioDraws, number_of_draws: int) -> BIOGEME:
     """Function returning the Biogeme object as a function of the selected draws
 
     :param the_draws: expression representing the draws.
@@ -63,11 +63,11 @@ def get_biogeme(the_draws: bioDraws, number_of_draws: int) -> bio.BIOGEME:
     av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
     # The choice model is a logit, with availability conditions
-    prob = models.logit(utilities, av, CHOICE)
+    prob = logit(utilities, av, CHOICE)
     logprob = log(MonteCarlo(prob))
 
     database = read_data()
 
-    the_biogeme = bio.BIOGEME(database, logprob, number_of_draws=number_of_draws)
+    the_biogeme = BIOGEME(database, logprob, number_of_draws=number_of_draws)
 
     return the_biogeme
