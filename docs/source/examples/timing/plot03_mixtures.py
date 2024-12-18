@@ -7,8 +7,6 @@ Michel Bierlaire
 Tue Jul 2 14:48:52 2024
 """
 
-from biogeme import models
-
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from biogeme.data.swissmetro import (
@@ -25,6 +23,7 @@ from biogeme.data.swissmetro import (
     CAR_CO_SCALED,
 )
 from biogeme.expressions import Beta, MonteCarlo, log, bioDraws
+from biogeme.models import logit
 from biogeme.tools.time import Timing
 
 # %%
@@ -60,7 +59,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional to b_time_rnd, we have a logit model (called the kernel).
-prob = models.logit(V, av, CHOICE)
+prob = logit(V, av, CHOICE)
 
 # %%
 # We integrate over b_time_rnd using Monte-Carlo.

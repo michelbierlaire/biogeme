@@ -13,13 +13,14 @@ such that Swissmetro was chosen are removed.
 """
 
 import pandas as pd
-import biogeme.database as db
+
+from biogeme.database import Database
 from biogeme.expressions import Variable
 
 # %%
 # Read the data.
 df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
+database = Database('swissmetro', df)
 
 # %%
 # Definition of the variables.

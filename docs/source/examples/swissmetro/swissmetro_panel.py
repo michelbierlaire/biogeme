@@ -14,13 +14,14 @@ panel configuration
 """
 
 import pandas as pd
-import biogeme.database as db
+
+from biogeme.database import Database
 from biogeme.expressions import Variable
 
 # %%
 # Read the data
 df = pd.read_csv('swissmetro.dat', sep='\t')
-database = db.Database('swissmetro', df)
+database = Database('swissmetro', df)
 
 # %%
 # Definition of the variables.
@@ -66,4 +67,4 @@ database.panel('ID')
 # %%
 # We flatten the database, so that each row corresponds to one individual.
 flat_df = database.generate_flat_panel_dataframe(identical_columns=None)
-flat_database = db.Database('swissmetro_flat', flat_df)
+flat_database = Database('swissmetro_flat', flat_df)

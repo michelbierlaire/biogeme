@@ -142,10 +142,10 @@ relative_to_gradient = (
     average_time_function_gradient_hessian - average_time_function_gradient
 ) / average_time_function_gradient
 print(
-    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compare to '
+    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compared to '
     f'calculating the function only.'
 )
 print(
-    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compare to '
+    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compared to '
     f'calculating the function and the gradient only.'
 )

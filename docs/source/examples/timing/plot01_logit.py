@@ -7,7 +7,7 @@ Michel Bierlaire
 Tue Jul 2 14:48:52 2024
 """
 
-from biogeme import models
+from biogeme.models import loglogit
 from biogeme.tools.time import Timing
 
 # %%
@@ -53,7 +53,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model.
 # This is the contribution of each observation to the log likelihood function.
-logprob: Expression = models.loglogit(V, av, CHOICE)
+logprob: Expression = loglogit(V, av, CHOICE)
 
 # %%
 database = read_data()
@@ -124,10 +124,10 @@ relative_to_gradient = (
     average_time_function_gradient_hessian - average_time_function_gradient
 ) / average_time_function_gradient
 print(
-    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compare to '
+    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compared to '
     f'calculating the function only.'
 )
 print(
-    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compare to '
+    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compared to '
     f'calculating the function and the gradient only.'
 )

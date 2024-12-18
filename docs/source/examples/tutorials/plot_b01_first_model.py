@@ -11,6 +11,7 @@ Example extracted from Ben-Akiva and Lerman (1985)
 """
 
 import pandas as pd
+
 from biogeme.database import Database
 from biogeme.expressions import Variable, Beta
 from biogeme.models import loglogit
@@ -139,7 +140,7 @@ utilities = {0: utility_car, 1: utility_transit}
 #
 # - a dictionary with the specification of the utility functions,
 # - a dictionary with the availability conditions. In this simple example, both alternatives are always available,
-#   so that there is no ned to provide it,
+#   so that there is no need to provide it,
 # - the choice variable.
 log_choice_probability = loglogit(utilities, None, choice)
 
@@ -163,5 +164,5 @@ results = biogeme_object.estimate()
 # estimation results.
 print(results.short_summary())
 
-# %% It can also provides the estimates of the parameters, with some statistics.
+# %% It can also provide the estimates of the parameters, with some statistics.
 results.get_estimated_parameters()

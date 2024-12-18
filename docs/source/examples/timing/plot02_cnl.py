@@ -7,10 +7,6 @@ Michel Bierlaire
 Tue Jul 2 14:49:25 2024
 """
 
-import sys
-
-from biogeme import models
-
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from biogeme.data.swissmetro import (
@@ -27,6 +23,7 @@ from biogeme.data.swissmetro import (
     CAR_CO_SCALED,
 )
 from biogeme.expressions import Beta, Expression
+from biogeme.models import logcnl
 from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
 from biogeme.tools.time import Timing
 
@@ -81,7 +78,7 @@ nests = NestsForCrossNestedLogit(
 # %%
 # Definition of the model.
 # This is the contribution of each observation to the log likelihood function.
-logprob: Expression = models.logcnl(V, av, nests, CHOICE)
+logprob: Expression = logcnl(V, av, nests, CHOICE)
 
 # %%
 database = read_data()
@@ -120,7 +117,8 @@ average_time_function_gradient = the_timing.time_function(
     },
 )
 print(
-    f'Cross-nested logit model, log likelihood and gradient for one iteration: {average_time_function_gradient:.3g} seconds'
+    f'Cross-nested logit model, log likelihood and gradient for one iteration: '
+    f'{average_time_function_gradient:.3g} seconds'
 )
 relative_gradient = (
     average_time_function_gradient - average_time_function_only
@@ -152,10 +150,10 @@ relative_to_gradient = (
     average_time_function_gradient_hessian - average_time_function_gradient
 ) / average_time_function_gradient
 print(
-    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compare to '
+    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compared to '
     f'calculating the function only.'
 )
 print(
-    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compare to '
+    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compared to '
     f'calculating the function and the gradient only.'
 )

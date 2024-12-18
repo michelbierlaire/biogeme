@@ -12,16 +12,15 @@ Data preparation and definition of the variables.
 """
 
 import pandas as pd
-import biogeme.database as db
+
+from biogeme.database import Database
 from biogeme.expressions import Variable
 
 import os
 
 
-def read_data() -> db.Database:
+def read_data() -> Database:
     """Read the data from file"""
-    # Get the directory of the current file
-    module_dir = os.path.dirname(__file__)
 
     # Construct the path to the data file
     data_file_path = 'swissmetro.dat'
@@ -29,7 +28,7 @@ def read_data() -> db.Database:
     # %%
     # Read the data.
     df = pd.read_csv(data_file_path, sep='\t')
-    database = db.Database('swissmetro', df)
+    database = Database('swissmetro', df)
     exclude = CHOICE == 0
     # exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0)) > 0
     database.remove(exclude)
