@@ -7,12 +7,16 @@
 
 from __future__ import annotations
 
-from typing import Iterable
+from itertools import product
+from typing import Iterable, NamedTuple
+
+import pandas as pd
 
 import biogeme.expressions
+from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioMultSum, Variable, Numeric, Expression
-from biogeme.deprecated import deprecated
+from biogeme.results_processing import EstimationResults
 
 
 class DiscreteSegmentationTuple:
@@ -84,6 +88,7 @@ class OneSegmentation:
         :param segmentation_tuple: characterization of the segmentation
         """
         self.beta: biogeme.expressions.Beta = beta
+        self.segmentation_tuple = segmentation_tuple
         self.variable: Variable = segmentation_tuple.variable
         self.reference: str = segmentation_tuple.reference
         self.mapping: dict[int, str] = {
@@ -102,25 +107,31 @@ class OneSegmentation:
         :raise BiogemeError: if the category is not listed in the
             mapping of the segmentation.
         """
-        if category not in self.mapping.values():
+        if category != self.reference and category not in self.mapping.values():
             error_msg = (
                 f'Unknown category: {category}. List of known categories: '
                 f'{self.mapping.values()}'
             )
             raise BiogemeError(error_msg)
-        return f'{self.beta.name}_{category}'
+        return (
+            f'{self.beta.name}_ref'
+            if category == self.reference
+            else f'{self.beta.name}_diff_{category}'
+        )
 
-    def beta_expression(self, category: str) -> biogeme.expressions.Beta:
+    def beta_expression(self, category: str | None = None) -> Beta:
         """Constructs the expression for the parameter associated with
             a specific category
 
-        :param category: name of the category
+        :param category: name of the category. If None, it is the reference category.
         :type category: str
 
         :return: expression of the parameter for the category
 
 
         """
+        if category is None:
+            category = self.reference
         name = self.beta_name(category)
         if category == self.reference:
             lower_bound = self.beta.lb
@@ -210,7 +221,7 @@ class Segmentation:
 
         :param beta: parameter to be segmented
         :param segmentation_tuples: characterization of the segmentations
-        :param prefix: prefix to be used to generated the name of the
+        :param prefix: prefix to be used to generate the name of the
             segmented parameter
         """
         self.beta: biogeme.expressions.Beta = beta
@@ -232,6 +243,10 @@ class Segmentation:
             f'{self.beta.ub}, {self.beta.status})'
         )
 
+    def get_reference_beta(self) -> Beta:
+        """Obtain the reference beta"""
+        return self.segmentations[0].beta_expression()
+
     def segmented_beta(self) -> Expression:
         """Create an expressions that combines all the segments
 
@@ -239,13 +254,7 @@ class Segmentation:
         :rtype: biogeme.expressions.Expression
 
         """
-        ref_beta = Beta(
-            name=self.beta.name,
-            value=self.beta.initValue,
-            lowerbound=self.beta.lb,
-            upperbound=self.beta.ub,
-            status=self.beta.status,
-        )
+        ref_beta = self.get_reference_beta()
         terms = [ref_beta]
         terms += [
             element for s in self.segmentations for element in s.list_of_expressions()
@@ -278,6 +287,48 @@ class Segmentation:
             result += f'{self.prefix}_{self.beta.name} = bioMultSum([{joined_terms}])'
         return result
 
+    def calculates_estimated_values(
+        self, estimation_results: EstimationResults
+    ) -> pd.DataFrame:
+        """Calculates the estimated values of the parameter for each segment.
+
+        :param estimation_results: results of the estimation
+        :return: a pandas data frame with the definition of the segments and the corresponding values for the
+        coefficient
+        """
+
+        class SegmentationValue(NamedTuple):
+            segmentation: OneSegmentation
+            value: str
+
+        all_segmentations = [
+            list(
+                SegmentationValue(segment, value)
+                for value in segment.segmentation_tuple.mapping.values()
+            )
+            for segment in self.segmentations
+        ]
+
+        # Use itertools.product to generate all combinations
+        beta_values = estimation_results.get_beta_values()
+        ref_beta_name = self.get_reference_beta().name
+        ref_value = beta_values[ref_beta_name]
+        list_of_rows = []
+        for combination in product(*all_segmentations):
+            the_row = {
+                element.segmentation.variable.name: element.value
+                for element in combination
+            }
+            the_row['parameter estimate'] = ref_value
+            for element in combination:
+                the_name = element.segmentation.beta_name(category=element.value)
+                if the_name != ref_beta_name:
+                    the_value = beta_values[the_name]
+                    the_row['parameter estimate'] += the_value
+            list_of_rows.append(the_row)
+        df = pd.DataFrame(list_of_rows)
+        return df
+
 
 def segmented_beta(
     beta: biogeme.expressions.Beta,
@@ -288,7 +339,7 @@ def segmented_beta(
 
     :param beta: parameter to be segmented
     :param segmentation_tuples: characterization of the segmentations
-    :param prefix: prefix to be used to generated the name of the
+    :param prefix: prefix to be used to generate the name of the
         segmented parameter
     :return: expression of the segmented Beta
     """
