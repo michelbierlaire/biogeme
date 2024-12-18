@@ -36,6 +36,8 @@
   biogeme/parameters.rst
   biogeme/partition.rst
   biogeme/results.rst
+  biogeme/results_keep.rst
+  biogeme/results_processing.rst
   biogeme/sampling_of_alternatives.rst
   biogeme/segmentation.rst
   biogeme/singleton.rst
