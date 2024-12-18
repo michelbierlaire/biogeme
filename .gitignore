@@ -417,3 +417,6 @@ docs/source/examples/programmers/simple_example_validation_001.csv
 docs/source/examples/programmers/simple_example_validation_002.csv
 docs/source/examples/programmers/simple_example_validation_003.csv
 docs/source/examples/programmers/simple_example_validation_004.csv
+docs/source/examples/swissmetro/01logit_all_algos.csv
+docs/source/examples/swissmetro/05normalMixture_allAlgos.csv
+*.pareto
