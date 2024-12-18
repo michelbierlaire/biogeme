@@ -422,3 +422,4 @@ docs/source/examples/swissmetro/05normalMixture_allAlgos.csv
 *.pareto
 docs/source/examples/swissmetro/b21process_pareto.csv
 docs/source/examples/swissmetro/b22process_pareto.csv
+*.pareto
