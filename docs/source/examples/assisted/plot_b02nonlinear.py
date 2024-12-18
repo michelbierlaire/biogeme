@@ -19,13 +19,13 @@ See `Bierlaire and Ortelli (2023)
 
 """
 
-import biogeme.biogeme as bio
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Expression, Beta
-from biogeme.models import boxcox
+from biogeme.models import boxcox, loglogit
 from biogeme.catalog import Catalog
-from biogeme.results import compile_estimation_results, pareto_optimal
 
 from biogeme.data.swissmetro import (
     read_data,
@@ -40,6 +40,7 @@ from biogeme.data.swissmetro import (
     CAR_TT_SCALED,
     CAR_CO_SCALED,
 )
+from biogeme.results_processing import pareto_optimal, compile_estimation_results
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -51,7 +52,7 @@ B_TIME = Beta('B_TIME', 0, None, 0, 0)
 B_COST = Beta('B_COST', 0, None, 0, 0)
 
 # %%
-# Non linear specifications for the travel time.
+# Non-linear specifications for the travel time.
 
 # %%
 # Parameter of the Box-Cox transform.
@@ -174,7 +175,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+logprob = loglogit(V, av, CHOICE)
 
 # %%
 # Read the data
@@ -182,7 +183,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b02nonlinear'
 the_biogeme.generate_html = False
 the_biogeme.generate_pickle = False
@@ -202,7 +203,7 @@ compiled_results, specs = compile_estimation_results(
 )
 
 # %%
-compiled_results
+display(compiled_results)
 
 # %%
 # Glossary
@@ -217,7 +218,7 @@ compiled_pareto_results, pareto_specs = compile_estimation_results(
 )
 
 # %%
-compiled_pareto_results
+display(compiled_pareto_results)
 
 # %%
 # Glossary.
