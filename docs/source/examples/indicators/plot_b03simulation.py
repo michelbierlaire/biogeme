@@ -12,12 +12,13 @@ We use an estimated model to perform various simulations.
 
 import sys
 import time
+
 import pandas as pd
-from biogeme import models
-import biogeme.biogeme as bio
-import biogeme.exceptions as excep
-import biogeme.results as res
+
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import read_data, normalized_weight
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 from scenarios import scenario
 
 # %%
@@ -31,18 +32,20 @@ V_SM = V[2]
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = models.nested(V, None, nests, 0)
-prob_CAR = models.nested(V, None, nests, 1)
-prob_SM = models.nested(V, None, nests, 2)
+prob_PT = nested(V, None, nests, 0)
+prob_CAR = nested(V, None, nests, 1)
+prob_SM = nested(V, None, nests, 2)
 
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except excep.BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02simulation.py '
         'in order to generate the '
-        'file b02estimation.pickle.'
+        'file b02estimation.yaml.'
     )
 
 # %%
@@ -109,7 +112,7 @@ simulate = {
 
 # %%
 start_time = time.time()
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 biogeme_simulation = the_biogeme.simulate(results.get_beta_values())
 
 # %%
