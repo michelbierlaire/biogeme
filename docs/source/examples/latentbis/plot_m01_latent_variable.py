@@ -10,8 +10,10 @@ Ordered probit.
 
 """
 
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
     log,
@@ -31,6 +33,7 @@ from biogeme.data.optima import (
     childSuburb,
     SocioProfCat,
 )
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example m01_latent_variable.py')
@@ -130,7 +133,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object
-biogeme = bio.BIOGEME(database, loglike)
+biogeme = BIOGEME(database, loglike)
 biogeme.modelName = 'm01_latent_variable'
 
 # %%
@@ -138,4 +141,11 @@ biogeme.modelName = 'm01_latent_variable'
 results = biogeme.estimate()
 
 # %%
-results.get_estimated_parameters()
+print(results.short_summary())
+
+# %%
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)
