@@ -13,22 +13,12 @@ Sequential estimation.
 """
 
 import sys
+
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
-from biogeme.exceptions import BiogemeError
 import biogeme.distributions as dist
-import biogeme.results as res
-from biogeme.expressions import (
-    Beta,
-    RandomVariable,
-    exp,
-    log,
-    Integrate,
-)
-
-from read_or_estimate import read_or_estimate
-
+from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import (
     read_data,
     age_65_more,
@@ -50,6 +40,19 @@ from biogeme.data.optima import (
     PurpOther,
     ScaledIncome,
 )
+from biogeme.expressions import (
+    Beta,
+    RandomVariable,
+    exp,
+    log,
+    Integrate,
+)
+from biogeme.models import piecewise_formula, logit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
+from read_or_estimate import read_or_estimate
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b04latent_choice_seq.py')
@@ -59,11 +62,13 @@ logger.info('Example b04latent_choice_seq.py')
 # Read the estimates from the structural equation estimation.
 MODELNAME = 'b02one_latent_ordered'
 try:
-    struct_results = res.bioResults(pickle_file=f'saved_results/{MODELNAME}.pickle')
-except BiogemeError:
+    struct_results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{MODELNAME}.yaml'
+    )
+except FileNotFoundError:
     print(
         f'Run first the script {MODELNAME}.py in order to generate the '
-        f'file {MODELNAME}.pickle, and move it to the directory saved_results'
+        f'file {MODELNAME}.yaml, and move it to the directory saved_results'
     )
     sys.exit()
 struct_betas = struct_results.get_beta_values()
@@ -92,7 +97,7 @@ density = dist.normalpdf(omega)
 sigma_s = Beta('sigma_s', 1, None, None, 0)
 
 thresholds = [None, 4, 6, 8, 10, None]
-formula_income = models.piecewise_formula(
+formula_income = piecewise_formula(
     variable=ScaledIncome,
     thresholds=thresholds,
     betas=[
@@ -167,7 +172,7 @@ V = {0: V0, 1: V1, 2: V2}
 
 # %%
 # Conditional on omega, we have a logit model (called the kernel).
-condprob = models.logit(V, None, Choice)
+condprob = logit(V, None, Choice)
 
 # %%
 # We integrate over omega using numerical integration.
@@ -179,7 +184,7 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, loglike)
+the_biogeme = BIOGEME(database, loglike)
 the_biogeme.modelName = 'b04latent_choice_seq'
 
 # %%
@@ -188,9 +193,11 @@ the_biogeme.modelName = 'b04latent_choice_seq'
 results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
 
 # %%
-print(f'Estimated betas: {len(results.data.betaValues)}')
-print(f'Final log likelihood: {results.data.logLike:.3f}')
-print(f'Output file: {results.data.htmlFileName}')
+print(f'Estimated betas: {results.number_of_parameters}')
+print(f'Final log likelihood: {results.final_log_likelihood:.3f}')
+print(f'Output file: {the_biogeme.html_filename}')
 
 # %%
-results.get_estimated_parameters()
+# %%
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)
