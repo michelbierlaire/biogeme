@@ -421,3 +421,5 @@ docs/source/examples/swissmetro/01logit_all_algos.csv
 docs/source/examples/swissmetro/05normalMixture_allAlgos.csv
 docs/source/examples/swissmetro/b21process_pareto.csv
 docs/source/examples/swissmetro/b22process_pareto.csv
+docs/source/examples/swissmetro/b21multiple_models.pareto
+docs/source/examples/swissmetro/b22multiple_models.pareto
