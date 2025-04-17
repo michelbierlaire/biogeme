@@ -1,3 +1,4 @@
+import glob
 import logging
 import os
 import shutil
@@ -112,3 +113,26 @@ def create_backup(filename: str, rename: bool = True) -> str:
             logger.info(f'File {filename} has been copied as {new_name}')
         return new_name
     logger.info(f'File {filename} does not exist. No backup has been generated')
+
+
+def files_of_type(extension: str, name: str, all_files: bool = False) -> list[str]:
+    """Identify the list of files with a given extension in the
+    local directory
+
+    :param extension: extension of the requested files (without
+        the dot): 'yaml', or 'html'
+    :param name: filename, without extension
+    :param all_files: if all_files is False, only files containing
+        the name of the model are identified. If all_files is
+        True, all files with the requested extension are
+        identified.
+
+    :return: list of files with the requested extension.
+    """
+    if all_files:
+        pattern = f"*.{extension}"
+        return glob.glob(pattern)
+    pattern1 = f"{name}.{extension}"
+    pattern2 = f"{name}~*.{extension}"
+    files = glob.glob(pattern1) + glob.glob(pattern2)
+    return files

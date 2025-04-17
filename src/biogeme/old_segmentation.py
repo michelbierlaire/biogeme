@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from itertools import product
 from typing import Iterable, NamedTuple
+import logging
 
 import pandas as pd
 
@@ -17,6 +18,8 @@ from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, bioMultSum, Variable, Numeric, Expression
 from biogeme.results_processing import EstimationResults
+
+logger = logging.getLogger(__name__)
 
 
 class DiscreteSegmentationTuple:
@@ -224,20 +227,28 @@ class Segmentation:
         :param prefix: prefix to be used to generate the name of the
             segmented parameter
         """
+        if not list(segmentation_tuples):
+            raise BiogemeError('segmentation_tuples cannot be empty')
         self.beta: biogeme.expressions.Beta = beta
         self.segmentations: tuple[OneSegmentation, ...] = tuple(
             OneSegmentation(beta, s) for s in segmentation_tuples
         )
         self.prefix = prefix
 
-    def beta_code(self) -> str:
+    def get_beta_ref_name(self) -> str:
+        """
+        Add a suffix to the name of the parameter
+        """
+        return self.beta.name + '_ref'
+
+    def beta_ref_code(self) -> str:
         """Constructs the Python code for the parameter
 
         :return: Python code
         :rtype: str
         """
 
-        beta_name = f"'{self.beta.name}'"
+        beta_name = f"'{self.get_beta_ref_name()}'"
         return (
             f'Beta({beta_name}, {self.beta.initValue}, {self.beta.lb}, '
             f'{self.beta.ub}, {self.beta.status})'
@@ -245,7 +256,10 @@ class Segmentation:
 
     def get_reference_beta(self) -> Beta:
         """Obtain the reference beta"""
-        return self.segmentations[0].beta_expression()
+        beta_name = self.get_beta_ref_name()
+        return Beta(
+            beta_name, self.beta.initValue, self.beta.lb, self.beta.ub, self.beta.status
+        )
 
     def segmented_beta(self) -> Expression:
         """Create an expressions that combines all the segments
@@ -277,7 +291,7 @@ class Segmentation:
         )
         result += '\n'
 
-        terms = [self.beta_code()]
+        terms = [self.beta_ref_code()]
         terms += [element for s in self.segmentations for element in s.list_of_code()]
 
         if len(terms) == 1:

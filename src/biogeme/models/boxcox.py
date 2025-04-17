@@ -1,4 +1,4 @@
-""" Implements the Box-Cox model
+"""Implements the Box-Cox model
 
 :author: Michel Bierlaire
 :date: Wed Oct 25 08:52:44 2023
@@ -37,11 +37,11 @@ def boxcox(x: ExpressionOrNumeric, ell: ExpressionOrNumeric) -> Expression:
 
     :return: the Box-Cox transform
     """
-    if isinstance(ell, Beta) and (ell.ub is None or ell.lb is None):
+    if isinstance(ell, Beta) and (ell.upper_bound is None or ell.lower_bound is None):
         warning_msg = (
             f'It is advised to set the bounds on parameter {ell.name}. '
             f'A value of -10 and 10 should be appropriate: Beta("{ell.name}", '
-            f'{ell.initValue}, -10, 10, {ell.status})'
+            f'{ell.init_value}, -10, 10, {ell.status})'
         )
         logger.warning(warning_msg)
 

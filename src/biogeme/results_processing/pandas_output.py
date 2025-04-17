@@ -50,16 +50,18 @@ def get_pandas_one_parameter(
         EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
     }[variance_covariance_type]
 
-    value = estimation_results.get_parameter_value(parameter_index=parameter_index)
-    std_err = estimation_results.get_parameter_std_err(
+    value = estimation_results.get_parameter_value_from_index(
+        parameter_index=parameter_index
+    )
+    std_err = estimation_results.get_parameter_std_err_from_index(
         parameter_index=parameter_index, estimate_var_covar=variance_covariance_type
     )
-    t_test = estimation_results.get_parameter_t_test(
+    t_test = estimation_results.get_parameter_t_test_from_index(
         parameter_index=parameter_index,
         estimate_var_covar=variance_covariance_type,
         target=0,
     )
-    p_value = estimation_results.get_parameter_p_value(
+    p_value = estimation_results.get_parameter_p_value_from_index(
         parameter_index=parameter_index,
         estimate_var_covar=variance_covariance_type,
         target=0,

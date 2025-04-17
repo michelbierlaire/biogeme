@@ -47,7 +47,6 @@ class RawResults:
         self.gradientNorm = None
         self.optimizationMessages = None
         self.convergence = None
-        self.numberOfThreads = None
         self.htmlFileName = None
         self.F12FileName = None
         self.latexFileName = None
@@ -126,7 +125,6 @@ def read_pickle_biogeme_3_2_14(filename: str) -> RawEstimationResults:
         if isinstance(value, np.ndarray):  # Check if the value is a numpy array
             optimization_messages[key] = value.tolist()
     convergence: bool = pickled_results.convergence
-    number_of_threads: int = pickled_results.numberOfThreads
     bootstrap: list[list[float]] = pickled_results.bootstrap.tolist()
     try:
         bootstrap_time: timedelta | None = pickled_results.bootstrap_time
@@ -156,7 +154,6 @@ def read_pickle_biogeme_3_2_14(filename: str) -> RawEstimationResults:
         draws_processing_time=draws_processing_time,
         optimization_messages=optimization_messages,
         convergence=convergence,
-        number_of_threads=number_of_threads,
         bootstrap=bootstrap,
         bootstrap_time=bootstrap_time,
     )
@@ -197,7 +194,6 @@ def read_pickle_biogeme_3_2_13(filename: str) -> RawEstimationResults:
         if isinstance(value, np.ndarray):  # Check if the value is a numpy array
             optimization_messages[key] = value.tolist()
     convergence: bool = pickled_results.convergence
-    number_of_threads: int = pickled_results.numberOfThreads
     bootstrap: list[list[float]] = pickled_results.bootstrap.tolist()
     try:
         bootstrap_time: timedelta | None = pickled_results.bootstrap_time
@@ -227,7 +223,6 @@ def read_pickle_biogeme_3_2_13(filename: str) -> RawEstimationResults:
         draws_processing_time=draws_processing_time,
         optimization_messages=optimization_messages,
         convergence=convergence,
-        number_of_threads=number_of_threads,
         bootstrap=bootstrap,
         bootstrap_time=bootstrap_time,
     )
@@ -271,7 +266,6 @@ def read_pickle_biogeme_3_2_12(filename: str) -> RawEstimationResults:
         ):  # Check if the value is a numpy array
             optimization_messages[key] = value.tolist()
     convergence: bool = True
-    number_of_threads: int = pickled_results.numberOfThreads
     bootstrap: list[list[float]] = (
         pickled_results.bootstrap.tolist()
         if pickled_results.bootstrap is not None
@@ -305,7 +299,6 @@ def read_pickle_biogeme_3_2_12(filename: str) -> RawEstimationResults:
         draws_processing_time=draws_processing_time,
         optimization_messages=optimization_messages,
         convergence=convergence,
-        number_of_threads=number_of_threads,
         bootstrap=bootstrap,
         bootstrap_time=bootstrap_time,
     )

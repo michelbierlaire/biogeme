@@ -217,22 +217,24 @@ def get_html_one_parameter(
     output += f'<td>{parameter_number}</td>'
     output += f'<td>{parameter_name}</td>'
     # Value
-    value = estimation_results.get_parameter_value(parameter_index=parameter_index)
+    value = estimation_results.get_parameter_value_from_index(
+        parameter_index=parameter_index
+    )
     output += f'<td>{format_real_number(value)}</td>'
     # std err
-    std_err = estimation_results.get_parameter_std_err(
+    std_err = estimation_results.get_parameter_std_err_from_index(
         parameter_index=parameter_index, estimate_var_covar=variance_covariance_type
     )
     output += f'<td>{format_real_number(std_err)}</td>'
     # t-test against 0
-    t_test = estimation_results.get_parameter_t_test(
+    t_test = estimation_results.get_parameter_t_test_from_index(
         parameter_index=parameter_index,
         estimate_var_covar=variance_covariance_type,
         target=0,
     )
     output += f'<td>{format_real_number(t_test)}</td>'
     # p-value against 0
-    p_value = estimation_results.get_parameter_p_value(
+    p_value = estimation_results.get_parameter_p_value_from_index(
         parameter_index=parameter_index,
         estimate_var_covar=variance_covariance_type,
         target=0,

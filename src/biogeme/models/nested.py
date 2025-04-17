@@ -15,7 +15,7 @@ from biogeme.expressions import (
     ExpressionOrNumeric,
     exp,
     log,
-    bioMultSum,
+    MultipleSum,
     Numeric,
     ConditionalTermTuple,
     ConditionalSum,
@@ -68,7 +68,7 @@ def get_mev_generating_for_nested(
     for m in nests:
         if availability is None:
             sum_terms = [exp(m.nest_param * util[i]) for i in m.list_of_alternatives]
-            the_sum = bioMultSum(sum_terms)
+            the_sum = MultipleSum(sum_terms)
         else:
             sum_terms = [
                 ConditionalTermTuple(
@@ -82,7 +82,7 @@ def get_mev_generating_for_nested(
     if nests.alone is not None:
         for i in nests.alone:
             terms_for_nests.append(util[i])
-    return bioMultSum(terms_for_nests)
+    return MultipleSum(terms_for_nests)
 
 
 @deprecated(get_mev_generating_for_nested)
@@ -143,7 +143,7 @@ def get_mev_for_nested(
     for m in nests:
         if availability is None:
             sum_terms = [exp(m.nest_param * util[i]) for i in m.list_of_alternatives]
-            the_sum = bioMultSum(sum_terms)
+            the_sum = MultipleSum(sum_terms)
         else:
             sum_terms = [
                 ConditionalTermTuple(
@@ -220,7 +220,7 @@ def get_mev_for_nested_mu(
     for m in nests:
         if availability is None:
             sum_terms = [exp(m.nest_param * util[i]) for i in m.list_of_alternatives]
-            the_sum = bioMultSum(sum_terms)
+            the_sum = MultipleSum(sum_terms)
 
         else:
             sum_terms = [

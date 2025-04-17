@@ -1,17 +1,20 @@
-""" Arithmetic expressions accepted by Biogeme: binary operators
+"""Arithmetic expressions accepted by Biogeme: binary operators
 
-:author: Michel Bierlaire
-
-:date: Sat Sep  9 15:18:27 2023
+Michel Bierlaire
+Wed Mar 26 09:55:46 2025
 """
 
 from __future__ import annotations
+from biogeme.exceptions import BiogemeError
 
 import logging
 
-from . import validate_and_convert
+import jax.numpy as jnp
+from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
+
+from .convert import validate_and_convert
 from .base_expressions import Expression, ExpressionOrNumeric
-from ..deprecated import deprecated
+from .jax_utils import JaxFunctionType
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +40,7 @@ class BinaryOperator(Expression):
             biogeme.expressions.Expression object.
 
         """
-        Expression.__init__(self)
+        super().__init__()
         self.left = validate_and_convert(left)
         self.right = validate_and_convert(right)
 
@@ -59,10 +62,13 @@ class Plus(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
         return f'({self.left} + {self.right})'
+
+    def __repr__(self) -> str:
+        return f'({repr(self.left)} + {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -72,15 +78,34 @@ class Plus(BinaryOperator):
         """
         return self.left.get_value() + self.right.get_value()
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> float:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return left_value + right_value
+
+        return the_jax_function
 
 
 class Minus(BinaryOperator):
     """
-    Substraction expression
+    Subtraction expression
     """
 
     def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
@@ -92,10 +117,13 @@ class Minus(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
         return f'({self.left} - {self.right})'
+
+    def __repr__(self) -> str:
+        return f'({repr(self.left)} - {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -105,10 +133,29 @@ class Minus(BinaryOperator):
         """
         return self.left.get_value() - self.right.get_value()
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> float:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return left_value - right_value
+
+        return the_jax_function
 
 
 class Times(BinaryOperator):
@@ -126,10 +173,13 @@ class Times(BinaryOperator):
         :type right: biogeme.expressions.Expression
 
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
         return f'({self.left} * {self.right})'
+
+    def __repr__(self) -> str:
+        return f'({repr(self.left)} * {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -139,10 +189,29 @@ class Times(BinaryOperator):
         """
         return self.left.get_value() * self.right.get_value()
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax = self.left.recursive_construct_jax_function()
+        right_jax = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> float:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return left_value * right_value
+
+        return the_jax_function
 
 
 class Divide(BinaryOperator):
@@ -159,43 +228,13 @@ class Divide(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
         return f'({self.left} / {self.right})'
 
-    def get_value(self) -> float:
-        """Evaluates the value of the expression
-
-        :return: value of the expression
-        :rtype: float
-        """
-        return self.left.get_value() / self.right.get_value()
-
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
-
-
-class Power(BinaryOperator):
-    """
-    Power expression
-    """
-
-    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
-        """Constructor
-
-        :param left: first arithmetic expression
-        :type left: biogeme.expressions.Expression
-
-        :param right: second arithmetic expression
-        :type right: biogeme.expressions.Expression
-        """
-        BinaryOperator.__init__(self, left, right)
-
-    def __str__(self) -> str:
-        return f'({self.left} ** {self.right})'
+    def __repr__(self) -> str:
+        return f'({repr(self.left)} / {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -203,15 +242,38 @@ class Power(BinaryOperator):
         :return: value of the expression
         :rtype: float
         """
-        return self.left.get_value() ** self.right.get_value()
+        left_val = self.left.get_value()
+        right_val = self.right.get_value()
+        if right_val == 0.0:
+            raise BiogemeError("Division by zero in Divide expression.")
+        return left_val / right_val
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> float:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return left_value / right_value
+
+        return the_jax_function
 
 
-class bioMin(BinaryOperator):
+class BinaryMin(BinaryOperator):
     """
     Minimum of two expressions
     """
@@ -225,10 +287,13 @@ class bioMin(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
-        return f'bioMin({self.left}, {self.right})'
+        return f'BinaryMin({self.left}, {self.right})'
+
+    def __repr__(self) -> str:
+        return f'BinaryMin({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -241,13 +306,32 @@ class bioMin(BinaryOperator):
 
         return self.right.get_value()
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return jnp.minimum(left_value, right_value)
+
+        return the_jax_function
 
 
-class bioMax(BinaryOperator):
+class BinaryMax(BinaryOperator):
     """
     Maximum of two expressions
     """
@@ -261,10 +345,13 @@ class bioMax(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
-        return f'bioMax({self.left}, {self.right})'
+        return f'BinaryMax({self.left}, {self.right})'
+
+    def __repr__(self) -> str:
+        return f'BinaryMax({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -277,10 +364,29 @@ class bioMax(BinaryOperator):
 
         return self.right.get_value()
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return jnp.maximum(left_value, right_value)
+
+        return the_jax_function
 
 
 class And(BinaryOperator):
@@ -298,10 +404,13 @@ class And(BinaryOperator):
         :type right: biogeme.expressions.Expression
 
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
         return f'({self.left} and {self.right})'
+
+    def __repr__(self) -> str:
+        return f'({repr(self.left)} and {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -315,10 +424,34 @@ class And(BinaryOperator):
             return 0.0
         return 1.0
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(self) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression.
+        :return: the function takes three parameters: the parameters, one row of the database, and the draws.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            condition = (left_value != 0.0).astype(JAX_FLOAT) * (
+                right_value != 0.0
+            ).astype(JAX_FLOAT)
+            return jnp.where(
+                condition != 0.0,
+                jnp.array(1.0, dtype=JAX_FLOAT),
+                jnp.array(0.0, dtype=JAX_FLOAT),
+            )
+
+        return the_jax_function
 
 
 class Or(BinaryOperator):
@@ -335,10 +468,13 @@ class Or(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
+        super().__init__(left, right)
 
     def __str__(self) -> str:
         return f'({self.left} or {self.right})'
+
+    def __repr__(self) -> str:
+        return f'({repr(self.left)} or {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -352,7 +488,27 @@ class Or(BinaryOperator):
             return 1.0
         return 0.0
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self,
+    ) -> JaxFunctionType:
+        """
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
+        right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> float:
+            left_value = left_jax(parameters, one_row, the_draws, the_random_variables)
+            right_value = right_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            condition = (left_value != 0.0) | (right_value != 0.0)
+            return condition.astype(JAX_FLOAT)
+
+        return the_jax_function

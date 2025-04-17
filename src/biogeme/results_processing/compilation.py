@@ -96,20 +96,20 @@ def compile_estimation_results(
         if estimation_results is not None:
             stats_results = estimation_results.get_general_statistics()
             for s in statistics:
-                df.loc[s, col] = stats_results[s][0]
+                df.loc[s, col] = stats_results[s]
             if include_parameter_estimates:
                 for (
                     parameter_index,
                     parameter_name,
                 ) in enumerate(estimation_results.beta_names):
-                    parameter_value = estimation_results.get_parameter_value(
+                    parameter_value = estimation_results.get_parameter_value_from_index(
                         parameter_index=parameter_index
                     )
-                    std_err_value = estimation_results.get_parameter_std_err(
+                    std_err_value = estimation_results.get_parameter_std_err_from_index(
                         parameter_index=parameter_index,
                         estimate_var_covar=variance_covariance_type,
                     )
-                    t_test_value = estimation_results.get_parameter_t_test(
+                    t_test_value = estimation_results.get_parameter_t_test_from_index(
                         parameter_index=parameter_index,
                         estimate_var_covar=variance_covariance_type,
                     )

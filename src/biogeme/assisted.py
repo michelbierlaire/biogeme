@@ -18,8 +18,7 @@ from matplotlib.axes import Axes
 import biogeme.tools.unique_ids
 import biogeme.version as bv
 from biogeme.biogeme import BIOGEME
-from biogeme.configuration import Configuration
-from biogeme.controller import ControllerOperator
+from biogeme.catalog import Configuration, ControllerOperator, CentralController
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import Parameters
 from biogeme.results_processing import EstimationResults
@@ -157,8 +156,13 @@ class AssistedSpecification(Neighborhood):
         self.multi_objectives = multi_objectives
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
-        self.central_controller = self.biogeme_object.log_like.set_central_controller()
-        Specification.generic_name = biogeme_object.modelName
+        self.central_controller = CentralController(
+            expression=self.biogeme_object.log_like,
+            maximum_number_of_configurations=self.biogeme_parameters.get_value(
+                name='maximum_number_catalog_expressions'
+            ),
+        )
+        Specification.generic_name = biogeme_object.model_name
         Specification.user_defined_validity_check = (
             None if validity is None else staticmethod(validity)
         )

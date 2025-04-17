@@ -9,8 +9,8 @@ import datetime
 import logging
 import os
 
-from biogeme.results_processing import get_pandas_estimated_parameters
-from biogeme.results_processing.estimation_results import (
+from .pandas_output import get_pandas_estimated_parameters
+from .estimation_results import (
     EstimationResults,
     EstimateVarianceCovariance,
     calculates_correlation_matrix,

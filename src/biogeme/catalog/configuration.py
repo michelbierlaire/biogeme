@@ -18,8 +18,7 @@ class SelectionTuple(NamedTuple):
     selection: str
 
 
-SEPARATOR = ';'
-SELECTION_SEPARATOR = ':'
+from biogeme.expressions import SEPARATOR, SELECTION_SEPARATOR
 
 
 class Configuration:

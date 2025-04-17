@@ -14,15 +14,20 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from numpy.linalg import eigh, LinAlgError, pinv, inv, norm
-from scipy.stats import norm as normal_distribution
+from scipy.stats import norm as normal_distribution, chi2
+
 from biogeme.exceptions import BiogemeError
-from .recycle_pickle import read_pickle_biogeme
+
 from .raw_estimation_results import (
     RawEstimationResults,
     serialize_to_yaml,
     deserialize_from_yaml,
 )
+from .recycle_pickle import read_pickle_biogeme
+from ..deprecated import deprecated_parameters
+from ..filenames import get_new_file_name
 from ..tools import likelihood_ratio
+from ..tools.ellipse import Ellipse
 
 
 class EstimateVarianceCovariance(Enum):
@@ -66,11 +71,18 @@ def calculates_correlation_matrix(covariance: np.ndarray) -> np.ndarray:
 class EstimationResults:
     """Extension of the raw estimation results."""
 
-    def __init__(self, raw_estimation_results: RawEstimationResults | None) -> None:
+    def __init__(self, raw_estimation_results: RawEstimationResults) -> None:
         """Ctor. with data from the object
 
         :param raw_estimation_results: raw estimation results
         """
+        if raw_estimation_results is None:
+            raise BiogemeError('Estimation results are missing')
+        if not isinstance(raw_estimation_results, RawEstimationResults):
+            raise BiogemeError(
+                f'Estimation results must be provided as a RawEstimationResults object, '
+                f'and not {type(raw_estimation_results)}'
+            )
         self.raw_estimation_results = raw_estimation_results
 
     @classmethod
@@ -94,9 +106,12 @@ class EstimationResults:
         return cls(raw_estimation_results=restored_results)
 
     def __getattr__(self, name: str) -> Any:
-        # If the attribute is not found in the current instance, check raw_estimation_results
-        if self.raw_estimation_results is None:
-            raise BiogemeError('No result available.')
+        # Check raw_estimation_results without triggering __getattr__ recursively
+        if (
+            'raw_estimation_results' not in self.__dict__
+            or self.__dict__['raw_estimation_results'] is None
+        ):
+            raise BiogemeError(f'Impossible to obtain {name}. No result available.')
         return getattr(self.raw_estimation_results, name)
 
     @property
@@ -116,6 +131,13 @@ class EstimationResults:
         return sum(
             not self.is_bound_active(parameter_name=beta) for beta in self.beta_names
         )
+
+    @property
+    def final_loglikelihood(self) -> float | None:
+        """Final log likelihood after estimation"""
+        if self.raw_estimation_results is None:
+            return None
+        return self.raw_estimation_results.final_log_likelihood
 
     def is_any_bound_active(self, threshold: float = 1.0e-6) -> bool:
         """
@@ -506,6 +528,37 @@ class EstimationResults:
             return self.bootstrap_variance_covariance_matrix
         raise ValueError(f'Unknown type: {variance_covariance_type}')
 
+    def get_sub_variance_covariance_matrix(
+        self,
+        parameters: list[str],
+        variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+    ) -> np.ndarray:
+        """Returns a sub-matrix of the variance-covariance matrix corresponding to a list of parameters
+
+        :param parameters: list of parameters to involve in the sub-matrix
+        :param variance_covariance_type: identifies the estimate of the variance-covariance matrix.
+        :return: a numpy array containing the submatrix.
+        """
+        the_complete_matrix = self.get_variance_covariance_matrix(
+            variance_covariance_type=variance_covariance_type
+        )
+        # Ensure all requested parameters exist in beta_names
+        missing_parameters = [
+            param for param in parameters if param not in self.beta_names
+        ]
+        if missing_parameters:
+            raise BiogemeError(
+                f'The following parameters are unknown: {", ".join(missing_parameters)}'
+            )
+
+        # Find indices of the requested parameters
+        parameter_indices = [self.beta_names.index(param) for param in parameters]
+
+        # Extract the sub-matrix using NumPy indexing
+        sub_matrix = the_complete_matrix[np.ix_(parameter_indices, parameter_indices)]
+
+        return sub_matrix
+
     @property
     def robust_variance_covariance_matrix(self) -> np.ndarray:
         """Calculates the "sandwich" estimate of the variance-covariance matrix"""
@@ -642,7 +695,6 @@ class EstimationResults:
             )
         if self.bootstrap is not None:
             d['Bootstrapping time'] = f'{self.bootstrap_time}'
-        d['Nbr of threads'] = f'{self.number_of_threads}'
         return d
 
     def get_parameter_index(self, parameter_name: str) -> int:
@@ -654,7 +706,7 @@ class EstimationResults:
         index_param = self.beta_names.index(parameter_name)
         return index_param
 
-    def get_parameter_value(self, parameter_index: int) -> float:
+    def get_parameter_value_from_index(self, parameter_index: int) -> float:
         """Retrieve the estimated value of a parameter
 
         :param parameter_index: index of the parameter
@@ -668,7 +720,15 @@ class EstimationResults:
 
         return self.beta_values[parameter_index]
 
-    def get_parameter_std_err(
+    def get_parameter_value(self, parameter_name: str) -> float:
+        """Retrieve the estimated value of a parameter
+
+        :param parameter_name: name of the parameter
+        """
+        index = self.get_parameter_index(parameter_name=parameter_name)
+        return self.get_parameter_value_from_index(parameter_index=index)
+
+    def get_parameter_std_err_from_index(
         self, parameter_index: int, estimate_var_covar: EstimateVarianceCovariance
     ) -> float:
         """Calculates the standard error of the parameter estimate"""
@@ -686,21 +746,38 @@ class EstimationResults:
             return float(np.finfo(float).max)
         return np.sqrt(variance)
 
-    def get_parameter_t_test(
+    def get_parameter_std_err(
+        self,
+        parameter_name: str,
+        estimate_var_covar: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+    ) -> float:
+        """Calculates the standard error of the parameter estimate"""
+        index = self.get_parameter_index(parameter_name=parameter_name)
+        return self.get_parameter_std_err_from_index(
+            parameter_index=index, estimate_var_covar=estimate_var_covar
+        )
+
+    def get_parameter_t_test_from_index(
         self,
         parameter_index: int,
         estimate_var_covar: EstimateVarianceCovariance,
         target: float = 0.0,
     ) -> float:
-        """Calculates the t-test of the parameter estimate"""
+        """Calculates the t-test of the parameter estimate
+
+        :param parameter_index: index of the parameter
+        :param estimate_var_covar: estimator for the variance-covariance matrix
+        :param target: value for the null hypothesis
+        :return: value of the t-test
+        """
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
                 f'{len(self.beta_values)-1}'
             )
             raise ValueError(error_msg)
-        value = self.get_parameter_value(parameter_index=parameter_index)
-        std_err = self.get_parameter_std_err(
+        value = self.get_parameter_value_from_index(parameter_index=parameter_index)
+        std_err = self.get_parameter_std_err_from_index(
             parameter_index=parameter_index, estimate_var_covar=estimate_var_covar
         )
         if std_err == 0:
@@ -708,25 +785,67 @@ class EstimationResults:
 
         return float(np.nan_to_num((value - target) / std_err))
 
-    def get_parameter_p_value(
+    def get_parameter_t_test(
+        self,
+        parameter_name: str,
+        estimate_var_covar: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+        target: float = 0.0,
+    ) -> float:
+        """Calculates the t-test of the parameter estimate
+
+        :param parameter_name: name of the parameter
+        :param estimate_var_covar: estimator for the variance-covariance matrix
+        :param target: value for the null hypothesis
+        :return: value of the t-test
+        """
+        index = self.get_parameter_index(parameter_name=parameter_name)
+        return self.get_parameter_t_test_from_index(
+            parameter_index=index, estimate_var_covar=estimate_var_covar, target=target
+        )
+
+    def get_parameter_p_value_from_index(
         self,
         parameter_index: int,
         estimate_var_covar: EstimateVarianceCovariance,
         target: float = 0.0,
     ) -> float:
-        """Calculates the p-value of the parameter estimate"""
+        """Calculates the p-value of the parameter estimate
+
+        :param parameter_index: index of the parameter
+        :param estimate_var_covar: estimator for the variance-covariance matrix
+        :param target: value for the null hypothesis
+        :return: p-value
+        """
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
                 f'{len(self.beta_values)-1}'
             )
             raise ValueError(error_msg)
-        t_test = self.get_parameter_t_test(
+        t_test = self.get_parameter_t_test_from_index(
             parameter_index=parameter_index,
             estimate_var_covar=estimate_var_covar,
             target=target,
         )
         return calc_p_value(t_test)
+
+    def get_parameter_p_value(
+        self,
+        parameter_name: str,
+        estimate_var_covar: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+        target: float = 0.0,
+    ) -> float:
+        """Calculates the p-value of the parameter estimate
+
+        :param parameter_name: name of the parameter
+        :param estimate_var_covar: estimator for the variance-covariance matrix
+        :param target: value for the null hypothesis
+        :return: p-value
+        """
+        index = self.get_parameter_index(parameter_name=parameter_name)
+        return self.get_parameter_p_value_from_index(
+            parameter_index=index, estimate_var_covar=estimate_var_covar, target=target
+        )
 
     def likelihood_ratio_test(
         self, other_model: EstimationResults, significance_level: float = 0.05
@@ -764,3 +883,76 @@ class EstimationResults:
         )
         warnings.warn(msg, DeprecationWarning, stacklevel=2)
         return get_pandas_estimated_parameters(estimation_results=self)
+
+    def get_confidence_ellipse(
+        self,
+        first_parameter: str,
+        second_parameter: str,
+        variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+        confidence_level=0.95,
+    ) -> Ellipse:
+        """Provides a Tikz picture of the confidence ellipsis for two parameters
+        :param first_parameter: name of the first parameter
+        :param second_parameter: name of the second parameter
+        :param variance_covariance_type: type of variance-covariance estimate to be used.
+        :param confidence_level: level of confidence for the confidence ellipse
+        :return: LaTeX code to draw the ellipsis
+        """
+        sigma = self.get_sub_variance_covariance_matrix(
+            variance_covariance_type=variance_covariance_type,
+            parameters=[first_parameter, second_parameter],
+        )
+        beta_1 = self.get_parameter_value_from_index(
+            parameter_index=self.get_parameter_index(parameter_name=first_parameter)
+        )
+        beta_2 = self.get_parameter_value_from_index(
+            parameter_index=self.get_parameter_index(parameter_name=second_parameter)
+        )
+        # Mean (center of the ellipse)
+        center_x, center_y = beta_1, beta_2
+
+        # Eigenvalue decomposition
+        eigenvalues, eigenvectors = np.linalg.eigh(sigma)
+        # Extract eigenvector corresponding to the largest eigenvalue
+        largest_eigenvector = eigenvectors[:, np.argmax(eigenvalues)]
+        # Calculate cos_phi and sin_phi
+        cos_phi, sin_phi = largest_eigenvector
+
+        # Compute axis lengths
+        chi2_value = chi2.ppf(confidence_level, 2)
+        axis_lengths = 2 * np.sqrt(chi2_value * eigenvalues)
+        axis_one, axis_two = axis_lengths[1], axis_lengths[0]  # Major and minor axes
+        return Ellipse(
+            center_x=center_x,
+            center_y=center_y,
+            sin_phi=sin_phi,
+            cos_phi=cos_phi,
+            axis_one=axis_one,
+            axis_two=axis_two,
+        )
+
+    @deprecated_parameters({'robust_std_err': None})
+    def write_f12(self, overwrite=False) -> str:
+        """
+        Writes the estimation results to a file in the F12 format (ALOGIT).
+
+        :param overwrite: If True, the existing file will be overwritten. Default is False.
+        :return: name of the file
+        """
+        from .f12_output import generate_f12_file
+
+        filename = get_new_file_name(self.model_name, 'F12')
+        generate_f12_file(self, filename, overwrite=overwrite)
+        return filename
+
+    def write_latex(self, include_begin_document=False) -> str:
+        """Write the results in a LaTeX file."""
+        from .latex_output import generate_latex_file
+
+        latex_file_name = get_new_file_name(self.model_name, 'tex')
+        generate_latex_file(
+            estimation_results=self,
+            filename=latex_file_name,
+            include_begin_document=include_begin_document,
+        )
+        return latex_file_name

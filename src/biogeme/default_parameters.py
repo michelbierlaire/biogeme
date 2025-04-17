@@ -14,11 +14,14 @@ from __future__ import annotations
 import numpy as np
 from typing import NamedTuple, Callable
 
+from biogeme.floating_point import NUMPY_FLOAT
 from biogeme.version import get_version
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
 
 ParameterValue = bool | int | float | str
+
+MISSING_VALUE = 99999
 
 
 class ParameterTuple(NamedTuple):
@@ -68,16 +71,6 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_boolean,),
         ),
         ParameterTuple(
-            name='generate_pickle',
-            value=True,
-            type=bool,
-            section='Output',
-            description=(
-                'bool: "True" if the pickle file with the ' 'results must be generated.'
-            ),
-            check=(cp.is_boolean,),
-        ),
-        ParameterTuple(
             name='generate_yaml',
             value=True,
             type=bool,
@@ -120,7 +113,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='missing_data',
-            value=99999,
+            value=MISSING_VALUE,
             type=int,
             section='Specification',
             description=(
@@ -226,7 +219,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='tolerance',
-            value=np.finfo(np.float64).eps ** 0.25,
+            value=float(np.finfo(NUMPY_FLOAT).eps ** (1.0 / 3.0)),
             type=float,
             section='SimpleBounds',
             description='float: the algorithm stops when this precision is reached',
@@ -264,7 +257,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='steptol',
-            value=1.0e-5,
+            value=float(np.finfo(NUMPY_FLOAT).eps ** (2.0 / 3.0)),
             type=float,
             section='SimpleBounds',
             description=(

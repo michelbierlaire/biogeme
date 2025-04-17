@@ -1,4 +1,4 @@
-""" Implements the Multivariate Extreme Value models.
+"""Implements the Multivariate Extreme Value models.
 
 :author: Michel Bierlaire
 :date: Wed Oct 25 11:35:34 2023
@@ -9,8 +9,7 @@ from biogeme.expressions import (
     Expression,
     exp,
     ExpressionOrNumeric,
-    _bioLogLogitFullChoiceSet,
-    _bioLogLogit,
+    LogLogit,
 )
 from biogeme.deprecated import deprecated
 
@@ -53,10 +52,7 @@ def logmev(
 
     """
     h = {i: v + log_gi[i] for i, v in util.items()}
-    if av is None:
-        log_p = _bioLogLogitFullChoiceSet(h, choice=choice)
-    else:
-        log_p = _bioLogLogit(h, av, choice)
+    log_p = LogLogit(h, av, choice=choice)
     return log_p
 
 
@@ -165,7 +161,7 @@ def logmev_endogenous_sampling(
 
     """
     h = {i: v + log_gi[i] + correction[i] for i, v in util.items()}
-    log_p = _bioLogLogit(h, av, choice)
+    log_p = LogLogit(h, av, choice)
     return log_p
 
 

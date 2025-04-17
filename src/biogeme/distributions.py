@@ -12,7 +12,7 @@ from biogeme.expressions import (
     log,
     exp,
     Numeric,
-    bioMultSum,
+    MultipleSum,
     validate_and_convert,
 )
 from biogeme.exceptions import BiogemeError
@@ -245,7 +245,7 @@ def triangularpdf(
 
     # b < x
     r5 = (x_expr > b_expr) * Numeric(0.0)
-    return bioMultSum([r1, r2, r3, r4, r5])
+    return MultipleSum([r1, r2, r3, r4, r5])
 
 
 def logisticcdf(

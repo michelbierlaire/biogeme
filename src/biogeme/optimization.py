@@ -18,6 +18,7 @@ Optimization algorithms for Biogeme
 
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -30,6 +31,17 @@ from biogeme_optimization.simple_bounds import simple_bounds_newton_algorithm
 from biogeme_optimization.trust_region import newton_trust_region, bfgs_trust_region
 
 logger = logging.getLogger(__name__)
+
+OptimizationAlgorithm = Callable[
+    [
+        FunctionToMinimize,
+        np.ndarray,
+        list[tuple[float, float]],
+        list[str],
+        dict[str, Any] | None,
+    ],
+    OptimizationResults,
+]
 
 
 def scipy(
@@ -673,7 +685,7 @@ def bio_bfgs(
     )
 
 
-algorithms = {
+algorithms: dict[str, OptimizationAlgorithm] = {
     'scipy': scipy,
     'LS-newton': newton_linesearch_for_biogeme,
     'TR-newton': newton_trust_region_for_biogeme,

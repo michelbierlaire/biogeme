@@ -53,7 +53,6 @@ class RawEstimationResults:
     draws_processing_time: timedelta
     optimization_messages: dict[str, Any]
     convergence: bool
-    number_of_threads: int
     bootstrap: list[list[float]]
     bootstrap_time: timedelta | None
 
@@ -129,7 +128,6 @@ def deserialize_from_yaml(filename) -> RawEstimationResults:
             ),
             optimization_messages=data['optimization_messages'],
             convergence=data['convergence'],
-            number_of_threads=data['number_of_threads'],
             bootstrap=data['bootstrap'],
             bootstrap_time=bootstrap_time,
         )

@@ -4,6 +4,7 @@ from typing import Callable
 import numpy as np
 
 from biogeme.deprecated import deprecated
+from biogeme.floating_point import SQRT_EPS
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ def findiff_g(
        calculated by finite differences.
     """
     x = x.astype(float)
-    tau = 0.0000001
+    tau = SQRT_EPS
     n = len(x)
     g = np.zeros(n)
     f = the_function(x).function
@@ -66,7 +67,7 @@ def findiff_h(
     :return: numpy matrix containing the hessian calculated by
              finite differences.
     """
-    tau = 1.0e-7
+    tau = SQRT_EPS
     n = len(x)
     h = np.zeros((n, n))
     the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
@@ -91,13 +92,6 @@ def findiff_h(
         gp = the_function_output.gradient
         h[:, i] = (gp - g).flatten() / s
     return h
-
-
-@deprecated(findiff_h)
-def findiff_H(
-    the_function: Callable[[np.ndarray], tuple[float, np.ndarray, ...]], x: np.ndarray
-) -> np.ndarray:
-    pass
 
 
 def check_derivatives(
@@ -169,13 +163,3 @@ def check_derivatives(
         gdiff,
         hdiff,
     )
-
-
-@deprecated(check_derivatives)
-def checkDerivatives(
-    the_function: Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]],
-    x: np.ndarray,
-    names: list[str] | None = None,
-    logg: bool | None = False,
-) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    pass

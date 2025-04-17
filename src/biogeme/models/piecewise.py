@@ -6,16 +6,15 @@
 
 import logging
 
-from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
     Beta,
     Variable,
-    bioMin,
-    bioMax,
+    BinaryMin,
+    BinaryMax,
     Numeric,
-    bioMultSum,
+    MultipleSum,
     ExpressionOrNumeric,
 )
 
@@ -78,29 +77,22 @@ def piecewise_variables(
 
     # First variable
     if thresholds[0] is None:
-        results = [bioMin(variable, thresholds[1])]
+        results = [BinaryMin(variable, thresholds[1])]
     else:
         b = thresholds[1] - thresholds[0]
-        results = [bioMax(Numeric(0), bioMin(variable - thresholds[0], b))]
+        results = [BinaryMax(Numeric(0), BinaryMin(variable - thresholds[0], b))]
 
     for i in range(1, eye - 2):
         b = thresholds[i + 1] - thresholds[i]
-        results += [bioMax(Numeric(0), bioMin(variable - thresholds[i], b))]
+        results += [BinaryMax(Numeric(0), BinaryMin(variable - thresholds[i], b))]
 
     # Last variable
     if thresholds[-1] is None:
-        results += [bioMax(0, variable - thresholds[-2])]
+        results += [BinaryMax(0, variable - thresholds[-2])]
     else:
         b = thresholds[-1] - thresholds[-2]
-        results += [bioMax(Numeric(0), bioMin(variable - thresholds[-2], b))]
+        results += [BinaryMax(Numeric(0), BinaryMin(variable - thresholds[-2], b))]
     return results
-
-
-@deprecated(new_func=piecewise_variables)
-def piecewiseVariables(
-    variable: Expression | str, thresholds: list[float]
-) -> list[Expression]:
-    pass
 
 
 def piecewise_formula(
@@ -195,14 +187,7 @@ def piecewise_formula(
 
     terms = [beta * the_vars[i] for i, beta in enumerate(betas)]
 
-    return bioMultSum(terms)
-
-
-@deprecated(new_func=piecewise_formula)
-def piecewiseFormula(
-    variable: str | Variable, thresholds: list[float], betas: list[Beta] | None = None
-) -> Expression:
-    pass
+    return MultipleSum(terms)
 
 
 def piecewise_as_variable(
@@ -300,7 +285,7 @@ def piecewise_as_variable(
 
     terms = [beta * theVars[i] for i, beta in enumerate(betas)]
 
-    return theVars[0] + bioMultSum(terms)
+    return theVars[0] + MultipleSum(terms)
 
 
 def piecewise_function(x: float, thresholds: list[float], betas: list[float]) -> float:
@@ -376,8 +361,3 @@ def piecewise_function(x: float, thresholds: list[float], betas: list[float]) ->
         )
         rest = x - thresholds[i + 1]
     return total
-
-
-@deprecated(new_func=piecewise_function)
-def piecewiseFunction(x: float, thresholds: list[float], betas: list[float]) -> float:
-    pass

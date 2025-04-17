@@ -1,18 +1,21 @@
 """ Generation of various types of draws.
 
-:author: Michel Bierlaire
-
-:date: Tue Jun 18 19:05:13 2019
+Michel Bierlaire
+Wed Mar 26 13:42:10 2025
 """
 
 from typing import Callable
 
-# Too constraining
-# pylint: disable=invalid-name, too-many-arguments, too-many-locals, too-many-statements
-
 import numpy as np
-import biogeme.exceptions as excep
-from biogeme.deprecated import deprecated, deprecated_parameters
+
+from biogeme.exceptions import BiogemeError
+
+
+def _validate_draw_dimensions(sample_size: int, number_of_draws: int):
+    if number_of_draws <= 0:
+        raise BiogemeError(f'Invalid number of draws: {number_of_draws}.')
+    if sample_size <= 0:
+        raise BiogemeError(f'Invalid sample size: {sample_size} when generating draws.')
 
 
 def get_uniform(
@@ -24,14 +27,10 @@ def get_uniform(
                        generated. If None, a one dimensional array
                        will be generated. If it has a values k, then k
                        series of draws will be generated
-    :type sample_size: int
     :param number_of_draws: number of draws to generate.
-    :type number_of_draws: int
     :param symmetric: if True, draws from [-1: 1] are generated.
         If False, draws from [0: 1] are generated.  Default: False
-    :type symmetric: bool
     :return: numpy array with the draws
-    :rtype: numpy.array
 
     Example::
 
@@ -56,16 +55,9 @@ def get_uniform(
         )
 
     :raise BiogemeError: if the number of draws is not positive.
-
     :raise BiogemeError: if the sample size is not positive.
     """
-    if number_of_draws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
-
-    if sample_size <= 0:
-        raise excep.BiogemeError(
-            f'Invalid sample size: {sample_size} when generating draws.'
-        )
+    _validate_draw_dimensions(sample_size, number_of_draws)
     total_size = number_of_draws * sample_size
 
     uniform_numbers = np.random.uniform(size=total_size)
@@ -76,12 +68,6 @@ def get_uniform(
     return uniform_numbers
 
 
-@deprecated(get_uniform)
-def getUniform(sample_size: int, number_of_draws: int, symmetric: bool = False):
-    pass
-
-
-@deprecated_parameters(obsolete_params={'uniformNumbers': 'uniform_numbers'})
 def get_latin_hypercube_draws(
     sample_size: int,
     number_of_draws: int,
@@ -128,28 +114,22 @@ def get_latin_hypercube_draws(
 
     :raise BiogemeError: if the number of uniform draws is inconsistent.
     """
-    if number_of_draws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
-
-    if sample_size <= 0:
-        raise excep.BiogemeError(
-            f'Invalid sample size: {sample_size} when generating draws.'
-        )
-    totalSize = number_of_draws * sample_size
+    _validate_draw_dimensions(sample_size, number_of_draws)
+    total_size = number_of_draws * sample_size
 
     if uniform_numbers is None:
-        uniform_numbers = np.random.uniform(size=totalSize)
+        uniform_numbers = np.random.uniform(size=total_size)
     else:
-        if uniform_numbers.size != totalSize:
-            errorMsg = (
-                f'A total of {totalSize} uniform draws '
+        if uniform_numbers.size != total_size:
+            error_msg = (
+                f'A total of {total_size} uniform draws '
                 f'must be provided, and not {uniform_numbers.size}.'
             )
-            raise excep.BiogemeError(errorMsg)
+            raise BiogemeError(error_msg)
 
-    uniform_numbers.shape = (totalSize,)
+    uniform_numbers.shape = (total_size,)
     numbers = np.array(
-        [(float(i) + uniform_numbers[i]) / float(totalSize) for i in range(totalSize)]
+        [(float(i) + uniform_numbers[i]) / float(total_size) for i in range(total_size)]
     )
     if symmetric:
         numbers = 2.0 * numbers - 1.0
@@ -157,13 +137,6 @@ def get_latin_hypercube_draws(
     np.random.shuffle(numbers)
     numbers.shape = (sample_size, number_of_draws)
     return numbers
-
-
-@deprecated(get_latin_hypercube_draws)
-def getLatinHypercubeDraws(
-    sample_size: int, number_of_draws: int, symmetric: bool = False, uniformNumbers=None
-):
-    pass
 
 
 def get_halton_draws(
@@ -215,13 +188,7 @@ def get_halton_draws(
 
     :raise BiogemeError: if the sample size is not positive.
     """
-    if number_of_draws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
-
-    if sample_size <= 0:
-        raise excep.BiogemeError(
-            f'Invalid sample size: {sample_size} when generating draws.'
-        )
+    _validate_draw_dimensions(sample_size, number_of_draws)
     length = number_of_draws * sample_size
     req_length = length + skip + 1
     numbers = np.empty(req_length)
@@ -250,18 +217,6 @@ def get_halton_draws(
 
     numbers.shape = (sample_size, number_of_draws)
     return numbers
-
-
-@deprecated(get_halton_draws)
-def getHaltonDraws(
-    sample_size: int,
-    number_of_draws: int,
-    symmetric: bool = False,
-    base: int = 2,
-    skip: int = 0,
-    shuffled: bool = False,
-):
-    pass
 
 
 def get_antithetic(
@@ -301,21 +256,11 @@ def get_antithetic(
                   0.18904413, 0.03828636, 0.59015183, 0.27822742, 0.83518904]])
 
     """
-    R = int(number_of_draws / 2.0)
-    draws = uniform_draws(sample_size, R)
+    actual_number_of_draws = int(number_of_draws / 2.0)
+    draws = uniform_draws(sample_size, actual_number_of_draws)
     return np.concatenate((draws, 1 - draws), axis=1)
 
 
-@deprecated(get_antithetic)
-def getAntithetic(
-    uniform_draws: Callable[[int, int], np.ndarray],
-    sample_size: int,
-    number_of_draws: int,
-) -> np.ndarray:
-    pass
-
-
-@deprecated_parameters(obsolete_params={'uniformNumbers': 'uniform_numbers'})
 def get_normal_wichura_draws(
     sample_size: int,
     number_of_draws: int,
@@ -368,24 +313,18 @@ def get_normal_wichura_draws(
     :raise BiogemeError: if the sample size is not positive.
 
     """
-    if number_of_draws <= 0:
-        raise excep.BiogemeError(f'Invalid number of draws: {number_of_draws}.')
-
     if antithetic:
         if number_of_draws % 2 != 0:
-            errorMsg = (
+            error_msg = (
                 f'Please specify an even number of draws for '
                 f'antithetic draws. Requested number of '
                 f'{number_of_draws}.'
             )
-            raise excep.BiogemeError(errorMsg)
+            raise BiogemeError(error_msg)
         number_of_draws = int(number_of_draws / 2.0)
 
-    if sample_size <= 0:
-        raise excep.BiogemeError(
-            f'Invalid sample size: {sample_size} when generating draws.'
-        )
-    totalSize = number_of_draws * sample_size
+    _validate_draw_dimensions(sample_size, number_of_draws)
+    total_size = number_of_draws * sample_size
 
     split2 = 5.0e00
     const1 = 0.180625e00
@@ -437,14 +376,14 @@ def get_normal_wichura_draws(
     f7 = 2.04426310338993978564e-15
 
     if uniform_numbers is None:
-        uniform_numbers = np.random.uniform(size=totalSize)
-    elif uniform_numbers.size != totalSize:
-        errorMsg = (
-            f'A total of {totalSize} uniform draws must be '
+        uniform_numbers = np.random.uniform(size=total_size)
+    elif uniform_numbers.size != total_size:
+        error_msg = (
+            f'A total of {total_size} uniform draws must be '
             f'provided, and not {uniform_numbers.size}.'
         )
-        raise excep.BiogemeError(errorMsg)
-    uniform_numbers.shape = (totalSize,)
+        raise BiogemeError(error_msg)
+    uniform_numbers.shape = (total_size,)
 
     q = uniform_numbers - 0.5
     draws = np.zeros(uniform_numbers.shape)
@@ -499,7 +438,7 @@ def get_normal_wichura_draws(
     r[cond2d] = np.sqrt(-np.log(r[cond2d]))
     cond2d_a = np.logical_and(cond2d, r <= split2)
     cond2d_b = np.logical_and(cond2d, r > split2)
-    r[cond2d_a] = r[cond2d_a] - const2
+    r[cond2d_a] -= const2
     draws[cond2d_a] = (
         (
             (
@@ -533,7 +472,7 @@ def get_normal_wichura_draws(
         * r[cond2d_a]
         + 1
     )
-    r[cond2d_b] = r[cond2d_b] - split2
+    r[cond2d_b] -= split2
     draws[cond2d_b] = (
         (
             (
@@ -575,13 +514,3 @@ def get_normal_wichura_draws(
         draws = np.concatenate((draws, -draws), axis=1)
 
     return draws
-
-
-@deprecated(get_normal_wichura_draws)
-def getNormalWichuraDraws(
-    sample_size: int,
-    number_of_draws: int,
-    uniform_numbers: np.ndarray | None = None,
-    antithetic: bool = False,
-):
-    pass

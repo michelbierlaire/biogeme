@@ -1,9 +1,7 @@
 from .derivatives import (
     findiff_g,
     findiff_h,
-    findiff_H,
     check_derivatives,
-    checkDerivatives,
 )
 from .primes import get_prime_numbers, calculate_prime_numbers
 from .database import flatten_database, count_number_of_groups, countNumberOfGroups

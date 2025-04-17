@@ -19,7 +19,8 @@ from biogeme_optimization.pareto import SetElement
 
 import biogeme.biogeme as bio
 import biogeme.tools.unique_ids
-from biogeme.configuration import Configuration
+from biogeme.catalog import Configuration, CentralController
+from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import get_default_value, Parameters
 from biogeme.results_processing import EstimationResults
@@ -31,9 +32,9 @@ logger = logging.getLogger(__name__)
 class Specification:
     """Implements a specification"""
 
-    database = None  #: :class:`biogeme.database.Database` object
-    all_results = {}  #: dict(str: `biogeme.results.bioResults`)
-    expression = None  #: :class:`biogeme.expressions.Expression` object
+    database: Database | None = None  #: :class:`biogeme.database.Database` object
+    all_results: dict[str: EstimationResults] = {}
+    central_controller: CentralController | None = None
     """
         function that generates all the objectives:
         fct(bioResults) -> list[floatNone]
@@ -47,7 +48,7 @@ class Specification:
 
     def __init__(
         self,
-        configuration: biogeme.configuration.Configuration,
+        configuration: Configuration,
         biogeme_parameters: Parameters | None = None,
     ):
         """Creates a specification from a  configuration
@@ -76,9 +77,6 @@ class Specification:
         assert (
             self.validity is not None
         ), 'Validity must be set by the _estimate function'
-        assert (
-            self.all_results.get(self.config_id) is not None
-        ), 'Results have not been generated'
 
     @classmethod
     def from_string_id(cls, configuration_id: str):
@@ -153,9 +151,7 @@ class Specification:
                         f'{self.maximum_number_parameters}'
                     ),
                 )
-                self.all_results[self.config_id] = EstimationResults(
-                    raw_estimation_results=None
-                )
+                self.all_results[self.config_id] = None
                 return
             the_biogeme.modelName = self.model_names(self.config_id)
             logger.info(f'*** Estimate {the_biogeme.modelName}')

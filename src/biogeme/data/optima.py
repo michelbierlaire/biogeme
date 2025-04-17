@@ -41,7 +41,7 @@ def read_data() -> db.Database:
     sum_weight = df['Weight'].sum()
     number_of_rows = df.shape[0]
     df['normalized_weight'] = df['Weight'] * number_of_rows / sum_weight
-    database = db.Database(name=data_file_path, pandas_database=df)
+    database = db.Database(name=data_file_path, dataframe=df)
     _ = database.define_variable('ScaledIncome', CalculatedIncome / 1000)
     _ = database.define_variable('age_65_more', age >= 65)
     _ = database.define_variable('moreThanOneCar', NbCar > 1)
