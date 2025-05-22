@@ -12,16 +12,17 @@ import logging
 import os
 from datetime import datetime
 from typing import NamedTuple
+
 import tomlkit as tk
 
+from biogeme.default_parameters import (
+    ParameterTuple,
+    ParameterValue,
+    all_parameters_tuple,
+)
 from biogeme.exceptions import BiogemeError
 from biogeme.tools.files import is_valid_filename
 from biogeme.version import get_version
-from biogeme.default_parameters import (
-    all_parameters_tuple,
-    ParameterTuple,
-    ParameterValue,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -362,7 +363,7 @@ class Parameters:
             if not is_ok:
                 ok = False
                 messages.append(
-                    f'Error for parameter {the_tuple.name} in '
+                    f'Error for parameter {the_tuple.name}={the_tuple.value} in '
                     f'section {the_tuple.section}. {diag}'
                 )
         return ok, messages
@@ -381,7 +382,7 @@ class Parameters:
         :type section: str
         """
         if not self.parameter_exists(name):
-            raise BiogemeError(f'Parameter {name} does not exist.')
+            raise BiogemeError(f'Parameter [{name}] does not exist.')
         the_tuple = self.get_param_tuple(name, section)
         the_parameter = ParameterTuple(
             name=the_tuple.name,
@@ -408,10 +409,7 @@ class Parameters:
                                    values are the values to set.
         """
         for name, value in dict_of_parameters.items():
-            try:
-                self.set_value(name, value)
-            except BiogemeError as e:
-                logger.warning(str(e))
+            self.set_value(name, value)
 
     def get_value(self, name: str, section: str | None = None) -> ParameterValue:
         """Get the value of a parameter. If the parameter appears in
