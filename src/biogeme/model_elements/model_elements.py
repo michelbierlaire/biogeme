@@ -1,21 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional
-
 import pandas as pd
 
-from biogeme.audit_tuple import AuditTuple, merge_audit_tuples, display_messages
+from biogeme.audit_tuple import AuditTuple, display_messages, merge_audit_tuples
 from biogeme.constants import LOG_LIKE, WEIGHT
-from biogeme.database import Database
-from biogeme.database.audit import audit_dataframe
-from biogeme.draws import DrawsManagement
+from biogeme.database import Database, PanelDatabase, audit_dataframe
+from biogeme.default_parameters import MISSING_VALUE
+from biogeme.draws import DrawsManagement, RandomNumberGeneratorTuple
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, audit_expression
 from biogeme.expressions.base_expressions import LogitTuple
 from biogeme.expressions_registry import ExpressionRegistry
-from biogeme.model_elements.audit import audit_chosen_alternative
-from biogeme.default_parameters import MISSING_VALUE
+from biogeme.function_output import FunctionOutput, NamedFunctionOutput
+from biogeme.model_elements.audit import audit_chosen_alternative, audit_variables
 
 
 class ModelElements:
@@ -29,57 +26,74 @@ class ModelElements:
         self,
         expressions: dict[str, Expression],
         database: Database,
-        number_of_draws: Optional[int] = 0,
-        draws_management: Optional[DrawsManagement] = None,
+        number_of_draws: int | None = None,
+        draws_management: DrawsManagement | None = None,
+        user_defined_draws: dict[str:RandomNumberGeneratorTuple] | None = None,
         expressions_registry: ExpressionRegistry = None,
     ):
-        self.expressions = expressions
-        self._database = database
-        self._flat_database = None
-        self.number_of_draws = number_of_draws
+        self.panel_prepared: bool = False
+        if database.panel_column is None:
+            self._is_panel = False
+            self._panel_database: PanelDatabase | None = None
+            self._database: Database = database
+        else:
+            self._is_panel: bool = True
+            self._panel_database = PanelDatabase(
+                database=database, panel_column=database.panel_column
+            )
+            self._database: Database = database
+
+        self.expressions: dict[str, Expression] = expressions
+        self._flat_database: Database | None = None
+        self.number_of_draws: int = number_of_draws
         self.draws_management = draws_management
+        self.user_defined_draws = user_defined_draws
         self.expressions_registry = expressions_registry
         # Validate inputs: only one must be provided
         if self.number_of_draws and self.draws_management:
             raise ValueError(
                 "One of 'number_of_draws' or 'draws_management' must be provided (or none of them)."
             )
-        self._prepare_for_panel()
 
         if self.expressions_registry is None:
             self.expressions_registry = ExpressionRegistry(
                 self.expressions.values(), self.database
             )
 
-        self.database.register_listener(self.on_database_update)
+        if self._database is not None:
+            self.database.register_listener(self.on_database_update)
 
-        if self.draws_management is None:
-            self.draws_management = DrawsManagement(
-                sample_size=self.database.sample_size,
-                number_of_draws=self.number_of_draws,
-            )
-            if self.expressions_registry.requires_draws:
-                self.draws_management.generate_draws(
-                    draw_types=self.expressions_registry.draw_types(),
-                    variable_names=self.expressions_registry.draws_names,
+            if self.draws_management is None:
+                self.draws_management = DrawsManagement(
+                    sample_size=self.sample_size,
+                    number_of_draws=self.number_of_draws,
+                    user_generators=user_defined_draws,
                 )
-        else:
-            # Check consistency of sized
-            if self.draws_management.sample_size != self.sample_size:
-                error_msg = f'Inconsistent sizes: database[{self.sample_size}] and draws [{self.draws_management.sample_size}]'
-                raise BiogemeError(error_msg)
+                if self.expressions_registry.requires_draws:
+                    self.draws_management.generate_draws(
+                        draw_types=self.expressions_registry.draw_types(),
+                        variable_names=self.expressions_registry.draws_names,
+                    )
+            else:
+                # Check consistency of sized
+                if self.draws_management.sample_size != self.sample_size:
+                    error_msg = f'Inconsistent sizes: database[{self.sample_size}] and draws [{self.draws_management.sample_size}]'
+                    raise BiogemeError(error_msg)
 
+        if self._is_panel:
+            self._prepare_for_panel()
+            self.panel_prepared: bool = True
         display_messages(self.audit())
 
     def is_panel(self) -> bool:
-        return self._database.panel_column is not None
+        return self._is_panel
 
     @property
     def database(self) -> Database:
         if not self.is_panel():
             return self._database
-        if self._flat_database is None:
-            raise BiogemeError('Flat database unavailable for panel data')
+        if not self.panel_prepared:
+            self._prepare_for_panel()
         return self._flat_database
 
     @classmethod
@@ -87,9 +101,10 @@ class ModelElements:
         cls,
         log_like: Expression,
         database: Database,
-        weight: Optional[Expression] = None,
-        number_of_draws: Optional[int] = 0,
-        draws_management: Optional[DrawsManagement] = None,
+        weight: Expression | None = None,
+        number_of_draws: int = 0,
+        draws_management: DrawsManagement | None = None,
+        user_defined_draws: dict[str:RandomNumberGeneratorTuple] | None = None,
     ) -> ModelElements:
         """
         Alternative constructor for two expressions.
@@ -110,19 +125,18 @@ class ModelElements:
             database=database,
             number_of_draws=number_of_draws,
             draws_management=draws_management,
+            user_defined_draws=user_defined_draws,
         )
 
     def on_database_update(self, updated_index: pd.Index):
         """Update the draws object to remain consistent with the new database"""
         self.draws_management.remove_rows(updated_index)
-        self._prepare_for_panel()
+        self.panel_prepared = False
 
     def _prepare_for_panel(self) -> None:
-        """If the database contains panel data,  it is flattened"""
-        if self._database.panel_column is None:
-            return
+
         flat_dataframe, maximum_number_of_observations_per_individual = (
-            self._database.flatten_database(missing_data=MISSING_VALUE)
+            self._panel_database.flatten_database(missing_data=MISSING_VALUE)
         )
         self._flat_database = Database(
             name=f'flat {self._database.name}', dataframe=flat_dataframe
@@ -131,10 +145,21 @@ class ModelElements:
             expression.set_maximum_number_of_observations_per_individual(
                 max_number=maximum_number_of_observations_per_individual
             )
+        self.expressions_registry = ExpressionRegistry(
+            self.expressions.values(), self._flat_database
+        )
 
     @property
-    def sample_size(self):
-        return self.database.sample_size
+    def sample_size(self) -> int:
+        if self._database is None:
+            return 0
+        return self.database.num_rows()
+
+    @property
+    def number_of_observations(self) -> int:
+        if self._database is None:
+            return 0
+        return self._database.num_rows()
 
     @property
     def loglikelihood(self) -> Expression | None:
@@ -148,22 +173,41 @@ class ModelElements:
     def formula_names(self) -> list[str]:
         return list(self.expressions.keys())
 
+    def generate_named_output(
+        self, function_output: FunctionOutput
+    ) -> NamedFunctionOutput:
+        """Assigns parameter name to the entries of the gradient and the hessian"""
+        return NamedFunctionOutput(
+            function_output=function_output,
+            mapping=self.expressions_registry.free_betas_indices,
+        )
+
     def audit(self) -> AuditTuple:
         """Audit the model elements"""
 
         # First, we audit the expressions.
         expression_audits = [
-            audit_expression(expr=expr) for expr in self.expressions.values()
+            audit_expression(expr) for expr in self.expressions.values()
         ]
 
         # Second, we audit the database
-        database_audits = [audit_dataframe(data=self.database.dataframe)]
+        database_audits = (
+            [audit_dataframe(data=self.database.dataframe)]
+            if self._database is not None
+            else []
+        )
+
+        # Then, we check the variables
+
+        variables_audits = [
+            audit_variables(expression=expr, database=self.database)
+            for expr in self.expressions.values()
+        ]
 
         # Finally, we verify the logit formula, if any.
         logit_audits = []
         if self.loglikelihood is not None:
             logits_to_check: list[LogitTuple] = self.loglikelihood.logit_choice_avail()
-
             logit_audits = (
                 [
                     audit_chosen_alternative(
@@ -177,4 +221,6 @@ class ModelElements:
                 else []
             )
 
-        return merge_audit_tuples(expression_audits + database_audits + logit_audits)
+        return merge_audit_tuples(
+            expression_audits + database_audits + variables_audits + logit_audits
+        )

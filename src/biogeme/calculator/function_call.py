@@ -13,7 +13,7 @@ from typing import Protocol
 
 import numpy as np
 
-from biogeme.function_output import FunctionOutput
+from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 from .single_formula import CompiledFormulaEvaluator
 
 
@@ -27,18 +27,57 @@ class CallableExpression(Protocol):
     ) -> FunctionOutput: ...
 
 
+class NamedCallableExpression(Protocol):
+    def __call__(
+        self,
+        x: np.ndarray,
+        gradient: bool,
+        hessian: bool,
+        bhhh: bool,
+    ) -> NamedFunctionOutput: ...
+
+
 def function_from_expression(
     the_compiled_function: CompiledFormulaEvaluator,
     the_betas: dict[str, float],
-) -> CallableExpression:
+    named_output: bool = False,
+) -> CallableExpression | NamedCallableExpression:
     """Create a callable function from a symbolic Biogeme expression.
 
     :param the_compiled_function: Compiled function evaluator.
     :param the_betas: Dictionary mapping parameter names to initial values.
+    :param named_output: if True, the entries of the derivatives are associated with parameter names
 
     :return: A callable that takes a NumPy array of parameter values
              and returns a FunctionOutput.
     """
+
+    if named_output:
+
+        def the_named_function(
+            x: np.ndarray,
+            gradient: bool,
+            hessian: bool,
+            bhhh: bool,
+        ) -> NamedFunctionOutput:
+            """Evaluate the Biogeme expression with updated parameter values.
+
+            :param x: A NumPy array of new parameter values.
+            :param gradient: If True, compute the gradient of the function.
+            :param hessian: If True, compute the Hessian of the function.
+            :param bhhh: If True, compute the BHHH matrix (outer product of gradients).
+            :return: The evaluated FunctionOutput object.
+            """
+            the_betas.update(dict(zip(the_betas.keys(), x)))
+            result: FunctionOutput = the_compiled_function.evaluate(
+                the_betas=the_betas, gradient=gradient, hessian=hessian, bhhh=bhhh
+            )
+            named_result = the_compiled_function.model_elements.generate_named_output(
+                function_output=result
+            )
+            return named_result
+
+        return the_named_function
 
     def the_function(
         x: np.ndarray,

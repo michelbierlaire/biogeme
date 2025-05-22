@@ -8,9 +8,7 @@ from __future__ import annotations
 
 import logging
 from itertools import chain
-from typing import TypeAlias, TYPE_CHECKING, NamedTuple
-
-from icecream import ic
+from typing import NamedTuple, TYPE_CHECKING, TypeAlias
 
 from biogeme.exceptions import BiogemeError, NotImplementedError
 from .elementary_types import TypeOfElementaryExpression
@@ -479,53 +477,12 @@ class Expression:
 
         return Greater(self, other)
 
-    def set_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> set[str]:
-        """Extract a set with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-
-        :return: returns a set with the names of the elementary expressions
-
-
-        """
-        return set(self.dict_of_elementary_expression(the_type).keys())
-
-    @property
-    def set_of_variables(self) -> set[str]:
-        return self.set_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.VARIABLE
-        )
-
     def dict_of_draw_types(self) -> dict[str:str]:
         """Extract a dict containing the types of draws involved in the expression"""
         the_draws = self.dict_of_elementary_expression(
             the_type=TypeOfElementaryExpression.DRAWS
         )
         return {name: expression.drawType for name, expression in the_draws.items()}
-
-    def dict_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> dict[str:Elementary]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        :type  the_type: TypeOfElementaryExpression
-
-        :return: returns a dict with the variables appearing in the
-               expression the keys being their names.
-        :rtype: dict(string:biogeme.expressions.Expression)
-
-        """
-        return dict(
-            chain(
-                *(
-                    e.dict_of_elementary_expression(the_type).items()
-                    for e in self.children
-                )
-            )
-        )
 
     def logit_choice_avail(self) -> list[LogitTuple]:
         """Extract a dict with all elementary expressions of a specific type
@@ -554,32 +511,6 @@ class Expression:
             if e.get_elementary_expression(name) is not None:
                 return e.get_elementary_expression(name)
         return None
-
-    def rename_elementary(
-        self, old_name: str, new_name: str, elementary_type: TypeOfElementaryExpression
-    ) -> int:
-        """Rename an elementary expression
-        :return: number of modifications actually performed
-        """
-        number_of_modifications = 0
-        for e in self.get_children():
-            number_of_modifications += e.rename_elementary(
-                old_name=old_name, new_name=new_name, elementary_type=elementary_type
-            )
-        return number_of_modifications
-
-    def add_suffix_to_all_variables(self, suffix: str) -> int:
-        """Adds a suffix to the name of a variable"""
-        number_of_modifications = 0
-        for variable_name in self.set_of_variables:
-            old_name = variable_name
-            new_name = f'{variable_name}{suffix}'
-            number_of_modifications += self.rename_elementary(
-                old_name=old_name,
-                new_name=new_name,
-                elementary_type=TypeOfElementaryExpression.VARIABLE,
-            )
-        return number_of_modifications
 
     def get_class_name(self) -> str:
         """

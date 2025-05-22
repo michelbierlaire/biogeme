@@ -14,8 +14,11 @@ from numpy.polynomial.hermite import hermgauss
 
 from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import ExpressionOrNumeric
-from .elementary_expressions import TypeOfElementaryExpression
-from .elementary_expressions import Elementary, RandomVariable
+from .elementary_expressions import (
+    Elementary,
+    RandomVariable,
+    TypeOfElementaryExpression,
+)
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 from ..exceptions import BiogemeError
@@ -25,7 +28,7 @@ logger = logging.getLogger(__name__)
 NUMBER_OF_QUADRATURE_POINTS = 30
 
 
-class Integrate(UnaryOperator):
+class IntegrateNormal(UnaryOperator):
     """
     Numerical integration
     """

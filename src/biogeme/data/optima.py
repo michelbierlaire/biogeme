@@ -14,6 +14,7 @@ Prepare data for the Optima case study.
 import os
 
 import pandas as pd
+from icecream import ic
 
 import biogeme.database as db
 from biogeme.expressions import Variable
@@ -67,6 +68,12 @@ def read_data() -> db.Database:
     _ = database.define_variable('distance_km_scaled', distance_km / 5)
     _ = database.define_variable('PurpHWH', TripPurpose == 1)
     _ = database.define_variable('PurpOther', TripPurpose != 1)
+
+    import numpy as np
+
+    nan_positions = np.where(database.dataframe.isna())
+    for row, col in zip(*nan_positions):
+        ic(f"NaN at row {row}, column '{database.dataframe.columns[col]}'")
     return database
 
 

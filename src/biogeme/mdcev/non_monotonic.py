@@ -8,9 +8,10 @@ from functools import lru_cache
 
 import numpy as np
 
+from biogeme.calculator import get_value_c
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, log, exp
+from biogeme.expressions import Expression, exp, log
 from biogeme.mdcev.mdcev import Mdcev
 from biogeme.tools.checks import validate_dict_types
 
@@ -133,17 +134,17 @@ class NonMonotonic(Mdcev):
     ) -> float:
         """As this function may be called many times with the same input in forecasting mode, we use the
         lru_cache decorator."""
-        assert one_observation.get_sample_size() == 1
+        assert one_observation.num_rows() == 1
         if self.estimation_results:
-            return self.mu_utilities[alternative_id].get_value_c(
+            return get_value_c(
+                expression=self.mu_utilities[alternative_id],
                 database=one_observation,
                 betas=self.estimation_results.get_beta_values(),
-                prepare_ids=True,
             )[0]
 
-        return self.mu_utilities[alternative_id].get_value_c(
+        return get_value_c(
+            expression=self.mu_utilities[alternative_id],
             database=one_observation,
-            prepare_ids=True,
         )[0]
 
     def utility_expression_one_alternative(

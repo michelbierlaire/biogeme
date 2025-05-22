@@ -13,8 +13,7 @@ from typing import Iterator
 import biogeme.expressions as ex
 import biogeme.expressions.convert
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression
-from biogeme.expressions import MultipleExpression, NamedExpression
+from biogeme.expressions import Expression, MultipleExpression, NamedExpression
 from .controller import Controller
 
 logger = logging.getLogger(__name__)
@@ -136,6 +135,10 @@ class Catalog(MultipleExpression):
             named_expressions=named_expressions,
             controlled_by=controlled_by,
         )
+
+    def __iter__(self) -> Iterator[NamedExpression]:
+        """Obtain an iterator on the named expressions"""
+        return self.get_iterator()
 
     def get_iterator(self) -> Iterator[NamedExpression]:
         """Obtain an iterator on the named expressions"""

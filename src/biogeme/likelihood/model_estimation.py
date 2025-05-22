@@ -15,9 +15,9 @@ import numpy as np
 from biogeme_optimization.function import FunctionToMinimize
 
 from biogeme.calculator import (
-    function_from_expression,
     CallableExpression,
     CompiledFormulaEvaluator,
+    function_from_expression,
 )
 from biogeme.default_parameters import ParameterValue
 from biogeme.likelihood.negative_likelihood import NegativeLikelihood

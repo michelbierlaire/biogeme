@@ -19,9 +19,10 @@ import pandas as pd
 from scipy.optimize import minimize
 
 from biogeme.biogeme import BIOGEME
+from biogeme.calculator import get_value_and_derivatives, get_value_c
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, Elem, bioMultSum, log, exp, Beta, Numeric
+from biogeme.expressions import Beta, Elem, Expression, Numeric, bioMultSum, exp, log
 from biogeme.function_output import FunctionOutput
 from biogeme.results_processing import EstimationResults
 from biogeme.tools.checks import validate_dict_types
@@ -153,7 +154,7 @@ class Mdcev(ABC):
     ) -> float:
         """As this function may be called many times with the same input in forecasting mode, we use the
         lru_cache decorator."""
-        assert one_observation.get_sample_size() == 1
+        assert one_observation.num_rows() == 1
         if self.estimation_results:
             return self.baseline_utilities[alternative_id].get_value_c(
                 database=one_observation,
@@ -161,9 +162,9 @@ class Mdcev(ABC):
                 prepare_ids=True,
             )[0]
 
-        return self.baseline_utilities[alternative_id].get_value_c(
+        return get_value_c(
+            expression=self.baseline_utilities[alternative_id],
             database=one_observation,
-            prepare_ids=True,
         )[0]
 
     @abstractmethod
@@ -757,8 +758,8 @@ class Mdcev(ABC):
             the_consumption=consumption,
             unscaled_epsilon=unscaled_epsilon,
         )
-        result: FunctionOutput = utility.get_value_and_derivatives(
-            database=one_row, prepare_ids=True, gradient=True, named_results=True
+        result: FunctionOutput = get_value_and_derivatives(
+            expression=utility, database=one_row, gradient=True, named_results=True
         )
 
         # Validate the utility calculation
@@ -871,7 +872,7 @@ class Mdcev(ABC):
         """
 
         rows_of_database = [
-            Database(name=f'row_{i}', pandas_database=database.data.iloc[[i]])
+            Database(name=f'row_{i}', dataframe=database.data.iloc[[i]])
             for i in range(len(database.data))
         ]
         if len(rows_of_database) == 0:

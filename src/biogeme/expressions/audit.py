@@ -4,16 +4,24 @@ Michel Bierlaire
 Fri Mar 28 17:01:01 2025
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from biogeme.audit_tuple import AuditTuple
-from .base_expressions import Expression
+from .belongs_to import BelongsTo
 from .comparison_expressions import ComparisonOperator
-from .integrate import Integrate
+from .elementary_expressions import Draws, RandomVariable
+from .integrate import IntegrateNormal
 from .logit_expressions import LogLogit
-from .unary_expressions import MonteCarlo, BelongsTo
+from .montecarlo import MonteCarlo
 from .visitor import ExpressionVisitor
 
 _audit_visitor = ExpressionVisitor()
 register_audit = _audit_visitor.register
+
+if TYPE_CHECKING:
+    from .base_expressions import Expression
 
 
 def audit_expression(expr: Expression) -> AuditTuple:
@@ -27,7 +35,12 @@ def audit_expression(expr: Expression) -> AuditTuple:
     """
     error_messages = []
     warning_messages = []
-    context = {"errors": error_messages, "warnings": warning_messages}
+    ancestors = []
+    context = {
+        "errors": error_messages,
+        "warnings": warning_messages,
+        "ancestors": ancestors,  # Stack of ancestor expressions
+    }
     _audit_visitor.visit(expr, context)
     return AuditTuple(errors=error_messages, warnings=warning_messages)
 
@@ -70,8 +83,8 @@ def audit_montecarlo(expr: MonteCarlo, context: dict[str, list[str]]) -> None:
         )
 
 
-@register_audit(Integrate)
-def audit_integrate(expr: Integrate, context: dict[str, list[str]]) -> None:
+@register_audit(IntegrateNormal)
+def audit_integrate(expr: IntegrateNormal, context: dict[str, list[str]]) -> None:
     """
     Audits an Integrate expression for structural consistency.
 
@@ -79,7 +92,7 @@ def audit_integrate(expr: Integrate, context: dict[str, list[str]]) -> None:
     :param context: Dictionary to collect error and warning messages.
     """
     if not expr.embed_expression('RandomVariable'):
-        context["errors"].append(
+        context["warnings"].append(
             f'Integrate expression {repr(expr)} does not contain any RandomVariable expression.'
         )
 
@@ -126,3 +139,21 @@ def audit_loglogit(expr: LogLogit, context: dict[str, list[str]]) -> None:
                 ' Id(s) used for availabilities and not for utilities: '
             ) + my_set_content
         context["errors"].append(the_error)
+
+
+@register_audit(RandomVariable)
+def audit_randomvariable(expr: RandomVariable, context: dict[str, list[str]]) -> None:
+    if not any(
+        isinstance(ancestor, IntegrateNormal) for ancestor in context['ancestors']
+    ):
+        context['errors'].append(
+            f'RandomVariable {repr(expr)} is not embedded inside an IntegrateNormal expression.'
+        )
+
+
+@register_audit(Draws)
+def audit_draws(expr: Draws, context: dict[str, list[str]]) -> None:
+    if not any(isinstance(ancestor, MonteCarlo) for ancestor in context['ancestors']):
+        context['errors'].append(
+            f'Draws {repr(expr)} is not embedded inside a MonteCarlo expression.'
+        )

@@ -11,12 +11,12 @@ import logging
 import jax.numpy as jnp
 import numpy as np
 
+from biogeme.floating_point import MAX_EXP_ARG, MIN_EXP_ARG
 from . import (
     ExpressionOrNumeric,
 )
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
-from ..floating_point import MAX_EXP_ARG, MIN_EXP_ARG
 
 logger = logging.getLogger(__name__)
 

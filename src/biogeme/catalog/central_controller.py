@@ -11,20 +11,15 @@ import random
 from collections.abc import Iterator
 from functools import reduce
 from itertools import product
-from typing import Callable, Any
+from typing import Any, Callable
 
 import biogeme
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, NamedExpression
+from biogeme.expressions import Expression, ExpressionCollector, NamedExpression
 from biogeme.parameters import get_default_value
 from .catalog import Catalog
-from .configuration import (
-    SelectionTuple,
-    Configuration,
-    SEPARATOR,
-)
+from .configuration import Configuration, SEPARATOR, SelectionTuple
 from .controller import Controller
-from ..expressions.visitor import ExpressionCollector
 
 ControllerOperator = Callable[
     [Configuration, int],
@@ -48,6 +43,11 @@ def extract_multiple_expressions_controllers(
 
     # Now use it
     return walker.walk(the_expression)
+
+
+def count_number_of_specifications(expression: Expression):
+    central_controller = CentralController(expression=expression)
+    return central_controller.number_of_configurations()
 
 
 class CentralController:
@@ -105,6 +105,10 @@ class CentralController:
             Configuration.from_string(conf_id)
             for conf_id in self.all_configurations_ids
         }
+
+    def reset_selection(self) -> None:
+        for controller in self.controllers:
+            controller.reset_selection()
 
     def number_of_configurations(self) -> int:
         """Total number of configurations"""
@@ -182,6 +186,14 @@ class CentralController:
         for config in self.all_configurations:
             self.set_configuration(config)
             yield NamedExpression(name=config.string_id, expression=self.expression)
+
+    def expression_configuration_iterator(self) -> Iterator[str]:
+        """Iterate over the expression corresponding to each configuration."""
+        if self.all_configurations is None:
+            return
+        for config in self.all_configurations:
+            self.set_configuration(config)
+            yield config
 
     def increased_controller(
         self,

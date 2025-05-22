@@ -24,9 +24,14 @@ def audit_dataframe(data: pd.DataFrame) -> AuditTuple:
             )
 
     if data.isnull().values.any():
+        nan_locations = data.isnull()
+        rows_with_nan = data.index[nan_locations.any(axis=1)].tolist()
+        cols_with_nan = data.columns[nan_locations.any(axis=0)].tolist()
         list_of_errors.append(
-            'The database contains NaN value(s). '
-            'Detect where they are using the function isnan().'
+            f"The database contains NaN value(s).\n"
+            f"Columns with NaN: {cols_with_nan}\n"
+            f"Rows with NaN: {rows_with_nan}\n"
+            f"Use database.dataframe.isna() to inspect further."
         )
 
     return AuditTuple(errors=list_of_errors, warnings=list_of_warnings)

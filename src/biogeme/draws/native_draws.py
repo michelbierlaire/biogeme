@@ -7,16 +7,17 @@ Thu Mar 27 09:46:17 2025
 """
 
 from __future__ import annotations
-from typing import NamedTuple, Callable
+
+from typing import Callable, NamedTuple
 
 import numpy as np
 
 from .generators import (
     get_antithetic,
-    get_uniform,
     get_halton_draws,
     get_latin_hypercube_draws,
     get_normal_wichura_draws,
+    get_uniform,
 )
 
 RandomNumberGenerator = Callable[[int, int], np.ndarray]
@@ -40,7 +41,7 @@ class RandomNumberGeneratorTuple(NamedTuple):
 
 
 def convert_random_generator_tuple(
-    the_tuple: RandomNumberGeneratorTuple | tuple[RandomNumberGenerator, str]
+    the_tuple: RandomNumberGeneratorTuple | tuple[RandomNumberGenerator, str],
 ) -> RandomNumberGeneratorTuple:
     """
     Convert a random generator specification to a RandomNumberGeneratorTuple.

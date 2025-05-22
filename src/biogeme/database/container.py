@@ -8,25 +8,27 @@ Wed Mar 26 19:30:57 2025
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Callable
 
-
-from biogeme.floating_point import PANDAS_FLOAT
-from .panel import flatten_dataframe
-from .sampling import sample_with_replacement
-import logging
-import pandas as pd
-from biogeme.exceptions import BiogemeError
 import jax.numpy as jnp
+import numpy as np
+import pandas as pd
 
-from biogeme.floating_point import JAX_FLOAT
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import (
+    Expression,
+    ExpressionOrNumeric,
+    Variable,
+    validate_and_convert,
+)
+from biogeme.floating_point import JAX_FLOAT, PANDAS_FLOAT
 from biogeme.segmentation import (
     DiscreteSegmentationTuple,
-    verify_segmentation,
     generate_segmentation,
+    verify_segmentation,
 )
-
-from biogeme.expressions import Expression, Variable
+from .sampling import sample_with_replacement
 
 logger = logging.getLogger(__name__)
 """Logger that controls the output of
@@ -59,8 +61,17 @@ class Database:
 
         self._listeners = []  # Called when the database is updated
 
-        # Entries for panel data
         self.panel_column: str | None = None
+
+    @classmethod
+    def dummy_database(
+        cls,
+    ) -> Database:
+        df = pd.DataFrame({'x': [0]})  # single-row dummy input
+        return Database('dummy', df)
+
+    def __str__(self) -> str:
+        return f'biogeme database {self.name}'
 
     def register_listener(self, callback: Callable[[pd.Index], None]):
         self._listeners.append(callback)
@@ -92,11 +103,6 @@ class Database:
         """Returns the number of columns in the dataset"""
         return self._df.shape[1]
 
-    @property
-    def sample_size(self) -> int:
-        """Returns the size of the sample. Panel case will be implemented later."""
-        return self.num_rows()
-
     def column_exists(self, column: str) -> bool:
         """Check if a column exists in the data"""
         return column in self._df.columns
@@ -112,7 +118,7 @@ class Database:
             raise BiogemeError(f'Column {column} not found in the database.')
         self._df[column] *= scale
 
-    def add_column(self, column: str, values: pd.Series):
+    def add_column(self, column: str, values: pd.Series) -> None:
         """Adds a new column to the dataset
 
         :param column: name of the new column
@@ -140,7 +146,10 @@ class Database:
         for callback in self._listeners:
             callback(condition_index)
 
-    def remove(self, exclude_condition: Expression):
+    def reset_indices(self) -> None:
+        self._df = self._df.reset_index(drop=True)
+
+    def remove(self, exclude_condition: ExpressionOrNumeric):
         """
         Removes rows from the database that satisfy a given condition.
 
@@ -153,11 +162,12 @@ class Database:
         """
         from biogeme.calculator import evaluate_simple_expression_per_row
 
+        exclude_condition: Expression = validate_and_convert(exclude_condition)
         condition = evaluate_simple_expression_per_row(
             expression=exclude_condition, database=self
         )
         series = pd.Series(condition != 0.0)
-        self.number_of_excluded_data = series.sum()
+        self.number_of_excluded_data = int(series.sum())
         self.remove_rows(series)
 
     def define_variable(self, name: str, expression: Expression) -> Variable:
@@ -168,13 +178,36 @@ class Database:
         :param name: Name of the new column to be added.
         :param expression: Biogeme expression to evaluate for each row.
         """
+        if name in self.dataframe.columns:
+            error_msg = f'Variable {name} already exists'
+            raise ValueError(error_msg)
+        if self.dataframe.empty:
+            error_msg = 'Empty database.'
+            raise BiogemeError(error_msg)
+
         from biogeme.calculator import evaluate_simple_expression_per_row
 
         new_values = evaluate_simple_expression_per_row(
             expression=expression,
             database=self,
         )
-        self.dataframe[name] = pd.Series(new_values, dtype=PANDAS_FLOAT)
+        if np.isnan(new_values).any():
+            num_total = len(new_values)
+            num_nan = np.isnan(new_values).sum()
+            nan_indices = np.where(np.isnan(new_values))[0].tolist()
+
+            message = f"The evaluated values for '{name}' contain NaN entries.\n"
+            message += f"Total values: {num_total}, NaN values: {num_nan}.\n"
+
+            if num_nan == num_total:
+                message += "All values are NaN."
+            else:
+                message += f"Indices with NaN: {nan_indices}"
+
+            raise BiogemeError(message)
+        self.dataframe[name] = pd.Series(
+            new_values, index=self.dataframe.index, dtype=PANDAS_FLOAT
+        )
         return Variable(name)
 
     def remove_column(self, column: str):
@@ -210,6 +243,9 @@ class Database:
             reference=reference,
         )
 
+    def panel(self, column_name: str):
+        self.panel_column = column_name
+
     def verify_segmentation(self, segmentation: DiscreteSegmentationTuple) -> None:
         """Verifies if the definition of the segmentation is consistent with the data
 
@@ -233,18 +269,58 @@ class Database:
         )
         return sliced_database
 
-    def panel(self, column_name: str):
-        """Defines the data as panel data
+    def suggest_scaling(
+        self, columns: list[str] | None = None, report_all: bool = False
+    ):
+        """Suggest a scaling of the variables in the database.
 
-        :param column_name: name of the columns that identifies individuals.
+        For each column, :math:`\\delta` is the difference between the
+        largest and the smallest value, or one if the difference is
+        smaller than one. The level of magnitude is evaluated as a
+        power of 10. The suggested scale is the inverse of this value.
+
+        .. math:: s = \\frac{1}{10^{|\\log_{10} \\delta|}}
+
+        where :math:`|x|` is the integer closest to :math:`x`.
+
+        :param columns: list of columns to be considered.
+                        If None, all of them will be considered.
+        :type columns: list(str)
+
+        :param report_all: if False, remove entries where the suggested
+            scale is 1, 0.1 or 10
+        :type report_all: bool
+
+        :return: A Pandas dataframe where each row contains the name
+                 of the variable and the suggested scale s. Ideally,
+                 the column should be multiplied by s.
+
+        :rtype: pandas.DataFrame
+
+        :raise BiogemeError: if a variable in ``columns`` is unknown.
         """
-        self.panel_column = column_name
+        if columns is None:
+            columns = self.dataframe.columns
+        else:
+            for c in columns:
+                if c not in self.dataframe:
+                    error_msg = f'Variable {c} not found.'
+                    raise BiogemeError(error_msg)
 
-    def flatten_database(self, missing_data: float) -> tuple[pd.DataFrame, int]:
-        if self.panel_column is None:
-            raise BiogemeError('The panel column has not been defined.')
-        return flatten_dataframe(
-            dataframe=self.dataframe,
-            grouping_column=self.panel_column,
-            missing_data=missing_data,
-        )
+        largest_value = [
+            max(np.abs(self.dataframe[col].max()), np.abs(self.dataframe[col].min()))
+            for col in columns
+        ]
+        res = [
+            [col, 1 / 10 ** np.round(np.log10(max(1.0, lv))), lv]
+            for col, lv in zip(columns, largest_value)
+        ]
+        df = pd.DataFrame(res, columns=['Column', 'Scale', 'Largest'])
+        if not report_all:
+            # Remove entries where the suggested scale is 1, 0.1 or 10
+            remove = (df.Scale == 1) | (df.Scale == 0.1) | (df.Scale == 10)
+            df.drop(df[remove].index, inplace=True)
+        return df
+
+    def is_panel(self) -> bool:
+        return self.panel_column is not None

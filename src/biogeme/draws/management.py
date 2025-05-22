@@ -7,15 +7,17 @@ Thu Mar 27 08:42:16 2025
 """
 
 from __future__ import annotations
+
 import logging
 from datetime import datetime, timedelta
 
-import numpy as np
 import jax.numpy as jnp
+import numpy as np
 import pandas as pd
 
-from biogeme.draws import RandomNumberGeneratorTuple, DrawFactory
 from biogeme.floating_point import JAX_FLOAT
+from .factory import DrawFactory
+from .native_draws import RandomNumberGeneratorTuple
 
 LOW_NUMBER_OF_DRAWS = 1000
 logger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ class DrawsManagement:
         self.factory: DrawFactory = DrawFactory(user_generators)
         self.draws: np.ndarray | None = None
         self.draw_types: dict[str, str] | None = None
-        self.processing_time: timedelta | None = None
+        self.processing_time: timedelta = timedelta(0)
 
     def generate_draws(
         self,

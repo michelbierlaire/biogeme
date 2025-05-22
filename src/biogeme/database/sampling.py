@@ -67,7 +67,8 @@ def split_validation_sets(
         ids = df[group_column].unique()
         np.random.shuffle(ids)
         folds = [
-            df[df[group_column].isin(group)] for group in np.array_split(ids, slices)
+            df[df[group_column].isin(group.tolist())]
+            for group in np.array_split(ids, slices)
         ]
     estimation_sets = []
     validation_sets = []

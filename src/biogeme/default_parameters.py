@@ -11,13 +11,14 @@ See https://www.w3schools.com/python/gloss_python_tuple_one_item.asp
 
 from __future__ import annotations
 
-import numpy as np
-from typing import NamedTuple, Callable
+from typing import Callable, NamedTuple
 
-from biogeme.floating_point import NUMPY_FLOAT
-from biogeme.version import get_version
+import numpy as np
+
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
+from biogeme.floating_point import NUMPY_FLOAT
+from biogeme.version import get_version
 
 ParameterValue = bool | int | float | str
 
@@ -142,6 +143,14 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             section='Estimation',
             description='int: number of re-estimations for bootstrap sampling.',
             check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='avoid_analytical_second_derivatives',
+            value=False,
+            type=bool,
+            section='Estimation',
+            description='bool: if True, second derivatives are calculated using finite difference.',
+            check=(cp.is_boolean,),
         ),
         ParameterTuple(
             name='large_data_set',

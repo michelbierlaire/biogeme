@@ -1,15 +1,22 @@
 """Defines  a catalog containing generic and alternative specific specifications
 
 Michel Bierlaire
-
+Sun Apr 27 2025, 15:49:25
 """
+
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Beta
+from biogeme.segmentation import DiscreteSegmentationTuple
+from .catalog import Catalog
+from .controller import Controller
+from .segmentation_catalog import SegmentedParameters, segmentation_catalogs
 
 
 def generic_alt_specific_catalogs(
     generic_name: str,
     beta_parameters: list[Beta],
     alternatives: tuple[str, ...],
-    potential_segmentations: tuple[seg.DiscreteSegmentationTuple, ...] | None = None,
+    potential_segmentations: tuple[DiscreteSegmentationTuple, ...] | None = None,
     maximum_number=5,
 ):
     """Generate catalogs selecting generic or alternative specific coefficients

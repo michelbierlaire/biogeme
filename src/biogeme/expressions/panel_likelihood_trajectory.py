@@ -9,16 +9,14 @@ from __future__ import annotations
 import copy
 import logging
 
-from icecream import ic
-
-from .log import log
-from .exp import exp
-
+from biogeme.exceptions import BiogemeError
+from . import add_prefix_suffix_to_all_variables
+from .base_expressions import Expression, ExpressionOrNumeric
 from .conditional_sum import ConditionalSum, ConditionalTermTuple
 from .elementary_expressions import Variable
-from .base_expressions import ExpressionOrNumeric, Expression
+from .exp import exp
 from .jax_utils import JaxFunctionType
-from biogeme.exceptions import BiogemeError
+from .log import log
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +58,7 @@ class PanelLikelihoodTrajectory(Expression):
         list_of_terms = []
         for index, a_copy in enumerate(copies_of_expression):
             suffix = observation_suffix(index)
-            a_copy.add_suffix_to_all_variables(suffix=suffix)
+            add_prefix_suffix_to_all_variables(expr=a_copy, prefix='', suffix=suffix)
             the_term = ConditionalTermTuple(
                 condition=Variable(f'{RELEVANT_PREFIX}{suffix}'), term=a_copy
             )
@@ -70,10 +68,10 @@ class PanelLikelihoodTrajectory(Expression):
         self.children.append(self.child)
 
     def __str__(self) -> str:
-        return f'PanelLikelihoodTrajectory({self.child})'
+        return f'PanelLikelihoodTrajectory({self.initial_formula})'
 
     def __repr__(self) -> str:
-        return f'PanelLikelihoodTrajectory({repr(self.child)})'
+        return f'PanelLikelihoodTrajectory({repr(self.initial_formula)})'
 
     def recursive_construct_jax_function(
         self,

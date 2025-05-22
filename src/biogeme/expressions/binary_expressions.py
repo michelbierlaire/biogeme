@@ -5,16 +5,17 @@ Wed Mar 26 09:55:46 2025
 """
 
 from __future__ import annotations
-from biogeme.exceptions import BiogemeError
 
 import logging
 
 import jax.numpy as jnp
-from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
 
-from .convert import validate_and_convert
+from biogeme.exceptions import BiogemeError
+from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import Expression, ExpressionOrNumeric
+from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
+from .numeric_expressions import Numeric
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,11 @@ class Plus(BinaryOperator):
         :type right: biogeme.expressions.Expression
         """
         super().__init__(left, right)
+        self.simplified = None
+        if isinstance(self.left, Numeric) and self.left.get_value() == 0:
+            self.simplified = self.right
+        elif isinstance(self.right, Numeric) and self.right.get_value() == 0:
+            self.simplified = self.left
 
     def __str__(self) -> str:
         return f'({self.left} + {self.right})'
@@ -76,6 +82,8 @@ class Plus(BinaryOperator):
         :return: value of the expression
         :rtype: float
         """
+        if self.simplified is not None:
+            return self.simplified.get_value()
         return self.left.get_value() + self.right.get_value()
 
     def recursive_construct_jax_function(
@@ -85,6 +93,8 @@ class Plus(BinaryOperator):
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
+        if self.simplified is not None:
+            return self.simplified.recursive_construct_jax_function()
         left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
         right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
 
@@ -118,6 +128,9 @@ class Minus(BinaryOperator):
         :type right: biogeme.expressions.Expression
         """
         super().__init__(left, right)
+        self.simplified = None
+        if isinstance(self.right, Numeric) and self.right.get_value() == 0:
+            self.simplified = self.left
 
     def __str__(self) -> str:
         return f'({self.left} - {self.right})'
@@ -131,6 +144,8 @@ class Minus(BinaryOperator):
         :return: value of the expression
         :rtype: float
         """
+        if self.simplified is not None:
+            return self.simplified.get_value()
         return self.left.get_value() - self.right.get_value()
 
     def recursive_construct_jax_function(
@@ -140,6 +155,8 @@ class Minus(BinaryOperator):
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
+        if self.simplified is not None:
+            return self.simplified.recursive_construct_jax_function()
         left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
         right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
 
@@ -174,6 +191,15 @@ class Times(BinaryOperator):
 
         """
         super().__init__(left, right)
+        self.simplified = None
+        if isinstance(self.left, Numeric) and self.left.get_value() == 0:
+            self.simplified = Numeric(0)
+        elif isinstance(self.right, Numeric) and self.right.get_value() == 0:
+            self.simplified = Numeric(0)
+        elif isinstance(self.left, Numeric) and self.left.get_value() == 1:
+            self.simplified = self.right
+        elif isinstance(self.right, Numeric) and self.right.get_value() == 1:
+            self.simplified = self.left
 
     def __str__(self) -> str:
         return f'({self.left} * {self.right})'
@@ -187,6 +213,8 @@ class Times(BinaryOperator):
         :return: value of the expression
         :rtype: float
         """
+        if self.simplified is not None:
+            return self.simplified.get_value()
         return self.left.get_value() * self.right.get_value()
 
     def recursive_construct_jax_function(
@@ -196,6 +224,8 @@ class Times(BinaryOperator):
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
+        if self.simplified is not None:
+            return self.simplified.recursive_construct_jax_function()
         left_jax = self.left.recursive_construct_jax_function()
         right_jax = self.right.recursive_construct_jax_function()
 
@@ -229,6 +259,11 @@ class Divide(BinaryOperator):
         :type right: biogeme.expressions.Expression
         """
         super().__init__(left, right)
+        self.simplified = None
+        if isinstance(self.left, Numeric) and self.left.get_value() == 0:
+            self.simplified = Numeric(0)
+        elif isinstance(self.right, Numeric) and self.right.get_value() == 1:
+            self.simplified = self.left
 
     def __str__(self) -> str:
         return f'({self.left} / {self.right})'
@@ -242,6 +277,8 @@ class Divide(BinaryOperator):
         :return: value of the expression
         :rtype: float
         """
+        if self.simplified is not None:
+            return self.simplified.get_value()
         left_val = self.left.get_value()
         right_val = self.right.get_value()
         if right_val == 0.0:
@@ -255,6 +292,8 @@ class Divide(BinaryOperator):
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
+        if self.simplified is not None:
+            return self.simplified.recursive_construct_jax_function()
         left_jax: JaxFunctionType = self.left.recursive_construct_jax_function()
         right_jax: JaxFunctionType = self.right.recursive_construct_jax_function()
 

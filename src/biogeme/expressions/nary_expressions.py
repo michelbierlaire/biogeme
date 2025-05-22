@@ -7,20 +7,15 @@ Sat Sep  9 15:29:36 2023
 from __future__ import annotations
 
 import logging
-from typing import NamedTuple, Iterable, TYPE_CHECKING, Any
+from typing import Any, NamedTuple, TYPE_CHECKING
 
-import jax
 import jax.numpy as jnp
 
 from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
 from .beta_parameters import Beta
 from .convert import validate_and_convert
-from .elementary_expressions import (
-    Variable,
-    TypeOfElementaryExpression,
-    Elementary,
-)
+from .elementary_expressions import Elementary, TypeOfElementaryExpression, Variable
 from .jax_utils import JaxFunctionType
 
 if TYPE_CHECKING:
@@ -100,107 +95,6 @@ class MultipleSum(Expression):
             for fn in compiled_children:
                 result += fn(parameters, one_row, the_draws, the_random_variables)
             return result
-
-        return the_jax_function
-
-
-class Elem(Expression):
-    """This returns the element of a dictionary. The key is evaluated
-    from an expression and must return an integer, possibly negative.
-    """
-
-    def __init__(
-        self,
-        dict_of_expressions: dict[int, ExpressionOrNumeric],
-        key_expression: ExpressionOrNumeric,
-    ):
-        """Constructor
-
-        :param dict_of_expressions: dict of objects with numerical keys.
-        :type dict_of_expressions: dict(int: biogeme.expressions.Expression)
-
-        :param key_expression: object providing the key of the element
-                              to be evaluated.
-        :type key_expression: biogeme.expressions.Expression
-
-        :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value nor a
-            biogeme.expressions.Expression object.
-        """
-        super().__init__()
-
-        self.key_expression = validate_and_convert(key_expression)
-        self.children.append(self.key_expression)
-
-        self.dict_of_expressions = {}  #: dict of expressions
-        for k, v in dict_of_expressions.items():
-            self.dict_of_expressions[k] = validate_and_convert(v)
-            self.children.append(self.dict_of_expressions[k])
-
-    def get_value(self) -> float:
-        """Evaluates the value of the expression
-
-        :return: value of the expression
-        :rtype: float
-
-        :raise BiogemeError: if the calculated key is not present in
-            the dictionary.
-        """
-        try:
-            key = int(self.key_expression.get_value())
-            return self.dict_of_expressions[key].get_value()
-        except (ValueError, KeyError):
-            raise BiogemeError(
-                f'Invalid or missing key: {key}. Available keys: {self.dict_of_expressions.keys()}'
-            )
-
-    def __str__(self) -> str:
-        s = '{{'
-        first = True
-        for k, v in self.dict_of_expressions.items():
-            if first:
-                s += f'{k}:{v}'
-                first = False
-            else:
-                s += f', {k}:{v}'
-        s += f'}}[{self.key_expression}]'
-        return s
-
-    def __repr__(self) -> str:
-        return f"Elem({repr(self.dict_of_expressions)}, {repr(self.key_expression)})"
-
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
-        compiled_dict = {
-            k: v.recursive_construct_jax_function()
-            for k, v in self.dict_of_expressions.items()
-        }
-        key_fn = self.key_expression.recursive_construct_jax_function()
-
-        def the_jax_function(
-            parameters: jnp.ndarray,
-            one_row: jnp.ndarray,
-            the_draws: jnp.ndarray,
-            the_random_variables: jnp.ndarray,
-        ) -> jnp.ndarray:
-            key = key_fn(parameters, one_row, the_draws, the_random_variables)
-            key_int = jnp.asarray(key, dtype=jnp.int32)
-
-            def dispatch(k):
-                return compiled_dict[k](
-                    parameters, one_row, the_draws, the_random_variables
-                )
-
-            branches = [
-                lambda parameters, one_row, the_draws, the_random_variables, fn=compiled_dict[
-                    k
-                ]: fn(
-                    parameters, one_row, the_draws, the_random_variables
-                )
-                for k in sorted(compiled_dict)
-            ]
-            return jax.lax.switch(
-                key_int, branches, parameters, one_row, the_draws, the_random_variables
-            )
 
         return the_jax_function
 

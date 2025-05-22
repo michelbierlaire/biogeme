@@ -7,16 +7,9 @@
 from __future__ import annotations
 
 import logging
-from typing import (
-    NamedTuple,
-    TypeVar,
-    Generic,
-    Iterable,
-    TYPE_CHECKING,
-)
+from typing import Generic, Iterable, NamedTuple, TYPE_CHECKING, TypeVar
 
 import numpy as np
-from icecream import ic
 
 if TYPE_CHECKING:
     from biogeme.database import Database
@@ -27,6 +20,10 @@ from biogeme.expressions import (
     Variable,
     RandomVariable,
     Draws,
+    list_of_fixed_betas_in_expression,
+    list_of_free_betas_in_expression,
+    list_of_random_variables_in_expression,
+    list_of_draws_in_expression,
 )
 
 T = TypeVar('T', bound='Elementary')
@@ -143,14 +140,12 @@ class ExpressionRegistry:
     @property
     def free_betas(self) -> list[Beta]:
         if self._free_betas is None:
-            free_betas = {}
+            self._free_betas = []
             for f in self.expressions:
-                d = f.dict_of_elementary_expression(
-                    the_type=TypeOfElementaryExpression.FREE_BETA
-                )
-                free_betas = dict(free_betas, **d)
-            self._free_betas = list(free_betas.values())
-
+                self._free_betas.extend(list_of_free_betas_in_expression(f))
+            # Remove duplicates based on the name attribute
+            unique_betas = {beta.name: beta for beta in self._free_betas}
+            self._free_betas = list(unique_betas.values())
         return self._free_betas
 
     @property
@@ -164,13 +159,12 @@ class ExpressionRegistry:
     @property
     def fixed_betas(self) -> list[Beta]:
         if self._fixed_betas is None:
-            fixed_betas = {}
+            self._fixed_betas = []
             for f in self.expressions:
-                d = f.dict_of_elementary_expression(
-                    the_type=TypeOfElementaryExpression.FIXED_BETA
-                )
-                fixed_betas = dict(fixed_betas, **d)
-            self._fixed_betas = list(fixed_betas.values())
+                self._fixed_betas.extend(list_of_fixed_betas_in_expression(f))
+            # Remove duplicates based on the name attribute
+            unique_betas = {beta.name: beta for beta in self._fixed_betas}
+            self._fixed_betas = list(unique_betas.values())
         return self._fixed_betas
 
     @property
@@ -184,13 +178,12 @@ class ExpressionRegistry:
     @property
     def random_variables(self) -> list[RandomVariable]:
         if self._random_variables is None:
-            random_variables = {}
+            self._random_variables = []
             for f in self.expressions:
-                d = f.dict_of_elementary_expression(
-                    the_type=TypeOfElementaryExpression.RANDOM_VARIABLE
-                )
-                random_variables = dict(random_variables, **d)
-            self._random_variables = list(random_variables.values())
+                self._random_variables.extend(list_of_random_variables_in_expression(f))
+            # Remove duplicates based on the name attribute
+            unique_rv = {rv.name: rv for rv in self._random_variables}
+            self._random_variables = list(unique_rv.values())
         return self._random_variables
 
     @property
@@ -204,13 +197,12 @@ class ExpressionRegistry:
     @property
     def draws(self) -> list[Draws]:
         if self._draws is None:
-            draws = {}
+            self._draws = []
             for f in self.expressions:
-                d = f.dict_of_elementary_expression(
-                    the_type=TypeOfElementaryExpression.DRAWS
-                )
-                draws = dict(draws, **d)
-            self._draws = list(draws.values())
+                self._draws.extend(list_of_draws_in_expression(f))
+            # Remove duplicates based on the name attribute
+            unique_draws = {draw.name: draw for draw in self._draws}
+            self._draws = list(unique_draws.values())
         return self._draws
 
     @property

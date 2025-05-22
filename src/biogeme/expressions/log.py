@@ -11,7 +11,7 @@ import logging
 import jax.numpy as jnp
 import numpy as np
 
-from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
+from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import ExpressionOrNumeric
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
@@ -64,8 +64,8 @@ class log(UnaryOperator):
             child_value = child_jax(
                 parameters, one_row, the_draws, the_random_variables
             )
-            clipped_value = jnp.clip(child_value, min=LOG_CLIP_MIN)
-            return jnp.log(clipped_value)
+            is_invalid = child_value <= 0
+            return jnp.where(is_invalid, jnp.nan, jnp.log(child_value))
 
         return the_jax_function
 

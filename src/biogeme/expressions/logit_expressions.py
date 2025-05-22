@@ -15,8 +15,7 @@ import jax.numpy as jnp
 import numpy as np
 from jax.scipy.special import logsumexp
 
-
-from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN, MAX_EXP_ARG, MIN_EXP_ARG
+from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import Expression, LogitTuple
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
@@ -162,26 +161,14 @@ class LogLogit(Expression):
         pass
 
     def __str__(self) -> str:
-        s = self.get_class_name()
-        s += f'[choice={self.choice}]'
-        s += 'U=('
-        first = True
-        for i, e in self.util.items():
-            if first:
-                s += f'{int(i)}:{e}'
-                first = False
-            else:
-                s += f', {int(i)}:{e}'
-        s += ')'
-        s += 'av=('
-        first = True
-        for i, e in self.av.items():
-            if first:
-                s += f'{int(i)}:{e}'
-                first = False
-            else:
-                s += f', {int(i)}:{e}'
-        s += ')'
+        s = f'{self.get_class_name()}[choice={self.choice}]'
+        util_str = ', '.join(f'{int(i)}:{e}' for i, e in self.util.items())
+        s += f'U=({util_str})'
+        if self.av is None:
+            s += '[always available]'
+        else:
+            av_str = ', '.join(f'{int(i)}:{e}' for i, e in self.av.items())
+            s += f'av=({av_str})'
         return s
 
     def recursive_construct_jax_function(

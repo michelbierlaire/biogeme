@@ -7,17 +7,24 @@ Wed Mar 26 19:30:57 2025
 
 from __future__ import annotations
 
+import logging
+
 import jax
 import jax.numpy as jnp
 import numpy as np
-from jax import jit
 
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import build_vectorized_function, Expression
+from biogeme.expressions import (
+    Expression,
+    build_vectorized_function,
+    collect_init_values,
+)
 from biogeme.floating_point import JAX_FLOAT, NUMPY_FLOAT
-from biogeme.function_output import FunctionOutput
+from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 from biogeme.model_elements import ModelElements
+
+logger = logging.getLogger(__name__)
 
 
 class CompiledFormulaEvaluator:
@@ -25,7 +32,11 @@ class CompiledFormulaEvaluator:
     Compiles and evaluates a Biogeme expression using JAX for efficient repeated computation.
     """
 
-    def __init__(self, model_elements: ModelElements):
+    def __init__(
+        self,
+        model_elements: ModelElements,
+        avoid_analytical_second_derivatives: bool,
+    ):
         """
         Prepares and compiles the JAX function for evaluating a Biogeme expression.
 
@@ -34,11 +45,20 @@ class CompiledFormulaEvaluator:
         from biogeme.expressions import build_vectorized_function
 
         self.model_elements = model_elements
+        self.avoid_analytical_second_derivatives = avoid_analytical_second_derivatives
         self.free_betas_names = (
             self.model_elements.expressions_registry.free_betas_names
         )
-        self.data_jax = self.model_elements.database.data_jax
-        self.draws_jax = self.model_elements.draws_management.draws_jax
+        self.data_jax = (
+            self.model_elements.database.data_jax
+            if self.model_elements.database is not None
+            else None
+        )
+        self.draws_jax = (
+            self.model_elements.draws_management.draws_jax
+            if self.model_elements.draws_management is not None
+            else None
+        )
         n_obs = self.model_elements.sample_size
         n_rv = self.model_elements.expressions_registry.number_of_random_variables
         self.random_variables_jax = jnp.zeros((n_rv,), dtype=JAX_FLOAT)
@@ -58,7 +78,6 @@ class CompiledFormulaEvaluator:
         else:
             vectorized_weight_function = None
 
-        @jit
         def sum_function(
             params: list[float],
             data: jnp.ndarray,
@@ -73,7 +92,7 @@ class CompiledFormulaEvaluator:
                 values *= weights
             return jnp.asarray(jnp.sum(values), dtype=JAX_FLOAT), values
 
-        self.sum_function = sum_function
+        self.sum_function = jax.jit(sum_function)
 
     def evaluate(
         self,
@@ -138,7 +157,8 @@ class CompiledFormulaEvaluator:
     def _evaluate_autodiff_hessian(self, free_betas_values):
         value_and_grad_fn = jax.jit(
             jax.value_and_grad(
-                lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0], argnums=0
+                lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
+                argnums=0,
             )
         )
         value, the_gradient = value_and_grad_fn(
@@ -149,14 +169,17 @@ class CompiledFormulaEvaluator:
         )
 
         if jnp.all(the_gradient == 0.0):
-            the_hessian = jnp.zeros(
-                (len(free_betas_values), len(free_betas_values)), dtype=JAX_FLOAT
+            the_hessian = np.zeros(
+                (len(free_betas_values), len(free_betas_values)), dtype=NUMPY_FLOAT
             )
+        elif self.avoid_analytical_second_derivatives:
+            the_hessian = self._evaluate_finite_difference_hessian(free_betas_values)
         else:
             hessian_fn = jax.jit(
                 jax.jacfwd(
                     jax.grad(
-                        lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0], argnums=0
+                        lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
+                        argnums=0,
                     ),
                     argnums=0,
                 )
@@ -168,11 +191,10 @@ class CompiledFormulaEvaluator:
                 self.random_variables_jax,
             )
             if jnp.any(jnp.isnan(hess_autodiff)):
-                the_hessian = self._evaluate_finite_difference_hessian(
-                    free_betas_values
+                raise BiogemeError(
+                    'The calculation of second derivatives generated numerical errors.'
                 )
-            else:
-                the_hessian = np.asarray(hess_autodiff, dtype=NUMPY_FLOAT)
+            the_hessian = np.asarray(hess_autodiff, dtype=NUMPY_FLOAT)
 
         return FunctionOutput(
             function=float(value),
@@ -293,6 +315,7 @@ def calculate_single_formula(
     gradient: bool,
     hessian: bool,
     bhhh: bool,
+    avoid_analytical_second_derivatives: bool,
 ) -> FunctionOutput:
     """
     Evaluates a single Biogeme expression using JAX, optionally computing the gradient and Hessian.
@@ -302,9 +325,14 @@ def calculate_single_formula(
     :param gradient: If True, compute the gradient.
     :param hessian: If True, compute the Hessian (requires gradient=True).
     :param bhhh: Unused here, included for compatibility.
+    :param avoid_analytical_second_derivatives: if True, the second derivatives are calculated with finite differences,
+        if requested.
     :return: A BiogemeFunctionOutput with the value, gradient, and optionally the Hessian.
     """
-    the_compiled_formula = CompiledFormulaEvaluator(model_elements=model_elements)
+    the_compiled_formula = CompiledFormulaEvaluator(
+        model_elements=model_elements,
+        avoid_analytical_second_derivatives=avoid_analytical_second_derivatives,
+    )
     return the_compiled_formula.evaluate(
         the_betas=the_betas, gradient=gradient, hessian=hessian, bhhh=bhhh
     )
@@ -335,12 +363,15 @@ def calculate_single_formula_from_expression(
 def evaluate_formula(
     model_elements: ModelElements,
     the_betas: dict[str, float],
+    avoid_analytical_second_derivatives: bool,
 ) -> float:
     """
     Evaluates a single Biogeme expression using JAX.
 
     :param model_elements: All elements needed to calculate the expression.
     :param the_betas: Dictionary of parameter names to values.
+    :param avoid_analytical_second_derivatives: if True, second derivatives are calculated using finite differences,
+        if requested.
     :return: the value of the expression.
     """
     result = calculate_single_formula(
@@ -349,6 +380,7 @@ def evaluate_formula(
         gradient=False,
         hessian=False,
         bhhh=False,
+        avoid_analytical_second_derivatives=avoid_analytical_second_derivatives,
     )
     return result.function
 
@@ -369,6 +401,68 @@ def evaluate_expression_per_row(
     :return: A NumPy array of values, one for each observation in the database.
     """
     the_compiled_formula = CompiledFormulaEvaluator(
-        model_elements=model_elements,
+        model_elements=model_elements, avoid_analytical_second_derivatives=True
     )
     return the_compiled_formula.evaluate_individual(the_betas=the_betas)
+
+
+def get_value_c(
+    expression: Expression,
+    database: Database | None = None,
+    betas: dict[str, float] | None = None,
+    number_of_draws: int = 1000,
+    aggregation: bool = False,
+) -> np.ndarray | float:
+    """For backward compatibility. This function used ot be a member of the Expression class."""
+    if database is None:
+        database = Database.dummy_database()
+    model_elements = ModelElements.from_expression_and_weight(
+        log_like=expression,
+        weight=None,
+        database=database,
+        number_of_draws=number_of_draws,
+    )
+    if betas is None:
+        betas = collect_init_values(expression=expression)
+    if aggregation:
+        return evaluate_formula(model_elements=model_elements, the_betas=betas)
+
+    return evaluate_expression_per_row(model_elements=model_elements, the_betas=betas)
+
+
+def get_value_and_derivatives(
+    expression: Expression,
+    betas: dict[str, float] | None = None,
+    database: Database | None = None,
+    number_of_draws: int = 1000,
+    gradient: bool = True,
+    hessian: bool = True,
+    bhhh: bool = True,
+    named_results: bool = False,
+) -> FunctionOutput | NamedFunctionOutput:
+    if database is None:
+        from biogeme.database import Database
+
+        database = Database.dummy_database()
+    model_elements = ModelElements.from_expression_and_weight(
+        log_like=expression,
+        weight=None,
+        database=database,
+        number_of_draws=number_of_draws,
+    )
+
+    the_compiled_formula = CompiledFormulaEvaluator(
+        model_elements=model_elements, avoid_analytical_second_derivatives=False
+    )
+    if betas is None:
+        betas = collect_init_values(expression=expression)
+    result: FunctionOutput = the_compiled_formula.evaluate(
+        the_betas=betas, gradient=gradient, hessian=hessian, bhhh=bhhh
+    )
+    if not named_results:
+        return result
+    named_results = NamedFunctionOutput(
+        function_output=result,
+        mapping=model_elements.expressions_registry.free_betas_indices,
+    )
+    return named_results

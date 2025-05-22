@@ -5,105 +5,47 @@ Thu Apr 3 09:55:57 2025
 """
 
 import warnings
-from .nary_expressions import LinearUtility, MultipleSum
+
+from .binary_expressions import BinaryMax, BinaryMin
 from .elementary_expressions import Draws
+from .integrate import IntegrateNormal
+from .nary_expressions import LinearUtility, MultipleSum
 from .unary_expressions import NormalCdf
 
 
-def bioLinearUtility(*args, **kwargs):
-    """
-    Deprecated wrapper for :class:`LinearUtility`.
+def deprecated_wrapper(old_name, new_class, comment=None):
+    def wrapper(*args, **kwargs):
+        message = (
+            f"'{old_name}' is deprecated and will be removed in a future version. "
+            f"Use '{new_class.__name__}' instead."
+        )
+        if comment:
+            message += f"\n{comment}"
+        warnings.warn(message, DeprecationWarning, stacklevel=2)
+        return new_class(*args, **kwargs)
 
-    .. warning::
-       This function is deprecated and will be removed in a future version.
-       Use :class:`LinearUtility` instead.
-
-    This function issues a deprecation warning and returns an instance of
-    :class:`LinearUtility` with the provided arguments.
-
-    :param \\*args: Positional arguments passed to :class:`LinearUtility`.
-    :param \\*\\*kwargs: Keyword arguments passed to :class:`LinearUtility`.
-    :return: An instance of :class:`LinearUtility`.
-    :rtype: LinearUtility
-    """
-    warnings.warn(
-        "'bioLinearUtility' is deprecated and will be removed in a future version. "
-        "Use 'LinearUtility' instead.",
-        DeprecationWarning,
-        stacklevel=2,
+    wrapper.__name__ = old_name
+    doc = (
+        f"Deprecated wrapper for :class:`{new_class.__name__}`.\n\n"
+        f".. warning::\n   This function is deprecated and will be removed in a future version.\n"
+        f"   Use :class:`{new_class.__name__}` instead.\n"
     )
-    return LinearUtility(*args, **kwargs)
+    if comment:
+        doc += f"\n   {comment}\n"
+    wrapper.__doc__ = doc
+    return wrapper
 
 
-def bioMultSum(*args, **kwargs):
-    """
-    Deprecated wrapper for :class:`MultipleSum`.
-
-    .. warning::
-       This function is deprecated and will be removed in a future version.
-       Use :class:`MultipleSum` instead.
-
-    This function issues a deprecation warning and returns an instance of
-    :class:`MultipleSum` with the provided arguments.
-
-    :param \\*args: Positional arguments passed to :class:`MultipleSum`.
-    :param \\*\\*kwargs: Keyword arguments passed to :class:`MultipleSum`.
-    :return: An instance of :class:`MultipleSum`.
-    :rtype: LinearUtility
-    """
-    warnings.warn(
-        "'bioMultSum' is deprecated and will be removed in a future version. "
-        "Use 'MultipleSum' instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return MultipleSum(*args, **kwargs)
-
-
-def bioDraws(*args, **kwargs):
-    """
-    Deprecated wrapper for :class:`Draws`.
-
-    .. warning::
-       This function is deprecated and will be removed in a future version.
-       Use :class:`Draws` instead.
-
-    This function issues a deprecation warning and returns an instance of
-    :class:`Draws` with the provided arguments.
-
-    :param \\*args: Positional arguments passed to :class:`Draws`.
-    :param \\*\\*kwargs: Keyword arguments passed to :class:`Draws`.
-    :return: An instance of :class:`Draws`.
-    :rtype: Draws
-    """
-    warnings.warn(
-        "'bioDraws' is deprecated and will be removed in a future version. "
-        "Use 'Draws' instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return Draws(*args, **kwargs)
-
-
-def bioNormalCdf(*args, **kwargs):
-    """
-    Deprecated wrapper for :class:`NormalCdf`.
-
-    .. warning::
-       This function is deprecated and will be removed in a future version.
-       Use :class:`NormalCdf` instead.
-
-    This function issues a deprecation warning and returns an instance of
-    :class:`NormalCdf` with the provided arguments.
-
-    :param \\*args: Positional arguments passed to :class:`Draws`.
-    :param \\*\\*kwargs: Keyword arguments passed to :class:`Draws`.
-    :return: An instance of :class:`NormalCdf`.
-    """
-    warnings.warn(
-        "'bioNormalPdf' is deprecated and will be removed in a future version. "
-        "Use 'NormalPdf' instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return NormalCdf(*args, **kwargs)
+bioLinearUtility = deprecated_wrapper("bioLinearUtility", LinearUtility)
+bioMultSum = deprecated_wrapper("bioMultSum", MultipleSum)
+bioDraws = deprecated_wrapper("bioDraws", Draws)
+bioNormalCdf = deprecated_wrapper("bioNormalCdf", NormalCdf)
+bioMin = deprecated_wrapper("bioMin", BinaryMin)
+bioMax = deprecated_wrapper("bioMax", BinaryMax)
+comment_integrate = (
+    'In Biogeme 3.2, Integrate calculated the integral from -infinity to +infinity of f(x) dx.\n'
+    'Since Biogeme 3.3, it is not available anymore.\n'
+    'Instead, IntegrateNormal calculates the integral from -infinity to +infinity of f(x) * phi(x) dx,\n'
+    'where phi(x) is the probability density function of the normal distribution.'
+)
+Integrate = deprecated_wrapper("Integrate", IntegrateNormal, comment=comment_integrate)
