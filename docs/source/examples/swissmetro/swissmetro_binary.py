@@ -44,9 +44,6 @@ TRAIN_HE = Variable('TRAIN_HE')
 SM_HE = Variable('SM_HE')
 INCOME = Variable('INCOME')
 
-# Excluding observations.
-exclude = ((PURPOSE != 1) * (PURPOSE != 3) + (CHOICE == 0) + (CHOICE == 2)) > 0
-database.remove(exclude)
 
 # %%
 # Definition of new variables.
@@ -60,3 +57,13 @@ SM_TT_SCALED = database.define_variable('SM_TT_SCALED', SM_TT / 100)
 SM_COST_SCALED = database.define_variable('SM_COST_SCALED', SM_COST / 100)
 CAR_TT_SCALED = database.define_variable('CAR_TT_SCALED', CAR_TT / 100)
 CAR_CO_SCALED = database.define_variable('CAR_CO_SCALED', CAR_CO / 100)
+
+# Excluding observations. We keep only observations where either car or train has been chosen, and both are available.
+exclude = (
+    (PURPOSE != 1) * (PURPOSE != 3)
+    + (CHOICE == 0)
+    + (CHOICE == 2)
+    + (CAR_AV_SP == 0)
+    + (TRAIN_AV_SP == 0)
+) > 0
+database.remove(exclude)
