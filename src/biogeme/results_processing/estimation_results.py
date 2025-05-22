@@ -8,26 +8,26 @@ Mon Sep 30 15:39:24 2024
 from __future__ import annotations
 
 import warnings
-from enum import auto, Enum
+from enum import Enum, auto
 from typing import Any
 
 import numpy as np
 import pandas as pd
-from numpy.linalg import eigh, LinAlgError, pinv, inv, norm
-from scipy.stats import norm as normal_distribution, chi2
+from numpy.linalg import LinAlgError, eigh, inv, norm, pinv
+from scipy.stats import chi2, norm as normal_distribution
+from yaml.constructor import ConstructorError
 
+from biogeme.deprecated import deprecated_parameters
 from biogeme.exceptions import BiogemeError
-
+from biogeme.filenames import get_new_file_name
+from biogeme.tools import likelihood_ratio
+from biogeme.tools.ellipse import Ellipse
 from .raw_estimation_results import (
     RawEstimationResults,
-    serialize_to_yaml,
     deserialize_from_yaml,
+    serialize_to_yaml,
 )
 from .recycle_pickle import read_pickle_biogeme
-from ..deprecated import deprecated_parameters
-from ..filenames import get_new_file_name
-from ..tools import likelihood_ratio
-from ..tools.ellipse import Ellipse
 
 
 class EstimateVarianceCovariance(Enum):
@@ -85,15 +85,38 @@ class EstimationResults:
             )
         self.raw_estimation_results = raw_estimation_results
 
+        self._are_derivatives_available = True
+
+        if (
+            self.raw_estimation_results.gradient == []
+            and self.raw_estimation_results.hessian == [[]]
+            and self.raw_estimation_results.bhhh == [[]]
+        ):
+            self._are_derivatives_available = False
+        elif (
+            len(self.raw_estimation_results.beta_names)
+            != len(self.raw_estimation_results.gradient)
+            or len(self.raw_estimation_results.beta_names)
+            != len(self.raw_estimation_results.hessian)
+            or len(self.raw_estimation_results.beta_names)
+            != len(self.raw_estimation_results.bhhh)
+        ):
+            error_msg = 'Incompatible derivatives for {len(self.raw_estimation_results.beta_names)} parameters.'
+            raise BiogemeError(error_msg)
+
     @classmethod
     def from_yaml_file(
         cls,
         filename: str,
     ) -> EstimationResults:
         """Ctor. with data from the file"""
-        restored_results: RawEstimationResults = deserialize_from_yaml(
-            filename=filename
-        )
+        try:
+            restored_results: RawEstimationResults = deserialize_from_yaml(
+                filename=filename
+            )
+        except ConstructorError as e:
+            error_msg = f'File {filename}: {e}'
+            raise BiogemeError(error_msg) from e
         return cls(raw_estimation_results=restored_results)
 
     @classmethod
@@ -113,6 +136,10 @@ class EstimationResults:
         ):
             raise BiogemeError(f'Impossible to obtain {name}. No result available.')
         return getattr(self.raw_estimation_results, name)
+
+    @property
+    def are_derivatives_available(self) -> bool:
+        return self._are_derivatives_available
 
     @property
     def number_of_parameters(self) -> int:
@@ -208,7 +235,7 @@ class EstimationResults:
 
     def get_betas_for_sensitivity_analysis(
         self,
-        my_betas: list[str],
+        my_betas: list[str] | None = None,
         size: int = 100,
         use_bootstrap: bool = True,
         variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
@@ -234,6 +261,8 @@ class EstimationResults:
         """
         if self.raw_estimation_results is None:
             raise BiogemeError('No result available')
+        if my_betas is None:
+            my_betas = self.raw_estimation_results.beta_names
         if use_bootstrap and self.raw_estimation_results.bootstrap is None:
             err = (
                 'Bootstrap results are not available for simulation. '
@@ -310,9 +339,10 @@ class EstimationResults:
         :return: True if missing.
         :rtype: bool
         """
+
         if self.raw_estimation_results is None:
             return True
-        return self.raw_estimation_results.hessian is None
+        return not self.are_derivatives_available
 
     def calculate_test(self, i: int, j: int, matrix: np.ndarray) -> float:
         """Calculates a t-test comparing two coefficients
@@ -447,7 +477,7 @@ class EstimationResults:
         """Norm of the final gradient"""
         if self.raw_estimation_results is None:
             raise BiogemeError('No result available.')
-        if self.raw_estimation_results.gradient is None:
+        if not self.are_derivatives_available:
             raise BiogemeError('No gradient available')
         gradient_norm = float(norm(self.raw_estimation_results.gradient))
         return gradient_norm
@@ -461,7 +491,7 @@ class EstimationResults:
                 -np.nan_to_num(np.array(self.raw_estimation_results.hessian))
             )
             return eigenvalues, eigenvectors
-        except LinAlgError as e:
+        except (LinAlgError, TypeError) as e:
             raise BiogemeError(f'Error in calculating the eigen structure: {e}')
 
     @property
@@ -513,6 +543,8 @@ class EstimationResults:
         """
         if self.raw_estimation_results is None:
             raise BiogemeError('No result available.')
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         var_covar = -pinv(np.nan_to_num(np.array(self.raw_estimation_results.hessian)))
         return var_covar
 
@@ -520,6 +552,8 @@ class EstimationResults:
         self, variance_covariance_type: EstimateVarianceCovariance
     ) -> np.ndarray:
         """Returns the variance-covariance matrix of a given type"""
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         if variance_covariance_type == EstimateVarianceCovariance.RAO_CRAMER:
             return self.rao_cramer_variance_covariance_matrix
         if variance_covariance_type == EstimateVarianceCovariance.ROBUST:
@@ -539,6 +573,8 @@ class EstimationResults:
         :param variance_covariance_type: identifies the estimate of the variance-covariance matrix.
         :return: a numpy array containing the submatrix.
         """
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         the_complete_matrix = self.get_variance_covariance_matrix(
             variance_covariance_type=variance_covariance_type
         )
@@ -562,7 +598,8 @@ class EstimationResults:
     @property
     def robust_variance_covariance_matrix(self) -> np.ndarray:
         """Calculates the "sandwich" estimate of the variance-covariance matrix"""
-
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         robust_var_covar = (
             self.rao_cramer_variance_covariance_matrix
             @ np.array(self.raw_estimation_results.bhhh)
@@ -650,7 +687,8 @@ class EstimationResults:
         d['Excluded observations'] = f'{self.number_of_excluded_data}'
         if self.null_log_likelihood is not None:
             d['Null log likelihood'] = f'{self.null_log_likelihood:.7g}'
-        d['Init log likelihood'] = f'{self.initial_log_likelihood:.7g}'
+        if self.initial_log_likelihood is not None:
+            d['Init log likelihood'] = f'{self.initial_log_likelihood:.7g}'
         d['Final log likelihood'] = f'{self.final_log_likelihood:.7g}'
         if self.null_log_likelihood is not None:
             d['Likelihood ratio test for the null model'] = (
@@ -658,9 +696,11 @@ class EstimationResults:
             )
             d['Rho-square for the null model'] = f'{self.rho_square_null:.3g}'
             d['Rho-square-bar for the null model'] = f'{self.rho_bar_square_null:.3g}'
-        d['Likelihood ratio test for the init. model'] = (
-            f'{self.likelihood_ratio_init:.7g}'
-        )
+        try:
+            likelihood_ratio_init = f'{self.likelihood_ratio_init:.7g}'
+        except (BiogemeError, ZeroDivisionError):
+            likelihood_ratio_init = ''
+        d['Likelihood ratio test for the init. model'] = likelihood_ratio_init
         try:
             rho_square_init = f'{self.rho_square_init:.3g}'
         except (BiogemeError, ZeroDivisionError):
@@ -731,6 +771,8 @@ class EstimationResults:
     def get_parameter_std_err_from_index(
         self, parameter_index: int, estimate_var_covar: EstimateVarianceCovariance
     ) -> float:
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         """Calculates the standard error of the parameter estimate"""
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
@@ -752,6 +794,8 @@ class EstimationResults:
         estimate_var_covar: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
     ) -> float:
         """Calculates the standard error of the parameter estimate"""
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         index = self.get_parameter_index(parameter_name=parameter_name)
         return self.get_parameter_std_err_from_index(
             parameter_index=index, estimate_var_covar=estimate_var_covar
@@ -770,6 +814,8 @@ class EstimationResults:
         :param target: value for the null hypothesis
         :return: value of the t-test
         """
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
@@ -798,6 +844,8 @@ class EstimationResults:
         :param target: value for the null hypothesis
         :return: value of the t-test
         """
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         index = self.get_parameter_index(parameter_name=parameter_name)
         return self.get_parameter_t_test_from_index(
             parameter_index=index, estimate_var_covar=estimate_var_covar, target=target
@@ -816,6 +864,8 @@ class EstimationResults:
         :param target: value for the null hypothesis
         :return: p-value
         """
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
@@ -842,6 +892,8 @@ class EstimationResults:
         :param target: value for the null hypothesis
         :return: p-value
         """
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         index = self.get_parameter_index(parameter_name=parameter_name)
         return self.get_parameter_p_value_from_index(
             parameter_index=index, estimate_var_covar=estimate_var_covar, target=target
@@ -898,6 +950,8 @@ class EstimationResults:
         :param confidence_level: level of confidence for the confidence ellipse
         :return: LaTeX code to draw the ellipsis
         """
+        if not self.are_derivatives_available:
+            raise BiogemeError('No derivatives available.')
         sigma = self.get_sub_variance_covariance_matrix(
             variance_covariance_type=variance_covariance_type,
             parameters=[first_parameter, second_parameter],
