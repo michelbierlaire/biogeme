@@ -15,7 +15,7 @@ from biogeme.version import __version__
 sys.path.insert(0, os.path.abspath('./extensions'))
 
 project = 'Biogeme'
-copyright = '2024, Michel Bierlaire'
+copyright = '2025, Michel Bierlaire'
 author = 'Michel Bierlaire'
 
 # The full version, including alpha/Beta/rc tags

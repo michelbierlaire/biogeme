@@ -1,50 +1,93 @@
-# Default parameter file for Biogeme 3.2.11a1
-# Automatically created on 2022-12-06
+# Default parameter file for Biogeme 3.3.0a01
+# Automatically created on May 04, 2025. 13:15:14
+
+[MonteCarlo]
+number_of_draws = 100 # int: Number of draws for Monte-Carlo integration.
+seed = 0 # int: Seed used for the pseudo-random number generation. It is useful
+         # only when each run should generate the exact same result. If 0, a new
+         # seed is used at each run.
 
 [Estimation]
+bootstrap_samples = 100 # int: number of re-estimations for bootstrap sampling.
+large_data_set = 100000 # If the number of observations is larger than this
+                        # value, the data set is deemed large, and the default
+                        # estimation algorithm will not use second derivatives.
+max_number_parameters_to_report = 15 # int: maximum number of parameters to
+                                     # report during the estimation.
 save_iterations = "True" # bool: If True, the current iterate is saved after each
                          # iteration, in a file named ``__[modelName].iter``,
                          # where ``[modelName]`` is the name given to the model.
                          # If such a file exists, the starting values for the
                          # estimation are replaced by the values saved in the
                          # file.
-optimization_algorithm = "simple_bounds" # str: optimization algorithm to be used
-                                         # for estimation. Valid values:
-                                         # ['scipy', 'LS-newton', 'TR-newton',
-                                         # 'LS-BFGS', 'TR-BFGS', 'simple_bounds']
+maximum_number_catalog_expressions = 100 # If the expression contains catalogs,
+                                         # the parameter sets an upper bound of
+                                         # the total number of possible
+                                         # combinations that can be estimated in
+                                         # the same loop.
+optimization_algorithm = "automatic" # str: optimization algorithm to be used for
+                                     # estimation. Valid values: ['automatic',
+                                     # 'scipy', 'LS-newton', 'TR-newton',
+                                     # 'LS-BFGS', 'TR-BFGS', 'simple_bounds',
+                                     # 'simple_bounds_newton',
+                                     # 'simple_bounds_BFGS']
 
-[Specification]
-skip_audit = "False" # bool: If True, does not check the validity of the formulas.
-                     # It may save significant amount of time for large models
-                     # and large data sets. 
-suggest_scales = "True" # bool: If True, Biogeme suggests the scaling of the
-                        # variables in the database.
-missing_data = 99999 # number: If one variable has this value, it is assumed that
-                     # a data is missing and an exception will be triggered.
-
-[MonteCarlo]
-number_of_draws = 1000 # int: Number of draws for Monte-Carlo integration.
-seed = 0 # int: Seed used for the pseudo-random number generation. It is useful
-         # only when each run should generate the exact same result. If 0, a new
-         # seed is used at each run.
+[Output]
+identification_threshold = 1e-05 # float: if the smallest eigenvalue of the
+                                 # second derivative matrix is lesser or equal to
+                                 # this parameter, the model is considered not
+                                 # identified. The corresponding eigenvector is
+                                 # then reported to identify the parameters
+                                 # involved in the issue.
+only_robust_stats = "True" # bool: "True" if only the robust statistics need to be
+                           # reported. If "False", the statistics from the
+                           # Rao-Cramer bound are also reported.
+generate_html = "True" # bool: "True" if the HTML file with the results must be
+                       # generated.
+generate_yaml = "True" # bool: "True" if the yaml file with the results must be
+                       # generated.
+save_validation_results = "True" # bool: "True" if the validation results are saved
+                                 # in CSV files.
 
 [SimpleBounds]
 second_derivatives = 1.0 # float: proportion (between 0 and 1) of iterations when
                          # the analytical Hessian is calculated
-tolerance = 6.06273418136464e-06 # float: the algorithm stops when this precision
-                                 # is reached
-max_iterations = 100 # int: maximum number of iterations
+tolerance = 6.055454452393343e-06 # float: the algorithm stops when this
+                                  # precision is reached
+max_iterations = 1000 # int: maximum number of iterations
 infeasible_cg = "False" # If True, the conjugate gradient algorithm may generate
-                        # infeasible solutiona until termination.  The result
+                        # infeasible solutions until termination.  The result
                         # will then be projected on the feasible domain.  If
                         # False, the algorithm stops as soon as an infeasible
                         # iterate is generated
+initial_radius = 1 # Initial radius of the trust region
+steptol = 3.666852862501036e-11 # The algorithm stops when the relative change in
+                                # x is below this threshold. Basically, if p
+                                # significant digits of x are needed, steptol
+                                # should be set to 1.0e-p.
+enlarging_factor = 10 # If an iteration is very successful, the radius of the
+                      # trust region is multiplied by this factor
 
-[Output]
-generate_html = "True" # bool: "True" if the HTML file with the results must be
-                       # generated.
-generate_pickle = "True" # bool: "True" if the pickle file with the results must be
-                         # generated.
+[Biogeme]
+version = "3.3.0a01" # Version of Biogeme that created the TOML file. Do not modify
+                     # this value.
+
+[AssistedSpecification]
+maximum_number_parameters = 50 # int: maximum number of parameters allowed in a
+                               # model. Each specification with a higher number
+                               # is deemed invalid and not estimated.
+number_of_neighbors = 20 # int: maximum number of neighbors that are visited by
+                         # the VNS algorithm.
+largest_neighborhood = 20 # int: size of the largest neighborhood copnsidered by
+                          # the Variable Neighborhood Search (VNS) algorithm.
+maximum_attempts = 100 # int: an attempts consists in selecting a solution in the
+                       # Pareto set, and trying to improve it. The parameter
+                       # imposes an upper bound on the total number of attempts,
+                       # irrespectively if they are successful or not.
+
+[Specification]
+missing_data = 99999 # number: If one variable has this value, it is assumed that
+                     # a data is missing and an exception will be triggered.
 
 [TrustRegion]
 dogleg = "True" # bool: choice of the method to solve the trust region subproblem.
