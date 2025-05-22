@@ -5,8 +5,8 @@ Data preparation for Swissmetro: one observation
 
 Use only the first observation for simulation.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:51:58 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 12:20:15
 """
 
 import pandas as pd

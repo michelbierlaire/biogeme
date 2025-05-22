@@ -7,35 +7,33 @@ Calculation of a mixtures of logit models where the integral is
 calculated using numerical integration and Monte-Carlo integration
 with various types of draws.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:58:50 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 12:10:06
 """
 
 from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
-from biogeme.distributions import normalpdf
 from biogeme.expressions import (
+    Draws,
     Expression,
-    Integrate,
-    RandomVariable,
+    IntegrateNormal,
     MonteCarlo,
-    bioDraws,
+    RandomVariable,
 )
 from biogeme.models import logit
-
 from swissmetro_one import (
-    database,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
-    TRAIN_AV_SP,
-    SM_AV,
     CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 # %%
@@ -53,13 +51,12 @@ B_COST = -1.29
 # %%
 # Generate several versions of the error component.
 omega = RandomVariable('omega')
-density = normalpdf(omega)
 b_time_rnd = B_TIME + B_TIME_S * omega
-b_time_rnd_normal = B_TIME + B_TIME_S * bioDraws('B_NORMAL', 'NORMAL')
-b_time_rnd_anti = B_TIME + B_TIME_S * bioDraws('B_ANTI', 'NORMAL_ANTI')
-b_time_rnd_halton = B_TIME + B_TIME_S * bioDraws('B_HALTON', 'NORMAL_HALTON2')
-b_time_rnd_mlhs = B_TIME + B_TIME_S * bioDraws('B_MLHS', 'NORMAL_MLHS')
-b_time_rnd_antimlhs = B_TIME + B_TIME_S * bioDraws('B_ANTIMLHS', 'NORMAL_MLHS_ANTI')
+b_time_rnd_normal = B_TIME + B_TIME_S * Draws('B_NORMAL', 'NORMAL')
+b_time_rnd_anti = B_TIME + B_TIME_S * Draws('B_ANTI', 'NORMAL_ANTI')
+b_time_rnd_halton = B_TIME + B_TIME_S * Draws('B_HALTON', 'NORMAL_HALTON2')
+b_time_rnd_mlhs = B_TIME + B_TIME_S * Draws('B_MLHS', 'NORMAL_MLHS')
+b_time_rnd_antimlhs = B_TIME + B_TIME_S * Draws('B_ANTIMLHS', 'NORMAL_MLHS_ANTI')
 
 
 # %%
@@ -88,7 +85,7 @@ def conditional_logit(the_b_time_rnd: Expression) -> Expression:
 
 # %%
 # Generate each integral.
-numerical_integral = Integrate(conditional_logit(b_time_rnd) * density, 'omega')
+numerical_integral = IntegrateNormal(conditional_logit(b_time_rnd), 'omega')
 normal = MonteCarlo(conditional_logit(b_time_rnd_normal))
 anti = MonteCarlo(conditional_logit(b_time_rnd_anti))
 halton = MonteCarlo(conditional_logit(b_time_rnd_halton))

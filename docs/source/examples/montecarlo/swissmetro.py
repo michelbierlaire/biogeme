@@ -5,8 +5,8 @@ Data preparation for Swissmetro
 
 Reading data and defining variables.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:51:58 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 17:34:50
 """
 
 import pandas as pd

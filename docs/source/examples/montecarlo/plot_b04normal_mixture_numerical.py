@@ -6,29 +6,27 @@ Numerical integration
 Calculation of a mixtures of logit models where the integral is
 calculated using numerical integration.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:51:32 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 12:08:42
 """
 
 from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
-from biogeme.distributions import normalpdf
-from biogeme.expressions import RandomVariable, Integrate
+from biogeme.expressions import IntegrateNormal, RandomVariable
 from biogeme.models import logit
-
 from swissmetro_one import (
-    database,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
-    TRAIN_AV_SP,
-    SM_AV,
     CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 # %%
@@ -44,7 +42,6 @@ B_COST = -1.29
 # Define a random parameter, normally distributed,
 # designed to be used for integration
 omega = RandomVariable('omega')
-density = normalpdf(omega)
 b_time_rnd = B_TIME + B_TIME_S * omega
 
 # %%
@@ -64,7 +61,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # The choice model is a logit, with availability conditions
 integrand = logit(util, av, CHOICE)
-numerical_integral = Integrate(integrand * density, 'omega')
+numerical_integral = IntegrateNormal(integrand, 'omega')
 
 # %%
 simulate = {'Numerical': numerical_integral}

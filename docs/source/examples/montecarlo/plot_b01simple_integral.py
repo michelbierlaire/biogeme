@@ -5,16 +5,15 @@ Simple integral
 
 Calculation of a simple integral using Monte-Carlo integration.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:42:24 2023
-
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:43:13
 """
 
 import pandas as pd
 
 from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
-from biogeme.expressions import exp, bioDraws, MonteCarlo
+from biogeme.expressions import Draws, MonteCarlo, exp
 
 # %%
 # We create a fake database with one entry, as it is required
@@ -24,7 +23,7 @@ df['FakeColumn'] = [1.0]
 database = Database('fake_database', df)
 
 # %%
-integrand = exp(bioDraws('U', 'UNIFORM'))
+integrand = exp(Draws('U', 'UNIFORM'))
 simulated_integral = MonteCarlo(integrand)
 
 # %%
@@ -51,7 +50,7 @@ simulate = {
 
 biosim = BIOGEME(database, simulate, number_of_draws=R)
 R = biosim.number_of_draws
-biosim.modelName = f'01simpleIntegral_{R}'
+biosim.model_name = f'01simpleIntegral_{R}'
 results = biosim.simulate(the_beta_values={})
 print(f'Number of draws: {R}')
 for c in results.columns:
@@ -60,7 +59,7 @@ for c in results.columns:
 # %%
 # Change the number of draws
 biogeme2 = BIOGEME(database, simulate, number_of_draws=R * MULTIPLIER)
-biogeme2.modelName = '01simpleIntegral_{multiplier*R}'
+biogeme2.model_name = '01simpleIntegral_{multiplier*R}'
 results2 = biogeme2.simulate(the_beta_values={})
 print(f'Number of draws: {MULTIPLIER * R}')
 for c in results2.columns:

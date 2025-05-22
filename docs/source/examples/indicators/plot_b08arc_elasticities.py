@@ -9,9 +9,8 @@ Details about this example are available in Section 3 of `Bierlaire (2018)
 Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:00:10 2023
-
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:29:11
 """
 
 import sys
@@ -19,7 +18,7 @@ import sys
 from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
-from biogeme.data.optima import read_data, normalized_weight
+from biogeme.data.optima import normalized_weight, read_data
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
 from scenarios import scenario

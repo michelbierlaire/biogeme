@@ -8,9 +8,8 @@ Details about this example are available in Section 4 of `Bierlaire (2018)
 Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 20:57:00 2023
-
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:27:27
 
 """
 
@@ -86,7 +85,7 @@ wtpcar = (60 * simulated_values['WTP CAR time'] * simulated_values['weight']).me
 
 # %%
 # Calculate confidence intervals
-b = results.get_betas_for_sensitivity_analysis(the_biogeme.free_beta_names)
+b = results.get_betas_for_sensitivity_analysis()
 
 # %%
 # Returns data frame containing, for each simulated value, the left
@@ -140,20 +139,20 @@ def wtp_for_subgroup(the_filter: 'pd.Series[np.bool_]') -> tuple[float, float, f
 
 # %%
 # Full time workers.
-aFilter = database.data['OccupStat'] == 1
-w, l, r = wtp_for_subgroup(aFilter)
+a_filter = database.dataframe['OccupStat'] == 1
+w, l, r = wtp_for_subgroup(a_filter)
 print(f'WTP car for workers: {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 
 # %%
 # Females.
-aFilter = database.data['Gender'] == 2
-w, l, r = wtp_for_subgroup(aFilter)
+a_filter = database.dataframe['Gender'] == 2
+w, l, r = wtp_for_subgroup(a_filter)
 print(f'WTP car for females: {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 
 # %%
 # Males.
-aFilter = database.data['Gender'] == 1
-w, l, r = wtp_for_subgroup(aFilter)
+a_filter = database.dataframe['Gender'] == 1
+w, l, r = wtp_for_subgroup(a_filter)
 print(f'WTP car for males  : {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 
 # %%

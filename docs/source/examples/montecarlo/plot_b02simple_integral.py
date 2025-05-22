@@ -8,19 +8,18 @@ Monte-Carlo integration with various types of draws, including Halton
 draws base 13. It illustrates how to use draws that are not directly
 available in Biogeme.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:46:01 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:44:22
 """
 
 import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
 
-from biogeme import draws
 from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
-from biogeme.expressions import exp, bioDraws, MonteCarlo
-from biogeme.native_draws import RandomNumberGeneratorTuple
+from biogeme.draws import RandomNumberGeneratorTuple, get_halton_draws
+from biogeme.expressions import Draws, MonteCarlo, exp
 
 # %%
 # We create a fake database with one entry, as it is required
@@ -41,35 +40,34 @@ def halton13(sample_size: int, number_of_draws: int) -> np.array:
     :param number_of_draws: number of draws to generate.
 
     """
-    return draws.get_halton_draws(sample_size, number_of_draws, base=13, skip=10)
+    return get_halton_draws(sample_size, number_of_draws, base=13, skip=10)
 
 
 # %%
-mydraws = {
+my_draws = {
     'HALTON13': RandomNumberGeneratorTuple(
         generator=halton13, description='Halton draws, base 13, skipping 10'
     )
 }
-database.set_random_number_generators(mydraws)
 
 # %%
 # Integrate with pseudo-random number generator.
-integrand = exp(bioDraws('U', 'UNIFORM'))
+integrand = exp(Draws('U', 'UNIFORM'))
 simulated_integral = MonteCarlo(integrand)
 
 # %%
 # Integrate with Halton draws, base 2.
-integrand_halton = exp(bioDraws('U_halton', 'UNIFORM_HALTON2'))
+integrand_halton = exp(Draws('U_halton', 'UNIFORM_HALTON2'))
 simulated_integral_halton = MonteCarlo(integrand_halton)
 
 # %%
 # Integrate with Halton draws, base 13.
-integrand_halton13 = exp(bioDraws('U_halton13', 'HALTON13'))
+integrand_halton13 = exp(Draws('U_halton13', 'HALTON13'))
 simulated_integral_halton13 = MonteCarlo(integrand_halton13)
 
 # %%
 # Integrate with MLHS.
-integrand_mlhs = exp(bioDraws('U_mlhs', 'UNIFORM_MLHS'))
+integrand_mlhs = exp(Draws('U_mlhs', 'UNIFORM_MLHS'))
 simulated_integral_mlhs = MonteCarlo(integrand_mlhs)
 
 # %%
@@ -133,8 +131,10 @@ simulate = {
 }
 
 # %%
-biosim = BIOGEME(database, simulate)
-biosim.modelName = 'b02simple_integral'
+biosim = BIOGEME(
+    database, simulate, random_number_generators=my_draws, number_of_draws=R
+)
+biosim.model_name = 'b02simple_integral'
 results = biosim.simulate(the_beta_values={})
 display(results)
 

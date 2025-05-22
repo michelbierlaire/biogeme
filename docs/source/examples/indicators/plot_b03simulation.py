@@ -5,9 +5,8 @@ Simulation of a choice model
 
 We use an estimated model to perform various simulations.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:04:33 2023
-
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 09:30:56
 """
 
 import sys
@@ -16,7 +15,8 @@ import time
 import pandas as pd
 
 from biogeme.biogeme import BIOGEME
-from biogeme.data.optima import read_data, normalized_weight
+from biogeme.calculator import get_value_c
+from biogeme.data.optima import normalized_weight, read_data
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
 from scenarios import scenario
@@ -58,26 +58,26 @@ database = read_data()
 # %%
 start_time = time.time()
 simulate_formulas = {
-    'weight': normalized_weight.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'weight': get_value_c(
+        expression=normalized_weight, betas=results.get_beta_values(), database=database
     ),
-    'Utility PT': V_PT.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'Utility PT': get_value_c(
+        expression=V_PT, betas=results.get_beta_values(), database=database
     ),
-    'Utility car': V_CAR.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'Utility car': get_value_c(
+        expression=V_CAR, betas=results.get_beta_values(), database=database
     ),
-    'Utility SM': V_SM.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'Utility SM': get_value_c(
+        expression=V_SM, betas=results.get_beta_values(), database=database
     ),
-    'Prob. PT': prob_PT.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'Prob. PT': get_value_c(
+        expression=prob_PT, betas=results.get_beta_values(), database=database
     ),
-    'Prob. car': prob_CAR.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'Prob. car': get_value_c(
+        expression=prob_CAR, betas=results.get_beta_values(), database=database
     ),
-    'Prob. SM': prob_SM.get_value_c(
-        betas=results.get_beta_values(), database=database, prepare_ids=True
+    'Prob. SM': get_value_c(
+        expression=prob_SM, betas=results.get_beta_values(), database=database
     ),
 }
 

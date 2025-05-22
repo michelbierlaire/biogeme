@@ -6,14 +6,14 @@ Estimation and simulation of a nested logit model
  We estimate a nested logit model, and we perform simulation using the
  estimated model.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:05:16 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 20:29:45
 """
 
 from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
+from biogeme.calculator import get_value_c
 from biogeme.data.optima import read_data
 from biogeme.models import lognested
 from biogeme.results_processing import get_pandas_estimated_parameters
@@ -34,12 +34,11 @@ logprob = lognested(util=V, availability=None, nests=nests, choice=Choice)
 database = read_data()
 # %%
 # Create the Biogeme object for estimation.
-the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b02estimation'
+the_biogeme = BIOGEME(database, logprob, bootstrap_samples=100)
+the_biogeme.model_name = 'b02estimation'
 
 # %%
 # Estimate the parameters. Perform bootstrapping.
-the_biogeme.bootstrap_samples = 100
 results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
@@ -50,13 +49,14 @@ display(pandas_results)
 
 # %%
 # Simulation
-simulated_choices = logprob.get_value_c(
-    betas=results.get_beta_values(), database=database
+simulated_choices = get_value_c(
+    expression=logprob, betas=results.get_beta_values(), database=database
 )
 display(simulated_choices)
 
 # %%
-loglikelihood = logprob.get_value_c(
+loglikelihood = get_value_c(
+    expression=logprob,
     betas=results.get_beta_values(),
     database=database,
     aggregation=True,

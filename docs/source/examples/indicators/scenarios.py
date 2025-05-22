@@ -10,23 +10,22 @@ Specification of a nested logit model, that will be estimated, and
  function that generates scenarios where the current cost of public
  transportation is multiplied by a factor.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 20:51:37 2023
-
+Michel Bierlaire, EPFL
+Mon Apr 28 2025, 12:12:42
 """
 
-from biogeme.expressions import Expression, Beta
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
 from biogeme.data.optima import (
     Choice,
-    TimePT,
-    TimeCar,
     CostCarCHF,
-    MarginalCostPT,
-    distance_km,
     Gender,
+    MarginalCostPT,
     OccupStat,
+    TimeCar,
+    TimePT,
+    distance_km,
 )
+from biogeme.expressions import Beta, Expression
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 # %%
 # List of parameters to be estimated.

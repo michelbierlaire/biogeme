@@ -5,9 +5,8 @@ Calculation of revenues
 
 We use an estimated model to calculate revenues.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:02:19 2023
-
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:18:20
 """
 
 import sys
@@ -24,7 +23,6 @@ try:
     can_plot = True
 except ModuleNotFoundError:
     can_plot = False
-from tqdm import tqdm
 from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
 
@@ -77,9 +75,7 @@ def revenues(factor: float) -> tuple[float, float, float]:
     simulated_values = the_biogeme.simulate(results.get_beta_values())
 
     # We also calculate confidence intervals for the calculated quantities
-
-    betas = the_biogeme.free_beta_names
-    beta_bootstrap = results.get_betas_for_sensitivity_analysis(betas)
+    beta_bootstrap = results.get_betas_for_sensitivity_analysis()
     left, right = the_biogeme.confidence_intervals(beta_bootstrap, 0.9)
 
     revenues_pt = (
@@ -103,7 +99,7 @@ print(
 # We now investigate how the revenues vary with the multiplicative factor
 
 factors = np.arange(0.0, 5.0, 0.1)
-plot_revenues = [revenues(s) for s in tqdm(factors)]
+plot_revenues = [revenues(s) for s in factors]
 zipped = zip(*plot_revenues)
 rev = next(zipped)
 lower = next(zipped)

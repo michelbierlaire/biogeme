@@ -6,15 +6,15 @@ Mixtures of logit with Monte-Carlo 500 draws
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 22:42:06 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 12:13:55
 """
 
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-from biogeme.expressions import bioDraws
 from b07estimation_specification import get_biogeme
+from biogeme.expressions import Draws
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
@@ -25,7 +25,7 @@ logger.info('Example b07estimation_monte_carlo_500.py')
 R = 500
 
 # %%
-the_draws = bioDraws('b_time_rnd', 'NORMAL')
+the_draws = Draws('b_time_rnd', 'NORMAL')
 the_biogeme = get_biogeme(the_draws=the_draws, number_of_draws=R)
 the_biogeme.modelName = 'b07estimation_monte_carlo_500'
 

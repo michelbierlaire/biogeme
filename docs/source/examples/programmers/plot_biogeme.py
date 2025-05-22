@@ -16,11 +16,10 @@ syntax. They do not correspond to any meaningful model.
 import pandas as pd
 from IPython.core.display_functions import display
 
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
 from biogeme.expressions import Beta, Variable, exp
-import biogeme.biogeme_logging as blog
-from biogeme.function_output import BiogemeFunctionOutput
 from biogeme.version import get_text
 
 # %%

@@ -6,26 +6,25 @@ Specification of the mixtures of logit
 Creation of the Biogeme object for a mixtures of logit models where
 the integral is approximated using MonteCarlo integration.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 21:04:47 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:42:42
 """
 
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, MonteCarlo, log, bioDraws
-
 from biogeme.data.swissmetro import (
-    read_data,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
-    TRAIN_AV_SP,
-    SM_AV,
     CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta, MonteCarlo, bioDraws, log
 from biogeme.models import logit
 
 # %%

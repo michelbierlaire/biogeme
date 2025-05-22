@@ -10,9 +10,8 @@ Details about this example are available in Section 3 of `Bierlaire (2018)
 Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:00:58 2023
-
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 11:29:10
 """
 
 import sys
@@ -20,19 +19,11 @@ import sys
 from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
+from biogeme.data.optima import normalized_weight, read_data
 from biogeme.expressions import Derive
-from biogeme.data.optima import read_data, normalized_weight
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
-
-from scenarios import (
-    scenario,
-    TimePT,
-    TimeCar,
-    MarginalCostPT,
-    CostCarCHF,
-)
-
+from scenarios import CostCarCHF, MarginalCostPT, TimeCar, TimePT, scenario
 
 # %%
 # Obtain the specification for the default scenario

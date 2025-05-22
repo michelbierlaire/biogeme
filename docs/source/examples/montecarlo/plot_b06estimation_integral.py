@@ -6,30 +6,28 @@ Estimation of mixtures of logit
 Estimation of a mixtures of logit models where the integral is
 calculated using numerical integration.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 21:03:03 2023
+Michel Bierlaire, EPFL
+Tue Apr 29 2025, 12:11:20
 """
 
 from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
-from biogeme.distributions import normalpdf
-from biogeme.expressions import Beta, RandomVariable, Integrate, log
+from biogeme.expressions import Beta, IntegrateNormal, RandomVariable, log
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
-
 from swissmetro import (
-    database,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
-    TRAIN_AV_SP,
-    SM_AV,
     CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 # %%
@@ -44,7 +42,6 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
 omega = RandomVariable('omega')
-density = normalpdf(omega)
 b_time_rnd = B_TIME + B_TIME_S * omega
 
 # %%
@@ -63,13 +60,13 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # The choice model is a logit, with availability conditions
-condprob = logit(util, av, CHOICE)
-prob = Integrate(condprob * density, 'omega')
-logprob = log(prob)
+cond_prob = logit(util, av, CHOICE)
+prob = IntegrateNormal(cond_prob, 'omega')
+log_prob = log(prob)
 
 # %%
-the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = '06estimation_integral'
+the_biogeme = BIOGEME(database, log_prob)
+the_biogeme.model_name = '06estimation_integral'
 
 # %%
 results = the_biogeme.estimate()
