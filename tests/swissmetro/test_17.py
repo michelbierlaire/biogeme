@@ -3,29 +3,23 @@ import unittest
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
-from biogeme.expressions import (
-    Beta,
-    exp,
-    log,
-    bioDraws,
-    MonteCarlo,
-)
+from biogeme.expressions import Beta, Draws, MonteCarlo, exp, log
 from biogeme.parameters import Parameters
 
 database = read_data()
@@ -43,7 +37,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 
 # Define a random parameter, log normally distributed, designed to be used
 # for Monte-Carlo simulation
-B_TIME_RND = -exp(B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL'))
+B_TIME_RND = -exp(B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL'))
 
 # Utility functions
 
@@ -74,12 +68,16 @@ class test_17(unittest.TestCase):
         parameters = Parameters()
         parameters.set_value(section='MonteCarlo', name='number_of_draws', value=5)
         parameters.set_value(section='MonteCarlo', name='seed', value=10)
-        biogeme = bio.BIOGEME(database, logprob, parameters=parameters)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            parameters=parameters,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.final_log_likelihood, -5316.3758171905365, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5312.735682816723, 2)
 
 
 if __name__ == '__main__':

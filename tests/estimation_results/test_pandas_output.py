@@ -41,7 +41,6 @@ class TestPandasGeneration(unittest.TestCase):
             draws_processing_time=timedelta(seconds=10),
             optimization_messages={'Diagnostic': 'test'},
             convergence=True,
-            number_of_threads=4,
             bootstrap=[[1.0, 1.0], [2.0, 2.0]],
             bootstrap_time=timedelta(seconds=20),
         )

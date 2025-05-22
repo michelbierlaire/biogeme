@@ -3,24 +3,24 @@ import unittest
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
 from biogeme.expressions import Beta
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -61,17 +61,21 @@ nests = NestsForNestedLogit(choice_set=[1, 2, 3], tuple_of_nests=(existing,))
 
 
 # The choice model is a nested logit, with availability conditions
-logprob = models.lognested(V, av, nests, CHOICE)
+log_prob = models.lognested(V, av, nests, CHOICE)
 
 
 class Test09(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameters=None)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            log_prob,
+            parameters=None,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.final_log_likelihood, -5236.9, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5236.900013578784, 2)
 
 
 if __name__ == '__main__':

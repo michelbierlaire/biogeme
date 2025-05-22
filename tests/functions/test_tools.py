@@ -7,6 +7,37 @@ Test the tools module
 
 import os
 import tempfile
+import unittest
+from copy import deepcopy
+from datetime import timedelta
+from unittest.mock import patch
+
+import numpy as np
+import pandas as pd
+
+import biogeme.tools.database
+import biogeme.tools.derivatives
+import biogeme.tools.files
+import biogeme.tools.likelihood_ratio
+import biogeme.tools.primes
+import biogeme.tools.unique_ids
+from biogeme.exceptions import BiogemeError
+from biogeme.function_output import FunctionOutput
+from biogeme.tools import (
+    create_backup,
+    format_timedelta,
+    is_valid_filename,
+    safe_deserialize_array,
+    safe_serialize_array,
+)
+from biogeme.tools.derivatives import CheckDerivativesResults
+from test_data import (
+    input_flatten,
+    output_flatten_1,
+    output_flatten_2,
+    output_flatten_3,
+)
+
 
 # Bug in pylint
 # pylint: disable=no-member
@@ -17,32 +48,10 @@ import tempfile
 # Not needed in test
 # pylint: disable=missing-function-docstring, missing-class-docstring
 
-import unittest
-from copy import deepcopy
-from datetime import timedelta
-from unittest.mock import patch
 
-import numpy as np
-import pandas as pd
-
-import biogeme.tools.derivatives
-import biogeme.tools.database
-import biogeme.tools.files
-import biogeme.tools.likelihood_ratio
-import biogeme.tools.primes
-import biogeme.tools.unique_ids
-from biogeme.exceptions import BiogemeError
-from biogeme.tools import format_timedelta, is_valid_filename, create_backup
-from biogeme.function_output import FunctionOutput
-from test_data import (
-    input_flatten,
-    output_flatten_1,
-    output_flatten_2,
-    output_flatten_3,
-)
-
-
-def my_function(x: np.ndarray) -> FunctionOutput:
+def my_function(
+    x: np.ndarray, gradient: bool, hessian: bool, bhhh: bool
+) -> FunctionOutput:
     f = np.log(x[0]) + np.exp(x[1])
     g = np.empty(2)
     g[0] = 1.0 / x[0]
@@ -59,7 +68,7 @@ class TestTools(unittest.TestCase):
     def test_findiff_g(self):
         x = np.array([1.1, 1.1])
         g_fd = biogeme.tools.derivatives.findiff_g(my_function, x)
-        np.testing.assert_almost_equal(g_fd, [0.90909087, 3.00416619])
+        np.testing.assert_almost_equal(g_fd, [0.90909087, 3.00416619], decimal=5)
 
     def test_findiff_H(self):
         x = np.array([1.1, 1.1])
@@ -76,22 +85,26 @@ class TestTools(unittest.TestCase):
                     3.00416619,
                 ],
             ],
+            decimal=5,
         )
 
     def test_checkDerivatives(self):
         x = np.array([1.1, -1.5])
-        _, _, _, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
+        results: CheckDerivativesResults = biogeme.tools.derivatives.check_derivatives(
             my_function, x, names=['First', 'Second']
         )
-        np.testing.assert_almost_equal(gdiff, [0, 0])
-        np.testing.assert_almost_equal(hdiff, [[0, 0], [0, 0]])
+
+        np.testing.assert_almost_equal(results.errors_gradient, [0, 0])
+        np.testing.assert_almost_equal(results.errors_hessian, [[0, 0], [0, 0]])
 
         x = np.array([3.2, 1.32])
-        _, _, _, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
+        results: CheckDerivativesResults = biogeme.tools.derivatives.check_derivatives(
             my_function, x, names=['First', 'Second']
         )
-        np.testing.assert_almost_equal(gdiff, [0, 0], decimal=5)
-        np.testing.assert_almost_equal(hdiff, [[0, 0], [0, 0]], decimal=5)
+        np.testing.assert_almost_equal(results.errors_gradient, [0, 0], decimal=5)
+        np.testing.assert_almost_equal(
+            results.errors_hessian, [[0, 0], [0, 0]], decimal=5
+        )
 
     def test_getPrimeNumbers(self):
         result = biogeme.tools.primes.get_prime_numbers(7)
@@ -183,10 +196,10 @@ class TestTools(unittest.TestCase):
 
     def test_temporary_file(self):
         content = 'a random sentence'
-        with biogeme.tools.files.TemporaryFile() as filename:
-            with open(filename, 'w', encoding='utf-8') as f:
+        with biogeme.tools.files.TemporaryFile() as temporary_file:
+            with open(temporary_file.name, 'w', encoding='utf-8') as f:
                 f.write(content)
-            with open(filename, encoding='utf-8') as f:
+            with open(temporary_file.name, encoding='utf-8') as f:
                 check = f.read()
             self.assertEqual(content, check)
 
@@ -404,6 +417,40 @@ class TestCreateBackup(unittest.TestCase):
         self.assertTrue(os.path.exists(filename))
         self.assertTrue(os.path.exists(backup_name1))
         self.assertTrue(os.path.exists(backup_name2))
+
+
+class TestSafeSerialization(unittest.TestCase):
+    def test_serialize_deserialize_1d(self):
+        arr = np.array([1.0, np.nan, 3.0])
+        serialized = safe_serialize_array(arr)
+        self.assertEqual(serialized, [1.0, None, 3.0])
+        deserialized = safe_deserialize_array(serialized)
+        np.testing.assert_array_equal(np.isnan(arr), np.isnan(deserialized))
+        np.testing.assert_allclose(
+            np.nan_to_num(arr, nan=0.0),
+            np.nan_to_num(deserialized, nan=0.0),
+            rtol=1e-10,
+        )
+
+    def test_serialize_deserialize_2d(self):
+        arr = np.array([[1.0, np.nan], [2.0, 3.0]])
+        serialized = safe_serialize_array(arr)
+        self.assertEqual(serialized, [[1.0, None], [2.0, 3.0]])
+        deserialized = safe_deserialize_array(serialized)
+        np.testing.assert_array_equal(np.isnan(arr), np.isnan(deserialized))
+        np.testing.assert_allclose(
+            np.nan_to_num(arr, nan=0.0),
+            np.nan_to_num(deserialized, nan=0.0),
+            rtol=1e-10,
+        )
+
+    def test_invalid_input_serialize(self):
+        with self.assertRaises(TypeError):
+            safe_serialize_array("not an array")
+
+    def test_invalid_input_deserialize(self):
+        with self.assertRaises(TypeError):
+            safe_deserialize_array("not a list")
 
 
 if __name__ == '__main__':

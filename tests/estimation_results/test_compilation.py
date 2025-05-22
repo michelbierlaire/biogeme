@@ -1,6 +1,7 @@
 import unittest
-from unittest.mock import MagicMock
+from datetime import timedelta
 
+from biogeme.results_processing import RawEstimationResults
 from biogeme.results_processing.compilation import compile_estimation_results
 from biogeme.results_processing.estimation_results import EstimationResults
 
@@ -8,24 +9,34 @@ from biogeme.results_processing.estimation_results import EstimationResults
 class TestCompileEstimationResults(unittest.TestCase):
 
     def setUp(self):
-        """Set up test fixtures."""
-        # Create a real instance of EstimationResults
-        self.mock_results = EstimationResults.__new__(EstimationResults)
-
-        # Mock necessary methods on this instance
-        self.mock_results.get_general_statistics = MagicMock(
-            return_value={
-                'Number of estimated parameters': ['2'],
-                'Sample size': ['100'],
-                'Final log likelihood': ['-1200.0'],
-                'Akaike Information Criterion': ['2404.0'],
-                'Bayesian Information Criterion': ['2450.0'],
-            }
+        raw_results = RawEstimationResults(
+            model_name='test',
+            user_notes='',
+            beta_names=['beta1', 'beta2'],
+            beta_values=[1.0, 2.0],
+            lower_bounds=[-100, -100],
+            upper_bounds=[100, 100],
+            gradient=[0, 0],
+            hessian=[[1, 1], [1, 1]],
+            bhhh=[[1, 1], [1, 1]],
+            null_log_likelihood=-1000,
+            initial_log_likelihood=-1000,
+            final_log_likelihood=-100,
+            data_name='data',
+            sample_size=500,
+            number_of_observations=500,
+            monte_carlo=False,
+            number_of_draws=0,
+            types_of_draws={},
+            number_of_excluded_data=0,
+            draws_processing_time=timedelta(1),
+            optimization_messages={},
+            convergence=True,
+            bootstrap=[],
+            bootstrap_time=None,
         )
-        self.mock_results.beta_names = ['beta1', 'beta2']
-        self.mock_results.get_parameter_value = MagicMock(side_effect=[1.0, 2.0])
-        self.mock_results.get_parameter_std_err = MagicMock(side_effect=[0.1, 0.2])
-        self.mock_results.get_parameter_t_test = MagicMock(side_effect=[10.0, 8.0])
+        # Create a real instance of EstimationResults
+        self.mock_results = EstimationResults(raw_results)
 
     def test_compile_estimation_results_basic(self):
         """Test basic functionality of compile_estimation_results."""
@@ -52,7 +63,7 @@ class TestCompileEstimationResults(unittest.TestCase):
 
         # Verify the values
         self.assertEqual(df.loc['Number of estimated parameters', 'Model_000000'], '2')
-        self.assertEqual(df.loc['Sample size', 'Model_000001'], '100')
+        self.assertEqual(df.loc['Sample size', 'Model_000001'], '500')
 
     def test_compile_estimation_results_with_parameters(self):
         """Test compile_estimation_results with parameter estimates, stderr, and t-test."""
@@ -73,8 +84,8 @@ class TestCompileEstimationResults(unittest.TestCase):
         # Check the inclusion of parameters, standard errors, and t-tests in formatted results
         self.assertIn('beta1 (std) (t-test)', df.index)
         self.assertIn('beta2 (std) (t-test)', df.index)
-        self.assertEqual(df.loc['beta1 (std) (t-test)', 'Model_1'], '1 (0.1) (10)')
-        self.assertEqual(df.loc['beta2 (std) (t-test)', 'Model_1'], '2 (0.2) (8)')
+        self.assertEqual(df.loc['beta1 (std) (t-test)', 'Model_1'], '1 (0.5) (2)')
+        self.assertEqual(df.loc['beta2 (std) (t-test)', 'Model_1'], '2 (0.5) (4)')
 
 
 if __name__ == '__main__':

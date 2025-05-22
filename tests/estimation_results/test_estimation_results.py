@@ -16,6 +16,7 @@ from biogeme.results_processing import (
     RawEstimationResults,
     calc_p_value,
     EstimateVarianceCovariance,
+    get_pandas_estimated_parameters,
 )
 
 
@@ -46,114 +47,14 @@ class TestEstimationResults(unittest.TestCase):
             draws_processing_time=timedelta(seconds=300),
             optimization_messages={'message': 'Optimization successful'},
             convergence=True,
-            number_of_threads=4,
             bootstrap=[[1.0, 2.0], [1.1, 2.1]],
             bootstrap_time=timedelta(seconds=100),
         )
         self.estimation_results = EstimationResults(self.raw_results)
 
     def test_empty(self):
-        the_empty = EstimationResults(raw_estimation_results=None)
-        self.assertEqual(the_empty.number_of_parameters, 0)
-        self.assertEqual(the_empty.number_of_free_parameters, 0)
-        self.assertFalse(the_empty.is_any_bound_active())
         with self.assertRaises(BiogemeError):
-            the_empty.is_bound_active(parameter_name='beta')
-        self.assertDictEqual(the_empty.get_beta_values(), {})
-        with self.assertRaises(BiogemeError):
-            the_empty.get_betas_for_sensitivity_analysis(my_betas=[])
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.akaike_information_criterion
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.bayesian_information_criterion
-        self.assertFalse(the_empty.algorithm_has_converged)
-        self.assertTrue(the_empty.variance_covariance_missing)
-        with self.assertRaises(BiogemeError):
-            the_empty.calculate_test(i=0, j=0, matrix=np.array([]))
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.likelihood_ratio_null
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.likelihood_ratio_init
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.rho_square_init
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.rho_square_null
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.rho_bar_square_init
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.rho_bar_square_null
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.gradient_norm
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.eigen_structure()
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.smallest_eigenvalue
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.smallest_eigenvector
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.largest_eigenvalue
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.largest_eigenvector
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.condition_number
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.rao_cramer_variance_covariance_matrix
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_variance_covariance_matrix(
-                variance_covariance_type=EstimateVarianceCovariance.RAO_CRAMER
-            )
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_variance_covariance_matrix(
-                variance_covariance_type=EstimateVarianceCovariance.BOOTSTRAP
-            )
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_variance_covariance_matrix(
-                variance_covariance_type=EstimateVarianceCovariance.ROBUST
-            )
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.robust_variance_covariance_matrix
-
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.bootstrap_variance_covariance_matrix
-
-        with self.assertRaises(BiogemeError):
-            the_empty.dump_yaml_file(filename='tmp.yaml')
-
-        summary = the_empty.short_summary()
-        self.assertEqual(summary, 'No estimation result is available.')
-
-        str_result = f'{the_empty}'
-        self.assertEqual(str_result, 'No estimation result is available.')
-
-        with self.assertRaises(BiogemeError):
-            the_empty.get_general_statistics()
-
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_parameter_index(parameter_name='beta')
-
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_parameter_value(parameter_index=0)
-
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_parameter_std_err(
-                parameter_index=0,
-                estimate_var_covar=EstimateVarianceCovariance.RAO_CRAMER,
-            )
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_parameter_t_test(
-                parameter_index=0,
-                estimate_var_covar=EstimateVarianceCovariance.RAO_CRAMER,
-            )
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.get_parameter_p_value(
-                parameter_index=0,
-                estimate_var_covar=EstimateVarianceCovariance.RAO_CRAMER,
-            )
-
-        with self.assertRaises(BiogemeError):
-            _ = the_empty.likelihood_ratio_test(
-                other_model=EstimationResults(raw_estimation_results=None)
-            )
+            the_empty = EstimationResults(raw_estimation_results=None)
 
     def test_number_of_parameters(self):
         """Test the number_of_parameters property."""
@@ -238,15 +139,15 @@ class TestEstimationResults(unittest.TestCase):
 
     def test_get_parameter_value(self):
         """Test parameter value retrieval."""
-        self.assertEqual(self.estimation_results.get_parameter_value(1), 1.5)
+        self.assertEqual(self.estimation_results.get_parameter_value_from_index(1), 1.5)
 
     def test_get_parameter_t_test(self):
         """Test t-test calculation for a parameter."""
-        t_value = self.estimation_results.get_parameter_t_test(
+        t_value = self.estimation_results.get_parameter_t_test_from_index(
             parameter_index=0, estimate_var_covar=EstimateVarianceCovariance.RAO_CRAMER
         )
         self.assertAlmostEqual(np.abs(t_value), 0.632455532033676)
-        t_value = self.estimation_results.get_parameter_t_test(
+        t_value = self.estimation_results.get_parameter_t_test_from_index(
             parameter_index=0,
             estimate_var_covar=EstimateVarianceCovariance.RAO_CRAMER,
             target=2.0,
@@ -255,7 +156,7 @@ class TestEstimationResults(unittest.TestCase):
 
     def test_get_parameter_p_value(self):
         """Test p-value calculation for a parameter."""
-        p_value = self.estimation_results.get_parameter_p_value(
+        p_value = self.estimation_results.get_parameter_p_value_from_index(
             0, EstimateVarianceCovariance.RAO_CRAMER
         )
         self.assertAlmostEqual(p_value, 0.5270892568655381)
@@ -316,7 +217,9 @@ class TestEstimationResults(unittest.TestCase):
             )
 
     def test_pandas_results(self):
-        pandas_results = self.estimation_results.get_estimated_parameters()
+        pandas_results = get_pandas_estimated_parameters(
+            estimation_results=self.estimation_results
+        )
         nrows, ncolumns = pandas_results.shape
         self.assertEqual(nrows, 2)
         self.assertEqual(ncolumns, 6)

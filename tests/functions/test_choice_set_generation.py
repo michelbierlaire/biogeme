@@ -1,20 +1,17 @@
 import os
-import unittest
 import tempfile
+import unittest
+
 import pandas as pd
-from biogeme.exceptions import BiogemeError
+
+from biogeme.database import Database
+from biogeme.expressions import Variable
 from biogeme.partition import Partition
 from biogeme.sampling_of_alternatives import (
-    SamplingOfAlternatives,
-    LOG_PROBA_COL,
-    SamplingContext,
-    StratumTuple,
-    CrossVariableTuple,
     ChoiceSetsGeneration,
-    MEV_PREFIX,
+    CrossVariableTuple,
+    SamplingContext,
 )
-from biogeme.expressions import Variable
-from biogeme.database import Database
 
 
 class TestChoiceSetsGeneration(unittest.TestCase):
@@ -98,7 +95,7 @@ class TestChoiceSetsGeneration(unittest.TestCase):
         self.choice_set_generator.define_new_variables(biogeme_database)
 
         # The new variable names should be new_var_0 and new_var_1 based on the sample size of 2
-        defined_variables = biogeme_database.variables
+        defined_variables = biogeme_database.dataframe.columns
         self.assertIn('new_var_0', defined_variables)
         self.assertIn('new_var_1', defined_variables)
 

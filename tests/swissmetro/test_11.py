@@ -1,53 +1,73 @@
 import unittest
 
 import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_HE,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_HE,
     TRAIN_TT,
+    read_data,
 )
 from biogeme.expressions import Beta, Derive
-from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
+from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
+
+logger = blog.get_screen_logger(level=blog.INFO)
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
 exclude = ((PURPOSE != 1) * (PURPOSE != 3)) > 0
 database.remove(exclude)
 
-
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
+ASC_CAR = Beta('ASC_CAR', -0.6, None, None, 0)
+ASC_TRAIN = Beta('ASC_TRAIN', -0.3, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+B_TIME_SM = Beta('B_TIME_SM', -1, None, None, 0)
+B_TIME_TRAIN = Beta('B_TIME_TRAIN', -1.07, None, None, 0)
+B_TIME_CAR = Beta('B_TIME_CAR', -0.86, None, None, 0)
+B_COST = Beta('B_COST', -0.97, None, None, 0)
+B_HEADWAY_SM = Beta('B_HEADWAY_SM', -0.008, None, None, 0)
+B_HEADWAY_TRAIN = Beta('B_HEADWAY_TRAIN', -0.004, None, None, 0)
+GA_TRAIN = Beta('GA_TRAIN', 1.14, None, None, 0)
+GA_SM = Beta('GA_SM', -0.14, None, None, 0)
 
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, None, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, None, 0)
-ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
-ALPHA_PUBLIC = 1 - ALPHA_EXISTING
+MU_EXISTING = Beta('MU_EXISTING', 1.77, 1, None, 0)
+MU_PUBLIC = Beta('MU_PUBLIC', 1.84, 1, None, 0)
+ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.645, 0, 1, 0)
+ALPHA_PUBLIC = 1.0 - ALPHA_EXISTING
 
 
 SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
 
-
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+V1 = (
+    ASC_TRAIN
+    + B_TIME_TRAIN * TRAIN_TT / 100
+    + B_COST * TRAIN_COST_SCALED
+    + B_HEADWAY_TRAIN * TRAIN_HE
+    + GA_TRAIN * GA
+)
+V2 = (
+    ASC_SM
+    + B_TIME_SM * SM_TT_SCALED
+    + B_COST * SM_COST_SCALED
+    + B_HEADWAY_SM * SM_HE
+    + GA_SM * GA
+)
+V3 = ASC_CAR + B_TIME_CAR * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
 
 # Associate utility functions with the numbering of alternatives
 V = {1: V1, 2: V2, 3: V3}
@@ -70,24 +90,28 @@ nests = NestsForCrossNestedLogit(
 )
 
 # The choice model is a cross-nested logit, with availability conditions
-logprob = models.logcnl(V, av, nests, CHOICE)
+log_prob = models.logcnl(V, av, nests, CHOICE)
 prob1 = models.cnl(V, av, nests, 1)
-genelas1 = Derive(prob1, 'TRAIN_TT') * TRAIN_TT / prob1
-simulate = {'Prob. train': prob1, 'Elas. 1': genelas1}
+gen_elas1 = Derive(prob1, 'TRAIN_TT') * TRAIN_TT / prob1
+simulate = {'Prob. train': prob1, 'Elas. 1': gen_elas1}
 
 
 class test_11(unittest.TestCase):
     def testEstimationAndSimulation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameters=None)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            log_prob,
+            generate_html=False,
+            generate_yaml=False,
+            save_iterations=False,
+        )
+        biogeme.model_name = 'test_11'
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.final_log_likelihood, -5214.049, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -4997.865308202665, 2)
         biosim = bio.BIOGEME(database, simulate)
         simresults = biosim.simulate(results.get_beta_values())
         self.assertAlmostEqual(
-            sum(simresults['Prob. train']), 888.3883902853023, delta=1
+            sum(simresults['Prob. train']), 902.4604168804027, delta=1
         )
 
 

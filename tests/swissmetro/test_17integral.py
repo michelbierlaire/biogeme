@@ -4,29 +4,23 @@ import biogeme.biogeme as bio
 import biogeme.distributions as dist
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
-from biogeme.expressions import (
-    Beta,
-    RandomVariable,
-    exp,
-    log,
-    Integrate,
-)
+from biogeme.expressions import Beta, IntegrateNormal, RandomVariable, exp, log
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -70,18 +64,22 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # The choice model is a logit, with availability conditions
 condprob = models.logit(V, av, CHOICE)
-prob = Integrate(condprob * density, 'omega')
+prob = IntegrateNormal(condprob, 'omega')
 logprob = log(prob)
 
 
 class test_17(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameters=None)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            parameters=None,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.final_log_likelihood, -5231.419418346811, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5231.50634765625, 2)
 
 
 if __name__ == '__main__':

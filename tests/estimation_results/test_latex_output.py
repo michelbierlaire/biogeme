@@ -8,6 +8,7 @@ Tue Oct 1 19:18:45 2024
 import unittest
 
 from biogeme.results_processing import latex_output
+from biogeme.results_processing.latex_output import get_sign_for_p_value
 
 
 class TestAddTrailingZero(unittest.TestCase):
@@ -70,6 +71,67 @@ class TestFormatRealNumber(unittest.TestCase):
         self.assertEqual(latex_output.format_real_number(1), '1.0')
         self.assertEqual(latex_output.format_real_number(10), '10.0')
         self.assertEqual(latex_output.format_real_number(1.234), '1.23')
+
+
+class TestGetSignForPValue(unittest.TestCase):
+    def test_valid_thresholds(self):
+        p_thresholds = [(0.01, '***'), (0.05, '**'), (0.1, '*'), (0.2, '+')]
+        self.assertEqual(
+            get_sign_for_p_value(0.005, p_thresholds), "***"
+        )  # Smallest p-value
+        self.assertEqual(
+            get_sign_for_p_value(0.03, p_thresholds), "**"
+        )  # Between 0.01 and 0.05
+        self.assertEqual(
+            get_sign_for_p_value(0.07, p_thresholds), "*"
+        )  # Between 0.05 and 0.1
+        self.assertEqual(
+            get_sign_for_p_value(0.15, p_thresholds), "+"
+        )  # Between 0.1 and 0.2
+        self.assertEqual(get_sign_for_p_value(0.25, p_thresholds), "")  # No match
+
+    def test_string(self):
+        p_thresholds = [(0.01, '***'), (0.05, '**'), (0.1, '*'), (0.2, '+')]
+        self.assertEqual(
+            get_sign_for_p_value('0.005', p_thresholds), "***"
+        )  # Smallest p-value
+        p_thresholds = [(0.01, 12), (0.05, '**'), (0.1, '*'), (0.2, '+')]
+        self.assertEqual(
+            get_sign_for_p_value(0.005, p_thresholds), '12'
+        )  # Smallest p-value
+
+    def test_exact_threshold_matches(self):
+        p_thresholds = [(0.01, "***"), (0.05, "**"), (0.1, "*"), (0.2, "+")]
+        self.assertEqual(get_sign_for_p_value(0.01, p_thresholds), "***")
+        self.assertEqual(get_sign_for_p_value(0.05, p_thresholds), "**")
+        self.assertEqual(get_sign_for_p_value(0.1, p_thresholds), "*")
+        self.assertEqual(get_sign_for_p_value(0.2, p_thresholds), "+")
+
+    def test_empty_threshold_list(self):
+        self.assertEqual(get_sign_for_p_value(0.05, []), "")  # No thresholds given
+
+    def test_invalid_p_value(self):
+        p_thresholds = [(0.01, "***"), (0.05, "**"), (0.1, "*")]
+
+        with self.assertRaises(TypeError):
+            get_sign_for_p_value(None, p_thresholds)  # None instead of float
+
+        with self.assertRaises(TypeError):
+            get_sign_for_p_value('a_string', p_thresholds)  # None instead of float
+
+    def test_invalid_threshold_structure(self):
+        with self.assertRaises(TypeError):
+            get_sign_for_p_value(0.05, [0.01, 0.05, 0.1])  # Not a list of tuples
+        with self.assertRaises(TypeError):
+            get_sign_for_p_value(
+                0.05, [(0.01, "***"), ("invalid", "**")]
+            )  # Non-float threshold
+
+    def test_unsorted_thresholds(self):
+        p_thresholds = [(0.1, "*"), (0.01, "***"), (0.05, "**")]  # Unsorted list
+        self.assertEqual(
+            get_sign_for_p_value(0.03, p_thresholds), "**"
+        )  # Finds correct minimum threshold
 
 
 if __name__ == "__main__":

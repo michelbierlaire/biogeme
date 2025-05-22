@@ -37,7 +37,6 @@ class TestParetoOptimal(unittest.TestCase):
             draws_processing_time=timedelta(seconds=15),
             optimization_messages={'Diagnostic': 'optimal'},
             convergence=True,
-            number_of_threads=4,
             bootstrap=[[1.0, 1.0], [2.0, 2.0]],
             bootstrap_time=timedelta(seconds=10),
         )
@@ -65,7 +64,6 @@ class TestParetoOptimal(unittest.TestCase):
             draws_processing_time=timedelta(seconds=20),
             optimization_messages={'Diagnostic': 'converged'},
             convergence=True,
-            number_of_threads=5,
             bootstrap=[[2.0, 2.0], [3.0, 3.0]],
             bootstrap_time=timedelta(seconds=12),
         )

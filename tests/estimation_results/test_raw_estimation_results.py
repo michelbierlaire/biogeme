@@ -5,20 +5,17 @@ Michel Bierlaire
 Tue Oct 1 19:18:45 2024
 """
 
-import unittest
-import tempfile
 import os
+import tempfile
+import unittest
 from datetime import timedelta
+
 from yaml import dump, load, SafeLoader
-from unittest.mock import patch
+
 from biogeme.results_processing import (
     RawEstimationResults,
     serialize_to_yaml,
     deserialize_from_yaml,
-)
-from biogeme.native_draws import (
-    RandomNumberGeneratorTuple,
-    native_random_number_generators,
 )
 
 
@@ -49,7 +46,6 @@ class TestRawEstimationResults(unittest.TestCase):
             draws_processing_time=timedelta(seconds=300),
             optimization_messages={'message': 'Optimization successful'},
             convergence=True,
-            number_of_threads=4,
             bootstrap=[[0.5, 1.5], [1.5, 2.5]],
             bootstrap_time=timedelta(seconds=100),
         )
@@ -137,7 +133,6 @@ class TestRawEstimationResults(unittest.TestCase):
             draws_processing_time=timedelta(seconds=0),
             optimization_messages={},
             convergence=False,
-            number_of_threads=0,
             bootstrap=[],
             bootstrap_time=None,
         )

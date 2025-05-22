@@ -1,18 +1,19 @@
 import unittest
+from unittest.mock import Mock
+
 import pandas as pd
-from unittest.mock import Mock, patch
+
+from biogeme.expressions import Beta, Expression, Variable
+from biogeme.nests import (
+    NestsForCrossNestedLogit,
+    NestsForNestedLogit,
+    OneNestForCrossNestedLogit,
+    OneNestForNestedLogit,
+)
 from biogeme.sampling_of_alternatives import (
+    CrossVariableTuple,
     GenerateModel,
     SamplingContext,
-    CrossVariableTuple,
-)
-from biogeme.partition import Partition
-from biogeme.expressions import Variable, Expression, Beta
-from biogeme.nests import (
-    NestsForNestedLogit,
-    OneNestForNestedLogit,
-    NestsForCrossNestedLogit,
-    OneNestForCrossNestedLogit,
 )
 
 
@@ -115,14 +116,14 @@ class TestGenerateModel(unittest.TestCase):
         model = GenerateModel(context)
         logit_expression = model.get_logit()
         self.assertIsInstance(logit_expression, Expression)
-        expected_start = '_bioLogLogitFullChoiceSet[choice=`0.0`]'
+        expected_start = 'LogLogit[choice=`0.0`]'
         self.assertTrue(str(logit_expression).startswith(expected_start))
 
     def test_get_nested_logit(self):
         model = GenerateModel(self.mock_context)
         nested_logit_expression = model.get_nested_logit(self.nests)
         self.assertIsInstance(nested_logit_expression, Expression)
-        expected = '_bioLogLogitFullChoiceSet[choice=`0.0`]'
+        expected = 'LogLogit[choice=`0.0`]'
         self.assertTrue(str(nested_logit_expression).startswith(expected))
 
     def test_get_cross_nested_logit(self):
@@ -130,7 +131,7 @@ class TestGenerateModel(unittest.TestCase):
         model = GenerateModel(self.mock_context)
         cross_nested_logit_expression = model.get_cross_nested_logit()
         self.assertIsInstance(cross_nested_logit_expression, Expression)
-        expected = '_bioLogLogitFullChoiceSet[choice=`0.0`]'
+        expected = 'LogLogit[choice=`0.0`]'
         self.assertTrue(str(cross_nested_logit_expression).startswith(expected))
 
 

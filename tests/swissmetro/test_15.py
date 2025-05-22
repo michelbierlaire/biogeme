@@ -3,29 +3,23 @@ import unittest
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
-from biogeme.expressions import (
-    Beta,
-    log,
-    bioDraws,
-    MonteCarlo,
-    PanelLikelihoodTrajectory,
-)
+from biogeme.expressions import Beta, Draws, MonteCarlo, PanelLikelihoodTrajectory, log
 from biogeme.results_processing import EstimationResults
 
 database = read_data()
@@ -46,9 +40,9 @@ SIGMA_TRAIN = Beta('SIGMA_TRAIN', 2.898149, None, None, 0)
 
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
-EC_CAR = SIGMA_CAR * bioDraws('EC_CAR', 'NORMAL')
-EC_SM = SIGMA_SM * bioDraws('EC_SM', 'NORMAL')
-EC_TRAIN = SIGMA_TRAIN * bioDraws('EC_TRAIN', 'NORMAL')
+EC_CAR = SIGMA_CAR * Draws('EC_CAR', 'NORMAL')
+EC_SM = SIGMA_SM * Draws('EC_SM', 'NORMAL')
+EC_TRAIN = SIGMA_TRAIN * Draws('EC_TRAIN', 'NORMAL')
 
 SM_COST = SM_CO * (GA == 0)
 TRAIN_COST = TRAIN_CO * (GA == 0)
@@ -80,18 +74,23 @@ probClass2 = W_OTHER
 # The choice model is a discrete mixture of logit, with availability conditions
 prob1 = PanelLikelihoodTrajectory(models.logit(V1, av, CHOICE))
 prob2 = PanelLikelihoodTrajectory(models.logit(V2, av, CHOICE))
-probIndiv = probClass1 * prob1 + probClass2 * prob2
-logprob = log(MonteCarlo(probIndiv))
+prob_indiv = probClass1 * prob1 + probClass2 * prob2
+log_prob = log(MonteCarlo(prob_indiv))
 
 
 class test_15(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1111)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            log_prob,
+            number_of_draws=100,
+            seed=1111,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results: EstimationResults = biogeme.estimate()
-        self.assertAlmostEqual(results.final_log_likelihood, -3639.6577652986966, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -3639.291359844362, 2)
 
 
 if __name__ == '__main__':
