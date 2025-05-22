@@ -201,7 +201,7 @@ logprob = loglogit(V, av, CHOICE)
 
 # %%
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b22multiple_models'
+the_biogeme.model_name = 'b22multiple_models'
 
 # %%
 PARETO_FILE_NAME = 'b22multiple_models.pareto'

@@ -10,6 +10,8 @@ Example of a nested logit model.
 
 """
 
+import sys
+
 from IPython.core.display_functions import display
 
 from biogeme import biogeme_logging as blog
@@ -45,7 +47,7 @@ ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
-MU = Beta('MU', 1, 1, 10, 0)
+MU = Beta('MU', 1, 1, 3, 0)
 
 # %%
 # Definition of the utility functions.
@@ -81,7 +83,7 @@ logprob = lognested(V, av, nests, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, logprob, optimization_algorithm='simple_bounds_BFGS')
 the_biogeme.modelName = "b09nested"
 
 # %%

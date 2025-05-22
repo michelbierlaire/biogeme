@@ -19,13 +19,13 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
-    bioDraws,
+    Draws,
     MonteCarlo,
     PanelLikelihoodTrajectory,
     log,
 )
 from biogeme.models import logit
-from biogeme.native_draws import RandomNumberGeneratorTuple
+from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
@@ -60,16 +60,12 @@ def the_triangular_generator(sample_size: int, number_of_draws: int) -> np.ndarr
 
 # %%
 # Associate the function with a name.
-myRandomNumberGenerators = {
+my_random_number_generators = {
     'TRIANGULAR': RandomNumberGeneratorTuple(
         the_triangular_generator,
         'Draws from a triangular distribution',
     )
 }
-
-# %%
-# Submit the generator to the database.
-database.set_random_number_generators(myRandomNumberGenerators)
 
 # %%
 # Parameters to be estimated.
@@ -87,21 +83,21 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # Scale of the distribution. It is advised not to use 0 as starting
 # value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'TRIANGULAR')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'TRIANGULAR')
 
 # %%
 # We do the same for the constants, to address serial correlation.
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_CAR_S = Beta('ASC_CAR_S', 1, None, None, 0)
-ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'TRIANGULAR')
+ASC_CAR_RND = ASC_CAR + ASC_CAR_S * Draws('ASC_CAR_RND', 'TRIANGULAR')
 
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_TRAIN_S = Beta('ASC_TRAIN_S', 1, None, None, 0)
-ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'TRIANGULAR')
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * Draws('ASC_TRAIN_RND', 'TRIANGULAR')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
-ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'TRIANGULAR')
+ASC_SM_RND = ASC_SM + ASC_SM_S * Draws('ASC_SM_RND', 'TRIANGULAR')
 
 # %%
 # Definition of the utility functions.
@@ -120,24 +116,30 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Conditional to the random parameters, the likelihood of one observation is
 # given by the logit model (called the kernel).
-obsprob = logit(V, av, CHOICE)
+obs_prob = logit(V, av, CHOICE)
 
 # %%
 # Conditional on the random parameters, the likelihood of all observations for
 # one individual (the trajectory) is the product of the likelihood of
 # each observation.
-condprobIndiv = PanelLikelihoodTrajectory(obsprob)
+condprob_indiv = PanelLikelihoodTrajectory(obs_prob)
 
 # %%
 # We integrate over the random parameters using Monte-Carlo
-logprob = log(MonteCarlo(condprobIndiv))
+logprob = log(MonteCarlo(condprob_indiv))
 
 # %%
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = 'b26triangular_panel_mixture'
+the_biogeme = BIOGEME(
+    database,
+    logprob,
+    random_number_generators=my_random_number_generators,
+    number_of_draws=1000,
+    seed=1223,
+)
+the_biogeme.model_name = 'b26triangular_panel_mixture'
 
 # %%
 # Estimate the parameters.

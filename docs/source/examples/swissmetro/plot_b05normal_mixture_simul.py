@@ -11,11 +11,11 @@ Simulation of the mixture model, with estimation of the integration error.
 """
 
 import sys
+
 import numpy as np
 
 from biogeme.biogeme import BIOGEME
-from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Beta, bioDraws, MonteCarlo
+from biogeme.expressions import Beta, MonteCarlo, Draws
 from biogeme.models import logit
 from biogeme.results_processing import EstimationResults
 
@@ -59,7 +59,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL')
 
 # %%
 # Definition of the utility functions.
@@ -114,12 +114,12 @@ simulate = {
 
 # %%
 # Create the Biogeme object.
-biosim = BIOGEME(database, simulate, number_or_draws=100)
-biosim.modelName = 'b05normal_mixture_simul'
+biosim = BIOGEME(database, simulate, number_of_draws=10000)
+biosim.model_name = 'b05normal_mixture_simul'
 
 # %%
 # NUmber of draws
-print(biosim.number_of_draws)
+print(f'Number of draws: {biosim.number_of_draws}')
 
 # %%
 # Simulate the requested quantities. The output is a Pandas data frame.

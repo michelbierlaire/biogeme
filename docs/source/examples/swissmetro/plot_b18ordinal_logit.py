@@ -80,7 +80,7 @@ logprob = log(the_chosen_proba)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b18ordinal_logit'
+the_biogeme.model_name = 'b18ordinal_logit'
 
 # %%
 # Estimate the parameters

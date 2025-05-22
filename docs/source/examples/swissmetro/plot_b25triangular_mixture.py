@@ -18,9 +18,9 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
+from biogeme.expressions import Beta, Draws, log, MonteCarlo
 from biogeme.models import logit
-from biogeme.native_draws import RandomNumberGeneratorTuple
+from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
@@ -38,6 +38,7 @@ from swissmetro_data import (
     CAR_CO_SCALED,
     SM_AV,
 )
+
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b25triangular_mixture.py')
@@ -77,21 +78,18 @@ def the_triangular_generator(sample_size: int, number_of_draws: int) -> np.ndarr
 
 # %%
 # Associate the function with a name.
-myRandomNumberGenerators = {
+my_random_number_generators = {
     'TRIANGULAR': RandomNumberGeneratorTuple(
         generator=the_triangular_generator,
         description='Draws from a triangular distribution',
     )
 }
 
-# %%
-# Submit the generator to the database.
-database.set_random_number_generators(myRandomNumberGenerators)
 
 # %%
 # Define a random parameter with a triangular distribution, designed to be used
 # for Monte-Carlo simulation.
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'TRIANGULAR')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'TRIANGULAR')
 
 # %%
 # Definition of the utility functions.
@@ -119,8 +117,16 @@ logprob = log(MonteCarlo(prob))
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = 'b25triangular_mixture'
+
+
+the_biogeme = BIOGEME(
+    database,
+    logprob,
+    random_number_generators=my_random_number_generators,
+    number_of_draws=1000,
+    seed=1223,
+)
+the_biogeme.model_name = 'b25triangular_mixture'
 
 # %%
 # Estimate the parameters

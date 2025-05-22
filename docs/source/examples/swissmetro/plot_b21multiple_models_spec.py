@@ -157,11 +157,6 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # observation to the log likelihood function.
 logprob = loglogit(V, av, CHOICE)
 
-# %%
-print(
-    f'Total number of possible specifications: '
-    f'{logprob.number_of_multiple_expressions()}'
-)
 
 # %%
 # Create the biogeme object.

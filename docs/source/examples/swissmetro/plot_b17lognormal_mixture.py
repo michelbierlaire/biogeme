@@ -21,7 +21,7 @@ from biogeme.expressions import (
     exp,
     log,
     MonteCarlo,
-    bioDraws,
+    Draws,
 )
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
@@ -64,7 +64,7 @@ B_TIME_S = Beta('B_TIME_S', 1, -2, 2, 0)
 # %%
 # Define a random parameter, log normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME_RND = -exp(B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL'))
+B_TIME_RND = -exp(B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL'))
 
 # %%
 # Definition of the utility functions.
@@ -93,7 +93,7 @@ logprob = log(MonteCarlo(prob))
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
 the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = '17lognormal_mixture'
+the_biogeme.model_name = '17lognormal_mixture'
 
 # %%
 # Estimate the parameters.

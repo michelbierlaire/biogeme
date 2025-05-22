@@ -61,7 +61,7 @@ logprob = loglogit(V, av, CHOICE)
 # %%
 # Create the Biogeme object
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b23logit'
+the_biogeme.model_name = 'b23logit'
 
 # %%
 # Estimate the parameters

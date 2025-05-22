@@ -99,33 +99,32 @@ second_derivatives_values = [0.0, 0.5, 1.0]
 # We run the optimization algorithm with all possible combinations of the parameters.
 # The results are stored in a Pandas DataFrame called ``summary``.
 results = {}
-summary = pd.DataFrame(
-    columns=[
-        'LogLikelihood',
-        'GradientNorm',
-        'Optimization time',
-        'TerminationCause',
-        'Status',
-    ]
-)
+summary_data = []
 
+# %%
+# The first estimation is performed twice, to warm up the python code, so that the execution times are comparable
+first = True
 for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     infeasible_cg_values, initial_radius_values, second_derivatives_values
 ):
     # Create the Biogeme object
-    the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-    # We set the parameters of the optimization algorithm
-    the_biogeme.infeasible_cg = infeasible_cg
-    the_biogeme.initial_radius = initial_radius
-    the_biogeme.second_derivatives = second_derivatives
-    # We cancel the generation of the output files
-    the_biogeme.generate_html = False
-    the_biogeme.generate_pickle = False
+    the_biogeme = BIOGEME(
+        database,
+        logprob,
+        number_of_draws=1000,
+        seed=1223,
+        infeasible_cg=infeasible_cg,
+        initial_radius=initial_radius,
+        second_derivatives=second_derivatives,
+        generate_html=False,
+        generate_yaml=False,
+    )
 
     name = (
         f'cg_{infeasible_cg}_radius_{initial_radius}_second_deriv_{second_derivatives}'
     )
-    the_biogeme.modelName = f'b05normal_mixture_algo_{name}'.strip()
+    the_biogeme.model_name = f'b05normal_mixture_algo_{name}'.strip()
+
     result_data = {
         'InfeasibleCG': infeasible_cg,
         'InitialRadius': initial_radius,
@@ -135,16 +134,20 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
 
     try:
         results[name] = the_biogeme.estimate()
+        if first:
+            results[name] = the_biogeme.estimate()
+            first = False
         opt_time = format_timedelta(
-            results[name].data.optimizationMessages["Optimization time"]
+            results[name].optimization_messages["Optimization time"]
         )
 
         result_data.update(
             {
-                'LogLikelihood': results[name].data.logLike,
-                'GradientNorm': results[name].data.gradientNorm,
+                'LogLikelihood': results[name].final_log_likelihood,
+                'GradientNorm': results[name].gradient_norm,
+                'Number of draws': results[name].number_of_draws,
                 'Optimization time': opt_time,
-                'TerminationCause': results[name].data.optimizationMessages[
+                'TerminationCause': results[name].optimization_messages[
                     "Cause of termination"
                 ],
             }
@@ -157,13 +160,16 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
                 'Status': 'Failed',
                 'LogLikelihood': None,
                 'GradientNorm': None,
+                'Number of draws': None,
                 'Optimization time': None,
                 'TerminationCause': str(e),
             }
         )
         results[name] = None
+    summary_data.append(result_data)
 
-    summary = pd.concat([summary, pd.DataFrame([result_data])], ignore_index=True)
+summary = pd.DataFrame(summary_data)
+
 
 # %%
 display(summary)

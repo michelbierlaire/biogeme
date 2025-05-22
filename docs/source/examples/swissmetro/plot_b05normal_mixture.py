@@ -14,7 +14,7 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, bioDraws, log, MonteCarlo
+from biogeme.expressions import Beta, log, MonteCarlo, Draws
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
 
@@ -52,7 +52,7 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # %%
 # It is advised *not* to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL')
 
 # %%
 # Definition of the utility functions.
@@ -86,9 +86,9 @@ USER_NOTES = (
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(
-    database, logprob, user_notes=USER_NOTES, number_of_draws=100, seed=1223
+    database, logprob, user_notes=USER_NOTES, number_of_draws=1000, seed=1223
 )
-the_biogeme.modelName = 'b05normal_mixture'
+the_biogeme.model_name = 'b05normal_mixture'
 
 # %%
 print(f'Number of draws: {the_biogeme.number_of_draws}')

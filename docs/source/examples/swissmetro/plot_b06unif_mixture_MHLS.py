@@ -18,7 +18,7 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
-    bioDraws,
+    Draws,
     log,
     MonteCarlo,
 )
@@ -63,7 +63,7 @@ B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 # %%
 # Define a random parameter, uniformly distributed, designed to be used
 # for Monte-Carlo simulation. The type of draws is set to ``NORMAL_MLHS``.
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_MLHS')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL_MLHS')
 
 # %%
 # Definition of the utility functions.
@@ -90,8 +90,8 @@ logprob = log(MonteCarlo(prob))
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = '06unif_mixture_MHLS'
+the_biogeme = BIOGEME(database, logprob, number_of_draws=1000, seed=1223)
+the_biogeme.model_name = '06unif_mixture_MHLS'
 
 # %%
 # Estimate the parameters.

@@ -113,7 +113,7 @@ corr = nests.correlation(
     parameters=results.get_beta_values(),
     alternatives_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'},
 )
-corr
+display(corr)
 
 # %%
 # The choice model is a cross-nested logit, with availability conditions.

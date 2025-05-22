@@ -18,25 +18,30 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
-    Variable,
-    bioDraws,
+    Draws,
     MonteCarlo,
     log,
-    exp,
-    bioMultSum,
     ExpressionOrNumeric,
+    PanelLikelihoodTrajectory,
 )
-from biogeme.models import loglogit, logit
+from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
 from swissmetro_panel import (
-    flat_database,
+    CHOICE,
+    database,
     SM_AV,
     CAR_AV_SP,
     TRAIN_AV_SP,
     INCOME,
+    TRAIN_TT_SCALED,
+    TRAIN_COST_SCALED,
+    SM_TT_SCALED,
+    SM_COST_SCALED,
+    CAR_TT_SCALED,
+    CAR_CO_SCALED,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -58,7 +63,7 @@ B_TIME_S = [
     Beta(f'B_TIME_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 B_TIME_RND: list[ExpressionOrNumeric] = [
-    B_TIME[i] + B_TIME_S[i] * bioDraws(f'B_TIME_RND_class{i}', 'NORMAL_ANTI')
+    B_TIME[i] + B_TIME_S[i] * Draws(f'B_TIME_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -71,7 +76,7 @@ ASC_CAR_S = [
     Beta(f'ASC_CAR_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_CAR_RND = [
-    ASC_CAR[i] + ASC_CAR_S[i] * bioDraws(f'ASC_CAR_RND_class{i}', 'NORMAL_ANTI')
+    ASC_CAR[i] + ASC_CAR_S[i] * Draws(f'ASC_CAR_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -82,7 +87,7 @@ ASC_TRAIN_S = [
     Beta(f'ASC_TRAIN_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_TRAIN_RND = [
-    ASC_TRAIN[i] + ASC_TRAIN_S[i] * bioDraws(f'ASC_TRAIN_RND_class{i}', 'NORMAL_ANTI')
+    ASC_TRAIN[i] + ASC_TRAIN_S[i] * Draws(f'ASC_TRAIN_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -91,7 +96,7 @@ ASC_SM_S = [
     Beta(f'ASC_SM_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_SM_RND = [
-    ASC_SM[i] + ASC_SM_S[i] * bioDraws(f'ASC_SM_RND_class{i}', 'NORMAL_ANTI')
+    ASC_SM[i] + ASC_SM_S[i] * Draws(f'ASC_SM_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -105,38 +110,20 @@ CLASS_INC = Beta('CLASS_INC', 0, None, None, 0)
 B_TIME_RND[0] = 0
 
 # %%
-# Utility functions
+# Utility functions.
 V1 = [
-    [
-        ASC_TRAIN_RND[i]
-        + B_TIME_RND[i] * Variable(f'{t}_TRAIN_TT_SCALED')
-        + B_COST[i] * Variable(f'{t}_TRAIN_COST_SCALED')
-        for t in range(1, 10)
-    ]
+    ASC_TRAIN_RND[i] + B_TIME_RND[i] * TRAIN_TT_SCALED + B_COST[i] * TRAIN_COST_SCALED
     for i in range(NUMBER_OF_CLASSES)
 ]
 V2 = [
-    [
-        ASC_SM_RND[i]
-        + B_TIME_RND[i] * Variable(f'{t}_SM_TT_SCALED')
-        + B_COST[i] * Variable(f'{t}_SM_COST_SCALED')
-        for t in range(1, 10)
-    ]
+    ASC_SM_RND[i] + B_TIME_RND[i] * SM_TT_SCALED + B_COST[i] * SM_COST_SCALED
     for i in range(NUMBER_OF_CLASSES)
 ]
 V3 = [
-    [
-        ASC_CAR_RND[i]
-        + B_TIME_RND[i] * Variable(f'{t}_CAR_TT_SCALED')
-        + B_COST[i] * Variable(f'{t}_CAR_CO_SCALED')
-        for t in range(1, 10)
-    ]
+    ASC_CAR_RND[i] + B_TIME_RND[i] * CAR_TT_SCALED + B_COST[i] * CAR_CO_SCALED
     for i in range(NUMBER_OF_CLASSES)
 ]
-V = [
-    [{1: V1[i][t], 2: V2[i][t], 3: V3[i][t]} for t in range(9)]
-    for i in range(NUMBER_OF_CLASSES)
-]
+V = [{1: V1[i], 2: V2[i], 3: V3[i]} for i in range(NUMBER_OF_CLASSES)]
 
 # %%
 # Associate the availability conditions with the alternatives
@@ -146,10 +133,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # The choice model is a discrete mixture of logit, with availability conditions
 # We calculate the conditional probability for each class.
 prob = [
-    exp(
-        bioMultSum([loglogit(V[i][t], av, Variable(f'{t+1}_CHOICE')) for t in range(9)])
-    )
-    for i in range(NUMBER_OF_CLASSES)
+    PanelLikelihoodTrajectory(logit(V[i], av, CHOICE)) for i in range(NUMBER_OF_CLASSES)
 ]
 
 # %%
@@ -170,7 +154,7 @@ logprob = log(MonteCarlo(prob_individual))
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(flat_database, logprob, number_of_draws=100, seed=1223)
+the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
 the_biogeme.modelName = 'b16panel_discrete_socio_eco'
 
 # %%

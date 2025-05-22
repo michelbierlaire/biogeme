@@ -11,6 +11,8 @@ Example of a mixture of logit models, using Monte-Carlo integration.
 
 """
 
+import sys
+
 import numpy as np
 from IPython.core.display_functions import display
 
@@ -18,13 +20,15 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
-    bioDraws,
+    Draws,
     PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
 )
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
+
+# from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -61,21 +65,21 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_ANTI')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL_ANTI')
 
 # %%
 # We do the same for the constants, to address serial correlation.
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_CAR_S = Beta('ASC_CAR_S', 1, None, None, 0)
-ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'NORMAL_ANTI')
+ASC_CAR_RND = ASC_CAR + ASC_CAR_S * Draws('ASC_CAR_RND', 'NORMAL_ANTI')
 
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_TRAIN_S = Beta('ASC_TRAIN_S', 1, None, None, 0)
-ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'NORMAL_ANTI')
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * Draws('ASC_TRAIN_RND', 'NORMAL_ANTI')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
-ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'NORMAL_ANTI')
+ASC_SM_RND = ASC_SM + ASC_SM_S * Draws('ASC_SM_RND', 'NORMAL_ANTI')
 
 # %%
 # Definition of the utility functions.
@@ -100,18 +104,18 @@ obsprob = logit(V, av, CHOICE)
 # Conditional on the random parameters, the likelihood of all observations for
 # one individual (the trajectory) is the product of the likelihood of
 # each observation.
-condprobIndiv = PanelLikelihoodTrajectory(obsprob)
+cond_prob_individual = PanelLikelihoodTrajectory(obsprob)
 
 # %%
 # We integrate over the random parameters using Monte-Carlo
-logprob = log(MonteCarlo(condprobIndiv))
+log_prob = log(MonteCarlo(cond_prob_individual))
 
 # %%
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = 'b12panel'
+the_biogeme = BIOGEME(database, log_prob, number_of_draws=1000, seed=1223)
+the_biogeme.model_name = 'b12panel'
 
 # %%
 # Estimate the parameters.

@@ -17,9 +17,10 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
+from biogeme.calculator.single_formula import calculate_single_formula_from_expression
 from biogeme.expressions import (
     Beta,
-    bioDraws,
+    Draws,
     PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
@@ -43,13 +44,13 @@ from swissmetro_panel import (
     CAR_CO_SCALED,
 )
 
-print(f'Samples size = {database.get_sample_size()}')
+print(f'Sample size = {database.sample_size}')
 
 # %%
 # We use a low number of draws, as the objective is to illustrate the
 # syntax. In practice, this value is insufficient to have a good
 # approximation of the integral.
-NUMBER_OF_DRAWS = 50
+NUMBER_OF_DRAWS = 1000
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b13panel_simul.py')
@@ -63,21 +64,21 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # designed to be used for Monte-Carlo simulation.
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_ANTI')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL_ANTI')
 
 # %%
 # We do the same for the constants, to address serial correlation.
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
 ASC_CAR_S = Beta('ASC_CAR_S', 1, None, None, 0)
-ASC_CAR_RND = ASC_CAR + ASC_CAR_S * bioDraws('ASC_CAR_RND', 'NORMAL_ANTI')
+ASC_CAR_RND = ASC_CAR + ASC_CAR_S * Draws('ASC_CAR_RND', 'NORMAL_ANTI')
 
 ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_TRAIN_S = Beta('ASC_TRAIN_S', 1, None, None, 0)
-ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * bioDraws('ASC_TRAIN_RND', 'NORMAL_ANTI')
+ASC_TRAIN_RND = ASC_TRAIN + ASC_TRAIN_S * Draws('ASC_TRAIN_RND', 'NORMAL_ANTI')
 
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 ASC_SM_S = Beta('ASC_SM_S', 1, None, None, 0)
-ASC_SM_RND = ASC_SM + ASC_SM_S * bioDraws('ASC_SM_RND', 'NORMAL_ANTI')
+ASC_SM_RND = ASC_SM + ASC_SM_S * Draws('ASC_SM_RND', 'NORMAL_ANTI')
 
 # %%
 # Definition of the utility functions.
@@ -122,12 +123,11 @@ except FileNotFoundError:
 # %%
 # Simulate to recalculate the log likelihood directly from the
 # formula, without the Biogeme object
-simulated_loglike = logprob.get_value_c(
+simulated_loglike = calculate_single_formula_from_expression(
+    expression=logprob,
     database=database,
-    betas=results.get_beta_values(),
     number_of_draws=NUMBER_OF_DRAWS,
-    aggregation=True,
-    prepare_ids=True,
+    the_betas=results.get_beta_values(),
 )
 
 # %%

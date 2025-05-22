@@ -14,7 +14,6 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.distributions import normalpdf
 from biogeme.expressions import (
     Beta,
     RandomVariable,
@@ -59,7 +58,6 @@ B_TIME = Beta('B_TIME', 0, None, None, 0)
 # It is advised not to use 0 as starting value for the following parameter.
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
 omega = RandomVariable('omega')
-density = normalpdf(omega)
 B_TIME_RND = B_TIME + B_TIME_S * omega
 
 # %%
@@ -82,11 +80,16 @@ condprob = logit(V, av, CHOICE)
 
 # %%
 # We integrate over omega using numerical integration
-logprob = log(Integrate(condprob * density, 'omega'))
+logprob = log(Integrate(condprob, 'omega'))
 
 # %%
 # Create the Biogeme object
-the_biogeme = BIOGEME(database, logprob)
+the_biogeme = BIOGEME(
+    database,
+    logprob,
+    optimization_algorithm='simple_bounds_BFGS',
+)
+# the_biogeme = BIOGEME(database, logprob)
 the_biogeme.modelName = 'b05normal_mixture_integral'
 
 # %%

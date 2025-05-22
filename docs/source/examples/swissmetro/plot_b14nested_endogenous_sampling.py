@@ -104,7 +104,7 @@ logprob = logmev_endogenous_sampling(V, Gi, av, correction, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b14nested_endogenous_sampling'
+the_biogeme.model_name = 'b14nested_endogenous_sampling'
 
 # %%
 # Estimate the parameters.

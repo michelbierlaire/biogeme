@@ -20,6 +20,7 @@ algorithm.
 """
 
 import biogeme.biogeme_logging as blog
+from biogeme.catalog import count_number_of_specifications
 from biogeme.multiobjectives import aic_bic_dimension
 from biogeme.assisted import AssistedSpecification
 from biogeme.results_processing import compile_estimation_results
@@ -30,7 +31,7 @@ logger = blog.get_screen_logger(blog.INFO)
 logger.info('Example b22multiple_models')
 
 # %%
-nbr = the_biogeme.log_like.number_of_multiple_expressions()
+nbr = count_number_of_specifications(the_biogeme.log_like)
 if nbr is None:
     print('There are too many possible specifications to be enumerated')
 else:

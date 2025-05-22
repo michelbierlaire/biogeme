@@ -95,7 +95,7 @@ logprob = log(Integrate(condprob * density, 'omega'))
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b17lognormal_mixture_integral'
+the_biogeme.model_name = 'b17lognormal_mixture_integral'
 
 # %%
 # Estimate the parameters

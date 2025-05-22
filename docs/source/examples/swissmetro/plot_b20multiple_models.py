@@ -104,8 +104,8 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 logprob = loglogit(V, av, CHOICE)
 
 # %%
-the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b20multiple_models'
+the_biogeme: BIOGEME = BIOGEME(database=database, formulas=logprob)
+the_biogeme.model_name = 'b20multiple_models'
 
 # %%
 dict_of_results = the_biogeme.estimate_catalog()

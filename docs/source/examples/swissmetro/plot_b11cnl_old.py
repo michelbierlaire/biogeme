@@ -88,7 +88,7 @@ logprob = logcnl(V, av, nests, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b11cnl_old'
+the_biogeme.model_name = 'b11cnl_old'
 
 # %%
 # Estimate the parameters

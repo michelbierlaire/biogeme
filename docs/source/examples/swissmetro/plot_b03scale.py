@@ -80,7 +80,7 @@ USER_NOTES = (
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob, user_notes=USER_NOTES)
-the_biogeme.modelName = 'b03scale'
+the_biogeme.model_name = 'b03scale'
 
 # %%
 # Estimate the parameters.

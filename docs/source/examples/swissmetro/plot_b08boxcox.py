@@ -11,10 +11,13 @@ Example of a logit model, with a Box-Cox transform of variables.
 
 from IPython.core.display_functions import display
 
+
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import boxcox, loglogit
 from biogeme.results_processing import get_pandas_estimated_parameters
+import biogeme.biogeme_logging as blog
+
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -32,6 +35,8 @@ from swissmetro_data import (
     CAR_CO_SCALED,
 )
 
+logger = blog.get_screen_logger(level=blog.INFO)
+
 # %%
 # Parameters to be estimated.
 ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
@@ -39,7 +44,7 @@ ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
-LAMBDA = Beta('LAMBDA', 0, None, None, 0)
+LAMBDA = Beta('LAMBDA', 0, -10, 10, 0)
 
 # %%
 # Definition of the utility functions.
@@ -63,11 +68,11 @@ logprob = loglogit(V, av, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b08boxcox'
+the_biogeme.model_name = 'b08boxcox'
 
 # %%
 # Check the derivatives of the log likelihood function around 0.
-the_biogeme.check_derivatives(beta=[0, 0, 0, 0, 0], verbose=True)
+the_biogeme.check_derivatives(verbose=True)
 
 # %%
 # Estimate the parameters

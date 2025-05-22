@@ -45,7 +45,7 @@ ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
 ASC_SM = Beta('ASC_SM', 0, None, None, 1)
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_COST = Beta('B_COST', 0, None, None, 0)
-MU = Beta('MU', 1, 1, 10, 0)
+MU = Beta('MU', 1, 1, 3, 0)
 
 # %%
 # Definition of the utility functions.

@@ -19,7 +19,7 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
-    bioDraws,
+    Draws,
     PanelLikelihoodTrajectory,
     MonteCarlo,
     log,
@@ -63,7 +63,7 @@ B_TIME_S = [
     Beta(f'B_TIME_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 B_TIME_RND: list[ExpressionOrNumeric] = [
-    B_TIME[i] + B_TIME_S[i] * bioDraws(f'B_TIME_RND_class{i}', 'NORMAL_ANTI')
+    B_TIME[i] + B_TIME_S[i] * Draws(f'B_TIME_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -76,7 +76,7 @@ ASC_CAR_S = [
     Beta(f'ASC_CAR_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_CAR_RND = [
-    ASC_CAR[i] + ASC_CAR_S[i] * bioDraws(f'ASC_CAR_RND_class{i}', 'NORMAL_ANTI')
+    ASC_CAR[i] + ASC_CAR_S[i] * Draws(f'ASC_CAR_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -87,7 +87,7 @@ ASC_TRAIN_S = [
     Beta(f'ASC_TRAIN_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_TRAIN_RND = [
-    ASC_TRAIN[i] + ASC_TRAIN_S[i] * bioDraws(f'ASC_TRAIN_RND_class{i}', 'NORMAL_ANTI')
+    ASC_TRAIN[i] + ASC_TRAIN_S[i] * Draws(f'ASC_TRAIN_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
@@ -96,12 +96,12 @@ ASC_SM_S = [
     Beta(f'ASC_SM_S_class{i}', 1, None, None, 0) for i in range(NUMBER_OF_CLASSES)
 ]
 ASC_SM_RND = [
-    ASC_SM[i] + ASC_SM_S[i] * bioDraws(f'ASC_SM_RND_class{i}', 'NORMAL_ANTI')
+    ASC_SM[i] + ASC_SM_S[i] * Draws(f'ASC_SM_RND_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
 
 # %%
-# Class memebership probability.
+# Class membership probability.
 prob_class0 = Beta('prob_class0', 0.5, 0, 1, 0)
 prob_class1 = 1 - prob_class0
 
@@ -150,7 +150,7 @@ logprob = log(probIndiv)
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
 the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = 'b15panel_discrete_bis'
+the_biogeme.model_name = 'b15panel_discrete_bis'
 
 # %%
 # Estimate the parameters.

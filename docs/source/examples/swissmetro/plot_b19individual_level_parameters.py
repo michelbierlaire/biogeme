@@ -15,9 +15,10 @@ import os
 import pickle
 
 from IPython.core.display_functions import display
+from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, bioDraws, MonteCarlo
+from biogeme.expressions import Beta, Draws, MonteCarlo
 from biogeme.models import logit
 
 # %%
@@ -47,7 +48,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # for Monte-Carlo simulation.
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL')
 
 # %%
 # Define values for these parameters
@@ -90,18 +91,8 @@ simulate = {
 }
 
 # %%
-# The results are saved in a picke file. The next time the script is
-# run, if the file exists, the results are simply loaded instead of
-# being re-calculated.
-PICKLE_FILE = 'b19individual_level_parameters.pickle'
-if os.path.isfile(PICKLE_FILE):
-    with open(PICKLE_FILE, 'rb') as f:
-        sim = pickle.load(f)
-else:
-    biosim = BIOGEME(database, simulate)
-    sim = biosim.simulate(beta_values)
-    sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
-    with open(PICKLE_FILE, 'wb') as f:
-        pickle.dump(sim, f)
+biosim = BIOGEME(database, simulate)
+sim: DataFrame = biosim.simulate(beta_values)
+sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
 
 display(sim)

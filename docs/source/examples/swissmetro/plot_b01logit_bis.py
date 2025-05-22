@@ -3,7 +3,7 @@
 Illustration of additional features of Biogeme
 ==============================================
 
-Same model as b01logit, using bioLinearUtility, segmentations
+Same model as b01logit, using LinearUtility, segmentations
  and features.
 
 :author: Michel Bierlaire, EPFL
@@ -13,12 +13,12 @@ Same model as b01logit, using bioLinearUtility, segmentations
 
 from IPython.core.display_functions import display
 
-import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, bioLinearUtility, LinearTermTuple
+from biogeme.expressions import Beta, LinearTermTuple, LinearUtility
 from biogeme.models import loglogit
 from biogeme.results_processing import get_pandas_estimated_parameters
 from biogeme.segmentation import Segmentation
+import biogeme.biogeme_logging as blog
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -80,19 +80,19 @@ terms1 = [
     LinearTermTuple(beta=B_TIME, x=TRAIN_TT_SCALED),
     LinearTermTuple(beta=B_COST, x=TRAIN_COST_SCALED),
 ]
-V1 = segmented_ASC_TRAIN + bioLinearUtility(terms1)
+V1 = segmented_ASC_TRAIN + LinearUtility(terms1)
 
 terms2 = [
     LinearTermTuple(beta=B_TIME, x=SM_TT_SCALED),
     LinearTermTuple(beta=B_COST, x=SM_COST_SCALED),
 ]
-V2 = bioLinearUtility(terms2)
+V2 = LinearUtility(terms2)
 
 terms3 = [
     LinearTermTuple(beta=B_TIME, x=CAR_TT_SCALED),
     LinearTermTuple(beta=B_COST, x=CAR_CO_SCALED),
 ]
-V3 = segmented_ASC_CAR + bioLinearUtility(terms3)
+V3 = segmented_ASC_CAR + LinearUtility(terms3)
 
 # %%
 # Associate utility functions with the numbering of alternatives.
@@ -123,7 +123,14 @@ USER_NOTES = (
 
 # %%
 # Create the Biogeme object. We include users notes, and we ask not to calculate the second derivatives.
-the_biogeme = BIOGEME(database, logprob, user_notes=USER_NOTES, second_derivatives=0)
+the_biogeme = BIOGEME(
+    database,
+    logprob,
+    user_notes=USER_NOTES,
+    second_derivatives=0,
+    save_iterations=False,
+    bootstrap_samples=100,
+)
 
 # %%
 # Calculate the null log likelihood for reporting.
@@ -131,17 +138,11 @@ the_biogeme = BIOGEME(database, logprob, user_notes=USER_NOTES, second_derivativ
 # As we have used starting values different from 0, the initial model
 # is not the equal probability model.
 the_biogeme.calculate_null_loglikelihood(av)
-the_biogeme.modelName = 'b01logit_bis'
-
-# %%
-# Turn off saving iterations.
-#
-the_biogeme.save_iterations = False
+the_biogeme.model_name = 'b01logit_bis'
 
 # %%
 # Estimate the parameters.
 #
-the_biogeme.bootstrap_samples = 100
 results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
@@ -158,25 +159,25 @@ display(pandas_results)
 print('General statistics')
 print('------------------')
 stats = results.get_general_statistics()
-for description, (value, formatting) in stats.items():
-    print(f'{description}: {value:{formatting}}')
+for description, value in stats.items():
+    print(f'{description}: {value}')
 
 # %%
 # Messages from the optimization algorithm.
 #
 print('Optimization algorithm')
 print('----------------------')
-for description, message in results.data.optimizationMessages.items():
+for description, message in results.optimization_messages.items():
     print(f'{description}:\t{message}')
 
 # %%
 # Generate the file in Alogit format.
 #
-results.write_f12(robust_std_err=True)
-print(f'Estimation results in ALogit format generated: {results.data.F12FileName}')
+f12_filename = results.write_f12()
+print(f'Estimation results in ALogit format generated: {f12_filename}')
 
 # %%
 # Generate LaTeX code with the results.
 #
-results.write_latex()
-print(f'Estimation results in LaTeX format generated: {results.data.latexFileName}')
+latex_filename = results.write_latex(include_begin_document=True)
+print(f'Estimation results in LaTeX format generated: {latex_filename}')

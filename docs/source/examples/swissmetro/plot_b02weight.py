@@ -83,17 +83,13 @@ USER_NOTES = (
 
 
 # %%
-#  Create the Biogeme object
-formulas = {'log_like': logprob, 'weight': weight}
-the_biogeme = BIOGEME(database, formulas, user_notes=USER_NOTES)
-the_biogeme.modelName = 'b02weight'
-
-# %%
-# It is possible to control the generation of the HTML and the pickle
-# .py. Note that these parameters can also be modified in the .TOML
+#  Create the Biogeme object.
+# It is possible to control the generation of the HTML and the yaml
+# files. Note that these parameters can also be modified in the .TOML
 # configuration file.
-the_biogeme.generate_html = True
-the_biogeme.generate_pickle = False
+formulas = {'log_like': logprob, 'weight': weight}
+the_biogeme = BIOGEME(database, formulas, user_notes=USER_NOTES, generate_html=True, generate_yaml=False)
+the_biogeme.model_name = 'b02weight'
 
 # %%
 # Estimate the parameters.

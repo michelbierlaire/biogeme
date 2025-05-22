@@ -90,7 +90,7 @@ logprob = lognested_mev_mu(V, av, nests, CHOICE, MU)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b10nested_bottom'
+the_biogeme.model_name = 'b10nested_bottom'
 
 # %%
 # Estimate the parameters.

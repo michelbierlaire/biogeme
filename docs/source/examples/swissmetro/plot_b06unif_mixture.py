@@ -17,9 +17,9 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
-    bioDraws,
     log,
     MonteCarlo,
+    Draws,
 )
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
@@ -55,7 +55,7 @@ B_COST = Beta('B_COST', 0, None, None, 0)
 # for Monte-Carlo simulation.
 B_TIME = Beta('B_TIME', 0, None, None, 0)
 B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'UNIFORMSYM')
+B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'UNIFORMSYM')
 
 # %%
 # Definition of the utility functions.
@@ -80,7 +80,7 @@ logprob = log(MonteCarlo(prob))
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = 'b06unif_mixture'
+the_biogeme.model_name = 'b06unif_mixture'
 
 # %%
 # Estimate the parameters

@@ -11,6 +11,8 @@ Example of simulation with a logit model
 
 """
 
+from IPython.core.display_functions import display
+
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
 from biogeme.models import logit
@@ -72,7 +74,7 @@ prob3 = logit(V, av, 3)
 # %%
 # First, the general definition of elasticities. This illustrates the
 # use of the Derive expression, and can be used with any model,
-# however complicated it is. Note the quotes in the Derive opertor.
+# however complicated it is. Note the quotes in the Derive operator.
 
 genelas1 = Derive(prob1, 'TRAIN_TT') * TRAIN_TT / prob1
 genelas2 = Derive(prob2, 'SM_TT') * SM_TT / prob2
@@ -105,10 +107,10 @@ simulate = {
 # %%
 # Create the Biogeme object.
 #
-# As we simulate the probability for all aternatives, even when one of
+# As we simulate the probability for all alternatives, even when one of
 # them is not available, Biogeme may trigger some warnings.
 biosim = BIOGEME(database, simulate)
-biosim.modelName = 'b01logit_simul'
+biosim.model_name = 'b01logit_simul'
 
 # %%
 # Values of the parameters.
@@ -124,4 +126,4 @@ betas = {
 # Simulation
 #
 results = biosim.simulate(the_beta_values=betas)
-results.describe()
+display(results.describe())

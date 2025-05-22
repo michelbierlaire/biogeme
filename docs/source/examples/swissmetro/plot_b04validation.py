@@ -13,6 +13,7 @@ Example of the out-of-sample validation of a logit model.
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
+from biogeme.validation import ValidationResult
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -60,7 +61,7 @@ logprob = loglogit(V, av, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b04validation'
+the_biogeme.model_name = 'b04validation'
 
 # %%
 # Estimate the parameters.
@@ -75,13 +76,10 @@ results = the_biogeme.estimate()
 # each observation in the validation set is reported in a
 # dataframe. As this is done for each slice, the output is a list of
 # dataframes, each corresponding to one of these exercises.
-
-validation_data = database.split(slices=5)
-
-validation_results = the_biogeme.validate(results, validation_data)
+validation_results: list[ValidationResult] = the_biogeme.validate(results, slices=5)
 
 for slide in validation_results:
     print(
-        f'Log likelihood for {slide.shape[0]} validation data: '
-        f'{slide["Loglikelihood"].sum()}'
+        f'Log likelihood for {slide.simulated_values.shape[0]} validation data: '
+        f'{slide.simulated_values.iloc[:, 0].sum()}'
     )
