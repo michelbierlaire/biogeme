@@ -16,31 +16,29 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from icecream import ic
+from tqdm import tqdm
 
-import biogeme.tools.derivatives
-import biogeme.tools.unique_ids
 from biogeme.biogeme_logging import suppress_logs
 from biogeme.calculator import (
     CallableExpression,
-    MultiRowEvaluator,
     CompiledFormulaEvaluator,
+    MultiRowEvaluator,
     function_from_expression,
 )
 from biogeme.calculator.simple_formula import evaluate_simple_expression
-from biogeme.catalog import Configuration, SelectedExpressionsIterator
+from biogeme.catalog import (
+    CentralController,
+    Configuration,
+    SelectedExpressionsIterator,
+)
 from biogeme.constants import LOG_LIKE, WEIGHT
 from biogeme.database import Database
 from biogeme.default_parameters import ParameterValue
 from biogeme.deprecated import deprecated_parameters
 from biogeme.dict_of_formulas import check_validity, get_expression
+from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.exceptions import BiogemeError, ValueOutOfRange
-from biogeme.expressions import (
-    Expression,
-    ExpressionOrNumeric,
-    log,
-    MultipleSum,
-)
+from biogeme.expressions import Expression, ExpressionOrNumeric, MultipleSum, log
 from biogeme.filenames import get_new_file_name
 from biogeme.function_output import (
     FunctionOutput,
@@ -50,18 +48,17 @@ from biogeme.likelihood.bootstrap import bootstrap
 from biogeme.model_elements import ModelElements
 from biogeme.optimization import OptimizationAlgorithm, algorithms
 from biogeme.parameters import (
-    Parameters,
     DEFAULT_FILE_NAME as DEFAULT_PARAMETER_FILE_NAME,
+    Parameters,
 )
 from biogeme.results_processing import (
     RawEstimationResults,
     generate_html_file,
 )
 from biogeme.results_processing.estimation_results import EstimationResults
-from biogeme.tools import ModelNames
+from biogeme.tools import ModelNames, check_derivatives, safe_serialize_array
 from biogeme.tools.files import files_of_type
-from biogeme.validation import cross_validate_model, ValidationResult
-from biogeme.catalog import CentralController
+from biogeme.validation import ValidationResult, cross_validate_model
 
 DEFAULT_MODEL_NAME = 'biogeme_model_default_name'
 logger = logging.getLogger(__name__)
@@ -93,15 +90,18 @@ class BIOGEME:
         'bootstrap_samples': int,
         'save_iterations': bool,
         'generate_html': bool,
+        'generate_html': bool,
         'generate_yaml': bool,
         'optimization_algorithm': str,
         'maximum_number_catalog_expressions': int,
+        'max_number_parameters_to_report': int,
     }
 
     def __init__(
         self,
         database: Database,
         formulas: Expression | dict[str, Expression],
+        random_number_generators: dict[str:RandomNumberGeneratorTuple] | None = None,
         user_notes: str | None = None,
         parameters: str | Parameters | None = None,
         **kwargs,
@@ -145,6 +145,7 @@ class BIOGEME:
                     )
                     raise AttributeError(error_msg)
 
+        database.reset_indices()
         self.parameter_file: str = self.biogeme_parameters.file_name
         self.html_filename: str | None = None
         self.yaml_filename: str | None = None
@@ -155,7 +156,6 @@ class BIOGEME:
         for name in self.biogeme_parameters.parameter_names:
             self._define_property(name)
 
-        self.flat_database: Database | None = None
         self.maximum_number_of_observations_per_individual: int | None = None
         self.database = database
 
@@ -178,7 +178,7 @@ class BIOGEME:
         if self.seed != 0:
             np.random.seed(self.seed)
 
-        self.short_names: biogeme.tools.unique_ids.ModelNames | None = None
+        self.short_names: ModelNames | None = None
 
         self.formulas = self._normalize_formulas(formulas)
 
@@ -192,25 +192,30 @@ class BIOGEME:
 
         self._model_elements = ModelElements(
             expressions=self.formulas,
-            database=(
-                self.database if self.flat_database is None else self.flat_database
-            ),
+            database=self.database,
             number_of_draws=self.biogeme_parameters.get_value(name='number_of_draws'),
+            user_defined_draws=random_number_generators,
         )
         self._function_evaluator = (
-            CompiledFormulaEvaluator(model_elements=self.model_elements)
+            CompiledFormulaEvaluator(
+                model_elements=self.model_elements,
+                avoid_analytical_second_derivatives=self.biogeme_parameters.get_value(
+                    name='avoid_analytical_second_derivatives'
+                ),
+            )
             if self.contains_log_likelihood()
             else None
         )
 
     @classmethod
-    def from_configuration(
+    def from_configuration_and_controller(
         cls,
         config_id: str,
         central_controller: CentralController,
         database: Database,
         user_notes: str | None = None,
         parameters: str | Parameters | None = None,
+        **kwargs,
     ) -> BIOGEME:
         """Obtain the Biogeme object corresponding to the
         configuration of a multiple expression
@@ -246,12 +251,45 @@ class BIOGEME:
         central_controller.set_configuration(the_configuration)
         if user_notes is None:
             user_notes = the_configuration.get_html()
-        ic('Biogeme with ', str(central_controller.expression))
         return cls(
             database=database,
             formulas=central_controller.expression,
             user_notes=user_notes,
             parameters=parameters,
+            **kwargs,
+        )
+
+    @classmethod
+    def from_configuration(
+        cls,
+        config_id: str,
+        multiple_expression: Expression,
+        database: Database,
+        user_notes: str | None = None,
+        parameters: str | Parameters | None = None,
+        **kwargs,
+    ) -> BIOGEME:
+        """Obtain the Biogeme object corresponding to the
+        configuration of a multiple expression
+        :param config_id: identifier of the configuration
+
+        :param multiple_expression: multiple expression containing the catalog.
+
+        :param database: database to be passed to the Biogeme object
+
+        :param user_notes: these notes will be included in the report file.
+
+        :param parameters: object with the parameters
+
+        """
+        central_controller = CentralController(expression=multiple_expression)
+        return cls.from_configuration_and_controller(
+            config_id=config_id,
+            central_controller=central_controller,
+            database=database,
+            user_notes=user_notes,
+            parameters=parameters,
+            **kwargs,
         )
 
     def _define_property(self, name: str):
@@ -366,17 +404,23 @@ class BIOGEME:
     @property
     def algo_parameters(self) -> dict[str, ParameterValue]:
         """Prepare the parameters for the optimization algorithm."""
+        avoid_hessian = self.biogeme_parameters.get_value(
+            name='avoid_analytical_second_derivatives'
+        )
         common_bounds_params = {
-            "infeasibleConjugateGradient": self.biogeme_parameters.get_value(
+            'infeasibleConjugateGradient': self.biogeme_parameters.get_value(
                 'infeasible_cg'
             ),
-            "radius": self.biogeme_parameters.get_value('initial_radius'),
-            "enlargingFactor": self.biogeme_parameters.get_value('enlarging_factor'),
-            "maxiter": self.biogeme_parameters.get_value('max_iterations'),
+            'radius': self.biogeme_parameters.get_value('initial_radius'),
+            'enlargingFactor': self.biogeme_parameters.get_value('enlarging_factor'),
+            'maxiter': self.biogeme_parameters.get_value('max_iterations'),
+            'max_number_parameters_to_report': self.biogeme_parameters.get_value(
+                'max_number_parameters_to_report'
+            ),
         }
 
         if self.optimization_algorithm == 'automatic':
-            if self.is_model_complex():
+            if self.is_model_complex() or avoid_hessian:
                 logger.info(
                     'As the model is rather complex, we cancel the calculation of second derivatives. '
                     'If you want to control the parameters, change the algorithm from "automatic" '
@@ -401,6 +445,16 @@ class BIOGEME:
                     'second_derivatives'
                 ),
             }
+            if (
+                avoid_hessian
+                and self.biogeme_parameters.get_value('second_derivatives') > 0
+            ):
+                warning = (
+                    f"The proportion of the analytical hessian is not zero, and the parameter "
+                    f"'avoid_analytical_second_derivatives' is set to True. The analytical hessian is approximated by "
+                    f"finite difference. It may not be the desired configuration."
+                )
+                logger.warning(warning)
             return algo_parameters
 
         if self.optimization_algorithm in {
@@ -621,6 +675,9 @@ class BIOGEME:
                 modeling_elements=self.model_elements,
                 parameters=opt_parameters,
                 starting_values=estimated_parameters,
+                avoid_analytical_second_derivatives=self.biogeme_parameters.get_value(
+                    name='avoid_analytical_second_derivatives'
+                ),
             )
         return [result.solution for result in bootstrap_results]
 
@@ -794,15 +851,15 @@ class BIOGEME:
             beta_values=algorithm_results.solution.tolist(),
             lower_bounds=[bound[0] for bound in self.expressions_registry.bounds],
             upper_bounds=[bound[1] for bound in self.expressions_registry.bounds],
-            gradient=f_g_h_b.gradient.tolist(),
-            hessian=f_g_h_b.hessian.tolist(),
-            bhhh=f_g_h_b.bhhh.tolist(),
+            gradient=safe_serialize_array(f_g_h_b.gradient),
+            hessian=safe_serialize_array(f_g_h_b.hessian),
+            bhhh=safe_serialize_array(f_g_h_b.bhhh),
             null_log_likelihood=null_log_likelihood,
             initial_log_likelihood=init_log_likelihood,
             final_log_likelihood=f_g_h_b.function,
             data_name=self.model_elements.database.name,
-            sample_size=self.model_elements.database.sample_size,
-            number_of_observations=self.model_elements.database.sample_size,
+            sample_size=self.model_elements.sample_size,
+            number_of_observations=self.model_elements.number_of_observations,
             monte_carlo=self.expressions_registry.requires_draws,
             number_of_draws=int(self.model_elements.draws_management.number_of_draws),
             types_of_draws=self.model_elements.draws_management.draw_types,
@@ -884,6 +941,16 @@ class BIOGEME:
             save_iterations_filename=save_iteration_file_name,
         )
 
+        optimal_betas = self.expressions_registry.get_named_betas_values(
+            algorithm_results.solution
+        )
+        f_g_h_b: FunctionOutput = self.function_evaluator.evaluate(
+            the_betas=optimal_betas,
+            gradient=False,
+            hessian=False,
+            bhhh=False,
+        )
+
         clean_optimization_messages = {}
         for key, value in algorithm_results.optimization_messages.items():
             if isinstance(value, np.floating):
@@ -906,14 +973,14 @@ class BIOGEME:
             lower_bounds=[bound[0] for bound in self.expressions_registry.bounds],
             upper_bounds=[bound[1] for bound in self.expressions_registry.bounds],
             gradient=[],
-            hessian=[],
-            bhhh=[],
+            hessian=[[]],
+            bhhh=[[]],
             null_log_likelihood=null_log_likelihood,
-            initial_log_likelihood=np.nan,
-            final_log_likelihood=np.nan,
+            initial_log_likelihood=None,
+            final_log_likelihood=f_g_h_b.function,
             data_name=self.model_elements.database.name,
-            sample_size=self.model_elements.database.sample_size,
-            number_of_observations=self.model_elements.database.sample_size,
+            sample_size=self.model_elements.sample_size,
+            number_of_observations=self.model_elements.number_of_observations,
             monte_carlo=self.expressions_registry.requires_draws,
             number_of_draws=int(self.model_elements.draws_management.number_of_draws),
             types_of_draws=self.model_elements.draws_management.draw_types,
@@ -990,7 +1057,6 @@ class BIOGEME:
         configurations = {}
         for config in the_iterator:
             config_id = config.get_string_id()
-            ic('***', config_id)
             b = self.__class__.from_configuration(
                 config_id=config_id,
                 central_controller=central_controller,
@@ -1037,6 +1103,11 @@ class BIOGEME:
         # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
         # I have no clue why.
         parameters = self.optimization_parameters
+        parameters['avoid_analytical_second_derivatives'] = (
+            self.biogeme_parameters.get_value(
+                name='avoid_analytical_second_derivatives'
+            )
+        )
         return cross_validate_model(
             the_algorithm=self._algorithm_configuration(),
             modeling_elements=self.model_elements,
@@ -1069,9 +1140,13 @@ class BIOGEME:
                 f'Contrarily to previous versions of Biogeme, '
                 f'the values of Beta must '
                 f'now be explicitly mentioned. If they have been estimated, they can be obtained from '
-                f'results.get_beta_values(). If not, used the default values: {current_beta_values}'
+                f'results.get_beta_values(). If not, use the default values: {current_beta_values}'
             )
             raise BiogemeError(err)
+
+        if not isinstance(the_beta_values, dict):
+            error_msg = f'the_beta_values must be a dict, and not an object of type {type(the_beta_values)}'
+            raise BiogemeError(error_msg)
 
         the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
             model_elements=self.model_elements
@@ -1124,7 +1199,7 @@ class BIOGEME:
 
         """
         list_of_results = []
-        for b in beta_values:
+        for b in tqdm(beta_values):
             r = self.simulate(b)
             list_of_results += [r]
         all_results = pd.concat(list_of_results)
@@ -1177,7 +1252,7 @@ class BIOGEME:
             )
             return the_function_output
 
-        return biogeme.tools.derivatives.check_derivatives(
+        return check_derivatives(
             the_function,
             np.asarray(
                 self.model_elements.expressions_registry.list_of_free_betas_init_values
