@@ -17,13 +17,12 @@ from typing import Callable
 
 from biogeme_optimization.pareto import SetElement
 
-import biogeme.biogeme as bio
-import biogeme.tools.unique_ids
-from biogeme.catalog import Configuration, CentralController
+from biogeme.catalog import CentralController, Configuration
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.parameters import get_default_value, Parameters
+from biogeme.parameters import Parameters, get_default_value
 from biogeme.results_processing import EstimationResults
+from biogeme.tools import ModelNames
 from biogeme.validity import Validity
 
 logger = logging.getLogger(__name__)
@@ -33,7 +32,7 @@ class Specification:
     """Implements a specification"""
 
     database: Database | None = None  #: :class:`biogeme.database.Database` object
-    all_results: dict[str: EstimationResults] = {}
+    all_results: dict[str:EstimationResults] = {}
     central_controller: CentralController | None = None
     """
         function that generates all the objectives:
@@ -45,6 +44,7 @@ class Specification:
     """
     generic_name = 'default_name'  #: short name for file names
     biogeme_parameters: Parameters | None = None
+    model_names: ModelNames | None = None
 
     def __init__(
         self,
@@ -59,7 +59,6 @@ class Specification:
             error_msg = 'Ctor needs an object of type Configuration'
             raise BiogemeError(error_msg)
         self.configuration = configuration
-        self.model_names = None
         self.validity = None
         self.biogeme_parameters = biogeme_parameters
         self.maximum_number_parameters = (
@@ -85,13 +84,15 @@ class Specification:
 
     def configure_expression(self) -> None:
         """Configure the expression to the current configuration"""
-        self.expression.configure_catalogs(self.configuration)
+        self.central_controller.set_configuration(self.configuration)
 
     @classmethod
     def default_specification(cls) -> Specification:
         """Alternative constructor for generate the default specification"""
-        cls.expression.reset_expression_selection()
-        the_config = cls.expression.current_configuration()
+        if cls.central_controller is None:
+            raise BiogemeError('No central controller has been defined')
+        cls.central_controller.reset_selection()
+        the_config = cls.central_controller.get_configuration()
         return cls(the_config)
 
     @property
@@ -116,24 +117,26 @@ class Specification:
 
     def _estimate(self) -> None:
         """Estimate the parameter of the current specification, if not already done"""
-        if self.expression is None:
-            error_msg = 'No expression has been provided for the model.'
+        if self.central_controller is None:
+            error_msg = 'No central controller has been provided for the model.'
             raise BiogemeError(error_msg)
         if self.database is None:
             error_msg = 'No database has been provided for the estimation.'
             raise BiogemeError(error_msg)
-        if self.model_names is None:
-            self.model_names = biogeme.tools.unique_ids.ModelNames(
-                prefix=self.generic_name
-            )
+        if __class__.model_names is None:
+            __class__.model_names = ModelNames(prefix=self.generic_name)
         if self.config_id in self.all_results:
             results = self.all_results.get(self.config_id)
         else:
             logger.debug(f'****** Estimate {self.config_id}')
-            the_biogeme = bio.BIOGEME.from_configuration(
+            from biogeme.biogeme import BIOGEME
+
+            the_biogeme: BIOGEME = BIOGEME.from_configuration(
                 config_id=self.config_id,
-                expression=self.expression,
+                central_controller=self.central_controller,
                 database=self.database,
+                generate_html=False,
+                generate_yaml=False,
             )
             number_of_parameters = the_biogeme.number_unknown_parameters()
             logger.info(
@@ -153,10 +156,9 @@ class Specification:
                 )
                 self.all_results[self.config_id] = None
                 return
-            the_biogeme.modelName = self.model_names(self.config_id)
-            logger.info(f'*** Estimate {the_biogeme.modelName}')
-            the_biogeme.generate_html = False
-            the_biogeme.generate_pickle = False
+
+            the_biogeme.model_name = __class__.model_names(self.config_id)
+            logger.info(f'*** Estimate {the_biogeme.model_name}')
             results = the_biogeme.quick_estimate()
         self.all_results[self.config_id] = results
         if not results.algorithm_has_converged:

@@ -15,34 +15,31 @@ See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Jul 13 16:18:10 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 15:49:05
 """
 
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta
 from biogeme.catalog import generic_alt_specific_catalogs
-
-
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta
 from biogeme.models import loglogit
-from biogeme.results_processing import pareto_optimal, compile_estimation_results
+from biogeme.results_processing import compile_estimation_results, pareto_optimal
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -101,10 +98,8 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b01alt_spec'
-the_biogeme.generate_html = False
-the_biogeme.generate_pickle = False
+the_biogeme = BIOGEME(database, logprob, generate_html=False, generate_yaml=False)
+the_biogeme.model_name = 'b01alt_spec'
 
 # %%
 # Estimate the parameters.

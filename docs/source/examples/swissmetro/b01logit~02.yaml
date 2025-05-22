@@ -1,0 +1,88 @@
+# File b01logit~02.yaml has automatically been generated on 2025-05-02 11:00:03.124986
+# biogeme 3.3.0a01 [2025-05-02]
+
+beta_names:
+- ASC_TRAIN
+- B_TIME
+- B_COST
+- ASC_CAR
+beta_values:
+- -0.7011883112709102
+- -1.277856366611196
+- -1.0837840712603442
+- -0.1546303259751611
+bhhh:
+- - 733.7008061147689
+  - 451.05740833117403
+  - -42.95974296936453
+  - -119.7349538762637
+- - 451.05740833117403
+  - 1535.599983895492
+  - -253.75846376608592
+  - 381.5044154528104
+- - -42.95974296936453
+  - -253.75846376608592
+  - 744.7562700439445
+  - -333.311313118303
+- - -119.7349538762637
+  - 381.5044154528104
+  - -333.311313118303
+  - 973.9545833088808
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5331.252006927242
+gradient:
+- 0.0002607982435449685
+- -0.0016950345755475382
+- -0.0017110819414156708
+- -0.0021736137263559385
+hessian:
+- - -761.3928538840773
+  - -452.9122601897275
+  - 59.479029600126324
+  - 197.06861601941702
+- - -452.9122601897275
+  - -825.7777213770785
+  - 235.86918386852804
+  - -362.68322371410545
+- - 59.479029600126324
+  - 235.86918386852807
+  - -467.41948396870555
+  - 258.8163580573112
+- - 197.06861601941702
+  - -362.68322371410545
+  - 258.8163580573112
+  - -1026.18827698798
+initial_log_likelihood: -5538.765920647225
+lower_bounds:
+- null
+- null
+- null
+- null
+model_name: b01logit
+monte_carlo: false
+null_log_likelihood: -6964.662979192191
+number_of_draws: 100
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 3.9e-07 <= 6.1e-06
+  Number of function evaluations: 10
+  Number of gradient evaluations: 7
+  Number of hessian evaluations: 3
+  Number of iterations: '3'
+  Optimization time: '0.96286'
+  Proportion of Hessian calculation: 3/3 = 100.0%
+  Relative gradient: 3.9243646644340293e-07
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+user_notes: null

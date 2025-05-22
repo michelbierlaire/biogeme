@@ -10,9 +10,8 @@ about the algorithm.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Jul 20 17:15:37 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 18:38:57
 """
 
 from biogeme.biogeme import BIOGEME
@@ -36,7 +35,7 @@ PARETO_FILE_NAME = 'saved_results/b07everything_assisted.pareto'
 # %%
 # Create the biogeme object from the catalog.
 the_biogeme = BIOGEME(database, model_catalog)
-the_biogeme.modelName = 'b09post_processing'
+the_biogeme.model_name = 'b09post_processing'
 
 # %%
 # Create the post-processing object.

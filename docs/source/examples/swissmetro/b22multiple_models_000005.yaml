@@ -1,0 +1,112 @@
+# File b22multiple_models_000005.yaml has automatically been generated on 2025-04-20 10:24:00.148329
+# biogeme 3.3.0a01 [2025-04-20]
+
+beta_names:
+- ASC_TRAIN
+- B_TIME
+- B_COST
+- ASC_CAR
+beta_values:
+- -0.6586164231486739
+- -2.994746197876814
+- -2.48483159324023
+- 0.04733988968434832
+bhhh:
+- - 731.220458984375
+  - 221.19741821289062
+  - -31.310392379760742
+  - -100.83280944824219
+- - 221.19741821289062
+  - 206.14581298828125
+  - -48.33171844482422
+  - 187.05435180664062
+- - -31.310392379760742
+  - -48.33171844482422
+  - 137.9462432861328
+  - -123.06532287597656
+- - -100.83280944824219
+  - 187.05435180664062
+  - -123.06532287597656
+  - 960.9403076171875
+bootstrap: []
+bootstrap_time: null
+convergence: false
+data_name: swissmetro
+draws_processing_time: null
+final_log_likelihood: -5254.67626953125
+gradient:
+- 40.52973175048828
+- -27.996553421020508
+- 22.781604766845703
+- -96.31039428710938
+hessian:
+- - -734.9368896484375
+  - -208.01400756835938
+  - 32.62760543823242
+  - 192.20870971679688
+- - -208.01400756835938
+  - -171.98806762695312
+  - 46.26545715332031
+  - -182.1239471435547
+- - 32.62760543823242
+  - 46.26545333862305
+  - -100.02372741699219
+  - 106.8175048828125
+- - 192.20870971679688
+  - -182.1239471435547
+  - 106.81749725341797
+  - -1020.843017578125
+initial_log_likelihood: -6174.5537109375
+lower_bounds:
+- null
+- null
+- null
+- null
+model_name: b22multiple_models_000005
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 100
+number_of_excluded_data: !!python/object/apply:numpy._core.multiarray.scalar
+- !!python/object/apply:numpy.dtype
+  args:
+  - i8
+  - false
+  - true
+  state: !!python/tuple
+  - 3
+  - <
+  - null
+  - null
+  - null
+  - -1
+  - -1
+  - 0
+- !!binary |
+  eA8AAAAAAAA=
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: 'Trust region is too small: 1.256438442172571e-08'
+  Number of iterations: '32'
+  Optimization time: '2.570276'
+  Proportion of Hessian calculation: 9/9 = 100.0%
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+user_notes: '<p>Specification</p><p><ul>
+
+  <li>ASC: no_seg</li>
+
+  <li>TRAIN_COST_catalog: sqrt</li>
+
+  <li>TRAIN_HEADWAY_catalog: without_headway</li>
+
+  <li>TRAIN_TT_catalog: sqrt</li>
+
+  </ul></p>
+
+  '

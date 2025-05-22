@@ -1,0 +1,110 @@
+# File b23logit~00.yaml has automatically been generated on 2025-04-25 09:52:03.189314
+# biogeme 3.3.0a01 [2025-04-25]
+
+beta_names:
+- B_TIME_TRAIN
+- B_COST_TRAIN
+- ASC_CAR
+- B_TIME_CAR
+- B_COST_CAR
+beta_values:
+- -1.133341479762902
+- -2.385245430825723
+- -0.8940459758012501
+- -0.3842538915424944
+- -1.0824561735700695
+bhhh:
+- - 647.2069702148438
+  - 300.2878112792969
+  - -373.6469421386719
+  - -600.480712890625
+  - -340.0314025878906
+- - 300.2878112792969
+  - 263.71453857421875
+  - -188.55685424804688
+  - -267.6318054199219
+  - -175.74574279785156
+- - -373.6469421386719
+  - -188.55685424804688
+  - 255.27096557617188
+  - 346.76495361328125
+  - 201.35142517089844
+- - -600.480712890625
+  - -267.6318054199219
+  - 346.76495361328125
+  - 924.4158325195312
+  - 304.69818115234375
+- - -340.0314025878906
+  - -175.74574279785156
+  - 201.35142517089844
+  - 304.69818115234375
+  - 215.3298797607422
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -872.9069213867188
+gradient:
+- -0.6811904907226562
+- -0.5743293762207031
+- 0.4086742401123047
+- 0.5493278503417969
+- 0.2940206527709961
+hessian:
+- - -657.9658813476562
+  - -267.70745849609375
+  - 398.5960693359375
+  - 518.64208984375
+  - 337.32513427734375
+- - -267.70745849609375
+  - -155.96990966796875
+  - 174.03680419921875
+  - 216.24917602539062
+  - 148.40585327148438
+- - 398.5960388183594
+  - 174.03680419921875
+  - -280.6602478027344
+  - -318.21588134765625
+  - -208.1580810546875
+- - 518.64208984375
+  - 216.24917602539062
+  - -318.21588134765625
+  - -475.5565185546875
+  - -274.6448669433594
+- - 337.32513427734375
+  - 148.4058380126953
+  - -208.1580810546875
+  - -274.6448669433594
+  - -198.23207092285156
+initial_log_likelihood: -872.9069213867188
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b23logit
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 100
+number_of_excluded_data: 8496
+number_of_observations: 2232
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 0.0016 <= 0.0049
+  Number of function evaluations: 1
+  Number of gradient evaluations: 1
+  Number of hessian evaluations: 0
+  Number of iterations: '0'
+  Optimization time: '0.089771'
+  Relative gradient: 0.0015693938091607266
+sample_size: 2232
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

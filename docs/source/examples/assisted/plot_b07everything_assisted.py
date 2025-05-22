@@ -3,16 +3,15 @@
 Combine many specifications: assisted specification algorithm
 =============================================================
 
-We combine many specifications, defined in :ref:`everything_spec_section`. 
+We combine many specifications, defined in :ref:`everything_spec_section`.
 This leads to a total of 432 specifications.
 The algorithm implemented in the AssistedSpecification object is used to
 investigate some of these specifications.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Jul 15 15:02:20 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 15:59:08
 """
 
 from IPython.core.display_functions import display
@@ -22,7 +21,7 @@ from biogeme.assisted import AssistedSpecification
 from biogeme.biogeme import BIOGEME
 from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.results_processing import EstimationResults, compile_estimation_results
-from everything_spec import model_catalog, database
+from everything_spec import database, model_catalog
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b07everything_assisted')
@@ -48,10 +47,8 @@ def validity(results: EstimationResults) -> tuple[bool, str | None]:
 
 # %%
 # Create the Biogeme object
-the_biogeme = BIOGEME(database, model_catalog)
-the_biogeme.modelName = 'b07everything'
-the_biogeme.generate_html = False
-the_biogeme.generate_pickle = False
+the_biogeme = BIOGEME(database, model_catalog, generate_html=False, generate_yaml=False)
+the_biogeme.model_name = 'b07everything'
 
 # %%
 # Estimate the parameters using assisted specification algorithm.

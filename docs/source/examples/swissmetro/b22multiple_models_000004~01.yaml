@@ -1,0 +1,119 @@
+# File b22multiple_models_000004~01.yaml has automatically been generated on 2025-04-21 13:56:19.931581
+# biogeme 3.3.0a01 [2025-04-21]
+
+beta_names:
+- ASC_TRAIN
+- B_TIME
+- B_COST
+- B_HEADWAY
+- ASC_CAR
+beta_values:
+- -1.1014881601446211
+- -2.666859299416565
+- -3.668277577331171
+- -0.004462155576420218
+- -0.5247956628394188
+bhhh:
+- - 757.9169921875
+  - 226.3582000732422
+  - -25.492929458618164
+  - 35977.21484375
+  - -105.19020080566406
+- - 226.3582000732422
+  - 206.90139770507812
+  - -48.17615509033203
+  - 6669.0888671875
+  - 186.1976318359375
+- - -25.492929458618164
+  - -48.17615509033203
+  - 145.87698364257812
+  - 1237.261962890625
+  - -126.722412109375
+- - 35977.21484375
+  - 6669.0888671875
+  - 1237.261962890625
+  - 3254740.75
+  - -23784.38671875
+- - -105.19020080566406
+  - 186.1976318359375
+  - -126.722412109375
+  - -23784.38671875
+  - 966.9588623046875
+bootstrap: []
+bootstrap_time: null
+convergence: false
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5393.32861328125
+gradient:
+- 290.3525390625
+- 70.5987548828125
+- 66.70183563232422
+- 10729.59765625
+- 67.03815460205078
+hessian:
+- - -548.6710815429688
+  - -159.56228637695312
+  - 24.513652801513672
+  - -26831.375
+  - 120.86988830566406
+- - -159.56228637695312
+  - -149.42654418945312
+  - 47.93623352050781
+  - -3554.417724609375
+  - -177.94529724121094
+- - 24.513652801513672
+  - 47.93623733520508
+  - -79.13497924804688
+  - -1471.831298828125
+  - 129.39022827148438
+- - -26831.375
+  - -3554.41796875
+  - -1471.831298828125
+  - -2465561.0
+  - 23498.958984375
+- - 120.869873046875
+  - -177.94529724121094
+  - 129.39022827148438
+  - 23498.958984375
+  - -905.1963500976562
+initial_log_likelihood: -5587.27783203125
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b22multiple_models_000004
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 100
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: 'Trust region is too small: 1.4901161193847656e-08'
+  Number of iterations: '27'
+  Optimization time: '0.715519'
+  Proportion of Hessian calculation: 2/2 = 100.0%
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: '<p>Specification</p><p><ul>
+
+  <li>ASC: no_seg</li>
+
+  <li>TRAIN_COST_catalog: sqrt</li>
+
+  <li>TRAIN_HEADWAY_catalog: with_headway</li>
+
+  <li>TRAIN_TT_catalog: sqrt</li>
+
+  </ul></p>
+
+  '

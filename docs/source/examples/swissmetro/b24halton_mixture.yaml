@@ -1,0 +1,113 @@
+# File b24halton_mixture.yaml has automatically been generated on 2025-04-22 00:34:27.428626
+# biogeme 3.3.0a01 [2025-04-22]
+
+beta_names:
+- ASC_TRAIN
+- B_TIME
+- B_TIME_S
+- B_COST
+- ASC_CAR
+beta_values:
+- -0.3288794556345565
+- -2.509196163518974
+- 1.9791780638810412
+- -1.339250561932488
+- 0.21017829503765834
+bhhh:
+- - 545.7174682617188
+  - 232.6826629638672
+  - 130.5903778076172
+  - -19.202478408813477
+  - -168.80307006835938
+- - 232.6826629638672
+  - 347.6208801269531
+  - 175.50083923339844
+  - -101.03323364257812
+  - 183.4630126953125
+- - 130.5903778076172
+  - 175.50083923339844
+  - 147.3944091796875
+  - 26.288963317871094
+  - 4.754802227020264
+- - -19.202478408813477
+  - -101.03323364257812
+  - 26.288963317871094
+  - 570.7554931640625
+  - -223.84910583496094
+- - -168.80307006835938
+  - 183.4630126953125
+  - 4.754802227020264
+  - -223.84910583496094
+  - 782.1804809570312
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.099179'
+final_log_likelihood: -5218.14501953125
+gradient:
+- -11.990894317626953
+- -3.2266321182250977
+- -14.274805068969727
+- 4.919586181640625
+- -5.530376434326172
+hessian:
+- - -578.3965454101562
+  - -255.24029541015625
+  - -154.00714111328125
+  - 29.89161491394043
+  - 228.0500030517578
+- - -255.24029541015625
+  - -354.8562927246094
+  - -181.6372833251953
+  - 96.01324462890625
+  - -144.94808959960938
+- - -154.00714111328125
+  - -181.63726806640625
+  - -151.7735595703125
+  - 1.1238458156585693
+  - 21.618358612060547
+- - 29.89161491394043
+  - 96.01324462890625
+  - 1.1238477230072021
+  - -298.6475830078125
+  - 141.9458465576172
+- - 228.0500030517578
+  - -144.94808959960938
+  - 21.618358612060547
+  - 141.9458465576172
+  - -790.3331909179688
+initial_log_likelihood: -6879.97314453125
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b24halton_mixture
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 100
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 0.0041 <= 0.0049
+  Number of function evaluations: 35
+  Number of gradient evaluations: 21
+  Number of hessian evaluations: 0
+  Number of iterations: '14'
+  Optimization time: '5.033049'
+  Proportion of Hessian calculation: 0/10 = 0.0%
+  Relative gradient: 0.004106468410576246
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: NORMAL_HALTON5
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: Example of a mixture of logit models with three alternatives, approximated
+  using Monte-Carlo integration with Halton draws.

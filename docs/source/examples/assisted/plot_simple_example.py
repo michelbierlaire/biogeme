@@ -6,44 +6,44 @@ Example of a catalog
 Illustration of the concept of catalog. See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Aug  6 18:13:18 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 18:39:23
 """
 
 import numpy as np
-from biogeme.expressions import Beta, Variable, Expression
-from biogeme.models import boxcox, loglogit, lognested
+
 from biogeme.catalog import (
     Catalog,
+    CentralController,
     generic_alt_specific_catalogs,
     segmentation_catalogs,
 )
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
-
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta, Expression, Variable
+from biogeme.models import boxcox, loglogit, lognested
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 
 # %%
 # Function printing all configurations of an expression.
 def print_all_configurations(expression: Expression) -> None:
     """Prints all configurations that an expression can take"""
-    expression.set_central_controller()
-    total = expression.central_controller.number_of_configurations()
+    the_central_controller = CentralController(expression=expression)
+    total = the_central_controller.number_of_configurations()
     print(f'Total: {total} configurations')
-    for config_id in expression.central_controller.all_configurations_ids:
+    for config_id in the_central_controller.all_configurations_ids:
         print(config_id)
 
 
@@ -246,7 +246,7 @@ database = read_data()
 # %%
 # We consider two trip purposes: `commuters` and anything else. We
 # need to define a binary variable first.
-database.data['COMMUTERS'] = np.where(database.data['PURPOSE'] == 1, 1, 0)
+database.dataframe['COMMUTERS'] = np.where(database.dataframe['PURPOSE'] == 1, 1, 0)
 
 # %%
 # Segmentation on trip purpose.
@@ -310,7 +310,7 @@ print_all_configurations(dummy_expression)
 (B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_TIME',
     beta_parameters=[B_TIME],
-    alternatives=['TRAIN', 'CAR'],
+    alternatives=('TRAIN', 'CAR'),
     potential_segmentations=(
         segmentation_purpose,
         segmentation_luggage,
@@ -326,7 +326,7 @@ print_all_configurations(B_TIME_catalog_dict['TRAIN'])
 (B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='B_TIME',
     beta_parameters=[B_TIME],
-    alternatives=['TRAIN', 'CAR'],
+    alternatives=('TRAIN', 'CAR'),
     potential_segmentations=(
         segmentation_purpose,
         segmentation_luggage,

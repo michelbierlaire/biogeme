@@ -8,9 +8,8 @@ We consider the model with 432 specifications defined in
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Jul 15 15:46:56 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 18:38:30
 """
 
 from IPython.core.display_functions import display
@@ -18,7 +17,7 @@ from IPython.core.display_functions import display
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.results_processing import get_pandas_estimated_parameters
-from everything_spec import model_catalog, database, av
+from everything_spec import av, database, model_catalog
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -39,10 +38,10 @@ SPEC_ID = (
 # the spec_id, and used as usual.
 the_biogeme = BIOGEME.from_configuration(
     config_id=SPEC_ID,
-    expression=model_catalog,
+    multiple_expression=model_catalog,
     database=database,
 )
-the_biogeme.modelName = 'my_favorite_model'
+the_biogeme.model_name = 'my_favorite_model'
 
 # %%
 # Calculate of the null log-likelihood for reporting.

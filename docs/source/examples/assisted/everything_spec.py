@@ -51,28 +51,28 @@ See `Bierlaire and Ortelli (2023)
 """
 
 import numpy as np
-from biogeme.expressions import Expression, Beta
-from biogeme.models import boxcox, loglogit, lognested
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
+
 from biogeme.catalog import (
     Catalog,
-    segmentation_catalogs,
     generic_alt_specific_catalogs,
+    segmentation_catalogs,
 )
-
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta, Expression
+from biogeme.models import boxcox, loglogit, lognested
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 # %%
 # Read the data
@@ -95,7 +95,7 @@ segmentation_first = database.generate_segmentation(
 # %%
 # We consider two trip purposes: 'commuters' and anything else. We
 # need to define a binary variable first.
-database.data['COMMUTERS'] = np.where(database.data['PURPOSE'] == 1, 1, 0)
+database.dataframe['COMMUTERS'] = np.where(database.dataframe['PURPOSE'] == 1, 1, 0)
 
 segmentation_purpose = database.generate_segmentation(
     variable='COMMUTERS', mapping={0: 'non_commuters', 1: 'commuters'}
