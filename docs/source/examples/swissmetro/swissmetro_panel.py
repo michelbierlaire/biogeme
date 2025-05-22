@@ -66,5 +66,5 @@ database.panel('ID')
 
 # %%
 # We flatten the database, so that each row corresponds to one individual.
-flat_df = database.generate_flat_panel_dataframe(identical_columns=None)
-flat_database = Database('swissmetro_flat', flat_df)
+# flat_df = database.generate_flat_panel_dataframe(identical_columns=None)
+# flat_database = Database('swissmetro_flat', flat_df)
