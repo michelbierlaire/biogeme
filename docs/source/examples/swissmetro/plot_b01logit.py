@@ -20,7 +20,7 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta
+from biogeme.expressions import Beta, Variable
 from biogeme.models import loglogit
 from biogeme.results_processing import get_pandas_estimated_parameters
 
@@ -75,7 +75,7 @@ logprob = loglogit(V, av, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, logprob)
-the_biogeme.modelName = 'b01logit'
+the_biogeme.model_name = 'b01logit'
 
 # %%
 # Calculate the null log likelihood for reporting.
