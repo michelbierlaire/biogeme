@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "cython"]
+requires = ["setuptools>=75", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -27,19 +27,19 @@ classifiers = [
 ]
 
 dependencies = [
-    "pandas>=2.2.2, <3",
-    "scipy>=1.14.0, <2",
-    "tqdm>=4.66.4",
-    "tomlkit>=0.12.5",
+    "pandas>=2.2.3, <3",
+    "scipy>=1.15.3, <2",
+    "tqdm>=4.67.1",
+    "tomlkit>=0.13.2",
     "python-levenshtein>=0.25.1",
     "fuzzywuzzy>=0.18.0",
     "biogeme_optimization==0.0.11",
-    "matplotlib>=3.9.0, <4",
-    "numpy>=2.0.0, <3",
-    "ipython>=8.25.0",
+    "matplotlib>=3.10.3, <4",
+    "numpy>=2.2.6, <3",
+    "ipython>=8.36.0",
     "Jinja2>=3.1.4",
     "PyYAML>=6.0.2",
-    "jax >= 0.5.2"
+    "jax >= 0.6.0"
 ]
 
 [project.optional-dependencies]
