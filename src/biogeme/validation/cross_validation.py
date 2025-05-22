@@ -3,12 +3,11 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from biogeme.calculator import MultiRowEvaluator
+from biogeme.calculator import CompiledFormulaEvaluator, MultiRowEvaluator
 from biogeme.default_parameters import ParameterValue
+from biogeme.likelihood import AlgorithmResults, model_estimation
 from biogeme.model_elements import ModelElements
-from biogeme.likelihood import model_estimation, AlgorithmResults
 from biogeme.optimization import OptimizationAlgorithm
-
 from .split_databases import EstimationValidationModels, split_databases
 
 logger = logging.getLogger(__name__)
@@ -35,11 +34,18 @@ def cross_validate_model(
     results = []
     for i, fold in enumerate(validation_models, 1):
         # Estimation phase
+        the_function_evaluator = CompiledFormulaEvaluator(
+            model_elements=fold.estimation,
+            avoid_analytical_second_derivatives=parameters[
+                'avoid_analytical_second_derivatives'
+            ],
+        )
         one_result: AlgorithmResults = model_estimation(
             the_algorithm=the_algorithm,
-            modeling_elements=fold.estimation,
+            function_evaluator=the_function_evaluator,
             parameters=parameters,
             some_starting_values=starting_values,
+            save_iterations_filename=None,
         )
         estimated_betas = fold.estimation.expressions_registry.get_named_betas_values(
             values=one_result.solution

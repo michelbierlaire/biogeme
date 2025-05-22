@@ -1,24 +1,26 @@
-"""Generation of models estimated with samples of alternatives 
+"""Generation of models estimated with samples of alternatives
 
 :author: Michel Bierlaire
 :date: Fri Sep 22 12:14:59 2023
 """
 
-import logging
 import copy
-from biogeme.models import loglogit
+import logging
+
 from biogeme.expressions import (
-    Variable,
-    Expression,
     BelongsTo,
-    ConditionalTermTuple,
     ConditionalSum,
+    ConditionalTermTuple,
+    Expression,
+    Variable,
     exp,
     log,
     logzero,
 )
+from biogeme.models import loglogit
 from biogeme.nests import NestsForNestedLogit
-from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT, CNL_PREFIX
+from .sampling_context import CNL_PREFIX, LOG_PROBA_COL, MEV_WEIGHT, SamplingContext
+from ..expressions.add_prefix_suffix import add_prefix_suffix_to_all_variables
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +77,9 @@ class GenerateModel:
 
         """
         copy_utility = copy.deepcopy(self.utility_function)
-        copy_utility.rename_elementary(self.attributes, suffix=suffix, prefix=prefix)
+        add_prefix_suffix_to_all_variables(
+            expr=copy_utility, prefix=prefix, suffix=suffix
+        )
         return copy_utility
 
     def get_logit(self) -> Expression:

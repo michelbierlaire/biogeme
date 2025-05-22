@@ -1,4 +1,4 @@
-""" Defines a class that characterized the context to apply sampling of alternatives
+"""Defines a class that characterized the context to apply sampling of alternatives
 
 :author: Michel Bierlaire
 :date: Wed Sep  6 14:38:31 2023
@@ -10,9 +10,13 @@ from dataclasses import dataclass
 from typing import NamedTuple
 
 import pandas as pd
-from biogeme.expressions import Expression, TypeOfElementaryExpression
-from biogeme.nests import NestsForCrossNestedLogit
+
 from biogeme.exceptions import BiogemeError
+from biogeme.expressions import (
+    Expression,
+    list_of_variables_in_expression,
+)
+from biogeme.nests import NestsForCrossNestedLogit
 from biogeme.partition import Partition, Segment
 
 logger = logging.getLogger(__name__)
@@ -91,9 +95,10 @@ class SamplingContext:
 
     def check_expression(self, expression: Expression) -> None:
         """Verifies if the variables contained in the expression can be found in the databases"""
-        variables = expression.set_of_elementary_expression(
-            TypeOfElementaryExpression.VARIABLE
-        )
+        variables = {
+            var.name
+            for var in list_of_variables_in_expression(the_expression=expression)
+        }
         for variable in variables:
             if (
                 variable not in self.individuals.columns

@@ -13,12 +13,11 @@ import numpy as np
 
 import biogeme.version as version
 from .estimation_results import (
-    EstimationResults,
     EstimateVarianceCovariance,
+    EstimationResults,
     calc_p_value,
     calculates_correlation_matrix,
 )
-from ..exceptions import BiogemeError
 from ..parameters import Parameters
 
 logger = logging.getLogger(__name__)
@@ -251,27 +250,17 @@ def get_html_one_parameter(
 def get_html_estimated_parameters(
     estimation_results: EstimationResults,
     variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
-    renumbering_parameters: dict[int, int] | None = None,
     renaming_parameters: dict[str, str] | None = None,
+    sort_by_name: bool = False,
 ) -> str:
     """Get the estimated parameters coded in HTML
 
     :param estimation_results: estimation results.
     :param variance_covariance_type: type of variance-covariance estimate to be used.
-    :param renumbering_parameters: a dict that suggests new numbers for parameters
     :param renaming_parameters: a dict that suggests new names for some or all parameters.
+    :param sort_by_name: if True, parameters are sorted alphabetically by name.
     :return: HTML code
     """
-    if renumbering_parameters is not None:
-        # Verify that the numbering is well-defined
-        number_values = list(renumbering_parameters.values())
-        if len(number_values) != len(set(number_values)):
-            error_msg = (
-                f'The new numbering cannot assign the same number to two different parameters:'
-                f' {renumbering_parameters}'
-            )
-            raise BiogemeError(error_msg)
-
     if renaming_parameters is not None:
         # Verify that the renaming is well-defined.
         name_values = list(renaming_parameters.values())
@@ -298,32 +287,31 @@ def get_html_estimated_parameters(
     if estimation_results.is_any_bound_active():
         html += '<th></th>'
     html += '</tr>\n'
-    all_rows = {}
+
+    rows = []
     for parameter_index, parameter_name in enumerate(estimation_results.beta_names):
-        new_number = (
-            renumbering_parameters.get(parameter_index)
-            if renumbering_parameters is not None
-            else parameter_index
-        )
-        new_name = (
+        name = (
             renaming_parameters.get(parameter_name)
             if renaming_parameters is not None
-            else estimation_results.beta_names[parameter_index]
+            else parameter_name
         )
-        the_row = (
+        row_html = (
             get_html_one_parameter(
                 estimation_results=estimation_results,
                 parameter_index=parameter_index,
                 variance_covariance_type=variance_covariance_type,
-                parameter_number=new_number,
-                parameter_name=new_name,
+                parameter_number=parameter_index,
+                parameter_name=name,
             )
             + '\n'
         )
-        all_rows[new_number] = the_row
+        rows.append((parameter_index, name, row_html))
 
-    for a_row_number in sorted(all_rows):
-        html += all_rows[a_row_number]
+    if sort_by_name:
+        rows.sort(key=lambda x: x[1])
+
+    for _, _, row_html in rows:
+        html += row_html
     html += '</table>'
     return html
 
@@ -484,7 +472,7 @@ def generate_html_file(
             estimation_results=estimation_results
         )
         parameters = get_html_estimated_parameters(
-            estimation_results=estimation_results
+            estimation_results=estimation_results, sort_by_name=True
         )
         correlation_results = get_html_correlation_results(
             estimation_results=estimation_results

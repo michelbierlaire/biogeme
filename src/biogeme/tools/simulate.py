@@ -4,14 +4,18 @@ Michel Bierlaire
 Sat Jan 18 11:24:47 2025
 """
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from pandas import DataFrame
 
-from biogeme.biogeme import BIOGEME
-from biogeme.database import Database
 from biogeme.expressions import Expression
-from biogeme.results_processing import EstimationResults
+
+if TYPE_CHECKING:
+    from biogeme.database import Database
+    from biogeme.results_processing import EstimationResults
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +35,10 @@ def simulate(
     :return: a pandas data frame with the simulated value. Each row corresponds to a row in the database, and each
               column to a formula.
     """
+    from biogeme.biogeme import BIOGEME
+
     biosim = BIOGEME(database, dict_of_expressions)
-    biosim.modelName = database.name + '_' + '_'.join(dict_of_expressions.keys())
+    biosim.model_name = database.name + '_' + '_'.join(dict_of_expressions.keys())
     simulation_results = biosim.simulate(
         the_beta_values=estimation_results.get_beta_values()
     )

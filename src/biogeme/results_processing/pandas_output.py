@@ -7,6 +7,7 @@ Wed Oct 2 06:43:33 2024
 
 import logging
 
+import numpy as np
 import pandas as pd
 
 from .estimation_results import (
@@ -53,18 +54,30 @@ def get_pandas_one_parameter(
     value = estimation_results.get_parameter_value_from_index(
         parameter_index=parameter_index
     )
-    std_err = estimation_results.get_parameter_std_err_from_index(
-        parameter_index=parameter_index, estimate_var_covar=variance_covariance_type
+    std_err = (
+        estimation_results.get_parameter_std_err_from_index(
+            parameter_index=parameter_index, estimate_var_covar=variance_covariance_type
+        )
+        if estimation_results.are_derivatives_available
+        else np.nan
     )
-    t_test = estimation_results.get_parameter_t_test_from_index(
-        parameter_index=parameter_index,
-        estimate_var_covar=variance_covariance_type,
-        target=0,
+    t_test = (
+        estimation_results.get_parameter_t_test_from_index(
+            parameter_index=parameter_index,
+            estimate_var_covar=variance_covariance_type,
+            target=0,
+        )
+        if estimation_results.are_derivatives_available
+        else np.nan
     )
-    p_value = estimation_results.get_parameter_p_value_from_index(
-        parameter_index=parameter_index,
-        estimate_var_covar=variance_covariance_type,
-        target=0,
+    p_value = (
+        estimation_results.get_parameter_p_value_from_index(
+            parameter_index=parameter_index,
+            estimate_var_covar=variance_covariance_type,
+            target=0,
+        )
+        if estimation_results.are_derivatives_available
+        else np.nan
     )
 
     the_row = {

@@ -3,37 +3,26 @@ import logging
 import os
 import shutil
 import tempfile
-import types
 import uuid
 from os import path
-from typing import Type
 
 logger = logging.getLogger(__name__)
 
 
 class TemporaryFile:
-    """Class generating a temporary file, so that the user does not
-    bother about its location, or even its name
-
-    Example::
-
-        with TemporaryFile() as filename:
-            with open(filename, 'w') as f:
-                print('stuff', file=f)
-    """
-
-    def __enter__(self, name: str = None) -> str:
+    def __enter__(self):
         self.dir = tempfile.mkdtemp()
-        name = str(uuid.uuid4()) if name is None else name
-        return path.join(self.dir, name)
+        self.name = str(uuid.uuid4())
+        self.fullpath = path.join(self.dir, self.name)
+        return self  # <--- return the object itself
 
-    def __exit__(
-        self,
-        exc_type: Type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: types.TracebackType | None,
-    ) -> None:
-        """Destroys the temporary directory"""
+    def __exit__(self, exc_type, exc_value, traceback):
+        shutil.rmtree(self.dir)
+
+    def __str__(self):
+        return self.fullpath
+
+    def remove(self):
         shutil.rmtree(self.dir)
 
 

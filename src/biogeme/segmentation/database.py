@@ -2,9 +2,9 @@ import logging
 
 import pandas as pd
 
+from biogeme.expressions import Variable
 from .segmentation import DiscreteSegmentationTuple
 from ..exceptions import BiogemeError
-from biogeme.expressions import Variable
 
 logger = logging.getLogger(__name__)
 """Logger that controls the output of
@@ -59,7 +59,9 @@ def generate_segmentation(
         )
         raise BiogemeError(error_msg)
 
-    the_mapping = {value: f'{the_variable.name}_{value}' for value in unique_values}
+    the_mapping = {
+        int(value): f'{the_variable.name}_{int(value)}' for value in unique_values
+    }
 
     if mapping is not None:
         the_mapping.update(mapping)
