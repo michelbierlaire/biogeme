@@ -11,18 +11,18 @@ import logging
 from typing import Callable
 
 from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
-from biogeme_optimization.pareto import Pareto, SetElement, DATE_TIME_STRING
-from biogeme_optimization.vns import vns, ParetoClass
+from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
+from biogeme_optimization.vns import ParetoClass, vns
 from matplotlib.axes import Axes
 
 import biogeme.tools.unique_ids
 import biogeme.version as bv
 from biogeme.biogeme import BIOGEME
-from biogeme.catalog import Configuration, ControllerOperator, CentralController
+from biogeme.catalog import CentralController, Configuration, ControllerOperator
+from biogeme.catalog.specification import Specification
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import Parameters
 from biogeme.results_processing import EstimationResults
-from biogeme.specification import Specification
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +55,12 @@ class ParetoPostProcessing:
             raise BiogemeError(error_msg)
         self.database = biogeme_object.database
         self.model_names = None
+        self.central_controller = CentralController(
+            expression=biogeme_object.log_like,
+            maximum_number_of_configurations=biogeme_object.biogeme_parameters.get_value(
+                'maximum_number_catalog_expressions'
+            ),
+        )
 
     def reestimate(self, recycle: bool = False) -> dict[str, EstimationResults]:
         """The assisted specification uses quickEstimate to estimate
@@ -70,9 +76,9 @@ class ParetoPostProcessing:
         all_results = {}
         for element in self.pareto.pareto:
             config_id = element.element_id
-            the_biogeme = BIOGEME.from_configuration(
+            the_biogeme = BIOGEME.from_configuration_and_controller(
                 config_id=config_id,
-                expression=self.expression,
+                central_controller=self.central_controller,
                 database=self.database,
                 parameters=self.biogeme_object.biogeme_parameters,
             )
@@ -166,6 +172,7 @@ class AssistedSpecification(Neighborhood):
         Specification.user_defined_validity_check = (
             None if validity is None else staticmethod(validity)
         )
+        Specification.central_controller = self.central_controller
         largest_neighborhood = self.biogeme_parameters.get_value(
             name='largest_neighborhood', section='AssistedSpecification'
         )
@@ -259,15 +266,13 @@ class AssistedSpecification(Neighborhood):
         pareto_before = self.pareto.length_of_all_sets()
 
         # Check if we can estimate everything
-        number_of_specifications = (
-            self.biogeme_object.log_like.number_of_multiple_expressions()
-        )
+        number_of_specifications = self.central_controller.number_of_configurations()
         maximum_number = self.biogeme_object.maximum_number_catalog_expressions
         if number_of_specifications <= maximum_number:
             logger.info('We consider all possible combinations of the catalogs.')
-            for index, configuration in enumerate(self.biogeme_object.log_like):
+            the_iterator = self.central_controller.expression_configuration_iterator()
+            for index, the_config in enumerate(the_iterator):
                 logger.info(f'Model {index}/{number_of_specifications}')
-                the_config = configuration.current_configuration()
                 the_specification = Specification(the_config)
                 the_element = the_specification.get_element(self.multi_objectives)
                 Specification.pareto.add(the_element)
