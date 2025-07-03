@@ -11,9 +11,10 @@ from typing import TYPE_CHECKING
 
 import jax
 import jax.numpy as jnp
-
 from biogeme.exceptions import BiogemeError
+
 from .base_expressions import Expression
+from .beta_parameters import Beta
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
 
@@ -49,13 +50,27 @@ class Elem(Expression):
         super().__init__()
 
         self.key_expression = validate_and_convert(key_expression)
-        self._key_depends_on_parameters = self.key_expression.embed_expression('Beta')
+        self._key_depends_on_parameters = self.key_expression.embed_expression(Beta)
         self.children.append(self.key_expression)
 
         self.dict_of_expressions = {}  #: dict of expressions
         for k, v in dict_of_expressions.items():
             self.dict_of_expressions[k] = validate_and_convert(v)
             self.children.append(self.dict_of_expressions[k])
+
+    def deep_flat_copy(self) -> Elem:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_dict_of_expressions = {
+            key: expression.deep_flat_copy()
+            for key, expression in self.dict_of_expressions.items()
+        }
+        copy_key = self.key_expression.deep_flat_copy()
+        return type(self)(
+            dict_of_expressions=copy_dict_of_expressions, key_expression=copy_key
+        )
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -71,7 +86,8 @@ class Elem(Expression):
             return self.dict_of_expressions[key].get_value()
         except (ValueError, KeyError):
             raise BiogemeError(
-                f'Invalid or missing key: {key}. Available keys: {self.dict_of_expressions.keys()}'
+                f'Invalid or missing key: {key}. '
+                f'Available keys: {self.dict_of_expressions.keys()}'
             )
 
     def __str__(self) -> str:
@@ -89,35 +105,41 @@ class Elem(Expression):
     def __repr__(self) -> str:
         return f"Elem({repr(self.dict_of_expressions)}, {repr(self.key_expression)})"
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         compiled_dict = {
-            k: v.recursive_construct_jax_function()
+            k: v.recursive_construct_jax_function(numerically_safe=numerically_safe)
             for k, v in self.dict_of_expressions.items()
         }
-        key_fn = self.key_expression.recursive_construct_jax_function()
+        key_fn = self.key_expression.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         sorted_keys = sorted(compiled_dict)
         key_array = jnp.array(sorted_keys)
 
-        branches = [
-            lambda p, r, d, rv, fn=compiled_dict[k]: fn(p, r, d, rv)
-            for k in sorted_keys
-        ]
+        def make_branch(fn, k):
+            def wrapped(*args):
+
+                result = fn(*args)
+                return result
+
+            return wrapped
+
+        branches = [make_branch(compiled_dict[k], k) for k in sorted_keys]
+
+        # branches = [
+        #    lambda p, r, d, rv, fn=compiled_dict[k]: fn(p, r, d, rv)
+        #    for k in sorted_keys
+        # ]
 
         def the_jax_function(parameters, one_row, the_draws, the_random_variables):
             key_value = key_fn(parameters, one_row, the_draws, the_random_variables)
-            # if self._key_depends_on_parameters and isinstance(
-            #    key_value, jax.core.Tracer
-            # ):
-            #    logger.warning(
-            #        "The key expression depends on a parameter and cannot be used "
-            #        "when computing derivatives, as it defines a non-differentiable control flow."
-            #    )
             key_int = jnp.asarray(key_value, dtype=jnp.int32)
             matches = key_array == key_int
             branch_index = jnp.argmax(matches)
-
-            return jax.lax.switch(
+            result = jax.lax.switch(
                 branch_index,
                 branches,
                 parameters,
@@ -125,5 +147,6 @@ class Elem(Expression):
                 the_draws,
                 the_random_variables,
             )
+            return result
 
         return the_jax_function

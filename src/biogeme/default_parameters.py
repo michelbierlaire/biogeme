@@ -14,10 +14,12 @@ from __future__ import annotations
 from typing import Callable, NamedTuple
 
 import numpy as np
+from tabulate import tabulate
 
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
 from biogeme.floating_point import NUMPY_FLOAT
+from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_version
 
 ParameterValue = bool | int | float | str
@@ -106,7 +108,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='number_of_draws',
-            value=100,
+            value=10_000,
             type=int,
             section='MonteCarlo',
             description='int: Number of draws for Monte-Carlo integration.',
@@ -123,6 +125,17 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
                 ' be triggered.'
             ),
             check=(cp.is_number,),
+        ),
+        ParameterTuple(
+            name='numerically_safe',
+            value=False,
+            type=bool,
+            section='Specification',
+            description=(
+                'If true, Biogeme is doing its best to deal with numerical issues, '
+                'such as division by a number close to zero, at the possible expense of speed.'
+            ),
+            check=(cp.is_boolean,),
         ),
         ParameterTuple(
             name='seed',
@@ -145,12 +158,14 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_integer, cp.is_non_negative),
         ),
         ParameterTuple(
-            name='avoid_analytical_second_derivatives',
-            value=False,
-            type=bool,
+            name='calculating_second_derivatives',
+            value='analytical',
+            type=str,
             section='Estimation',
-            description='bool: if True, second derivatives are calculated using finite difference.',
-            check=(cp.is_boolean,),
+            description=(
+                f'Defines how to calculate the second derivatives: {",".join([value.value for value in SecondDerivativesMode])}. '
+            ),
+            check=(cp.check_calculating_second_derivatives,),
         ),
         ParameterTuple(
             name='large_data_set',
@@ -344,6 +359,16 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_integer, cp.is_non_negative),
         ),
         ParameterTuple(
+            name='number_of_jobs',
+            value=-1,
+            type=int,
+            section='Bootstrap',
+            description=(
+                'int: The maximum number of concurrently running jobs. If -1 is given, joblib tries to use all CPUs.'
+            ),
+            check=(cp.is_integer,),
+        ),
+        ParameterTuple(
             name='version',
             value=get_version(),
             type=str,
@@ -352,3 +377,20 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(),
         ),
     )
+
+
+def print_list_of_parameters(table_format='plain') -> str:
+    """Generate a table describing all the parameters"""
+
+    headers = ['Parameter', 'Default value', 'Type', 'Section', 'Description']
+    rows = [
+        [
+            parameter.name,
+            parameter.value,
+            parameter.type,
+            parameter.section,
+            parameter.description,
+        ]
+        for parameter in all_parameters_tuple()
+    ]
+    return tabulate(rows, headers=headers, tablefmt='plain')

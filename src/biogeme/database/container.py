@@ -23,6 +23,7 @@ from biogeme.expressions import (
     validate_and_convert,
 )
 from biogeme.floating_point import JAX_FLOAT, PANDAS_FLOAT
+from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.segmentation import (
     DiscreteSegmentationTuple,
     generate_segmentation,
@@ -130,7 +131,8 @@ class Database:
 
         if len(values) != self.num_rows():
             raise ValueError(
-                f'Length mismatch: column has {len(values)} values, expected {self.num_rows()}.'
+                f'Length mismatch: column has {len(values)} values, '
+                f'expected {self.num_rows()}.'
             )
 
         self._df[column] = values
@@ -164,7 +166,10 @@ class Database:
 
         exclude_condition: Expression = validate_and_convert(exclude_condition)
         condition = evaluate_simple_expression_per_row(
-            expression=exclude_condition, database=self
+            expression=exclude_condition,
+            database=self,
+            numerically_safe=True,
+            second_derivatives_mode=SecondDerivativesMode.NEVER,
         )
         series = pd.Series(condition != 0.0)
         self.number_of_excluded_data = int(series.sum())
@@ -190,6 +195,8 @@ class Database:
         new_values = evaluate_simple_expression_per_row(
             expression=expression,
             database=self,
+            numerically_safe=True,
+            second_derivatives_mode=SecondDerivativesMode.NEVER,
         )
         if np.isnan(new_values).any():
             num_total = len(new_values)
@@ -258,8 +265,8 @@ class Database:
         """
         Create a new Database instance containing only a subset of the data.
 
-        This is useful to maintain consistency across estimation and validation datasets by slicing
-        the original draws array according to the provided indices.
+        This is useful to maintain consistency across estimation and validation datasets
+        by slicing the original draws array according to the provided indices.
 
         :param indices: The indices used to extract the subset of draws.
         :return: A new Database instance containing the sliced draws.
@@ -271,7 +278,7 @@ class Database:
 
     def suggest_scaling(
         self, columns: list[str] | None = None, report_all: bool = False
-    ):
+    ) -> pd.DataFrame:
         """Suggest a scaling of the variables in the database.
 
         For each column, :math:`\\delta` is the difference between the
@@ -285,17 +292,13 @@ class Database:
 
         :param columns: list of columns to be considered.
                         If None, all of them will be considered.
-        :type columns: list(str)
 
         :param report_all: if False, remove entries where the suggested
             scale is 1, 0.1 or 10
-        :type report_all: bool
 
         :return: A Pandas dataframe where each row contains the name
                  of the variable and the suggested scale s. Ideally,
                  the column should be multiplied by s.
-
-        :rtype: pandas.DataFrame
 
         :raise BiogemeError: if a variable in ``columns`` is unknown.
         """

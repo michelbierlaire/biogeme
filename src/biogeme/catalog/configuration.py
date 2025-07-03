@@ -6,9 +6,12 @@
 """
 
 from __future__ import annotations
+
 import logging
-from typing import NamedTuple, Iterable
+from typing import Iterable, NamedTuple
+
 import biogeme.exceptions as excep
+from biogeme.exceptions import BiogemeError
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +61,8 @@ class Configuration:
         :type string_id: str
 
         """
+        if not string_id:
+            raise BiogemeError('No string id has been provided')
         terms = string_id.split(SEPARATOR)
         the_config = {}
         for term in terms:

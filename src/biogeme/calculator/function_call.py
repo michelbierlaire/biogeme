@@ -15,6 +15,11 @@ import numpy as np
 
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 from .single_formula import CompiledFormulaEvaluator
+from ..constants import LOG_LIKE
+from ..database import Database
+from ..expressions import Expression
+from ..model_elements import ModelElements
+from ..second_derivatives import SecondDerivativesMode
 
 
 class CallableExpression(Protocol):
@@ -37,7 +42,7 @@ class NamedCallableExpression(Protocol):
     ) -> NamedFunctionOutput: ...
 
 
-def function_from_expression(
+def function_from_compiled_formula(
     the_compiled_function: CompiledFormulaEvaluator,
     the_betas: dict[str, float],
     named_output: bool = False,
@@ -98,4 +103,31 @@ def function_from_expression(
             the_betas=the_betas, gradient=gradient, hessian=hessian, bhhh=bhhh
         )
 
+    return the_function
+
+
+def function_from_expression(
+    expression: Expression,
+    database: Database,
+    numerically_safe: bool,
+    the_betas: dict[str, float],
+    number_of_draws: int | None = None,
+    named_output: bool = False,
+) -> CallableExpression | NamedCallableExpression:
+
+    model_elements = ModelElements(
+        expressions={LOG_LIKE: expression},
+        database=database,
+        number_of_draws=number_of_draws,
+    )
+    compiled_formula = CompiledFormulaEvaluator(
+        model_elements=model_elements,
+        second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+        numerically_safe=numerically_safe,
+    )
+    the_function = function_from_compiled_formula(
+        the_compiled_function=compiled_formula,
+        the_betas=the_betas,
+        named_output=named_output,
+    )
     return the_function

@@ -26,6 +26,7 @@ def cross_validate_model(
     parameters: dict[str, ParameterValue],
     starting_values: dict[str, float],
     slices: int,
+    numerically_safe: bool,
     groups: str | None = None,
 ) -> list[ValidationResult]:
     validation_models: list[EstimationValidationModels] = split_databases(
@@ -36,9 +37,8 @@ def cross_validate_model(
         # Estimation phase
         the_function_evaluator = CompiledFormulaEvaluator(
             model_elements=fold.estimation,
-            avoid_analytical_second_derivatives=parameters[
-                'avoid_analytical_second_derivatives'
-            ],
+            second_derivatives_mode=parameters['calculating_second_derivatives'],
+            numerically_safe=numerically_safe,
         )
         one_result: AlgorithmResults = model_estimation(
             the_algorithm=the_algorithm,
@@ -50,7 +50,9 @@ def cross_validate_model(
         estimated_betas = fold.estimation.expressions_registry.get_named_betas_values(
             values=one_result.solution
         )
-        simulation_evaluator = MultiRowEvaluator(model_elements=fold.validation)
+        simulation_evaluator = MultiRowEvaluator(
+            model_elements=fold.validation, numerically_safe=numerically_safe
+        )
         simulated_values: pd.DataFrame = simulation_evaluator.evaluate(
             the_betas=estimated_betas
         )

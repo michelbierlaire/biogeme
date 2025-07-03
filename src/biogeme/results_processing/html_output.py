@@ -9,9 +9,10 @@ import logging
 import os
 from datetime import datetime
 
-import numpy as np
-
 import biogeme.version as version
+import numpy as np
+from biogeme.exceptions import BiogemeError
+
 from .estimation_results import (
     EstimateVarianceCovariance,
     EstimationResults,
@@ -119,27 +120,32 @@ def get_html_preamble(estimation_results: EstimationResults, file_name: str) -> 
             'or the criteria for convergence of the algorithm. </p>'
         )
     identification_threshold = Parameters().get_value('identification_threshold')
-    if np.abs(estimation_results.smallest_eigenvalue) <= identification_threshold:
-        html += '<h2>Warning: identification issue</h2>\n'
-        html += (
-            f'<p>The second derivatives matrix is close to singularity. '
-            f'The smallest eigenvalue is '
-            f'{np.abs(estimation_results.smallest_eigenvalue):.3g}. This warning is '
-            f'triggered when it is smaller than the parameter '
-            f'<code>identification_threshold</code>='
-            f'{identification_threshold}.</p>'
-            f'<p>Variables involved:'
-        )
-        html += '<table>'
-        for i, ev in enumerate(estimation_results.smallest_eigenvector):
-            if np.abs(ev) > identification_threshold:
-                html += (
-                    f'<tr><td>{ev:.3g}</td>'
-                    f'<td> *</td>'
-                    f'<td> {estimation_results.beta_names[i]}</td></tr>\n'
-                )
-        html += '</table>'
-        html += '</p>\n'
+    try:
+        if np.abs(estimation_results.smallest_eigenvalue) <= identification_threshold:
+            html += '<h2>Warning: identification issue</h2>\n'
+            html += (
+                f'<p>The second derivatives matrix is close to singularity. '
+                f'The smallest eigenvalue is '
+                f'{np.abs(estimation_results.smallest_eigenvalue):.3g}. This warning is '
+                f'triggered when it is smaller than the parameter '
+                f'<code>identification_threshold</code>='
+                f'{identification_threshold}.</p>'
+                f'<p>Variables involved:'
+            )
+            html += '<table>'
+            for i, ev in enumerate(estimation_results.smallest_eigenvector):
+                if np.abs(ev) > identification_threshold:
+                    html += (
+                        f'<tr><td>{ev:.3g}</td>'
+                        f'<td> *</td>'
+                        f'<td> {estimation_results.beta_names[i]}</td></tr>\n'
+                    )
+            html += '</table>'
+            html += '</p>\n'
+    except BiogemeError:
+        html += '<h2>Warning: second derivatives matrix not available.</h2>\n'
+        html += '<p>The second derivatives matrix has not been calculated. The statistics requiring '
+        html += 'it have been generated using the BHHH matrix or the bootstrap samples (if available).</p>'
 
     if estimation_results.user_notes is not None:
         # User notes
@@ -249,7 +255,7 @@ def get_html_one_parameter(
 
 def get_html_estimated_parameters(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+    variance_covariance_type: EstimateVarianceCovariance,
     renaming_parameters: dict[str, str] | None = None,
     sort_by_name: bool = False,
 ) -> str:
@@ -271,11 +277,7 @@ def get_html_estimated_parameters(
             )
             logger.warning(warning_msg)
 
-    covar_header = {
-        EstimateVarianceCovariance.RAO_CRAMER: 'Rao-Cramer',
-        EstimateVarianceCovariance.ROBUST: 'Robust',
-        EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
-    }[variance_covariance_type]
+    covar_header = str(variance_covariance_type)
     html = '<table border="1">\n'
     html += '<tr class=biostyle>'
     html += '<th>Id</th>'
@@ -381,8 +383,8 @@ def get_html_one_pair_of_parameters(
 
 def get_html_correlation_results(
     estimation_results: EstimationResults,
+    variance_covariance_type: EstimateVarianceCovariance,
     involved_parameters: dict[str, str] | None = None,
-    variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
 ) -> str:
     """Get the correlation results in an HTML format
 
@@ -392,11 +394,7 @@ def get_html_correlation_results(
         reporting.
     :return: HTML code
     """
-    covar_header = {
-        EstimateVarianceCovariance.RAO_CRAMER: 'Rao-Cramer',
-        EstimateVarianceCovariance.ROBUST: 'Robust',
-        EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
-    }[variance_covariance_type]
+    covar_header = str(variance_covariance_type)
 
     if involved_parameters is None:
         list_of_parameters = {
@@ -451,14 +449,31 @@ def get_html_condition_number(estimation_results: EstimationResults) -> str:
 
 
 def generate_html_file(
-    estimation_results: EstimationResults, filename: str, overwrite=False
+    estimation_results: EstimationResults,
+    filename: str,
+    overwrite=False,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
 ) -> None:
     """Generate an HTML file with the estimation results
 
     :param estimation_results: estimation results
     :param filename: name of the file
     :param overwrite: if True and the file exists, it is overwritten
+    :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
+        statistics. If None, the bootstrap one is used if available. If not available, the robust one.
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
+    if (
+        variance_covariance_type == EstimateVarianceCovariance.BOOTSTRAP
+        and estimation_results.bootstrap_time is None
+    ):
+        logger.warning(
+            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+        )
+        variance_covariance_type = EstimateVarianceCovariance.ROBUST
 
     if not overwrite and os.path.exists(filename):
         raise FileExistsError(f"The file '{filename}' already exists.")
@@ -472,14 +487,15 @@ def generate_html_file(
             estimation_results=estimation_results
         )
         parameters = get_html_estimated_parameters(
-            estimation_results=estimation_results, sort_by_name=True
+            estimation_results=estimation_results,
+            sort_by_name=True,
+            variance_covariance_type=variance_covariance_type,
         )
         correlation_results = get_html_correlation_results(
-            estimation_results=estimation_results
+            estimation_results=estimation_results,
+            variance_covariance_type=variance_covariance_type,
         )
-        condition_number = get_html_condition_number(
-            estimation_results=estimation_results
-        )
+
         footer = get_html_footer()
 
         print(header, file=file)
@@ -490,6 +506,12 @@ def generate_html_file(
         print(parameters, file=file)
         print('<h2>Correlation of coefficients</h2>', file=file)
         print(correlation_results, file=file)
-        print(condition_number, file=file)
+        try:
+            condition_number = get_html_condition_number(
+                estimation_results=estimation_results
+            )
+            print(condition_number, file=file)
+        except BiogemeError:
+            ...
         print(footer, file=file)
     logger.info(f'File {filename} has been generated.')

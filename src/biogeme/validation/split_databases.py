@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
-from biogeme.model_elements import ModelElements
 from biogeme.database import Database
+from biogeme.model_elements import ModelElements
 from biogeme.validation.prepare_validation import split
 
 
@@ -15,7 +15,7 @@ def split_databases(
 ) -> list[EstimationValidationModels]:
     """
 
-    :param model_elements: modeling elements, including the database and the draws that will be slit.
+    :param model_elements: modeling elements, including the database and the draws that will be split.
     :param slices: The number of folds/slices. Must be >= 2.
     :param groups: Optional name of the column containing group identifiers.
                        If provided, all rows with the same group ID are kept in the same fold.

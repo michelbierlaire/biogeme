@@ -19,7 +19,10 @@ import pandas as pd
 from scipy.optimize import minimize
 
 from biogeme.biogeme import BIOGEME
-from biogeme.calculator import get_value_and_derivatives, get_value_c
+from biogeme.calculator import (
+    evaluate_expression,
+    get_value_and_derivatives,
+)
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, Elem, Expression, Numeric, bioMultSum, exp, log
@@ -156,16 +159,20 @@ class Mdcev(ABC):
         lru_cache decorator."""
         assert one_observation.num_rows() == 1
         if self.estimation_results:
-            return self.baseline_utilities[alternative_id].get_value_c(
+            return evaluate_expression(
+                expression=self.baseline_utilities[alternative_id],
+                numerically_safe=False,
                 database=one_observation,
                 betas=self.estimation_results.get_beta_values(),
-                prepare_ids=True,
-            )[0]
+                aggregation=True,
+            )
 
-        return get_value_c(
+        return evaluate_expression(
             expression=self.baseline_utilities[alternative_id],
+            numerically_safe=False,
             database=one_observation,
-        )[0]
+            aggregation=True,
+        )
 
     @abstractmethod
     def transformed_utility(
@@ -759,7 +766,11 @@ class Mdcev(ABC):
             unscaled_epsilon=unscaled_epsilon,
         )
         result: FunctionOutput = get_value_and_derivatives(
-            expression=utility, database=one_row, gradient=True, named_results=True
+            expression=utility,
+            database=one_row,
+            gradient=True,
+            named_results=True,
+            numerically_safe=False,
         )
 
         # Validate the utility calculation

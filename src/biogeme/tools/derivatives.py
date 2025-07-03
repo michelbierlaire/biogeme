@@ -4,6 +4,7 @@ import logging
 from typing import NamedTuple, TYPE_CHECKING
 
 import numpy as np
+from tabulate import tabulate
 
 from biogeme.floating_point import SQRT_EPS
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
@@ -148,24 +149,40 @@ def check_derivatives(
     g_num = findiff_g(the_function, x)
     gdiff = the_function_output.gradient - g_num
     if logg:
+        headers = ['x', 'Gradient', 'FinDiff', 'Difference']
+
         if names is None:
             names = [f'x[{i}]' for i in range(len(x))]
-        logger.info('x\t\tGradient\tFinDiff\t\tDifference')
-        for k, v in enumerate(gdiff):
-            logger.info(
-                f'{names[k]:15}\t{the_function_output.gradient[k]:+E}\t{g_num[k]:+E}\t{v:+E}'
-            )
+        rows = [
+            [
+                f'{names[k]}',
+                f'{the_function_output.gradient[k]:+E}',
+                f'{g_num[k]:+E}',
+                f'{v:+E}',
+            ]
+            for k, v in enumerate(gdiff)
+        ]
+        logger.info('Comparing first derivatives')
+        logger.info(tabulate(rows, headers=headers, tablefmt='plain'))
 
     h_num = findiff_h(the_function, x)
     hdiff = the_function_output.hessian - h_num
     if logg:
-        logger.info('Row\t\tCol\t\tHessian\tFinDiff\t\tDifference')
-        for row in range(len(hdiff)):
-            for col in range(len(hdiff)):
-                logger.info(
-                    f'{names[row]:15}\t{names[col]:15}\t{the_function_output.hessian[row, col]:+E}\t'
-                    f'{h_num[row, col]:+E}\t{hdiff[row, col]:+E}'
-                )
+        headers = ['Row', 'Col', 'Hessian', 'FinDiff', 'Difference']
+        rows = [
+            [
+                names[row],
+                names[col],
+                f'{the_function_output.hessian[row, col]:+E}',
+                f'{h_num[row, col]:+E}',
+                f'{hdiff[row, col]:+E}',
+            ]
+            for col in range(len(hdiff))
+            for row in range(len(hdiff))
+        ]
+        logger.info('Comparing second derivatives')
+        logger.info(tabulate(rows, headers=headers, tablefmt='plain'))
+
     return CheckDerivativesResults(
         function=the_function_output.function,
         analytical_gradient=the_function_output.gradient,

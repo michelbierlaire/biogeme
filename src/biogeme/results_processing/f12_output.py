@@ -9,13 +9,14 @@ import datetime
 import logging
 import os
 
-from .pandas_output import get_pandas_estimated_parameters
+from biogeme.version import get_version
+
 from .estimation_results import (
-    EstimationResults,
     EstimateVarianceCovariance,
+    EstimationResults,
     calculates_correlation_matrix,
 )
-from biogeme.version import get_version
+from .pandas_output import get_pandas_estimated_parameters
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +32,8 @@ def get_f12(
     :param variance_covariance_type: type of variance-covariance estimate to be used.
     :return: results formatted in F12 format
     """
-    covar_header = {
-        EstimateVarianceCovariance.RAO_CRAMER: 'Rao-Cramer',
-        EstimateVarianceCovariance.ROBUST: 'Robust',
-        EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
-    }[variance_covariance_type]
+
+    covar_header = str(variance_covariance_type)
 
     # checkline1 = (
     #    '0000000001111111111222222222233333333334444444444'
@@ -169,14 +167,31 @@ def get_f12(
 
 
 def generate_f12_file(
-    estimation_results: EstimationResults, filename: str, overwrite=False
+    estimation_results: EstimationResults,
+    filename: str,
+    overwrite=False,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
 ) -> None:
     """Generate a F12 file with the estimation results
 
     :param estimation_results: estimation results
     :param filename: name of the file
     :param overwrite: if True and the file exists, it is overwritten
+    :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
+        statistics. If None, the bootstrap one is used if available. If not available, the robust one.
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
+    if (
+        variance_covariance_type == EstimateVarianceCovariance.BOOTSTRAP
+        and estimation_results.bootstrap_time is None
+    ):
+        logger.warning(
+            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+        )
+        variance_covariance_type = EstimateVarianceCovariance.ROBUST
 
     if not overwrite and os.path.exists(filename):
         raise FileExistsError(f"The file '{filename}' already exists.")
@@ -184,7 +199,7 @@ def generate_f12_file(
     with open(filename, 'w') as file:
         content = get_f12(
             estimation_results=estimation_results,
-            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+            variance_covariance_type=variance_covariance_type,
         )
         print(content, file=file)
     logger.info(f'File {filename} has been generated.')

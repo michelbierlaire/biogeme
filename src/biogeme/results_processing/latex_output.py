@@ -11,13 +11,9 @@ from collections import Counter
 from datetime import datetime
 
 import numpy as np
+from biogeme.version import get_latex, get_version, versionDate
 
-from biogeme.version import get_version, versionDate, get_latex
-from .estimation_results import (
-    EstimationResults,
-    EstimateVarianceCovariance,
-)
-from .. import version
+from .estimation_results import EstimateVarianceCovariance, EstimationResults
 from ..exceptions import BiogemeError
 from ..parameters import Parameters
 from ..tools.ellipse import Ellipse
@@ -167,22 +163,28 @@ def get_latex_preamble(estimation_results: EstimationResults, file_name: str) ->
             'or the criteria for convergence of the algorithm.'
         )
     identification_threshold = Parameters().get_value('identification_threshold')
-    if np.abs(estimation_results.smallest_eigenvalue) <= identification_threshold:
-        latex += r'\section{Warning: identification issue}\n'
-        latex += (
-            f'The second derivatives matrix is close to singularity. '
-            f'The smallest eigenvalue is '
-            f'{np.abs(estimation_results.smallest_eigenvalue):.3g}. This warning is '
-            f'triggered when it is smaller than the parameter '
-            f'\\texttt{{identification_threshold}}='
-            f'{identification_threshold}.\n\n'
-            f'Variables involved:'
-        )
-        latex += r'\begin{tabular}{l@{*}l}'
-        for i, ev in enumerate(estimation_results.smallest_eigenvector):
-            if np.abs(ev) > identification_threshold:
-                latex += f'{ev:.3g}' f' & ' f'{estimation_results.beta_names[i]}\\\\ \n'
-        latex += r'\end{tabular}'
+    try:
+        if np.abs(estimation_results.smallest_eigenvalue) <= identification_threshold:
+            latex += r'\section{Warning: identification issue}\n'
+            latex += (
+                f'The second derivatives matrix is close to singularity. '
+                f'The smallest eigenvalue is '
+                f'{np.abs(estimation_results.smallest_eigenvalue):.3g}. This warning is '
+                f'triggered when it is smaller than the parameter '
+                f'\\texttt{{identification_threshold}}='
+                f'{identification_threshold}.\n\n'
+                f'Variables involved:'
+            )
+            latex += r'\begin{tabular}{l@{*}l}'
+            for i, ev in enumerate(estimation_results.smallest_eigenvector):
+                if np.abs(ev) > identification_threshold:
+                    latex += (
+                        f'{ev:.3g}' f' & ' f'{estimation_results.beta_names[i]}\\\\ \n'
+                    )
+            latex += r'\end{tabular}'
+    except BiogemeError:
+        latex += r'\section{Warning: second derivatives matrix not available}\n'
+        latex += 'The second derivatives matrix has not been calculated. The statistics requiring it are not generated.'
 
     if estimation_results.user_notes is not None:
         # User notes
@@ -291,7 +293,6 @@ def rename_and_renumber(
     :param renaming_parameters: dict mapping old names to new names.
     :return: dict mapping the original parameter index with the new number and the new name.
     """
-
     if renumbering_parameters is None:
         renumbering_parameters = {}
     if renaming_parameters is None:
@@ -323,7 +324,7 @@ def rename_and_renumber(
 
 def get_latex_estimated_parameters(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+    variance_covariance_type: EstimateVarianceCovariance,
     renumbering_parameters: dict[int, int] | None = None,
     renaming_parameters: dict[str, str] | None = None,
 ) -> str:
@@ -350,17 +351,12 @@ def get_latex_estimated_parameters(
             error_msg = f'The new numbering cannot assign the same number to two different parameters: {renumbering_parameters}'
             raise BiogemeError(error_msg)
 
-    covar_header = {
-        EstimateVarianceCovariance.RAO_CRAMER: 'Rao-Cramer',
-        EstimateVarianceCovariance.ROBUST: 'Robust',
-        EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
-    }
     the_header = (
         PARAMETERS_TABLE_HEADER_ACTIVE
         if estimation_results.is_any_bound_active()
         else PARAMETERS_TABLE_HEADER
     )
-    output = the_header.replace('__VARCOVAR__', covar_header[variance_covariance_type])
+    output = the_header.replace('__VARCOVAR__', str(variance_covariance_type))
 
     renamed_parameters: dict[int, tuple[int, str]] = rename_and_renumber(
         names=estimation_results.beta_names,
@@ -440,7 +436,9 @@ def compare_parameters(
 
     latex_code = COMPARAISON_PREAMBLE
     # Opening the longtable environment
-    latex_code += r'\begin{longtable}{rlSS}'
+    number_of_columns = len(estimation_results)
+    s_columns = 'S' * number_of_columns
+    latex_code += r'\begin{longtable}{rl' + s_columns + r'}'
     latex_code += '\n'
     # First row
     latex_code += '& & '
@@ -631,6 +629,7 @@ def draw_confidence_ellipse(
 def generate_latex_file_content(
     estimation_results: EstimationResults,
     filename: str,
+    variance_covariance_type: EstimateVarianceCovariance,
     include_begin_document=False,
 ) -> str:
     """
@@ -645,6 +644,8 @@ def generate_latex_file_content(
     :param filename: The name of the LaTeX file, used only for documentation within the file.
     :param include_begin_document: if True, the LaTeX file can be directly compiled. If False, it must be included
         in another document.
+    :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
+        statistics.
     :return: None. The LaTeX content is generated as a string but not written to a file.
     """
     latex = ''
@@ -654,7 +655,10 @@ def generate_latex_file_content(
         estimation_results=estimation_results, file_name=filename
     )
     latex += get_latex_general_statistics(estimation_results=estimation_results)
-    latex += get_latex_estimated_parameters(estimation_results=estimation_results)
+    latex += get_latex_estimated_parameters(
+        estimation_results=estimation_results,
+        variance_covariance_type=variance_covariance_type,
+    )
     if include_begin_document:
         latex += LATEX_FILE_FOOTER
     return latex
@@ -665,6 +669,7 @@ def generate_latex_file(
     filename: str,
     include_begin_document=False,
     overwrite=False,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
 ) -> None:
     """
     Generate and save a LaTeX document that summarizes the model estimation results.
@@ -678,7 +683,22 @@ def generate_latex_file(
         in another document.
     :param filename: Path to the LaTeX file to be created.
     :param overwrite: If True, overwrite the file if it already exists. Defaults to False.
+    :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
+        statistics. If None, the bootstrap one is used if available. If not available, the robust one.
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
+    if (
+        variance_covariance_type == EstimateVarianceCovariance.BOOTSTRAP
+        and estimation_results.bootstrap_time is None
+    ):
+        logger.warning(
+            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+        )
+        variance_covariance_type = EstimateVarianceCovariance.ROBUST
+
     if not overwrite and os.path.exists(filename):
         raise FileExistsError(f"The file '{filename}' already exists.")
 
@@ -687,6 +707,7 @@ def generate_latex_file(
             estimation_results=estimation_results,
             filename=filename,
             include_begin_document=include_begin_document,
+            variance_covariance_type=variance_covariance_type,
         )
         print(content, file=file)
     logger.info(f'File {filename} has been generated.')

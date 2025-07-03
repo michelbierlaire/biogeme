@@ -33,7 +33,9 @@ FLOAT = 'float64' if FLOAT_TYPE == 64 else 'float32'
 NUMPY_FLOAT = np.float64 if FLOAT_TYPE == 64 else np.float32
 PANDAS_FLOAT = FLOAT
 JAX_FLOAT = jnp.dtype(jnp.float32) if FLOAT_TYPE == 32 else jnp.dtype(jnp.float64)
-SQRT_EPS = jnp.sqrt(jnp.finfo(JAX_FLOAT).eps)
+EPSILON = jnp.finfo(JAX_FLOAT).eps
+SQRT_EPS = jnp.sqrt(EPSILON)
 LOG_CLIP_MIN = SQRT_EPS
 MAX_EXP_ARG = jnp.log(jnp.finfo(JAX_FLOAT).max)
 MIN_EXP_ARG = jnp.log(jnp.finfo(JAX_FLOAT).tiny)
+MOST_NEGATIVE = jnp.finfo(JAX_FLOAT).min

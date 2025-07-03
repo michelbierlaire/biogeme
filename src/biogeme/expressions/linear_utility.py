@@ -7,96 +7,21 @@ Sat Sep  9 15:29:36 2023
 from __future__ import annotations
 
 import logging
-from typing import Any, NamedTuple, TYPE_CHECKING
+from typing import NamedTuple, TYPE_CHECKING
 
 import jax.numpy as jnp
-
 from biogeme.exceptions import BiogemeError
+
 from .base_expressions import Expression
 from .beta_parameters import Beta
-from .convert import validate_and_convert
-from .elementary_expressions import Elementary, TypeOfElementaryExpression, Variable
+from .elementary_expressions import Elementary, TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
+from .variable import Variable
 
 if TYPE_CHECKING:
-    from . import ExpressionOrNumeric
+    pass
 
 logger = logging.getLogger(__name__)
-
-
-class MultipleSum(Expression):
-    """This expression returns the sum of several other expressions.
-
-    It is a generalization of 'Plus' for more than two terms
-    """
-
-    def __init__(
-        self,
-        list_of_expressions: list[ExpressionOrNumeric] | dict[Any:ExpressionOrNumeric],
-    ):
-        """Constructor
-
-        :param list_of_expressions: list of objects representing the
-                                     terms of the sum.
-
-        :type list_of_expressions: list(biogeme.expressions.Expression)
-
-        :raise BiogemeError: if one of the expressions is invalid, that is
-            neither a numeric value nor a
-            biogeme.expressions.Expression object.
-        :raise BiogemeError: if the list of expressions is empty
-        :raise BiogemeError: if the list of expressions is neither a dict nor a list
-        """
-        if not list_of_expressions:
-            raise BiogemeError('The argument of bioMultSum cannot be empty')
-
-        super().__init__()
-
-        if isinstance(list_of_expressions, dict):
-            items = list_of_expressions.values()
-        elif isinstance(list_of_expressions, list):
-            items = list_of_expressions
-        else:
-            raise BiogemeError('Argument of bioMultSum must be a dict or a list.')
-
-        for expression in items:
-            self.children.append(validate_and_convert(expression))
-
-    def get_value(self) -> float:
-        """Evaluates the value of the expression
-
-        :return: value of the expression
-        :rtype: float
-        """
-        result = 0.0
-        for e in self.get_children():
-            result += e.get_value()
-        return result
-
-    def __str__(self) -> str:
-        s = 'bioMultSum(' + ', '.join([f'{e}' for e in self.get_children()]) + ')'
-        return s
-
-    def __repr__(self) -> str:
-        return f"MultipleSum({repr(self.get_children())})"
-
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
-        compiled_children = [
-            child.recursive_construct_jax_function() for child in self.get_children()
-        ]
-
-        def the_jax_function(
-            parameters: jnp.ndarray,
-            one_row: jnp.ndarray,
-            the_draws: jnp.ndarray,
-            the_random_variables: jnp.ndarray,
-        ) -> jnp.array:
-            result = 0.0
-            for fn in compiled_children:
-                result += fn(parameters, one_row, the_draws, the_random_variables)
-            return result
-
-        return the_jax_function
 
 
 class LinearTermTuple(NamedTuple):
@@ -146,6 +71,17 @@ class LinearUtility(Expression):
 
         self.children += self.betas + self.variables
 
+    def deep_flat_copy(self) -> LinearUtility:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_list_of_terms = [
+            LinearTermTuple(beta=term[0].deep_flat_copy(), x=term[1].deep_flat_copy())
+            for term in self.list_of_terms
+        ]
+        return type(self)(list_of_terms=copy_list_of_terms)
+
     def __str__(self) -> str:
         return ' + '.join([f'{b} * {x}' for b, x in self.list_of_terms])
 
@@ -180,14 +116,20 @@ class LinearUtility(Expression):
         return {}
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        beta_fns = [b.recursive_construct_jax_function() for b in self.betas]
-        variable_fns = [v.recursive_construct_jax_function() for v in self.variables]
+        beta_fns = [
+            b.recursive_construct_jax_function(numerically_safe=numerically_safe)
+            for b in self.betas
+        ]
+        variable_fns = [
+            v.recursive_construct_jax_function(numerically_safe=numerically_safe)
+            for v in self.variables
+        ]
 
         def the_jax_function(
             parameters: jnp.ndarray,

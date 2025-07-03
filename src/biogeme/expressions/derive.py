@@ -13,9 +13,9 @@ import jax.numpy as jnp
 
 from .base_expressions import ExpressionOrNumeric
 from .collectors import list_of_all_betas_in_expression, list_of_variables_in_expression
-from .elementary_expressions import Variable
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
+from .variable import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +51,16 @@ class Derive(UnaryOperator):
 
         if self.beta is None and self.variable is None:
             logger.warning(
-                f'{name} for not appear in expression {child}. Derivative is trivially zero.'
+                f'Variable {name} does not appear in expression {child}. Derivative is trivially zero.'
             )
+
+    def deep_flat_copy(self) -> Derive:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_child = self.child.deep_flat_copy()
+        return type(self)(child=copy_child, name=self.name)
 
     def __str__(self) -> str:
         return f'Derive({self.child}, "{self.name}")'
@@ -61,13 +69,15 @@ class Derive(UnaryOperator):
         return f'Derive({self.child}, "{self.name}")'
 
     def recursive_construct_jax_function_variable(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        child_jax = self.child.recursive_construct_jax_function()
+        child_jax = self.child.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -89,13 +99,15 @@ class Derive(UnaryOperator):
         return the_jax_function
 
     def recursive_construct_jax_function_beta(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        child_jax = self.child.recursive_construct_jax_function()
+        child_jax = self.child.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -117,15 +129,19 @@ class Derive(UnaryOperator):
         return the_jax_function
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
         if self.beta is not None:
-            return self.recursive_construct_jax_function_beta()
+            return self.recursive_construct_jax_function_beta(
+                numerically_safe=numerically_safe
+            )
         if self.variable is not None:
-            return self.recursive_construct_jax_function_variable()
+            return self.recursive_construct_jax_function_variable(
+                numerically_safe=numerically_safe
+            )
         # Return zero function if neither beta nor variable is matched
         return lambda p, row, d, rv: jnp.array(0.0)

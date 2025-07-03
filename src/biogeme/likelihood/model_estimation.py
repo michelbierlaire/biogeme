@@ -8,6 +8,7 @@ Michel Bierlaire
 Sun Mar 30 16:07:55 2025
 """
 
+import logging
 from datetime import datetime
 from typing import Any, NamedTuple
 
@@ -17,11 +18,13 @@ from biogeme_optimization.function import FunctionToMinimize
 from biogeme.calculator import (
     CallableExpression,
     CompiledFormulaEvaluator,
-    function_from_expression,
+    function_from_compiled_formula,
 )
 from biogeme.default_parameters import ParameterValue
 from biogeme.likelihood.negative_likelihood import NegativeLikelihood
 from biogeme.optimization import OptimizationAlgorithm
+
+logger = logging.getLogger(__name__)
 
 
 class AlgorithmResults(NamedTuple):
@@ -61,6 +64,7 @@ def optimization(
         - optimization_messages: a dictionary with diagnostic messages and timing,
         - convergence: a boolean indicating whether the optimization converged successfully.
     """
+    the_function.set_variables(starting_values)
     start_time = datetime.now()
     output = the_algorithm(
         fct=the_function,
@@ -107,7 +111,7 @@ def model_estimation(
         the_betas=some_starting_values
     )
 
-    the_function: CallableExpression = function_from_expression(
+    the_function: CallableExpression = function_from_compiled_formula(
         the_compiled_function=function_evaluator,
         the_betas=starting_values,
     )
@@ -117,6 +121,8 @@ def model_estimation(
         loglikelihood=the_function,
         parameters=parameters,
     )
+
+    the_function_to_minimize.set_variables(np.array(list(starting_values.values())))
     if save_iterations_filename is not None:
         the_function_to_minimize.save_iterations(
             filename_for_best_iteration=save_iterations_filename,

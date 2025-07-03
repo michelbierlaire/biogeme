@@ -11,8 +11,8 @@ import numpy as np
 import pandas as pd
 
 from .estimation_results import (
-    EstimationResults,
     EstimateVarianceCovariance,
+    EstimationResults,
     calc_p_value,
     calculates_correlation_matrix,
 )
@@ -45,11 +45,7 @@ def get_pandas_one_parameter(
     if parameter_name is None:
         parameter_name = estimation_results.beta_names[parameter_index]
 
-    covar_header = {
-        EstimateVarianceCovariance.RAO_CRAMER: 'Rao-Cramer',
-        EstimateVarianceCovariance.ROBUST: 'Robust',
-        EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
-    }[variance_covariance_type]
+    covar_header = covar_header = str(variance_covariance_type)
 
     value = estimation_results.get_parameter_value_from_index(
         parameter_index=parameter_index
@@ -97,7 +93,7 @@ def get_pandas_one_parameter(
 
 def get_pandas_estimated_parameters(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
     renumbering_parameters: dict[int, int] | None = None,
     renaming_parameters: dict[str, str] | None = None,
 ) -> pd.DataFrame:
@@ -107,8 +103,22 @@ def get_pandas_estimated_parameters(
     :param variance_covariance_type: type of variance-covariance estimate to be used.
     :param renumbering_parameters: a dict that suggests new numbers for parameters
     :param renaming_parameters: a dict that suggests new names for some or all parameters.
+    :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
+        statistics. If None, the bootstrap one is used if available. If not available, the robust one.
     :return: a Pandas data frame
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
+    if (
+        variance_covariance_type == EstimateVarianceCovariance.BOOTSTRAP
+        and estimation_results.bootstrap_time is None
+    ):
+        logger.warning(
+            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+        )
+        variance_covariance_type = EstimateVarianceCovariance.ROBUST
     if renumbering_parameters is not None:
         # Verify that the numbering is well defined
         number_values = list(renumbering_parameters.values())
@@ -192,11 +202,7 @@ def get_pandas_one_pair_of_parameters(
     if second_parameter_name is None:
         second_parameter_name = estimation_results.beta_names[second_parameter_index]
 
-    covar_header = {
-        EstimateVarianceCovariance.RAO_CRAMER: 'Rao-Cramer',
-        EstimateVarianceCovariance.ROBUST: 'Robust',
-        EstimateVarianceCovariance.BOOTSTRAP: 'Bootstrap',
-    }[variance_covariance_type]
+    covar_header = str(variance_covariance_type)
 
     covariance_matrix = estimation_results.get_variance_covariance_matrix(
         variance_covariance_type=variance_covariance_type
@@ -221,8 +227,8 @@ def get_pandas_one_pair_of_parameters(
 
 def get_pandas_correlation_results(
     estimation_results: EstimationResults,
+    variance_covariance_type: EstimateVarianceCovariance,
     involved_parameters: dict[str, str] | None = None,
-    variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
 ) -> pd.DataFrame:
     """Get the correlation results in a Pandas data frame
 

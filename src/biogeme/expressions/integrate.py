@@ -10,22 +10,20 @@ import logging
 
 import jax
 import jax.numpy as jnp
+from biogeme.floating_point import JAX_FLOAT
 from numpy.polynomial.hermite import hermgauss
 
-from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import ExpressionOrNumeric
 from .elementary_expressions import (
     Elementary,
-    RandomVariable,
     TypeOfElementaryExpression,
 )
 from .jax_utils import JaxFunctionType
+from .random_variable import RandomVariable
 from .unary_expressions import UnaryOperator
 from ..exceptions import BiogemeError
 
 logger = logging.getLogger(__name__)
-
-NUMBER_OF_QUADRATURE_POINTS = 30
 
 
 class IntegrateNormal(UnaryOperator):
@@ -33,7 +31,12 @@ class IntegrateNormal(UnaryOperator):
     Numerical integration
     """
 
-    def __init__(self, child: ExpressionOrNumeric, name: str):
+    def __init__(
+        self,
+        child: ExpressionOrNumeric,
+        name: str,
+        number_of_quadrature_points: int = 30,
+    ):
         """Constructor
 
         :param child: first arithmetic expression
@@ -42,9 +45,22 @@ class IntegrateNormal(UnaryOperator):
         :type name: string
         """
         super().__init__(child)
-        self.random_variable_name = name
+        self.random_variable_name: str = name
         self.random_variable_id: int | None = (
             None  # Index of the element in its own array.
+        )
+        self.number_of_quadrature_points: int = number_of_quadrature_points
+
+    def deep_flat_copy(self) -> IntegrateNormal:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_child = self.child.deep_flat_copy()
+        return type(self)(
+            child=copy_child,
+            name=self.random_variable_name,
+            number_of_quadrature_points=self.number_of_quadrature_points,
         )
 
     def dict_of_elementary_expression(
@@ -90,9 +106,15 @@ class IntegrateNormal(UnaryOperator):
     def __repr__(self) -> str:
         return f'Integrate({self.child}, "{self.random_variable_name}")'
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
-        child_jax = jax.checkpoint(self.child.recursive_construct_jax_function())
-        x, w = hermgauss(NUMBER_OF_QUADRATURE_POINTS)
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
+        child_jax = jax.checkpoint(
+            self.child.recursive_construct_jax_function(
+                numerically_safe=numerically_safe
+            )
+        )
+        x, w = hermgauss(self.number_of_quadrature_points)
         x = jnp.asarray(x, dtype=JAX_FLOAT)
         w = jnp.asarray(w, dtype=JAX_FLOAT)
 

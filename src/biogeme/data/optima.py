@@ -14,7 +14,6 @@ Prepare data for the Optima case study.
 import os
 
 import pandas as pd
-from icecream import ic
 
 import biogeme.database as db
 from biogeme.expressions import Variable

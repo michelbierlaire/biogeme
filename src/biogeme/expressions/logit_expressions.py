@@ -13,9 +13,9 @@ from typing import TYPE_CHECKING
 import jax
 import jax.numpy as jnp
 import numpy as np
+from biogeme.floating_point import JAX_FLOAT
 from jax.scipy.special import logsumexp
 
-from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import Expression, LogitTuple
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
@@ -100,17 +100,24 @@ class LogLogit(Expression):
         self.util_keys = jnp.array(list(self.util.keys()), dtype=JAX_FLOAT)
         self.util_values = tuple(self.util[k] for k in self.util.keys())
 
-    def logit_choice_avail(self) -> list[LogitTuple]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        :type  the_type: TypeOfElementaryExpression
-
-        :return: returns a dict with the variables appearing in the
-               expression the keys being their names.
-        :rtype: dict(string:biogeme.expressions.Expression)
-
+    def deep_flat_copy(self) -> LogLogit:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
         """
+        copy_util = {key: util.deep_flat_copy() for key, util in self.util.items()}
+        copy_av = (
+            {
+                key: av.deep_flat_copy() if av is not None else None
+                for key, av in self.av.items()
+            }
+            if self.av is not None
+            else None
+        )
+        copy_choice = self.choice.deep_flat_copy()
+        return type(self)(util=copy_util, av=copy_av, choice=copy_choice)
+
+    def logit_choice_avail(self) -> list[LogitTuple]:
         result: list[LogitTuple] = list(
             chain.from_iterable(e.logit_choice_avail() for e in self.children)
         )
@@ -172,13 +179,14 @@ class LogLogit(Expression):
         return s
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a JAX-compatible function. This function computes the logit-based
         probability calculation based on availability and utility values.
 
-        :return: A function that takes parameters, a row of the database, and random draws.
+        :return: A function that takes parameters, a row of the database,
+            and random draws.
         """
 
         def get_value(
@@ -189,7 +197,9 @@ class LogLogit(Expression):
             the_random_variables: jnp.ndarray,
         ) -> jnp.ndarray:
             """Retrieve the JAX function of an object and evaluate it."""
-            jax_fn = expression.recursive_construct_jax_function()
+            jax_fn = expression.recursive_construct_jax_function(
+                numerically_safe=numerically_safe
+            )
             return jax_fn(parameters, one_row, the_draws, the_random_variables)
 
         if self.av is None:
@@ -200,7 +210,8 @@ class LogLogit(Expression):
                 the_draws: jnp.ndarray,
                 the_random_variables: jnp.ndarray,
             ) -> jnp.ndarray:
-                """JAX-compatible function for logit probability calculation with availability."""
+                """JAX-compatible function for logit probability calculation
+                with availability."""
 
                 choice_id = get_value(
                     self.choice, parameters, one_row, the_draws, the_random_variables
@@ -231,7 +242,8 @@ class LogLogit(Expression):
                 )
 
                 # Compute the log-sum-exp safely
-                return -logsumexp(all_utils)
+                result = -logsumexp(all_utils)
+                return result
 
             return the_jax_function
 
@@ -296,7 +308,7 @@ class LogLogit(Expression):
                     )
 
                     masked_utils = jnp.where(all_avail != 0.0, all_utils, -jnp.inf)
-                    return -jax.scipy.special.logsumexp(masked_utils)
+                    return -logsumexp(masked_utils)
 
                 # Conditionally compute result
                 result = jax.lax.cond(

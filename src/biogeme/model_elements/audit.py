@@ -6,6 +6,7 @@ from biogeme.default_parameters import MISSING_VALUE
 from biogeme.expressions import (
     Expression,
     ExpressionOrNumeric,
+    PanelLikelihoodTrajectory,
     Variable,
     list_of_variables_in_expression,
 )
@@ -34,7 +35,7 @@ def audit_panel(expression: Expression, database: Database) -> AuditTuple:
         return AuditTuple(errors=list_of_errors, warnings=list_of_warnings)
 
     all_variables: list[Variable] = list_of_variables_in_expression(expression)
-    if all_variables and not expression.embed_expression('PanelLikelihoodTrajectory'):
+    if all_variables and not expression.embed_expression(PanelLikelihoodTrajectory):
         error_msg = (
             f'Expression {expression} does not contain  "PanelLikelihoodTrajectory" although the data has been '
             f'declared to have a panel structure.'
@@ -53,7 +54,7 @@ def audit_chosen_alternative(
 
     """Checks all the rows in the database such that the chosen alternative is not available"""
 
-    list_of_warnings = []
+    list_of_errors = []
 
     dict_of_expressions = {CHOICE_LABEL: choice} | {
         f'{AVAILABILITY_LABEL}{alt_id:.1f}': the_expression
@@ -61,7 +62,9 @@ def audit_chosen_alternative(
     }
     model_elements = ModelElements(expressions=dict_of_expressions, database=database)
 
-    the_evaluator: MultiRowEvaluator = MultiRowEvaluator(model_elements=model_elements)
+    the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
+        model_elements=model_elements, numerically_safe=True
+    )
     results: pd.DataFrame = the_evaluator.evaluate({})
 
     def chosen_unavailable(row):
@@ -73,7 +76,7 @@ def audit_chosen_alternative(
     invalid_indices = results.apply(chosen_unavailable, axis=1)
     problematic_rows = results[invalid_indices]
 
-    list_of_errors = [
+    list_of_warnings = [
         f'Row index {idx}: chosen alternative {row[CHOICE_LABEL]} is not available'
         for idx, row in problematic_rows.iterrows()
     ]

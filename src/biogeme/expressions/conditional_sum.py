@@ -7,11 +7,11 @@ Sat Sep  9 15:29:36 2023
 from __future__ import annotations
 
 import logging
-from typing import NamedTuple, Iterable
+from typing import Iterable, NamedTuple
 
 import jax
-
 from biogeme.exceptions import BiogemeError
+
 from .base_expressions import Expression, ExpressionOrNumeric
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
@@ -60,6 +60,20 @@ class ConditionalSum(Expression):
             self.children.append(the_term.condition)
             self.children.append(the_term.term)
 
+    def deep_flat_copy(self) -> ConditionalSum:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_list_of_terms: list[ConditionalTermTuple] = [
+            ConditionalTermTuple(
+                condition=the_term.condition.deep_flat_copy(),
+                term=the_term.term.deep_flat_copy(),
+            )
+            for the_term in self.list_of_terms
+        ]
+        return type(self)(list_of_terms=copy_list_of_terms)
+
     def get_value(self) -> float:
         """Evaluates the value of the expression
 
@@ -73,11 +87,17 @@ class ConditionalSum(Expression):
                 result += the_term.term.get_value()
         return result
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         compiled_terms = [
             (
-                cond.recursive_construct_jax_function(),
-                term.recursive_construct_jax_function(),
+                cond.recursive_construct_jax_function(
+                    numerically_safe=numerically_safe
+                ),
+                term.recursive_construct_jax_function(
+                    numerically_safe=numerically_safe
+                ),
             )
             for cond, term in self.list_of_terms
         ]

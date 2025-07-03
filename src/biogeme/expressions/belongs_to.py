@@ -33,6 +33,14 @@ class BelongsTo(UnaryOperator):
         super().__init__(child)
         self.the_set: set[float] = the_set
 
+    def deep_flat_copy(self) -> BelongsTo:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        child_copy = self.child.deep_flat_copy()
+        return type(self)(child=child_copy, the_set=self.the_set)
+
     def __str__(self) -> str:
         return f'BelongsTo({self.child}, "{self.the_set}")'
 
@@ -40,13 +48,15 @@ class BelongsTo(UnaryOperator):
         return f'BelongsTo({self.child}, "{self.the_set}")'
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        child_jax = self.child.recursive_construct_jax_function()
+        child_jax = self.child.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,

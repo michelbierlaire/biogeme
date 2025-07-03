@@ -1,10 +1,17 @@
-from tqdm import tqdm
+import logging
 
 from biogeme.calculator import CompiledFormulaEvaluator
 from biogeme.default_parameters import ParameterValue
 from biogeme.model_elements import ModelElements
 from biogeme.optimization import OptimizationAlgorithm
+from biogeme.second_derivatives import SecondDerivativesMode
+from joblib import Parallel, delayed
+from tqdm import tqdm
+from tqdm_joblib import tqdm_joblib
+
 from .model_estimation import AlgorithmResults, model_estimation
+
+logger = logging.getLogger(__name__)
 
 
 def bootstrap(
@@ -13,7 +20,9 @@ def bootstrap(
     modeling_elements: ModelElements,
     parameters: dict[str, ParameterValue],
     starting_values: dict[str, float],
-    avoid_analytical_second_derivatives: bool,
+    second_derivatives_mode: SecondDerivativesMode,
+    numerically_safe: bool,
+    number_of_jobs: int,
 ) -> list[AlgorithmResults]:
     """
     Perform bootstrap estimation to assess the variability of model parameters.
@@ -27,7 +36,8 @@ def bootstrap(
     :param modeling_elements: The components defining the model, including the database and log-likelihood expression.
     :param parameters: Configuration parameters used during estimation.
     :param starting_values: Dictionary of initial values for the model's free parameters.
-    :param avoid_analytical_second_derivatives: if True, the hessian is never calculated.
+    :param second_derivatives_mode: specifies how second derivatives are calculated.
+    :param numerically_safe: improves the numerical stability of the calculations.
 
     :return: A list of tuples containing:
         - estimated parameter values (NumPy array),
@@ -35,8 +45,8 @@ def bootstrap(
         - convergence status (boolean).
     """
     the_database = modeling_elements.database
-    results = []
-    for _ in tqdm(range(number_of_bootstrap_samples)):
+
+    def run_one_bootstrap_estimation(_):
         bootstrap_modeling_elements = ModelElements(
             expressions=modeling_elements.expressions,
             database=the_database.bootstrap_sample(),
@@ -47,7 +57,8 @@ def bootstrap(
         )
         compiled_formula = CompiledFormulaEvaluator(
             model_elements=bootstrap_modeling_elements,
-            avoid_analytical_second_derivatives=avoid_analytical_second_derivatives,
+            second_derivatives_mode=second_derivatives_mode,
+            numerically_safe=numerically_safe,
         )
         one_result = model_estimation(
             the_algorithm=the_algorithm,
@@ -56,5 +67,25 @@ def bootstrap(
             some_starting_values=starting_values,
             save_iterations_filename=None,
         )
-        results.append(one_result)
-    return results
+        return one_result
+
+    PARALLEL = True
+
+    logger.info(f'Number of jobs for bootstrapping: {number_of_jobs}')
+    if PARALLEL:
+        with tqdm_joblib(
+            tqdm(
+                desc="Bootstraps",
+                total=number_of_bootstrap_samples,
+            )
+        ) as progress_bar:
+            results = Parallel(n_jobs=number_of_jobs)(
+                delayed(run_one_bootstrap_estimation)(_)
+                for _ in range(number_of_bootstrap_samples)
+            )
+        return results
+    else:
+        results = []
+        for _ in tqdm(range(number_of_bootstrap_samples)):
+            results.append(run_one_bootstrap_estimation(_))
+        return results

@@ -5,8 +5,8 @@
 
 """Model specification in a multiple expression context
 
-:author: Michel Bierlaire
-:date: Mon Apr 10 12:33:18 2023
+Michel Bierlaire
+Sat Jun 28 2025, 12:13:22
 
 Implements a model specification in a multiple expression context (using Catalogs)
 """
@@ -15,8 +15,6 @@ from __future__ import annotations
 import logging
 from typing import Callable
 
-from biogeme_optimization.pareto import SetElement
-
 from biogeme.catalog import CentralController, Configuration
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
@@ -24,6 +22,7 @@ from biogeme.parameters import Parameters, get_default_value
 from biogeme.results_processing import EstimationResults
 from biogeme.tools import ModelNames
 from biogeme.validity import Validity
+from biogeme_optimization.pareto import SetElement
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +132,7 @@ class Specification:
 
             the_biogeme: BIOGEME = BIOGEME.from_configuration(
                 config_id=self.config_id,
-                central_controller=self.central_controller,
+                multiple_expression=self.expression,
                 database=self.database,
                 generate_html=False,
                 generate_yaml=False,

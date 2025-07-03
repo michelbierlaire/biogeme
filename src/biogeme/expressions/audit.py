@@ -9,12 +9,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from biogeme.audit_tuple import AuditTuple
+
 from .belongs_to import BelongsTo
 from .comparison_expressions import ComparisonOperator
-from .elementary_expressions import Draws, RandomVariable
+from .draws import Draws
 from .integrate import IntegrateNormal
 from .logit_expressions import LogLogit
 from .montecarlo import MonteCarlo
+from .random_variable import RandomVariable
 from .visitor import ExpressionVisitor
 
 _audit_visitor = ExpressionVisitor()
@@ -73,11 +75,11 @@ def audit_montecarlo(expr: MonteCarlo, context: dict[str, list[str]]) -> None:
     :param expr: The MonteCarlo expression to audit.
     :param context: Dictionary to collect error and warning messages.
     """
-    if not expr.embed_expression('Draws'):
+    if not expr.embed_expression(Draws):
         context["errors"].append(
             f'MonteCarlo expression {repr(expr)} does not contain any Draws expression.'
         )
-    if any(child.embed_expression('MonteCarlo') for child in expr.get_children()):
+    if any(child.embed_expression(MonteCarlo) for child in expr.get_children()):
         context["errors"].append(
             f'MonteCarlo expression {repr(expr)} cannot contain another MonteCarlo expression.'
         )
@@ -91,7 +93,7 @@ def audit_integrate(expr: IntegrateNormal, context: dict[str, list[str]]) -> Non
     :param expr: The Integrate expression to audit.
     :param context: Dictionary to collect error and warning messages.
     """
-    if not expr.embed_expression('RandomVariable'):
+    if not expr.embed_expression(RandomVariable):
         context["warnings"].append(
             f'Integrate expression {repr(expr)} does not contain any RandomVariable expression.'
         )

@@ -10,13 +10,14 @@ import copy
 import logging
 
 from biogeme.exceptions import BiogemeError
+
 from . import add_prefix_suffix_to_all_variables
 from .base_expressions import Expression, ExpressionOrNumeric
 from .conditional_sum import ConditionalSum, ConditionalTermTuple
-from .elementary_expressions import Variable
 from .exp import exp
 from .jax_utils import JaxFunctionType
 from .log import log
+from .variable import Variable
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,19 @@ class PanelLikelihoodTrajectory(Expression):
         self.child: Expression | None = None
         self.initial_formula: Expression = child
         self.maximum_number_of_observations_per_individual: int | None = None
+
+    def deep_flat_copy(self) -> PanelLikelihoodTrajectory:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_child = self.initial_formula.deep_flat_copy()
+        the_copy = PanelLikelihoodTrajectory(child=copy_child)
+        if self.maximum_number_of_observations_per_individual is not None:
+            the_copy.set_maximum_number_of_observations_per_individual(
+                self.maximum_number_of_observations_per_individual
+            )
+        return the_copy
 
     def set_maximum_number_of_observations_per_individual(
         self, max_number: int
@@ -74,7 +88,7 @@ class PanelLikelihoodTrajectory(Expression):
         return f'PanelLikelihoodTrajectory({repr(self.initial_formula)})'
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates recursively a function to be used by biogeme_jax. Must be overloaded by each expression
@@ -89,4 +103,6 @@ class PanelLikelihoodTrajectory(Expression):
             )
             raise BiogemeError(error_msg)
 
-        return self.child.recursive_construct_jax_function()
+        return self.child.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )

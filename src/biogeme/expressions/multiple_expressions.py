@@ -7,9 +7,10 @@ Michel Bierlaire
 
 import abc
 import logging
-from typing import NamedTuple, Iterator, final
+from typing import Iterator, NamedTuple, final
 
 from biogeme import exceptions
+
 from .base_expressions import Expression
 
 logger = logging.getLogger(__name__)
@@ -57,15 +58,24 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
     modified algorithmically.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, the_name: str):
+        self.name = the_name  # The name of the expression catalog
         if SEPARATOR in name or SELECTION_SEPARATOR in name:
             error_msg = (
-                f'Invalid name: {name}. Cannot contain characters '
+                f'Invalid name: {the_name}. Cannot contain characters '
                 f'{SELECTION_SEPARATOR} or {SELECTION_SEPARATOR}'
             )
             raise exceptions.BiogemeError(error_msg)
         super().__init__()
-        self.name = name  # The name of the expression catalog
+
+    def deep_flat_copy(self) -> Expression:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` such as this one
+        is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        the_expression = self.selected_expression()
+        return the_expression.deep_flat_copy()
 
     @abc.abstractmethod
     def selected(self) -> NamedExpression:
@@ -119,7 +129,6 @@ class MultipleExpression(Expression, metaclass=abc.ABCMeta):
 delegated_methods = [
     'set_maximum_number_of_observations_per_individual',
     'change_init_values',
-    'embed_expression',
     'rename_elementary',
     'dict_of_elementary_expression',
     'set_of_elementary_expression',

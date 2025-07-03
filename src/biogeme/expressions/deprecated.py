@@ -6,11 +6,13 @@ Thu Apr 3 09:55:57 2025
 
 import warnings
 
-from .binary_expressions import BinaryMax, BinaryMin
-from .elementary_expressions import Draws
+from .binary_max import BinaryMax
+from .binary_min import BinaryMin
+from .draws import Draws
 from .integrate import IntegrateNormal
-from .nary_expressions import LinearUtility, MultipleSum
-from .unary_expressions import NormalCdf
+from .linear_utility import LinearUtility
+from .multiple_sum import MultipleSum
+from .normalcdf import NormalCdf
 
 
 def deprecated_wrapper(old_name, new_class, comment=None):

@@ -10,10 +10,14 @@ from __future__ import annotations
 import logging
 from typing import Iterator
 
-import biogeme.expressions as ex
-import biogeme.expressions.convert
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, MultipleExpression, NamedExpression
+from biogeme.expressions import (
+    Expression,
+    MultipleExpression,
+    NamedExpression,
+    validate_and_convert,
+)
+
 from .controller import Controller
 
 logger = logging.getLogger(__name__)
@@ -61,9 +65,7 @@ class Catalog(MultipleExpression):
         self.named_expressions = [
             NamedExpression(
                 name=named.name,
-                expression=biogeme.expressions.convert.validate_and_convert(
-                    named.expression
-                ),
+                expression=validate_and_convert(named.expression),
             )
             for named in named_expressions
         ]
@@ -107,23 +109,18 @@ class Catalog(MultipleExpression):
         catalog_name: str,
         dict_of_expressions: dict[str, Expression],
         controlled_by: Controller | None = None,
-    ):
+    ) -> Catalog:
         """Ctor using a dict instead of a list.
 
-        Python does not guarantee the order of elements of a dict,
+        Python used not to guarantee the order of elements of a dict,
         although, in practice, it is always preserved. If the order is
         critical, it is better to use the main constructor. If not,
         this constructor provides a more readable code.
 
         :param catalog_name: name of the catalog
-        :type catalog_name: str
-
         :param dict_of_expressions: dict associating the name of an
             expression and the expression itself.
-        :type dict_of_expressions: dict(str:biogeme.expressions.Expression)
-
         :param controlled_by: Object controlling the selection of the specifications.
-        :type controlled_by: Controller
 
         """
         named_expressions = [

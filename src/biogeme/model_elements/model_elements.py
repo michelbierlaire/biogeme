@@ -25,12 +25,14 @@ class ModelElements:
     def __init__(
         self,
         expressions: dict[str, Expression],
-        database: Database,
+        database: Database | None,
         number_of_draws: int | None = None,
         draws_management: DrawsManagement | None = None,
         user_defined_draws: dict[str:RandomNumberGeneratorTuple] | None = None,
         expressions_registry: ExpressionRegistry = None,
     ):
+        if database is None:
+            database = Database.dummy_database()
         self.panel_prepared: bool = False
         if database.panel_column is None:
             self._is_panel = False

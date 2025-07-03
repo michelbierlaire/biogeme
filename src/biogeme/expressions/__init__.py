@@ -7,7 +7,8 @@ from .base_expressions import (
 )
 from .belongs_to import BelongsTo
 from .beta_parameters import Beta
-from .binary_expressions import BinaryMax, BinaryMin
+from .binary_max import BinaryMax
+from .binary_min import BinaryMin
 from .collectors import (
     ExpressionCollector,
     collect_init_values,
@@ -25,6 +26,7 @@ from .convert import (
     get_dict_values,
     validate_and_convert,
 )
+from .cos import cos
 from .deprecated import (
     Integrate,
     bioDraws,
@@ -35,20 +37,20 @@ from .deprecated import (
     bioNormalCdf,
 )
 from .derive import Derive
+from .draws import Draws
 from .elem import Elem
 from .elementary_expressions import (
-    Draws,
     Elementary,
-    RandomVariable,
-    Variable,
     get_free_beta_values,
 )
 from .elementary_types import TypeOfElementaryExpression
 from .exp import exp
 from .integrate import IntegrateNormal
 from .jax_utils import build_vectorized_function
-from .log import log, logzero
+from .linear_utility import LinearTermTuple, LinearUtility
+from .log import log
 from .logit_expressions import LogLogit
+from .logzero import logzero
 from .montecarlo import MonteCarlo
 from .multiple_expressions import (
     CatalogItem,
@@ -57,11 +59,15 @@ from .multiple_expressions import (
     SELECTION_SEPARATOR,
     SEPARATOR,
 )
+from .multiple_product import MultipleProduct
+from .multiple_sum import MultipleSum
 from .named_expression import named_function_output
-from .nary_expressions import LinearTermTuple, LinearUtility, MultipleSum
+from .normalcdf import NormalCdf
 from .numeric_expressions import Numeric
 from .numeric_tools import is_numeric
 from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
+from .random_variable import RandomVariable
 from .rename_variables import rename_all_variables
-from .unary_expressions import NormalCdf, cos, sin
+from .sin import sin
+from .variable import Variable
 from .visitor import ExpressionVisitor

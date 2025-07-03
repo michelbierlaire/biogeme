@@ -1,5 +1,5 @@
 from .catalog import Catalog
-from .catalog_iterator import SelectedExpressionsIterator
+from .catalog_iterator import SelectedConfigurationsIterator
 from .central_controller import (
     CentralController,
     count_number_of_specifications,

@@ -31,6 +31,14 @@ class MonteCarlo(UnaryOperator):
         """
         super().__init__(child)
 
+    def deep_flat_copy(self) -> MonteCarlo:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        copy_child = self.child.deep_flat_copy()
+        return type(self)(child=copy_child)
+
     def __str__(self) -> str:
         return f'MonteCarlo({self.child})'
 
@@ -38,13 +46,15 @@ class MonteCarlo(UnaryOperator):
         return f'MonteCarlo({repr(self.child)})'
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        child_jax = self.child.recursive_construct_jax_function()
+        child_jax = self.child.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
         vectorized_function = vmap(
             lambda parameters, row, draws, random_variables: child_jax(
                 parameters, row, draws, random_variables

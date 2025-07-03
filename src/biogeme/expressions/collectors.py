@@ -9,7 +9,9 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING
 
 from .beta_parameters import Beta
-from .elementary_expressions import Draws, RandomVariable, Variable
+from .draws import Draws
+from .random_variable import RandomVariable
+from .variable import Variable
 
 if TYPE_CHECKING:
     from .base_expressions import Expression

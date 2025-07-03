@@ -10,18 +10,13 @@ from __future__ import annotations
 import logging
 from itertools import product
 
-from .configuration import (
-    SEPARATOR,
-    SELECTION_SEPARATOR,
-)
-from .controller import Controller
-from .catalog import Catalog
-
-
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Beta, Expression
-from biogeme.expressions import NamedExpression
-from biogeme.segmentation import Segmentation, DiscreteSegmentationTuple
+from biogeme.expressions import Beta, Expression, NamedExpression
+from biogeme.segmentation import DiscreteSegmentationTuple, Segmentation
+
+from .catalog import Catalog
+from .configuration import SELECTION_SEPARATOR, SEPARATOR
+from .controller import Controller
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +33,6 @@ def segmentation_catalogs(
     :param beta_parameters: list of parameters to be segmented
     :param potential_segmentations: tuple of potential segmentations
     :param maximum_number: maximum number of segmentations to consider
-
     """
 
     for segmentation in potential_segmentations:

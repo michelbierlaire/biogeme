@@ -10,8 +10,8 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
-
 from biogeme.exceptions import BiogemeError
+
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -65,6 +65,19 @@ class Beta(Elementary):
         self.lower_bound = lowerbound
         self.upper_bound = upperbound
         self.status = status
+
+    def deep_flat_copy(self) -> Beta:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        return type(self)(
+            name=self.name,
+            value=self.init_value,
+            lowerbound=self.lower_bound,
+            upperbound=self.upper_bound,
+            status=self.status,
+        )
 
     @property
     def is_free(self):
@@ -153,7 +166,7 @@ class Beta(Elementary):
             self.init_value = value
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Returns a compiled JAX-compatible function that extracts the beta value from the parameter vector using its

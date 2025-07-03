@@ -23,13 +23,13 @@ from biogeme.calculator import (
     CallableExpression,
     CompiledFormulaEvaluator,
     MultiRowEvaluator,
-    function_from_expression,
+    function_from_compiled_formula,
 )
 from biogeme.calculator.simple_formula import evaluate_simple_expression
 from biogeme.catalog import (
     CentralController,
     Configuration,
-    SelectedExpressionsIterator,
+    SelectedConfigurationsIterator,
 )
 from biogeme.constants import LOG_LIKE, WEIGHT
 from biogeme.database import Database
@@ -38,7 +38,13 @@ from biogeme.deprecated import deprecated_parameters
 from biogeme.dict_of_formulas import check_validity, get_expression
 from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.exceptions import BiogemeError, ValueOutOfRange
-from biogeme.expressions import Expression, ExpressionOrNumeric, MultipleSum, log
+from biogeme.expressions import (
+    Expression,
+    ExpressionOrNumeric,
+    IntegrateNormal,
+    MultipleSum,
+    log,
+)
 from biogeme.filenames import get_new_file_name
 from biogeme.function_output import (
     FunctionOutput,
@@ -56,7 +62,13 @@ from biogeme.results_processing import (
     generate_html_file,
 )
 from biogeme.results_processing.estimation_results import EstimationResults
-from biogeme.tools import ModelNames, check_derivatives, safe_serialize_array
+from biogeme.second_derivatives import SecondDerivativesMode
+from biogeme.tools import (
+    CheckDerivativesResults,
+    ModelNames,
+    check_derivatives,
+    safe_serialize_array,
+)
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult, cross_validate_model
 
@@ -89,7 +101,6 @@ class BIOGEME:
         'dogleg': bool,
         'bootstrap_samples': int,
         'save_iterations': bool,
-        'generate_html': bool,
         'generate_html': bool,
         'generate_yaml': bool,
         'optimization_algorithm': str,
@@ -175,6 +186,10 @@ class BIOGEME:
         """Name of the model. Default: 'biogemeModelDefaultName'
         """
 
+        self.second_derivatives_mode = SecondDerivativesMode(
+            self.calculating_second_derivatives
+        )
+
         if self.seed != 0:
             np.random.seed(self.seed)
 
@@ -198,10 +213,9 @@ class BIOGEME:
         )
         self._function_evaluator = (
             CompiledFormulaEvaluator(
-                model_elements=self.model_elements,
-                avoid_analytical_second_derivatives=self.biogeme_parameters.get_value(
-                    name='avoid_analytical_second_derivatives'
-                ),
+                model_elements=self._model_elements,
+                second_derivatives_mode=self.second_derivatives_mode,
+                numerically_safe=self.numerically_safe,
             )
             if self.contains_log_likelihood()
             else None
@@ -251,9 +265,10 @@ class BIOGEME:
         central_controller.set_configuration(the_configuration)
         if user_notes is None:
             user_notes = the_configuration.get_html()
+        flat_expression = central_controller.expression.deep_flat_copy()
         return cls(
             database=database,
-            formulas=central_controller.expression,
+            formulas=flat_expression,
             user_notes=user_notes,
             parameters=parameters,
             **kwargs,
@@ -297,7 +312,10 @@ class BIOGEME:
             return obj.biogeme_parameters.get_value(name=name)
 
         def setter(obj, value):
-            error_msg = f"Direct assignment to '{name}' is not allowed. Please use the constructor or the .toml file."
+            error_msg = (
+                f"Direct assignment to '{name}' is not allowed. Please set the value in the "
+                f"constructor or in the .toml file."
+            )
             raise BiogemeError(error_msg)
 
         prop = property(getter, setter)
@@ -383,7 +401,7 @@ class BIOGEME:
         """Check if the model is potentially complex to estimate"""
         if self.log_like.requires_draws():
             return True
-        if self.log_like.embed_expression('Integrate'):
+        if self.log_like.embed_expression(IntegrateNormal):
             return True
 
         return False
@@ -404,9 +422,6 @@ class BIOGEME:
     @property
     def algo_parameters(self) -> dict[str, ParameterValue]:
         """Prepare the parameters for the optimization algorithm."""
-        avoid_hessian = self.biogeme_parameters.get_value(
-            name='avoid_analytical_second_derivatives'
-        )
         common_bounds_params = {
             'infeasibleConjugateGradient': self.biogeme_parameters.get_value(
                 'infeasible_cg'
@@ -420,7 +435,10 @@ class BIOGEME:
         }
 
         if self.optimization_algorithm == 'automatic':
-            if self.is_model_complex() or avoid_hessian:
+            if (
+                self.is_model_complex()
+                or self.second_derivatives_mode == SecondDerivativesMode.NEVER
+            ):
                 logger.info(
                     'As the model is rather complex, we cancel the calculation of second derivatives. '
                     'If you want to control the parameters, change the algorithm from "automatic" '
@@ -446,15 +464,22 @@ class BIOGEME:
                 ),
             }
             if (
-                avoid_hessian
+                self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES
                 and self.biogeme_parameters.get_value('second_derivatives') > 0
             ):
                 warning = (
-                    f"The proportion of the analytical hessian is not zero, and the parameter "
-                    f"'avoid_analytical_second_derivatives' is set to True. The analytical hessian is approximated by "
-                    f"finite difference. It may not be the desired configuration."
+                    f'The proportion of the analytical hessian is not zero, and the second derivatives are approximated by '
+                    f'finite difference. It may not be the desired configuration.'
                 )
                 logger.warning(warning)
+            if (
+                self.second_derivatives_mode == SecondDerivativesMode.NEVER
+                and self.biogeme_parameters.get_value('second_derivatives') > 0
+            ):
+                error_msg = (
+                    f'The proportion of the analytical hessian is not zero, and the second derivatives cannot be '
+                    f'evaluated. The parameters "calculating_second_derivatives" and "second_derivatives" are inconsistent.'
+                )
             return algo_parameters
 
         if self.optimization_algorithm in {
@@ -518,7 +543,7 @@ class BIOGEME:
         """
         expression = -log(MultipleSum(avail))
         result = evaluate_simple_expression(
-            expression=expression, database=self.database
+            expression=expression, database=self.database, numerically_safe=False
         )
         self.null_loglikelihood = result
         return self.null_loglikelihood
@@ -544,7 +569,7 @@ class BIOGEME:
     def _get_likelihood_function(
         self,
     ) -> CallableExpression:
-        return function_from_expression(
+        return function_from_compiled_formula(
             the_compiled_function=self.function_evaluator,
             the_betas=self.expressions_registry.free_betas_init_values,
         )
@@ -675,10 +700,13 @@ class BIOGEME:
                 modeling_elements=self.model_elements,
                 parameters=opt_parameters,
                 starting_values=estimated_parameters,
-                avoid_analytical_second_derivatives=self.biogeme_parameters.get_value(
-                    name='avoid_analytical_second_derivatives'
+                second_derivatives_mode=self.biogeme_parameters.get_value(
+                    name='calculating_second_derivatives'
                 ),
+                numerically_safe=self.numerically_safe,
+                number_of_jobs=self.biogeme_parameters.get_value(name='number_of_jobs'),
             )
+
         return [result.solution for result in bootstrap_results]
 
     def retrieve_saved_estimates(self) -> EstimationResults | None:
@@ -700,6 +728,7 @@ class BIOGEME:
 
     def estimate(
         self,
+        starting_values: dict[str, float] | None = None,
         recycle: bool = False,
         run_bootstrap: bool = False,
         **kwargs,
@@ -788,15 +817,23 @@ class BIOGEME:
             )
 
         save_iteration_file_name = None
-        starting_values = {}
+        saved_starting_values = {}
         if self.biogeme_parameters.get_value('save_iterations'):
             logger.info(
                 f"*** Initial values of the parameters are "
                 f"obtained from the file {self._save_iterations_file_name()}"
             )
             save_iteration_file_name = self._save_iterations_file_name()
-            starting_values = self._load_saved_iteration()
+            saved_starting_values = self._load_saved_iteration()
+
+        if starting_values is None:
+            starting_values = saved_starting_values.copy()
+        else:
+            for key, value in saved_starting_values.items():
+                starting_values.setdefault(key, value)
+        logger.info(f'Starting values for the algorithm: {starting_values}')
         init_log_likelihood = self.calculate_init_likelihood()
+        logger.debug(f'Init log likelihood: {init_log_likelihood}')
 
         # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
         # I have no clue why.
@@ -814,10 +851,11 @@ class BIOGEME:
             algorithm_results.solution
         )
 
+        calculate_hessian = self.second_derivatives_mode != SecondDerivativesMode.NEVER
         f_g_h_b: FunctionOutput = self.function_evaluator.evaluate(
             the_betas=optimal_betas,
             gradient=True,
-            hessian=True,
+            hessian=calculate_hessian,
             bhhh=True,
         )
 
@@ -844,6 +882,9 @@ class BIOGEME:
             if self.null_loglikelihood is not None
             else None
         )
+        the_hessian = (
+            None if f_g_h_b.hessian is None else safe_serialize_array(f_g_h_b.hessian)
+        )
         raw_estimation_results = RawEstimationResults(
             model_name=self.model_name,
             user_notes=self.user_notes,
@@ -852,7 +893,7 @@ class BIOGEME:
             lower_bounds=[bound[0] for bound in self.expressions_registry.bounds],
             upper_bounds=[bound[1] for bound in self.expressions_registry.bounds],
             gradient=safe_serialize_array(f_g_h_b.gradient),
-            hessian=safe_serialize_array(f_g_h_b.hessian),
+            hessian=the_hessian,
             bhhh=safe_serialize_array(f_g_h_b.bhhh),
             null_log_likelihood=null_log_likelihood,
             initial_log_likelihood=init_log_likelihood,
@@ -1046,11 +1087,11 @@ class BIOGEME:
                 )
                 raise ValueOutOfRange(error_msg)
 
-            the_iterator = SelectedExpressionsIterator(
+            the_iterator = SelectedConfigurationsIterator(
                 the_central_controller=central_controller
             )
         else:
-            the_iterator = SelectedExpressionsIterator(
+            the_iterator = SelectedConfigurationsIterator(
                 the_central_controller=central_controller,
                 selected_configurations=selected_configurations,
             )
@@ -1059,7 +1100,7 @@ class BIOGEME:
             config_id = config.get_string_id()
             b = self.__class__.from_configuration(
                 config_id=config_id,
-                central_controller=central_controller,
+                multiple_expression=self.log_like,
                 database=self.database,
                 user_notes=self.user_notes,
                 parameters=self.biogeme_parameters,
@@ -1103,10 +1144,8 @@ class BIOGEME:
         # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
         # I have no clue why.
         parameters = self.optimization_parameters
-        parameters['avoid_analytical_second_derivatives'] = (
-            self.biogeme_parameters.get_value(
-                name='avoid_analytical_second_derivatives'
-            )
+        parameters['calculating_second_derivatives'] = (
+            self.biogeme_parameters.get_value(name='calculating_second_derivatives')
         )
         return cross_validate_model(
             the_algorithm=self._algorithm_configuration(),
@@ -1114,6 +1153,7 @@ class BIOGEME:
             parameters=parameters,
             starting_values=estimation_results.get_beta_values(),
             slices=slices,
+            numerically_safe=self.numerically_safe,
             groups=groups,
         )
 
@@ -1149,8 +1189,9 @@ class BIOGEME:
             raise BiogemeError(error_msg)
 
         the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
-            model_elements=self.model_elements
+            model_elements=self.model_elements, numerically_safe=self.numerically_safe
         )
+
         results = the_evaluator.evaluate(the_beta_values)
         return results
 
@@ -1214,7 +1255,7 @@ class BIOGEME:
         return r
 
     @deprecated_parameters({'beta': None})
-    def check_derivatives(self, verbose: bool = False):
+    def check_derivatives(self, verbose: bool = False) -> CheckDerivativesResults:
         """Verifies the implementation of the derivatives.
 
         It compares the analytical version with the finite differences
@@ -1240,7 +1281,7 @@ class BIOGEME:
             )
         )
 
-        the_log_likelihood: CallableExpression = function_from_expression(
+        the_log_likelihood: CallableExpression = function_from_compiled_formula(
             the_compiled_function=self.function_evaluator,
             the_betas=starting_values,
         )

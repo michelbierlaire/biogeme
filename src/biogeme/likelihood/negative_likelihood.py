@@ -4,13 +4,16 @@ Michel Bierlaire
 Sat Mar 29 16:27:47 2025
 """
 
+import logging
 from typing import Callable
 
 import numpy as np
-from biogeme_optimization.function import FunctionToMinimize, FunctionData
+from biogeme_optimization.function import FunctionData, FunctionToMinimize
 
 from biogeme.exceptions import BiogemeError
 from biogeme.function_output import FunctionOutput
+
+logger = logging.getLogger(__name__)
 
 
 class NegativeLikelihood(FunctionToMinimize):

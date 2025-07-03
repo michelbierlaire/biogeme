@@ -23,29 +23,35 @@ from biogeme.expressions import (
 from biogeme.floating_point import JAX_FLOAT, NUMPY_FLOAT
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 from biogeme.model_elements import ModelElements
+from biogeme.second_derivatives import SecondDerivativesMode
 
 logger = logging.getLogger(__name__)
 
 
 class CompiledFormulaEvaluator:
     """
-    Compiles and evaluates a Biogeme expression using JAX for efficient repeated computation.
+    Compiles and evaluates a Biogeme expression using JAX for efficient
+        repeated computation.
     """
 
     def __init__(
         self,
         model_elements: ModelElements,
-        avoid_analytical_second_derivatives: bool,
+        second_derivatives_mode: SecondDerivativesMode,
+        numerically_safe: bool,
     ):
         """
         Prepares and compiles the JAX function for evaluating a Biogeme expression.
 
         :param model_elements: All elements needed to calculate the expression.
+        :param second_derivatives_mode: specifies how second derivatives are calculated.
+        :param numerically_safe: improves the numerical stability of the calculations.
         """
         from biogeme.expressions import build_vectorized_function
 
         self.model_elements = model_elements
-        self.avoid_analytical_second_derivatives = avoid_analytical_second_derivatives
+        self.second_derivatives_mode = second_derivatives_mode
+        self.numerically_safe = numerically_safe
         self.free_betas_names = (
             self.model_elements.expressions_registry.free_betas_names
         )
@@ -59,20 +65,26 @@ class CompiledFormulaEvaluator:
             if self.model_elements.draws_management is not None
             else None
         )
-        n_obs = self.model_elements.sample_size
         n_rv = self.model_elements.expressions_registry.number_of_random_variables
         self.random_variables_jax = jnp.zeros((n_rv,), dtype=JAX_FLOAT)
 
         log_likelihood = self.model_elements.loglikelihood
         if log_likelihood is None:
-            error_message = f'No expression found for log likelihood. Available expressions: {self.model_elements.formula_names}'
+            error_message = (
+                f'No expression found for log likelihood. '
+                f'Available expressions: {self.model_elements.formula_names}'
+            )
             raise BiogemeError(error_message)
-        the_function = log_likelihood.recursive_construct_jax_function()
+        the_function = log_likelihood.recursive_construct_jax_function(
+            numerically_safe=self.numerically_safe
+        )
         vectorized_function = build_vectorized_function(the_function)
 
         if self.model_elements.weight is not None:
             weight_function = (
-                self.model_elements.weight.recursive_construct_jax_function()
+                self.model_elements.weight.recursive_construct_jax_function(
+                    numerically_safe=numerically_safe
+                )
             )
             vectorized_weight_function = build_vectorized_function(weight_function)
         else:
@@ -155,6 +167,10 @@ class CompiledFormulaEvaluator:
         )
 
     def _evaluate_autodiff_hessian(self, free_betas_values):
+        if self.second_derivatives_mode == SecondDerivativesMode.NEVER:
+            error_msg = 'The second derivatives are not supposed to be evaluated'
+            raise BiogemeError(error_msg)
+
         value_and_grad_fn = jax.jit(
             jax.value_and_grad(
                 lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
@@ -167,12 +183,11 @@ class CompiledFormulaEvaluator:
             self.draws_jax,
             self.random_variables_jax,
         )
-
         if jnp.all(the_gradient == 0.0):
             the_hessian = np.zeros(
                 (len(free_betas_values), len(free_betas_values)), dtype=NUMPY_FLOAT
             )
-        elif self.avoid_analytical_second_derivatives:
+        elif self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES:
             the_hessian = self._evaluate_finite_difference_hessian(free_betas_values)
         else:
             hessian_fn = jax.jit(
@@ -213,7 +228,9 @@ class CompiledFormulaEvaluator:
 
         def one_gradient(p, d, r, rv):
             loglik_fn = (
-                self.model_elements.loglikelihood.recursive_construct_jax_function()
+                self.model_elements.loglikelihood.recursive_construct_jax_function(
+                    numerically_safe=self.numerically_safe
+                )
             )
             vectorized_function = build_vectorized_function(loglik_fn)
             draw_values = vectorized_function(p, d[None, :], r[None, :, :], rv)
@@ -315,23 +332,27 @@ def calculate_single_formula(
     gradient: bool,
     hessian: bool,
     bhhh: bool,
-    avoid_analytical_second_derivatives: bool,
+    second_derivatives_mode: SecondDerivativesMode,
+    numerically_safe: bool,
 ) -> FunctionOutput:
     """
-    Evaluates a single Biogeme expression using JAX, optionally computing the gradient and Hessian.
+    Evaluates a single Biogeme expression using JAX, optionally computing the gradient
+        and Hessian.
 
     :param model_elements: All elements needed to calculate the expression.
     :param the_betas: Dictionary of parameter names to values.
     :param gradient: If True, compute the gradient.
     :param hessian: If True, compute the Hessian (requires gradient=True).
     :param bhhh: Unused here, included for compatibility.
-    :param avoid_analytical_second_derivatives: if True, the second derivatives are calculated with finite differences,
-        if requested.
-    :return: A BiogemeFunctionOutput with the value, gradient, and optionally the Hessian.
+    :param second_derivatives_mode: specifies how second derivatives are calculated.
+    :param numerically_safe: improves the numerical stability of the calculations.
+    :return: A BiogemeFunctionOutput with the value, gradient,
+       and optionally the Hessian.
     """
     the_compiled_formula = CompiledFormulaEvaluator(
         model_elements=model_elements,
-        avoid_analytical_second_derivatives=avoid_analytical_second_derivatives,
+        second_derivatives_mode=second_derivatives_mode,
+        numerically_safe=numerically_safe,
     )
     return the_compiled_formula.evaluate(
         the_betas=the_betas, gradient=gradient, hessian=hessian, bhhh=bhhh
@@ -343,6 +364,8 @@ def calculate_single_formula_from_expression(
     database: Database,
     number_of_draws: int,
     the_betas: dict[str, float],
+    second_derivatives_mode: SecondDerivativesMode,
+    numerically_safe: bool,
 ) -> float:
     model_elements = ModelElements.from_expression_and_weight(
         log_like=expression,
@@ -352,6 +375,8 @@ def calculate_single_formula_from_expression(
     )
     result = calculate_single_formula(
         model_elements=model_elements,
+        second_derivatives_mode=second_derivatives_mode,
+        numerically_safe=numerically_safe,
         the_betas=the_betas,
         gradient=False,
         hessian=False,
@@ -363,15 +388,16 @@ def calculate_single_formula_from_expression(
 def evaluate_formula(
     model_elements: ModelElements,
     the_betas: dict[str, float],
-    avoid_analytical_second_derivatives: bool,
+    second_derivatives_mode: SecondDerivativesMode,
+    numerically_safe: bool,
 ) -> float:
     """
     Evaluates a single Biogeme expression using JAX.
 
     :param model_elements: All elements needed to calculate the expression.
     :param the_betas: Dictionary of parameter names to values.
-    :param avoid_analytical_second_derivatives: if True, second derivatives are calculated using finite differences,
-        if requested.
+    :param second_derivatives_mode: specifies how second derivatives are calculated.
+    :param numerically_safe: improves the numerical stability of the calculations.
     :return: the value of the expression.
     """
     result = calculate_single_formula(
@@ -380,17 +406,21 @@ def evaluate_formula(
         gradient=False,
         hessian=False,
         bhhh=False,
-        avoid_analytical_second_derivatives=avoid_analytical_second_derivatives,
+        second_derivatives_mode=second_derivatives_mode,
+        numerically_safe=numerically_safe,
     )
     return result.function
 
 
-def evaluate_expression_per_row(
+def evaluate_model_per_row(
     model_elements: ModelElements,
     the_betas: dict[str, float],
+    second_derivatives_mode: SecondDerivativesMode,
+    numerically_safe: bool,
 ) -> np.ndarray:
     """
-    Evaluates a Biogeme expression for each entry in the database and returns individual results.
+    Evaluates a Biogeme expression for each entry in the database and returns
+    individual results.
 
     This function compiles the expression using JAX, applies it to all observations
     in the database, and returns a NumPy array containing the evaluated values
@@ -398,22 +428,36 @@ def evaluate_expression_per_row(
 
     :param model_elements: All elements needed to calculate the expression.
     :param the_betas: Dictionary mapping parameter names to their values.
+    :param second_derivatives_mode: specifies how second derivatives are calculated.
+    :param numerically_safe: improves the numerical stability of the calculations.
     :return: A NumPy array of values, one for each observation in the database.
     """
     the_compiled_formula = CompiledFormulaEvaluator(
-        model_elements=model_elements, avoid_analytical_second_derivatives=True
+        model_elements=model_elements,
+        second_derivatives_mode=second_derivatives_mode,
+        numerically_safe=numerically_safe,
     )
     return the_compiled_formula.evaluate_individual(the_betas=the_betas)
 
 
-def get_value_c(
+def evaluate_expression(
     expression: Expression,
+    numerically_safe: bool,
     database: Database | None = None,
     betas: dict[str, float] | None = None,
     number_of_draws: int = 1000,
     aggregation: bool = False,
 ) -> np.ndarray | float:
-    """For backward compatibility. This function used ot be a member of the Expression class."""
+    """Evaluate an arithmetic expression
+
+    :param expression: the expression to be evaluated
+    :param numerically_safe: if True, the numerical stability of the evaluation is improved, possibly at the expense
+         of calculation speed. Set it to False except if necessary.
+    :param database: database, needed if the expression involves `Variable`
+    :param betas: values of the parameters, if the expression involves `Beta`
+    :param number_of_draws: number of draws for Monte Carlo integration, if the expression involves it.
+    :param aggregation: if True, the sum over all rows is calculated. If False, the value for each row is returned.
+    """
     if database is None:
         database = Database.dummy_database()
     model_elements = ModelElements.from_expression_and_weight(
@@ -425,13 +469,24 @@ def get_value_c(
     if betas is None:
         betas = collect_init_values(expression=expression)
     if aggregation:
-        return evaluate_formula(model_elements=model_elements, the_betas=betas)
+        return evaluate_formula(
+            model_elements=model_elements,
+            the_betas=betas,
+            second_derivatives_mode=SecondDerivativesMode.NEVER,
+            numerically_safe=numerically_safe,
+        )
 
-    return evaluate_expression_per_row(model_elements=model_elements, the_betas=betas)
+    return evaluate_model_per_row(
+        model_elements=model_elements,
+        the_betas=betas,
+        second_derivatives_mode=SecondDerivativesMode.NEVER,
+        numerically_safe=numerically_safe,
+    )
 
 
 def get_value_and_derivatives(
     expression: Expression,
+    numerically_safe: bool,
     betas: dict[str, float] | None = None,
     database: Database | None = None,
     number_of_draws: int = 1000,
@@ -452,7 +507,9 @@ def get_value_and_derivatives(
     )
 
     the_compiled_formula = CompiledFormulaEvaluator(
-        model_elements=model_elements, avoid_analytical_second_derivatives=False
+        model_elements=model_elements,
+        second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+        numerically_safe=numerically_safe,
     )
     if betas is None:
         betas = collect_init_values(expression=expression)
@@ -466,3 +523,23 @@ def get_value_and_derivatives(
         mapping=model_elements.expressions_registry.free_betas_indices,
     )
     return named_results
+
+
+def get_value_c(
+    expression: Expression,
+    numerically_safe: bool,
+    database: Database | None = None,
+    betas: dict[str, float] | None = None,
+    number_of_draws: int = 1000,
+    aggregation: bool = False,
+) -> np.ndarray | float:
+    """For backward compatibility. This function used to be a member of the
+    Expression class."""
+    return evaluate_expression(
+        expression=expression,
+        numerically_safe=numerically_safe,
+        database=database,
+        betas=betas,
+        number_of_draws=number_of_draws,
+        aggregation=aggregation,
+    )

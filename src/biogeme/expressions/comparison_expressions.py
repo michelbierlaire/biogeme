@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 
-from jax import Array
+from jax import Array, lax
 
 from .base_expressions import ExpressionOrNumeric
 from .binary_expressions import BinaryOperator
@@ -48,6 +48,15 @@ class Equal(ComparisonOperator):
         """
         super().__init__(left, right)
 
+    def deep_flat_copy(self) -> Equal:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
+
     def __str__(self) -> str:
         return f'({self.left} == {self.right})'
 
@@ -63,11 +72,15 @@ class Equal(ComparisonOperator):
         r = 1 if self.left.get_value() == self.right.get_value() else 0
         return r
 
-    def recursive_construct_jax_function(self):
+    def recursive_construct_jax_function(self, numerically_safe: bool):
         import jax.numpy as jnp
 
-        left_fn = self.left.recursive_construct_jax_function()
-        right_fn = self.right.recursive_construct_jax_function()
+        left_fn = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -75,12 +88,10 @@ class Equal(ComparisonOperator):
             the_draws: jnp.ndarray,
             the_random_variables: jnp.ndarray,
         ):
-            return jnp.where(
-                left_fn(parameters, one_row, the_draws, the_random_variables)
-                == right_fn(parameters, one_row, the_draws, the_random_variables),
-                1.0,
-                0.0,
-            )
+            is_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) == right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_equal, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
 
@@ -101,6 +112,15 @@ class NotEqual(ComparisonOperator):
         """
         super().__init__(left, right)
 
+    def deep_flat_copy(self) -> NotEqual:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
+
     def __str__(self) -> str:
         return f'({self.left} != {self.right})'
 
@@ -116,11 +136,17 @@ class NotEqual(ComparisonOperator):
         r = 1 if self.left.get_value() != self.right.get_value() else 0
         return r
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         import jax.numpy as jnp
 
-        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function()
-        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function()
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -128,12 +154,10 @@ class NotEqual(ComparisonOperator):
             the_draws: jnp.ndarray,
             the_random_variables: jnp.ndarray,
         ) -> Array:
-            return jnp.where(
-                left_fn(parameters, one_row, the_draws, the_random_variables)
-                != right_fn(parameters, one_row, the_draws, the_random_variables),
-                1.0,
-                0.0,
-            )
+            is_not_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) != right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_not_equal, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
 
@@ -155,6 +179,15 @@ class LessOrEqual(ComparisonOperator):
         """
         super().__init__(left, right)
 
+    def deep_flat_copy(self) -> LessOrEqual:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
+
     def __str__(self) -> str:
         return f'({self.left} <= {self.right})'
 
@@ -170,11 +203,17 @@ class LessOrEqual(ComparisonOperator):
         r = 1 if self.left.get_value() <= self.right.get_value() else 0
         return r
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         import jax.numpy as jnp
 
-        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function()
-        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function()
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -182,11 +221,11 @@ class LessOrEqual(ComparisonOperator):
             the_draws: jnp.ndarray,
             the_random_variables: jnp.ndarray,
         ):
-            return jnp.where(
-                left_fn(parameters, one_row, the_draws, the_random_variables)
-                <= right_fn(parameters, one_row, the_draws, the_random_variables),
-                1.0,
-                0.0,
+            is_less_or_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) <= right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(
+                is_less_or_equal, lambda _: 1.0, lambda _: 0.0, operand=None
             )
 
         return the_jax_function
@@ -208,6 +247,15 @@ class GreaterOrEqual(ComparisonOperator):
         """
         super().__init__(left, right)
 
+    def deep_flat_copy(self) -> GreaterOrEqual:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
+
     def __str__(self) -> str:
         return f'({self.left} >= {self.right})'
 
@@ -223,11 +271,17 @@ class GreaterOrEqual(ComparisonOperator):
         r = 1 if self.left.get_value() >= self.right.get_value() else 0
         return r
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         import jax.numpy as jnp
 
-        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function()
-        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function()
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -235,11 +289,11 @@ class GreaterOrEqual(ComparisonOperator):
             the_draws: jnp.ndarray,
             the_random_variables: jnp.ndarray,
         ):
-            return jnp.where(
-                left_fn(parameters, one_row, the_draws, the_random_variables)
-                >= right_fn(parameters, one_row, the_draws, the_random_variables),
-                1.0,
-                0.0,
+            is_greater_or_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) >= right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(
+                is_greater_or_equal, lambda _: 1.0, lambda _: 0.0, operand=None
             )
 
         return the_jax_function
@@ -261,6 +315,15 @@ class Less(ComparisonOperator):
         """
         super().__init__(left, right)
 
+    def deep_flat_copy(self) -> Less:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
+
     def __str__(self) -> str:
         return f'({self.left} < {self.right})'
 
@@ -276,11 +339,17 @@ class Less(ComparisonOperator):
         r = 1 if self.left.get_value() < self.right.get_value() else 0
         return r
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         import jax.numpy as jnp
 
-        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function()
-        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function()
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -288,12 +357,10 @@ class Less(ComparisonOperator):
             the_draws: jnp.ndarray,
             the_random_variables: jnp.ndarray,
         ):
-            return jnp.where(
-                left_fn(parameters, one_row, the_draws, the_random_variables)
-                < right_fn(parameters, one_row, the_draws, the_random_variables),
-                1.0,
-                0.0,
-            )
+            is_less = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) < right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_less, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
 
@@ -314,6 +381,15 @@ class Greater(ComparisonOperator):
         """
         super().__init__(left, right)
 
+    def deep_flat_copy(self) -> Greater:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
+
     def __str__(self) -> str:
         return f'({self.left} > {self.right})'
 
@@ -329,11 +405,17 @@ class Greater(ComparisonOperator):
         r = 1 if self.left.get_value() > self.right.get_value() else 0
         return r
 
-    def recursive_construct_jax_function(self) -> JaxFunctionType:
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
         import jax.numpy as jnp
 
-        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function()
-        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function()
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
 
         def the_jax_function(
             parameters: jnp.ndarray,
@@ -341,11 +423,9 @@ class Greater(ComparisonOperator):
             the_draws: jnp.ndarray,
             the_random_variables: jnp.ndarray,
         ):
-            return jnp.where(
-                left_fn(parameters, one_row, the_draws, the_random_variables)
-                > right_fn(parameters, one_row, the_draws, the_random_variables),
-                1.0,
-                0.0,
-            )
+            is_greater = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) > right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_greater, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function

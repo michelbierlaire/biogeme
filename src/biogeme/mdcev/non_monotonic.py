@@ -8,7 +8,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from biogeme.calculator import get_value_c
+from biogeme.calculator import evaluate_expression
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, exp, log
@@ -136,16 +136,20 @@ class NonMonotonic(Mdcev):
         lru_cache decorator."""
         assert one_observation.num_rows() == 1
         if self.estimation_results:
-            return get_value_c(
+            return evaluate_expression(
                 expression=self.mu_utilities[alternative_id],
+                numerically_safe=False,
                 database=one_observation,
                 betas=self.estimation_results.get_beta_values(),
-            )[0]
+                aggregation=True,
+            )
 
-        return get_value_c(
+        return evaluate_expression(
             expression=self.mu_utilities[alternative_id],
+            numerically_safe=False,
             database=one_observation,
-        )[0]
+            aggregation=True,
+        )
 
     def utility_expression_one_alternative(
         self,

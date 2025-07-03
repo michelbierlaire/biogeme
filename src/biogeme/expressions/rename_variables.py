@@ -5,7 +5,7 @@ Fri May 02 2025, 13:51:23
 """
 
 from .base_expressions import Expression
-from .elementary_expressions import Variable
+from .variable import Variable
 from .visitor import ExpressionVisitor
 
 _rename_visitor = ExpressionVisitor()

@@ -1,5 +1,10 @@
 from .database import countNumberOfGroups, count_number_of_groups, flatten_database
-from .derivatives import check_derivatives, findiff_g, findiff_h
+from .derivatives import (
+    CheckDerivativesResults,
+    check_derivatives,
+    findiff_g,
+    findiff_h,
+)
 from .files import TemporaryFile, create_backup, is_valid_filename
 from .formatting import format_memory_size
 from .likelihood_ratio import LRTuple, likelihood_ratio_test

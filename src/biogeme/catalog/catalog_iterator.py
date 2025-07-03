@@ -6,17 +6,13 @@ Thu Apr 17 2025, 08:30:58
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from biogeme.exceptions import BiogemeError
 
 from .central_controller import CentralController
 from .configuration import Configuration
-from ..exceptions import BiogemeError
-
-if TYPE_CHECKING:
-    from biogeme.expressions import Expression
 
 
-class SelectedExpressionsIterator:
+class SelectedConfigurationsIterator:
     """A multiple expression is an expression that contains
     Catalog. This iterator loops on pre-specified configurations
     """
@@ -44,7 +40,7 @@ class SelectedExpressionsIterator:
         self.first = True
         self.number = 0
 
-    def __iter__(self) -> SelectedExpressionsIterator:
+    def __iter__(self) -> SelectedConfigurationsIterator:
         return self
 
     def __next__(self) -> Configuration:

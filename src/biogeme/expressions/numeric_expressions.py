@@ -5,6 +5,7 @@ Tue Mar 25 18:41:06 2025
 """
 
 from __future__ import annotations
+
 import logging
 
 import jax.numpy as jnp
@@ -30,6 +31,13 @@ class Numeric(Expression):
         super().__init__()
         self.value = float(value)  #: numeric value
 
+    def deep_flat_copy(self) -> Numeric:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        return type(self)(value=self.value)
+
     def __str__(self) -> str:
         return '`' + str(self.value) + '`'
 
@@ -45,7 +53,7 @@ class Numeric(Expression):
         return self.value
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression

@@ -11,6 +11,7 @@ from itertools import chain
 from typing import NamedTuple, TYPE_CHECKING, TypeAlias
 
 from biogeme.exceptions import BiogemeError, NotImplementedError
+
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
 from .numeric_tools import is_numeric
@@ -34,7 +35,6 @@ class Expression:
 
     def __init__(self) -> None:
         """Constructor"""
-
         self.children = []  #: List of children expressions
 
         self.fixed_beta_values = None
@@ -52,11 +52,17 @@ class Expression:
         )
 
     def recursive_construct_jax_function(
-        self,
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates recursively a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        raise NotImplementedError(f'{repr(self)}')
+
+    def deep_flat_copy(self) -> Expression:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
         """
         raise NotImplementedError(f'{repr(self)}')
 
@@ -82,7 +88,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import Plus
+        from .plus import Plus
 
         return Plus(self, other)
 
@@ -103,7 +109,7 @@ class Expression:
 
         """
         validate_expression_type(other)
-        from .binary_expressions import Plus
+        from .plus import Plus
 
         return Plus(other, self)
 
@@ -123,7 +129,7 @@ class Expression:
 
         """
         validate_expression_type(other)
-        from .binary_expressions import Minus
+        from .minus import Minus
 
         return Minus(self, other)
 
@@ -143,7 +149,7 @@ class Expression:
 
         """
         validate_expression_type(other)
-        from .binary_expressions import Minus
+        from .minus import Minus
 
         return Minus(other, self)
 
@@ -163,7 +169,7 @@ class Expression:
 
         """
         validate_expression_type(other)
-        from .binary_expressions import Times
+        from .times import Times
 
         return Times(self, other)
 
@@ -182,7 +188,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import Times
+        from .times import Times
 
         return Times(other, self)
 
@@ -201,7 +207,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import Divide
+        from .divide import Divide
 
         return Divide(self, other)
 
@@ -220,7 +226,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import Divide
+        from .divide import Divide
 
         return Divide(other, self)
 
@@ -231,7 +237,7 @@ class Expression:
         :return: -self
         :rtype: biogeme.expressions.Expression
         """
-        from .unary_expressions import UnaryMinus
+        from .unary_minus import UnaryMinus
 
         return UnaryMinus(self)
 
@@ -252,14 +258,14 @@ class Expression:
         """
         validate_expression_type(other)
         if is_numeric(other):
-            from .power import PowerConstant
+            from .power_constant import PowerConstant
 
             return PowerConstant(child=self, exponent=float(other))
 
         from .numeric_expressions import Numeric
 
         if isinstance(other, Numeric):
-            from .power import PowerConstant
+            from .power_constant import PowerConstant
 
             return PowerConstant(self, other.get_value())
 
@@ -302,7 +308,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import And
+        from .logical_and import And
 
         return And(self, other)
 
@@ -321,7 +327,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import And
+        from .logical_and import And
 
         return And(other, self)
 
@@ -340,7 +346,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import Or
+        from .logical_or import Or
 
         return Or(self, other)
 
@@ -359,7 +365,7 @@ class Expression:
             biogeme.expressions.Expression object.
         """
         validate_expression_type(other)
-        from .binary_expressions import Or
+        from .logical_or import Or
 
         return Or(other, self)
 
@@ -530,16 +536,18 @@ class Expression:
         """
         return self.children
 
-    def embed_expression(self, name: str) -> bool:
+    def embed_expression(self, name: type) -> bool:
         """Check if an expression embeds a specific operator"""
-        if self.get_class_name() == name:
+        if isinstance(self, name):
             return True
         return any(child.embed_expression(name) for child in self.get_children())
 
-    def set_specific_id(self, name, specific_id, the_type: TypeOfElementaryExpression):
+    def set_specific_id(
+        self, the_name, specific_id, the_type: TypeOfElementaryExpression
+    ):
         """The elementary IDs identify the position of each element in the corresponding datab"""
         for child in self.get_children():
-            child.set_specific_id(name, specific_id, the_type)
+            child.set_specific_id(the_name, specific_id, the_type)
 
     def set_maximum_number_of_observations_per_individual(
         self, max_number: int
@@ -563,7 +571,9 @@ class Expression:
             child.change_init_values(betas=betas)
 
     def requires_draws(self):
-        return self.embed_expression('Draws')
+        from .draws import Draws
+
+        return self.embed_expression(Draws)
 
 
 ExpressionOrNumeric: TypeAlias = Expression | float | int | bool

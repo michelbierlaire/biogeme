@@ -1,10 +1,106 @@
 """Audit the dataframe"""
 
+from typing import NamedTuple
+
 import numpy as np
 import pandas as pd
 
 from biogeme.audit_tuple import AuditTuple
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Expression
 from biogeme.tools import count_number_of_groups
+from .container import Database
+
+
+class ChosenAvailable(NamedTuple):
+    chosen: int
+    available: int
+
+
+def check_availability_of_chosen_alt(
+    database: Database, avail: dict[int:Expression], choice: Expression
+) -> pd.Series:
+    """Check if the chosen alternative is available for each entry
+    in the database.
+
+    :param database: object containing the data
+    :param avail: list of expressions to evaluate the
+                  availability conditions for each alternative.
+    :param choice: expression for the chosen alternative.
+
+    :return: numpy series of bool, long as the number of entries
+             in the database, containing True is the chosen alternative is
+             available, False otherwise.
+
+    :raise BiogemeError: if the chosen alternative does not appear
+        in the availability dict
+    """
+    from biogeme.calculator import evaluate_expression
+
+    choice_array = evaluate_expression(
+        expression=choice,
+        numerically_safe=False,
+        database=database,
+    )
+    calculated_avail = {}
+    for key, expression in avail.items():
+        calculated_avail[key] = evaluate_expression(
+            expression=expression,
+            numerically_safe=False,
+            database=database,
+        )
+    try:
+        avail_chosen = np.array(
+            [calculated_avail[c][i] for i, c in enumerate(choice_array)]
+        )
+        return avail_chosen != 0
+    except KeyError as exc:
+        for c in choice_array:
+            if c not in calculated_avail:
+                err_msg = (
+                    f'Chosen alternative {c} does not appear in '
+                    f'availability dict: {calculated_avail.keys()}'
+                )
+                raise BiogemeError(err_msg) from exc
+
+
+def choice_availability_statistics(
+    database: Database, avail: dict[int:Expression], choice: Expression
+) -> dict[int, ChosenAvailable]:
+    """Calculates the number of times an alternative is chosen and available
+
+    :param database: object containing the data
+    :param avail: list of expressions to evaluate the
+                  availability conditions for each alternative.
+    :param choice: expression for the chosen alternative.
+
+    :return: for each alternative, a tuple containing the number of time
+        it is chosen, and the number of time it is available.
+
+    :raise BiogemeError: if the database is empty.
+    """
+    from biogeme.calculator import evaluate_expression
+
+    choice_array = evaluate_expression(
+        expression=choice,
+        numerically_safe=False,
+        database=database,
+    )
+    calculated_avail = {}
+    for key, expression in avail.items():
+        calculated_avail[key] = evaluate_expression(
+            expression=expression,
+            numerically_safe=False,
+            database=database,
+        )
+    unique = np.unique(choice_array, return_counts=True)
+    choice_stat = {alt: int(unique[1][i]) for i, alt in enumerate(list(unique[0]))}
+    avail_stat = {k: sum(a) for k, a in calculated_avail.items()}
+    the_results = {
+        alt: ChosenAvailable(chosen=c, available=avail_stat[alt])
+        for alt, c in choice_stat.items()
+    }
+    return the_results
 
 
 def audit_dataframe(data: pd.DataFrame) -> AuditTuple:
