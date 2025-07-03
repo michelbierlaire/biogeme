@@ -3,17 +3,18 @@ import unittest
 from datetime import timedelta
 
 from biogeme.results_processing import (
+    EstimateVarianceCovariance,
     EstimationResults,
     RawEstimationResults,
     format_real_number,
-    get_html_header,
-    get_html_footer,
-    get_html_preamble,
-    get_html_general_statistics,
-    get_html_estimated_parameters,
-    get_html_correlation_results,
-    get_html_condition_number,
     generate_html_file,
+    get_html_condition_number,
+    get_html_correlation_results,
+    get_html_estimated_parameters,
+    get_html_footer,
+    get_html_general_statistics,
+    get_html_header,
+    get_html_preamble,
 )
 from biogeme.version import get_version, versionDate
 
@@ -80,7 +81,10 @@ class TestHTMLGeneration(unittest.TestCase):
         self.assertIn('<strong>Sample size</strong>', result)
 
     def test_get_html_estimated_parameters(self):
-        result = get_html_estimated_parameters(self.estimation_results)
+        result = get_html_estimated_parameters(
+            self.estimation_results,
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
         self.assertIn('<th>Name</th>', result)
         self.assertIn('<td>beta1</td>', result)
         self.assertIn('<td>1.2</td>', result)
@@ -91,7 +95,10 @@ class TestHTMLGeneration(unittest.TestCase):
         self.assertIn('<p>Largest eigenvalue', result)
 
     def test_get_html_correlation_results(self):
-        result = get_html_correlation_results(self.estimation_results)
+        result = get_html_correlation_results(
+            self.estimation_results,
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
         self.assertIn('<th>Coefficient 1</th>', result)
         self.assertIn('<th>Coefficient 2</th>', result)
         self.assertIn('<th>Robust covariance</th>', result)

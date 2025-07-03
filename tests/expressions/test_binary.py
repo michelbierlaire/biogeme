@@ -9,17 +9,15 @@ import warnings
 
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Numeric, bioMax, bioMin
-from biogeme.expressions.binary_expressions import (
-    And,
-    BinaryMax,
-    BinaryMin,
-    Divide,
-    Minus,
-    Or,
-    Plus,
-    Times,
-)
+from biogeme.expressions.binary_max import BinaryMax
+from biogeme.expressions.binary_min import BinaryMin
+from biogeme.expressions.divide import Divide
+from biogeme.expressions.logical_and import And
+from biogeme.expressions.logical_or import Or
+from biogeme.expressions.minus import Minus
+from biogeme.expressions.plus import Plus
 from biogeme.expressions.power import Power
+from biogeme.expressions.times import Times
 
 
 class TestComprehensiveBinaryExpressions(unittest.TestCase):
@@ -54,7 +52,7 @@ class TestComprehensiveBinaryExpressions(unittest.TestCase):
                 else:
                     self.assertIn(op_symbol, repr(expr))
                 # Test JAX function correctness
-                jax_fn = expr.recursive_construct_jax_function()
+                jax_fn = expr.recursive_construct_jax_function(numerically_safe=False)
                 self.assertAlmostEqual(
                     float(jax_fn(None, None, None, None)), float(expected), places=5
                 )

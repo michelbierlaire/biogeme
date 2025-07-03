@@ -115,7 +115,7 @@ class TestPiecewiseFormula(unittest.TestCase):
         variable = "x"
         thresholds = [None, 10, 20, None]
         result = piecewise_formula(variable, thresholds)
-        expected_result = 'bioMultSum'
+        expected_result = 'MultipleSum'
         self.assertTrue(str(result).startswith(expected_result))
 
     def test_valid_input_with_betas(self):
@@ -129,7 +129,7 @@ class TestPiecewiseFormula(unittest.TestCase):
         result = piecewise_formula(
             variable=variable, thresholds=thresholds, betas=betas
         )
-        expected_result = 'bioMultSum'
+        expected_result = 'MultipleSum'
         self.assertTrue(str(result).startswith(expected_result))
 
     def test_variable_not_variable_or_str(self):

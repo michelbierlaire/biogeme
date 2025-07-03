@@ -26,8 +26,8 @@ from biogeme.expressions import (
     logzero,
     sin,
 )
-from biogeme.expressions.power import PowerConstant
-from biogeme.expressions.unary_expressions import UnaryMinus
+from biogeme.expressions.power_constant import PowerConstant
+from biogeme.expressions.unary_minus import UnaryMinus
 
 
 class DummyNumeric(Expression):
@@ -38,7 +38,7 @@ class DummyNumeric(Expression):
     def get_value(self) -> float:
         return self.value
 
-    def recursive_construct_jax_function(self):
+    def recursive_construct_jax_function(self, numerically_safe: bool):
         def f(
             parameters: jnp.ndarray,
             one_row: jnp.ndarray,
@@ -113,15 +113,16 @@ class TestUnaryExpressions(unittest.TestCase):
 
     def test_normal_cdf_repr(self):
         expr = NormalCdf(self.constant)
-        self.assertIn('bioNormalCdf', repr(expr))
+        print(repr(expr))
+        self.assertIn('NormalCdf', repr(expr))
 
     def test_monte_carlo_jax(self):
         expr = MonteCarlo(self.constant)
-        jax_fn = expr.recursive_construct_jax_function()
+        jax_fn = expr.recursive_construct_jax_function(numerically_safe=False)
         draws = jnp.array([[1.0], [2.0], [3.0]])
         self.assertAlmostEqual(jax_fn(None, None, draws, None), 2.0)
 
-    def test_biodraws_deprecation_warning(self):
+    def test_draws_deprecation_warning(self):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             _ = bioNormalCdf(self.constant)

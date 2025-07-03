@@ -42,7 +42,7 @@ class TestElementaryExpressions(unittest.TestCase):
     def test_variable_jax_function(self):
         v = Variable("income")
         v.specific_id = 2
-        jax_fn = v.recursive_construct_jax_function()
+        jax_fn = v.recursive_construct_jax_function(numerically_safe=False)
         one_row = jnp.array([10.0, 20.0, 30.0])
         result = jax_fn(None, one_row, None, None)
         self.assertEqual(result, 30.0)
@@ -55,7 +55,7 @@ class TestElementaryExpressions(unittest.TestCase):
     def test_biodraws_jax_function(self):
         d = Draws("eps", "NORMAL")
         d.specific_id = 1
-        jax_fn = d.recursive_construct_jax_function()
+        jax_fn = d.recursive_construct_jax_function(numerically_safe=False)
         draws = jnp.array([[0.0, 0.5, 1.0]])
         result = jax_fn(None, None, draws, None)
         self.assertAlmostEqual(result, 0.5)

@@ -12,11 +12,12 @@ import pandas as pd
 from biogeme.calculator import (
     CallableExpression,
     CompiledFormulaEvaluator,
-    function_from_expression,
+    function_from_compiled_formula,
 )
 from biogeme.database import Database
 from biogeme.expressions import Beta, Variable
 from biogeme.model_elements import ModelElements
+from biogeme.second_derivatives import SecondDerivativesMode
 
 
 class TestFunctionFromExpression(unittest.TestCase):
@@ -31,9 +32,11 @@ class TestFunctionFromExpression(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
         compiled_function = CompiledFormulaEvaluator(
-            model_elements=model_elements, avoid_analytical_second_derivatives=False
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
-        self.func: CallableExpression = function_from_expression(
+        self.func: CallableExpression = function_from_compiled_formula(
             the_compiled_function=compiled_function, the_betas=self.initial_betas
         )
 

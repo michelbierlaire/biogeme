@@ -10,10 +10,11 @@ import numpy as np
 import pandas as pd
 
 from biogeme.calculator import CompiledFormulaEvaluator, calculate_single_formula
-from biogeme.calculator.single_formula import evaluate_expression_per_row
+from biogeme.calculator.single_formula import evaluate_model_per_row
 from biogeme.database import Database
 from biogeme.expressions import Beta, Variable
 from biogeme.model_elements import ModelElements
+from biogeme.second_derivatives import SecondDerivativesMode
 
 
 class TestCompiledFormulaEvaluator(unittest.TestCase):
@@ -32,7 +33,9 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
         evaluator = CompiledFormulaEvaluator(
-            model_elements=model_elements, avoid_analytical_second_derivatives=False
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         output = evaluator.evaluate(
@@ -49,7 +52,9 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
         evaluator = CompiledFormulaEvaluator(
-            model_elements=model_elements, avoid_analytical_second_derivatives=False
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         output = evaluator.evaluate(
             self.betas, gradient=True, hessian=False, bhhh=False
@@ -63,7 +68,9 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
         evaluator = CompiledFormulaEvaluator(
-            model_elements=model_elements, avoid_analytical_second_derivatives=False
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         output = evaluator.evaluate(self.betas, gradient=True, hessian=True, bhhh=False)
         self.assertIsNotNone(output.hessian)
@@ -75,7 +82,9 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
         evaluator = CompiledFormulaEvaluator(
-            model_elements=model_elements, avoid_analytical_second_derivatives=False
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         output = evaluator.evaluate(self.betas, gradient=True, hessian=False, bhhh=True)
@@ -88,7 +97,9 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
         evaluator = CompiledFormulaEvaluator(
-            model_elements=model_elements, avoid_analytical_second_derivatives=False
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         output = evaluator.evaluate(
             betas_missing, gradient=False, hessian=False, bhhh=False
@@ -108,7 +119,8 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
             gradient=True,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         self.assertIsNotNone(output.function)
         self.assertIsNotNone(output.gradient)
@@ -132,9 +144,11 @@ class TestEvaluateExpressionPerRow(unittest.TestCase):
             log_like=self.expression, weight=None, database=self.database
         )
 
-        results = evaluate_expression_per_row(
+        results = evaluate_model_per_row(
             model_elements=model_elements,
             the_betas=betas,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected = np.array([2.0, 4.0, 6.0])
         np.testing.assert_array_almost_equal(results, expected)
@@ -145,9 +159,11 @@ class TestEvaluateExpressionPerRow(unittest.TestCase):
         model_elements = ModelElements.from_expression_and_weight(
             log_like=self.expression, weight=None, database=self.database
         )
-        results = evaluate_expression_per_row(
+        results = evaluate_model_per_row(
             model_elements=model_elements,
             the_betas=betas,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected = np.array([1.0, 2.0, 3.0])
         np.testing.assert_array_almost_equal(results, expected)

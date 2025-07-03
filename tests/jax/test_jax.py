@@ -5,6 +5,7 @@ Sat Mar 29 10:56:13 2025
 
 """
 
+import logging
 import unittest
 
 import jax.numpy as jnp
@@ -16,7 +17,6 @@ from scipy.stats import norm
 from biogeme.calculator import calculate_single_formula
 from biogeme.database import Database
 from biogeme.draws import DrawsManagement
-from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Beta,
     BinaryMax,
@@ -34,8 +34,11 @@ from biogeme.expressions import (
     logzero,
     sin,
 )
-from biogeme.expressions.power import PowerConstant
+from biogeme.expressions.power_constant import PowerConstant
 from biogeme.model_elements import ModelElements
+from biogeme.second_derivatives import SecondDerivativesMode
+
+logging.basicConfig(level=logging.WARNING)
 
 
 class TestBetaConstructJaxFunction(unittest.TestCase):
@@ -68,7 +71,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum(
             [
@@ -105,7 +109,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum(
             [
@@ -130,7 +135,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum(
@@ -158,7 +164,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1, 2, 3])
         self.assertEqual(jax_income.function, expected_result)
@@ -179,7 +186,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([10, 20, 30])
         self.assertEqual(jax_age.function, expected_result)
@@ -196,7 +204,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0, 1, 0])
         self.assertEqual(jax_choice.function, expected_result)
@@ -213,7 +222,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0.9 + 1.5, 0.9 + 1.5, 0.9 + 1.5])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -237,7 +247,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1.5 + 10, 1.5 + 20, 1.5 + 30])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -261,7 +272,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1 + 1.5 + 10, 2 + 1.5 + 20, 3 + 1.5 + 30])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -286,7 +298,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0.9 - 1.5, 0.9 - 1.5, 0.9 - 1.5])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -309,7 +322,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1.5 - 10, 1.5 - 20, 1.5 - 30])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -331,7 +345,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1 - 1.5 - 10, 2 - 1.5 - 20, 3 - 1.5 - 30])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -355,7 +370,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0.9 * 1.5, 0.9 * 1.5, 0.9 * 1.5])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -380,7 +396,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([1.5 * 10, 1.5 * 20, 1.5 * 30])
@@ -405,7 +422,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1 * 1.5 * 10, 2 * 1.5 * 20, 3 * 1.5 * 30])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -430,7 +448,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0.9 / 1.5, 0.9 / 1.5, 0.9 / 1.5])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -456,7 +475,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1.5 / 10, 1.5 / 20, 1.5 / 30])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -479,7 +499,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1 / 1.5 / 10, 2 / 1.5 / 20, 3 / 1.5 / 30])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -508,7 +529,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([0.9**1.5, 0.9**1.5, 0.9**1.5])
@@ -562,7 +584,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([1.5**10, 1.5**20, 1.5**30])
@@ -603,7 +626,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0.9, 0.9, 0.9])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -630,7 +654,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1.5, 1.5, 1.5])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -657,7 +682,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([1.5, 1.5, 1.5])
@@ -684,7 +710,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([10, 20, 30])
@@ -713,7 +740,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([0, 0, 0])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -739,7 +767,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1.5, 1.5, 1.5])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -764,7 +793,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1, 1, 1])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -791,7 +821,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1, 1, 1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -817,7 +848,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1.5, 1.5, 1.5])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -844,7 +876,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1, 1, 1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -870,7 +903,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([-10, -20, -30])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -893,7 +927,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([cdf_1, cdf_1, cdf_1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -918,7 +953,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([cdf_2, cdf_2, cdf_2])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -948,7 +984,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([exp_1, exp_1, exp_1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -973,7 +1010,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([exp_2, exp_2, exp_2])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -996,7 +1034,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([sin_1, sin_1, sin_1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -1021,7 +1060,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([sin_2, sin_2, sin_2])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -1049,7 +1089,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([cos_1, cos_1, cos_1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -1065,7 +1106,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([cos_2, cos_2, cos_2])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -1086,7 +1128,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([log_1, log_1, log_1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -1107,7 +1150,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([log_2, log_2, log_2])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -1133,7 +1177,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([log_1, log_1, log_1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -1154,7 +1199,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([log_2, log_2, log_2])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -1177,7 +1223,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([4, 4, 4])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -1192,7 +1239,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([-8, -8, -8])
         self.assertTrue(jnp.allclose(jax_2.function, expected_result))
@@ -1208,7 +1256,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=True,
         )
         expected_result = sum([0, 0, 0])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -1228,7 +1277,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1, 1, 1])
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
@@ -1238,7 +1288,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([1, 1, 1])
@@ -1251,7 +1302,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([1, 1, 1])
@@ -1267,7 +1319,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([1, 1, 1])
         self.assertTrue(jnp.allclose(jax_4.function, expected_result))
@@ -1302,7 +1355,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         # Integral using scipy
@@ -1330,7 +1384,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([result, result, result])
@@ -1342,7 +1397,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         expected_result = sum([result, result, result])
@@ -1356,7 +1412,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([result, result, result])
         self.assertTrue(jnp.allclose(jax_3.function, expected_result))
@@ -1370,7 +1427,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_result = sum([result, result, result])
         self.assertTrue(jnp.allclose(jax_4.function, expected_result))
@@ -1398,7 +1456,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=False,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         for obs in model_elements_1.draws_management.draws:
             integral = 0
@@ -1424,7 +1483,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         for obs in model_elements_2.draws_management.draws:
             integral = 0
@@ -1450,7 +1510,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=False,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         self.assertTrue(jnp.allclose(jax_3.function, sum(expected_results)))
         self.assertTrue(jnp.allclose(jax_3.gradient, expected_gradient_2))
@@ -1464,7 +1525,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=False,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         self.assertTrue(jnp.allclose(jax_4.function, sum(expected_results)))
         self.assertTrue(jnp.allclose(jax_4.gradient, expected_gradient_2))
@@ -1492,7 +1554,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         self.assertTrue(jnp.allclose(jax.function, expected_f))
         self.assertTrue(jnp.allclose(jax.gradient, expected_g))
@@ -1522,7 +1585,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
 
         self.assertTrue(jnp.allclose(jax.function, expected_function))
@@ -1550,7 +1614,8 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             gradient=True,
             hessian=True,
             bhhh=True,
-            avoid_analytical_second_derivatives=False,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
         )
         expected_function = 0.0
         expected_gradient = np.array([0.0, 0.0])
@@ -1562,20 +1627,6 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         self.assertTrue(jnp.allclose(jax.hessian, expected_hessian))
         self.assertEqual(jax.bhhh.shape, expected_bhhh.shape)
         self.assertTrue(jnp.allclose(jax.bhhh, expected_bhhh))
-
-    def test_logit_4(self):
-        value_1 = 0.1
-        value_2 = 0.2
-        parameters = {'beta_1': value_1, 'beta_2': value_2}
-        beta_1 = Beta('beta_1', 0, None, None, 0)
-        beta_2 = Beta('beta_2', 0, None, None, 0)
-        utilities = {12: beta_1, 23: beta_2}
-        av = {12: 1, 23: 0}
-        the_logit = LogLogit(utilities, av, 23)
-        with self.assertRaises(BiogemeError) as context:
-            ModelElements.from_expression_and_weight(
-                log_like=the_logit, weight=None, database=self.database
-            )
 
 
 if __name__ == '__main__':

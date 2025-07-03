@@ -1,8 +1,8 @@
 import unittest
 
-from biogeme.expressions import Beta, SEPARATOR, SELECTION_SEPARATOR
-from biogeme.exceptions import BiogemeError
 from biogeme.catalog import Catalog, segmentation_catalogs
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Beta, SELECTION_SEPARATOR, SEPARATOR
 from biogeme.segmentation import DiscreteSegmentationTuple
 
 

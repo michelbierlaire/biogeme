@@ -77,6 +77,7 @@ class test_07(unittest.TestCase):
             save_iterations=False,
             generate_html=False,
             generate_yaml=False,
+            numerically_safe=True,
         )
         results = biogeme.estimate()
         self.assertAlmostEqual(results.final_log_likelihood, -5208.4980304812725, 2)

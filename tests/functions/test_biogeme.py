@@ -24,6 +24,7 @@ from biogeme.expressions import (
     Variable,
     exp,
 )
+from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult
 from test_data import getData, getPanelData
@@ -448,8 +449,6 @@ class TestBiogeme(unittest.TestCase):
             database=getData(1),
         )
 
-        self.assertIs(the_biogeme.log_like, catalog)
-
         # Invalid constructor: typo
         config_id = 'the_catalog:bta_2'
         with self.assertRaises(BiogemeError):
@@ -477,6 +476,45 @@ class TestBiogeme(unittest.TestCase):
         result = my_biogeme.report_array(array, with_names=False)
         expected_result = '12, 45'
         self.assertEqual(result, expected_result)
+
+    def test_calculate_second_derivatives(self):
+
+        data = getData(1)
+
+        biogeme_0 = BIOGEME(data, self.get_dict_of_expressions())
+        self.assertEqual(
+            biogeme_0.second_derivatives_mode, SecondDerivativesMode.ANALYTICAL
+        )
+
+        biogeme_1 = BIOGEME(
+            data, self.get_dict_of_expressions(), calculating_second_derivatives='never'
+        )
+        self.assertEqual(biogeme_1.second_derivatives_mode, SecondDerivativesMode.NEVER)
+
+        biogeme_2 = BIOGEME(
+            data,
+            self.get_dict_of_expressions(),
+            calculating_second_derivatives='finite_differences',
+        )
+        self.assertEqual(
+            biogeme_2.second_derivatives_mode, SecondDerivativesMode.FINITE_DIFFERENCES
+        )
+
+        biogeme_3 = BIOGEME(
+            data,
+            self.get_dict_of_expressions(),
+            calculating_second_derivatives='analytical',
+        )
+        self.assertEqual(
+            biogeme_3.second_derivatives_mode, SecondDerivativesMode.ANALYTICAL
+        )
+
+        with self.assertRaises(BiogemeError):
+            _ = BIOGEME(
+                data,
+                self.get_dict_of_expressions(),
+                calculating_second_derivatives='xxx',
+            )
 
 
 if __name__ == '__main__':

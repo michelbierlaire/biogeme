@@ -79,7 +79,7 @@ class TestBetaParameter(unittest.TestCase):
     def test_jax_function_returns_value(self):
         beta = Beta('beta1', 1.0, None, None, 0)
         beta.specific_id = 2
-        fn = beta.recursive_construct_jax_function()
+        fn = beta.recursive_construct_jax_function(numerically_safe=False)
         parameters = jnp.array([0.0, 1.0, 3.14])
         result = fn(parameters, None, None, None)
         self.assertEqual(result, 3.14)
