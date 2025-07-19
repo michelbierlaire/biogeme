@@ -5,13 +5,13 @@ Specification of a nested logit model
 =====================================
 
 Specification of a nested logit model, that will be estimated, and
- used for simulation.  Three alternatives: public transporation, car
+ used for simulation.  Three alternatives: public transportation, car
  and slow modes.  RP data.  Based on the Optima data.  It contains a
  function that generates scenarios where the current cost of public
  transportation is multiplied by a factor.
 
 Michel Bierlaire, EPFL
-Mon Apr 28 2025, 12:12:42
+Sat Jun 28 2025, 15:52:11
 """
 
 from biogeme.data.optima import (
@@ -29,15 +29,15 @@ from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 # %%
 # List of parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_PT = Beta('ASC_PT', 0, None, None, 1)
-ASC_SM = Beta('ASC_SM', 0, None, None, 0)
-BETA_TIME_FULLTIME = Beta('BETA_TIME_FULLTIME', 0, None, None, 0)
-BETA_TIME_OTHER = Beta('BETA_TIME_OTHER', 0, None, None, 0)
-BETA_DIST_MALE = Beta('BETA_DIST_MALE', 0, None, None, 0)
-BETA_DIST_FEMALE = Beta('BETA_DIST_FEMALE', 0, None, None, 0)
-BETA_DIST_UNREPORTED = Beta('BETA_DIST_UNREPORTED', 0, None, None, 0)
-BETA_COST = Beta('BETA_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_pt = Beta('asc_pt', 0, None, None, 1)
+asc_sm = Beta('asc_sm', 0, None, None, 0)
+beta_time_fulltime = Beta('beta_time_fulltime', 0, None, None, 0)
+beta_time_other = Beta('beta_time_other', 0, None, None, 0)
+beta_dist_male = Beta('beta_dist_male', 0, None, None, 0)
+beta_dist_female = Beta('beta_dist_female', 0, None, None, 0)
+beta_dist_unreported = Beta('beta_dist_unreported', 0, None, None, 0)
+beta_cost = Beta('beta_cost', 0, None, None, 0)
 
 # %%
 # Definition of variables:
@@ -65,51 +65,47 @@ def scenario(
         public transportation is multiplied by a factor
 
     :param factor: factor that multiples the price of public transportation.
-    :type factor: float
-
     :return: a dict with the utility functions, the nesting structure,
         and the choice expression.
 
-    :rtype: dict(int: biogeme.expression), tuple(biogeme.expression,
-        list(int)), biogeme.expression
     """
     marginal_cost_scenario = MarginalCostPT * factor
     marginal_cost_pt_scaled = marginal_cost_scenario / 10
     # Definition of utility functions:
     v_pt = (
-        ASC_PT
-        + BETA_TIME_FULLTIME * TimePT_scaled * fulltime
-        + BETA_TIME_OTHER * TimePT_scaled * notfulltime
-        + BETA_COST * marginal_cost_pt_scaled
+        asc_pt
+        + beta_time_fulltime * TimePT_scaled * fulltime
+        + beta_time_other * TimePT_scaled * notfulltime
+        + beta_cost * marginal_cost_pt_scaled
     )
     v_car = (
-        ASC_CAR
-        + BETA_TIME_FULLTIME * TimeCar_scaled * fulltime
-        + BETA_TIME_OTHER * TimeCar_scaled * notfulltime
-        + BETA_COST * CostCarCHF_scaled
+        asc_car
+        + beta_time_fulltime * TimeCar_scaled * fulltime
+        + beta_time_other * TimeCar_scaled * notfulltime
+        + beta_cost * CostCarCHF_scaled
     )
     v_sm = (
-        ASC_SM
-        + BETA_DIST_MALE * distance_km_scaled * male
-        + BETA_DIST_FEMALE * distance_km_scaled * female
-        + BETA_DIST_UNREPORTED * distance_km_scaled * unreportedGender
+        asc_sm
+        + beta_dist_male * distance_km_scaled * male
+        + beta_dist_female * distance_km_scaled * female
+        + beta_dist_unreported * distance_km_scaled * unreportedGender
     )
 
     # Associate utility functions with the numbering of alternatives
-    V = {0: v_pt, 1: v_car, 2: v_sm}
+    v = {0: v_pt, 1: v_car, 2: v_sm}
 
     # Definition of the nests:
     # 1: nests parameter
     # 2: list of alternatives
-    mu_nocar = Beta('mu_nocar', 1, 1, 2, 0)
+    mu_no_car = Beta('mu_no_car', 1, 1, 2, 0)
 
     no_car_nest = OneNestForNestedLogit(
-        nest_param=mu_nocar, list_of_alternatives=[0, 2], name='no_car'
+        nest_param=mu_no_car, list_of_alternatives=[0, 2], name='no_car'
     )
     car_nest = OneNestForNestedLogit(
         nest_param=1.0, list_of_alternatives=[1], name='car'
     )
     nests = NestsForNestedLogit(
-        choice_set=list(V), tuple_of_nests=(no_car_nest, car_nest)
+        choice_set=list(v), tuple_of_nests=(no_car_nest, car_nest)
     )
-    return V, nests, Choice, marginal_cost_scenario
+    return v, nests, Choice, marginal_cost_scenario
