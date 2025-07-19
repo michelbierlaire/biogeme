@@ -6,13 +6,11 @@ WESML
  Example of a logit model with Weighted Exogenous Sample Maximum
  Likelihood (WESML).
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 17:02:59 2023
-
+Michel Bierlaire, EPFL
+Wed Jun 18 2025, 11:20:51
 """
 
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
@@ -21,40 +19,40 @@ from biogeme.results_processing import get_pandas_estimated_parameters
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
-    CHOICE,
-    SM_AV,
     CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
     CAR_CO_SCALED,
+    CAR_TT_SCALED,
+    CHOICE,
     GROUP,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 # %%
 # Parameters to be estimated.
 #
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Definition of the utility functions.
 #
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
 #
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -66,12 +64,14 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 #
 #
 # This is the contribution of each observation to the log likelihood function.
-logprob = loglogit(V, av, CHOICE)
+logprob = loglogit(v, av, CHOICE)
 
 # %%
 # Definition of the weight.
-#
-weight = 8.890991e-01 * (1.0 * (GROUP == 2) + 1.2 * (GROUP == 3))
+
+WEIGHT_GROUP_2 = 8.890991e-01
+WEIGHT_GROUP_3 = 1.2
+weight = WEIGHT_GROUP_2 * (GROUP == 2) + WEIGHT_GROUP_3 * (GROUP == 3)
 
 # %%
 # These notes will be included as such in the report file.
@@ -88,7 +88,9 @@ USER_NOTES = (
 # files. Note that these parameters can also be modified in the .TOML
 # configuration file.
 formulas = {'log_like': logprob, 'weight': weight}
-the_biogeme = BIOGEME(database, formulas, user_notes=USER_NOTES, generate_html=True, generate_yaml=False)
+the_biogeme = BIOGEME(
+    database, formulas, user_notes=USER_NOTES, generate_html=True, generate_yaml=False
+)
 the_biogeme.model_name = 'b02weight'
 
 # %%

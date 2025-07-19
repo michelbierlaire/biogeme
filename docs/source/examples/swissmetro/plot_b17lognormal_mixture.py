@@ -7,39 +7,31 @@ Mixture with lognormal distribution
 Example of a mixture of logit models, using Monte-Carlo integration.
 The mixing distribution is distributed as a log normal.
 
-:author: Michel Bierlaire, EPFL
-:date: Mon Apr 10 12:11:53 2023
-
+Michel Bierlaire, EPFL
+Thu Jun 26 2025, 15:31:41
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import (
-    Beta,
-    exp,
-    log,
-    MonteCarlo,
-    Draws,
-)
+from biogeme.expressions import Beta, Draws, MonteCarlo, exp, log
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -47,34 +39,34 @@ logger.info('Example b17lognormal_mixture.py')
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME = Beta('B_TIME', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
 
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 1, -2, 2, 0)
+b_time_s = Beta('b_time_s', 1, -2, 2, 0)
 
 # %%
 # Define a random parameter, log normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME_RND = -exp(B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL'))
+b_time_rnd = -exp(b_time + b_time_s * Draws('b_time_rnd', 'NORMAL'))
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -82,17 +74,17 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional to b_time_rnd, we have a logit model (called the kernel).
-prob = logit(V, av, CHOICE)
+conditional_probability = logit(v, av, CHOICE)
 
 # %%
 # We integrate over b_time_rnd using Monte-Carlo.
-logprob = log(MonteCarlo(prob))
+log_probability = log(MonteCarlo(conditional_probability))
 
 # %%
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(database, logprob, number_of_draws=100, seed=1223)
+the_biogeme = BIOGEME(database, log_probability, number_of_draws=10_000ope, seed=1223)
 the_biogeme.model_name = '17lognormal_mixture'
 
 # %%

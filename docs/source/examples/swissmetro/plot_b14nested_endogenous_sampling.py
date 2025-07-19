@@ -6,40 +6,38 @@ Nested logit with corrections for endogeneous sampling
 The sample is said to be endogenous if the probability for an
 individual to be in the sample depends on the choice that has been
 made. In that case, the ESML estimator is not appropriate anymore, and
-corrections need to be made. See `Bierlaire, bolduc, McFadden (2008)
+corrections need to be made. See `Bierlaire, Bolduc, McFadden (2008)
 <https://dx.doi.org/10.1016/j.trb.2007.09.003>`_.
 
 This is illustrated in this example.
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 18:25:03 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 21 2025, 17:13:33
 """
 
+import biogeme.biogeme_logging as blog
 import numpy as np
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import get_mev_for_nested, logmev_endogenous_sampling
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -47,12 +45,12 @@ logger.info('Example b14nested_endogenous_sampling.py')
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
-MU = Beta('MU', 1, 1, 10, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
+nest_parameter = Beta('nest_parameter', 1, 1, 10, 0)
 
 # %%
 # In this example, we assume that the three modes exist, and that the
@@ -68,13 +66,13 @@ correction = {1: np.log(R_TRAIN), 2: np.log(R_SM), 3: np.log(R_CAR)}
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -87,23 +85,25 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # and car (3).
 
 existing = OneNestForNestedLogit(
-    nest_param=MU, list_of_alternatives=[1, 3], name='existing'
+    nest_param=nest_parameter, list_of_alternatives=[1, 3], name='existing'
 )
 
-nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
+nests = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(existing,))
 
 # %%
 # The choice model is a nested logit, with corrections for endogenous sampling
 # We first obtain the expression of the Gi function for nested logit.
-Gi = get_mev_for_nested(V, av, nests)
+probability_generating_function = get_mev_for_nested(v, av, nests)
 
 # %%
 # Then we calculate the MEV log probability, accounting for the correction.
-logprob = logmev_endogenous_sampling(V, Gi, av, correction, CHOICE)
+log_probability = logmev_endogenous_sampling(
+    v, probability_generating_function, av, correction, CHOICE
+)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b14nested_endogenous_sampling'
 
 # %%

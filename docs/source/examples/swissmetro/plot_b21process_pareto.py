@@ -8,8 +8,8 @@ pareto optimal specification. This script is designed to re-estimate
 the Pareto optimal models. The catalog of specifications is defined in
 :ref:`plot_b21multiple_models_spec` .
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 17:46:14 2023
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 20:58:22
 
 """
 

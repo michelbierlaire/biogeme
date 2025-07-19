@@ -7,35 +7,28 @@ Example of an ordinal probit model.  This is just to illustrate the
 syntax, as the data are not ordered.  But the example assume, for the
 sake of it, that the alternatives are ordered as 1->2->3
 
-:author: Michel Bierlaire, EPFL
-:date: Mon Apr 10 12:15:28 2023
-
+Michel Bierlaire, EPFL
+Thu Jun 26 2025, 15:54:37
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Elem, log
 from biogeme.models import ordered_probit
-from biogeme.expressions import Beta, log, Elem
 from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
-from swissmetro_data import (
-    database,
-    CHOICE,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-)
+from swissmetro_data import CHOICE, TRAIN_COST_SCALED, TRAIN_TT_SCALED, database
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b18ordinal_probit.py')
 
 # %%
 # Parameters to be estimated
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Threshold parameters for the ordered probit.
@@ -54,7 +47,7 @@ tau2 = tau1 + delta2
 
 # %%
 # Utility
-U = B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
+utility = b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
 
 # %%
 # Associate each discrete indicator with an interval.
@@ -62,24 +55,24 @@ U = B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 #   1. :math:`-\infty \to \tau_1`,
 #   2. :math:`\tau_1 \to \tau_2`,
 #   3. :math:`\tau_2 \to +\infty`.
-the_proba = ordered_probit(
-    continuous_value=U,
+the_probability = ordered_probit(
+    continuous_value=utility,
     list_of_discrete_values=[1, 2, 3],
     tau_parameter=tau1,
 )
 
 # %%
 # Extract from the dict the formula associated with the observed choice.
-the_chosen_proba = Elem(the_proba, CHOICE)
+the_chosen_proba = Elem(the_probability, CHOICE)
 
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = log(the_chosen_proba)
+log_probability = log(the_chosen_proba)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b18ordinal_probit'
 
 # %%

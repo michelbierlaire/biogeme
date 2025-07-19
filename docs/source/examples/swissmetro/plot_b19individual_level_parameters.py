@@ -6,69 +6,61 @@ Calculation of individual level parameters
 Calculation of the individual level parameters for the model defined
 in :ref:`plot_b05normal_mixture`.
 
-:author: Michel Bierlaire, EPFL
-:date: Mon Apr 10 12:17:12 2023
+Michel Bierlaire, EPFL
+Thu Jun 26 2025, 15:55:41
 
 """
 
-import os
-import pickle
-
 from IPython.core.display_functions import display
-from pandas.core.interchange.dataframe_protocol import DataFrame
-
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Draws, MonteCarlo
 from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
+from pandas.core.interchange.dataframe_protocol import DataFrame
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 # %%
 # Parameters. The initial value is irrelevant.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL')
+b_time = Beta('b_time', 0, None, None, 0)
+b_time_s = Beta('b_time_s', 1, None, None, 0)
+b_time_rnd = b_time + b_time_s * Draws('b_time_rnd', 'NORMAL')
 
 # %%
-# Define values for these parameters
-beta_values = {
-    'ASC_CAR': 0.137,
-    'ASC_TRAIN': -0.402,
-    'B_COST': -1.28,
-    'B_TIME': -2.26,
-    'B_TIME_S': 1.65,
-}
+# Retrieve estimation results
+result_file_name = 'saved_results/b05normal_mixture.yaml'
+the_estimation_results = EstimationResults.from_yaml_file(filename=result_file_name)
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -76,11 +68,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional on b_time_rnd, we have a logit model (called the kernel).
-prob_chosen = logit(V, av, CHOICE)
+prob_chosen = logit(v, av, CHOICE)
 
 # %%
 # Numerator and denominator of the formula for individual parameters.
-numerator = MonteCarlo(B_TIME_RND * prob_chosen)
+numerator = MonteCarlo(b_time_rnd * prob_chosen)
 denominator = MonteCarlo(prob_chosen)
 
 # %%
@@ -91,8 +83,8 @@ simulate = {
 }
 
 # %%
-biosim = BIOGEME(database, simulate)
-sim: DataFrame = biosim.simulate(beta_values)
+biosim = BIOGEME(database, simulate, number_of_draws=10_000)
+sim: DataFrame = biosim.simulate(the_estimation_results.get_beta_values())
 sim['Individual-level parameters'] = sim['Numerator'] / sim['Denominator']
 
 display(sim)

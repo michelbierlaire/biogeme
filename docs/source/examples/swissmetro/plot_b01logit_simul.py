@@ -6,52 +6,50 @@ Simulation of a logit model
 Example of simulation with a logit model
 
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 17:13:23 2023
-
+Michel Bierlaire, EPFL
+Wed Jun 18 2025, 11:05:50
 """
 
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
 from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
-    SM_AV,
     CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT,
-    CAR_TT_SCALED,
     CAR_CO_SCALED,
+    CAR_TT,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT,
+    database,
 )
 
 # %%
 # Parameters.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
-# Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+# Definition of the utility functions. As we will calculate the derivative with respect to TRAIN_TT, SM_TT and CAR_TT,
+# they must explicitly appear in the model. If not, the derivative will be zero. Therefore, we do not use the
+# `_SCALED` version of the attributes. We explicitly include their definition.
+v_train = asc_train + b_time * TRAIN_TT / 100 + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time * SM_TT / 100 + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT / 100 + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -60,9 +58,9 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Choice probability.
 #
-prob1 = logit(V, av, 1)
-prob2 = logit(V, av, 2)
-prob3 = logit(V, av, 3)
+prob_train = logit(v, av, 1)
+prob_swissmetro = logit(v, av, 2)
+prob_car = logit(v, av, 3)
 
 # %%
 # Elasticities.
@@ -76,31 +74,35 @@ prob3 = logit(V, av, 3)
 # use of the Derive expression, and can be used with any model,
 # however complicated it is. Note the quotes in the Derive operator.
 
-genelas1 = Derive(prob1, 'TRAIN_TT') * TRAIN_TT / prob1
-genelas2 = Derive(prob2, 'SM_TT') * SM_TT / prob2
-genelas3 = Derive(prob3, 'CAR_TT') * CAR_TT / prob3
+general_time_elasticity_train = Derive(prob_train, 'TRAIN_TT') * TRAIN_TT / prob_train
+general_time_elasticity_swissmetro = (
+    Derive(prob_swissmetro, 'SM_TT') * SM_TT / prob_swissmetro
+)
+general_time_elasticity_car = Derive(prob_car, 'CAR_TT') * CAR_TT / prob_car
 
 # %%
 # Second, the elasticity of logit models. See Ben-Akiva and Lerman for
 # the formula
 
-logitelas1 = TRAIN_AV_SP * (1.0 - prob1) * TRAIN_TT_SCALED * B_TIME
-logitelas2 = SM_AV * (1.0 - prob2) * SM_TT_SCALED * B_TIME
-logitelas3 = CAR_AV_SP * (1.0 - prob3) * CAR_TT_SCALED * B_TIME
+logit_time_elasticity_train = TRAIN_AV_SP * (1.0 - prob_train) * TRAIN_TT * b_time / 100
+logit_time_elasticity_swissmetro = (
+    SM_AV * (1.0 - prob_swissmetro) * SM_TT * b_time / 100
+)
+logit_time_elasticity_car = CAR_AV_SP * (1.0 - prob_car) * CAR_TT * b_time / 100
 
 # %%
 # Quantities to be simulated.
 #
 simulate = {
-    'Prob. train': prob1,
-    'Prob. Swissmetro': prob2,
-    'Prob. car': prob3,
-    'logit elas. 1': logitelas1,
-    'generic elas. 1': genelas1,
-    'logit elas. 2': logitelas2,
-    'generic elas. 2': genelas2,
-    'logit elas. 3': logitelas3,
-    'generic elas. 3': genelas3,
+    'Prob. train': prob_train,
+    'Prob. Swissmetro': prob_swissmetro,
+    'Prob. car': prob_car,
+    'logit elas. 1': logit_time_elasticity_train,
+    'generic elas. 1': general_time_elasticity_train,
+    'logit elas. 2': logit_time_elasticity_swissmetro,
+    'generic elas. 2': general_time_elasticity_swissmetro,
+    'logit elas. 3': logit_time_elasticity_car,
+    'generic elas. 3': general_time_elasticity_car,
 }
 
 
@@ -113,13 +115,10 @@ biosim = BIOGEME(database, simulate)
 biosim.model_name = 'b01logit_simul'
 
 # %%
-# Values of the parameters.
-betas = {
-    'ASC_TRAIN': -0.701188,
-    'B_TIME': -1.27786,
-    'B_COST': -1.08379,
-    'ASC_CAR': -0.154633,
-}
+# Retrieve the estimated values of the parameters.
+RESULTS_FILE_NAME = 'saved_results/b01logit.yaml'
+estimation_results = EstimationResults.from_yaml_file(filename=RESULTS_FILE_NAME)
+betas = estimation_results.get_beta_values()
 
 
 # %%

@@ -10,8 +10,8 @@ Cross-nested logit
 
 This illustrates the possibility to ignore all membership parameters that are 0.
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 18:06:44 2023
+Michel Bierlaire, EPFL
+Sat Jun 21 2025, 16:50:19
 
 """
 
@@ -45,30 +45,31 @@ logger.info('Example b11cnl.py')
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %% Nest parameters.
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, 10, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, 10, 0)
+existing_nest_parameter = Beta('existing_nest_parameter', 1, 1, 5, 0)
+public_nest_parameter = Beta('public_nest_parameter', 1, 1, 5, 0)
 
 # %%
 # Nest membership parameters.
-ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
-ALPHA_PUBLIC = 1 - ALPHA_EXISTING
+alpha_existing = Beta('alpha_existing', 0.5, 0, 1, 0)
+alpha_public = 1 - alpha_existing
+
 
 # %%
 # Definition of the utility functions
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives
@@ -77,14 +78,20 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of nests.
 
+# %%
+# The parameter for alternative 2 is omitted, which is equivalent to sez it to zero.
 nest_existing = OneNestForCrossNestedLogit(
-    nest_param=MU_EXISTING,
-    dict_of_alpha={1: ALPHA_EXISTING, 3: 1.0},
+    nest_param=existing_nest_parameter,
+    dict_of_alpha={1: alpha_existing, 3: 1.0},
     name='existing',
 )
 
+# %%
+# The parameter for alternative 3 is omitted, which is equivalent to sez it to zero.
 nest_public = OneNestForCrossNestedLogit(
-    nest_param=MU_PUBLIC, dict_of_alpha={1: ALPHA_PUBLIC, 2: 1.0}, name='public'
+    nest_param=public_nest_parameter,
+    dict_of_alpha={1: alpha_public, 2: 1.0},
+    name='public',
 )
 
 nests = NestsForCrossNestedLogit(
@@ -93,11 +100,11 @@ nests = NestsForCrossNestedLogit(
 
 # %%
 # The choice model is a cross-nested logit, with availability conditions.
-logprob = logcnl(V, av, nests, CHOICE)
+log_probability = logcnl(v, av, nests, CHOICE)
 
 # %%
 # Create the Biogeme object
-the_biogeme = BIOGEME(database, logprob)
+the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b11cnl_sparse'
 
 # %%

@@ -5,34 +5,32 @@ Simulation of a mixture model
 
 Simulation of the mixture model, with estimation of the integration error.
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 17:47:42 2023
-
+Michel Bierlaire, EPFL
+Fri Jun 20 2025, 10:29:35
 """
 
 import sys
 
 import numpy as np
-
 from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, MonteCarlo, Draws
+from biogeme.expressions import Beta, Draws, MonteCarlo
 from biogeme.models import logit
 from biogeme.results_processing import EstimationResults
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 try:
@@ -46,30 +44,30 @@ except ModuleNotFoundError:
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME = Beta('B_TIME', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
 
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * Draws('b_time_rnd', 'NORMAL')
+b_time_s = Beta('b_time_s', 1, None, None, 0)
+b_time_rnd = b_time + b_time_s * Draws('b_time_rnd', 'NORMAL')
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -83,25 +81,25 @@ try:
     )
 except FileNotFoundError:
     print(
-        'Run first the script 05normalMixture.py in order to generate the '
+        'Run first the script plot_b05normal_mixture.py in order to generate the '
         'file b05normal_mixture.yaml.'
     )
     sys.exit()
 # %%
 # Conditional to b_time_rnd, we have a logit model (called the kernel)
-prob = logit(V, av, CHOICE)
+conditional_probability = logit(v, av, CHOICE)
 
 # %%
 # We calculate the integration error. Note that this formula assumes
 # independent draws, and is not valid for Halton or antithetic draws.
-integral = MonteCarlo(prob)
-integralSquare = MonteCarlo(prob * prob)
-variance = integralSquare - integral * integral
+integral = MonteCarlo(conditional_probability)
+integral_square = MonteCarlo(conditional_probability * conditional_probability)
+variance = integral_square - integral * integral
 error = (variance / 2.0) ** 0.5
 
 # %%
 # And the value of the individual parameters.
-numerator = MonteCarlo(B_TIME_RND * prob)
+numerator = MonteCarlo(b_time_rnd * conditional_probability)
 denominator = integral
 
 # %%
@@ -123,44 +121,46 @@ print(f'Number of draws: {biosim.number_of_draws}')
 
 # %%
 # Simulate the requested quantities. The output is a Pandas data frame.
-simresults = biosim.simulate(results.get_beta_values())
+simulation_results = biosim.simulate(results.get_beta_values())
 
 # %%
 # 95% confidence interval on the log likelihood.
-simresults['left'] = np.log(
-    simresults['Integral'] - 1.96 * simresults['Integration error']
+simulation_results['left'] = np.log(
+    simulation_results['Integral'] - 1.96 * simulation_results['Integration error']
 )
-simresults['right'] = np.log(
-    simresults['Integral'] + 1.96 * simresults['Integration error']
+simulation_results['right'] = np.log(
+    simulation_results['Integral'] + 1.96 * simulation_results['Integration error']
 )
 
 # %%
-print(f'Log likelihood: {np.log(simresults["Integral"]).sum()}')
+print(f'Log likelihood: {np.log(simulation_results["Integral"]).sum()}')
 
 # %%
 print(
     f'Integration error for {biosim.number_of_draws} draws: '
-    f'{simresults["Integration error"].sum()}'
+    f'{simulation_results["Integration error"].sum()}'
 )
 
 # %%
-print(f'In average {simresults["Integration error"].mean()} per observation.')
+print(f'In average {simulation_results["Integration error"].mean()} per observation.')
 
 # %%
 # 95% confidence interval
 print(
-    f'95% confidence interval: [{simresults["left"].sum()} - '
-    f'{simresults["right"].sum()}]'
+    f'95% confidence interval: [{simulation_results["left"].sum()} - '
+    f'{simulation_results["right"].sum()}]'
 )
 
 # %%
 # Post processing to obtain the individual parameters.
-simresults['Beta'] = simresults['Numerator'] / simresults['Denominator']
+simulation_results['Beta'] = (
+    simulation_results['Numerator'] / simulation_results['Denominator']
+)
 
 # %%
 # Plot the histogram of individual parameters
 if PLOT:
-    simresults['Beta'].plot(kind='hist', density=True, bins=20)
+    simulation_results['Beta'].plot(kind='hist', density=True, bins=20)
 
 
 # %%
@@ -180,10 +180,10 @@ def normalpdf(val: float, mu: float = 0.0, std: float = 1.0) -> float:
 
 
 # %%
-betas = results.get_beta_values(['B_TIME', 'B_TIME_S'])
-x = np.arange(simresults['Beta'].min(), simresults['Beta'].max(), 0.01)
+betas = results.get_beta_values(['b_time', 'b_time_s'])
+x = np.arange(simulation_results['Beta'].min(), simulation_results['Beta'].max(), 0.01)
 
 # %%
 if PLOT:
-    plt.plot(x, normalpdf(x, betas['B_TIME'], betas['B_TIME_S']), '-')
+    plt.plot(x, normalpdf(x, betas['b_time'], betas['b_time_s']), '-')
     plt.show()
