@@ -7,15 +7,15 @@ Estimation of a mixtures of logit models where the integral is
 calculated using numerical integration.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 12:11:20
+Sat Jun 28 2025, 21:12:42
 """
 
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, IntegrateNormal, RandomVariable, log
 from biogeme.models import logit
 from biogeme.results_processing import get_pandas_estimated_parameters
+
 from swissmetro import (
     CAR_AV_SP,
     CAR_CO_SCALED,
@@ -31,28 +31,28 @@ from swissmetro import (
 )
 
 # %%
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_time = Beta('b_time', 0, None, None, 0)
+b_time_s = Beta('b_time_s', 1, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation
 omega = RandomVariable('omega')
-b_time_rnd = B_TIME + B_TIME_S * omega
+b_time_rnd = b_time + b_time_s * omega
 
 # %%
 # Definition of the utility functions
-v1 = ASC_TRAIN + b_time_rnd * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-v2 = ASC_SM + b_time_rnd * SM_TT_SCALED + B_COST * SM_COST_SCALED
-v3 = ASC_CAR + b_time_rnd * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives
-util = {1: v1, 2: v2, 3: v3}
+util = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives

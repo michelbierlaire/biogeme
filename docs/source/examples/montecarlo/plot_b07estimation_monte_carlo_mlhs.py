@@ -1,7 +1,7 @@
 """
 
-Mixtures of logit with Monte-Carlo 2000 MLHS draws
-==================================================
+Mixtures of logit with Monte-Carlo 10_000 MLHS draws
+====================================================
 
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration with MLHS draws.
@@ -22,7 +22,7 @@ logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b07estimation_monte_carlo_mlhs.py')
 
 # %%
-R = 2000
+R = 10_000
 
 # %%
 the_draws = Draws('b_time_rnd', 'NORMAL_MLHS')

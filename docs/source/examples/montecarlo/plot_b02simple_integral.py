@@ -9,7 +9,7 @@ draws base 13. It illustrates how to use draws that are not directly
 available in Biogeme.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:44:22
+Sat Jun 28 2025, 21:06:47
 """
 
 import numpy as np
@@ -76,7 +76,7 @@ true_integral = exp(1.0) - 1.0
 
 # %%
 # Number of draws.
-R = 20000
+R = 2_000_000
 
 # %%
 sample_variance = (

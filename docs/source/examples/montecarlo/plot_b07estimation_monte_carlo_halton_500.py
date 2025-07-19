@@ -7,7 +7,7 @@ Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration with Halton draws.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 12:16:32
+Sun Jun 29 2025, 06:47:20
 """
 
 from IPython.core.display_functions import display

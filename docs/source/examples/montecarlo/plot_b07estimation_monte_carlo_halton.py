@@ -1,7 +1,7 @@
 """
 
-Mixtures of logit with Monte-Carlo 2000 Halton draws
-====================================================
+Mixtures of logit with Monte-Carlo 10_000 Halton draws
+======================================================
 
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration with Halton draws.
@@ -22,7 +22,7 @@ logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b07estimation_monte_carlo_halton.py')
 
 # %%
-R = 2000
+R = 10_000
 
 # %%
 the_draws = Draws('b_time_rnd', 'NORMAL_HALTON2')

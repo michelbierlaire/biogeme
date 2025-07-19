@@ -7,7 +7,7 @@ Calculation of a simple integral using Monte-Carlo integration. It
 illustrates how to use antithetic draws, explicitly generated.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 12:05:24
+Sat Jun 28 2025, 21:09:19
 """
 
 import numpy as np
@@ -20,7 +20,7 @@ from biogeme.draws import RandomNumberGeneratorTuple, get_halton_draws
 from biogeme.expressions import Draws, MonteCarlo, exp
 
 # %%
-R = 10000
+R = 2_000_000
 
 # %%
 # We create a fake database with one entry, as it is required to store

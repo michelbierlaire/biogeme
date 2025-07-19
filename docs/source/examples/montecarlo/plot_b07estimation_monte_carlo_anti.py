@@ -1,13 +1,13 @@
 """
 
-Mixtures of logit with Monte-Carlo 2000 antithetic draws
-========================================================
+Mixtures of logit with Monte-Carlo 10_000 antithetic draws
+==========================================================
 
 Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration with antithetic draws.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 12:14:34
+Sun Jun 29 2025, 00:37:30
 """
 
 from IPython.core.display_functions import display
@@ -22,7 +22,7 @@ logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b07estimation_monte_carlo_anti.py')
 
 # %%
-R = 2000
+R = 10_000
 
 # %%
 the_draws = Draws('b_time_rnd', 'NORMAL_ANTI')

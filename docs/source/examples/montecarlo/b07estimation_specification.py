@@ -7,7 +7,7 @@ Creation of the Biogeme object for a mixtures of logit models where
 the integral is approximated using MonteCarlo integration.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:42:42
+Sat Jun 28 2025, 21:02:24
 """
 
 from biogeme.biogeme import BIOGEME
@@ -28,7 +28,7 @@ from biogeme.expressions import Beta, MonteCarlo, bioDraws, log
 from biogeme.models import logit
 
 # %%
-R = 2000
+R = 10_000
 
 
 # %%
@@ -51,22 +51,22 @@ def get_biogeme(the_draws: bioDraws, number_of_draws: int) -> BIOGEME:
     b_time_rnd = b_time + b_time_s * the_draws
 
     # Definition of the utility functions
-    v_1 = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
-    v_2 = b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
-    v_3 = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
+    v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+    v_swissmetro = b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+    v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
     # Associate utility functions with the numbering of alternatives
-    utilities = {1: v_1, 2: v_2, 3: v_3}
+    utilities = {1: v_train, 2: v_swissmetro, 3: v_car}
 
     # Associate the availability conditions with the alternatives
     av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
     # The choice model is a logit, with availability conditions
-    prob = logit(utilities, av, CHOICE)
-    logprob = log(MonteCarlo(prob))
+    conditional_probability = logit(utilities, av, CHOICE)
+    log_probability = log(MonteCarlo(conditional_probability))
 
     database = read_data()
 
-    the_biogeme = BIOGEME(database, logprob, number_of_draws=number_of_draws)
+    the_biogeme = BIOGEME(database, log_probability, number_of_draws=number_of_draws)
 
     return the_biogeme

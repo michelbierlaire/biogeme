@@ -6,7 +6,7 @@ Simple integral
 Calculation of a simple integral using Monte-Carlo integration.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:43:13
+Sat Jun 28 2025, 21:03:30
 """
 
 import pandas as pd
@@ -30,8 +30,8 @@ simulated_integral = MonteCarlo(integrand)
 true_integral = exp(1.0) - 1.0
 
 # %%
-R = 200
-MULTIPLIER = 100000
+R = 2_000
+MULTIPLIER = 100_000
 
 
 sample_variance = (
@@ -61,6 +61,6 @@ for c in results.columns:
 biogeme2 = BIOGEME(database, simulate, number_of_draws=R * MULTIPLIER)
 biogeme2.model_name = '01simpleIntegral_{multiplier*R}'
 results2 = biogeme2.simulate(the_beta_values={})
-print(f'Number of draws: {MULTIPLIER * R}')
+print(f'Number of draws: {MULTIPLIER * R:_}')
 for c in results2.columns:
     print(f'{c}: {results2.loc[0, c]}')

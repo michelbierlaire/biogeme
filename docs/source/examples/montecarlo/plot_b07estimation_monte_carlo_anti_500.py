@@ -7,7 +7,7 @@ Estimation of a mixtures of logit models where the integral is
 approximated using MonteCarlo integration with antithetic draws.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 12:15:10
+Sun Jun 29 2025, 06:47:25
 """
 
 from IPython.core.display_functions import display
