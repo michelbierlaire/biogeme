@@ -1,0 +1,54 @@
+# File first_model.yaml has automatically been generated on 2025-06-16 18:58:29.454225
+# biogeme 3.3.0a01 [2025-06-16]
+
+beta_names:
+- asc_car
+- b_time
+beta_values:
+- -0.23757284960890074
+- -0.053109815731156265
+bhhh:
+- - 1.785110555008213
+  - 23.49260081500888
+- - 23.49260081500888
+  - 2241.6376715679075
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: ben_akiva_lerman
+draws_processing_time: '0.0'
+final_log_likelihood: -6.166042212423727
+gradient:
+- -4.608062202635099e-06
+- 3.5227259331804817e-08
+hessian:
+- - -1.824960901306782
+  - 10.920497043701141
+- - 10.920497043701161
+  - -2412.1961270547
+initial_log_likelihood: -14.556090791758852
+lower_bounds:
+- null
+- null
+model_name: first_model
+monte_carlo: false
+null_log_likelihood: -14.556090791758852
+number_of_draws: 100
+number_of_excluded_data: 0
+number_of_observations: 21
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 3.2e-07 <= 6.1e-06
+  Number of function evaluations: 19
+  Number of gradient evaluations: 13
+  Number of hessian evaluations: 6
+  Number of iterations: '6'
+  Optimization time: '1.607055'
+  Proportion of Hessian calculation: 6/6 = 100.0%
+  Relative gradient: 3.1657278521673103e-07
+sample_size: 21
+types_of_draws: null
+upper_bounds:
+- null
+- null
+user_notes: null

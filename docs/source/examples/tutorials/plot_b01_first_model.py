@@ -5,18 +5,19 @@ Estimation of a binary logit model
 
 Example extracted from Ben-Akiva and Lerman (1985)
 
-:author: Michel Bierlaire, EPFL
-:date: Thu May 16 11:59:49 2024
+Michel Bierlaire, EPFL
+Thu May 16 11:59:49 2024
 
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
 
-from biogeme.database import Database
-from biogeme.expressions import Variable, Beta
-from biogeme.models import loglogit
 from biogeme.biogeme import BIOGEME
-
+from biogeme.database import Database
+from biogeme.expressions import Beta, Variable
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # The data set is organized as a Pandas data frame. In this simple example, the data is provided directly in the
@@ -79,6 +80,7 @@ data = {
     ),
 }
 pandas_dataframe = pd.DataFrame(data)
+display(pandas_dataframe)
 
 # %%
 # The data frame is used to initialize the Biogeme database.
@@ -153,7 +155,13 @@ biogeme_object = BIOGEME(biogeme_database, log_choice_probability)
 # It is recommended to provide a name to the model. Indeed, the estimation results will be saved in two files: a
 # "human-readable" HTML file, and a Python-specific format called `pickle` so that existing estimation results can
 # be read from file instead of being re-estimated.
-biogeme_object.modelName = 'first_model'
+biogeme_object.model_name = 'first_model'
+
+# %%
+# It is good practice to calculate the log likelihood of the null model, used as a benchmark for the general statistics.
+# This quantity is calculated based only on the choice set. This is why the availability of the alternatives must be
+# provided as an argument. In this case, both alternatives are always available, so that they are associated with 1
+biogeme_object.calculate_null_loglikelihood(avail={0: 1, 1: 1})
 
 # %%
 # Finally, we run the estimation algorithm to obtain the estimates of the coefficients.
@@ -165,4 +173,4 @@ results = biogeme_object.estimate()
 print(results.short_summary())
 
 # %% It can also provide the estimates of the parameters, with some statistics.
-results.get_estimated_parameters()
+print(get_pandas_estimated_parameters(estimation_results=results))
