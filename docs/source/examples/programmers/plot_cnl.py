@@ -7,8 +7,8 @@ Example of usage of the cnl module.  This is for programmers who need
 examples of use of the functions of the class. The examples are
 designed to illustrate the syntax.
 
-:author: Michel Bierlaire
-:date: Fri Nov 17 08:27:24 2023
+Michel Bierlaire
+Sun Jun 29 2025, 02:25:16
 
 """
 
@@ -17,9 +17,9 @@ import pandas as pd
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-from biogeme.cnl import cnl_g, cnl_cdf
-from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
-from biogeme.tools import check_derivatives
+from biogeme.cnl import cnl_cdf, cnl_g
+from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
+from biogeme.tools import CheckDerivativesResults, check_derivatives
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Logging on')
@@ -52,21 +52,16 @@ y = np.random.uniform(low=0.01, high=2, size=4)
 display(y)
 
 # %%
-f, g, h, gdiff, hdiff = check_derivatives(G, y, names=None, logg=True)
-display(f)
+check_results: CheckDerivativesResults = check_derivatives(G, y, names=None, logg=True)
 
 # %%
-pd.DataFrame(g)
-
+print(f'f = {check_results.function}')
 # %%
-pd.DataFrame(h)
-
+# We display the differences between the entries of the analytical gradient and the finite differences gradient
+display(pd.DataFrame(check_results.errors_gradient))
 # %%
-pd.DataFrame(gdiff)
-
-# %%
-pd.DataFrame(hdiff)
-
+# We display the differences between the entries of the analytical hessian and the finite differences hessian
+display(pd.DataFrame(check_results.errors_hessian))
 
 # %%
 # We do the same for the CDF.
@@ -79,17 +74,14 @@ display(xi)
 F = cnl_cdf(choice_set, nests)
 
 # %%
-f, g, h, gdiff, hdiff = check_derivatives(F, y, names=None, logg=True)
-display(f)
-
+check_cdf_results: CheckDerivativesResults = check_derivatives(
+    F, y, names=None, logg=True
+)
 # %%
-pd.DataFrame(g)
-
+print(f'f = {check_cdf_results.function}')
 # %%
-pd.DataFrame(h)
-
+# We display the differences between the entries of the analytical gradient and the finite differences gradient
+display(pd.DataFrame(check_cdf_results.errors_gradient))
 # %%
-pd.DataFrame(gdiff)
-
-# %%
-pd.DataFrame(hdiff)
+# We display the differences between the entries of the analytical hessian and the finite differences hessian
+display(pd.DataFrame(check_cdf_results.errors_hessian))

@@ -7,18 +7,18 @@ Example of usage of the `distributions` module.  This is for programmers who nee
 examples of use of the functions of the class. The examples are
 designed to illustrate the syntax.
 
-:author: Michel Bierlaire
-:date: Fri Nov 17 08:27:24 2023
+Michel Bierlaire
+Sun Jun 29 2025, 07:12:12
 """
 
 from IPython.core.display_functions import display
 
 from biogeme.distributions import (
-    normalpdf,
-    lognormalpdf,
-    uniformpdf,
-    triangularpdf,
     logisticcdf,
+    lognormalpdf,
+    normalpdf,
+    triangularpdf,
+    uniformpdf,
 )
 from biogeme.expressions import Beta
 from biogeme.version import get_text

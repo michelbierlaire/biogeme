@@ -9,15 +9,14 @@ This is designed for programmers who need examples of use of the
 functions of the module. The examples are designed to illustrate the
 syntax. They do not correspond to any meaningful model.
 
-:author: Michel Bierlaire
-:date: Wed Nov 22 13:47:01 2023
+Michel Bierlaire
+Sun Jun 29 2025, 10:59:35
 """
 
 from IPython.core.display_functions import display
 
 from biogeme.filenames import get_new_file_name
 from biogeme.version import get_text
-
 
 # %%
 # Version of Biogeme.

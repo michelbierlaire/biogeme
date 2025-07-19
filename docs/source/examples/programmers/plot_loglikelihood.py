@@ -9,8 +9,8 @@ This is designed for programmers who need examples of use of the
 functions of the module. The examples are designed to illustrate the
 syntax. They do not correspond to any meaningful model.
 
-:author: Michel Bierlaire
-:date: Wed Nov 22 15:16:56 2023
+Michel Bierlaire
+Sun Jun 29 2025, 10:59:55
 """
 
 # %%
@@ -19,15 +19,19 @@ import pandas as pd
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
+from biogeme.calculator.simple_formula import (
+    evaluate_simple_expression_per_row,
+)
 from biogeme.database import Database
-from biogeme.expressions import Beta, bioDraws, MonteCarlo, Variable
+from biogeme.expressions import Beta, Draws, MonteCarlo, Variable
 from biogeme.loglikelihood import (
-    loglikelihood,
-    mixedloglikelihood,
     likelihoodregression,
+    loglikelihood,
     loglikelihoodregression,
+    mixedloglikelihood,
 )
 from biogeme.models import logit
+from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_text
 
 # %%
@@ -44,29 +48,29 @@ logger = blog.get_screen_logger(level=blog.INFO)
 # Let's consider first a simple choice model.
 
 # %%
-V1 = 0
-beta = Beta('Beta', 0, None, None, 0)
+v_1 = 0
+beta = Beta('beta', 0, None, None, 0)
 sigma = Beta('sigma', 1, 0, None, 0)
-V2 = beta + sigma * bioDraws('v2', 'NORMAL')
-V = {1: V1, 2: V2}
-condprob = logit(V, None, 0)
-prob = MonteCarlo(condprob)
-print(prob)
+v_2 = beta + sigma * Draws('v2', 'NORMAL')
+v = {1: v_1, 2: v_2}
+conditional_probability = logit(v, None, 0)
+probability = MonteCarlo(conditional_probability)
+display(probability)
 
 # %%
 # The first function simply takes the log of the probability for each
 # observation.
 
 # %%
-loglike = loglikelihood(prob)
-print(loglike)
+loglike = loglikelihood(probability)
+display(loglike)
 
 # %%
 # The second function also involves the integral using Monte-Carlo
 # simulation.
 
 # %%
-loglike = mixedloglikelihood(condprob)
+loglike = mixedloglikelihood(conditional_probability)
 print(loglike)
 
 # %%
@@ -76,7 +80,7 @@ print(loglike)
 # %%
 x = Variable('x')
 y = Variable('y')
-beta = Beta('Beta', 1, None, None, 0)
+beta = Beta('beta', 1, None, None, 0)
 sigma = Beta('sigma', 1, None, None, 0)
 intercept = Beta('intercept', 0, None, None, 0)
 model = intercept + beta * x
@@ -88,7 +92,7 @@ model = intercept + beta * x
 #
 #  where :math:`\phi(\cdot)` is the pdf of the normal distribution.
 like = likelihoodregression(y, model, sigma)
-print(like)
+display(like)
 
 # %%
 # The following function calculates the log of the contribution to the
@@ -107,11 +111,22 @@ df = pd.DataFrame({'x': [-2, -1, 0, 1, 2], 'y': [1, 1, 1, 1, 1]})
 my_data = Database('test', df)
 
 # %%
-lr = like.get_value_c(my_data, prepare_ids=True)
-display(lr)
+lr = evaluate_simple_expression_per_row(
+    expression=like,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Likelihood evaluated by Biogeme: {lr}')
 
 # %%
-np.log(lr)
+display(f'Log of the above likelihood: {np.log(lr)}')
 
 # %%
-loglike.get_value_c(my_data, prepare_ids=True)
+log_lr = evaluate_simple_expression_per_row(
+    expression=loglike,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Log likelihood evaluated by Biogeme: {log_lr}')

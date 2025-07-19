@@ -9,44 +9,46 @@ This is designed for programmers who need examples of use of the
 functions of the module. The examples are designed to illustrate the
 syntax. They do not correspond to any meaningful model.
 
-:author: Michel Bierlaire
-:date: Wed Nov 22 15:24:34 2023
+Michel Bierlaire
+Sun Jun 29 2025, 11:21:51
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from IPython.core.display_functions import display
 
+from biogeme.calculator import evaluate_simple_expression_per_row
 from biogeme.database import Database
+from biogeme.expressions import Beta, Variable
 from biogeme.models import (
-    piecewise_variables,
-    piecewise_formula,
-    piecewise_function,
-    logit,
-    loglogit,
     boxcox,
-    nested,
-    lognested,
-    nested_mev_mu,
-    lognested_mev_mu,
     cnl,
     cnlmu,
     get_mev_for_cross_nested,
-    mev_endogenous_sampling,
-    logmev_endogenous_sampling,
+    get_mev_for_cross_nested_mu,
     get_mev_for_nested,
     get_mev_for_nested_mu,
-    get_mev_for_cross_nested_mu,
+    logit,
+    loglogit,
+    logmev_endogenous_sampling,
+    lognested,
+    lognested_mev_mu,
+    mev_endogenous_sampling,
+    nested,
+    nested_mev_mu,
+    piecewise_formula,
+    piecewise_function,
+    piecewise_variables,
 )
-from biogeme.version import get_text
 from biogeme.nests import (
-    OneNestForNestedLogit,
-    OneNestForCrossNestedLogit,
-    NestsForNestedLogit,
     NestsForCrossNestedLogit,
+    NestsForNestedLogit,
+    OneNestForCrossNestedLogit,
+    OneNestForNestedLogit,
 )
-from biogeme.expressions import Variable, Beta
+from biogeme.second_derivatives import SecondDerivativesMode
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
@@ -62,7 +64,7 @@ df = pd.DataFrame(
         'Exclude': [0, 0, 1, 0, 1],
         'Variable1': [1, 2, 3, 4, 5],
         'Variable2': [10, 20, 30, 40, 50],
-        'Choice': [1, 2, 3, 1, 2],
+        'Choice': [2, 2, 3, 1, 2],
         'Av1': [0, 1, 1, 1, 1],
         'Av2': [1, 1, 0, 1, 1],
         'Av3': [0, 1, 1, 1, 0],
@@ -163,7 +165,7 @@ plt.plot(X, Y)
 # +++++
 
 # %%
-V = {1: Variable('Variable1'), 2: 0.1, 3: -0.1}
+v = {1: Variable('Variable1'), 2: 0.1, 3: -0.1}
 av = {1: Variable('Av1'), 2: Variable('Av2'), 3: Variable('Av3')}
 
 # %%
@@ -172,61 +174,72 @@ av = {1: Variable('Av1'), 2: Variable('Av2'), 3: Variable('Av3')}
 
 # %%
 # Alternative 1
-p1 = logit(V, av, 1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-p1 = loglogit(V, av, 1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = logit(v, av, 1)
+prob_1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Probability of alternative 1: {prob_1_value}')
 
 # %%
 # Alternative 2
-p2 = logit(V, av, 2)
-p2.get_value_c(my_data, prepare_ids=True)
-
-# %%
-p2 = loglogit(V, av, 2)
-p2.get_value_c(my_data, prepare_ids=True)
+p2 = logit(v, av, 2)
+prob_2_value = evaluate_simple_expression_per_row(
+    expression=p2,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Probability of alternative 2: {prob_2_value}')
 
 # %%
 # Alternative 3
-p3 = logit(V, av, 3)
-p3.get_value_c(my_data, prepare_ids=True)
+p3 = logit(v, av, 3)
+prob_3_value = evaluate_simple_expression_per_row(
+    expression=p3,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Probability of alternative 3: {prob_3_value}')
 
 # %%
-p3 = loglogit(V, av, 3)
-p3.get_value_c(my_data, prepare_ids=True)
-
-# %%
-# Calculation of the log of the logit for the three alternatives,
-# **assuming that they are all available**.
-
+# Calculation of the log of the logit for the three alternatives.
+# If `av` is set to None, it means that all alternatives are always available.
 # %%
 # Alternative 1
-pa1 = logit(V, av=None, i=1)
-pa1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-pa1 = loglogit(V, av=None, i=1)
-pa1.get_value_c(my_data, prepare_ids=True)
+p1 = loglogit(util=v, av=None, i=1)
+log_prob_1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Log probability of alternative 1: {log_prob_1_value}')
 
 # %%
 # Alternative 2
-pa2 = logit(V, av=None, i=2)
-pa2.get_value_c(my_data, prepare_ids=True)
-
-# %%
-pa2 = loglogit(V, av=None, i=2)
-pa2.get_value_c(my_data, prepare_ids=True)
+p2 = loglogit(util=v, av=None, i=2)
+log_prob_2_value = evaluate_simple_expression_per_row(
+    expression=p2,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Log probability of alternative 2: {log_prob_2_value}')
 
 # %%
 # Alternative 3
-pa3 = logit(V, av=None, i=3)
-pa3.get_value_c(my_data, prepare_ids=True)
-
-# %%
-pa3 = loglogit(V, av=None, i=3)
-pa3.get_value_c(my_data, prepare_ids=True)
+p3 = loglogit(util=v, av=None, i=3)
+log_prob_3_value = evaluate_simple_expression_per_row(
+    expression=p3,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Log probability of alternative 3: {log_prob_3_value}')
 
 # %%
 # Box-Cox transform
@@ -242,19 +255,25 @@ pa3.get_value_c(my_data, prepare_ids=True)
 #
 # .. math:: \lim_{\ell \to 0} B(x,\ell)=\log(x).
 x = Variable('Variable1')
-boxcox(x, 4)
+display(boxcox(x, 4))
 
 # %%
 x = Variable('Variable1')
-boxcox(x, 0)
+display(boxcox(x, 0))
 
 # %%
 ell = Variable('Variable2')
 e = boxcox(x, ell)
-print(e)
+display(e)
 
 # %%
-e.get_value_c(my_data, prepare_ids=True)
+boxcox_value = evaluate_simple_expression_per_row(
+    expression=e,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Box-Cox transform of Variable2: {boxcox_value}')
 
 # %%
 # We numerically illustrate that, when :math:`\lambda` goes to 0, the BoxCox
@@ -302,7 +321,7 @@ for ell in range(1, 16):
 # with a scale parameter :math:`\mu_B=2.3`.
 
 # %%
-V = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
+v = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
 av = {1: 1, 2: 0, 3: 1, 4: 1, 5: 1}
 
 # %%
@@ -314,50 +333,81 @@ nest_b = OneNestForNestedLogit(
     nest_param=2.3, list_of_alternatives=[3, 5], name='name_b'
 )
 
-nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(nest_a, nest_b))
+nests = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(nest_a, nest_b))
 
 # %%
-p1 = nested(V, availability=av, nests=nests, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = nested(v, availability=av, nests=nests, choice=1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Nested logit probability of alternative 1: {p1_value}')
 
 # %%
 # If all the alternatives are available, define the availability dictionary as None.
-p1 = nested(V, availability=None, nests=nests, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(
+    f'Nested logit probability of alternative 1, all alternatives are available: {p1_value}'
+)
 
 # %%
 # The syntax is similar to obtain the log of the probability.
-p2 = lognested(V, availability=av, nests=nests, choice=1)
-p2.get_value_c(my_data, prepare_ids=True)
+p2 = lognested(v, availability=av, nests=nests, choice=1)
+p2_value = evaluate_simple_expression_per_row(
+    expression=p2,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Nested logit log probability of alternative 1: {p2_value}')
 
 # %%
-p2 = lognested(V, availability=None, nests=nests, choice=1)
-p2.get_value_c(my_data, prepare_ids=True)
+p2 = lognested(v, availability=None, nests=nests, choice=1)
+p2_value = evaluate_simple_expression_per_row(
+    expression=p2,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(
+    f'Nested logit log probability of alternative 1, all alternatives are available: {p2_value}'
+)
 
 # %%
 # If the value of the parameter :math:`\mu` is not 1, there is another
 # function to call. Note that, for the sake of computational
 # efficiency, it is not verified by the code if the condition :math:`0 \leq
 # \mu \leq \mu_m` is valid.
-p1 = nested_mev_mu(V, availability=av, nests=nests, choice=1, mu=1.1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = nested_mev_mu(v, availability=av, nests=nests, choice=1, mu=1.1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Nested logit probability of alternative 1, mu=1.1: {p1_value}')
 
 # %%
-p1 = nested_mev_mu(V, availability=None, nests=nests, choice=1, mu=1.1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-p1 = lognested_mev_mu(V, availability=av, nests=nests, choice=1, mu=1.1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-p1 = lognested_mev_mu(V, availability=None, nests=nests, choice=1, mu=1.1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = lognested_mev_mu(v, availability=av, nests=nests, choice=1, mu=1.1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Nested logit log probability of alternative 1, mu=1.1: {p1_value}')
 
 # %%
 # The validity of the nested structure can be verified.
 nest_c = OneNestForNestedLogit(nest_param=2.3, list_of_alternatives=[3], name='name_c')
-nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(nest_a, nest_b))
+nests = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(nest_a, nest_b))
 
 is_valid, msg = nests.check_partition()
 
@@ -373,7 +423,7 @@ print(msg)
 # %%
 nest_a = OneNestForNestedLogit(nest_param=1.2, list_of_alternatives=[1, 2, 3, 4])
 nest_b = OneNestForNestedLogit(nest_param=2.3, list_of_alternatives=[3, 5])
-nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(nest_a, nest_b))
+nests = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(nest_a, nest_b))
 is_valid, msg = nests.check_partition()
 
 # %%
@@ -410,7 +460,7 @@ print(msg)
 # - Alt. 5 belongs to nest B.
 
 # %%
-V = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
+v = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
 av = {1: 1, 2: 0, 3: 1, 4: 1, 5: 1}
 alpha_a = {1: 1, 2: 1, 3: 0.5, 4: 0, 5: 0}
 alpha_b = {1: 0, 2: 0, 3: 0.5, 4: 1, 5: 1}
@@ -420,28 +470,44 @@ nest_a = OneNestForCrossNestedLogit(
 nest_b = OneNestForCrossNestedLogit(
     nest_param=2.3, dict_of_alpha=alpha_b, name='Nest b'
 )
-nests = NestsForCrossNestedLogit(choice_set=list(V), tuple_of_nests=(nest_a, nest_b))
+nests = NestsForCrossNestedLogit(choice_set=list(v), tuple_of_nests=(nest_a, nest_b))
 
 # %%
-p1 = cnl(V, availability=av, nests=nests, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = cnl(v, availability=av, nests=nests, choice=1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Cross-Nested logit probability of alternative 1: {p1_value}')
 
 # %%
 # If all the alternatives are available, define the availability dictionary as None.
-p1 = cnl(V, availability=None, nests=nests, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = cnl(v, availability=None, nests=nests, choice=1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(
+    f'Cross-Nested logit probability of alternative 1, all alternatives are available: {p1_value}'
+)
 
 # %%
 # If the value of the parameter :math:`\mu` is not 1, there is another
 # function to call. Note that, for the sake of computational
 # efficiency, it is not verified by the code if the condition :math:`0 \leq
 # \mu \leq \mu_m` is verified.
-p1 = cnlmu(V, availability=av, nests=nests, choice=1, mu=1.1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-p1 = cnlmu(V, availability=None, nests=nests, choice=1, mu=1.1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = cnlmu(v, availability=av, nests=nests, choice=1, mu=1.1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'Cross-Nested logit probability of alternative 1, mu = 1.1: {p1_value}')
 
 # %%
 # If the sample is endogenous, a correction must be included in the
@@ -449,59 +515,62 @@ p1.get_value_c(my_data, prepare_ids=True)
 # <http://dx.doi.org/10.1016/j.trb.2007.09.003>`_.
 # In this case, the generating function must first be defined, and the
 # MEV model with correction is then called.
-logGi = get_mev_for_cross_nested(V, availability=av, nests=nests)
-display(logGi)
+log_gi = get_mev_for_cross_nested(v, availability=av, nests=nests)
+display(log_gi)
+
+# %%
+# Assume the following correction factors
+correction = {1: -0.1, 2: 0.1, 3: 0.2, 4: -0.2, 5: 0}
+p1 = mev_endogenous_sampling(v, log_gi, av, correction, choice=1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'MEV model probability with correction: {p1_value}')
 
 # %%
 correction = {1: -0.1, 2: 0.1, 3: 0.2, 4: -0.2, 5: 0}
-p1 = mev_endogenous_sampling(V, logGi, av, correction, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-correction = {1: -0.1, 2: 0.1, 3: 0.2, 4: -0.2, 5: 0}
-p1 = logmev_endogenous_sampling(V, logGi, av, correction, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-correction = {1: -0.1, 2: 0.1, 3: 0.2, 4: -0.2, 5: 0}
-p1 = mev_endogenous_sampling(V, logGi, av=None, correction=correction, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
-
-# %%
-correction = {1: -0.1, 2: 0.1, 3: 0.2, 4: -0.2, 5: 0}
-p1 = logmev_endogenous_sampling(V, logGi, av=None, correction=correction, choice=1)
-p1.get_value_c(my_data, prepare_ids=True)
+p1 = logmev_endogenous_sampling(v, log_gi, av, correction, choice=1)
+p1_value = evaluate_simple_expression_per_row(
+    expression=p1,
+    database=my_data,
+    numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+)
+display(f'MEV model log probability with correction: {p1_value}')
 
 # %%
 # The MEV generating function for the following models are available.
 
 # %%
 # Nested logit model
-V = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
+v = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
 nest_a = OneNestForNestedLogit(
     nest_param=Beta('muA', 1.2, 1.0, None, 0), list_of_alternatives=[1, 2, 4]
 )
 nest_b = OneNestForNestedLogit(
     nest_param=Beta('muB', 2.3, 1.0, None, 0), list_of_alternatives=[3, 5]
 )
-nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(nest_a, nest_b))
+nests = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(nest_a, nest_b))
 
 # %%
-logGi = get_mev_for_nested(V, availability=None, nests=nests)
-display(logGi)
+log_gi = get_mev_for_nested(v, availability=None, nests=nests)
+display(log_gi)
 
 # %%
 # And with the :math:`\mu` parameter.
 
 # %%
-logGi = get_mev_for_nested_mu(V, availability=None, nests=nests, mu=1.1)
-display(logGi)
+log_gi = get_mev_for_nested_mu(v, availability=None, nests=nests, mu=1.1)
+display(log_gi)
 
 # %%
 # Cross nested logit model
 
 # %%
-V = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
+v = {1: Variable('Variable1'), 2: 0.1, 3: -0.1, 4: -0.2, 5: 0.2}
 av = {1: 1, 2: 0, 3: 1, 4: 1, 5: 1}
 alpha_a = {1: 1, 2: 1, 3: 0.5, 4: 0, 5: 0}
 alpha_b = {1: 0, 2: 0, 3: 0.5, 4: 1, 5: 1}
@@ -511,14 +580,14 @@ nest_a = OneNestForCrossNestedLogit(
 nest_b = OneNestForCrossNestedLogit(
     nest_param=Beta('muB', 2.3, 1.0, None, 0), dict_of_alpha=alpha_b
 )
-nests = NestsForCrossNestedLogit(choice_set=list(V), tuple_of_nests=(nest_a, nest_b))
+nests = NestsForCrossNestedLogit(choice_set=list(v), tuple_of_nests=(nest_a, nest_b))
 # %%
-logGi = get_mev_for_cross_nested(V, availability=None, nests=nests)
-display(logGi)
+log_gi = get_mev_for_cross_nested(v, availability=None, nests=nests)
+display(log_gi)
 
 # %%
 # Cross nested logit model with :math:`\mu` parameter.
 
 # %%
-logGi = get_mev_for_cross_nested_mu(V, availability=None, nests=nests, mu=1.1)
-display(logGi)
+log_gi = get_mev_for_cross_nested_mu(v, availability=None, nests=nests, mu=1.1)
+display(log_gi)
