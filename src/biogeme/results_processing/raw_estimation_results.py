@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 from typing import Any
 
 import numpy as np
+from biogeme.tools import safe_deserialize_array
+from biogeme.version import get_version, versionDate
 from yaml import (
     Dumper,
     Loader,
@@ -21,9 +23,6 @@ from yaml import (
     dump,
     load,
 )
-
-from biogeme.tools import safe_deserialize_array
-from biogeme.version import get_version, versionDate
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +141,9 @@ def deserialize_from_yaml(filename) -> RawEstimationResults:
         lower_bounds=data['lower_bounds'],
         upper_bounds=data['upper_bounds'],
         gradient=safe_deserialize_array(data['gradient']),
-        hessian=safe_deserialize_array(data['hessian']),
+        hessian=(
+            None if data['hessian'] is None else safe_deserialize_array(data['hessian'])
+        ),
         bhhh=safe_deserialize_array(data['bhhh']),
         null_log_likelihood=data['null_log_likelihood'],
         initial_log_likelihood=data['initial_log_likelihood'],
