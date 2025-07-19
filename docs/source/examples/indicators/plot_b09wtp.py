@@ -9,7 +9,7 @@ Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:27:27
+Sat Jun 28 2025, 21:00:12
 
 """
 
@@ -18,7 +18,6 @@ import sys
 import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.results_processing import EstimationResults
 
@@ -35,22 +34,22 @@ from scenarios import scenario
 # %%
 # Obtain the specification for the default scenario
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, _, _, _ = scenario()
+v, _, _, _ = scenario()
 
-V_PT = V[0]
-V_CAR = V[1]
+v_pt = v[0]
+v_car = v[1]
 
 # %%
 # Calculation of the willingness to pay using derivatives.
-WTP_PT_TIME = Derive(V_PT, 'TimePT') / Derive(V_PT, 'MarginalCostPT')
-WTP_CAR_TIME = Derive(V_CAR, 'TimeCar') / Derive(V_CAR, 'CostCarCHF')
+wtp_pt_time = Derive(v_pt, 'TimePT') / Derive(v_pt, 'MarginalCostPT')
+wtp_car_time = Derive(v_car, 'TimeCar') / Derive(v_car, 'CostCarCHF')
 
 # %%
 # Formulas to simulate.
 simulate = {
     'weight': normalized_weight,
-    'WTP PT time': WTP_PT_TIME,
-    'WTP CAR time': WTP_CAR_TIME,
+    'WTP PT time': wtp_pt_time,
+    'WTP CAR time': wtp_car_time,
 }
 
 # %%

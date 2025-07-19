@@ -6,35 +6,35 @@ Simulation of a choice model
 We use an estimated model to perform various simulations.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 09:30:56
+Sat Jun 28 2025, 16:56:26
 """
 
 import sys
 import time
 
 import pandas as pd
-
 from biogeme.biogeme import BIOGEME
 from biogeme.calculator import get_value_c
 from biogeme.data.optima import normalized_weight, read_data
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
+
 from scenarios import scenario
 
 # %%
 # Obtain the specification for the default scenario.
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, _, _ = scenario()
+v, nests, _, _ = scenario()
 
-V_PT = V[0]
-V_CAR = V[1]
-V_SM = V[2]
+v_pt = v[0]
+v_car = v[1]
+v_sm = v[2]
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = nested(V, None, nests, 0)
-prob_CAR = nested(V, None, nests, 1)
-prob_SM = nested(V, None, nests, 2)
+prob_pt = nested(v, None, nests, 0)
+prob_car = nested(v, None, nests, 1)
+prob_sm = nested(v, None, nests, 2)
 
 # Read the estimation results from the file
 try:
@@ -59,42 +59,61 @@ database = read_data()
 start_time = time.time()
 simulate_formulas = {
     'weight': get_value_c(
-        expression=normalized_weight, betas=results.get_beta_values(), database=database
+        expression=normalized_weight,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
     'Utility PT': get_value_c(
-        expression=V_PT, betas=results.get_beta_values(), database=database
+        expression=v_pt,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
     'Utility car': get_value_c(
-        expression=V_CAR, betas=results.get_beta_values(), database=database
+        expression=v_car,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
     'Utility SM': get_value_c(
-        expression=V_SM, betas=results.get_beta_values(), database=database
+        expression=v_sm,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
     'Prob. PT': get_value_c(
-        expression=prob_PT, betas=results.get_beta_values(), database=database
+        expression=prob_pt,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
     'Prob. car': get_value_c(
-        expression=prob_CAR, betas=results.get_beta_values(), database=database
+        expression=prob_car,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
     'Prob. SM': get_value_c(
-        expression=prob_SM, betas=results.get_beta_values(), database=database
+        expression=prob_sm,
+        betas=results.get_beta_values(),
+        database=database,
+        numerically_safe=False,
     ),
 }
 
-# %%
-simulated_values = pd.DataFrame.from_dict(
-    simulate_formulas,
-)
+simulated_values = pd.DataFrame.from_dict(simulate_formulas)
+end_time = time.time()
 
 # %%
 print(
-    f'--- Execution time with getValue_c: '
-    f'{time.time() - start_time:.2f} seconds ---'
+    f'--- Execution time without Biogeme:    '
+    f'{end_time - start_time:.2f} seconds ---'
 )
 
 # %%
 # We now perform the same simulation using Biogeme. The results are
-# identical, but the execution time is faster. Indeed, Biogeme
+# identical, but the syntax is simpler and the execution time is a little bit faster. Indeed, Biogeme
 # recycles calculations performed for one expression for the other
 # expressions.
 
@@ -102,22 +121,24 @@ print(
 # A dictionary with the requested expression must be provided to Biogeme
 simulate = {
     'weight': normalized_weight,
-    'Utility PT': V_PT,
-    'Utility car': V_CAR,
-    'Utility SM': V_SM,
-    'Prob. PT': prob_PT,
-    'Prob. car': prob_CAR,
-    'Prob. SM': prob_SM,
+    'Utility PT': v_pt,
+    'Utility car': v_car,
+    'Utility SM': v_sm,
+    'Prob. PT': prob_pt,
+    'Prob. car': prob_car,
+    'Prob. SM': prob_sm,
 }
 
 # %%
 start_time = time.time()
 the_biogeme = BIOGEME(database, simulate)
+the_betas = results.get_beta_values()
 biogeme_simulation = the_biogeme.simulate(results.get_beta_values())
+end_time = time.time()
 
 # %%
 print(
-    f'--- Execution time with Biogeme:    '
+    f'--- Execution time with Biogeme:       '
     f'{time.time() - start_time:.2f} seconds ---'
 )
 

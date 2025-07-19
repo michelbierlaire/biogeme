@@ -11,46 +11,46 @@ Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:29:10
+Sat Jun 28 2025, 20:58:34
 """
 
 import sys
 
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import normalized_weight, read_data
 from biogeme.expressions import Derive
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
+
 from scenarios import CostCarCHF, MarginalCostPT, TimeCar, TimePT, scenario
 
 # %%
 # Obtain the specification for the default scenario
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, _, _ = scenario()
+v, nests, _, _ = scenario()
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = nested(V, None, nests, 0)
-prob_CAR = nested(V, None, nests, 1)
-prob_SM = nested(V, None, nests, 2)
+prob_pt = nested(v, None, nests, 0)
+prob_car = nested(v, None, nests, 1)
+prob_sm = nested(v, None, nests, 2)
 
 # %%
 # Calculation of the cross elasticities.
 # We use the 'Derive' operator to calculate the derivatives.
-cross_elas_pt_time = Derive(prob_PT, 'TimeCar') * TimeCar / prob_PT
-cross_elas_pt_cost = Derive(prob_PT, 'CostCarCHF') * CostCarCHF / prob_PT
-cross_elas_car_time = Derive(prob_CAR, 'TimePT') * TimePT / prob_CAR
-cross_elas_car_cost = Derive(prob_CAR, 'MarginalCostPT') * MarginalCostPT / prob_CAR
+cross_elas_pt_time = Derive(prob_pt, 'TimeCar') * TimeCar / prob_pt
+cross_elas_pt_cost = Derive(prob_pt, 'CostCarCHF') * CostCarCHF / prob_pt
+cross_elas_car_time = Derive(prob_car, 'TimePT') * TimePT / prob_car
+cross_elas_car_cost = Derive(prob_car, 'MarginalCostPT') * MarginalCostPT / prob_car
 
 # %%
 # Formulas to simulate.
 simulate = {
     'weight': normalized_weight,
-    'Prob. car': prob_CAR,
-    'Prob. public transportation': prob_PT,
-    'Prob. slow modes': prob_SM,
+    'Prob. car': prob_car,
+    'Prob. public transportation': prob_pt,
+    'Prob. slow modes': prob_sm,
     'cross_elas_pt_time': cross_elas_pt_time,
     'cross_elas_pt_cost': cross_elas_pt_cost,
     'cross_elas_car_time': cross_elas_car_time,

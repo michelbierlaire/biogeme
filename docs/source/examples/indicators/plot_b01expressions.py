@@ -7,11 +7,10 @@ Example of manipulating mathematical expressions and calculation of
 derivatives.
 
 Michel Bierlaire, EPFL
-Sun Apr 27 2025, 18:56:15
+Sat Jun 28 2025, 15:54:00
 """
 
 import numpy as np
-
 from biogeme.calculator import (
     CallableExpression,
     create_function_simple_expression,
@@ -45,7 +44,9 @@ print(f'exp(-b * b + 1) = {z}')
 # We can also calculate the value, the first derivative, the second
 # derivative, and the BHHH, which in this case is the square of the
 # first derivatives
-the_function_output: FunctionOutput = get_value_and_derivatives(expression)
+the_function_output: FunctionOutput = get_value_and_derivatives(
+    expression, numerically_safe=False
+)
 
 # %%
 print(f'f = {the_function_output.function}')
@@ -60,7 +61,9 @@ print(f'BHHH = {the_function_output.bhhh}')
 # From the expression, we can create a Python function that takes as
 # argument the value of the free parameters, and returns the function,
 # the first, the second derivatives, and the BHHH.
-fct: CallableExpression = create_function_simple_expression(expression)
+fct: CallableExpression = create_function_simple_expression(
+    expression, numerically_safe=False, named_output=True
+)
 
 
 # %%
@@ -85,11 +88,10 @@ the_named_function_output = the_function(beta)
 print(f'f({beta}) = {the_named_function_output.function}')
 print(f'g({beta}) = {the_named_function_output.gradient}')
 print(f'h({beta}) = {the_named_function_output.hessian}')
-
 # %%
 if can_plot:
     # We can also use it to plot the function and its derivatives
-    x = np.arange(-2, 2, 0.01)
+    x = np.arange(-2, 2, 0.1)
 
     # The value of the function.
     f = [the_function(xx).function for xx in x]

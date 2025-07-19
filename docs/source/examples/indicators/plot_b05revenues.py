@@ -6,13 +6,12 @@ Calculation of revenues
 We use an estimated model to calculate revenues.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:18:20
+Sat Jun 28 2025, 18:57:49
 """
 
 import sys
 
 import numpy as np
-
 from biogeme.biogeme import BIOGEME
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
@@ -57,6 +56,16 @@ def revenues(factor: float) -> tuple[float, float, float]:
         the confidence interval.
 
     """
+    filename = f'revenue_{factor:.2f}.txt'
+    SEPARATOR = '%'
+    try:
+        with open(filename, 'r') as f:
+            line = f.read()
+            revenue, left, right = line.split(SEPARATOR)
+            return float(revenue), float(left), float(right)
+    except FileNotFoundError:
+        ...
+
     # Obtain the specification for the default scenario
     utilities, nests, _, marginal_cost_scenario = scenario(factor=factor)
 
@@ -83,6 +92,11 @@ def revenues(factor: float) -> tuple[float, float, float]:
     ).sum()
     revenues_pt_left = (left['Revenue public transportation'] * left['weight']).sum()
     revenues_pt_right = (right['Revenue public transportation'] * right['weight']).sum()
+    with open(filename, 'w') as f:
+        print(
+            f'{revenues_pt} {SEPARATOR} {revenues_pt_left} {SEPARATOR} {revenues_pt_right}',
+            file=f,
+        )
     return revenues_pt, revenues_pt_left, revenues_pt_right
 
 

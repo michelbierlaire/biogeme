@@ -7,34 +7,38 @@ Estimation and simulation of a nested logit model
  estimated model.
 
 Michel Bierlaire, EPFL
-Sun Apr 27 2025, 20:29:45
+Sat Jun 28 2025, 16:08:07
 """
 
+import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.calculator import get_value_c
 from biogeme.data.optima import read_data
 from biogeme.models import lognested
 from biogeme.results_processing import get_pandas_estimated_parameters
+
 from scenarios import scenario
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example plot_b02estimation')
 
 # %%
 # Obtain the specification for the default scenario.
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, Choice, _ = scenario()
+V, nests, choice, _ = scenario()
 
 # %%
 # The choice model is a nested logit, with availability conditions
 # For estimation, we need the log of the probability.
-logprob = lognested(util=V, availability=None, nests=nests, choice=Choice)
+log_probability = lognested(util=V, availability=None, nests=nests, choice=choice)
 
 # %%
 # Get the database
 database = read_data()
 # %%
 # Create the Biogeme object for estimation.
-the_biogeme = BIOGEME(database, logprob, bootstrap_samples=100)
+the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b02estimation'
 
 # %%
@@ -50,16 +54,20 @@ display(pandas_results)
 # %%
 # Simulation
 simulated_choices = get_value_c(
-    expression=logprob, betas=results.get_beta_values(), database=database
+    expression=log_probability,
+    betas=results.get_beta_values(),
+    database=database,
+    numerically_safe=False,
 )
 display(simulated_choices)
 
 # %%
 loglikelihood = get_value_c(
-    expression=logprob,
+    expression=log_probability,
     betas=results.get_beta_values(),
     database=database,
     aggregation=True,
+    numerically_safe=False,
 )
 print(f'Final log likelihood:     {results.final_log_likelihood}')
 print(f'Simulated log likelihood: {loglikelihood}')

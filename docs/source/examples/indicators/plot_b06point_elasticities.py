@@ -11,51 +11,51 @@ Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 11:26:21
+Sat Jun 28 2025, 19:21:30
 """
 
 import sys
 
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import normalized_weight, read_data
 from biogeme.expressions import Derive
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
+
 from scenarios import CostCarCHF, MarginalCostPT, TimeCar, TimePT, distance_km, scenario
 
 # %%
 # Obtain the specification for the default scenario
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, _, _ = scenario()
+v, nests, _, _ = scenario()
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = nested(V, None, nests, 0)
-prob_CAR = nested(V, None, nests, 1)
-prob_SM = nested(V, None, nests, 2)
+prob_pt = nested(v, None, nests, 0)
+prob_car = nested(v, None, nests, 1)
+prob_sm = nested(v, None, nests, 2)
 
 # %%
 # Calculation of the direct elasticities.
 # We use the 'Derive' operator to calculate the derivatives.
-direct_elas_pt_time = Derive(prob_PT, 'TimePT') * TimePT / prob_PT
+direct_elas_pt_time = Derive(prob_pt, 'TimePT') * TimePT / prob_pt
 
-direct_elas_pt_cost = Derive(prob_PT, 'MarginalCostPT') * MarginalCostPT / prob_PT
+direct_elas_pt_cost = Derive(prob_pt, 'MarginalCostPT') * MarginalCostPT / prob_pt
 
-direct_elas_car_time = Derive(prob_CAR, 'TimeCar') * TimeCar / prob_CAR
+direct_elas_car_time = Derive(prob_car, 'TimeCar') * TimeCar / prob_car
 
-direct_elas_car_cost = Derive(prob_CAR, 'CostCarCHF') * CostCarCHF / prob_CAR
+direct_elas_car_cost = Derive(prob_car, 'CostCarCHF') * CostCarCHF / prob_car
 
-direct_elas_sm_dist = Derive(prob_SM, 'distance_km') * distance_km / prob_SM
+direct_elas_sm_dist = Derive(prob_sm, 'distance_km') * distance_km / prob_sm
 
 # %%
 # Formulas to simulate.
 simulate = {
     'weight': normalized_weight,
-    'Prob. car': prob_CAR,
-    'Prob. public transportation': prob_PT,
-    'Prob. slow modes': prob_SM,
+    'Prob. car': prob_car,
+    'Prob. public transportation': prob_pt,
+    'Prob. slow modes': prob_sm,
     'direct_elas_pt_time': direct_elas_pt_time,
     'direct_elas_pt_cost': direct_elas_pt_cost,
     'direct_elas_car_time': direct_elas_car_time,

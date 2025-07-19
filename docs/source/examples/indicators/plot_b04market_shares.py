@@ -6,7 +6,7 @@ Calculation of market shares
 We use an estimated model to calculate market shares.
 
 Michel Bierlaire, EPFL
-Tue Apr 29 2025, 09:34:16
+Sat Jun 28 2025, 18:06:27
 """
 
 import sys
@@ -15,17 +15,18 @@ from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import normalized_weight, read_data
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
+
 from scenarios import scenario
 
 # %%
 # Obtain the specification for the default scenario
-V, nests, _, _ = scenario()
+v, nests, _, _ = scenario()
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = nested(V, None, nests, 0)
-prob_CAR = nested(V, None, nests, 1)
-prob_SM = nested(V, None, nests, 2)
+prob_pt = nested(v, None, nests, 0)
+prob_car = nested(v, None, nests, 1)
+prob_sm = nested(v, None, nests, 2)
 
 # %%
 # Read the estimation results from the file
@@ -48,9 +49,9 @@ database = read_data()
 # We now simulate the choice probabilities and the weight
 simulate = {
     'weight': normalized_weight,
-    'Prob. PT': prob_PT,
-    'Prob. car': prob_CAR,
-    'Prob. SM': prob_SM,
+    'Prob. PT': prob_pt,
+    'Prob. car': prob_car,
+    'Prob. SM': prob_sm,
 }
 
 the_biogeme = BIOGEME(database, simulate)
