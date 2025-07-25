@@ -11,8 +11,9 @@ Michel Bierlaire, EPFL
 Fri May 16 2025, 15:53:52
 """
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import (
     Choice,
@@ -39,7 +40,6 @@ from biogeme.models import logit
 from biogeme.results_processing import (
     get_pandas_estimated_parameters,
 )
-
 from measurement_equations import all_indicators, generate_measurement_equations
 from read_or_estimate import read_or_estimate
 from structural_equations import (
@@ -47,7 +47,7 @@ from structural_equations import (
     build_urban_preference_attitude,
 )
 
-logger = blog.get_screen_logger(level=blog.DEBUG)
+logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
 # Structural equation: car centric attitude
