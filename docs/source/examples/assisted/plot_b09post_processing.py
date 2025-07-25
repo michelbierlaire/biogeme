@@ -14,7 +14,10 @@ Michel Bierlaire, EPFL
 Sun Apr 27 2025, 18:38:57
 """
 
+from IPython.core.display_functions import display
+
 from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 try:
     import matplotlib.pyplot as plt
@@ -58,8 +61,8 @@ print(spec)
 print(results.short_summary())
 
 # %%
-results.get_estimated_parameters()
-
+estimated_parameters = get_pandas_estimated_parameters(estimation_results=results)
+display(estimated_parameters)
 
 # %%
 # The following plot illustrates all models that have been
