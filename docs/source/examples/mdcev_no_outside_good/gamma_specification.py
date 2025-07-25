@@ -1,17 +1,14 @@
 """File gamma_specification.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 11:09:58 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 16:35:52
 
 Specification of the "gamma_profile" MDCEV model.
 """
 
 from biogeme.expressions import Beta
 from biogeme.mdcev import GammaProfile
-from specification import (
-    weight,
-    baseline_utilities,
-)
+from specification import baseline_utilities, weight
 
 # %
 # Gamma parameters. Must be positive.

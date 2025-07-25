@@ -1,7 +1,7 @@
 """File non_monotonic_estimation.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 18:29:30 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 17:14:53
 
 Estimation of a MDCEV model with the "non monotonic utility" specification.
 """
@@ -11,11 +11,8 @@ from IPython.core.display_functions import display
 import biogeme.biogeme_logging as blog
 from biogeme.results_processing import get_pandas_estimated_parameters
 from non_monotonic_specification import the_non_monotonic
-from specification import (
-    database,
-    number_chosen,
-    consumed_quantities,
-)
+from process_data import database, number_chosen
+from specification import consumed_quantities
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example: non monotonic utility')
@@ -24,6 +21,7 @@ results = the_non_monotonic.estimate_parameters(
     database=database,
     number_of_chosen_alternatives=number_chosen,
     consumed_quantities=consumed_quantities,
+    tolerance=0.0004,
 )
 
 # %%

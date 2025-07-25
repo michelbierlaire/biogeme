@@ -3,48 +3,30 @@
 Specification of the baseline utilities of a MDCEV model.
 ========================================================
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 10:57:50 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 17:06:56
 
 Specification of the baseline utilities of a MDCEV model.
 """
 
 from biogeme.expressions import Beta
 from process_data import (
-    database,
-    PersonID,
-    weight as orig_weight,
-    hhsize,
-    childnum,
-    faminc,
-    faminc25K,
-    income,
-    employed,
-    fulltime,
-    spousepr,
-    spousemp,
-    male,
-    married,
-    age,
-    age2,
+    Sunday,
     age15_40,
     age41_60,
-    age61_85,
     bachigher,
-    white,
-    metro,
-    diaryday,
-    Sunday,
+    employed,
+    hhsize,
     holiday,
-    weekearn,
-    weekwordur,
-    hhchild,
-    ohhchild,
+    male,
+    metro,
+    spousepr,
     t1,
     t2,
     t3,
     t4,
-    number_chosen,
+    weight as orig_weight,
+    white,
 )
 
 # %

@@ -1,7 +1,7 @@
 """File process_data.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 11:01:21 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 17:07:29
 
 Import and process the data to be used in Biogeme
 

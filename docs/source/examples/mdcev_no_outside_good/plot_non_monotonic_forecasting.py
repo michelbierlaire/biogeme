@@ -1,7 +1,7 @@
 """File non_monotonic_forecasting.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 18:36:50 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 17:27:35
 
 Forecasting with a MDCEV model and the "non-monotonic utility" specification.
 """
@@ -17,9 +17,7 @@ import biogeme.biogeme_logging as blog
 from biogeme.database import Database
 from biogeme.results_processing import EstimationResults
 from non_monotonic_specification import the_non_monotonic
-from specification import (
-    database,
-)
+from process_data import database
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example: non monotonic utility')
@@ -61,7 +59,7 @@ epsilons = [
     np.random.gumbel(
         loc=0, scale=1, size=(number_of_draws, the_non_monotonic.number_of_alternatives)
     )
-    for _ in range(two_rows_of_database.get_sample_size())
+    for _ in range(two_rows_of_database.num_rows())
 ]
 
 # %
@@ -80,7 +78,7 @@ number_of_draws = 2000
 # %
 # We generate the draws
 epsilons = the_non_monotonic.generate_epsilons(
-    number_of_observations=two_rows_of_database.get_sample_size(),
+    number_of_observations=two_rows_of_database.num_rows(),
     number_of_draws=number_of_draws,
 )
 # %
