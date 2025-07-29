@@ -430,3 +430,8 @@ src/biogeme/data/data/Untitled.ipynb
 src/biogeme/results_keep.py
 tests/estimation_results/test.yaml
 /docs/source/examples.old
+/docs/source/examples/latent/keep
+/docs/source/examples/latent/saved_results_old
+/docs/source/examples/latent/saved_html_old
+/docs/source/code
+*.bak
