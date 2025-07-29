@@ -10,16 +10,14 @@ import logging
 
 import jax
 import jax.numpy as jnp
-from biogeme.floating_point import JAX_FLOAT
 from numpy.polynomial.hermite import hermgauss
 
+from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import ExpressionOrNumeric
 from .elementary_expressions import (
-    Elementary,
     TypeOfElementaryExpression,
 )
 from .jax_utils import JaxFunctionType
-from .random_variable import RandomVariable
 from .unary_expressions import UnaryOperator
 from ..exceptions import BiogemeError
 
@@ -50,6 +48,7 @@ class IntegrateNormal(UnaryOperator):
             None  # Index of the element in its own array.
         )
         self.number_of_quadrature_points: int = number_of_quadrature_points
+        self._is_complex = True
 
     def deep_flat_copy(self) -> IntegrateNormal:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
@@ -62,23 +61,6 @@ class IntegrateNormal(UnaryOperator):
             name=self.random_variable_name,
             number_of_quadrature_points=self.number_of_quadrature_points,
         )
-
-    def dict_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> dict[str:Elementary]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        :type  the_type: TypeOfElementaryExpression
-        """
-        the_dict = self.child.dict_of_elementary_expression(the_type=the_type)
-        if the_type == TypeOfElementaryExpression.RANDOM_VARIABLE:
-            return the_dict | {
-                self.random_variable_name: RandomVariable(
-                    name=self.random_variable_name
-                )
-            }
-        return the_dict
 
     def set_specific_id(self, name, specific_id, the_type: TypeOfElementaryExpression):
         """The elementary IDs identify the position of each element in the corresponding datab"""

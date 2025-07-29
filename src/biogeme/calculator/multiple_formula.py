@@ -27,7 +27,12 @@ class MultiRowEvaluator:
     :param model_elements: Object containing the expressions and all elements needed to calculate them.
     """
 
-    def __init__(self, model_elements: ModelElements, numerically_safe: bool):
+    def __init__(
+        self,
+        model_elements: ModelElements,
+        numerically_safe: bool,
+        use_jit: bool,
+    ):
         if model_elements is None:
             raise BiogemeError('A model must be provided.')
         self.multiple_model_elements = model_elements
@@ -42,19 +47,24 @@ class MultiRowEvaluator:
 
         self.vectorized_functions = [
             build_vectorized_function(
-                expr.recursive_construct_jax_function(numerically_safe=numerically_safe)
+                expr.recursive_construct_jax_function(
+                    numerically_safe=numerically_safe
+                ),
+                use_jit=use_jit,
             )
             for expr in self.multiple_model_elements.expressions.values()
         ]
 
-        @jax.jit
-        def evaluate_all(params, data, draws, rv):
+        def evaluate_all_impl(params, data, draws, rv):
             return jnp.stack(
                 [vf(params, data, draws, rv) for vf in self.vectorized_functions],
                 axis=1,
             )
 
-        self._evaluate_all = evaluate_all
+        if use_jit:
+            self._evaluate_all = jax.jit(evaluate_all_impl)
+        else:
+            self._evaluate_all = evaluate_all_impl
 
     def evaluate(self, the_betas: dict[str, float]) -> pd.DataFrame:
         """

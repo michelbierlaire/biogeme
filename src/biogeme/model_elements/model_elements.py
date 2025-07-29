@@ -25,12 +25,14 @@ class ModelElements:
     def __init__(
         self,
         expressions: dict[str, Expression],
+        use_jit: bool,
         database: Database | None,
         number_of_draws: int | None = None,
         draws_management: DrawsManagement | None = None,
         user_defined_draws: dict[str:RandomNumberGeneratorTuple] | None = None,
         expressions_registry: ExpressionRegistry = None,
     ):
+        self.use_jit = use_jit
         if database is None:
             database = Database.dummy_database()
         self.panel_prepared: bool = False
@@ -103,6 +105,7 @@ class ModelElements:
         cls,
         log_like: Expression,
         database: Database,
+        use_jit: bool,
         weight: Expression | None = None,
         number_of_draws: int = 0,
         draws_management: DrawsManagement | None = None,
@@ -128,6 +131,7 @@ class ModelElements:
             number_of_draws=number_of_draws,
             draws_management=draws_management,
             user_defined_draws=user_defined_draws,
+            use_jit=use_jit,
         )
 
     def on_database_update(self, updated_index: pd.Index):
@@ -216,6 +220,7 @@ class ModelElements:
                         choice=logit_to_check.choice,
                         availability=logit_to_check.availabilities,
                         database=self.database,
+                        use_jit=self.use_jit,
                     )
                     for logit_to_check in logits_to_check
                 ]

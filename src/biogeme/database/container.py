@@ -43,7 +43,7 @@ class Database:
     and column manipulation.
     """
 
-    def __init__(self, name: str, dataframe: pd.DataFrame):
+    def __init__(self, name: str, dataframe: pd.DataFrame, use_jit: bool = True):
         """
         Constructor
 
@@ -58,6 +58,7 @@ class Database:
             self._df = dataframe.astype(PANDAS_FLOAT)
         except ValueError as e:
             raise BiogemeError(f'Data type conversion failed: {e}')
+        self.use_jit = use_jit
         self.number_of_excluded_data = 0
 
         self._listeners = []  # Called when the database is updated
@@ -170,6 +171,7 @@ class Database:
             database=self,
             numerically_safe=True,
             second_derivatives_mode=SecondDerivativesMode.NEVER,
+            use_jit=self.use_jit,
         )
         series = pd.Series(condition != 0.0)
         self.number_of_excluded_data = int(series.sum())
@@ -197,6 +199,7 @@ class Database:
             database=self,
             numerically_safe=True,
             second_derivatives_mode=SecondDerivativesMode.NEVER,
+            use_jit=self.use_jit,
         )
         if np.isnan(new_values).any():
             num_total = len(new_values)
@@ -327,3 +330,13 @@ class Database:
 
     def is_panel(self) -> bool:
         return self.panel_column is not None
+
+    def extract_rows(self, rows: list[int]) -> Database:
+        """Extracts selected rows fronm the database.
+
+        :param rows: list of rows to extract
+        :return: the new database with the selected rows.
+        """
+        selected_rows = self.dataframe.iloc[rows]
+        new_name = f'{self.name}_{rows}'
+        return Database(name=new_name, dataframe=selected_rows)

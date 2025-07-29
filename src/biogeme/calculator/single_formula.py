@@ -52,6 +52,7 @@ class CompiledFormulaEvaluator:
         self.model_elements = model_elements
         self.second_derivatives_mode = second_derivatives_mode
         self.numerically_safe = numerically_safe
+        self.use_jit = model_elements.use_jit
         self.free_betas_names = (
             self.model_elements.expressions_registry.free_betas_names
         )
@@ -78,7 +79,9 @@ class CompiledFormulaEvaluator:
         the_function = log_likelihood.recursive_construct_jax_function(
             numerically_safe=self.numerically_safe
         )
-        vectorized_function = build_vectorized_function(the_function)
+        vectorized_function = build_vectorized_function(
+            the_function, use_jit=self.use_jit
+        )
 
         if self.model_elements.weight is not None:
             weight_function = (
@@ -86,7 +89,9 @@ class CompiledFormulaEvaluator:
                     numerically_safe=numerically_safe
                 )
             )
-            vectorized_weight_function = build_vectorized_function(weight_function)
+            vectorized_weight_function = build_vectorized_function(
+                weight_function, use_jit=self.use_jit
+            )
         else:
             vectorized_weight_function = None
 
@@ -104,7 +109,14 @@ class CompiledFormulaEvaluator:
                 values *= weights
             return jnp.asarray(jnp.sum(values), dtype=JAX_FLOAT), values
 
-        self.sum_function = jax.jit(sum_function)
+        if self.use_jit:
+            logger.info('Just-in-time compilation.')
+        else:
+            logger.info('Just-in-time compilation skipped.')
+
+        self.sum_function = jax.jit(sum_function) if self.use_jit else sum_function
+        if self.use_jit:
+            logger.info('Just-in-time compilation: done.')
 
     def evaluate(
         self,
@@ -126,7 +138,7 @@ class CompiledFormulaEvaluator:
             if hessian:
                 return self._evaluate_autodiff_hessian_bhhh(free_betas_values)
             else:
-                return self._evaluate_bhhh_only(free_betas_values)
+                return self._evaluate_bhhh_only(free_betas_values, use_jit=self.use_jit)
 
         if hessian:
             return self._evaluate_autodiff_hessian(free_betas_values)
@@ -148,10 +160,8 @@ class CompiledFormulaEvaluator:
         )
 
     def _evaluate_function_and_gradient(self, free_betas_values):
-        value_and_grad_fn = jax.jit(
-            jax.value_and_grad(
-                lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0], argnums=0
-            )
+        value_and_grad_fn = jax.value_and_grad(
+            lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0], argnums=0
         )
         value, the_gradient = value_and_grad_fn(
             free_betas_values,
@@ -171,11 +181,9 @@ class CompiledFormulaEvaluator:
             error_msg = 'The second derivatives are not supposed to be evaluated'
             raise BiogemeError(error_msg)
 
-        value_and_grad_fn = jax.jit(
-            jax.value_and_grad(
-                lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
-                argnums=0,
-            )
+        value_and_grad_fn = jax.value_and_grad(
+            lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
+            argnums=0,
         )
         value, the_gradient = value_and_grad_fn(
             free_betas_values,
@@ -190,14 +198,12 @@ class CompiledFormulaEvaluator:
         elif self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES:
             the_hessian = self._evaluate_finite_difference_hessian(free_betas_values)
         else:
-            hessian_fn = jax.jit(
-                jax.jacfwd(
-                    jax.grad(
-                        lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
-                        argnums=0,
-                    ),
+            hessian_fn = jax.jacfwd(
+                jax.grad(
+                    lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
                     argnums=0,
-                )
+                ),
+                argnums=0,
             )
             hess_autodiff = hessian_fn(
                 free_betas_values,
@@ -206,9 +212,13 @@ class CompiledFormulaEvaluator:
                 self.random_variables_jax,
             )
             if jnp.any(jnp.isnan(hess_autodiff)):
-                raise BiogemeError(
+                logger.warning(
                     'The calculation of second derivatives generated numerical errors.'
                 )
+            #    raise BiogemeError(
+            #        'The calculation of second derivatives generated numerical errors.'
+            #    )
+
             the_hessian = np.asarray(hess_autodiff, dtype=NUMPY_FLOAT)
 
         return FunctionOutput(
@@ -218,7 +228,7 @@ class CompiledFormulaEvaluator:
             bhhh=None,
         )
 
-    def _evaluate_bhhh_only(self, free_betas_values):
+    def _evaluate_bhhh_only(self, free_betas_values, use_jit: bool):
         _, individual_values = self.sum_function(
             free_betas_values,
             self.data_jax,
@@ -232,12 +242,16 @@ class CompiledFormulaEvaluator:
                     numerically_safe=self.numerically_safe
                 )
             )
-            vectorized_function = build_vectorized_function(loglik_fn)
+            vectorized_function = build_vectorized_function(loglik_fn, use_jit=use_jit)
             draw_values = vectorized_function(p, d[None, :], r[None, :, :], rv)
             return jnp.mean(draw_values)
 
-        per_obs_grad_fn = jax.jit(
-            jax.vmap(jax.grad(one_gradient, argnums=0), in_axes=(None, 0, 0, 0))
+        per_obs_grad_fn = (
+            jax.jit(
+                jax.vmap(jax.grad(one_gradient, argnums=0), in_axes=(None, 0, 0, 0))
+            )
+            if self.use_jit
+            else jax.vmap(jax.grad(one_gradient, argnums=0), in_axes=(None, 0, 0, 0))
         )
         free_betas_values_jnp = jnp.asarray(free_betas_values, dtype=JAX_FLOAT)
         random_variables_broadcast = jnp.tile(
@@ -269,7 +283,7 @@ class CompiledFormulaEvaluator:
         )
 
     def _evaluate_autodiff_hessian_bhhh(self, free_betas_values):
-        bhhh_result = self._evaluate_bhhh_only(free_betas_values)
+        bhhh_result = self._evaluate_bhhh_only(free_betas_values, use_jit=self.use_jit)
         hessian = self._evaluate_autodiff_hessian(free_betas_values).hessian
         return FunctionOutput(
             function=bhhh_result.function,
@@ -366,12 +380,14 @@ def calculate_single_formula_from_expression(
     the_betas: dict[str, float],
     second_derivatives_mode: SecondDerivativesMode,
     numerically_safe: bool,
+    use_jit: bool,
 ) -> float:
     model_elements = ModelElements.from_expression_and_weight(
         log_like=expression,
         weight=None,
         database=database,
         number_of_draws=number_of_draws,
+        use_jit=use_jit,
     )
     result = calculate_single_formula(
         model_elements=model_elements,
@@ -443,6 +459,7 @@ def evaluate_model_per_row(
 def evaluate_expression(
     expression: Expression,
     numerically_safe: bool,
+    use_jit: bool,
     database: Database | None = None,
     betas: dict[str, float] | None = None,
     number_of_draws: int = 1000,
@@ -453,6 +470,7 @@ def evaluate_expression(
     :param expression: the expression to be evaluated
     :param numerically_safe: if True, the numerical stability of the evaluation is improved, possibly at the expense
          of calculation speed. Set it to False except if necessary.
+    :param use_jit: if True, performs just-in-time compilation.
     :param database: database, needed if the expression involves `Variable`
     :param betas: values of the parameters, if the expression involves `Beta`
     :param number_of_draws: number of draws for Monte Carlo integration, if the expression involves it.
@@ -465,6 +483,7 @@ def evaluate_expression(
         weight=None,
         database=database,
         number_of_draws=number_of_draws,
+        use_jit=use_jit,
     )
     if betas is None:
         betas = collect_init_values(expression=expression)
@@ -487,6 +506,7 @@ def evaluate_expression(
 def get_value_and_derivatives(
     expression: Expression,
     numerically_safe: bool,
+    use_jit: bool,
     betas: dict[str, float] | None = None,
     database: Database | None = None,
     number_of_draws: int = 1000,
@@ -504,6 +524,7 @@ def get_value_and_derivatives(
         weight=None,
         database=database,
         number_of_draws=number_of_draws,
+        use_jit=use_jit,
     )
 
     the_compiled_formula = CompiledFormulaEvaluator(
@@ -528,6 +549,7 @@ def get_value_and_derivatives(
 def get_value_c(
     expression: Expression,
     numerically_safe: bool,
+    use_jit: bool,
     database: Database | None = None,
     betas: dict[str, float] | None = None,
     number_of_draws: int = 1000,
@@ -542,4 +564,5 @@ def get_value_c(
         betas=betas,
         number_of_draws=number_of_draws,
         aggregation=aggregation,
+        use_jit=use_jit,
     )

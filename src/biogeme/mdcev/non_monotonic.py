@@ -142,6 +142,7 @@ class NonMonotonic(Mdcev):
                 database=one_observation,
                 betas=self.estimation_results.get_beta_values(),
                 aggregation=True,
+                use_jit=True,
             )
 
         return evaluate_expression(
@@ -149,6 +150,7 @@ class NonMonotonic(Mdcev):
             numerically_safe=False,
             database=one_observation,
             aggregation=True,
+            use_jit=True,
         )
 
     def utility_expression_one_alternative(

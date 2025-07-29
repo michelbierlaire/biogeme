@@ -2,8 +2,6 @@ import pickle
 import subprocess
 import sys
 
-import jax
-
 from biogeme.tools import TemporaryFile
 
 
@@ -52,21 +50,3 @@ def evaluate_hessian_in_subprocess(free_betas_values, data, draws, rv, sum_funct
             except FileNotFoundError:
                 print(f"[DEBUG] Could not delete missing file: {hess_file}")
         return None
-
-
-if __name__ == "__main__":
-    free_betas_values, data, draws, rv, sum_function, hess_file = pickle.loads(
-        sys.stdin.buffer.read()
-    )
-    print(f"[DEBUG subprocess] Writing result to: {hess_file}")
-    fn = lambda p, d, r, rv: sum_function(p, d, r, rv)[0]
-    jitted_fn = jax.jit(fn)
-    hessian = jax.jacfwd(jax.grad(jitted_fn, argnums=0), argnums=0)(
-        free_betas_values, data, draws, rv
-    )
-    try:
-        with open(hess_file, "wb") as f:
-            pickle.dump(hessian, f)
-            print(f"[DEBUG subprocess] Successfully wrote Hessian to: {hess_file}")
-    except Exception as e:
-        print(f"[DEBUG subprocess] Failed to write Hessian: {e}")

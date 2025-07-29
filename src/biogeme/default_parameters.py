@@ -138,6 +138,17 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_boolean,),
         ),
         ParameterTuple(
+            name='use_jit',
+            value=True,
+            type=bool,
+            section='Specification',
+            description=(
+                'If True, the model is compiled using jit (just-in-time) to speed up the calculation. For complex '
+                'models, compilation time may exceed the gain due to compilation, so that it is worth turning it off.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
             name='seed',
             value=0,
             type=int,

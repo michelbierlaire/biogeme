@@ -9,8 +9,8 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
-from biogeme.exceptions import BiogemeError
 
+from biogeme.exceptions import BiogemeError
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -41,18 +41,6 @@ class Variable(Elementary):
         The flat part is irrelevant for this expression.
         """
         return type(self)(name=self.name)
-
-    def dict_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> dict[str:Elementary]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        :type  the_type: TypeOfElementaryExpression
-        """
-        if the_type == TypeOfElementaryExpression.VARIABLE:
-            return {self.name: self}
-        return {}
 
     @property
     def safe_variable_id(self) -> int:

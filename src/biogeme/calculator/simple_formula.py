@@ -22,10 +22,11 @@ def evaluate_simple_expression_per_row(
     expression: Expression,
     database: Database,
     numerically_safe: bool,
+    use_jit: bool,
     second_derivatives_mode: SecondDerivativesMode,
 ) -> np.ndarray:
     model_elements = ModelElements.from_expression_and_weight(
-        log_like=expression, weight=None, database=database
+        log_like=expression, weight=None, database=database, use_jit=use_jit
     )
     return evaluate_model_per_row(
         model_elements=model_elements,
@@ -36,10 +37,13 @@ def evaluate_simple_expression_per_row(
 
 
 def evaluate_simple_expression(
-    expression: Expression, database: Database | None, numerically_safe: bool
+    expression: Expression,
+    database: Database | None,
+    numerically_safe: bool,
+    use_jit: bool,
 ) -> float:
     model_elements = ModelElements.from_expression_and_weight(
-        log_like=expression, weight=None, database=database
+        log_like=expression, weight=None, database=database, use_jit=use_jit
     )
 
     return evaluate_formula(
@@ -53,13 +57,14 @@ def evaluate_simple_expression(
 def create_function_simple_expression(
     expression: Expression,
     numerically_safe: bool,
+    use_jit: bool,
     named_output: bool = False,
     database: Database | None = None,
 ) -> CallableExpression:
     if database is None:
         database = Database.dummy_database()
     model_elements = ModelElements.from_expression_and_weight(
-        log_like=expression, weight=None, database=database
+        log_like=expression, weight=None, database=database, use_jit=use_jit
     )
 
     the_evaluator = CompiledFormulaEvaluator(

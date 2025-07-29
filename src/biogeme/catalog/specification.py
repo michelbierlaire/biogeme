@@ -15,6 +15,8 @@ from __future__ import annotations
 import logging
 from typing import Callable
 
+from biogeme_optimization.pareto import SetElement
+
 from biogeme.catalog import CentralController, Configuration
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
@@ -22,7 +24,6 @@ from biogeme.parameters import Parameters, get_default_value
 from biogeme.results_processing import EstimationResults
 from biogeme.tools import ModelNames
 from biogeme.validity import Validity
-from biogeme_optimization.pareto import SetElement
 
 logger = logging.getLogger(__name__)
 
@@ -136,6 +137,7 @@ class Specification:
                 database=self.database,
                 generate_html=False,
                 generate_yaml=False,
+                save_iterations=False,
             )
             number_of_parameters = the_biogeme.number_unknown_parameters()
             logger.info(

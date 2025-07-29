@@ -41,7 +41,6 @@ from .draws import Draws
 from .elem import Elem
 from .elementary_expressions import (
     Elementary,
-    get_free_beta_values,
 )
 from .elementary_types import TypeOfElementaryExpression
 from .exp import exp
@@ -67,7 +66,7 @@ from .numeric_expressions import Numeric
 from .numeric_tools import is_numeric
 from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
 from .random_variable import RandomVariable
-from .rename_variables import rename_all_variables
+from .rename_variables import OldNewName, rename_all_variables
 from .sin import sin
 from .variable import Variable
 from .visitor import ExpressionVisitor

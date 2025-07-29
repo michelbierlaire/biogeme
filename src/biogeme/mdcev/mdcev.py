@@ -29,6 +29,7 @@ from biogeme.expressions import Beta, Elem, Expression, Numeric, bioMultSum, exp
 from biogeme.function_output import FunctionOutput
 from biogeme.results_processing import EstimationResults
 from biogeme.tools.checks import validate_dict_types
+from .database_utils import mdcev_row_split
 
 logger = logging.getLogger(__name__)
 
@@ -165,6 +166,7 @@ class Mdcev(ABC):
                 database=one_observation,
                 betas=self.estimation_results.get_beta_values(),
                 aggregation=True,
+                use_jit=True,
             )
 
         return evaluate_expression(
@@ -172,6 +174,7 @@ class Mdcev(ABC):
             numerically_safe=False,
             database=one_observation,
             aggregation=True,
+            use_jit=True,
         )
 
     @abstractmethod
@@ -428,8 +431,10 @@ class Mdcev(ABC):
             error_msg = f'epsilon must be a vector of size {self.number_of_alternatives}, not {epsilon.shape}'
             raise BiogemeError(error_msg)
 
-        if len(one_row_database.data) != 1:
-            error_msg = f'Expecting exactly one row, not {len(one_row_database.data)}'
+        if len(one_row_database.dataframe) != 1:
+            error_msg = (
+                f'Expecting exactly one row, not {len(one_row_database.dataframe)}'
+            )
             raise BiogemeError(error_msg)
 
         self.database = one_row_database
@@ -771,6 +776,7 @@ class Mdcev(ABC):
             gradient=True,
             named_results=True,
             numerically_safe=False,
+            use_jit=True,
         )
 
         # Validate the utility calculation
@@ -883,8 +889,8 @@ class Mdcev(ABC):
         """
 
         rows_of_database = [
-            Database(name=f'row_{i}', dataframe=database.data.iloc[[i]])
-            for i in range(len(database.data))
+            Database(name=f'row_{i}', dataframe=database.dataframe.iloc[[i]])
+            for i in range(len(database.dataframe))
         ]
         if len(rows_of_database) == 0:
             error_msg = 'Empty database'
@@ -1127,7 +1133,7 @@ class Mdcev(ABC):
 
         """
 
-        rows_of_database = database.mdcev_row_split()
+        rows_of_database = mdcev_row_split(database)
         if len(rows_of_database) == 0:
             error_msg = 'Empty database'
             raise BiogemeError(error_msg)

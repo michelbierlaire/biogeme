@@ -10,7 +10,6 @@ import logging
 from typing import Iterator, NamedTuple, final
 
 from biogeme import exceptions
-
 from .base_expressions import Expression
 
 logger = logging.getLogger(__name__)
@@ -130,13 +129,10 @@ delegated_methods = [
     'set_maximum_number_of_observations_per_individual',
     'change_init_values',
     'rename_elementary',
-    'dict_of_elementary_expression',
-    'set_of_elementary_expression',
     'get_elementary_expression',
     'get_value',
     'requires_draws',
     'recursive_construct_jax_function',
-    'dict_of_draw_types',
     'logit_choice_avail',
     'add_suffix_to_all_variables',
     'set_specific_id',

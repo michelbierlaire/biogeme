@@ -40,6 +40,7 @@ def split_databases(
             expressions=model_elements.expressions,
             database=estimation_data,
             draws_management=estimation_draws_management,
+            use_jit=model_elements.use_jit,
         )
         validation_df = model_elements.database.dataframe.iloc[split_indices.validation]
         validation_data = Database(
@@ -56,6 +57,7 @@ def split_databases(
             },
             database=validation_data,
             draws_management=validation_draws_management,
+            use_jit=model_elements.use_jit,
         )
         the_pair = EstimationValidationModels(
             estimation=estimation_model_elements, validation=validation_model_elements

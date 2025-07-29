@@ -48,6 +48,7 @@ def audit_chosen_alternative(
     choice: ExpressionOrNumeric,
     availability: dict[int, ExpressionOrNumeric],
     database: Database,
+    use_jit: bool,
 ) -> AuditTuple:
     from .model_elements import ModelElements
     from biogeme.calculator import MultiRowEvaluator
@@ -60,10 +61,12 @@ def audit_chosen_alternative(
         f'{AVAILABILITY_LABEL}{alt_id:.1f}': the_expression
         for alt_id, the_expression in availability.items()
     }
-    model_elements = ModelElements(expressions=dict_of_expressions, database=database)
+    model_elements = ModelElements(
+        expressions=dict_of_expressions, database=database, use_jit=use_jit
+    )
 
     the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
-        model_elements=model_elements, numerically_safe=True
+        model_elements=model_elements, numerically_safe=True, use_jit=use_jit
     )
     results: pd.DataFrame = the_evaluator.evaluate({})
 

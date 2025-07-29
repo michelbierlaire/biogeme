@@ -9,8 +9,8 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
-from biogeme.exceptions import BiogemeError
 
+from biogeme.exceptions import BiogemeError
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -35,6 +35,7 @@ class Draws(Elementary):
         """
         super().__init__(name)
         self.draw_type = draw_type
+        self._is_complex = True
 
     def deep_flat_copy(self) -> Draws:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
@@ -52,21 +53,6 @@ class Draws(Elementary):
         if self.specific_id is None:
             raise BiogemeError(f"No id defined for draw {self.name}")
         return self.specific_id
-
-    def dict_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> dict[str, Elementary]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        :type  the_type: TypeOfElementaryExpression
-        """
-
-        if the_type == TypeOfElementaryExpression.DRAWS:
-            # Until version 3.2.13, this function returned the following:
-            # return {self.name: self.drawType}
-            return {self.name: self}
-        return {}
 
     def recursive_construct_jax_function(
         self, numerically_safe: bool

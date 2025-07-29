@@ -41,7 +41,6 @@ from biogeme.exceptions import BiogemeError, ValueOutOfRange
 from biogeme.expressions import (
     Expression,
     ExpressionOrNumeric,
-    IntegrateNormal,
     MultipleSum,
     log,
 )
@@ -210,6 +209,7 @@ class BIOGEME:
             database=self.database,
             number_of_draws=self.biogeme_parameters.get_value(name='number_of_draws'),
             user_defined_draws=random_number_generators,
+            use_jit=self.biogeme_parameters.get_value(name='use_jit'),
         )
         self._function_evaluator = (
             CompiledFormulaEvaluator(
@@ -399,12 +399,7 @@ class BIOGEME:
 
     def is_model_complex(self) -> bool:
         """Check if the model is potentially complex to estimate"""
-        if self.log_like.requires_draws():
-            return True
-        if self.log_like.embed_expression(IntegrateNormal):
-            return True
-
-        return False
+        return self.log_like.is_complex()
 
     @property
     def loglike(self) -> Expression:
@@ -543,7 +538,10 @@ class BIOGEME:
         """
         expression = -log(MultipleSum(avail))
         result = evaluate_simple_expression(
-            expression=expression, database=self.database, numerically_safe=False
+            expression=expression,
+            database=self.database,
+            numerically_safe=False,
+            use_jit=self.use_jit,
         )
         self.null_loglikelihood = result
         return self.null_loglikelihood
@@ -705,6 +703,7 @@ class BIOGEME:
                 ),
                 numerically_safe=self.numerically_safe,
                 number_of_jobs=self.biogeme_parameters.get_value(name='number_of_jobs'),
+                use_jit=self.use_jit,
             )
 
         return [result.solution for result in bootstrap_results]
@@ -1189,7 +1188,9 @@ class BIOGEME:
             raise BiogemeError(error_msg)
 
         the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
-            model_elements=self.model_elements, numerically_safe=self.numerically_safe
+            model_elements=self.model_elements,
+            numerically_safe=self.numerically_safe,
+            use_jit=self.use_jit,
         )
 
         results = the_evaluator.evaluate(the_beta_values)

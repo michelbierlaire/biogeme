@@ -76,30 +76,7 @@ class Elementary(Expression):
             return 1
         return 0
 
-    def dict_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> dict[str, Elementary]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        """
-        if self.expression_type == the_type:
-            return {self.name: self}
-        return {}
-
     def set_specific_id(self, name, specific_id, the_type: TypeOfElementaryExpression):
         """The elementary IDs identify the position of each element in the corresponding datab"""
         if the_type == self.expression_type and name == self.name:
             self.specific_id = specific_id
-
-
-def get_free_beta_values(the_expression: Expression) -> dict[str, float]:
-    free_beta_expressions: dict[str:Elementary] = (
-        the_expression.dict_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.FREE_BETA
-        )
-    )
-    return {
-        the_beta.name: the_beta.get_value()
-        for the_beta in free_beta_expressions.values()
-    }

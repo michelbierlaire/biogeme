@@ -9,7 +9,6 @@
 :date: Fri Oct 27 12:50:06 2023
 """
 
-import copy
 import logging
 import os
 
@@ -19,6 +18,7 @@ from tqdm import tqdm
 from biogeme.database import Database
 from biogeme.expressions import (
     Expression,
+    OldNewName,
     list_of_variables_in_expression,
     rename_all_variables,
 )
@@ -112,12 +112,14 @@ class ChoiceSetsGeneration:
         ) as progress_bar:
             for new_variable in self.combined_variables:
                 for index in range(self.total_sample_size):
-                    copy_expression = copy.deepcopy(new_variable.formula)
+                    copy_expression = new_variable.formula.deep_flat_copy()
                     attributes = self.get_attributes_from_expression(copy_expression)
+                    renaming_list = [
+                        OldNewName(old_name=attribute, new_name=f'{attribute}_{index}')
+                        for attribute in attributes
+                    ]
                     rename_all_variables(
-                        expr=copy_expression,
-                        old_name=new_variable.name,
-                        new_name=f'{new_variable.name}_{index}',
+                        expr=copy_expression, renaming_list=renaming_list
                     )
                     database.define_variable(
                         f"{new_variable.name}_{index}", copy_expression
@@ -125,14 +127,23 @@ class ChoiceSetsGeneration:
                     progress_bar.update(1)
                 if self.second_partition is not None:
                     for index in range(self.second_sample_size):
-                        copy_expression = copy.deepcopy(new_variable.formula)
+                        copy_expression = new_variable.formula.deep_flat_copy()
                         attributes = self.get_attributes_from_expression(
                             copy_expression
                         )
+                        renaming_list = [
+                            OldNewName(
+                                old_name=attribute,
+                                new_name=f'{MEV_PREFIX}{attribute}_{index}',
+                            )
+                            for attribute in attributes
+                        ]
                         rename_all_variables(
                             expr=copy_expression,
-                            old_name=new_variable.name,
-                            new_name=f'{MEV_PREFIX}{new_variable.name}_{index}',
+                            renaming_list=renaming_list,
+                        )
+                        database.define_variable(
+                            f"{MEV_PREFIX}{new_variable.name}_{index}", copy_expression
                         )
 
     def sample_and_merge(self, recycle: bool = False) -> Database:

@@ -11,7 +11,6 @@ from itertools import chain
 from typing import NamedTuple, TYPE_CHECKING, TypeAlias
 
 from biogeme.exceptions import BiogemeError, NotImplementedError
-
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
 from .numeric_tools import is_numeric
@@ -40,6 +39,20 @@ class Expression:
         self.fixed_beta_values = None
         """values of the Beta that are not estimated
         """
+
+        self._is_complex = False
+        """ Flag identifying complex expressions 
+        """
+
+    def is_complex(self) -> bool:
+        """Determine if the expression is complex.
+
+        An expression is considered complex if its own _is_complex flag
+        is set or if any of its children are complex.
+
+        :return: True if the expression or any of its children is complex.
+        """
+        return self._is_complex or any(child.is_complex() for child in self.children)
 
     def __bool__(self) -> None:
         error_msg = f'Expression {str(self)} cannot be used in a boolean expression. Use & for "and" and | for "or"'
@@ -483,13 +496,6 @@ class Expression:
 
         return Greater(self, other)
 
-    def dict_of_draw_types(self) -> dict[str:str]:
-        """Extract a dict containing the types of draws involved in the expression"""
-        the_draws = self.dict_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.DRAWS
-        )
-        return {name: expression.drawType for name, expression in the_draws.items()}
-
     def logit_choice_avail(self) -> list[LogitTuple]:
         """Extract a dict with all elementary expressions of a specific type
 
@@ -563,6 +569,7 @@ class Expression:
         The fact that the parameters are fixed or free is irrelevant here.
 
         :param betas: dictionary where the keys are the names of the
+                      parameters, and the values are the new value for
                       parameters, and the values are the new value for
                       the parameters.
         :type betas: dict(string:float)

@@ -1,14 +1,14 @@
 import logging
 
+from joblib import Parallel, delayed
+from tqdm import tqdm
+from tqdm_joblib import tqdm_joblib
+
 from biogeme.calculator import CompiledFormulaEvaluator
 from biogeme.default_parameters import ParameterValue
 from biogeme.model_elements import ModelElements
 from biogeme.optimization import OptimizationAlgorithm
 from biogeme.second_derivatives import SecondDerivativesMode
-from joblib import Parallel, delayed
-from tqdm import tqdm
-from tqdm_joblib import tqdm_joblib
-
 from .model_estimation import AlgorithmResults, model_estimation
 
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ def bootstrap(
     starting_values: dict[str, float],
     second_derivatives_mode: SecondDerivativesMode,
     numerically_safe: bool,
+    use_jit: bool,
     number_of_jobs: int,
 ) -> list[AlgorithmResults]:
     """
@@ -38,6 +39,8 @@ def bootstrap(
     :param starting_values: Dictionary of initial values for the model's free parameters.
     :param second_derivatives_mode: specifies how second derivatives are calculated.
     :param numerically_safe: improves the numerical stability of the calculations.
+    :param use_jit: if True, performs just-in-time compilation.
+    :param number_of_jobs: number of jobs for parallel execution of bootstrapping.
 
     :return: A list of tuples containing:
         - estimated parameter values (NumPy array),
@@ -54,6 +57,7 @@ def bootstrap(
             draws_management=None,
             user_defined_draws=modeling_elements.user_defined_draws,
             expressions_registry=None,
+            use_jit=use_jit,
         )
         compiled_formula = CompiledFormulaEvaluator(
             model_elements=bootstrap_modeling_elements,

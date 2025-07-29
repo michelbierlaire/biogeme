@@ -20,7 +20,7 @@ URL_UNIVERSITY = 'http://www.epfl.ch'
 URL_BIOGEME = 'http://biogeme.epfl.ch'
 URL_FORUM = 'https://groups.google.com/d/forum/biogeme'
 
-__version__ = '3.3.0a02'
+__version__ = '3.3.0a03'
 
 
 def get_version() -> str:

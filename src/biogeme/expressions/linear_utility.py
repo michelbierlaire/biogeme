@@ -10,11 +10,10 @@ import logging
 from typing import NamedTuple, TYPE_CHECKING
 
 import jax.numpy as jnp
-from biogeme.exceptions import BiogemeError
 
+from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
 from .beta_parameters import Beta
-from .elementary_expressions import Elementary, TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
 from .variable import Variable
 
@@ -87,33 +86,6 @@ class LinearUtility(Expression):
 
     def __repr__(self) -> str:
         return f"LinearUtility({repr(self.list_of_terms)})"
-
-    def dict_of_elementary_expression(
-        self, the_type: TypeOfElementaryExpression
-    ) -> dict[str, Elementary]:
-        """Extract a dict with all elementary expressions of a specific type
-
-        :param the_type: the type of expression
-        :type  the_type: TypeOfElementaryExpression
-
-        :return: returns a dict with the variables appearing in the
-               expression the keys being their names.
-        :rtype: dict(string:biogeme.expressions.Expression)
-
-        """
-        if the_type == TypeOfElementaryExpression.BETA:
-            return {x.name: x for x in self.betas}
-
-        if the_type == TypeOfElementaryExpression.FREE_BETA:
-            return {x.name: x for x in self.betas if x.status == 0}
-
-        if the_type == TypeOfElementaryExpression.FIXED_BETA:
-            return {x.name: x for x in self.betas if x.status != 0}
-
-        if the_type == TypeOfElementaryExpression.VARIABLE:
-            return {x.name: x for x in self.variables}
-
-        return {}
 
     def recursive_construct_jax_function(
         self, numerically_safe: bool

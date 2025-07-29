@@ -14,7 +14,7 @@ JaxFunctionType = Callable[
 ]
 
 
-def build_vectorized_function(the_function):
+def build_vectorized_function(the_function, use_jit: bool):
     """Build the function that is applied to each row of the databaser"""
 
     def vectorized_function(parameters, data, draws, random_variables):
@@ -23,4 +23,4 @@ def build_vectorized_function(the_function):
             in_axes=(0, 0),
         )(data, draws)
 
-    return jit(vectorized_function)
+    return jit(vectorized_function) if use_jit else vectorized_function

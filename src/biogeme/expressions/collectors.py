@@ -85,7 +85,7 @@ def collect_init_values(expression: Expression) -> dict[str, float]:
     collector = ExpressionCollector()
 
     @collector.register(Beta)
-    def collect_beta(expr: Beta, context):
+    def collect_beta(expr: Beta, context) -> list[tuple[str, float]]:
         if expr.is_free:
             return [(expr.name, expr.init_value)]
         return []

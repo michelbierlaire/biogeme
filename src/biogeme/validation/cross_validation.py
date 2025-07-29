@@ -51,7 +51,9 @@ def cross_validate_model(
             values=one_result.solution
         )
         simulation_evaluator = MultiRowEvaluator(
-            model_elements=fold.validation, numerically_safe=numerically_safe
+            model_elements=fold.validation,
+            numerically_safe=numerically_safe,
+            use_jit=modeling_elements.use_jit,
         )
         simulated_values: pd.DataFrame = simulation_evaluator.evaluate(
             the_betas=estimated_betas
