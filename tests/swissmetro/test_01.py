@@ -81,6 +81,7 @@ class test_01(unittest.TestCase):
 
     def testEstimationScipy(self):
         logprob = models.loglogit(V, av, CHOICE)
+        self.assertFalse(logprob.is_complex())
         biogeme = bio.BIOGEME(
             database,
             logprob,

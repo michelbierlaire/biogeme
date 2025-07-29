@@ -63,7 +63,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.5}  # Example parameters
 
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=self.beta_1, weight=None, database=self.database
+            log_like=self.beta_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -101,7 +101,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         the_expression = fixed_beta + self.beta_1
 
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=the_expression, weight=None, database=self.database
+            log_like=the_expression, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -127,7 +127,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expected_bhhh = [[3]]
         self.assertEqual(jax_1.bhhh, expected_bhhh)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=fixed_beta, weight=None, database=self.database
+            log_like=fixed_beta, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -156,7 +156,10 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expression_income = Variable('income')
 
         model_elements_income = ModelElements.from_expression_and_weight(
-            log_like=expression_income, weight=None, database=self.database
+            log_like=expression_income,
+            weight=None,
+            database=self.database,
+            use_jit=True,
         )
         jax_income = calculate_single_formula(
             model_elements=model_elements_income,
@@ -177,7 +180,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expression_age = Variable('age')
 
         model_elements_age = ModelElements.from_expression_and_weight(
-            log_like=expression_age, weight=None, database=self.database
+            log_like=expression_age, weight=None, database=self.database, use_jit=True
         )
 
         jax_age = calculate_single_formula(
@@ -195,7 +198,10 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expression_choice = Variable('choice')
 
         model_elements_choice = ModelElements.from_expression_and_weight(
-            log_like=expression_choice, weight=None, database=self.database
+            log_like=expression_choice,
+            weight=None,
+            database=self.database,
+            use_jit=True,
         )
 
         jax_choice = calculate_single_formula(
@@ -214,7 +220,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 + self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -239,7 +245,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 + Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -264,7 +270,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') + self.beta_2 + Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database
+            log_like=expression_3, weight=None, database=self.database, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -290,7 +296,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 - self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -314,7 +320,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 - Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -337,7 +343,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') - self.beta_2 - Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database
+            log_like=expression_3, weight=None, database=self.database, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -362,7 +368,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 * self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -387,7 +393,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 * Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -413,7 +419,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') * self.beta_2 * Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database
+            log_like=expression_3, weight=None, database=self.database, use_jit=True
         )
 
         jax_3 = calculate_single_formula(
@@ -440,7 +446,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 / self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -467,7 +473,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 / Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -491,7 +497,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') / self.beta_2 / Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database
+            log_like=expression_3, weight=None, database=self.database, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -521,7 +527,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1**self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -576,7 +582,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 ** Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -618,7 +624,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = BinaryMin(self.beta_1, self.beta_2)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -646,7 +652,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = BinaryMin(self.beta_2, Variable('age'))
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -674,7 +680,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = BinaryMax(self.beta_1, self.beta_2)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -702,7 +708,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = BinaryMax(self.beta_2, Variable('age'))
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -732,7 +738,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 & self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -759,7 +765,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 1.5}  # Example parameters
         expression_2 = self.beta_1 * (Variable('age') & Variable('income'))
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -785,7 +791,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 1, 'beta_2': 1.5}  # Example parameters
         expression_3 = self.beta_1 & self.beta_2
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database
+            log_like=expression_3, weight=None, database=self.database, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -813,7 +819,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 0, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 | self.beta_2
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -840,7 +846,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': 1.5}  # Example parameters
         expression_2 = self.beta_1 * (Variable('age') | Variable('income'))
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -868,7 +874,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': -1}  # Example parameters
         expression_1 = -self.beta_1
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -894,7 +900,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_2 = -Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -919,7 +925,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': value_1}
         expression_1 = NormalCdf(self.beta_1)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -945,7 +951,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = NormalCdf(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -976,7 +982,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = exp(self.beta_1)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1002,7 +1008,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_2 = exp(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1026,7 +1032,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         # Test sin(beta_1)
         expression_1 = sin(self.beta_1)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1051,7 +1057,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = sin(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -1081,7 +1087,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = cos(self.beta_1)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1097,7 +1103,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = cos(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -1120,7 +1126,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = log(self.beta_1)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1142,7 +1148,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = log(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1169,7 +1175,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = logzero(self.beta_1)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1191,7 +1197,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = logzero(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1215,7 +1221,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_1 = PowerConstant(self.beta_1, 2)
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database
+            log_like=expression_1, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1231,7 +1237,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_2 = PowerConstant(self.beta_1, 3)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database
+            log_like=expression_2, weight=None, database=self.database, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1248,7 +1254,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = PowerConstant(self.beta_2, -3.1)
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database
+            log_like=expression_3, weight=None, database=self.database, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -1267,9 +1273,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         omega = RandomVariable('omega')
         integral = IntegrateNormal(omega - omega + beta, name='omega')
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=integral,
-            weight=None,
-            database=self.database,
+            log_like=integral, weight=None, database=self.database, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements,
@@ -1348,6 +1352,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             weight=None,
             database=self.database,
             number_of_draws=1000000,
+            use_jit=True,
         )
         jax_mc = calculate_single_formula(
             model_elements=model_elements_mc,
@@ -1373,9 +1378,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         formula_rv = beta_1 * beta_2 * exp(omega)
         integral_rv = IntegrateNormal(formula_rv, name='omega')
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=integral_rv,
-            weight=None,
-            database=self.database,
+            log_like=integral_rv, weight=None, database=self.database, use_jit=True
         )
 
         jax_rv = calculate_single_formula(
@@ -1446,6 +1449,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             weight=None,
             database=self.database,
             number_of_draws=10,
+            use_jit=True,
         )
 
         expected_results = []
@@ -1476,6 +1480,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
             weight=None,
             database=self.database,
             number_of_draws=10,
+            use_jit=True,
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1546,7 +1551,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expected_h = np.array([[-0.75, 0.75], [0.75, -0.75]])
         expected_bhhh = 3 * np.outer([0.5, -0.5], [0.5, -0.5])
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=the_logit, weight=None, database=self.database
+            log_like=the_logit, weight=None, database=self.database, use_jit=True
         )
         jax = calculate_single_formula(
             model_elements=model_elements,
@@ -1577,7 +1582,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expected_hessian = np.array([[-0.7481281, 0.7481281], [0.7481281, -0.7481281]])
         expected_bhhh = np.array([[0.82680964, -0.8268095], [-0.8268095, 0.8268094]])
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=the_logit, weight=None, database=self.database
+            log_like=the_logit, weight=None, database=self.database, use_jit=True
         )
         jax = calculate_single_formula(
             model_elements=model_elements,
@@ -1606,7 +1611,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         av = {12: 1, 23: 0}
         the_logit = LogLogit(utilities, av, 12)
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=the_logit, weight=None, database=self.database
+            log_like=the_logit, weight=None, database=self.database, use_jit=True
         )
         jax = calculate_single_formula(
             model_elements=model_elements,

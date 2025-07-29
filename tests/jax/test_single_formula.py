@@ -30,7 +30,7 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
 
     def test_function_only(self):
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -49,7 +49,7 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
 
     def test_function_and_gradient(self):
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -65,7 +65,7 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
 
     def test_function_gradient_hessian(self):
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -79,7 +79,7 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
 
     def test_function_bhhh(self):
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -94,7 +94,7 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
     def test_missing_beta_uses_default(self):
         betas_missing = {}
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -111,7 +111,7 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
 
     def test_legacy_calculate_single_formula(self):
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         output = calculate_single_formula(
             model_elements=model_elements,
@@ -141,7 +141,7 @@ class TestEvaluateExpressionPerRow(unittest.TestCase):
     def test_evaluate_expression_per_row_with_specified_beta(self):
         betas = {'beta': 2.0}
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
 
         results = evaluate_model_per_row(
@@ -157,7 +157,7 @@ class TestEvaluateExpressionPerRow(unittest.TestCase):
         # No beta passed, should use default (1.0)
         betas = {}
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         results = evaluate_model_per_row(
             model_elements=model_elements,

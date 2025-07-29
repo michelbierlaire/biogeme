@@ -98,6 +98,7 @@ simulate = {'Prob. train': prob1, 'Elas. 1': gen_elas1}
 
 class test_11(unittest.TestCase):
     def testEstimationAndSimulation(self):
+        self.assertTrue(log_prob.is_complex())
         biogeme = bio.BIOGEME(
             database,
             log_prob,

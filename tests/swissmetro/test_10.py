@@ -67,6 +67,7 @@ log_prob = models.lognested_mev_mu(V, av, nests, CHOICE, MU)
 
 class test_10(unittest.TestCase):
     def testEstimation(self):
+        self.assertTrue(log_prob.is_complex())
         biogeme = bio.BIOGEME(
             database,
             log_prob,

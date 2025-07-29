@@ -29,7 +29,7 @@ class TestFunctionFromExpression(unittest.TestCase):
         self.expression = self.beta * self.x
         self.initial_betas = {'beta': 1.0}
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database
+            log_like=self.expression, weight=None, database=self.database, use_jit=True
         )
         compiled_function = CompiledFormulaEvaluator(
             model_elements=model_elements,
