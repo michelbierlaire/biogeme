@@ -2,8 +2,8 @@ import os
 import shutil
 from datetime import datetime
 
-from biogeme.native_draws import description_of_native_draws
-from biogeme.default_parameters import all_parameters_tuple, ParameterTuple
+from biogeme.default_parameters import ParameterTuple, all_parameters_tuple
+from biogeme.draws import description_of_native_draws
 from biogeme.parameters import Parameters
 
 
