@@ -5,35 +5,35 @@ Cross-nested logit
 
 Estimation of a cross-nested logit model using sampling of alternatives.
 
-:author: Michel Bierlaire
-:date: Wed Nov  1 18:00:33 2023
+Michel Bierlaire
+Sat Jul 26 2025, 14:57:17
 """
 
 import pandas as pd
 from IPython.core.display_functions import display
 
+import biogeme.biogeme_logging as blog
+from alternatives import (
+    ID_COLUMN,
+    all_alternatives,
+    alternatives,
+    asian_and_downtown,
+    only_asian,
+    only_downtown,
+    partitions,
+)
 from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta
+from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
 from biogeme.results_processing import get_pandas_estimated_parameters
 from biogeme.sampling_of_alternatives import (
-    SamplingContext,
     ChoiceSetsGeneration,
     GenerateModel,
+    SamplingContext,
     generate_segment_size,
 )
-from biogeme.expressions import Beta
-import biogeme.biogeme_logging as blog
-from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
-from specification_sampling import V, combined_variables
 from compare import compare
-from alternatives import (
-    alternatives,
-    ID_COLUMN,
-    partitions,
-    all_alternatives,
-    asian_and_downtown,
-    only_downtown,
-    only_asian,
-)
+from specification_sampling import V, combined_variables
 
 # %%
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -126,7 +126,7 @@ logprob = the_model_generation.get_cross_nested_logit()
 
 # %%
 the_biogeme = BIOGEME(biogeme_database, logprob)
-the_biogeme.modelName = MODEL_NAME
+the_biogeme.model_name = MODEL_NAME
 
 # %%
 # Calculate the null log likelihood for reporting.

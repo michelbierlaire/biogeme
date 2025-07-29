@@ -5,8 +5,8 @@ Compare parameters
 
 Function to compare estimated parameters with true parameters.
 
-:author: Michel Bierlaire
-:date: Wed Nov  1 18:07:08 2023
+Michel Bierlaire
+Fri Jul 25 2025, 17:43:55
 """
 
 import pandas as pd
