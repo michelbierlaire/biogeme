@@ -7,25 +7,27 @@ Michel Bierlaire
 Tue Jul 2 14:49:25 2024
 """
 
+from tabulate import tabulate
+
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
 from biogeme.expressions import Beta, Expression
 from biogeme.models import logcnl
-from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
-from biogeme.tools.time import Timing
+from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
+from timing_expression import timing_expression
 
 # %%
 # Parameters to be estimated.
@@ -78,82 +80,15 @@ nests = NestsForCrossNestedLogit(
 # %%
 # Definition of the model.
 # This is the contribution of each observation to the log likelihood function.
-logprob: Expression = logcnl(V, av, nests, CHOICE)
+log_probability: Expression = logcnl(V, av, nests, CHOICE)
 
 # %%
 database = read_data()
 
 # %%
-# Create a Timing object
-the_timing = Timing(warm_up_runs=10, num_runs=100)
-
-# %%
-# Timing when only the log likelihood is needed
-average_time_function_only = the_timing.time_function(
-    logprob.get_value_and_derivatives,
-    kwargs={
-        'gradient': False,
-        'hessian': False,
-        'bhhh': False,
-        'prepare_ids': True,
-        'database': database,
-    },
+# Timing
+timing_results = timing_expression(
+    the_expression=log_probability, the_database=database
 )
-
-print(
-    f'Cross-nested logit model, log likelihood for one iteration: {average_time_function_only:.3g} seconds'
-)
-
-# %%
-# Timing when the log likelihood and the gradient
-average_time_function_gradient = the_timing.time_function(
-    logprob.get_value_and_derivatives,
-    kwargs={
-        'gradient': True,
-        'hessian': False,
-        'bhhh': False,
-        'prepare_ids': True,
-        'database': database,
-    },
-)
-print(
-    f'Cross-nested logit model, log likelihood and gradient for one iteration: '
-    f'{average_time_function_gradient:.3g} seconds'
-)
-relative_gradient = (
-    average_time_function_gradient - average_time_function_only
-) / average_time_function_only
-print(
-    f'Calculating the gradient means a {100*relative_gradient:.2f}% increase of the calculation time.'
-)
-
-# %%
-# Timing when the log likelihood, the gradient and hessian are needed
-average_time_function_gradient_hessian = the_timing.time_function(
-    logprob.get_value_and_derivatives,
-    kwargs={
-        'gradient': True,
-        'hessian': True,
-        'bhhh': False,
-        'prepare_ids': True,
-        'database': database,
-    },
-)
-print(
-    f'Cross-nested logit model, log likelihood, gradient and hessian for one iteration: '
-    f'{average_time_function_gradient_hessian:.3g} seconds'
-)
-relative_to_function = (
-    average_time_function_gradient_hessian - average_time_function_only
-) / average_time_function_only
-relative_to_gradient = (
-    average_time_function_gradient_hessian - average_time_function_gradient
-) / average_time_function_gradient
-print(
-    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compared to '
-    f'calculating the function only.'
-)
-print(
-    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compared to '
-    f'calculating the function and the gradient only.'
-)
+results = [[k, f'{v:.3g}'] for k, v in timing_results.items()]
+print(tabulate(results, headers=['', 'Time (in sec.)'], tablefmt='github'))
