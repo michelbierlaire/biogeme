@@ -1,7 +1,7 @@
 """File translated_specification.py
 
 Michel Bierlaire, EPFL
-Fri Jul 25 2025, 17:07:33
+Fri Jul 25 2025, 17:59:01
 
 Specification of the "translated utility" MDCEV model.
 """
