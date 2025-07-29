@@ -24,7 +24,9 @@ class TestElemExpression(unittest.TestCase):
         b1 = Beta('b1', 1.0, None, None, 0)
         b2 = Beta('b2', 2.0, None, None, 0)
         expr = Elem({0: b1 * b1, 1: b2 * b2}, Numeric(1))
-        result = get_value_and_derivatives(expression=expr, numerically_safe=False)
+        result = get_value_and_derivatives(
+            expression=expr, numerically_safe=False, use_jit=True
+        )
         value = result.function
         gradient = list(result.gradient)
         expected_gradient = [0, 4]
@@ -32,7 +34,9 @@ class TestElemExpression(unittest.TestCase):
         self.assertListEqual(gradient, expected_gradient)
 
         expr = Elem({0: b1 * b1, 1: b2 * b2}, Numeric(2))
-        result = get_value_and_derivatives(expression=expr, numerically_safe=False)
+        result = get_value_and_derivatives(
+            expression=expr, numerically_safe=False, use_jit=True
+        )
         value = result.function
         gradient = list(result.gradient)
         expected_gradient = [2, 0]

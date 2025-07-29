@@ -1,6 +1,7 @@
 import unittest
 
 import numpy as np
+
 from biogeme.calculator import create_function_simple_expression
 from biogeme.expressions import Beta, log, logzero
 from biogeme.function_output import FunctionOutput
@@ -12,7 +13,7 @@ class test_expressions(unittest.TestCase):
         argument = Beta('argument', 2, None, None, 0)
         the_log = log(argument)
         expression_function = create_function_simple_expression(
-            expression=the_log, numerically_safe=True
+            expression=the_log, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [10.0], gradient=False, hessian=False, bhhh=False
@@ -21,7 +22,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=the_log, numerically_safe=True
+                expression=the_log, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[1.0])
@@ -44,7 +45,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=the_log, numerically_safe=True
+                expression=the_log, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[-1.0])
@@ -67,7 +68,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=the_log, numerically_safe=True
+                expression=the_log, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[-1.0])
@@ -86,7 +87,7 @@ class test_expressions(unittest.TestCase):
         argument = Beta('argument', 2, None, None, 0)
         the_log = logzero(argument)
         expression_function = create_function_simple_expression(
-            expression=the_log, numerically_safe=True
+            expression=the_log, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [10.0], gradient=False, hessian=False, bhhh=False
@@ -95,7 +96,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=the_log, numerically_safe=True
+                expression=the_log, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[1.0])
@@ -118,7 +119,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=the_log, numerically_safe=True
+                expression=the_log, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[-1.0])
@@ -141,7 +142,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=the_log, numerically_safe=True
+                expression=the_log, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[-1.0])
@@ -161,7 +162,7 @@ class test_expressions(unittest.TestCase):
         denominator = Beta('denominator', 1, None, None, 0)
         ratio = numerator / denominator
         expression_function = create_function_simple_expression(
-            expression=ratio, numerically_safe=True
+            expression=ratio, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [1, 1], gradient=True, hessian=False, bhhh=False
@@ -189,7 +190,7 @@ class test_expressions(unittest.TestCase):
         exponent = Beta('exponent', 1, None, None, 0)
         power = base**exponent
         expression_function = create_function_simple_expression(
-            expression=power, numerically_safe=True
+            expression=power, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [1, 1], gradient=True, hessian=False, bhhh=False
@@ -203,7 +204,7 @@ class test_expressions(unittest.TestCase):
         optimization_function = NegativeLikelihood(
             dimension=1,
             loglikelihood=create_function_simple_expression(
-                expression=power, numerically_safe=True
+                expression=power, numerically_safe=True, use_jit=True
             ),
         )
         check_results = optimization_function.check_derivatives(x=[1.0, 1.0])
@@ -224,7 +225,7 @@ class test_expressions(unittest.TestCase):
         exponent = Beta('exponent', exponent_value, None, None, 0)
         power = base**exponent
         expression_function = create_function_simple_expression(
-            expression=power, numerically_safe=True
+            expression=power, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [base_value, exponent_value], gradient=True, hessian=False, bhhh=False
@@ -241,7 +242,7 @@ class test_expressions(unittest.TestCase):
         exponent = Beta('exponent', exponent_value, None, None, 0)
         power = base**exponent
         expression_function = create_function_simple_expression(
-            expression=power, numerically_safe=True
+            expression=power, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [base_value, exponent_value], gradient=True, hessian=False, bhhh=False
@@ -258,7 +259,7 @@ class test_expressions(unittest.TestCase):
         exponent = Beta('exponent', exponent_value, None, None, 0)
         power = base**exponent
         expression_function = create_function_simple_expression(
-            expression=power, numerically_safe=True
+            expression=power, numerically_safe=True, use_jit=True
         )
         the_function_output: FunctionOutput = expression_function(
             [base_value, exponent_value], gradient=True, hessian=False, bhhh=False

@@ -13,31 +13,24 @@ from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Draws,
     RandomVariable,
-    TypeOfElementaryExpression,
     Variable,
     bioDraws,
+    list_of_random_variables_in_expression,
+    list_of_variables_in_expression,
 )
-from biogeme.expressions.elementary_expressions import Elementary
 
 
 class TestElementaryExpressions(unittest.TestCase):
-    def test_elementary_repr_and_str(self):
-        e = Elementary("x")
-        e.elementary_index = 0
-        self.assertEqual(str(e), "x")
-        self.assertIn("Elementary", repr(e))
 
     def test_elementary_dict_type_match(self):
-        e = Elementary("x")
-        e.expression_type = TypeOfElementaryExpression.VARIABLE
-        result = e.dict_of_elementary_expression(TypeOfElementaryExpression.VARIABLE)
-        self.assertIn("x", result)
+        e = Variable('x')
+        result = list_of_variables_in_expression(the_expression=e)
+        self.assertIn(e, result)
 
     def test_elementary_dict_type_mismatch(self):
-        e = Elementary("x")
-        e.expression_type = TypeOfElementaryExpression.DRAWS
-        result = e.dict_of_elementary_expression(TypeOfElementaryExpression.VARIABLE)
-        self.assertEqual(result, {})
+        e = Variable("x")
+        result = list_of_random_variables_in_expression(the_expression=e)
+        self.assertEqual(result, [])
 
     def test_variable_jax_function(self):
         v = Variable("income")

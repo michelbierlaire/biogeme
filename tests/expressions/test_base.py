@@ -7,7 +7,7 @@ Tue Mar 25 17:43:42 2025
 import unittest
 
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, list_of_all_betas_in_expression
+from biogeme.expressions import Expression, OldNewName, list_of_all_betas_in_expression
 from biogeme.expressions.rename_variables import rename_all_variables
 
 
@@ -86,12 +86,12 @@ class TestExpression(unittest.TestCase):
     def test_rename_elementary_does_not_fail(self):
         try:
             _ = rename_all_variables(
-                expr=self.expr1, old_name='x', new_name='pre_x_suf'
+                expr=self.expr1,
+                renaming_list=[OldNewName(old_name='x', new_name='pre_x_suf')],
             )
             _ = rename_all_variables(
                 expr=self.expr1,
-                old_name='y',
-                new_name='pre_y_suf',
+                renaming_list=[OldNewName(old_name='y', new_name='pre_y_suf')],
             )
         except Exception as e:
             self.fail(f"rename_elementary raised an exception unexpectedly: {e}")
