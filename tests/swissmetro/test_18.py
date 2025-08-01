@@ -3,15 +3,15 @@ import unittest
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
     CHOICE,
     GA,
+    PURPOSE,
     TRAIN_CO,
-    TRAIN_TT_SCALED,
     TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
-from biogeme.expressions import Beta, log, Elem
+from biogeme.expressions import Beta, Elem, log
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -47,12 +47,16 @@ logprob = log(Elem(ChoiceProba, CHOICE))
 
 class test_18(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameters=None)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            parameters=None,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -5789.309, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5789.309, 2)
 
 
 if __name__ == '__main__':

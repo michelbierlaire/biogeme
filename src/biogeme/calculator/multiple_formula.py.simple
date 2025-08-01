@@ -1,0 +1,66 @@
+"""
+This module defines the MultiRowEvaluator class, which evaluates multiple expressions
+on a given database using JAX for efficient batched computation. It returns results
+as a pandas DataFrame with one column per expression and one row per observation.
+
+Michel Bierlaire
+Wed Apr 2 13:10:17 2025
+"""
+
+import jax.numpy as jnp
+import pandas as pd
+from biogeme.calculator.single_formula import evaluate_expression_per_row
+
+from biogeme.exceptions import BiogemeError
+from biogeme.floating_point import JAX_FLOAT
+from biogeme.model_elements import ModelElements
+from biogeme.second_derivatives import SecondDerivativesMode
+
+
+class MultiRowEvaluator:
+    """
+    Evaluates multiple expressions on a common dataset using JAX and returns results
+    as a pandas DataFrame. This class compiles all expressions into JAX functions and
+    evaluates them efficiently in a single batched operation.
+
+    :param model_elements: Object containing the expressions and all elements needed to calculate them.
+    """
+
+    def __init__(self, model_elements: ModelElements, numerically_safe: bool):
+        if model_elements is None:
+            raise BiogemeError('A model must be provided.')
+        self.multiple_model_elements = model_elements
+        self.free_betas_names = model_elements.expressions_registry.free_betas_names
+        self.data_jax = model_elements.database.data_jax
+        self.draws_jax = model_elements.draws_management.draws_jax
+        self.names = list(model_elements.expressions.keys())
+        n_rv = (
+            self.multiple_model_elements.expressions_registry.number_of_random_variables
+        )
+        self.random_variables_jax = jnp.zeros((n_rv,), dtype=JAX_FLOAT)
+        self.numerically_safe = numerically_safe
+
+    def evaluate(self, the_betas: dict[str, float]) -> pd.DataFrame:
+        """
+        Evaluates all expressions using the provided beta values.
+
+        :param the_betas: A dictionary mapping beta names to their numerical values.
+        :return: A pandas DataFrame with one column per expression and one row per observation.
+        """
+        all_results = {}
+        for name, expr in self.multiple_model_elements.expressions.items():
+            single_model_elements = ModelElements.from_expression_and_weight(
+                log_like=expr,
+                weight=None,
+                database=self.multiple_model_elements.database,
+                number_of_draws=self.multiple_model_elements.number_of_draws,
+            )
+            results = evaluate_expression_per_row(
+                model_elements=single_model_elements,
+                the_betas=the_betas,
+                second_derivatives_mode=SecondDerivativesMode.NEVER,
+                numerically_safe=self.numerically_safe,
+            )
+            all_results[name] = results
+        # return pd.DataFrame(np.asarray(values, dtype=NUMPY_FLOAT), columns=self.names)
+        return pd.DataFrame.from_dict(all_results)

@@ -17,9 +17,6 @@ from .piecewise import (
     piecewise_formula,
     piecewise_as_variable,
     piecewise_function,
-    piecewiseFormula,
-    piecewiseFunction,
-    piecewiseVariables,
 )
 
 from .nested import (

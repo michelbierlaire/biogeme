@@ -22,34 +22,31 @@ We obtain a total of 12 specifications.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Jul 13 16:18:10 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 15:52:48
 """
 
 import numpy as np
 from IPython.core.display_functions import display
 
-import biogeme.biogeme as bio
-from biogeme import models
-from biogeme.expressions import Beta
+from biogeme.biogeme import BIOGEME
 from biogeme.catalog import segmentation_catalogs
-from biogeme.results import compile_estimation_results, pareto_optimal
-
-
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta
+from biogeme.models import loglogit
+from biogeme.results_processing import compile_estimation_results, pareto_optimal
 
 # %%
 # Read the data
@@ -73,7 +70,7 @@ segmentation_first = database.generate_segmentation(
 # %%
 # We consider two trip purposes: 'commuters' and anything else. We
 # need to define a binary variable first.
-database.data['COMMUTERS'] = np.where(database.data['PURPOSE'] == 1, 1, 0)
+database.dataframe['COMMUTERS'] = np.where(database.dataframe['PURPOSE'] == 1, 1, 0)
 
 segmentation_purpose = database.generate_segmentation(
     variable='COMMUTERS', mapping={0: 'non_commuters', 1: 'commuters'}
@@ -81,16 +78,16 @@ segmentation_purpose = database.generate_segmentation(
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Catalogs for the alternative specific constants.
-ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
-    generic_name='ASC',
-    beta_parameters=[ASC_TRAIN, ASC_CAR],
+asc_train_catalog, asc_car_catalog = segmentation_catalogs(
+    generic_name='asc',
+    beta_parameters=[asc_train, asc_car],
     potential_segmentations=(
         segmentation_ga,
         segmentation_luggage,
@@ -103,9 +100,9 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 # Note that the function returns a list of catalogs. Here, the list
 # contains only one of them.  This is why there is a comma after
 # "B_TIME_catalog".
-(B_TIME_catalog,) = segmentation_catalogs(
-    generic_name='B_TIME',
-    beta_parameters=[B_TIME],
+(b_time_catalog,) = segmentation_catalogs(
+    generic_name='b_time',
+    beta_parameters=[b_time],
     potential_segmentations=(
         segmentation_first,
         segmentation_purpose,
@@ -115,13 +112,15 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN_catalog + B_TIME_catalog * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = B_TIME_catalog * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR_catalog + B_TIME_catalog * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = (
+    asc_train_catalog + b_time_catalog * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+)
+v_swissmetro = b_time_catalog * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car_catalog + b_time_catalog * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -130,14 +129,14 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+log_probability = loglogit(v, av, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b04segmentation'
-the_biogeme.generate_html = False
-the_biogeme.generate_pickle = False
+the_biogeme = BIOGEME(
+    database, log_probability, generate_html=False, generate_yaml=False
+)
+the_biogeme.model_name = 'b04segmentation'
 
 # %%
 # Estimate the parameters
@@ -154,6 +153,7 @@ compiled_results, specs = compile_estimation_results(
 )
 
 # %%
+display('All estimated models')
 display(compiled_results)
 
 # %%
@@ -169,6 +169,7 @@ compiled_pareto_results, pareto_specs = compile_estimation_results(
 )
 
 # %%
+display('Non dominated models')
 display(compiled_pareto_results)
 
 # %%

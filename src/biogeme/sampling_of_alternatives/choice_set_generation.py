@@ -1,4 +1,4 @@
-""" Module in charge of functionalities related to the choice set generation
+"""Module in charge of functionalities related to the choice set generation
 
 
     For thew main sample, all alternatives except the last one must be used: 0 to
@@ -9,7 +9,6 @@
 :date: Fri Oct 27 12:50:06 2023
 """
 
-import copy
 import logging
 import os
 
@@ -17,8 +16,13 @@ import pandas as pd
 from tqdm import tqdm
 
 from biogeme.database import Database
-from biogeme.expressions import Expression, TypeOfElementaryExpression
-from .sampling_context import SamplingContext, MEV_PREFIX
+from biogeme.expressions import (
+    Expression,
+    OldNewName,
+    list_of_variables_in_expression,
+    rename_all_variables,
+)
+from .sampling_context import MEV_PREFIX, SamplingContext
 from .sampling_of_alternatives import SamplingOfAlternatives
 
 tqdm.pandas()
@@ -27,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class ChoiceSetsGeneration:
-    """Class in charge of generationg the choice sets for each individual."""
+    """Class in charge of generating the choice sets for each individual."""
 
     def __init__(self, context: SamplingContext):
         """Constructor
@@ -44,20 +48,21 @@ class ChoiceSetsGeneration:
         self.choice_column = context.choice_column
         self.number_of_individuals = context.number_of_individuals
         self.id_column = context.id_column
-        self.partition = context.partition
-        self.second_partition = context.second_partition
+        self.partition = context.sampling_protocol
+        self.second_partition = context.mev_sampling_protocol
         self.combined_variables = context.combined_variables
         self.biogeme_file_name = context.biogeme_file_name
         self.total_sample_size = context.total_sample_size
-        self.second_sample_size = context.second_sample_size
+        self.second_sample_size = context.total_mev_sample_size
         self.cnl_nests = context.cnl_nests
         self.biogeme_data = None
 
     def get_attributes_from_expression(self, expression: Expression) -> set[str]:
         """Extract the names of the attributes of alternatives from an expression"""
-        variables = expression.set_of_elementary_expression(
-            TypeOfElementaryExpression.VARIABLE
-        )
+        variables = {
+            var.name
+            for var in list_of_variables_in_expression(the_expression=expression)
+        }
         attributes = set(self.alternatives.columns)
         return variables & attributes
 
@@ -107,21 +112,35 @@ class ChoiceSetsGeneration:
         ) as progress_bar:
             for new_variable in self.combined_variables:
                 for index in range(self.total_sample_size):
-                    copy_expression = copy.deepcopy(new_variable.formula)
+                    copy_expression = new_variable.formula.deep_flat_copy()
                     attributes = self.get_attributes_from_expression(copy_expression)
-                    copy_expression.rename_elementary(attributes, suffix=f"_{index}")
+                    renaming_list = [
+                        OldNewName(old_name=attribute, new_name=f'{attribute}_{index}')
+                        for attribute in attributes
+                    ]
+                    rename_all_variables(
+                        expr=copy_expression, renaming_list=renaming_list
+                    )
                     database.define_variable(
                         f"{new_variable.name}_{index}", copy_expression
                     )
                     progress_bar.update(1)
                 if self.second_partition is not None:
                     for index in range(self.second_sample_size):
-                        copy_expression = copy.deepcopy(new_variable.formula)
+                        copy_expression = new_variable.formula.deep_flat_copy()
                         attributes = self.get_attributes_from_expression(
                             copy_expression
                         )
-                        copy_expression.rename_elementary(
-                            attributes, prefix=MEV_PREFIX, suffix=f"_{index}"
+                        renaming_list = [
+                            OldNewName(
+                                old_name=attribute,
+                                new_name=f'{MEV_PREFIX}{attribute}_{index}',
+                            )
+                            for attribute in attributes
+                        ]
+                        rename_all_variables(
+                            expr=copy_expression,
+                            renaming_list=renaming_list,
                         )
                         database.define_variable(
                             f"{MEV_PREFIX}{new_variable.name}_{index}", copy_expression
@@ -130,7 +149,7 @@ class ChoiceSetsGeneration:
     def sample_and_merge(self, recycle: bool = False) -> Database:
         """Loops on the individuals and generate a choice set for each of them
 
-        :param recycle: if True, if the data file already exisits, it is not re-created.
+        :param recycle: if True, if the data file already exists, it is not re-created.
 
         :return: database for Biogeme
         """

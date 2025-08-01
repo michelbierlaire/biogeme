@@ -9,50 +9,48 @@ Details about this example are available in Section 3 of `Bierlaire (2018)
 Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:00:10 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 20:59:31
 """
 
 import sys
 
 from IPython.core.display_functions import display
+from biogeme.biogeme import BIOGEME
+from biogeme.data.optima import normalized_weight, read_data
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 
-import biogeme.biogeme as bio
-from biogeme.exceptions import BiogemeError
-from biogeme import models
-import biogeme.results as res
-from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
 
 # %%
 # Obtain the specification for the default scenario
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, _, MarginalCostPT = scenario()
+v, nests, _, MarginalCostPT = scenario()
 
 # %%
 # Obtain the expression for the choice probability of the public transportation.
-prob_PT = models.nested(V, None, nests, 0)
+prob_pt = nested(v, None, nests, 0)
 
 # %%
 # We investigate a scenario where the price for public transportation
 # increases by 20%. We extract the corresponding scenario.
-V_after, _, _, MarginalCostPT_after = scenario(factor=1.2)
-prob_PT_after = models.nested(V_after, None, nests, 0)
+v_after, _, _, marginal_cost_pt_after = scenario(factor=1.2)
+prob_pt_after = nested(v_after, None, nests, 0)
 
 # %%
 # Disaggregate elasticities
 direct_elas_pt = (
-    (prob_PT_after - prob_PT)
+    (prob_pt_after - prob_pt)
     * MarginalCostPT
-    / (prob_PT * (MarginalCostPT_after - MarginalCostPT))
+    / (prob_pt * (marginal_cost_pt_after - MarginalCostPT))
 )
 
 # %%
 # Formulas to simulate.
 simulate = {
     'weight': normalized_weight,
-    'Prob. PT': prob_PT,
+    'Prob. PT': prob_pt,
     'direct_elas_pt': direct_elas_pt,
 }
 
@@ -62,16 +60,18 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 
 # %%
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
-        'the file b02estimation.pickle.'
+        'the file b02estimation.yaml.'
     )
 
 # %%

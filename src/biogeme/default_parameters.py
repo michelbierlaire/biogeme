@@ -11,14 +11,20 @@ See https://www.w3schools.com/python/gloss_python_tuple_one_item.asp
 
 from __future__ import annotations
 
-import numpy as np
-from typing import NamedTuple, Callable
+from typing import Callable, NamedTuple
 
-from biogeme.version import get_version
+import numpy as np
+from tabulate import tabulate
+
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
+from biogeme.floating_point import NUMPY_FLOAT
+from biogeme.second_derivatives import SecondDerivativesMode
+from biogeme.version import get_version
 
 ParameterValue = bool | int | float | str
+
+MISSING_VALUE = 99999
 
 
 class ParameterTuple(NamedTuple):
@@ -68,12 +74,22 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_boolean,),
         ),
         ParameterTuple(
-            name='generate_pickle',
+            name='generate_yaml',
             value=True,
             type=bool,
             section='Output',
             description=(
-                'bool: "True" if the pickle file with the ' 'results must be generated.'
+                'bool: "True" if the yaml file with the results must be generated.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='save_validation_results',
+            value=True,
+            type=bool,
+            section='Output',
+            description=(
+                'bool: "True" if the validation results are saved in CSV files.'
             ),
             check=(cp.is_boolean,),
         ),
@@ -92,7 +108,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='number_of_draws',
-            value=100,
+            value=10_000,
             type=int,
             section='MonteCarlo',
             description='int: Number of draws for Monte-Carlo integration.',
@@ -100,7 +116,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='missing_data',
-            value=99999,
+            value=MISSING_VALUE,
             type=int,
             section='Specification',
             description=(
@@ -109,6 +125,28 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
                 ' be triggered.'
             ),
             check=(cp.is_number,),
+        ),
+        ParameterTuple(
+            name='numerically_safe',
+            value=False,
+            type=bool,
+            section='Specification',
+            description=(
+                'If true, Biogeme is doing its best to deal with numerical issues, '
+                'such as division by a number close to zero, at the possible expense of speed.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='use_jit',
+            value=True,
+            type=bool,
+            section='Specification',
+            description=(
+                'If True, the model is compiled using jit (just-in-time) to speed up the calculation. For complex '
+                'models, compilation time may exceed the gain due to compilation, so that it is worth turning it off.'
+            ),
+            check=(cp.is_boolean,),
         ),
         ParameterTuple(
             name='seed',
@@ -129,6 +167,16 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             section='Estimation',
             description='int: number of re-estimations for bootstrap sampling.',
             check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='calculating_second_derivatives',
+            value='analytical',
+            type=str,
+            section='Estimation',
+            description=(
+                f'Defines how to calculate the second derivatives: {",".join([value.value for value in SecondDerivativesMode])}. '
+            ),
+            check=(cp.check_calculating_second_derivatives,),
         ),
         ParameterTuple(
             name='large_data_set',
@@ -206,7 +254,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='tolerance',
-            value=np.finfo(np.float64).eps ** 0.25,
+            value=float(np.finfo(NUMPY_FLOAT).eps ** (1.0 / 3.0)),
             type=float,
             section='SimpleBounds',
             description='float: the algorithm stops when this precision is reached',
@@ -244,7 +292,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='steptol',
-            value=1.0e-5,
+            value=float(np.finfo(NUMPY_FLOAT).eps ** (2.0 / 3.0)),
             type=float,
             section='SimpleBounds',
             description=(
@@ -322,6 +370,16 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_integer, cp.is_non_negative),
         ),
         ParameterTuple(
+            name='number_of_jobs',
+            value=2,
+            type=int,
+            section='Bootstrap',
+            description=(
+                'int: The maximum number of concurrently running jobs. If -1 is given, joblib tries to use all CPUs.'
+            ),
+            check=(cp.is_integer,),
+        ),
+        ParameterTuple(
             name='version',
             value=get_version(),
             type=str,
@@ -330,3 +388,20 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(),
         ),
     )
+
+
+def print_list_of_parameters(table_format='plain') -> str:
+    """Generate a table describing all the parameters"""
+
+    headers = ['Parameter', 'Default value', 'Type', 'Section', 'Description']
+    rows = [
+        [
+            parameter.name,
+            parameter.value,
+            parameter.type,
+            parameter.section,
+            parameter.description,
+        ]
+        for parameter in all_parameters_tuple()
+    ]
+    return tabulate(rows, headers=headers, tablefmt='plain')

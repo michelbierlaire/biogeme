@@ -1,12 +1,12 @@
 import unittest
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
 import pandas as pd
 
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Numeric, Beta, Expression
+from biogeme.expressions import Beta, Expression, Numeric
 from biogeme.mdcev.mdcev import Mdcev
 
 
@@ -148,8 +148,8 @@ class TestConcreteMdcev(unittest.TestCase):
         self.instance.alternatives = {1, 2}  # Assuming two alternatives
 
         # Assuming two observations
-        database = Mock(spec=Database)
-        database.data = pd.DataFrame({'Column1': [1, 2], 'Column2': [1, 2]})
+        data = pd.DataFrame({'Column1': [1, 2], 'Column2': [1, 2]})
+        database = Database('test', dataframe=data)
         number_of_draws = 10
         epsilons = [
             np.random.gumbel(

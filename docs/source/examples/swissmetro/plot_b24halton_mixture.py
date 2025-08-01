@@ -6,33 +6,33 @@ Mixture of logit with Halton draws
 Example of a mixture of logit models, using quasi Monte-Carlo integration with
 Halton draws (base 5). The mixing distribution is normal.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 18:21:13 2023
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 12:45:21
 
 
 """
 
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
-
-from biogeme.expressions import Beta, bioDraws, MonteCarlo, log
-from biogeme.parameters import Parameters
+from IPython.core.display_functions import display
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Draws, MonteCarlo, log
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
-    CHOICE,
     CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
     CAR_CO_SCALED,
+    CAR_TT_SCALED,
+    CHOICE,
     SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -40,33 +40,33 @@ logger.info('Example b24halton_mixture.py')
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME = Beta('B_TIME', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
 
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
+b_time_s = Beta('b_time_s', 1, None, None, 0)
 # %%
 # Define a random parameter with a normal distribution, designed to be used
 # for quasi Monte-Carlo simulation with Halton draws (base 5).
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_HALTON5')
+b_time_rnd = b_time + b_time_s * Draws('b_time_rnd', 'NORMAL_HALTON5')
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -74,11 +74,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional on b_time_rnd, we have a logit model (called the kernel)
-prob = models.logit(V, av, CHOICE)
+conditional_probability = logit(v, av, CHOICE)
 
 # %%
 # We integrate over b_time_rnd using Monte-Carlo.
-logprob = log(MonteCarlo(prob))
+log_probability = log(MonteCarlo(conditional_probability))
 
 # %%
 # These notes will be included as such in the report file.
@@ -91,10 +91,10 @@ USER_NOTES = (
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = bio.BIOGEME(
-    database, logprob, user_notes=USER_NOTES, number_of_draws=100, seed=1223
+the_biogeme = BIOGEME(
+    database, log_probability, user_notes=USER_NOTES, number_of_draws=10_000, seed=1223
 )
-the_biogeme.modelName = 'b24halton_mixture'
+the_biogeme.model_name = 'b24halton_mixture'
 
 # %%
 # Estimate the parameters
@@ -104,5 +104,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

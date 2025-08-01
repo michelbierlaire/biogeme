@@ -1,17 +1,31 @@
+from __future__ import annotations
+
 import logging
-from typing import Callable
+from typing import NamedTuple, TYPE_CHECKING
 
 import numpy as np
+from tabulate import tabulate
 
-from biogeme.deprecated import deprecated
+from biogeme.floating_point import SQRT_EPS
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
+
+if TYPE_CHECKING:
+    from biogeme.calculator import CallableExpression
 
 logger = logging.getLogger(__name__)
 
 
-def findiff_g(
-    the_function: Callable[[np.ndarray], FunctionOutput], x: np.ndarray
-) -> np.ndarray:
+class CheckDerivativesResults(NamedTuple):
+    function: float
+    analytical_gradient: np.ndarray
+    analytical_hessian: np.ndarray
+    finite_differences_gradient: np.ndarray
+    finite_differences_hessian: np.ndarray
+    errors_gradient: np.ndarray
+    errors_hessian: np.ndarray
+
+
+def findiff_g(the_function: CallableExpression, x: np.ndarray) -> np.ndarray:
     """Calculates the gradient of a function :math:`f` using finite differences
 
     :param the_function: A function object that takes a vector as an
@@ -26,10 +40,10 @@ def findiff_g(
        calculated by finite differences.
     """
     x = x.astype(float)
-    tau = 0.0000001
+    tau = SQRT_EPS
     n = len(x)
     g = np.zeros(n)
-    f = the_function(x).function
+    f = the_function(x, gradient=False, hessian=False, bhhh=False).function
     for i in range(n):
         xi = x.item(i)
         xp = x.copy()
@@ -40,16 +54,13 @@ def findiff_g(
         else:
             s = -tau
         xp[i] = xi + s
-        fp = the_function(xp).function
+        fp = the_function(xp, gradient=False, hessian=False, bhhh=False).function
         g[i] = (fp - f) / s
     return g
 
 
 def findiff_h(
-    the_function: (
-        Callable[[np.ndarray], FunctionOutput]
-        | Callable[[np.ndarray], NamedFunctionOutput]
-    ),
+    the_function: CallableExpression,
     x: np.ndarray,
 ) -> np.ndarray:
     """Calculates the hessian of a function :math:`f` using finite differences
@@ -66,10 +77,12 @@ def findiff_h(
     :return: numpy matrix containing the hessian calculated by
              finite differences.
     """
-    tau = 1.0e-7
+    tau = SQRT_EPS
     n = len(x)
     h = np.zeros((n, n))
-    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
+    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
+        x, gradient=True, hessian=False, bhhh=False
+    )
     if isinstance(the_function_output, NamedFunctionOutput):
         the_function_output = the_function_output.function_output
     g = the_function_output.gradient
@@ -84,7 +97,7 @@ def findiff_h(
             s = -tau
         ei = eye[i]
         the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
-            x + s * ei
+            x + s * ei, gradient=True, hessian=False, bhhh=False
         )
         if isinstance(the_function_output, NamedFunctionOutput):
             the_function_output = the_function_output.function_output
@@ -93,22 +106,12 @@ def findiff_h(
     return h
 
 
-@deprecated(findiff_h)
-def findiff_H(
-    the_function: Callable[[np.ndarray], tuple[float, np.ndarray, ...]], x: np.ndarray
-) -> np.ndarray:
-    pass
-
-
 def check_derivatives(
-    the_function: (
-        Callable[[np.ndarray], FunctionOutput]
-        | Callable[[np.ndarray], NamedFunctionOutput]
-    ),
+    the_function: CallableExpression,
     x: np.ndarray,
     names: list[str] | None = None,
     logg: bool | None = False,
-) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> CheckDerivativesResults:
     """Verifies the analytical derivatives of a function by comparing
     them with finite difference approximations.
 
@@ -138,44 +141,54 @@ def check_derivatives(
 
     """
     x = np.array(x, dtype=float)
-    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
+    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
+        x, gradient=True, hessian=True, bhhh=False
+    )
     if isinstance(the_function_output, NamedFunctionOutput):
         the_function_output = the_function_output.function_output
     g_num = findiff_g(the_function, x)
     gdiff = the_function_output.gradient - g_num
     if logg:
+        headers = ['x', 'Gradient', 'FinDiff', 'Difference']
+
         if names is None:
             names = [f'x[{i}]' for i in range(len(x))]
-        logger.info('x\t\tGradient\tFinDiff\t\tDifference')
-        for k, v in enumerate(gdiff):
-            logger.info(
-                f'{names[k]:15}\t{the_function_output.gradient[k]:+E}\t{g_num[k]:+E}\t{v:+E}'
-            )
+        rows = [
+            [
+                f'{names[k]}',
+                f'{the_function_output.gradient[k]:+E}',
+                f'{g_num[k]:+E}',
+                f'{v:+E}',
+            ]
+            for k, v in enumerate(gdiff)
+        ]
+        logger.info('Comparing first derivatives')
+        logger.info(tabulate(rows, headers=headers, tablefmt='plain'))
 
     h_num = findiff_h(the_function, x)
     hdiff = the_function_output.hessian - h_num
     if logg:
-        logger.info('Row\t\tCol\t\tHessian\tFinDiff\t\tDifference')
-        for row in range(len(hdiff)):
-            for col in range(len(hdiff)):
-                logger.info(
-                    f'{names[row]:15}\t{names[col]:15}\t{the_function_output.hessian[row, col]:+E}\t'
-                    f'{h_num[row, col]:+E}\t{hdiff[row, col]:+E}'
-                )
-    return (
-        the_function_output.function,
-        the_function_output.gradient,
-        the_function_output.hessian,
-        gdiff,
-        hdiff,
+        headers = ['Row', 'Col', 'Hessian', 'FinDiff', 'Difference']
+        rows = [
+            [
+                names[row],
+                names[col],
+                f'{the_function_output.hessian[row, col]:+E}',
+                f'{h_num[row, col]:+E}',
+                f'{hdiff[row, col]:+E}',
+            ]
+            for col in range(len(hdiff))
+            for row in range(len(hdiff))
+        ]
+        logger.info('Comparing second derivatives')
+        logger.info(tabulate(rows, headers=headers, tablefmt='plain'))
+
+    return CheckDerivativesResults(
+        function=the_function_output.function,
+        analytical_gradient=the_function_output.gradient,
+        analytical_hessian=the_function_output.hessian,
+        finite_differences_gradient=g_num,
+        finite_differences_hessian=h_num,
+        errors_gradient=gdiff,
+        errors_hessian=hdiff,
     )
-
-
-@deprecated(check_derivatives)
-def checkDerivatives(
-    the_function: Callable[[np.ndarray], tuple[float, np.ndarray, np.ndarray]],
-    x: np.ndarray,
-    names: list[str] | None = None,
-    logg: bool | None = False,
-) -> tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    pass

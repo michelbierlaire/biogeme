@@ -1,6 +1,15 @@
+"""
+
+Tool for timing an expression
+=============================
+
+Michel Bierlaire
+Thu Jul 31 2025, 13:40:20
+"""
+
 import time
 from datetime import timedelta
-from typing import Callable, Any
+from typing import Any, Callable
 
 
 def format_timedelta(td: timedelta) -> str:

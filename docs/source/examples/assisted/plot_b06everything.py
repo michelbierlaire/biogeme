@@ -10,27 +10,25 @@ ValueOutOfRange exception when the estimate_catalog is called.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Fri Jul 14 09:55:33 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 15:57:10
 """
-import biogeme.biogeme as bio
+
+from biogeme.biogeme import BIOGEME
 from biogeme.exceptions import BiogemeError
 
 # %%
 # See :ref:`everything_spec_section`.
-from everything_spec import model_catalog, database
+from everything_spec import database, model_catalog
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, model_catalog)
-the_biogeme.modelName = 'b06everything'
-the_biogeme.generate_html = False
-the_biogeme.generate_pickle = False
+the_biogeme = BIOGEME(database, model_catalog, generate_html=False, generate_yaml=False)
+the_biogeme.model_name = 'b06everything'
 
 # %%
 # Estimate the parameters.
-# It does not work as there are two many specifications
+# It does not work as there are too many specifications
 try:
     dict_of_results = the_biogeme.estimate_catalog()
 except BiogemeError as e:

@@ -6,17 +6,17 @@ Simple estimation test from the Ben-Akiva and Lerman book
 
 """
 
-import unittest
-from os import path
 import shutil
 import tempfile
+import unittest
+from os import path
 
 import pandas as pd
 
-import biogeme.database as db
 import biogeme.biogeme as bio
+import biogeme.database as db
 from biogeme import models
-from biogeme.expressions import Variable, Beta
+from biogeme.expressions import Beta, Variable
 
 GROUP = Variable('GROUP')
 SURVEY = Variable('SURVEY')
@@ -110,9 +110,9 @@ class test_biogeme(unittest.TestCase):
                 [1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0]
             ),
         }
-        pandas = pd.DataFrame(data)
+        dataframe = pd.DataFrame(data)
 
-        self.database = db.Database('akiva', pandas)
+        self.database = db.Database('akiva', dataframe)
 
     def tearDown(self):
         # Remove the directory after the test
@@ -132,13 +132,18 @@ class test_biogeme(unittest.TestCase):
 
         logprob = models.loglogit(V, av, Choice)
 
-        biogeme = bio.BIOGEME(self.database, logprob, parameters=self.toml_file)
-        biogeme.modelName = 'test'
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
-        biogeme.saveIterations = False
+        biogeme = bio.BIOGEME(
+            self.database,
+            logprob,
+            parameters=self.toml_file,
+            generate_html=False,
+            generate_yaml=False,
+            save_iterations=False,
+            optimization_algorithm='scipy',
+        )
+        biogeme.model_name = 'test'
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -6.166042, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -6.166042, 2)
 
 
 if __name__ == '__main__':

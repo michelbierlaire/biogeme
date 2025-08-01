@@ -10,16 +10,16 @@ Assisted specification
  example where the number of specifications is too high to be
  enumerated.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 16:58:49 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 19:21:26
 """
 
 import biogeme.biogeme_logging as blog
-from biogeme.results import compile_estimation_results
-from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.assisted import AssistedSpecification
-from plot_b21multiple_models_spec import the_biogeme, PARETO_FILE_NAME
+from biogeme.multiobjectives import loglikelihood_dimension
+from biogeme.results_processing import compile_estimation_results
+
+from plot_b21multiple_models_spec import PARETO_FILE_NAME, the_biogeme
 
 logger = blog.get_screen_logger(blog.INFO)
 logger.info('Example b21multipleModels')

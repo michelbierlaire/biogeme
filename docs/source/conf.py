@@ -15,7 +15,7 @@ from biogeme.version import __version__
 sys.path.insert(0, os.path.abspath('./extensions'))
 
 project = 'Biogeme'
-copyright = '2024, Michel Bierlaire'
+copyright = '2025, Michel Bierlaire'
 author = 'Michel Bierlaire'
 
 # The full version, including alpha/Beta/rc tags
@@ -65,9 +65,19 @@ autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 python_use_unqualified_type_names = True
 
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "private-members": False,
+    "show-inheritance": True,
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
+html_theme_options = {
+    "navigation_depth": 4,
+    "collapse_navigation": False,
+}
 html_static_path = ['_static']

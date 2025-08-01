@@ -9,18 +9,19 @@ This is designed for programmers who need examples of use of the
 functions of the module. The examples are designed to illustrate the
 syntax. They do not correspond to any meaningful model.
 
-:author: Michel Bierlaire
-:date: Wed Nov 22 13:52:20 2023
+Michel Bierlaire
+Sun Jun 29 2025, 02:24:09
 """
 
 # %%
 import os
-import biogeme.version as ver
+
 import biogeme.biogeme_logging as blog
+from biogeme.version import get_text
 
 # %%
 # Version of Biogeme.
-print(ver.get_text())
+print(get_text())
 
 # %%
 # In Python, the levels of reporting are:
@@ -34,9 +35,9 @@ print(ver.get_text())
 # In Biogeme, we basically use the first three.
 
 # %%
-# If we request a specific level, all message from this level and all
+# If we request a specific level, all messages from this level and all
 # levels above are displayed. For example, if INFO is requested,
-# everything except DEBUG will be diplayed.
+# everything except DEBUG will be displayed.
 logger = blog.get_screen_logger(level=blog.INFO)
 
 

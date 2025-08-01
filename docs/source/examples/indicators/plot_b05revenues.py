@@ -5,13 +5,16 @@ Calculation of revenues
 
 We use an estimated model to calculate revenues.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:02:19 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 18:57:49
 """
 
 import sys
+
 import numpy as np
+from biogeme.biogeme import BIOGEME
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 
 try:
     import matplotlib.pyplot as plt
@@ -19,23 +22,20 @@ try:
     can_plot = True
 except ModuleNotFoundError:
     can_plot = False
-from tqdm import tqdm
-from biogeme import models
-from biogeme.exceptions import BiogemeError
-import biogeme.biogeme as bio
-import biogeme.results as res
 from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
 
 # %%
 # Read the estimation results from the file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02simulation.py '
         'in order to generate the '
-        'file b02estimation.pickle.'
+        'file b02estimation.yaml.'
     )
 
 # %%
@@ -56,11 +56,21 @@ def revenues(factor: float) -> tuple[float, float, float]:
         the confidence interval.
 
     """
+    filename = f'revenue_{factor:.2f}.txt'
+    SEPARATOR = '%'
+    try:
+        with open(filename, 'r') as f:
+            line = f.read()
+            revenue, left, right = line.split(SEPARATOR)
+            return float(revenue), float(left), float(right)
+    except FileNotFoundError:
+        ...
+
     # Obtain the specification for the default scenario
-    V, nests, _, marginal_cost_scenario = scenario(factor=factor)
+    utilities, nests, _, marginal_cost_scenario = scenario(factor=factor)
 
     # Obtain the expression for the choice probability of each alternative
-    prob_pt = models.nested(V, None, nests, 0)
+    prob_pt = nested(utilities, None, nests, 0)
 
     # We now simulate the choice probabilities,the weight and the
     # price variable
@@ -70,13 +80,11 @@ def revenues(factor: float) -> tuple[float, float, float]:
         'Revenue public transportation': prob_pt * marginal_cost_scenario,
     }
 
-    the_biogeme = bio.BIOGEME(database, simulate)
+    the_biogeme = BIOGEME(database, simulate)
     simulated_values = the_biogeme.simulate(results.get_beta_values())
 
     # We also calculate confidence intervals for the calculated quantities
-
-    betas = the_biogeme.free_beta_names
-    beta_bootstrap = results.get_betas_for_sensitivity_analysis(betas)
+    beta_bootstrap = results.get_betas_for_sensitivity_analysis()
     left, right = the_biogeme.confidence_intervals(beta_bootstrap, 0.9)
 
     revenues_pt = (
@@ -84,6 +92,11 @@ def revenues(factor: float) -> tuple[float, float, float]:
     ).sum()
     revenues_pt_left = (left['Revenue public transportation'] * left['weight']).sum()
     revenues_pt_right = (right['Revenue public transportation'] * right['weight']).sum()
+    with open(filename, 'w') as f:
+        print(
+            f'{revenues_pt} {SEPARATOR} {revenues_pt_left} {SEPARATOR} {revenues_pt_right}',
+            file=f,
+        )
     return revenues_pt, revenues_pt_left, revenues_pt_right
 
 
@@ -100,7 +113,7 @@ print(
 # We now investigate how the revenues vary with the multiplicative factor
 
 factors = np.arange(0.0, 5.0, 0.1)
-plot_revenues = [revenues(s) for s in tqdm(factors)]
+plot_revenues = [revenues(s) for s in factors]
 zipped = zip(*plot_revenues)
 rev = next(zipped)
 lower = next(zipped)

@@ -1,11 +1,12 @@
 import os
 import unittest
-import pandas as pd
-import biogeme.database as db
-import biogeme.biogeme as bio
-from biogeme import models
 
-from spec_optima import V, av, Choice
+import pandas as pd
+
+import biogeme.biogeme as bio
+import biogeme.database as db
+from biogeme import models
+from spec_optima import Choice, V, av
 
 myPath = os.path.dirname(os.path.abspath(__file__))
 df = pd.read_csv(f'{myPath}/optima.dat', sep='\t')
@@ -30,13 +31,16 @@ database = db.Database('optima', df)
 class test_01(unittest.TestCase):
     def testQuickEstimate(self):
         logprob = models.loglogit(V, av, Choice)
-        biogeme = bio.BIOGEME(database, logprob)
-        biogeme.modelName = 'test_01'
-        biogeme.generateHtml = False
-        biogeme.generatePickle = False
-        biogeme.saveIterations = False
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            generate_html=False,
+            generate_yaml=False,
+            save_iterations=False,
+        )
+        biogeme.model_name = 'test_01'
         results = biogeme.quick_estimate()
-        self.assertAlmostEqual(results.data.logLike, -1068.78, 1)
+        self.assertAlmostEqual(results.final_log_likelihood, -1068.78, 1)
 
 
 if __name__ == '__main__':

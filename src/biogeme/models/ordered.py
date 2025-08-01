@@ -8,7 +8,7 @@ import logging
 from typing import Callable
 import biogeme.distributions as dist
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, Beta, bioNormalCdf
+from biogeme.expressions import Expression, Beta, NormalCdf
 
 logger = logging.getLogger(__name__)
 
@@ -152,5 +152,5 @@ def ordered_probit(
         continuous_value=continuous_value,
         list_of_discrete_values=list_of_discrete_values,
         tau_parameter=tau_parameter,
-        cdf=bioNormalCdf,
+        cdf=NormalCdf,
     )

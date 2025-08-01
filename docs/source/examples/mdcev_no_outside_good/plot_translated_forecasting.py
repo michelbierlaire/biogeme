@@ -1,7 +1,7 @@
 """File translated_forecasting.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 18:08:50 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 17:34:35
 
 Forecasting with a MDCEV model and the "translated utility" specification.
 """
@@ -15,20 +15,17 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.database import Database
-from biogeme.exceptions import BiogemeError
-from biogeme.results import bioResults
-from specification import (
-    database,
-)
+from biogeme.results_processing import EstimationResults
+from process_data import database
 from translated_specification import the_translated
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example: translated utility')
 
-result_file = 'saved_results/translated.pickle'
+result_file = 'saved_results/translated.yaml'
 try:
-    results = bioResults(pickle_file=result_file)
-except BiogemeError as e:
+    results = EstimationResults.from_yaml_file(filename=result_file)
+except FileNotFoundError as e:
     print(e)
     print(f'File {result_file} is missing.')
     sys.exit()
@@ -63,7 +60,7 @@ epsilons = [
     np.random.gumbel(
         loc=0, scale=1, size=(number_of_draws, the_translated.number_of_alternatives)
     )
-    for _ in range(two_rows_of_database.get_sample_size())
+    for _ in range(two_rows_of_database.num_rows())
 ]
 
 # %
@@ -85,7 +82,7 @@ epsilons = [
     np.random.gumbel(
         loc=0, scale=1, size=(number_of_draws, the_translated.number_of_alternatives)
     )
-    for _ in range(two_rows_of_database.get_sample_size())
+    for _ in range(two_rows_of_database.num_rows())
 ]
 
 # %

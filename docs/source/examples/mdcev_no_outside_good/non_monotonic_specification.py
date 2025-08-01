@@ -1,28 +1,13 @@
 """File non_monotonic_specification.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 18:18:38 2024
-
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 16:36:49
 Specification of the "non monotonic utility" MDCEV model.
 """
 
 from biogeme.expressions import Beta
 from biogeme.mdcev import NonMonotonic
-from specification import (
-    weight,
-    baseline_utilities,
-    mu_utilities,
-    hhsize,
-    employed,
-    spousepr,
-    male,
-    age15_40,
-    age41_60,
-    bachigher,
-    white,
-    metro,
-    Sunday,
-)
+from specification import baseline_utilities, mu_utilities, weight
 
 # %
 # Gamma parameters. Must be positive.

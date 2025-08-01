@@ -12,6 +12,9 @@ class LRTuple(NamedTuple):
     statistic: float
     threshold: float
 
+    def __str__(self):
+        return f'{self.message} (statistic: {self.statistic:.2f}, threshold: {self.threshold:.2f})'
+
 
 def likelihood_ratio_test(
     model1: tuple[float, int],

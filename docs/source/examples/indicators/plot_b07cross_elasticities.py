@@ -10,57 +10,47 @@ Details about this example are available in Section 3 of `Bierlaire (2018)
 Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:00:58 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 20:58:34
 """
 
 import sys
 
 from IPython.core.display_functions import display
-
-import biogeme.biogeme as bio
-from biogeme import models
-from biogeme.exceptions import BiogemeError
-import biogeme.results as res
+from biogeme.biogeme import BIOGEME
+from biogeme.data.optima import normalized_weight, read_data
 from biogeme.expressions import Derive
-from biogeme.data.optima import read_data, normalized_weight
+from biogeme.models import nested
+from biogeme.results_processing import EstimationResults
 
-from scenarios import (
-    scenario,
-    TimePT,
-    TimeCar,
-    MarginalCostPT,
-    CostCarCHF,
-)
-
+from scenarios import CostCarCHF, MarginalCostPT, TimeCar, TimePT, scenario
 
 # %%
 # Obtain the specification for the default scenario
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, _, _ = scenario()
+v, nests, _, _ = scenario()
 
 # %%
 # Obtain the expression for the choice probability of each alternative.
-prob_PT = models.nested(V, None, nests, 0)
-prob_CAR = models.nested(V, None, nests, 1)
-prob_SM = models.nested(V, None, nests, 2)
+prob_pt = nested(v, None, nests, 0)
+prob_car = nested(v, None, nests, 1)
+prob_sm = nested(v, None, nests, 2)
 
 # %%
 # Calculation of the cross elasticities.
 # We use the 'Derive' operator to calculate the derivatives.
-cross_elas_pt_time = Derive(prob_PT, 'TimeCar') * TimeCar / prob_PT
-cross_elas_pt_cost = Derive(prob_PT, 'CostCarCHF') * CostCarCHF / prob_PT
-cross_elas_car_time = Derive(prob_CAR, 'TimePT') * TimePT / prob_CAR
-cross_elas_car_cost = Derive(prob_CAR, 'MarginalCostPT') * MarginalCostPT / prob_CAR
+cross_elas_pt_time = Derive(prob_pt, 'TimeCar') * TimeCar / prob_pt
+cross_elas_pt_cost = Derive(prob_pt, 'CostCarCHF') * CostCarCHF / prob_pt
+cross_elas_car_time = Derive(prob_car, 'TimePT') * TimePT / prob_car
+cross_elas_car_cost = Derive(prob_car, 'MarginalCostPT') * MarginalCostPT / prob_car
 
 # %%
 # Formulas to simulate.
 simulate = {
     'weight': normalized_weight,
-    'Prob. car': prob_CAR,
-    'Prob. public transportation': prob_PT,
-    'Prob. slow modes': prob_SM,
+    'Prob. car': prob_car,
+    'Prob. public transportation': prob_pt,
+    'Prob. slow modes': prob_sm,
     'cross_elas_pt_time': cross_elas_pt_time,
     'cross_elas_pt_cost': cross_elas_pt_cost,
     'cross_elas_car_time': cross_elas_car_time,
@@ -73,16 +63,18 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 
 # %%
 # Read the estimation results from the file
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except excep.BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
-        'the file b02estimation.pickle.'
+        'the file b02estimation.yaml.'
     )
 
 # %%

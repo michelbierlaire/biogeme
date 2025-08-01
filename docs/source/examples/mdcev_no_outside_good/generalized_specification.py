@@ -1,18 +1,14 @@
 """File generalized_specification.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 18:11:21 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 16:36:06
 
 Specification of the "generalized translated utility" MDCEV model.
 """
 
-import biogeme.biogeme_logging as blog
 from biogeme.expressions import Beta
 from biogeme.mdcev import Generalized
-from specification import (
-    weight,
-    baseline_utilities,
-)
+from specification import baseline_utilities, weight
 
 # %
 # Gamma parameters. Must be positive.

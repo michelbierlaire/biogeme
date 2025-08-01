@@ -1,24 +1,26 @@
-"""Generation of models estimated with samples of alternatives 
+"""Generation of models estimated with samples of alternatives
 
 :author: Michel Bierlaire
 :date: Fri Sep 22 12:14:59 2023
 """
 
-import logging
 import copy
-from biogeme.models import loglogit
+import logging
+
 from biogeme.expressions import (
-    Variable,
-    Expression,
     BelongsTo,
-    ConditionalTermTuple,
     ConditionalSum,
+    ConditionalTermTuple,
+    Expression,
+    Variable,
     exp,
     log,
     logzero,
 )
+from biogeme.models import loglogit
 from biogeme.nests import NestsForNestedLogit
-from .sampling_context import SamplingContext, LOG_PROBA_COL, MEV_WEIGHT, CNL_PREFIX
+from .sampling_context import CNL_PREFIX, LOG_PROBA_COL, MEV_WEIGHT, SamplingContext
+from ..expressions.add_prefix_suffix import add_prefix_suffix_to_all_variables
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +41,7 @@ class GenerateModel:
         self.context = context
         self.utility_function = context.utility_function
         self.total_sample_size = context.total_sample_size
+        self.total_mev_sample_size = context.total_mev_sample_size
         self.attributes = context.attributes
         self.mev_prefix = context.mev_prefix
 
@@ -46,18 +49,24 @@ class GenerateModel:
             alt_id: self.generate_utility(prefix="", suffix=f"_{alt_id}")
             for alt_id in range(self.total_sample_size)
         }
-        if self.context.second_partition is None:
+        if self.context.mev_partition is None:
             self.mev_utilities = {
                 alt_id: self.utilities[alt_id]
                 for alt_id in range(1, self.total_sample_size)
             }
+            logger.debug(
+                f'No specific MEV partition. {self.total_sample_size} are sampled for MEV terms.'
+            )
         else:
             self.mev_utilities = {
                 alt_id: self.generate_utility(
                     prefix=self.mev_prefix, suffix=f"_{alt_id}"
                 )
-                for alt_id in range(self.context.second_sample_size)
+                for alt_id in range(self.context.total_mev_sample_size)
             }
+            logger.debug(
+                f'Specific MEV partition provided. {self.total_mev_sample_size} are sampled for MEV terms.'
+            )
 
     def generate_utility(self, prefix: str, suffix: str) -> Expression:
         """Generate the utility function for one alternative
@@ -68,7 +77,9 @@ class GenerateModel:
 
         """
         copy_utility = copy.deepcopy(self.utility_function)
-        copy_utility.rename_elementary(self.attributes, suffix=suffix, prefix=prefix)
+        add_prefix_suffix_to_all_variables(
+            expr=copy_utility, prefix=prefix, suffix=suffix
+        )
         return copy_utility
 
     def get_logit(self) -> Expression:
@@ -121,7 +132,6 @@ class GenerateModel:
                 the_term = ConditionalTermTuple(
                     condition=belong_to_nest, term=weight * exp(mu_param * utility)
                 )
-
                 list_of_terms.append(the_term)
             dict_of_mev_sums[tuple(list_of_alternatives)] = ConditionalSum(
                 list_of_terms
@@ -167,7 +177,8 @@ class GenerateModel:
             # we ignore the chosen alternative.
             list_of_terms = []
             for i, utility in self.mev_utilities.items():
-                alpha = Variable(f"{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}")
+                alpha_name = f'{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}'
+                alpha = Variable(alpha_name)
                 weight = Variable(f"{self.mev_prefix}{MEV_WEIGHT}_{i}")
                 the_term = ConditionalTermTuple(
                     condition=alpha != 0.0,
@@ -182,12 +193,11 @@ class GenerateModel:
         for i, the_utility in self.utilities.items():
             list_of_terms = []
             for nest in nests:
-                alpha = Variable(f"{self.mev_prefix}{CNL_PREFIX}{nest.name}_{i}")
+                # Note that we need an alpha for each alternative in the main sample.
+                alpha = Variable(f"{CNL_PREFIX}{nest.name}_{i}")
                 mu_param = nest.nest_param
                 mev_sum = dict_of_mev_sums[nest.name] ** ((1.0 / mu_param) - 1.0)
-                mev_term = (
-                    alpha**mu_param * exp((mu_param - 1) * the_utility) * mev_sum
-                )
+                mev_term = alpha**mu_param * exp((mu_param - 1) * the_utility) * mev_sum
                 the_term = ConditionalTermTuple(condition=alpha != 0.0, term=mev_term)
                 list_of_terms.append(the_term)
             dict_of_mev_terms[i] = logzero(ConditionalSum(list_of_terms))

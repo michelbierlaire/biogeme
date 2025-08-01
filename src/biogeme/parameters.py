@@ -12,15 +12,17 @@ import logging
 import os
 from datetime import datetime
 from typing import NamedTuple
+
 import tomlkit as tk
-import biogeme.exceptions as excep
-from biogeme.tools.files import is_valid_filename
-from biogeme.version import get_version
+
 from biogeme.default_parameters import (
-    all_parameters_tuple,
     ParameterTuple,
     ParameterValue,
+    all_parameters_tuple,
 )
+from biogeme.exceptions import BiogemeError
+from biogeme.tools.files import is_valid_filename
+from biogeme.version import get_version
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +40,7 @@ class NameSectionTuple(NamedTuple):
 def format_comment(the_param: ParameterTuple) -> str:
     """Format the content of the file, in particular the description of the parameter
 
-    :param the_param: parmeter to format
+    :param the_param: parameter to format
     :type the_param: biogeme.default_parameters.ParameterTuple
 
     :return: formatted text
@@ -83,15 +85,28 @@ def parse_boolean(value: str) -> bool:
         return False
 
     error_msg = f'{value} is not a valid boolean. Use "True" of "False"'
-    raise excep.BiogemeError(error_msg)
+    raise BiogemeError(error_msg)
 
 
 class Parameters:
-    """Parameters management"""
+    """
+    Class to manage configuration parameters used throughout Biogeme.
+
+    Parameters are organized by section and identified by name. This class
+    allows loading, accessing, modifying, and validating parameters, typically
+    stored in a TOML file. Default values are defined centrally and added during
+    initialization.
+
+    Attributes are stored internally in a dictionary keyed by `(name, section)` tuples.
+    """
 
     def __init__(self) -> None:
+        """
+        Initializes the Parameters instance by loading default parameter values.
+        """
         # Store values in a dict
         self.document = None  # TOML document
+        self.file_name = None
         self.file_name = None
         self.all_parameters_dict: dict[NameSectionTuple, ParameterTuple] = {}
         # Add the default parameters
@@ -99,6 +114,12 @@ class Parameters:
             self.add_parameter(param)
 
     def __str__(self) -> str:
+        """
+        Returns a formatted string representation of all parameters grouped by section.
+
+        :return: Human-readable string of parameters.
+        :rtype: str
+        """
         output = ''
         for section in self.sections:
             output += f'[{section}]\n'
@@ -112,15 +133,34 @@ class Parameters:
 
     @property
     def sections(self) -> list[str]:
+        """
+        List of all defined parameter sections.
+
+        :return: Sorted list of section names.
+        """
         return sorted(
             {name_section.section for name_section in self.all_parameters_dict.keys()}
         )
 
     @property
     def parameter_names(self) -> list[str]:
+        """
+        List of all unique parameter names across sections.
+
+        :return: Sorted list of parameter names.
+        """
         return sorted(
             {name_section.name for name_section in self.all_parameters_dict.keys()}
         )
+
+    def parameter_exists(self, name: str) -> bool:
+        """
+        Checks if a parameter with the given name exists in any section.
+
+        :param name: Name of the parameter to check.
+        :return: True if the parameter exists, False otherwise.
+        """
+        return name in self.parameter_names
 
     def add_parameter(self, parameter_tuple: ParameterTuple):
         """Add one parameter
@@ -133,7 +173,7 @@ class Parameters:
         )
         ok, messages = self.check_parameter_value(parameter_tuple)
         if not ok:
-            raise excep.BiogemeError(messages)
+            raise BiogemeError(messages)
 
         already_there = self.all_parameters_dict.get(key)
         self.all_parameters_dict[key] = parameter_tuple
@@ -161,13 +201,35 @@ class Parameters:
                 logger.debug(f'Parameter file: {os.path.abspath(self.file_name)}')
                 content = f.read()
                 self.document = tk.parse(content)
-                self.import_document()
+                parameters_read_from_file = self.import_document()
                 logger.info(f'Biogeme parameters read from {self.file_name}.')
-
+                all_parameters = set(
+                    key.name for key in self.all_parameters_dict.keys()
+                )
+                not_defined_in_file = all_parameters - parameters_read_from_file
+                irrelevant_in_file = parameters_read_from_file - all_parameters
+                if not_defined_in_file:
+                    warning_msg = f'The following parameters are not defined in file {self.file_name}: {not_defined_in_file}.'
+                    logger.warning(warning_msg)
+                if irrelevant_in_file:
+                    warning_msg = (
+                        f'The following parameters defined in file {self.file_name} are ignored by '
+                        f'Biogeme {get_version()}: {irrelevant_in_file}.'
+                    )
+                    logger.warning(warning_msg)
         except FileNotFoundError:
             info_msg = f'Default values of the Biogeme parameters are used.'
             logger.info(info_msg)
             self.dump_file(self.file_name)
+
+        biogeme_version_in_file = self.get_value(name='version')
+        current_biogeme_version = get_version()
+        if biogeme_version_in_file != current_biogeme_version:
+            warning_msg = (
+                f'File {self.file_name} has been created by Biogeme {biogeme_version_in_file}. The current '
+                f'version of Biogeme is {get_version()}'
+            )
+            logger.warning(warning_msg)
 
     def parameters_in_section(self, section_name: str) -> list[ParameterTuple]:
         """Returns the parameters in a section
@@ -196,10 +258,13 @@ class Parameters:
             print(tk.dumps(self.document), file=f)
         logger.warning(f'File {file_name} has been created')
 
-    def import_document(self) -> None:
+    def import_document(self) -> set[str]:
         """Record the values of the parameters in the TOML document"""
+        parameters_read_from_file = set()
+
         for section_name, entries in self.document.items():
             for entry_name, entry_value in entries.items():
+                parameters_read_from_file.add(entry_name)
                 key = NameSectionTuple(name=entry_name, section=section_name)
                 default = self.all_parameters_dict.get(key)
                 if default is None:
@@ -214,7 +279,7 @@ class Parameters:
                 elif default.type is bool:
                     try:
                         value = parse_boolean(entry_value)
-                    except excep.BiogemeError as e:
+                    except BiogemeError as e:
                         error_msg = (
                             f'Error with entry {entry_name} in Section '
                             f'{section_name}: {e}'
@@ -232,6 +297,7 @@ class Parameters:
                     check=default.check,
                 )
                 self.add_parameter(the_parameter)
+        return parameters_read_from_file
 
     def generate_document(self) -> tk.TOMLDocument:
         """Generate the  TOML document"""
@@ -279,10 +345,10 @@ class Parameters:
                     f'Ambiguity: parameter {name} belongs to multiple '
                     f'sections: {sections}.'
                 )
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
             if not sections:
                 error_msg = f'Parameter {name} does not belong to any section.'
-                raise excep.BiogemeError(error_msg)
+                raise BiogemeError(error_msg)
             section = sections.pop()
 
         name_section = NameSectionTuple(name=name, section=section)
@@ -299,7 +365,7 @@ class Parameters:
                 error_msg = (
                     f'Unknown parameter {name} in section {section}. {known_msg}'
                 )
-            raise excep.BiogemeError(error_msg)
+            raise BiogemeError(error_msg)
 
         return the_tuple
 
@@ -323,14 +389,14 @@ class Parameters:
             if not is_ok:
                 ok = False
                 messages.append(
-                    f'Error for parameter {the_tuple.name} in '
+                    f'Error for parameter {the_tuple.name}={the_tuple.value} in '
                     f'section {the_tuple.section}. {diag}'
                 )
         return ok, messages
 
     def set_value(self, name: str, value: ParameterValue, section: str | None = None):
         """Set a value of a parameter. If the parameter appears in
-        only one section, the name of the section can be ommitted.
+        only one section, the name of the section can be omitted.
 
         :param name: name of the parameter
         :type name: str
@@ -341,6 +407,8 @@ class Parameters:
         :param section: section containing the parameter
         :type section: str
         """
+        if not self.parameter_exists(name):
+            raise BiogemeError(f'Parameter [{name}] does not exist.')
         the_tuple = self.get_param_tuple(name, section)
         the_parameter = ParameterTuple(
             name=the_tuple.name,
@@ -352,6 +420,22 @@ class Parameters:
         )
 
         self.add_parameter(the_parameter)
+
+    def set_several_parameters(
+        self, dict_of_parameters: dict[str, ParameterValue]
+    ) -> None:
+        """
+        Sets multiple parameter values from a dictionary.
+
+        This method iterates through the provided dictionary of parameters,
+        updating their values. If a parameter name is invalid or cannot be updated,
+        a warning is logged instead of raising an exception.
+
+        :param dict_of_parameters: A dictionary where keys are parameter names and
+                                   values are the values to set.
+        """
+        for name, value in dict_of_parameters.items():
+            self.set_value(name, value)
 
     def get_value(self, name: str, section: str | None = None) -> ParameterValue:
         """Get the value of a parameter. If the parameter appears in

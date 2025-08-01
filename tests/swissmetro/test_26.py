@@ -2,34 +2,27 @@ import unittest
 
 import numpy as np
 
-import biogeme.biogeme as bio
 from biogeme import models
+from biogeme.biogeme import BIOGEME
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
-from biogeme.expressions import (
-    Beta,
-    bioDraws,
-    PanelLikelihoodTrajectory,
-    MonteCarlo,
-    log,
-)
-from biogeme.native_draws import RandomNumberGeneratorTuple
-from biogeme.parameters import Parameters
+from biogeme.draws import RandomNumberGeneratorTuple
+from biogeme.expressions import Beta, Draws, MonteCarlo, PanelLikelihoodTrajectory, log
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -63,13 +56,12 @@ my_random_number_generators = {
         'Triangular distribution T(-1,0,1)',
     )
 }
-database.set_random_number_generators(my_random_number_generators)
 
 # Define a random parameter, with a triangular distribution, designed
 # to be used for Monte-Carlo simulation
-EC_CAR = SIGMA_CAR * bioDraws('EC_CAR', 'TRIANGULAR')
-EC_SM = SIGMA_SM * bioDraws('EC_SM', 'TRIANGULAR')
-EC_TRAIN = SIGMA_TRAIN * bioDraws('EC_TRAIN', 'TRIANGULAR')
+EC_CAR = SIGMA_CAR * Draws('EC_CAR', 'TRIANGULAR')
+EC_SM = SIGMA_SM * Draws('EC_SM', 'TRIANGULAR')
+EC_TRAIN = SIGMA_TRAIN * Draws('EC_TRAIN', 'TRIANGULAR')
 
 
 SM_COST = SM_CO * (GA == 0)
@@ -86,19 +78,27 @@ V = {1: V1, 2: V2, 3: V3}
 
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
-obsprob = models.logit(V, av, CHOICE)
-condprobIndiv = PanelLikelihoodTrajectory(obsprob)
-logprob = log(MonteCarlo(condprobIndiv))
+obs_prob = models.logit(V, av, CHOICE)
+cond_prob_indiv = PanelLikelihoodTrajectory(obs_prob)
+log_prob = log(MonteCarlo(cond_prob_indiv))
 
 
 class test_26(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1111)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = BIOGEME(
+            database,
+            log_prob,
+            number_of_draws=100,
+            seed=1111,
+            random_number_generators=my_random_number_generators,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -3902.730531755739, delta=10)
+        self.assertAlmostEqual(
+            results.final_log_likelihood, -3915.6714670664164, delta=10
+        )
 
 
 if __name__ == '__main__':

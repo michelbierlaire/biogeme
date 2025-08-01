@@ -5,12 +5,8 @@ from biogeme.function_output import (
     convert_to_dict,
     FunctionOutput,
     NamedFunctionOutput,
-    BiogemeFunctionOutput,
-    NamedBiogemeFunctionOutput,
+    DisaggregateFunctionOutput,
 )
-
-
-# Assuming all classes and functions are imported here
 
 
 class TestConvertToDict(unittest.TestCase):
@@ -22,7 +18,7 @@ class TestConvertToDict(unittest.TestCase):
 
     def test_index_out_of_bounds(self):
         sequence = ['apple', 'banana', 'cherry']
-        the_map = {'first': 0, 'third': 10}  # Invalid index
+        the_map = {'first': 0, 'third': 10}
         with self.assertRaises(IndexError):
             convert_to_dict(sequence, the_map)
 
@@ -42,7 +38,7 @@ class TestNamedFunctionOutput(unittest.TestCase):
     def test_initialization(self):
         f_output = FunctionOutput(3.5, np.array([0.5, 1.5]), np.array([[2, 0], [0, 3]]))
         mapping = {'zero': 0, 'one': 1}
-        named_output = NamedFunctionOutput(f_output, mapping)
+        named_output = NamedFunctionOutput(function_output=f_output, mapping=mapping)
         expected_gradient = {'zero': 0.5, 'one': 1.5}
         expected_hessian = {'zero': {'zero': 2, 'one': 0}, 'one': {'zero': 0, 'one': 3}}
         self.assertEqual(named_output.function, 3.5)
@@ -52,32 +48,51 @@ class TestNamedFunctionOutput(unittest.TestCase):
     def test_with_none_gradients_and_hessians(self):
         f_output = FunctionOutput(1.0)
         mapping = {'zero': 0, 'one': 1}
-        named_output = NamedFunctionOutput(f_output, mapping)
+        named_output = NamedFunctionOutput(function_output=f_output, mapping=mapping)
         self.assertIsNone(named_output.gradient)
         self.assertIsNone(named_output.hessian)
 
 
-class TestBiogemeFunctionOutput(unittest.TestCase):
+class TestNamedFunctionOutputFromDisaggregate(unittest.TestCase):
     def test_initialization(self):
-        b_output = BiogemeFunctionOutput(
-            4.0, np.array([1, 1]), np.array([[1, 0], [0, 1]]), np.array([[1]])
-        )
-        self.assertEqual(b_output.function, 4.0)
-        self.assertTrue((b_output.bhhh == np.array([[1]])).all())
-
-
-class TestNamedBiogemeFunctionOutput(unittest.TestCase):
-    def test_initialization(self):
-        b_output = BiogemeFunctionOutput(
-            5.0,
-            np.array([2, 3]),
-            np.array([[4, 0], [0, 4]]),
-            np.array([[2, 2], [2, 2]]),
+        output = DisaggregateFunctionOutput(
+            functions=np.array([3.0]),
+            gradients=np.array([[1.0, 1.5]]),
+            hessians=np.array([[[1.0, 0.0], [0.0, 1.0]]]),
+            bhhhs=np.array([[[2.0, 2.0], [2.0, 2.0]]]),
         )
         mapping = {'zero': 0, 'one': 1}
-        named_b_output = NamedBiogemeFunctionOutput(b_output, mapping)
-        expected_bhhh = {'zero': {'zero': 2, 'one': 2}, 'one': {'zero': 2, 'one': 2}}
-        self.assertEqual(named_b_output.bhhh, expected_bhhh)
+        unique = output.unique_entry()
+        named_output = NamedFunctionOutput(function_output=unique, mapping=mapping)
+        expected_bhhh = {
+            'zero': {'zero': 2.0, 'one': 2.0},
+            'one': {'zero': 2.0, 'one': 2.0},
+        }
+        self.assertEqual(named_output.bhhh, expected_bhhh)
+
+
+class TestDisaggregateFunctionOutput(unittest.TestCase):
+    def test_unique_entry_single(self):
+        output = DisaggregateFunctionOutput(
+            functions=np.array([1.0]),
+            gradients=np.array([[1.0, 2.0]]),
+            hessians=np.array([[[1.0, 0.0], [0.0, 1.0]]]),
+            bhhhs=np.array([[[2.0, 2.0], [2.0, 2.0]]]),
+        )
+        unique = output.unique_entry()
+        self.assertIsInstance(unique, FunctionOutput)
+        self.assertEqual(unique.function, 1.0)
+        self.assertTrue((unique.gradient == np.array([1.0, 2.0])).all())
+        self.assertTrue((unique.hessian == np.array([[1.0, 0.0], [0.0, 1.0]])).all())
+        self.assertTrue((unique.bhhh == np.array([[2.0, 2.0], [2.0, 2.0]])).all())
+
+    def test_unique_entry_multiple(self):
+        output = DisaggregateFunctionOutput(functions=np.array([1.0, 2.0]))
+        self.assertIsNone(output.unique_entry())
+
+    def test_length(self):
+        output = DisaggregateFunctionOutput(functions=np.array([1.0, 2.0, 3.0]))
+        self.assertEqual(len(output), 3)
 
 
 if __name__ == '__main__':

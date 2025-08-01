@@ -11,54 +11,66 @@ Estimation of a logit model
 
  Stated preferences data.
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 17:02:18 2023
-
+Michel Bierlaire, EPFL
+Wed Jun 18 2025, 09:56:59
 """
 
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
+from IPython.core.display_functions import display
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.models import loglogit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
+# %%
+# See the data processing script: :ref:`swissmetro_data`.
+from swissmetro_data import (
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
+    CHOICE,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
+)
+
+# %%
+# The logger sets the verbosity of Biogeme. By default, Biogem eis quite silent and generates only warnings.
+# To have more information about what it happening behind the scene, the level should be set to `blog.INFO`.
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b01logit_bis.py')
 
 
 # %%
-# See the data processing script: :ref:`swissmetro_data`.
-from swissmetro_data import (
-    database,
-    CHOICE,
-    SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
-)
+# Parameters to be estimated: alternative specific constants
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
 
 # %%
-# Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+# The constant associated with Swissmetro is normalized to zero. It does not need to be defined at all.
+# Here, we illustrate the fact that setting the last argument of the `Beta` function to 1 fixes the parameter
+# to its default value (here, 0).
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+
+# %%
+# Coefficients of the attributes
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_sm = asc_sm + b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_sm, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -67,12 +79,12 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model.
 # This is the contribution of each observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+log_probability = loglogit(v, av, CHOICE)
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b01logit'
+the_biogeme = BIOGEME(database, log_probability)
+the_biogeme.model_name = 'b01logit'
 
 # %%
 # Calculate the null log likelihood for reporting.
@@ -87,5 +99,7 @@ print(results.short_summary())
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
-print(pandas_results)
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
+display(pandas_results)

@@ -8,14 +8,14 @@ Test the models module
 import unittest
 
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Beta, bioMin, bioMax, Variable, Expression
+from biogeme.expressions import Beta, BinaryMax, BinaryMin, Expression, Variable
 from biogeme.models import (
     ordered_logit,
     ordered_probit,
-    piecewise_variables,
-    piecewise_formula,
     piecewise_as_variable,
+    piecewise_formula,
     piecewise_function,
+    piecewise_variables,
 )
 
 
@@ -70,9 +70,9 @@ class TestPiecewiseVariables(unittest.TestCase):
         expected_number_of_variables = len(thresholds) - 1
         result = piecewise_variables(variable, thresholds)
         expected_result = [
-            bioMin(Variable('x'), 10.0),
-            bioMax(0.0, bioMin((Variable('x') - 10.0), 10.0)),
-            bioMax(0.0, (Variable('x') - 20.0)),
+            BinaryMin(Variable('x'), 10.0),
+            BinaryMax(0.0, BinaryMin((Variable('x') - 10.0), 10.0)),
+            BinaryMax(0.0, (Variable('x') - 20.0)),
         ]
         self.assertEqual(len(result), expected_number_of_variables)
         for expected, obtained in zip(expected_result, result):
@@ -115,7 +115,7 @@ class TestPiecewiseFormula(unittest.TestCase):
         variable = "x"
         thresholds = [None, 10, 20, None]
         result = piecewise_formula(variable, thresholds)
-        expected_result = 'bioMultSum'
+        expected_result = 'MultipleSum'
         self.assertTrue(str(result).startswith(expected_result))
 
     def test_valid_input_with_betas(self):
@@ -129,7 +129,7 @@ class TestPiecewiseFormula(unittest.TestCase):
         result = piecewise_formula(
             variable=variable, thresholds=thresholds, betas=betas
         )
-        expected_result = 'bioMultSum'
+        expected_result = 'MultipleSum'
         self.assertTrue(str(result).startswith(expected_result))
 
     def test_variable_not_variable_or_str(self):
@@ -182,7 +182,7 @@ class TestPiecewiseAsVariable(unittest.TestCase):
         result = piecewise_as_variable(variable.name, thresholds)
         # Assert the result is an Expression
         self.assertIsInstance(result, Expression)
-        expected_result = '(bioMin(x, `10.0`)'
+        expected_result = '(BinaryMin(x, `10.0`)'
         self.assertTrue(str(result).startswith(expected_result))
 
     def test_valid_input_with_betas(self):
@@ -193,7 +193,7 @@ class TestPiecewiseAsVariable(unittest.TestCase):
         betas = [beta_1, beta_2]
         result = piecewise_as_variable(variable, thresholds, betas)
         self.assertIsInstance(result, Expression)
-        expected_result = '(bioMin(x, `10.0`)'
+        expected_result = '(BinaryMin(x, `10.0`)'
         self.assertTrue(str(result).startswith(expected_result))
 
     def test_invalid_variable_type(self):

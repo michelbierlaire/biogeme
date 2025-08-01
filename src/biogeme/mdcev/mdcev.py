@@ -19,12 +19,17 @@ import pandas as pd
 from scipy.optimize import minimize
 
 from biogeme.biogeme import BIOGEME
+from biogeme.calculator import (
+    evaluate_expression,
+    get_value_and_derivatives,
+)
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Expression, Elem, bioMultSum, log, exp, Beta, Numeric
+from biogeme.expressions import Beta, Elem, Expression, Numeric, bioMultSum, exp, log
 from biogeme.function_output import FunctionOutput
-from biogeme.results import bioResults
+from biogeme.results_processing import EstimationResults
 from biogeme.tools.checks import validate_dict_types
+from .database_utils import mdcev_row_split
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +63,7 @@ class Mdcev(ABC):
         self.alpha_parameters: dict[int, Expression] | None = alpha_parameters
         self.scale_parameter: Expression | None = scale_parameter
         self.weights: Expression | None = weights
-        self._estimation_results: bioResults | None = None
+        self._estimation_results: EstimationResults | None = None
         self.database: Database | None = None
         # Check the numbering
         self.alternatives: set[int] = set(self.baseline_utilities)
@@ -112,12 +117,12 @@ class Mdcev(ABC):
         return self.key_to_index[self.outside_good_key]
 
     @property
-    def estimation_results(self) -> bioResults | None:
+    def estimation_results(self) -> EstimationResults | None:
         """Property for the estimation results"""
         return self._estimation_results
 
     @estimation_results.setter
-    def estimation_results(self, the_results: bioResults):
+    def estimation_results(self, the_results: EstimationResults):
         self._estimation_results = the_results
         self._update_parameters_in_expressions()
 
@@ -153,18 +158,24 @@ class Mdcev(ABC):
     ) -> float:
         """As this function may be called many times with the same input in forecasting mode, we use the
         lru_cache decorator."""
-        assert one_observation.get_sample_size() == 1
+        assert one_observation.num_rows() == 1
         if self.estimation_results:
-            return self.baseline_utilities[alternative_id].get_value_c(
+            return evaluate_expression(
+                expression=self.baseline_utilities[alternative_id],
+                numerically_safe=False,
                 database=one_observation,
                 betas=self.estimation_results.get_beta_values(),
-                prepare_ids=True,
-            )[0]
+                aggregation=True,
+                use_jit=True,
+            )
 
-        return self.baseline_utilities[alternative_id].get_value_c(
+        return evaluate_expression(
+            expression=self.baseline_utilities[alternative_id],
+            numerically_safe=False,
             database=one_observation,
-            prepare_ids=True,
-        )[0]
+            aggregation=True,
+            use_jit=True,
+        )
 
     @abstractmethod
     def transformed_utility(
@@ -306,7 +317,7 @@ class Mdcev(ABC):
         number_of_chosen_alternatives: Expression,
         consumed_quantities: dict[int, Expression],
         **kwargs,
-    ) -> bioResults:
+    ) -> EstimationResults:
         """Generate the Biogeme formula for the log probability of the MDCEV model
 
         :param database: data needed for the estimation of the parameters, in Biogeme format.
@@ -420,8 +431,10 @@ class Mdcev(ABC):
             error_msg = f'epsilon must be a vector of size {self.number_of_alternatives}, not {epsilon.shape}'
             raise BiogemeError(error_msg)
 
-        if len(one_row_database.data) != 1:
-            error_msg = f'Expecting exactly one row, not {len(one_row_database.data)}'
+        if len(one_row_database.dataframe) != 1:
+            error_msg = (
+                f'Expecting exactly one row, not {len(one_row_database.dataframe)}'
+            )
             raise BiogemeError(error_msg)
 
         self.database = one_row_database
@@ -757,8 +770,13 @@ class Mdcev(ABC):
             the_consumption=consumption,
             unscaled_epsilon=unscaled_epsilon,
         )
-        result: FunctionOutput = utility.get_value_and_derivatives(
-            database=one_row, prepare_ids=True, gradient=True, named_results=True
+        result: FunctionOutput = get_value_and_derivatives(
+            expression=utility,
+            database=one_row,
+            gradient=True,
+            named_results=True,
+            numerically_safe=False,
+            use_jit=True,
         )
 
         # Validate the utility calculation
@@ -871,8 +889,8 @@ class Mdcev(ABC):
         """
 
         rows_of_database = [
-            Database(name=f'row_{i}', pandas_database=database.data.iloc[[i]])
-            for i in range(len(database.data))
+            Database(name=f'row_{i}', dataframe=database.dataframe.iloc[[i]])
+            for i in range(len(database.dataframe))
         ]
         if len(rows_of_database) == 0:
             error_msg = 'Empty database'
@@ -1115,7 +1133,7 @@ class Mdcev(ABC):
 
         """
 
-        rows_of_database = database.mdcev_row_split()
+        rows_of_database = mdcev_row_split(database)
         if len(rows_of_database) == 0:
             error_msg = 'Empty database'
             raise BiogemeError(error_msg)

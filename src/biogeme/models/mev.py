@@ -1,18 +1,13 @@
-""" Implements the Multivariate Extreme Value models.
+"""Implements the Multivariate Extreme Value models.
 
 :author: Michel Bierlaire
 :date: Wed Oct 25 11:35:34 2023
 """
 
 import logging
-from biogeme.expressions import (
-    Expression,
-    exp,
-    ExpressionOrNumeric,
-    _bioLogLogitFullChoiceSet,
-    _bioLogLogit,
-)
+
 from biogeme.deprecated import deprecated
+from biogeme.expressions import Expression, ExpressionOrNumeric, LogLogit, exp
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +48,8 @@ def logmev(
 
     """
     h = {i: v + log_gi[i] for i, v in util.items()}
-    if av is None:
-        log_p = _bioLogLogitFullChoiceSet(h, choice=choice)
-    else:
-        log_p = _bioLogLogit(h, av, choice)
+    log_p = LogLogit(h, av, choice=choice)
+    log_p._is_complex = True
     return log_p
 
 
@@ -65,7 +58,7 @@ def mev(
     log_gi: dict[int, Expression],
     av: dict[int, ExpressionOrNumeric] | None,
     choice: ExpressionOrNumeric,
-):
+) -> Expression:
     """Choice probability for a MEV model.
 
     :param util: dict of objects representing the utility functions of
@@ -113,7 +106,7 @@ def logmev_endogenous_sampling(
     av: dict[int, ExpressionOrNumeric] | None,
     correction: dict[int, ExpressionOrNumeric],
     choice: ExpressionOrNumeric,
-):
+) -> Expression:
     """Log of choice probability for a MEV model, including the
     correction for endogenous sampling as proposed by `Bierlaire, Bolduc
     and McFadden (2008)`_.
@@ -145,7 +138,7 @@ def logmev_endogenous_sampling(
     :type av: dict(int:biogeme.expressions.expr.Expression)
 
 
-    :param correction: a dict of expressions for the correstion terms
+    :param correction: a dict of expressions for the correction terms
                        of each alternative.
     :type correction: dict(int:biogeme.expressions.expr.Expression)
 
@@ -165,7 +158,8 @@ def logmev_endogenous_sampling(
 
     """
     h = {i: v + log_gi[i] + correction[i] for i, v in util.items()}
-    log_p = _bioLogLogit(h, av, choice)
+    log_p = LogLogit(h, av, choice)
+    log_p._is_complex = True
     return log_p
 
 
@@ -218,7 +212,7 @@ def mev_endogenous_sampling(
     :type av: dict(int:biogeme.expressions.expr.Expression)
 
 
-    :param correction: a dict of expressions for the correstion terms
+    :param correction: a dict of expressions for the correction terms
                        of each alternative.
     :type correction: dict(int:biogeme.expressions.expr.Expression)
 
@@ -237,7 +231,11 @@ def mev_endogenous_sampling(
     :rtype: biogeme.expressions.expr.Expression
 
     """
-    return exp(logmev_endogenous_sampling(util, log_gi, av, correction, choice))
+    the_expression = exp(
+        logmev_endogenous_sampling(util, log_gi, av, correction, choice)
+    )
+    the_expression._is_complex = True
+    return the_expression
 
 
 @deprecated(new_func=mev_endogenous_sampling)

@@ -13,52 +13,51 @@ for a total of 3 specifications.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Fri Jul 14 09:47:21 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 15:46:15
 """
 
-import biogeme.biogeme as bio
-import biogeme.biogeme_logging as blog
-from biogeme import models
-from biogeme.expressions import Beta
-from biogeme.catalog import Catalog
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
-from biogeme.results import compile_estimation_results, pareto_optimal
 from IPython.core.display_functions import display
 
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.catalog import Catalog
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta
+from biogeme.models import loglogit, lognested
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
+from biogeme.results_processing import compile_estimation_results, pareto_optimal
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
 # Parameters to be estimated
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Definition of the utility functions
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives
@@ -67,7 +66,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the logit model. This is the contribution of each
 # observation to the log likelihood function.
-logprob_logit = models.loglogit(V, av, CHOICE)
+log_probability_logit = loglogit(v, av, CHOICE)
 
 # %%
 # Nested logit model: nest with existing alternatives.
@@ -76,8 +75,8 @@ existing = OneNestForNestedLogit(
     nest_param=mu_existing, list_of_alternatives=[1, 3], name='Existing'
 )
 
-nests_existing = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
-logprob_nested_existing = models.lognested(V, av, nests_existing, CHOICE)
+nests_existing = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(existing,))
+log_probability_nested_existing = lognested(v, av, nests_existing, CHOICE)
 
 # %%
 # Nested logit model: nest with public transportation alternatives.
@@ -86,17 +85,17 @@ public = OneNestForNestedLogit(
     nest_param=mu_public, list_of_alternatives=[1, 2], name='Public'
 )
 
-nests_public = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(public,))
-logprob_nested_public = models.lognested(V, av, nests_public, CHOICE)
+nests_public = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(public,))
+log_probability_nested_public = lognested(v, av, nests_public, CHOICE)
 
 # %%
 # Catalog.
 model_catalog = Catalog.from_dict(
     catalog_name='model_catalog',
     dict_of_expressions={
-        'logit': logprob_logit,
-        'nested existing': logprob_nested_existing,
-        'nested public': logprob_nested_public,
+        'logit': log_probability_logit,
+        'nested existing': log_probability_nested_existing,
+        'nested public': log_probability_nested_public,
     },
 )
 
@@ -106,10 +105,8 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, model_catalog)
-the_biogeme.modelName = 'b01model'
-the_biogeme.generate_html = False
-the_biogeme.generate_pickle = False
+the_biogeme = BIOGEME(database, model_catalog, generate_html=False, generate_yaml=False)
+the_biogeme.model_name = 'b01model'
 
 # %%
 # Estimate the parameters.
@@ -125,6 +122,7 @@ compiled_results, specs = compile_estimation_results(
     dict_of_results, use_short_names=True
 )
 # %%
+display('All estimated models')
 display(compiled_results)
 
 # %%
@@ -140,6 +138,7 @@ compiled_pareto_results, pareto_specs = compile_estimation_results(
 )
 
 # %%
+display('Non dominated models')
 display(compiled_pareto_results)
 
 # %%

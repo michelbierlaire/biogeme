@@ -8,9 +8,8 @@ Details about this example are available in Section 4 of `Bierlaire (2018)
 Calculating indicators with PandasBiogeme
 <http://transp-or.epfl.ch/documents/technicalReports/Bier18a.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 20:57:00 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 21:00:12
 
 """
 
@@ -19,6 +18,8 @@ import sys
 import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
+from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import EstimationResults
 
 try:
     import matplotlib.pyplot as plt
@@ -26,10 +27,6 @@ try:
     can_plot = True
 except ModuleNotFoundError:
     can_plot = False
-import biogeme.biogeme as bio
-from biogeme.exceptions import BiogemeError
-import biogeme.results as res
-
 from biogeme.expressions import Derive
 from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
@@ -37,22 +34,22 @@ from scenarios import scenario
 # %%
 # Obtain the specification for the default scenario
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, _, _, _ = scenario()
+v, _, _, _ = scenario()
 
-V_PT = V[0]
-V_CAR = V[1]
+v_pt = v[0]
+v_car = v[1]
 
 # %%
 # Calculation of the willingness to pay using derivatives.
-WTP_PT_TIME = Derive(V_PT, 'TimePT') / Derive(V_PT, 'MarginalCostPT')
-WTP_CAR_TIME = Derive(V_CAR, 'TimeCar') / Derive(V_CAR, 'CostCarCHF')
+wtp_pt_time = Derive(v_pt, 'TimePT') / Derive(v_pt, 'MarginalCostPT')
+wtp_car_time = Derive(v_car, 'TimeCar') / Derive(v_car, 'CostCarCHF')
 
 # %%
 # Formulas to simulate.
 simulate = {
     'weight': normalized_weight,
-    'WTP PT time': WTP_PT_TIME,
-    'WTP CAR time': WTP_CAR_TIME,
+    'WTP PT time': wtp_pt_time,
+    'WTP CAR time': wtp_car_time,
 }
 
 # %%
@@ -61,16 +58,18 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, simulate)
+the_biogeme = BIOGEME(database, simulate)
 
 # %%
 # Read the estimation results from the file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b02estimation.pickle')
-except BiogemeError:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b02estimation.yaml'
+    )
+except FileNotFoundError:
     sys.exit(
         'Run first the script b02estimation.py in order to generate '
-        'the file b02estimation.pickle.'
+        'the file b02estimation.yaml.'
     )
 
 # %%
@@ -85,7 +84,7 @@ wtpcar = (60 * simulated_values['WTP CAR time'] * simulated_values['weight']).me
 
 # %%
 # Calculate confidence intervals
-b = results.get_betas_for_sensitivity_analysis(the_biogeme.free_beta_names)
+b = results.get_betas_for_sensitivity_analysis()
 
 # %%
 # Returns data frame containing, for each simulated value, the left
@@ -139,20 +138,20 @@ def wtp_for_subgroup(the_filter: 'pd.Series[np.bool_]') -> tuple[float, float, f
 
 # %%
 # Full time workers.
-aFilter = database.data['OccupStat'] == 1
-w, l, r = wtp_for_subgroup(aFilter)
+a_filter = database.dataframe['OccupStat'] == 1
+w, l, r = wtp_for_subgroup(a_filter)
 print(f'WTP car for workers: {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 
 # %%
 # Females.
-aFilter = database.data['Gender'] == 2
-w, l, r = wtp_for_subgroup(aFilter)
+a_filter = database.dataframe['Gender'] == 2
+w, l, r = wtp_for_subgroup(a_filter)
 print(f'WTP car for females: {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 
 # %%
 # Males.
-aFilter = database.data['Gender'] == 1
-w, l, r = wtp_for_subgroup(aFilter)
+a_filter = database.dataframe['Gender'] == 1
+w, l, r = wtp_for_subgroup(a_filter)
 print(f'WTP car for males  : {w:.3g} CI:[{l:.3g}, {r:.3g}]')
 
 # %%

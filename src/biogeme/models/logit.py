@@ -8,8 +8,7 @@ import logging
 
 from biogeme.expressions import (
     Expression,
-    _bioLogLogit,
-    _bioLogLogitFullChoiceSet,
+    LogLogit,
     exp,
     ExpressionOrNumeric,
 )
@@ -43,10 +42,7 @@ def loglogit(
     :return: choice probability of alternative number i.
     """
 
-    if av is None:
-        return _bioLogLogitFullChoiceSet(util, choice=i)
-
-    return _bioLogLogit(util, av, i)
+    return LogLogit(util, av, i)
 
 
 def logit(
@@ -75,7 +71,4 @@ def logit(
     :return: choice probability of alternative number i.
 
     """
-    if av is None:
-        return exp(_bioLogLogitFullChoiceSet(util, choice=i))
-
-    return exp(_bioLogLogit(util, av, i))
+    return exp(LogLogit(util, av, i))

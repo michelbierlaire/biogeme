@@ -5,9 +5,10 @@ Model specification
 
 Script containing the model specification.
 
-:author: Michel Bierlaire
-:date: Wed Nov  1 17:37:33 2023
+Michel Bierlaire
+Fri Jul 25 2025, 13:39:50
 """
+
 from biogeme.expressions import Beta, Variable, log
 from biogeme.sampling_of_alternatives import CrossVariableTuple
 

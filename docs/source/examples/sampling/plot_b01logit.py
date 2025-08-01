@@ -5,26 +5,25 @@ Logit
 
 Estimation of a logit model using sampling of alternatives.
 
-:author: Michel Bierlaire
-:date: Wed Nov  1 17:39:47 2023
+Michel Bierlaire
+Fri Jul 25 2025, 17:36:23
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
+from alternatives import ID_COLUMN, alternatives, partitions
+from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import get_pandas_estimated_parameters
 from biogeme.sampling_of_alternatives import (
-    SamplingContext,
     ChoiceSetsGeneration,
     GenerateModel,
+    SamplingContext,
     generate_segment_size,
 )
-import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
 from compare import compare
 from specification_sampling import V, combined_variables
-from alternatives import (
-    alternatives,
-    ID_COLUMN,
-    partitions,
-)
 
 # %%
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -81,7 +80,7 @@ biogeme_database = the_data_generation.sample_and_merge(recycle=False)
 logprob = the_model_generation.get_logit()
 
 # %%
-the_biogeme = bio.BIOGEME(biogeme_database, logprob)
+the_biogeme = BIOGEME(biogeme_database, logprob)
 the_biogeme.modelName = MODEL_NAME
 
 # %%
@@ -96,8 +95,8 @@ results = the_biogeme.estimate(recycle=False)
 print(results.short_summary())
 
 # %%
-estimated_parameters = results.get_estimated_parameters()
-estimated_parameters
+estimated_parameters = get_pandas_estimated_parameters(estimation_results=results)
+display(estimated_parameters)
 
 # %%
 df, msg = compare(estimated_parameters)

@@ -1,0 +1,480 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{michel}
+\usepackage[dcucite,abbr]{harvard}
+\harvardparenthesis{none}\harvardyearparenthesis{round}
+\usepackage{hyperref}
+\usepackage{longtable}
+
+\title{Estimating choice models with latent variables with Biogeme}
+\author{Michel Bierlaire \and Moshe Ben-Akiva \and Joan Walker} 
+\date{\today}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+\pagestyle{empty}
+
+\maketitle
+\vspace{2cm}
+
+\begin{center}
+\small Report TRANSP-OR xxxxxx  \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+\begin{center}
+\textsc{Series on Biogeme}
+\end{center}
+\end{center}
+
+
+\clearpage
+\end{titlepage}
+
+
+The package Biogeme (\texttt{biogeme.epfl.ch}) is designed to estimate
+the parameters of various models using maximum likelihood
+estimation. It is particularly designed for discrete choice
+models.  In this document, we present how to estimate choice
+models involving latent variables.
+
+We assume that the reader is already familiar with discrete choice
+models, and has successfully installed Biogeme. This document has
+been written using Biogeme 3.3.
+
+
+
+\section{Models and notations}
+
+The literature on discrete choice models with latent variables is vast
+(\cite{walker2001extended}, \cite{ashok2002extending},
+\cite{greene2003latent}, \cite{ben2002integration}, to cite just a
+few). We start this document by a short introduction to the models and
+the notations. 
+
+A \emph{latent variable} is a variable that cannot be directly
+observed. It is typically modeled using a \textbf{structural
+  equation}, which expresses the latent variable as a function of
+observed (explanatory) variables and an error term. A general form of
+such a structural equation is:
+\begin{equation}
+\label{eq:structural}
+x_{nk}^* = x^*(x_n; \psi_k) + \omega_{nk},
+\end{equation}
+where $n$ indexes individuals, $x_{nk}^*$ is the $k$th latent variable of interest, $x_n$ is a vector of observed explanatory variables, $\psi_k$ is a vector of parameters to be estimated, and $\omega_{nk}$ is a stochastic error term, normally distributed $N(0, \Sigma_{\omega k})$, where $\Sigma_{\omega k}$ is the variance-covariance matrix.
+
+A common specification assumes a linear functional form  i.i.d.   error terms:
+\begin{equation}
+\label{eq:linearStructural}
+ x_{nk}^* = \psi_{0k} + \sum_s \psi_{sk} x_{ns} + \sigma_{\omega k} \omega_{nk},
+\end{equation}
+where $\omega_{nk} \sim N(0, 1)$, $\psi_{0k}$ is an intercept term, and $\sigma_{\omega k}$ is a scaling parameter for the error term. The vector $\sigma_\omega = (\sigma_{\omega 1}, \ldots, \sigma_{\omega K})^\top$ corresponds to the diagonal of the covariance matrix $\Sigma_{\omega n}$, with all off-diagonal elements set to zero, implying uncorrelated errors across alternatives.
+
+In discrete choice models, for example, the utility $U_{in}$ that
+individual $n$ associates with alternative $i$ is a typical example of
+a latent variable.
+
+Information about latent variables is obtained indirectly through
+\emph{measurements}, which are observable manifestations of the
+underlying latent constructs. For example, in discrete choice models,
+utility is not directly observed but is inferred from the choices
+individuals make. The relationship between a latent variable and its
+associated measurements is described by \textbf{measurement
+  equations}. The specific form of these equations depends on the
+nature of the observed measurements (e.g., continuous, or ordinal).
+
+
+\subsection{Measurement equations: the continuous case}
+
+Since latent variables cannot be directly observed, analysts rely on
+indirect measurements to infer their values. A common approach
+involves asking respondents to rate the perceived magnitude of the
+latent construct on an arbitrary scale. For example: \emph{``How would
+you rate the level of pain that you are experiencing, from 0 (no pain)
+to 10 (worst pain imaginable)?''}
+
+Each such rating is referred to as an \emph{indicator}, indexed by
+$\ell=1, \ldots, L_n$, and is modeled using a \textbf{measurement equation}. This
+equation relates the observed indicator to the latent variables and
+other explanatory variables:
+\begin{equation}
+\label{eq:continuousMeasurement}
+I_{n\ell} = I_\ell(x_n, x_n^*;\lambda_\ell) + \upsilon_{n\ell}, \; \forall \ell=1, \ldots, L_n, \forall n,
+\end{equation}
+where $I_{n\ell}$ denotes the response provided by individual $n$ for
+indicator $\ell$, $x_n^*$ is the latent variable of interest (e.g., pain
+perception), $x_n$ is a vector of observed explanatory variables (such as
+socio-demographic characteristics), $\lambda_\ell$ is a vector of $K^\lambda$
+parameters to be estimated, and $\upsilon_{n\ell}$ is a normally distributed random error term with mean 0 and variance-covariance matrix $\Sigma_{\upsilon \ell}$. 
+
+A common specification of the measurement function assumes linearity
+and normally distributed errors:
+\begin{equation}
+\label{eq:linearMeasurement}
+I_{n\ell} = \lambda_{\ell 0} + \sum_k \lambda_{\ell k}  x_{nk}^* + \sigma_{\upsilon \ell} \upsilon_{n\ell}, \quad \forall \ell,
+\end{equation}
+where $\lambda_{\ell k}$ are unknown parameters to be estimated, $\sigma_{\upsilon \ell}$ is an indicator-specific scale parameter, and $\upsilon_{n\ell} \sim N(0, 1)$.
+
+
+\subsection{Measurement equation: the ordinal case}
+
+Another type of indicator arises when respondents are asked to
+evaluate a statement using an ordinal scale. A typical context for
+this type of measurement is the use of a Likert scale
+(\cite{likert1932technique}), where individuals express their degree of
+agreement or disagreement with a given statement. For example:
+\begin{quote}
+\emph{``I believe that my own actions have an impact on the planet.''} \\
+Response options: strongly agree (2), agree (1), neutral (0), disagree ($-1$), strongly disagree ($-2$).
+\end{quote}
+
+Another common example is the observed choice itself. In discrete
+choice models, whether or not an alternative is chosen is represented
+by a binary variable, which can be interpreted as a special case of an
+ordinal scale with only two categories.
+
+To model these types of indicators, we represent the observed
+measurement as an \emph{ordered discrete variable} $I_{n\ell}$, which
+takes values in a finite, ordered set $\{j_1, j_2, \ldots, j_{M_\ell}\}$. The
+measurement equation involves two stages:
+
+\paragraph{Step 1: Latent response formulation.} We first define a continuous response variable, that happens to be unobserved (latent) in this case:
+\begin{equation}
+I^*_{n\ell} = I^*_\ell(x_n, x_n^*; \lambda_\ell) + \upsilon_{n\ell},
+\end{equation}
+where $I^*_{n\ell}$ is a continuous latent variable underlying the
+reported response, $x_n^*$ is the relevant latent variable (e.g.,
+environmental concern), $x_n$ is a vector of observed explanatory
+variables (e.g., age, income), $\lambda$ is a vector of parameters to
+be estimated, and $\upsilon_{n\ell}$ is a random error term.
+
+\paragraph{Step 2: Discretization via thresholds.} Since $I^*_{n\ell}$ is not observed, we relate it to the reported discrete measurement $I_{n\ell}$ through a set of threshold parameters:
+\begin{equation}
+\label{eq:discreteMeas-b}
+I_{n\ell} = \left\{
+\begin{array}{ll}
+j_1 & \text{if } I^*_{n\ell} < \tau_1, \\
+j_2 & \text{if } \tau_1 \leq I^*_{n\ell} < \tau_2, \\
+\vdots \\
+j_m & \text{if } \tau_{m-1} \leq I^*_{n\ell} < \tau_m, \\
+\vdots \\
+j_M & \text{if } \tau_{M_\ell-1} \leq I^*_{n\ell},
+\end{array}
+\right.
+\end{equation}
+where $\tau_1, \ldots, \tau_{M_\ell-1}$ are threshold parameters to be estimated, satisfying the ordering constraint:
+\begin{equation}
+\label{eq:discreteMeas-c}
+\tau_1 \leq \tau_2 \leq \cdots \leq \tau_{M_\ell-1}.
+\end{equation}
+Note that it is customary to use the same set of parameters for all
+individuals $n$ and all indicators $\ell$, which explains the absence
+of these indices on the parameter $\tau$.
+
+Defining $\tau_0=-\infty$ and $\tau_{M_\ell}=+\infty$, it simplifies to
+\begin{equation}
+I_{n\ell} = j_m  \text{ if } \tau_{m-1} \leq I^*_{n\ell} < \tau_m, \; m=1, \ldots, M_\ell. 
+\end{equation}
+
+
+
+
+
+
+\subsection{Summary of notations}
+
+\begin{longtable}{lp{6cm}l}
+$n$           & index for individuals         & $\mathbb{N}$ \\
+$N$           & number of individuals in the sample & $\mathbb{N}$\\
+$\C$          & universal choice set        &    \\
+$\C_n$        & choice set of individual $n$ \\
+$i,j \in \C_n$  & indices of  alternatives \\
+$J$           & total number of alternatives in $\C$ & $\mathbb{N}_0$  \\
+  $J_n$         & number of alternatives in $\C_n$ & $\mathbb{N}$ \\
+  $L_n$   & number of indicators available for individal $n$ & $\mathbb{N}$ \\
+  $M_\ell$ & number of levels for the discrete Likert scale of indicator $\ell$ & $\mathbb{N}$ \\
+$\theta=(\theta_1,\ldots,\theta_{K^{\theta}})^T$      & vector of all unknown
+parameters  & $\R^{K^{\theta}}$  \\
+$\beta=(\beta_1,\ldots,\beta_K)^T$      & vector of  unknown
+coefficients in the systematic part
+of the utility& $\R^K$  \\
+$\gamma=(\gamma_1,\ldots,\gamma_{K^{\gamma}})^T$ & vector of unknown parameters that are not coefficients  & $\R^{K^{\gamma}}$ \\
+$\alpha=(\alpha_1,\ldots,\alpha_{K^{\alpha}})^T$ & vector of all unknown parameters of structural equations & $\R^{K^{\alpha}}$ \\
+$\psi=(\psi_1,\ldots,\psi_{K^{\psi}})^T$ & vector of  unknown coefficients in the systematic part  of the structural equations & $\R^{K^{\alpha}}$ \\
+$\kappa=(\kappa_1,\ldots,\kappa_{K^{\kappa}})^T$ & vector of all unknown parameters of measurement equations & $\R^{K^{\alpha}}$ \\
+$\lambda=(\lambda_1,\ldots,\lambda_{K^{\lambda}})^T$ & vector of unknown coefficients in the systematic part of measurement equations & $\R^{K^{\lambda}}$ \\
+$m=(m_1,\ldots,m_{K^{m}})^T$ & vector of measurements/indicators & $\R^{K^{m}}$ \\
+$S_n$ & vector of characteristics of individual $n$ or the choice context &
+\\
+$z_{in}$ & vector of attributes describing alternative $i$ as
+perceived by individual $n$ \\
+$x_{in} = (x_{in1},\ldots,x_{in{K^x}})^T$ & vector of explanatory
+variables for alternative $i$ and individual $n$,  function of   attributes and 
+characteristics, that is $x_{in}=h(z_{in},S_n)$ (for notational simplification, $K^x$ may be denoted by $K$ or $L$ in the text) & $\R^{K^x}$\\
+$x^*_{n} = (x_{n1},\ldots,x_{n{K^{x^*}}})^T$ & vector of latent variables for individual $n$ & $\R^{K^{x^*}}$\\
+$\varepsilon_{n}$ & vector of error terms of the utility functions  & $\R$ \\
+$\omega_n$ & vector of error terms of structural equations  \\
+$\upsilon_n$ & vector of error terms of measurement equations \\
+$\LL^*(\theta)$      & likelihood function & $\R^{K^{\theta}}\rightarrow \R$ \\
+$\LL(\theta)$      & log-likelihood function, $\LL(\theta) = \ln \LL^*(\theta)$ & $\R^{K^{\theta}}\rightarrow \R$,
+ \\
+$f_\varepsilon(\cdot;\theta)$ & probability density function (pdf)  of
+continuous  random variable $\varepsilon$, parameterized by the vector $\theta$ & $\R^{K^{\varepsilon}}
+\rightarrow \R^+$ \\
+$F_\varepsilon(\cdot; \theta)$ & cumulative distribution function (CDF) of
+random variable $\varepsilon$, parameterized by $\theta$  & $\R^{K^{\varepsilon}}
+\rightarrow [0,1]$ \\
+$\phi(\cdot)$ & probability density function of the univariate  standardized normal distribution & $\R
+\rightarrow \R^+$ \\
+$\Phi(\cdot)$ & cumulative distribution function of the univariate standardized normal distribution  & $\R
+\rightarrow [0,1]$ \\
+$R$ & number of draws in simulation context &  $\N$\\
+$r$ & index of the draws in simulation context & $\N$ \\
+$\Sigma_\xi$ & variance-covariance matrix of the normal random vector $\xi$ &$\R^{K^{\xi}\times K^{\xi}}$\\
+\end{longtable}
+
+\section{The MIMIC model}
+
+The Multiple Indicators Multiple Causes (MIMIC) model is a structural
+equation modeling framework designed to analyze relationships
+involving latent variables. In a MIMIC model, the latent variable is
+simultaneously influenced by a set of observed explanatory variables
+(the ``multiple causes'') and reflected in several observed indicators
+(the ``multiple indicators''). This dual structure enables the analyst
+to capture both the determinants and the manifestations of latent
+constructs, such as attitudes, preferences, or psychological traits.
+A seminal introduction to the MIMIC model is provided by
+\citeasnoun{Joreskog:1975aa}, who formalized its use within the
+broader class of structural equation models.
+
+The model involves the structural equations \req{eq:structural} and the measurement equations \req{eq:continuousMeasurement} and \req{eq:discreteMeas-b}. Conditional on the latent variables, the contribution of each indicator $\ell$ for each observation $n$ to the likelihood function is defined as follows.
+
+\begin{equation}
+  \label{eq:discreteMeas-d}
+  \begin{aligned}
+    \prob(I_{n\ell} = j_m| x^*_n, x_n ; \lambda_\ell, \Sigma_{\upsilon \ell}) &= \prob(\tau_{m-1} < I^*_{n\ell} \leq \tau_m) \\
+    &= \prob(I^*_{n\ell} \leq \tau_m) -  \prob(I^*_{n\ell} \leq \tau_{m-1}),
+  \end{aligned}
+\end{equation}
+where $j_m$ is the observed category for respondent $n$ and indicator $\ell$.
+
+We can assume a linear specification of the latent response function, as in
+Equation~\eqref{eq:linearMeasurement}:
+\begin{equation}
+  \label{eq:measurement_latent}
+I^*_{n\ell} = \lambda_{\ell 0}  + \sum_k \lambda_{\ell k}  x_{nk}^* + \sigma_{\upsilon \ell} \upsilon_{n\ell}, \quad \forall \ell,
+\end{equation}
+where the error term $\upsilon_{n\ell} \sim N(0,1)$.
+In order to normalize the model, we associated each latent variable $k$ with a different indicator $\ell_k$.
+The following normalization must be done:
+\begin{itemize}
+\item As the error terms of the structural and measurement equations are confounded, we set $\sigma_{\omega k}=0$, for each latent variable $k$.
+\item As the zero of the latent variable is arbitrary, we set the intercept of the corresponding indicators to zero: $\lambda_{\ell_k 0}=0$, for each latent variable $k$.
+\item As the units of the latent variables are arbitrary, we set the coefficient of latent variable to one in the corresponding measurement equation, and the scale parameter: $\lambda_{\ell_k k}=1$, $\sigma_{\upsilon \ell_k}$ for each latent variable $k$.l
+\end{itemize}
+The
+probability of observing category $j_m$ for individual $n$ and indicator $\ell$ becomes:
+\[
+\renewcommand{\arraystretch}{1.5}
+\begin{array}{rcl}
+\prob(I_{n\ell} = j_m| x^*_n, x_n ; \lambda_\ell, \Sigma_{\upsilon \ell}) &=&\prob(I_{n\ell} = j_m| x_n ; \lambda'_\ell, \sigma'_{\upsilon \ell}) \\&=& \prob(I^*_{n\ell} \leq \tau_m) - \prob(I^*_{n\ell} \leq \tau_{m-1}) \\
+&=& \prob\left( \upsilon'_{n\ell} \leq \dfrac{\tau_m -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right) \\
+& &- \prob\left( \upsilon'_{n\ell} \leq \dfrac{\tau_{m-1} -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right) \\
+&=& \Phi\left(\dfrac{\tau_m -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right) \\
+& &- \Phi\left( \dfrac{\tau_{m-1} -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right), \\
+\end{array}
+\]
+where $\Phi(\cdot)$ denotes the cumulative distribution function (CDF) of the standard normal distribution.
+x
+This specification is known as the \emph{ordered probit model} and is
+widely used for modeling ordinal responses that depend on latent
+constructs.
+
+The likelihood function is therefore:
+\[
+\mathcal{L}^*(\lambda', \sigma', \tau) = 
+\prod_n \prod_\ell \prod_m 
+\left(
+\begin{aligned}
+&\Phi\left(
+\dfrac{
+\tau_m - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
+}{
+\sigma'_{\upsilon \ell}
+}
+\right) \\
+&\quad - \Phi\left(
+\dfrac{
+\tau_{m-1} - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
+}{
+\sigma'_{\upsilon \ell}
+}
+\right)
+\end{aligned}
+\right),
+\]
+where $\tau_0=-\infty$ and $\tau_{M_\ell}=+\infty$. Therefore, the log-likelihood function $\log \LL^*(\lambda', \sigma')$ is 
+\[
+\LL(\lambda', \sigma', \tau) = 
+\sum_n \sum_\ell \sum_m \log 
+\left(
+\begin{aligned}
+&\Phi\left(
+\dfrac{
+\tau_m - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
+}{
+\sigma'_{\upsilon \ell}
+}
+\right) \\
+&\quad - \Phi\left(
+\dfrac{
+\tau_{m-1} - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
+}{
+\sigma'_{\upsilon \ell}
+}
+\right)
+\end{aligned}
+\right).
+\]
+
+Not all parameters are identified in this specification. It is
+therefore important to normalize the parameters.  A common practice is
+to select one indicator $\ell$ per latent variable $k$, and set the
+intercept $\lambda_{\ell 0} =0$, the coefficient $\lambda_{\ell k} =1$,
+the scale parameter of the measurement equation $\sigma_{\upsilon \ell}=0$ and the scale parameter of the structual equation $\sigma_{\omega k}=1$.
+
+It means that for the corresponding pair $\ell, k$, we have...
+
+
+Once the parameters $\lambda'$ and $\sigma'$ have been estimated, there are infinitely many combinations of the original parameters that verify the equations
+\begin{align*}
+  \lambda'_{\ell 0} &=\lambda_{\ell 0}+\sum_k \lambda_{\ell k} \psi_{0k}, \\
+  \lambda'_{\ell s} &=\sum_{k} \lambda_{\ell k} \psi_{sk}, \\
+  \sigma'_{\ell}&=\sqrt{\sum_k \lambda^2_k \sigma_{\omega k}^2+\sigma^2_{\upsilon \ell}}.
+\end{align*}
+
+Consider an example where there is only one latent variable $x^*_n$, two explanatory variables and three indicators. The structural equation \req{eq:linearStructural} is written
+\[
+x^*_n = \psi_0 + \psi_1 x_{n1} + \psi_2 x_{n2} + \sigma_\omega \omega_{nk}.
+\]
+The measurement equations \req{eq:measurement_latent} are written
+\[
+\begin{aligned}
+I^*_{n1} &= \lambda_{10} +\lambda_{11}  x_{n}^* + \sigma_{\upsilon 1} \upsilon_{n1}, \\
+I^*_{n2} &= \lambda_{20} +\lambda_{21}  x_{n}^* + \sigma_{\upsilon 2} \upsilon_{n2}, \\
+I^*_{n3} &= \lambda_{30} +\lambda_{31}  x_{n}^* + \sigma_{\upsilon 3} \upsilon_{n3}. \\
+\end{aligned}
+\]
+Substituting $x^*_n$, we obtain
+\[
+\begin{aligned}
+I^*_{n1} &= \lambda_{10} + \lambda_{11}\psi_0 + \lambda_{11}\psi_1  x_{n1} + \lambda_{11}\psi_2 x_{n2} + \lambda_{11}\sigma_\omega \omega_n + \sigma_{\upsilon 1} \upsilon_{n1}, \\
+        &= \lambda'_{10}+ \lambda'_{11} x_{n1} + \lambda'_{12} x_{n2} + \sigma'_{\upsilon 1} \upsilon'_{n1}, \\
+I^*_{n2} &= \lambda_{20}+\lambda_{21} \psi_0 + \lambda_{21}\psi_1  x_{n1} + \lambda_{21}\psi_2 x_{n2} + \lambda_{21}\sigma_\omega \omega_n + \sigma_{\upsilon 2} \upsilon_{n2}, \\
+        &= \lambda'_{20}+ \lambda'_{21} x_{n1} + \lambda'_{22} x_{n2} + \sigma'_{\upsilon 2} \upsilon'_{n2}, \\
+I^*_{n3} &= \lambda_{30} +\lambda_{31}  \psi_0 + \lambda_{31}\psi_1  x_{n1} + \lambda_{31}\psi_2 x_{n2} + \lambda_{31}\sigma_\omega \omega_n + \sigma_{\upsilon 3} \upsilon_{n3}, \\
+        &= \lambda'_{30}+ \lambda'_{31} x_{n1} + \lambda'_{32} x_{n2} + \sigma'_{\upsilon 3} \upsilon'_{n3}, \\
+\end{aligned}
+\]
+where
+\begin{align*}
+  \lambda'_{\ell 0} &= \lambda_{\ell 0}, \\
+  \lambda'_{\ell 1} &=\lambda_{\ell 1}\psi_1,\\
+  \lambda'_{\ell 2} &=\lambda_{\ell 1}\psi_2, \\
+  \sigma'_{\upsilon \ell} &= \sqrt{\lambda_{\ell 1}^2\sigma_\omega^2 + (\sigma_{\upsilon \ell})^2}.
+\end{align*}
+
+Now, if we associate the latent variable with the first indicator, it means that we normalize
+$\lambda_{10}=0$,
+$\lambda_{11}=1$ and
+$\sigma_{\upsilon 1} = 0$, so that the first measurement equation is  now written
+\[
+I^*_{n1} = x_{n}^*.
+\]
+Once the parameters $\lambda'$ and $\sigma'$ have been estimated, the original parameters can be recovered by solving the following system of equations:
+\begin{align*}
+  \lambda'_{1 0} &= 0, \\
+  \lambda'_{1 1} &=\psi_1,\\
+  \lambda'_{1 2} &=\psi_2, \\
+  \sigma'_{\upsilon 1} &= \sigma_\omega,\\
+  \lambda'_{2 0} &= \lambda_{2 0}, \\
+  \lambda'_{2 1} &=\lambda_{2 1}\psi_1,\\
+  \lambda'_{2 2} &=\lambda_{2 1}\psi_2, \\
+  \sigma'_{\upsilon 2} &= \sqrt{\lambda_{2 1}^2\sigma_\omega^2 + (\sigma_{\upsilon 2})^2},\\
+  \lambda'_{3 0} &= \lambda_{3 0}, \\
+  \lambda'_{3 1} &=\lambda_{3 1}\psi_1,\\
+  \lambda'_{3 2} &=\lambda_{3 1}\psi_2, \\
+  \sigma'_{\upsilon 3} &= \sqrt{\lambda_{3 1}^2\sigma_\omega^2 + (\sigma_{\upsilon 3})^2}.
+\end{align*}
+
+
+Consider now a more complex example where there are two latent variables $x^*_{n1}$ and $x^*_{n2}$, one explanatory variable $x_n$ and four indicators. The structural equations \req{eq:linearStructural} are written
+\[
+\begin{aligned}
+x^*_{n1} &=  \psi_{01} + \psi_{11} x_{n} + \sigma_{\omega 1} \omega_{n1}, \\
+x^*_{n2} &= \psi_{02} + \psi_{12} x_{n} + \sigma_{\omega 2} \omega_{n2}.
+\end{aligned}
+\]
+The measurement equations \req{eq:measurement_latent} are written
+\[
+\begin{aligned}
+I^*_{n1} &= \lambda_{10} +\lambda_{11}  x_{n1}^* + \lambda_{12}  x_{n2}^* + \sigma_{\upsilon 1} \upsilon_{n1}, \\
+I^*_{n2} &= \lambda_{20} +\lambda_{21}  x_{n1}^* + \lambda_{22}  x_{n2}^* + \sigma_{\upsilon 2} \upsilon_{n2}, \\
+I^*_{n3} &= \lambda_{30} +\lambda_{31}  x_{n1}^* + \lambda_{32}  x_{n2}^* + \sigma_{\upsilon 3} \upsilon_{n3}. \\
+I^*_{n4} &= \lambda_{40} +\lambda_{41}  x_{n1}^* + \lambda_{42}  x_{n2}^* + \sigma_{\upsilon 4} \upsilon_{n4}. \\
+\end{aligned}
+\]
+Substituting $x^*_{n}$, we obtain
+\[
+\begin{aligned}
+  I^*_{n1} &=  \lambda_{10} +\lambda_{11}  \psi_{01} + \lambda_{11}\psi_{11} x_{n} + \lambda_{11}\sigma_{\omega 1} \omega_{n1} + \lambda_{12}  \psi_{02} + \lambda_{12}\psi_{12} x_{n} + \lambda_{12}\sigma_{\omega 2} \omega_{n2} + \sigma_{\upsilon 1} \upsilon_{n1}\\
+  I^*_{n2} &=   \lambda_{20} +\lambda_{21}  \psi_{01} + \lambda_{21}\psi_{11} x_{n} + \lambda_{21}\sigma_{\omega 1} \omega_{n1} + \lambda_{22}  \psi_{02} + \lambda_{22}\psi_{12} x_{n} + \lambda_{22}\sigma_{\omega 2} \omega_{n2} + \sigma_{\upsilon 2} \upsilon_{n2}\\
+  I^*_{n3} &=   \lambda_{30} +\lambda_{31}  \psi_{01} + \lambda_{31}\psi_{11} x_{n} + \lambda_{31}\sigma_{\omega 1} \omega_{n1} + \lambda_{32}  \psi_{02} + \lambda_{32}\psi_{12} x_{n} + \lambda_{32}\sigma_{\omega 2} \omega_{n2} + \sigma_{\upsilon 3} \upsilon_{n3}\\
+  I^*_{n4} &=   \lambda_{40} +\lambda_{41}  \psi_{01} + \lambda_{41}\psi_{11} x_{n} + \lambda_{41}\sigma_{\omega 1} \omega_{n1} + \lambda_{42}  \psi_{02} + \lambda_{42}\psi_{12} x_{n} + \lambda_{42}\sigma_{\omega 2} \omega_{n2} + \sigma_{\upsilon 4} \upsilon_{n4}.\\
+\end{aligned}
+\]
+
+Now, if we associate the first latent variable $x^*_{n1}$ with the first indicator $I^*_{n1}$,
+and the second latent variable $x^*_{n2}$ with the second indicator $I^*_{n2}$, it is equivalent to normalize the parameters $\lambda_{10}=0$, $\lambda_{11}=1$ and $\sigma_{\upsilon 1}=0$ for the first indicator, and the parameters $\lambda_{20}=0$, $\lambda_{22}=1$ and $\sigma_{\upsilon 2}=0$.
+The measurement equations then become
+\[
+\begin{aligned}
+I^*_{n1} &= x_{n1}^* + \lambda_{12} x_{n2}^2, \\
+I^*_{n2} &=\lambda_{11} x_{n1}^* + x_{n2}^*, \\
+I^*_{n3} &= \lambda_{30}  x_{n1}^* + \lambda_{31}  x_{n2}^* + \sigma_{\upsilon 3} \upsilon_{n3}, \\
+I^*_{n4} &= \lambda_{40}  x_{n1}^* + \lambda_{41}  x_{n2}^* + \sigma_{\upsilon 4} \upsilon_{n4}. \\
+\end{aligned}
+\]
+Once the parameters $\lambda'$ and $\sigma'$ have been estimated, the original parameters can be recovered by solving the following system of equations:
+\[
+\begin{aligned}
+  \lambda'_{10} &=  \psi_{01} + \lambda_{12} \psi_{02}, \\
+  \lambda'_{11} &= \psi_{11} + \lambda_{12}\psi_{12} \\
+  \sigma'_{\upsilon 1} &= \sqrt{\sigma^2_{\omega 1}+\lambda^2_{12}\sigma^2_{\omega 2}}, \\
+  \lambda'_{20} &= \lambda_{21}  \psi_{01} + \psi_{02}, \\
+  \lambda'_{21} &= \lambda_{21}\psi_{11} +\psi_{12} \\
+  \sigma'_{\upsilon 2} &= \sqrt{\lambda^2_{21}\sigma^2_{\omega 1}+\sigma^2_{\omega 2}}, \\
+  \lambda'_{30} &= \lambda_{30} +\lambda_{31}  \psi_{01} + \lambda_{32} \psi_{02}, \\
+  \lambda'_{31} &= \lambda_{31}\psi_{11} + \lambda_{32}\psi_{12} \\
+  \sigma'_{\upsilon 3} &= \sqrt{\lambda^2_{31}\sigma^2_{\omega 1}+\lambda^2_{32}\sigma^2_{\omega 2}+\sigma^2_{\upsilon 3}}, \\
+  \lambda'_{40} &= \lambda_{40} +\lambda_{41}  \psi_{01} + \lambda_{42} \psi_{02}, \\
+  \lambda'_{41} &= \lambda_{41}\psi_{11} + \lambda_{42}\psi_{12} \\
+  \sigma'_{\upsilon 4} &= \sqrt{\lambda^2_{41}\sigma^2_{\omega 1}+\lambda^2_{42}\sigma^2_{\omega 2}+\sigma^2_{\upsilon 4}}. \\
+\end{aligned}
+\]
+
+
+\clearpage
+\bibliographystyle{dcudoi}
+\bibliography{transpor}
+
+\end{document}
+
+
+
+\end{document}
+
+
+
+
+

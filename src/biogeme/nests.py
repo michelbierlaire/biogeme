@@ -267,7 +267,7 @@ class NestsForNestedLogit(Nests):
             if isinstance(m.nest_param, Expression):
                 if parameters:
                     m.nest_param.change_init_values(parameters)
-                mu_m = m.nest_param.get_value_c(prepare_ids=True)
+                mu_m = m.nest_param.get_value()
             else:
                 mu_m = m.nest_param
             alt_m = m.list_of_alternatives
@@ -467,7 +467,7 @@ class NestsForCrossNestedLogit(Nests):
                 if isinstance(m.nest_param, Expression):
                     if parameters:
                         m.nest_param.change_init_values(parameters)
-                    mu_m = m.nest_param.get_value_c(prepare_ids=True)
+                    mu_m = m.nest_param.get_value()
                 else:
                     mu_m = m.nest_param
                 alphas = get_dict_values(m.dict_of_alpha, parameters)

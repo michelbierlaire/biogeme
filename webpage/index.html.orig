@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
     <meta name="description" content="" >
     <meta name="author" content="" >
-    <title>Biogeme 3.2.14</title>
+    <title>Biogeme __VERSION__</title>
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" >
     <!-- Font Awesome icons (free version)-->
@@ -58,62 +58,75 @@
     </header>
     <!-- Start-->
     <section class="page-section" id="start">
-      <div class="container">
-        <div class="text-center">
-          <h2 class="section-heading text-uppercase">Start</h2>
-          <h3 class="section-subheading text-muted">If you have not
-          used PandasBiogeme yet, here are some tips to get you started.</h3>
-        </div>
-        <div class="row text-center">
-          <div class="col-md-3">
-            <span class="fa-stack fa-4x">
-              <i class="fas fa-circle fa-stack-2x text-primary"></i>
-              <i class="fas fa-download fa-stack-1x fa-inverse"></i>
-            </span>
-            <h4 class="my-3">Install</h4>
-            <p class="text-muted"><code>pip install
-                biogeme</code></p>
-	    <p class="text-muted">More detailed
-	      instructions <a href="#install">here</a>.</p>
-	    
-          </div>
-          <div class="col-md-3">
-            <span class="fa-stack fa-4x">
-              <i class="fas fa-circle fa-stack-2x text-primary"></i>
-              <i class="fas fa-book fa-stack-1x fa-inverse"></i>
-            </span>
-            <h4 class="my-3">Get started</h4>
-            <p class="text-muted">Read
-              the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf"
-                     target="_blank">primer</a>.</p>
-            <p class="text-muted">Watch
-              the <a href="https://youtu.be/lhbpra2dILA" target="_blank"> video on data</a>.</p>
-            <p class="text-muted">Watch
-              the <a href="https://youtu.be/jIAIsqh_g0E" target="_blank"> video on model specification</a>.</p>
-              <p class="text-muted">Use the <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" target="_blank"> Biogeme Assistant from ChatGPT</a>.</p>
-          </div>
-          <div class="col-md-3">
-            <span class="fa-stack fa-4x">
-              <i class="fas fa-circle fa-stack-2x text-primary"></i>
-              <i class="fas fa-code fa-stack-1x fa-inverse"></i>
-            </span>
-            <h4 class="my-3">Examples</h4>
-            <p class="text-muted">Examples are available <a href="sphinx/examples.html" target="_blank">here</a></p>
-          </div>
-          <div class="col-md-3">
-            <span class="fa-stack fa-4x">
-              <i class="fas fa-circle fa-stack-2x text-primary"></i>
-              <i class="fas fa-comments fa-stack-1x fa-inverse"></i>
-            </span>
-            <h4 class="my-3">Users group</h4>
-            <p class="text-muted">Post your questions on
-              the users
-              group: <a href="https://groups.google.com/d/forum/biogeme"
-                        target="_blank">groups.google.com/d/forum/biogeme</a>.</p>
-          </div>
-        </div>
+  <div class="container">
+    <div class="text-center">
+      <h2 class="section-heading text-uppercase">Start</h2>
+      <h3 class="section-subheading text-muted">
+        If you have not used PandasBiogeme yet, here are some tips to get you started.
+      </h3>
+    </div>
+    <div class="row text-center d-flex justify-content-around flex-wrap">
+
+      <div class="col-auto mb-4">
+        <span class="fa-stack fa-3x">
+          <i class="fas fa-circle fa-stack-2x text-primary"></i>
+          <i class="fas fa-download fa-stack-1x fa-inverse"></i>
+        </span>
+        <h4 class="my-3">Install</h4>
+        <p class="text-muted"><code>pip install biogeme</code></p>
+        <p class="text-muted">More detailed instructions <a href="#install">here</a>.</p>
       </div>
-    </section>
+
+      <div class="col-auto mb-4">
+        <span class="fa-stack fa-3x">
+          <i class="fas fa-circle fa-stack-2x text-primary"></i>
+          <i class="fas fa-book fa-stack-1x fa-inverse"></i>
+        </span>
+        <h4 class="my-3">Get started</h4>
+        <p class="text-muted">Read the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf" target="_blank">primer</a>.</p>
+        <p class="text-muted">Watch the <a href="https://youtu.be/lhbpra2dILA" target="_blank">video on data</a>.</p>
+        <p class="text-muted">Watch the <a href="https://youtu.be/jIAIsqh_g0E" target="_blank">video on model specification</a>.</p>
+        <p class="text-muted">Use the <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" target="_blank">Biogeme Assistant from ChatGPT</a>.</p>
+      </div>
+
+      <div class="col-auto mb-4">
+        <span class="fa-stack fa-3x">
+          <i class="fas fa-circle fa-stack-2x text-primary"></i>
+          <i class="fas fa-code fa-stack-1x fa-inverse"></i>
+        </span>
+        <h4 class="my-3">Examples</h4>
+        <p class="text-muted">Examples are available <a href="sphinx/examples.html" target="_blank">here</a></p>
+      </div>
+
+      <div class="col-auto mb-4">
+        <span class="fa-stack fa-3x">
+          <i class="fas fa-circle fa-stack-2x text-primary"></i>
+          <i class="fas fa-comments fa-stack-1x fa-inverse"></i>
+        </span>
+        <h4 class="my-3">Users group</h4>
+        <p class="text-muted">Post your questions on the users group:
+          <a href="https://groups.google.com/d/forum/biogeme" target="_blank">
+            groups.google.com/d/forum/biogeme
+          </a>.
+        </p>
+      </div>
+
+      <div class="col-auto mb-4">
+        <span class="fa-stack fa-3x">
+          <i class="fas fa-circle fa-stack-2x text-primary"></i>
+          <i class="fas fa-magic fa-stack-1x fa-inverse"></i>
+        </span>
+        <h4 class="my-3">ChatGPT Biogeme assistant</h4>
+        <p class="text-muted">
+          <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" target="_blank">
+            Ask ChatGPT to help you
+          </a>.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
     <!-- About-->
     <section class="page-section" id="about">
       <div class="container px-4">

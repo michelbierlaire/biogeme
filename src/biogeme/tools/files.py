@@ -1,38 +1,28 @@
+import glob
 import logging
 import os
 import shutil
 import tempfile
-import types
 import uuid
 from os import path
-from typing import Type
 
 logger = logging.getLogger(__name__)
 
 
 class TemporaryFile:
-    """Class generating a temporary file, so that the user does not
-    bother about its location, or even its name
-
-    Example::
-
-        with TemporaryFile() as filename:
-            with open(filename, 'w') as f:
-                print('stuff', file=f)
-    """
-
-    def __enter__(self, name: str = None) -> str:
+    def __enter__(self):
         self.dir = tempfile.mkdtemp()
-        name = str(uuid.uuid4()) if name is None else name
-        return path.join(self.dir, name)
+        self.name = str(uuid.uuid4())
+        self.fullpath = path.join(self.dir, self.name)
+        return self  # <--- return the object itself
 
-    def __exit__(
-        self,
-        exc_type: Type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: types.TracebackType | None,
-    ) -> None:
-        """Destroys the temporary directory"""
+    def __exit__(self, exc_type, exc_value, traceback):
+        shutil.rmtree(self.dir)
+
+    def __str__(self):
+        return self.fullpath
+
+    def remove(self):
         shutil.rmtree(self.dir)
 
 
@@ -112,3 +102,26 @@ def create_backup(filename: str, rename: bool = True) -> str:
             logger.info(f'File {filename} has been copied as {new_name}')
         return new_name
     logger.info(f'File {filename} does not exist. No backup has been generated')
+
+
+def files_of_type(extension: str, name: str, all_files: bool = False) -> list[str]:
+    """Identify the list of files with a given extension in the
+    local directory
+
+    :param extension: extension of the requested files (without
+        the dot): 'yaml', or 'html'
+    :param name: filename, without extension
+    :param all_files: if all_files is False, only files containing
+        the name of the model are identified. If all_files is
+        True, all files with the requested extension are
+        identified.
+
+    :return: list of files with the requested extension.
+    """
+    if all_files:
+        pattern = f"*.{extension}"
+        return glob.glob(pattern)
+    pattern1 = f"{name}.{extension}"
+    pattern2 = f"{name}~*.{extension}"
+    files = glob.glob(pattern1) + glob.glob(pattern2)
+    return files

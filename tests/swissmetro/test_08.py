@@ -3,21 +3,21 @@ import unittest
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
 from biogeme.expressions import Beta
 
@@ -53,17 +53,21 @@ V = {1: V1, 2: V2, 3: V3}
 
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
-logprob = models.loglogit(V, av, CHOICE)
+log_prob = models.loglogit(V, av, CHOICE)
 
 
 class test_08(unittest.TestCase):
     def testEstimation(self):
-        biogeme = bio.BIOGEME(database, logprob, parameters=None)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
+        biogeme = bio.BIOGEME(
+            database,
+            log_prob,
+            parameters=None,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
         results = biogeme.estimate()
-        self.assertAlmostEqual(results.data.logLike, -5292.095410794698, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5292.095410794698, 2)
 
 
 if __name__ == '__main__':

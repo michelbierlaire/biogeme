@@ -11,19 +11,18 @@ import logging
 from typing import Callable
 
 from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
-from biogeme_optimization.pareto import Pareto, SetElement, DATE_TIME_STRING
-from biogeme_optimization.vns import vns, ParetoClass
+from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
+from biogeme_optimization.vns import ParetoClass, vns
 from matplotlib.axes import Axes
 
 import biogeme.tools.unique_ids
 import biogeme.version as bv
 from biogeme.biogeme import BIOGEME
-from biogeme.configuration import Configuration
-from biogeme.controller import ControllerOperator
+from biogeme.catalog import CentralController, Configuration, ControllerOperator
+from biogeme.catalog.specification import Specification
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import Parameters
-from biogeme.results import bioResults
-from biogeme.specification import Specification
+from biogeme.results_processing import EstimationResults
 
 logger = logging.getLogger(__name__)
 
@@ -56,8 +55,14 @@ class ParetoPostProcessing:
             raise BiogemeError(error_msg)
         self.database = biogeme_object.database
         self.model_names = None
+        self.central_controller = CentralController(
+            expression=biogeme_object.log_like,
+            maximum_number_of_configurations=biogeme_object.biogeme_parameters.get_value(
+                'maximum_number_catalog_expressions'
+            ),
+        )
 
-    def reestimate(self, recycle: bool = False) -> dict[str, bioResults]:
+    def reestimate(self, recycle: bool = False) -> dict[str, EstimationResults]:
         """The assisted specification uses quickEstimate to estimate
         the models. A complete estimation is necessary to obtain the
         full estimation results.
@@ -71,9 +76,9 @@ class ParetoPostProcessing:
         all_results = {}
         for element in self.pareto.pareto:
             config_id = element.element_id
-            the_biogeme = BIOGEME.from_configuration(
+            the_biogeme = BIOGEME.from_configuration_and_controller(
                 config_id=config_id,
-                expression=self.expression,
+                central_controller=self.central_controller,
                 database=self.database,
                 parameters=self.biogeme_object.biogeme_parameters,
             )
@@ -136,9 +141,9 @@ class AssistedSpecification(Neighborhood):
     def __init__(
         self,
         biogeme_object: BIOGEME,
-        multi_objectives: Callable[[bioResults | None], list[float]],
+        multi_objectives: Callable[[EstimationResults | None], list[float]],
         pareto_file_name: str,
-        validity: Callable[[bioResults], bool] | None = None,
+        validity: Callable[[EstimationResults], bool] | None = None,
         parameter_file: str | None = None,
     ):
         """Ctor
@@ -157,11 +162,17 @@ class AssistedSpecification(Neighborhood):
         self.multi_objectives = multi_objectives
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
-        self.central_controller = self.biogeme_object.log_like.set_central_controller()
-        Specification.generic_name = biogeme_object.modelName
+        self.central_controller = CentralController(
+            expression=self.biogeme_object.log_like,
+            maximum_number_of_configurations=self.biogeme_parameters.get_value(
+                name='maximum_number_catalog_expressions'
+            ),
+        )
+        Specification.generic_name = biogeme_object.model_name
         Specification.user_defined_validity_check = (
             None if validity is None else staticmethod(validity)
         )
+        Specification.central_controller = self.central_controller
         largest_neighborhood = self.biogeme_parameters.get_value(
             name='largest_neighborhood', section='AssistedSpecification'
         )
@@ -230,7 +241,7 @@ class AssistedSpecification(Neighborhood):
         specification = Specification.from_string_id(element.element_id)
         return specification.validity
 
-    def run(self) -> dict[str, bioResults]:
+    def run(self) -> dict[str, EstimationResults]:
         """Runs the VNS algorithm
 
         :return: doct with the estimation results of the Pareto optimal models
@@ -255,15 +266,13 @@ class AssistedSpecification(Neighborhood):
         pareto_before = self.pareto.length_of_all_sets()
 
         # Check if we can estimate everything
-        number_of_specifications = (
-            self.biogeme_object.log_like.number_of_multiple_expressions()
-        )
+        number_of_specifications = self.central_controller.number_of_configurations()
         maximum_number = self.biogeme_object.maximum_number_catalog_expressions
         if number_of_specifications <= maximum_number:
             logger.info('We consider all possible combinations of the catalogs.')
-            for index, configuration in enumerate(self.biogeme_object.log_like):
+            the_iterator = self.central_controller.expression_configuration_iterator()
+            for index, the_config in enumerate(the_iterator):
                 logger.info(f'Model {index}/{number_of_specifications}')
-                the_config = configuration.current_configuration()
                 the_specification = Specification(the_config)
                 the_element = the_specification.get_element(self.multi_objectives)
                 Specification.pareto.add(the_element)

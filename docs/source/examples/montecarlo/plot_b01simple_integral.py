@@ -5,34 +5,33 @@ Simple integral
 
 Calculation of a simple integral using Monte-Carlo integration.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:42:24 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 21:03:30
 """
 
 import pandas as pd
 
-import biogeme.biogeme as bio
-import biogeme.database as db
-from biogeme.expressions import exp, bioDraws, MonteCarlo
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
+from biogeme.expressions import Draws, MonteCarlo, exp
 
 # %%
 # We create a fake database with one entry, as it is required
 # to store the draws
 df = pd.DataFrame()
 df['FakeColumn'] = [1.0]
-database = db.Database('fake_database', df)
+database = Database('fake_database', df)
 
 # %%
-integrand = exp(bioDraws('U', 'UNIFORM'))
+integrand = exp(Draws('U', 'UNIFORM'))
 simulated_integral = MonteCarlo(integrand)
 
 # %%
 true_integral = exp(1.0) - 1.0
 
 # %%
-R = 200
-MULTIPLIER = 100000
+R = 2_000
+MULTIPLIER = 100_000
 
 
 sample_variance = (
@@ -49,9 +48,9 @@ simulate = {
     'Error             ': error,
 }
 
-biosim = bio.BIOGEME(database, simulate, number_of_draws=R)
+biosim = BIOGEME(database, simulate, number_of_draws=R)
 R = biosim.number_of_draws
-biosim.modelName = f'01simpleIntegral_{R}'
+biosim.model_name = f'01simpleIntegral_{R}'
 results = biosim.simulate(the_beta_values={})
 print(f'Number of draws: {R}')
 for c in results.columns:
@@ -59,9 +58,9 @@ for c in results.columns:
 
 # %%
 # Change the number of draws
-biogeme2 = bio.BIOGEME(database, simulate, number_of_draws=R * MULTIPLIER)
-biogeme2.modelName = '01simpleIntegral_{multiplier*R}'
+biogeme2 = BIOGEME(database, simulate, number_of_draws=R * MULTIPLIER)
+biogeme2.model_name = '01simpleIntegral_{multiplier*R}'
 results2 = biogeme2.simulate(the_beta_values={})
-print(f'Number of draws: {MULTIPLIER * R}')
+print(f'Number of draws: {MULTIPLIER * R:_}')
 for c in results2.columns:
     print(f'{c}: {results2.loc[0, c]}')

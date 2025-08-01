@@ -1,0 +1,113 @@
+# File b05normal_mixture.yaml has automatically been generated on 2025-06-20 10:32:30.685778
+# biogeme 3.3.0a01 [2025-06-20]
+
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.40264212863591886
+- -2.2568332766424475
+- 1.6543391977077933
+- -1.2846226483353278
+- 0.13632028087892004
+bhhh:
+- - 583.3242938575406
+  - 268.0262827429455
+  - 140.63155295960766
+  - -22.40758285993696
+  - -162.80297329713576
+- - 268.0262827429455
+  - 417.9843574875688
+  - 209.88352003384165
+  - -118.45376851080147
+  - 211.27697001788192
+- - 140.63155295960766
+  - 209.88352003384165
+  - 174.78999259934244
+  - 25.309971953581403
+  - 14.189954920579646
+- - -22.40758285993696
+  - -118.45376851080147
+  - 25.309971953581403
+  - 597.7525703505377
+  - -239.78634890112397
+- - -162.80297329713576
+  - 211.27697001788192
+  - 14.189954920579646
+  - -239.78634890112397
+  - 809.5463379381822
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '14.637767'
+final_log_likelihood: -5215.694234617809
+gradient:
+- 0.006277844653077125
+- 0.013651469373876068
+- 0.004359740086705699
+- 0.02365028440677719
+- 0.002224094744605054
+hessian:
+- - -612.3724866163636
+  - -287.0694668077691
+  - -162.96967529383403
+  - 34.3608873987531
+  - 224.33688170123304
+- - -287.0694668077691
+  - -417.57593882004943
+  - -208.65901862576985
+  - 112.44712232707957
+  - -172.1924670348116
+- - -162.96967529383406
+  - -208.65901862576985
+  - -177.47698170271389
+  - 3.366725091966837
+  - 14.466286066422565
+- - 34.36088739875309
+  - 112.44712232707957
+  - 3.3667250919668357
+  - -323.05878705147984
+  - 158.43052178697872
+- - 224.33688170123304
+  - -172.19246703481164
+  - 14.466286066422562
+  - 158.43052178697872
+  - -828.8124146551131
+initial_log_likelihood: -6880.042509694934
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b05normal_mixture
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 4.5e-06 <= 6.1e-06
+  Number of function evaluations: 89
+  Number of gradient evaluations: 49
+  Number of hessian evaluations: 0
+  Number of iterations: '40'
+  Optimization time: '90.606553'
+  Proportion of Hessian calculation: 0/24 = 0.0%
+  Relative gradient: 4.478037790416352e-06
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: NORMAL
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: Example of a mixture of logit models with three alternatives, approximated
+  using Monte-Carlo integration.

@@ -14,48 +14,47 @@ See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Jul 13 21:31:54 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 15:47:18
 """
 
-import biogeme.biogeme as bio
-import biogeme.biogeme_logging as blog
-from biogeme import models
-from biogeme.expressions import Expression, Beta
-from biogeme.models import boxcox
-from biogeme.catalog import Catalog
-from biogeme.results import compile_estimation_results, pareto_optimal
+from IPython.core.display_functions import display
 
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.catalog import Catalog
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta, Expression
+from biogeme.models import boxcox, loglogit
+from biogeme.results_processing import compile_estimation_results, pareto_optimal
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, 0, 0)
-B_COST = Beta('B_COST', 0, None, 0, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, 0, 0)
+b_cost = Beta('b_cost', 0, None, 0, 0)
 
 # %%
-# Non linear specifications for the travel time.
+# Non-linear specifications for the travel time.
 
 # %%
 # Parameter of the Box-Cox transform.
-ell_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
+lambda_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
 
 # %%
 # Coefficients of the power series.
@@ -86,7 +85,7 @@ linear_train_tt = TRAIN_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_train_tt = boxcox(TRAIN_TT_SCALED, ell_travel_time)
+boxcox_train_tt = boxcox(TRAIN_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.
@@ -112,7 +111,7 @@ linear_sm_tt = SM_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_sm_tt = boxcox(SM_TT_SCALED, ell_travel_time)
+boxcox_sm_tt = boxcox(SM_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.
@@ -139,7 +138,7 @@ linear_car_tt = CAR_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_car_tt = boxcox(CAR_TT_SCALED, ell_travel_time)
+boxcox_car_tt = boxcox(CAR_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.
@@ -159,13 +158,13 @@ car_tt_catalog = Catalog.from_dict(
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME * train_tt_catalog + B_COST * TRAIN_COST_SCALED
-V2 = B_TIME * sm_tt_catalog + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * car_tt_catalog + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * train_tt_catalog + b_cost * TRAIN_COST_SCALED
+v_swissmetro = b_time * sm_tt_catalog + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * car_tt_catalog + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -174,7 +173,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+log_probability = loglogit(v, av, CHOICE)
 
 # %%
 # Read the data
@@ -182,10 +181,10 @@ database = read_data()
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b02nonlinear'
-the_biogeme.generate_html = False
-the_biogeme.generate_pickle = False
+the_biogeme = BIOGEME(
+    database, log_probability, generate_html=False, generate_yaml=False
+)
+the_biogeme.model_name = 'b02nonlinear'
 
 # %%
 # Estimate the parameters.
@@ -202,7 +201,8 @@ compiled_results, specs = compile_estimation_results(
 )
 
 # %%
-compiled_results
+display('All estimated models')
+display(compiled_results)
 
 # %%
 # Glossary
@@ -217,7 +217,8 @@ compiled_pareto_results, pareto_specs = compile_estimation_results(
 )
 
 # %%
-compiled_pareto_results
+display('Non dominated models')
+display(compiled_pareto_results)
 
 # %%
 # Glossary.

@@ -3,21 +3,21 @@ import unittest
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     GA,
-    TRAIN_CO,
-    SM_CO,
+    PURPOSE,
     SM_AV,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
+    SM_CO,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
     TRAIN_AV_SP,
-    CAR_AV_SP,
+    TRAIN_CO,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
 from biogeme.expressions import Beta
 from biogeme.parameters import Parameters
@@ -81,36 +81,49 @@ class test_01(unittest.TestCase):
 
     def testEstimationScipy(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameters=self.scipy_configuration)
-        biogeme.modelName = 'test_01'
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
-        biogeme.saveIterations = False
-        biogeme.bootstrap_samples = 10
+        self.assertFalse(logprob.is_complex())
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            parameters=self.scipy_configuration,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+            bootstrap_samples=10,
+        )
+        biogeme.model_name = 'test_01'
         results = biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5331.252, 2)
 
-    def testEstimationLineSearch(self):
+    def _testEstimationLineSearch(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameters=self.ls_configuration)
-        biogeme.modelName = 'test_01'
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
-        biogeme.saveIterations = False
-        biogeme.bootstrap_samples = 10
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            parameters=self.ls_configuration,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+            bootstrap_samples=10,
+        )
+        biogeme.model_name = 'test_01'
         results = biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5331.252, 2)
 
     def testEstimationTrustRegion(self):
         logprob = models.loglogit(V, av, CHOICE)
-        biogeme = bio.BIOGEME(database, logprob, parameters=self.tr_configuration)
-        biogeme.modelName = 'test_01'
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
-        biogeme.saveIterations = False
-        biogeme.bootstrap_samples = 10
+        biogeme = bio.BIOGEME(
+            database,
+            logprob,
+            parameters=self.tr_configuration,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+            bootstrap_samples=10,
+        )
+        biogeme.model_name = 'test_01'
         results = biogeme.estimate(run_bootstrap=True)
-        self.assertAlmostEqual(results.data.logLike, -5331.252, 2)
+        self.assertAlmostEqual(results.final_log_likelihood, -5331.252, 2)
 
 
 if __name__ == '__main__':

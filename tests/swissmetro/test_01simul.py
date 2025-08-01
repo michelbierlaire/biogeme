@@ -3,20 +3,20 @@ import unittest
 import biogeme.biogeme as bio
 from biogeme import models
 from biogeme.data.swissmetro import (
-    read_data,
-    PURPOSE,
-    GA,
-    TRAIN_CO,
-    SM_CO,
-    SM_AV,
-    TRAIN_AV_SP,
     CAR_AV_SP,
-    TRAIN_TT,
-    SM_TT,
-    CAR_TT,
     CAR_CO,
+    CAR_TT,
+    GA,
+    PURPOSE,
+    SM_AV,
+    SM_CO,
+    SM_TT,
+    TRAIN_AV_SP,
+    TRAIN_CO,
+    TRAIN_TT,
+    read_data,
 )
-from biogeme.expressions import Beta, Elem, Derive
+from biogeme.expressions import Beta, Derive, Elem
 
 database = read_data()
 # Keep only trip purposes 1 (commuter) and 3 (business)
@@ -84,11 +84,15 @@ the_betas_values = {
 
 class test_01simul(unittest.TestCase):
     def testSimulation(self):
-        biogeme = bio.BIOGEME(database, simulate, parameters=None)
-        biogeme.save_iterations = False
-        biogeme.generate_html = False
-        biogeme.generate_pickle = False
-        biogeme.modelName = '01logit_simul'
+        biogeme = bio.BIOGEME(
+            database,
+            simulate,
+            parameters=None,
+            save_iterations=False,
+            generate_html=False,
+            generate_yaml=False,
+        )
+        biogeme.model_name = '01logit_simul'
         results = biogeme.simulate(the_betas_values)
         self.assertAlmostEqual(sum(results['P1']), 907.9992101964821, 2)
         self.assertAlmostEqual(sum(results['logit elas. 1']), -12673.838605478186, 2)

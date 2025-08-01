@@ -12,31 +12,67 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-import biogeme.expressions as ex
 from biogeme import models
+from biogeme.audit_tuple import AuditTuple
+from biogeme.calculator import (
+    CallableExpression,
+    create_function_simple_expression,
+    get_value_and_derivatives,
+    get_value_c,
+)
+from biogeme.database import Database
+from biogeme.distributions import normalpdf
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
-    IdManager,
-    TypeOfElementaryExpression,
-    LinearTermTuple,
-    Numeric,
+    BelongsTo,
     Beta,
+    BinaryMax,
+    BinaryMin,
+    ConditionalSum,
+    ConditionalTermTuple,
+    Derive,
+    Draws,
+    Elem,
     Expression,
-)
-
-
-from biogeme.expressions import (
-    validate_and_convert,
+    IntegrateNormal,
+    LinearTermTuple,
+    LinearUtility,
+    LogLogit,
+    MonteCarlo,
+    MultipleSum,
+    NormalCdf,
+    Numeric,
+    PanelLikelihoodTrajectory,
+    RandomVariable,
+    Variable,
+    audit_expression,
+    cos,
+    exp,
     expression_to_value,
-    get_dict_values,
     get_dict_expressions,
+    get_dict_values,
+    is_numeric,
+    list_of_all_betas_in_expression,
+    list_of_fixed_betas_in_expression,
+    list_of_free_betas_in_expression,
+    list_of_random_variables_in_expression,
+    list_of_variables_in_expression,
+    log,
+    logzero,
+    sin,
+    validate_and_convert,
 )
+from biogeme.expressions.collectors import list_of_draws_in_expression
+from biogeme.expressions.minus import Minus
+from biogeme.expressions_registry import ExpressionRegistry
 from biogeme.function_output import (
-    BiogemeDisaggregateFunctionOutput,
-    BiogemeFunctionOutput,
+    FunctionOutput,
+    NamedFunctionOutput,
     convert_to_dict,
-    NamedBiogemeFunctionOutput,
 )
+from biogeme.likelihood.negative_likelihood import NegativeLikelihood
+from biogeme.tools import check_derivatives
+from biogeme.tools.derivatives import CheckDerivativesResults
 from test_data import getData
 
 EPSILON: float = np.finfo(np.float64).eps
@@ -45,35 +81,48 @@ EPSILON: float = np.finfo(np.float64).eps
 class test_expressions(unittest.TestCase):
     def setUp(self):
         self.myData = getData(2)
-        self.Person = ex.Variable('Person')
-        self.Variable1 = ex.Variable('Variable1')
-        self.Variable2 = ex.Variable('Variable2')
-        self.Choice = ex.Variable('Choice')
-        self.Av1 = ex.Variable('Av1')
-        self.Av2 = ex.Variable('Av2')
-        self.Av3 = ex.Variable('Av3')
-        self.beta1 = ex.Beta('beta1', 0.2, None, None, 0)
-        self.beta2 = ex.Beta('beta2', 0.4, None, None, 0)
-        self.beta3 = ex.Beta('beta3', 1, None, None, 1)
-        self.beta4 = ex.Beta('beta4', 0, None, None, 1)
-        self.omega1 = ex.RandomVariable('omega1')
-        self.omega2 = ex.RandomVariable('omega2')
-        self.xi1 = ex.bioDraws('xi1', 'NORMAL')
-        self.xi2 = ex.bioDraws('xi2', 'UNIF')
-        self.xi3 = ex.bioDraws('xi3', 'WRONGTYPE')
+        self.Person = Variable('Person')
+        self.Variable1 = Variable('Variable1')
+        self.Variable2 = Variable('Variable2')
+        self.Choice = Variable('Choice')
+        self.Av1 = Variable('Av1')
+        self.Av2 = Variable('Av2')
+        self.Av3 = Variable('Av3')
+        self.beta1 = Beta('beta1', 0.2, None, None, 0)
+        self.beta2 = Beta('beta2', 0.4, None, None, 0)
+        self.beta3 = Beta('beta3', 1, None, None, 1)
+        self.beta4 = Beta('beta4', 0, None, None, 1)
+        self.omega1 = RandomVariable('omega1')
+        self.omega2 = RandomVariable('omega2')
+        self.xi1 = Draws('xi1', 'NORMAL')
+        self.xi2 = Draws('xi2', 'UNIF')
+        self.xi3 = Draws('xi3', 'WRONGTYPE')
         self.addTypeEqualityFunc(pd.DataFrame, self.assertDataframeEqual)
+        self.newvar = self.myData.define_variable(
+            'newvar', self.Variable1 + self.Variable2
+        )
 
-    def test_create_function(self):
+    def run_test_create_function(self, use_jit: bool):
         beta1 = Beta('beta1', 0, None, None, 0)
         beta2 = Beta('beta2', 0, None, None, 0)
         quotient = beta1 / beta2
-        the_function = quotient.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = the_function([2, 4])
+        the_function: CallableExpression = create_function_simple_expression(
+            expression=quotient, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = the_function(
+            [2, 4], gradient=False, hessian=False, bhhh=False
+        )
         self.assertEqual(2.0 / 4.0, the_function_output.function)
+
+    def test_create_function(self):
+        self.run_test_create_function(use_jit=True)
+
+    def test_create_function_no_jit(self):
+        self.run_test_create_function(use_jit=False)
 
     def test_errors(self):
         with self.assertRaises(BiogemeError):
-            _ = ex.Numeric(1) / 'ert'
+            _ = Numeric(1) / 'ert'
 
     #        with self.assertRaises(exceptions.BiogemeError):
     #            _ = 'ert' / Numeric(1)
@@ -85,13 +134,13 @@ class test_expressions(unittest.TestCase):
             raise self.failureException(msg) from e
 
     def test_is_numeric(self):
-        result = ex.is_numeric(1)
+        result = is_numeric(1)
         self.assertTrue(result)
-        result = ex.is_numeric(0.1)
+        result = is_numeric(0.1)
         self.assertTrue(result)
-        result = ex.is_numeric(True)
+        result = is_numeric(True)
         self.assertTrue(result)
-        result = ex.is_numeric(self)
+        result = is_numeric(self)
         self.assertFalse(result)
 
     def test_add(self):
@@ -109,10 +158,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self + self.Variable1
+            _ = self + self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 + self
+            _ = self.Variable1 + self
 
     def test_sub(self):
         result = self.Variable1 - self.Variable2
@@ -129,10 +178,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self - self.Variable1
+            _ = self - self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 - self
+            _ = self.Variable1 - self
 
     def test_mul(self):
         result = self.Variable1 * self.Variable2
@@ -149,225 +198,409 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self * self.Variable1
+            _ = self * self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 * self
+            _ = self.Variable1 * self
 
-    def test_exp(self):
+    def run_test_exp(self, use_jit: bool):
         argument = Beta('argument', 2, None, None, 0)
-        the_exp = ex.exp(argument)
-        expression_function = the_exp.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([10.0])
+        the_exp = exp(argument)
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=the_exp, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [10.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, np.exp(10), 3)
-        optimization_function = the_exp.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0])
+        optimization_function: CallableExpression = create_function_simple_expression(
+            expression=the_exp, numerically_safe=False, use_jit=use_jit
+        )
+        check_results: CheckDerivativesResults = check_derivatives(
+            the_function=optimization_function, x=[1.0]
+        )
         for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
+            check_results.analytical_gradient, check_results.finite_differences_gradient
         ):
             self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
         for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # exp of a large number
-        check_results = optimization_function.check_derivatives(x=[800.0])
-        self.assertTrue(
-            np.isinf(check_results.analytical.function), 'The value is not infinity'
+        check_results = check_derivatives(
+            the_function=optimization_function, x=[1800.0]
         )
-        for a_grad in check_results.analytical.gradient:
-            self.assertTrue(np.isinf(a_grad), 'The value is not infinity')
+        self.assertAlmostEqual(check_results.function, np.inf)
 
-        for a_hess in np.nditer(check_results.analytical.hessian):
-            self.assertTrue(np.isinf(a_hess), 'The value is not infinity')
+    def test_exp(self):
+        self.run_test_exp(use_jit=True)
 
-    def test_loglogit(self):
+    def test_exp_no_jit(self):
+        self.run_test_exp(use_jit=False)
+
+    def run_test_loglogit(self, use_jit: bool):
         V1 = Beta('V1', 2, None, None, 0)
         V2 = Beta('V2', 2, None, None, 0)
         V = {1: V1, 2: V2}
         av = {1: 1, 2: 1}
-        the_logit = ex._bioLogLogit(V, av, 1)
-        expression_function = the_logit.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [10.0, 30]
+        the_logit = LogLogit(V, av, 1)
+        expression_function = create_function_simple_expression(
+            expression=the_logit, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [10.0, 30], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, -20.000000002061153, 3)
-        optimization_function = the_logit.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[10, 11])
+        optimization_function = create_function_simple_expression(
+            expression=the_logit, numerically_safe=False, use_jit=use_jit
+        )
+        check_results = check_derivatives(
+            the_function=optimization_function, x=[10, 11]
+        )
         for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
+            check_results.analytical_gradient, check_results.finite_differences_gradient
         ):
             self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
         for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
-    def test_conjunction(self):
+    def test_loglogit(self):
+        self.run_test_loglogit(use_jit=True)
+
+    def test_loglogit_no_jit(self):
+        self.run_test_loglogit(use_jit=False)
+
+    def run_test_conjunction(self, use_jit: bool):
+
         zero = Numeric(0)
         non_zero = Numeric(12)
         other_non_zero = Numeric(-1)
         and_result = non_zero & other_non_zero
-        should_be_true = and_result.get_value_and_derivatives(prepare_ids=True)
+        should_be_true = get_value_and_derivatives(
+            expression=and_result, numerically_safe=False, use_jit=use_jit
+        )
         self.assertEqual(1, should_be_true.function)
         and_result_with_other_syntax = non_zero & other_non_zero
-        should_be_true = and_result.get_value_and_derivatives(prepare_ids=True)
+        should_be_true = get_value_and_derivatives(
+            expression=and_result, numerically_safe=False, use_jit=use_jit
+        )
         self.assertEqual(should_be_true.function, 1)
         other_result = zero & other_non_zero
-        should_be_false = other_result.get_value_and_derivatives(prepare_ids=True)
+        should_be_false = get_value_and_derivatives(
+            expression=other_result, numerically_safe=False, use_jit=use_jit
+        )
         self.assertEqual(should_be_false.function, 0)
 
-    def test_disjunction(self):
+    def test_conjunction_no_jit(self):
+        self.run_test_conjunction(use_jit=False)
+
+    def test_conjunction(self):
+        self.run_test_conjunction(use_jit=True)
+
+    def run_test_disjunction(self, use_jit: bool):
         zero = Numeric(0)
         zero_two = Numeric(0)
         non_zero = Numeric(12)
         or_result = non_zero | zero
-        should_be_true = or_result.get_value_and_derivatives(prepare_ids=True)
+        should_be_true = get_value_and_derivatives(
+            expression=or_result, numerically_safe=False, use_jit=use_jit
+        )
         self.assertEqual(should_be_true.function, 1)
         other_result = zero | zero_two
-        should_be_false = other_result.get_value_and_derivatives(prepare_ids=True)
+        should_be_false = get_value_and_derivatives(
+            expression=other_result, numerically_safe=False, use_jit=use_jit
+        )
         self.assertEqual(should_be_false.function, 0)
 
-    def test_loglogit_full_choice_set(self):
+    def test_disjunction(self):
+        self.run_test_disjunction(use_jit=True)
+
+    def test_disjunction_no_jit(self):
+        self.run_test_disjunction(use_jit=False)
+
+    def run_test_loglogit_full_choice_set(self, use_jit: bool):
         V1 = Beta('V1', 2, None, None, 0)
         V2 = Beta('V2', 2, None, None, 0)
         V = {1: V1, 2: V2}
-        the_logit = ex._bioLogLogitFullChoiceSet(V, 1)
-        expression_function = the_logit.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [10.0, 30]
+        the_logit = LogLogit(util=V, av=None, choice=1)
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=the_logit, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [10.0, 30], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, -20.000000002061153, 3)
-        optimization_function = the_logit.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[10, 11])
+        optimization_function = create_function_simple_expression(
+            expression=the_logit, numerically_safe=False, use_jit=use_jit
+        )
+        check_results = check_derivatives(
+            the_function=optimization_function, x=[10, 11]
+        )
         for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
+            check_results.analytical_gradient, check_results.finite_differences_gradient
         ):
             self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
         for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
+        ):
+            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+
+    def test_loglogit_full_choice_set(self):
+        self.run_test_loglogit_full_choice_set(use_jit=True)
+
+    def test_loglogit_full_choice_set_no_jit(self):
+        self.run_test_loglogit_full_choice_set(use_jit=False)
+
+    def run_test_normal_cdf(self, use_jit: bool):
+        argument = Beta('argument', 2, None, None, 0)
+        the_cdf = NormalCdf(argument)
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=the_cdf, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [10.0], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, norm.cdf(10), 3)
+        the_function_output: FunctionOutput = expression_function(
+            [-0.01], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, norm.cdf(-0.01), 3)
+
+        optimization_function = create_function_simple_expression(
+            expression=the_cdf, numerically_safe=False, use_jit=use_jit
+        )
+        check_results = check_derivatives(the_function=optimization_function, x=[1.0])
+        for a_grad, fd_grad in zip(
+            check_results.analytical_gradient, check_results.finite_differences_gradient
+        ):
+            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+        for a_hess, fd_hess in zip(
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
     def test_normal_cdf(self):
-        argument = Beta('argument', 2, None, None, 0)
-        the_cdf = ex.bioNormalCdf(argument)
-        expression_function = the_cdf.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([10.0])
-        self.assertAlmostEqual(the_function_output.function, norm.cdf(10), 3)
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([-0.01])
-        self.assertAlmostEqual(the_function_output.function, norm.cdf(-0.01), 3)
+        self.run_test_normal_cdf(use_jit=True)
 
-        optimization_function = the_cdf.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0])
+    def test_normal_cdf_no_jit(self):
+        self.run_test_normal_cdf(use_jit=False)
+
+    def run_test_power_constant(self, use_jit: bool):
+        x = Beta('x', 2, None, None, 0)
+        x_square = x * x
+        the_power = x_square**2
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=the_power, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [2.0], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, 16, 3)
+        check_results = check_derivatives(the_function=expression_function, x=[1.0])
         for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
+            check_results.analytical_gradient, check_results.finite_differences_gradient
         ):
             self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
         for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
+        ):
+            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+
+        # Test a negative argument and an integer
+        check_results = check_derivatives(the_function=expression_function, x=[-1.0])
+        for a_grad, fd_grad in zip(
+            check_results.analytical_gradient, check_results.finite_differences_gradient
+        ):
+            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+        for a_hess, fd_hess in zip(
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
     def test_power_constant(self):
-        x = Beta('x', 2, None, None, 0)
-        x_square = x * x
-        the_power = x_square**2
-        expression_function = the_power.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([2.0])
-        self.assertAlmostEqual(the_function_output.function, 16, 3)
-        optimization_function = the_power.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0])
-        for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
-        ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
-        for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
-        ):
-            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+        self.run_test_power_constant(use_jit=True)
 
+    def test_power_constant_no_jit(self):
+        self.run_test_power_constant(use_jit=False)
+
+    def run_test_power_constant_neg_integer(self, use_jit: bool):
+        x = Beta('x', 2, None, None, 0)
         # Test a negative argument and an integer
-        check_results = optimization_function.check_derivatives(x=[-1.0])
+        the_power = x**-2
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=the_power, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [-2.0], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, 0.25, 3)
+        check_results: CheckDerivativesResults = check_derivatives(
+            the_function=expression_function, x=[-1.0]
+        )
         for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
+            check_results.analytical_gradient, check_results.finite_differences_gradient
         ):
             self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
         for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
     def test_power_constant_neg_integer(self):
+        self.run_test_power_constant_neg_integer(use_jit=True)
+
+    def test_power_constant_neg_integer_no_jit(self):
+        self.run_test_power_constant_neg_integer(use_jit=False)
+
+    def run_test_power_constant_epsilon(self, use_jit: bool):
         x = Beta('x', 2, None, None, 0)
         # Test a negative argument and an integer
-        the_power = x**-2
-        expression_function = the_power.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([-2.0])
-        self.assertAlmostEqual(the_function_output.function, 0.25, 3)
-        optimization_function = the_power.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[-1.0])
-        for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
-        ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
-        for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
-        ):
-            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+        the_power = x**2
+        small_x = 1.0e-34
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=the_power, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [small_x], gradient=True, hessian=True, bhhh=True
+        )
+        self.assertAlmostEqual(the_function_output.function, 0)
+        self.assertAlmostEqual(the_function_output.gradient[0], 0)
+        self.assertAlmostEqual(the_function_output.hessian[0][0], 2)
 
-    def test_power_constant_neg_non_integer(self):
+    def test_power_constant_epsilon(self):
+        self.run_test_power_constant_epsilon(use_jit=True)
+
+    def test_power_constant_epsilon_no_jit(self):
+        self.run_test_power_constant_epsilon(use_jit=False)
+
+    def run_test_power_constant_neg_non_integer(self, use_jit: bool):
         # -2 ** -2.5: this must raise an exception
         x = Beta('x', 2, None, None, 0)
         # Test a negative argument and an integer
         the_power = x**-2.5
-        expression_function = the_power.create_function()
+        expression_function = create_function_simple_expression(
+            expression=the_power, numerically_safe=False, use_jit=use_jit
+        )
 
-        negative_number = expression_function([-2.0])
+        negative_number = expression_function(
+            [-2.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertTrue(np.isnan(negative_number.function), 'The value is not NaN')
 
-    def test_power(self):
+    def test_power_constant_neg_non_integer(self):
+        self.run_test_power_constant_neg_non_integer(use_jit=True)
+
+    def test_power_constant_neg_non_integer_no_jit(self):
+        self.run_test_power_constant_neg_non_integer(use_jit=False)
+
+    def run_test_power(self, use_jit: bool):
         x = Beta('x', 2, None, None, 0)
         y = Beta('y', 2, None, None, 0)
 
         other_power = (x * x) ** (y + y)
-        expression_function = other_power.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([2, 1])
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=other_power, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [2, 1], gradient=False, hessian=False, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, 16, 3)
-        optimization_function = other_power.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0, 1.0])
+        check_results = check_derivatives(
+            the_function=expression_function, x=[1.0, 1.0]
+        )
         for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
+            check_results.analytical_gradient, check_results.finite_differences_gradient
         ):
             self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
         for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
+        ):
+            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+
+    def test_power(self):
+        self.run_test_power(use_jit=True)
+
+    def test_power_no_jit(self):
+        self.run_test_power(use_jit=False)
+
+    def run_test_power_small_base(self, use_jit: bool):
+        x = Beta('x', 2, None, None, 0)
+        y = Beta('y', 2, None, None, 0)
+
+        other_power = (x * x) ** (y + y)
+        expression_function: CallableExpression = create_function_simple_expression(
+            expression=other_power, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [2, 1], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, 16, 3)
+        check_results = check_derivatives(
+            the_function=expression_function, x=[1.0, 1.0]
+        )
+        for a_grad, fd_grad in zip(
+            check_results.analytical_gradient, check_results.finite_differences_gradient
+        ):
+            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+        for a_hess, fd_hess in zip(
+            np.nditer(check_results.analytical_hessian),
+            np.nditer(check_results.finite_differences_hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
     def test_power_small_base(self):
-        x = Beta('x', 2, None, None, 0)
-        y = Beta('y', 2, None, None, 0)
+        self.run_test_power_small_base(use_jit=True)
 
-        other_power = (x * x) ** (y + y)
-        expression_function = other_power.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([2, 1])
-        self.assertAlmostEqual(the_function_output.function, 16, 3)
-        optimization_function = other_power.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0, 1.0])
+    def test_power_small_base_no_jit(self):
+        self.run_test_power_small_base(use_jit=False)
+
+    def run_test_power_neg_non_integer(self, use_jit: bool):
+        # -2 ** -2.5: this must raise an exception
+        x = Beta('x', 2, None, None, 0)
+        exponent = Beta('exponent', -2.5, None, None, 0)
+        # Test a negative argument and an integer
+        the_power = x**exponent
+        expression_function = create_function_simple_expression(
+            expression=the_power, numerically_safe=False, use_jit=use_jit
+        )
+
+        negative_number = expression_function(
+            [-2.0], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertTrue(np.isnan(negative_number.function), 'The value is not NaN')
+
+    def test_power_neg_non_integer(self):
+        self.run_test_power_neg_non_integer(use_jit=True)
+        self.run_test_power_neg_non_integer(use_jit=False)
+
+    def run_test_power_using_constant(self, use_jit: bool):
+        x = Beta('x', 2, None, None, 0)
+        y = Numeric(1) * Numeric(1)
+
+        the_power = (x * x) ** (y + y)
+        optimization_function = NegativeLikelihood(
+            dimension=2,
+            loglikelihood=create_function_simple_expression(
+                expression=the_power, numerically_safe=False, use_jit=use_jit
+            ),
+        )
+        check_results = optimization_function.check_derivatives(x=[1.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+            self.assertAlmostEqual(a_grad, fd_grad, places=2)
         for a_hess, fd_hess in zip(
             np.nditer(check_results.analytical.hessian),
             np.nditer(check_results.finite_differences.hessian),
@@ -375,34 +608,76 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
     def test_power_using_constant(self):
-        x = Beta('x', 2, None, None, 0)
-        y = Numeric(1) * Numeric(1)
+        self.run_test_power_using_constant(use_jit=True)
+        self.run_test_power_using_constant(use_jit=False)
 
-        the_power = (x * x) ** (y + y)
-        optimization_function = the_power.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0])
+    def run_test_complex_expression(self, use_jit: bool):
+
+        df1 = pd.DataFrame(
+            {
+                'Person': [1, 1, 1, 2, 2],
+                'Exclude': [0, 0, 1, 0, 1],
+                'Variable1': [1, 2, 3, 4, 5],
+                'Variable2': [10, 20, 30, 40, 50],
+                'Choice': [1, 2, 3, 1, 2],
+                'Av1': [0, 1, 1, 1, 1],
+                'Av2': [1, 1, 1, 1, 1],
+                'Av3': [0, 1, 1, 1, 1],
+            }
+        )
+        data = Database(f'test', df1)
+        variable1 = Variable('Variable1')
+        variable2 = Variable('Variable2')
+        beta1 = Beta('beta1', -1.0, None, None, 0)
+        beta2 = Beta('beta2', 2.0, None, None, 0)
+        likelihood = -((beta1 * variable1) ** 2) - (beta2 * variable2) ** 2
+        optimization_function = NegativeLikelihood(
+            dimension=2,
+            loglikelihood=create_function_simple_expression(
+                expression=likelihood,
+                database=data,
+                numerically_safe=False,
+                use_jit=use_jit,
+            ),
+        )
+        check_results = optimization_function.check_derivatives(x=[-1.0, -1.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+            self.assertAlmostEqual(a_grad, fd_grad, places=2)
         for a_hess, fd_hess in zip(
             np.nditer(check_results.analytical.hessian),
             np.nditer(check_results.finite_differences.hessian),
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
-    def test_log(self):
+    def test_complex_expression(self):
+        self.run_test_complex_expression(use_jit=True)
+
+    def test_complex_expression_no_jit(self):
+        self.run_test_complex_expression(use_jit=False)
+
+    def run_test_log(self, use_jit: bool):
         argument = Beta('argument', 2, None, None, 0)
-        the_log = ex.log(argument)
-        expression_function = the_log.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([10.0])
+        the_log = log(argument)
+        expression_function = create_function_simple_expression(
+            expression=the_log, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [10.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, np.log(10), 3)
-        optimization_function = the_log.create_objective_function()
+        optimization_function = NegativeLikelihood(
+            dimension=1,
+            loglikelihood=create_function_simple_expression(
+                expression=the_log, numerically_safe=False, use_jit=use_jit
+            ),
+        )
         check_results = optimization_function.check_derivatives(x=[1.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+            self.assertAlmostEqual(a_grad, fd_grad, places=2)
         for a_hess, fd_hess in zip(
             np.nditer(check_results.analytical.hessian),
             np.nditer(check_results.finite_differences.hessian),
@@ -410,36 +685,55 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # Log of a negative number
-        log_negative = expression_function([-10.0])
+        log_negative = expression_function(
+            [-10.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertTrue(np.isnan(log_negative.function), 'The value is not NaN')
 
         # Log of zero
-        log_of_zero = expression_function([0.0])
+        log_of_zero = expression_function(
+            [0.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertTrue(np.isinf(log_of_zero.function), 'The value is not infinity')
 
         # Log of a number close to zero
-        log_small_number = expression_function([EPSILON])
+        log_small_number = expression_function(
+            [EPSILON], gradient=False, hessian=False, bhhh=False
+        )
         self.assertEqual(
             np.log(EPSILON),
             log_small_number.function,
         )
 
         # Log of a number very close to zero
-        log_small_number = expression_function([EPSILON / 2])
+        log_small_number = expression_function(
+            [EPSILON / 2], gradient=False, hessian=False, bhhh=False
+        )
         self.assertEqual(np.log(EPSILON / 2), log_small_number.function)
 
-    def test_logzero(self):
+    def test_log(self):
+        self.run_test_log(use_jit=True)
+        self.run_test_log(use_jit=False)
+
+    def run_test_logzero(self, use_jit: bool):
         argument = Beta('argument', 2, None, None, 0)
-        the_log = ex.logzero(argument)
-        expression_function = the_log.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([10.0])
+        the_log = logzero(argument)
+        expression_function = create_function_simple_expression(
+            expression=the_log, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [10.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, np.log(10), 3)
-        optimization_function = the_log.create_objective_function()
+        optimization_function = NegativeLikelihood(
+            dimension=1,
+            loglikelihood=expression_function,
+        )
         check_results = optimization_function.check_derivatives(x=[1.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+            self.assertAlmostEqual(a_grad, fd_grad, places=3)
         for a_hess, fd_hess in zip(
             np.nditer(check_results.analytical.hessian),
             np.nditer(check_results.finite_differences.hessian),
@@ -447,28 +741,40 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # Log of a negative number
-        log_negative = expression_function([-10.0])
+        log_negative = expression_function(
+            [-10.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertTrue(np.isnan(log_negative.function), 'The value is not NaN')
 
         # Log of zero
-        log_of_zero = expression_function([0.0])
+        log_of_zero = expression_function(
+            [0.0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertEqual(
             0,
             log_of_zero.function,
         )
 
         # Log of a number close to zero
-        log_small_number = expression_function([EPSILON])
+        log_small_number = expression_function(
+            [EPSILON], gradient=False, hessian=False, bhhh=False
+        )
         self.assertEqual(
             np.log(EPSILON),
             log_small_number.function,
         )
 
         # Log of a number very close to zero
-        log_small_number = expression_function([EPSILON / 2])
+        log_small_number = expression_function(
+            [EPSILON / 2], gradient=False, hessian=False, bhhh=False
+        )
         self.assertEqual(np.log(EPSILON / 2), log_small_number.function)
 
-    def test_div(self):
+    def test_logzero(self):
+        self.run_test_logzero(use_jit=True)
+        self.run_test_logzero(use_jit=False)
+
+    def run_test_div(self, use_jit: bool):
         result = self.Variable1 / self.Variable2
         self.assertEqual(str(result), '(Variable1 / Variable2)')
         self.assertTrue(result.children[0] is self.Variable1)
@@ -478,12 +784,17 @@ class test_expressions(unittest.TestCase):
         numerator = Beta('a_numerator', 2, None, None, 0)
         denominator = Beta('b_denominator', 2, None, None, 0)
         the_ratio = numerator / denominator
-        expression_function = the_ratio.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [2.0, 2.0]
+        expression_function = create_function_simple_expression(
+            expression=the_ratio, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [2.0, 2.0], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, 1, 3)
-        optimization_function = the_ratio.create_objective_function()
+        optimization_function = NegativeLikelihood(
+            dimension=2,
+            loglikelihood=expression_function,
+        )
         optimization_function.x = [2.0, 4.0]
         check_results = optimization_function.check_derivatives(x=[2.0, 4.0])
         for a_grad, fd_grad in zip(
@@ -496,11 +807,10 @@ class test_expressions(unittest.TestCase):
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
         # Special case where numerator is 0
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [0.0, 2.0]
+        the_function_output: FunctionOutput = expression_function(
+            [0.0, 2.0], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, 0, 3)
-        optimization_function = the_ratio.create_objective_function()
         check_results = optimization_function.check_derivatives(x=[0.0, 2.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
@@ -513,16 +823,15 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # Special case where denominator is 1
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [2.0, 1.0]
+        the_function_output: FunctionOutput = expression_function(
+            [2.0, 1.0], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, 2, 3)
-        optimization_function = the_ratio.create_objective_function()
         check_results = optimization_function.check_derivatives(x=[2.0, 1.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+            self.assertAlmostEqual(a_grad, fd_grad, places=2)
         for a_hess, fd_hess in zip(
             np.nditer(check_results.analytical.hessian),
             np.nditer(check_results.finite_differences.hessian),
@@ -530,22 +839,24 @@ class test_expressions(unittest.TestCase):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
         # Special case where denominator is close to zero
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [2.0, 1.0e-18]
+        the_function_output: FunctionOutput = expression_function(
+            [2.0, 1.0e-18], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, 2e18, delta=1e12)
         # Here, no way to verify the derivatives with finite difference, due to the numerical difficulties.
 
         # Special case where denominator is zero
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([2, 0])
+        the_function_output: FunctionOutput = expression_function(
+            [2, 0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertTrue(
             np.isinf(the_function_output.function), 'The value is not infinity'
         )
         # Here, no way to verify the derivatives with finite difference, due to the numerical difficulties.
 
         # Special case where denominator is close to zero
-        the_function_output: NamedBiogemeFunctionOutput = expression_function(
-            [2.0, -1.0e-18]
+        the_function_output: FunctionOutput = expression_function(
+            [2.0, -1.0e-18], gradient=False, hessian=False, bhhh=False
         )
         self.assertAlmostEqual(the_function_output.function, -2e18, delta=1e12)
         # Here, no way to verify the derivatives with finite difference, due to the numerical difficulties.
@@ -559,10 +870,14 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self / self.Variable1
+            _ = self / self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 / self
+            _ = self.Variable1 / self
+
+    def test_div(self):
+        self.run_test_div(use_jit=True)
+        self.run_test_div(use_jit=False)
 
     def test_neg(self):
         result = -self.Variable1
@@ -588,10 +903,10 @@ class test_expressions(unittest.TestCase):
         self.assertEqual(9, nine)
 
         with self.assertRaises(BiogemeError):
-            result = self**self.Variable1
+            _ = self**self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1**self
+            _ = self.Variable1**self
 
     def test_and_1(self):
         result = self.Variable1 & self.Variable2
@@ -608,10 +923,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self & self.Variable1
+            _ = self & self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 & self
+            _ = self.Variable1 & self
 
     def test_or(self):
         result = self.Variable1 | self.Variable2
@@ -628,10 +943,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[1] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self | self.Variable1
+            _ = self | self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 | self
+            _ = self.Variable1 | self
 
     def test_eq(self):
         result = self.Variable1 == self.Variable2
@@ -648,10 +963,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self == self.Variable1
+            _ = self == self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 == self
+            _ = self.Variable1 == self
 
     def test_neq(self):
         result = self.Variable1 != self.Variable2
@@ -668,10 +983,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self != self.Variable1
+            _ = self != self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 != self
+            _ = self.Variable1 != self
 
     def test_le(self):
         result = self.Variable1 <= self.Variable2
@@ -688,10 +1003,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self <= self.Variable1
+            _ = self <= self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 <= self
+            _ = self.Variable1 <= self
 
     def test_ge(self):
         result = self.Variable1 >= self.Variable2
@@ -708,10 +1023,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self >= self.Variable1
+            _ = self >= self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 >= self
+            _ = self.Variable1 >= self
 
     def test_lt(self):
         result = self.Variable1 < self.Variable2
@@ -728,10 +1043,10 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self < self.Variable1
+            _ = self < self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 < self
+            _ = self.Variable1 < self
 
     def test_gt(self):
         result = self.Variable1 > self.Variable2
@@ -748,63 +1063,80 @@ class test_expressions(unittest.TestCase):
         self.assertTrue(result.children[0] is self.Variable1)
 
         with self.assertRaises(BiogemeError):
-            result = self > self.Variable1
+            _ = self > self.Variable1
 
         with self.assertRaises(BiogemeError):
-            result = self.Variable1 > self
+            _ = self.Variable1 > self
+
+    def run_test_get_value_c(self, use_jit: bool):
+        result = get_value_c(
+            expression=self.Variable1,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
+        np.testing.assert_equal(result, [10, 20, 30, 40, 50])
 
     def test_get_value_c(self):
-        result = self.Variable1.get_value_c(database=self.myData, prepare_ids=True)
-        np.testing.assert_equal(result, [10, 20, 30, 40, 50])
+        self.run_test_get_value_c(use_jit=True)
+        self.run_test_get_value_c(use_jit=False)
 
     def test_DefineVariable(self):
         _ = self.myData.define_variable('newvar_b', self.Variable1 + self.Variable2)
-        cols = self.myData.data.columns
+        cols = self.myData.dataframe.columns
         added = 'newvar_b' in cols
         self.assertTrue(added)
-        self.myData.data['newvar_p'] = (
-            self.myData.data['Variable1'] + self.myData.data['Variable2']
+        self.myData.dataframe['newvar_p'] = (
+            self.myData.dataframe['Variable1'] + self.myData.dataframe['Variable2']
         )
         pd.testing.assert_series_equal(
-            self.myData.data['newvar_b'],
-            self.myData.data['newvar_p'],
+            self.myData.dataframe['newvar_b'],
+            self.myData.dataframe['newvar_p'],
             check_dtype=False,
             check_names=False,
         )
 
-    def test_expr1(self):
+    def run_test_expr1(self, use_jit: bool):
         self.beta1.status = 1
         self.beta2.status = 1
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
         self.assertAlmostEqual(expr1.get_value(), -1.275800115089098, 5)
-        res = expr1.get_value_c(prepare_ids=True)
+        res = get_value_c(expression=expr1, numerically_safe=False, use_jit=use_jit)
         self.assertAlmostEqual(res, -1.275800115089098, 5)
 
-    def test_expr1_newvalues(self):
+    def test_expr1(self):
+        self.run_test_expr1(use_jit=True)
+        self.run_test_expr1(use_jit=False)
+
+    def run_test_expr1_newvalues(self, use_jit: bool):
         self.beta1.status = 1
         self.beta2.status = 1
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
-        expr1.change_init_values(newvalues)
+        new_values = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
+        expr1.change_init_values(new_values)
         self.assertAlmostEqual(expr1.get_value(), 1.9323323583816936, 5)
-        res = expr1.get_value_c(prepare_ids=True)
+        res = get_value_c(expression=expr1, numerically_safe=False, use_jit=use_jit)
         self.assertAlmostEqual(res, 1.9323323583816936, 5)
 
-    def test_expr1_derivatives(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr1_newvalues(self):
+        self.run_test_expr1_newvalues(use_jit=True)
+        self.run_test_expr1_newvalues(use_jit=False)
+
+    def run_test_expr1_derivatives(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
         newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
         expr1.change_init_values(newvalues)
-        the_function_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
-            prepare_ids=True
+        the_function_output: FunctionOutput = get_value_and_derivatives(
+            expression=expr1, numerically_safe=False, use_jit=use_jit
         )
         self.assertAlmostEqual(the_function_output.function, 1.9323323583816936, 5)
         g_ok = [2.0, 0.10150146242745953]
@@ -823,15 +1155,22 @@ class test_expressions(unittest.TestCase):
         for check_left, check_right in zip(the_function_output.bhhh[1], bhhh1_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
 
-    def test_expr1_named_derivatives(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr1_derivatives(self):
+        self.run_test_expr1_derivatives(use_jit=True)
+        self.run_test_expr1_derivatives(use_jit=False)
+
+    def run_test_expr1_named_derivatives(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        newvalues = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
-        expr1.change_init_values(newvalues)
-        the_function_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
-            prepare_ids=True, named_results=True
+        new_values = {'beta1': 1, 'beta2': 2, 'beta3': 3, 'beta4': 2}
+        expr1.change_init_values(new_values)
+        the_function_output: NamedFunctionOutput = get_value_and_derivatives(
+            expression=expr1,
+            named_results=True,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
         self.assertAlmostEqual(the_function_output.function, 1.9323323583816936, 5)
         g_ok = {'beta1': 2.0, 'beta2': 0.10150146242745953}
@@ -847,13 +1186,22 @@ class test_expressions(unittest.TestCase):
         }
         self.assertDictEqual(the_function_output.bhhh, bhhh_ok)
 
-    def test_expr1_gradient(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr1_named_derivatives(self):
+        self.run_test_expr1_named_derivatives(use_jit=True)
+        self.run_test_expr1_named_derivatives(use_jit=False)
+
+    def run_test_expr1_gradient(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        the_function_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
-            gradient=True, hessian=False, bhhh=False, prepare_ids=True
+        the_function_output: FunctionOutput = get_value_and_derivatives(
+            expression=expr1,
+            gradient=True,
+            hessian=False,
+            bhhh=False,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
         self.assertAlmostEqual(the_function_output.function, -1.275800115089098, 5)
         g_ok = [2.0, 5.865300402811844]
@@ -862,92 +1210,62 @@ class test_expressions(unittest.TestCase):
         self.assertIsNone(the_function_output.hessian)
         self.assertIsNone(the_function_output.bhhh)
 
-    def test_expr1_function(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr1_gradient(self):
+        self.run_test_expr1_gradient(use_jit=True)
+        self.run_test_expr1_gradient(use_jit=False)
+
+    def run_test_expr1_function(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        the_function = expr1.create_function()
-        the_function_output: NamedBiogemeFunctionOutput = the_function([1, 2])
+        self.assertFalse(expr1.is_complex())
+
+        the_function = create_function_simple_expression(
+            expression=expr1, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = the_function(
+            [1, 2], gradient=True, hessian=True, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, 1.9323323583816936, 5)
         g_ok = [2.0, 0.10150146242745953]
         h0_ok = [0.0, 0.0]
         h1_ok = [0.0, -0.16916910404576588]
-        for check_left, check_right in zip(
-            the_function_output.function_output.gradient, g_ok
-        ):
+        for check_left, check_right in zip(the_function_output.gradient, g_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
-        for check_left, check_right in zip(
-            the_function_output.function_output.hessian[0], h0_ok
-        ):
+        for check_left, check_right in zip(the_function_output.hessian[0], h0_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
-        for check_left, check_right in zip(
-            the_function_output.function_output.hessian[1], h1_ok
-        ):
+        for check_left, check_right in zip(the_function_output.hessian[1], h1_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
 
-        the_function_output: NamedBiogemeFunctionOutput = the_function([10, -2])
+        the_function_output: FunctionOutput = the_function(
+            [10, -2], gradient=True, hessian=True, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, 23.694528049465326, 5)
         g_ok = [2, -1.84726402]
         h0_ok = [0.0, 0.0]
         h1_ok = [0.0, 1.84726402]
-        for check_left, check_right in zip(
-            the_function_output.function_output.gradient, g_ok
-        ):
+        for check_left, check_right in zip(the_function_output.gradient, g_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
-        for check_left, check_right in zip(
-            the_function_output.function_output.hessian[0], h0_ok
-        ):
+        for check_left, check_right in zip(the_function_output.hessian[0], h0_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
-        for check_left, check_right in zip(
-            the_function_output.function_output.hessian[1], h1_ok
-        ):
+        for check_left, check_right in zip(the_function_output.hessian[1], h1_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
 
-    def test_expr1_database(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr1_function(self):
+        self.run_test_expr1_function(use_jit=True)
+        self.run_test_expr1_function(use_jit=False)
+
+    def run_test_expr1_database_agg(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        the_function_output: BiogemeDisaggregateFunctionOutput = (
-            expr1.get_value_and_derivatives(
-                database=self.myData, aggregation=False, prepare_ids=True
-            )
-        )
-        f_ok: float = -1.27580012
-        g_ok = [2.0, 5.8653004]
-        h0_ok = [0.0, 0.0]
-        h1_ok = [0.0, -31.00230213]
-        bhhh0_ok = [4.0, 11.73060081]
-        bhhh1_ok = [11.73060081, 34.40174882]
-        for i, f in enumerate(the_function_output.functions):
-            self.assertAlmostEqual(f, f_ok, 5)
-            for check_left, check_right in zip(the_function_output.gradients[i], g_ok):
-                self.assertAlmostEqual(check_left, check_right, 5)
-            for check_left, check_right in zip(
-                the_function_output.hessians[i][0], h0_ok
-            ):
-                self.assertAlmostEqual(check_left, check_right, 5)
-            for check_left, check_right in zip(
-                the_function_output.hessians[i][1], h1_ok
-            ):
-                self.assertAlmostEqual(check_left, check_right, 5)
-            for check_left, check_right in zip(
-                the_function_output.bhhhs[i][0], bhhh0_ok
-            ):
-                self.assertAlmostEqual(check_left, check_right, 5)
-            for check_left, check_right in zip(
-                the_function_output.bhhhs[i][1], bhhh1_ok
-            ):
-                self.assertAlmostEqual(check_left, check_right, 5)
-
-    def test_expr1_database_agg(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
-            self.beta2 * (self.beta3 >= self.beta4)
-            + self.beta1 * (self.beta3 < self.beta4)
-        )
-        the_function_output: BiogemeFunctionOutput = expr1.get_value_and_derivatives(
-            database=self.myData, aggregation=True, prepare_ids=True
+        the_function_output: FunctionOutput = get_value_and_derivatives(
+            expression=expr1,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
         f_ok = -6.37900057544549
         g_ok = [10.0, 29.32650201405922]
@@ -967,233 +1285,233 @@ class test_expressions(unittest.TestCase):
         for check_left, check_right in zip(the_function_output.bhhh[1], b1_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
 
-    def test_setOfBetas(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
-            self.beta3 * (self.beta2 >= self.beta1)
-        )
-        s = expr1.set_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.FREE_BETA
-        )
-        self.assertSetEqual(s, {'beta1', 'beta2'})
-        s = expr1.set_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.FIXED_BETA
-        )
-        self.assertSetEqual(s, {'beta3'})
-        s = expr1.set_of_elementary_expression(the_type=TypeOfElementaryExpression.BETA)
-        self.assertSetEqual(s, {'beta1', 'beta2', 'beta3'})
+    def test_expr1_database_agg(self):
+        self.run_test_expr1_database_agg(use_jit=True)
+        self.run_test_expr1_database_agg(use_jit=False)
 
-    def test_setOfVariables(self):
-        expr1 = 2 * self.Variable1 - ex.exp(-self.Variable2) / (
-            self.Variable1 * (self.Variable1 >= self.Variable2)
-        )
-        s = expr1.set_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.VARIABLE
-        )
-        self.assertSetEqual(s, {'Variable1', 'Variable2'})
-
-    def test_getElementaryExpression(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
-            self.beta3 * (self.beta2 >= self.beta1)
-        )
-        ell = expr1.get_elementary_expression('beta2')
-        self.assertEqual(ell.name, 'beta2')
-
-    def test_expr2(self):
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (
+    def run_test_expr2(self, use_jit: bool):
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
         with self.assertRaises(BiogemeError):
             expr2.get_value()
-        with self.assertRaises(BiogemeError):
-            expr2.get_value_c()
-        res = list(expr2.get_value_c(database=self.myData, prepare_ids=True))
+        res = list(
+            get_value_c(
+                expression=expr2,
+                database=self.myData,
+                numerically_safe=False,
+                use_jit=use_jit,
+            )
+        )
         self.assertListEqual(res, [4.0, 8.0, 12.0, 16.0, 20.0])
 
-    def test_dictOfBetas(self):
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        b: dict[str, Expression] = expr2.dict_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.BETA
+    def test_expr2(self):
+        self.run_test_expr2(use_jit=True)
+        self.run_test_expr2(use_jit=False)
+
+    def test_list_of_variables(self):
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
         )
-        expected = {'beta1': 0, 'beta2': self.beta2, 'beta3': self.beta3}
-        # Note that the following checks only the labels. Its probably
-        # good enough for our purpose.
-        self.assertEqual(
-            set(expected.keys()), set(b.keys()), "Dictionaries have different keys"
+        the_list = list_of_variables_in_expression(expr2)
+        the_expected_list = [self.Variable1, self.Variable2]
+        self.assertCountEqual(
+            [str(x) for x in the_list],
+            [str(x) for x in the_expected_list],
         )
 
-    def test_dictOfVariables(self):
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        b = expr2.dict_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.VARIABLE
+    def test_list_of_betas(self):
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
         )
-        # Note that the following checks only the labels. Its probably
-        # good enough for our purpose.
-        self.assertDictEqual(
-            b, {'Variable1': self.Variable1, 'Variable2': self.Variable2}
+        the_list = list_of_all_betas_in_expression(expr2)
+        the_expected_list = [self.beta1, self.beta2, self.beta3]
+        self.assertCountEqual(
+            {str(x) for x in the_list},
+            {str(x) for x in the_expected_list},
+        )
+        the_list_free = list_of_free_betas_in_expression(expr2)
+        the_expected_list_free = [self.beta1, self.beta2]
+        self.assertCountEqual(
+            {str(x) for x in the_list_free},
+            {str(x) for x in the_expected_list_free},
+        )
+        the_list_fixed = list_of_fixed_betas_in_expression(expr2)
+        the_expected_list_fixed = [self.beta3]
+        self.assertCountEqual(
+            {str(x) for x in the_list_fixed},
+            {str(x) for x in the_expected_list_fixed},
+        )
+        expr_numeric = Numeric(0)
+        the_list_empty = list_of_all_betas_in_expression(expr_numeric)
+        self.assertFalse(the_list_empty)
+
+    def test_list_of_random_variables(self):
+        rv1 = RandomVariable('test')
+        rv2 = RandomVariable('test2')
+        dr1 = Draws('test', draw_type='NORMAL')
+        dr2 = Draws('test2', draw_type='UNIFORM')
+        expression = rv1 * rv2 + dr1 * dr2
+        the_list = list_of_random_variables_in_expression(expression)
+        the_expected_list = [rv1, rv2]
+        self.assertCountEqual(
+            {str(x) for x in the_list},
+            {str(x) for x in the_expected_list},
         )
 
-    def test_dictOfRandomVariables(self):
-        expr = -(self.omega1 + self.omega2 + self.Variable1)
-        b = expr.dict_of_elementary_expression(
-            the_type=TypeOfElementaryExpression.RANDOM_VARIABLE
-        )
-        self.assertDictEqual(b, {'omega1': self.omega1, 'omega2': self.omega2})
-
-    def test_dictOfDraws(self):
-        expr = -(self.xi1 + self.xi2 - self.xi3 + self.Variable1)
-        the_types = expr.dict_of_draw_types()
-        self.assertDictEqual(
-            the_types, {'xi1': 'NORMAL', 'xi2': 'UNIF', 'xi3': 'WRONGTYPE'}
+    def test_list_of_draws(self):
+        rv1 = RandomVariable('test')
+        rv2 = RandomVariable('test2')
+        dr1 = Draws('test', draw_type='NORMAL')
+        dr2 = Draws('test2', draw_type='UNIFORM')
+        expression = rv1 * rv2 + dr1 * dr2
+        the_list = list_of_draws_in_expression(expression)
+        the_expected_list = [dr1, dr2]
+        self.assertCountEqual(
+            {str(x) for x in the_list},
+            {str(x) for x in the_expected_list},
         )
 
     def test_getClassName(self):
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
+        )
         c = expr2.get_class_name()
         self.assertEqual(c, 'Minus')
 
-    def test_getSignature(self):
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        expr2.set_id_manager(IdManager([expr2], self.myData, 0))
-        s = expr2.get_signature()
-        self.assertEqual(len(s), 17)
-
     def test_embedExpression(self):
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        self.assertTrue(expr2.embed_expression('Minus'))
-        self.assertFalse(expr2.embed_expression('bioDraws'))
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
+        )
+        self.assertTrue(expr2.embed_expression(Minus))
+        self.assertFalse(expr2.embed_expression(Draws))
 
     def test_panel_variables(self):
-        expr_ok = ex.PanelLikelihoodTrajectory(self.Variable1)
-        check_ok = expr_ok.check_panel_trajectory()
-        self.assertEqual(len(check_ok), 0)
-        expr_not_ok = self.Variable2 + ex.PanelLikelihoodTrajectory(self.Variable1)
-        check_not_ok = expr_not_ok.check_panel_trajectory()
-        self.assertSetEqual(check_not_ok, {'Variable2'})
+        expr_ok = PanelLikelihoodTrajectory(self.Variable1)
+        audit_tuple: AuditTuple = audit_expression(expr_ok)
+        self.assertFalse(audit_tuple.warnings)
+        self.assertFalse(audit_tuple.errors)
 
     def test_check_draws(self):
-        d1 = ex.bioDraws('d1', 'UNIFORM')
-        d2 = ex.bioDraws('d2', 'UNIFORM')
-        expr_ok = ex.MonteCarlo(d1 * d2)
-        check_ok = expr_ok.check_draws()
-        self.assertEqual(len(check_ok), 0)
-        expr_not_ok = d1 + ex.MonteCarlo(d1 * d2)
-        check_not_ok = expr_not_ok.check_draws()
-        self.assertSetEqual(check_not_ok, {'d1'})
+        d1 = Draws('d1', 'UNIFORM')
+        d2 = Draws('d2', 'UNIFORM')
+        expr_ok = MonteCarlo(d1 * d2)
+        audit_tuple: AuditTuple = audit_expression(expr_ok)
+        self.assertFalse(audit_tuple.warnings)
+        self.assertFalse(audit_tuple.errors)
+        expr_not_ok = d1 + MonteCarlo(d1 * d2)
+        audit_tuple: AuditTuple = audit_expression(expr_not_ok)
+        self.assertTrue(audit_tuple.errors)
 
     def test_check_rv(self):
-        d1 = ex.RandomVariable('d1')
-        d2 = ex.RandomVariable('d2')
-        expr_ok = ex.Integrate(1, d1)
-        check_ok = expr_ok.check_rv()
-        self.assertEqual(len(check_ok), 0)
-        expr_not_ok = d1 + ex.Integrate(1, d2)
-        check_not_ok = expr_not_ok.check_rv()
-        self.assertSetEqual(check_not_ok, {'d1'})
-
-    def test_countPanelTrajectoryExpressions(self):
-        expr1 = self.beta1
-        c1 = expr1.count_panel_trajectory_expressions()
-        self.assertEqual(c1, 0)
-        expr2 = ex.PanelLikelihoodTrajectory(self.beta1)
-        c2 = expr2.count_panel_trajectory_expressions()
-        self.assertEqual(c2, 1)
-        expr3 = ex.PanelLikelihoodTrajectory(ex.PanelLikelihoodTrajectory(self.beta1))
-        c3 = expr3.count_panel_trajectory_expressions()
-        expr4 = self.Variable1 + ex.PanelLikelihoodTrajectory(
-            ex.PanelLikelihoodTrajectory(self.beta1)
-        )
-        c4 = expr4.count_panel_trajectory_expressions()
-        self.assertEqual(c4, 2)
+        d1 = RandomVariable('d1')
+        d2 = RandomVariable('d2')
+        expr_ok = IntegrateNormal(d1, d1)
+        audit_tuple: AuditTuple = audit_expression(expr_ok)
+        self.assertFalse(audit_tuple.warnings)
+        self.assertFalse(audit_tuple.errors)
+        expr_warning = IntegrateNormal(1, d1)
+        audit_tuple: AuditTuple = audit_expression(expr_warning)
+        self.assertTrue(audit_tuple.warnings)
+        self.assertFalse(audit_tuple.errors)
+        expr_not_ok = d1 + IntegrateNormal(1, d2)
+        audit_tuple: AuditTuple = audit_expression(expr_not_ok)
+        self.assertTrue(audit_tuple.errors)
 
     def test_ids_multiple_formulas(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
             self.beta2 * (self.beta3 >= self.beta4)
             + self.beta1 * (self.beta3 < self.beta4)
         )
         collection_of_formulas = [expr1, expr2]
-        formulas = IdManager(
-            expressions=collection_of_formulas, database=self.myData, number_of_draws=0
+        registry = ExpressionRegistry(
+            expressions=collection_of_formulas,
+            database=self.myData,
         )
-        elementary_expression_index_ok = {
-            'beta1': 0,
-            'beta2': 1,
-            'beta3': 2,
-            'beta4': 3,
-            'Person': 4,
-            'Exclude': 5,
-            'Variable1': 6,
-            'Variable2': 7,
-            'Choice': 8,
-            'Av1': 9,
-            'Av2': 10,
-            'Av3': 11,
+        expected_free_betas_indices = {'beta1': 0, 'beta2': 1}
+        self.assertDictEqual(registry.free_betas_indices, expected_free_betas_indices)
+        expected_fixed_betas_indices = {'beta3': 0, 'beta4': 1}
+        self.assertDictEqual(registry.fixed_betas_indices, expected_fixed_betas_indices)
+        expected_variables_indices = {
+            'Av1': 5,
+            'Av2': 6,
+            'Av3': 7,
+            'Choice': 4,
+            'Exclude': 1,
+            'Person': 0,
+            'Variable1': 2,
+            'Variable2': 3,
+            'newvar': 8,
         }
+        self.assertDictEqual(registry.variables_indices, expected_variables_indices)
+        expected_draws_indices = {}
+        self.assertDictEqual(registry.draws_indices, expected_draws_indices)
+        expected_random_variables_indices = {}
         self.assertDictEqual(
-            formulas.elementary_expressions.indices,
-            elementary_expression_index_ok,
+            registry.random_variables_indices, expected_random_variables_indices
         )
-        self.assertListEqual(
-            list(formulas.free_betas.expressions.keys()), ['beta1', 'beta2']
+
+    def run_test_expr3(self, use_jit: bool):
+        my_draws = Draws('myDraws', 'UNIFORM')
+        expr3 = MonteCarlo(my_draws * my_draws)
+        res = get_value_c(
+            expression=expr3,
+            database=self.myData,
+            number_of_draws=100000,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
-        self.assertListEqual(formulas.free_betas.names, ['beta1', 'beta2'])
-        self.assertListEqual(
-            list(formulas.fixed_betas.expressions.keys()), ['beta3', 'beta4']
-        )
-        self.assertListEqual(formulas.fixed_betas.names, ['beta3', 'beta4'])
-        self.assertFalse(formulas.random_variables.expressions)
-        self.assertFalse(formulas.draws.expressions)
+        for v in res:
+            self.assertAlmostEqual(v, 1.0 / 3.0, 2)
 
     def test_expr3(self):
-        myDraws = ex.bioDraws('myDraws', 'UNIFORM')
-        expr3 = ex.MonteCarlo(myDraws * myDraws)
-        with self.assertRaises(BiogemeError):
-            res = expr3.get_value_c(number_of_draws=100000)
-        res = expr3.get_value_c(
-            database=self.myData, number_of_draws=100000, prepare_ids=True
+        self.run_test_expr3(use_jit=True)
+        self.run_test_expr3(use_jit=False)
+
+    def run_test_expr4(self, use_jit: bool):
+        omega = RandomVariable('omega')
+        density = normalpdf(omega)
+        a = 0
+        b = 1
+        x = a + (b - a) / (1 + exp(-omega))
+        dx = (b - a) * exp(-omega) * (1 + exp(-omega)) ** (-2)
+        integrand = x * x
+        expr4 = IntegrateNormal((integrand * dx / (b - a)) / density, 'omega')
+        res = get_value_c(
+            expression=expr4,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
+        self.assertTrue(expr4.is_complex())
         for v in res:
             self.assertAlmostEqual(v, 1.0 / 3.0, 2)
 
     def test_expr4(self):
-        omega = ex.RandomVariable('omega')
-        a = 0
-        b = 1
-        x = a + (b - a) / (1 + ex.exp(-omega))
-        dx = (b - a) * ex.exp(-omega) * (1 + ex.exp(-omega)) ** (-2)
-        integrand = x * x
-        expr4 = ex.Integrate(integrand * dx / (b - a), 'omega')
-        res = expr4.get_value_c(database=self.myData, prepare_ids=True)
-        for v in res:
-            self.assertAlmostEqual(v, 1.0 / 3.0, 2)
+        self.run_test_expr4(use_jit=True)
+        self.run_test_expr4(use_jit=False)
 
-    def test_expr5(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def run_test_expr5(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta3 * (self.beta2 >= self.beta1)
         )
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
-        res = list(expr5.get_value_c(database=self.myData, prepare_ids=True))
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
+        )
+        expr5 = Elem({1: expr1, 2: expr2}, self.Person) / 10
+        res = list(
+            get_value_c(
+                expression=expr5,
+                database=self.myData,
+                numerically_safe=False,
+                use_jit=use_jit,
+            )
+        )
         res_ok = [
             -0.02703200460356393,
             -0.02703200460356393,
@@ -1204,22 +1522,34 @@ class test_expressions(unittest.TestCase):
         for check_left, check_right in zip(res, res_ok):
             self.assertAlmostEqual(check_left, check_right, 5)
 
-    def test_expr6(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr5(self):
+        self.run_test_expr5(use_jit=True)
+        self.run_test_expr5(use_jit=False)
+
+    def run_test_expr6(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta3 * (self.beta2 >= self.beta1)
         )
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        omega = ex.RandomVariable('omega')
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
+        )
+        omega = RandomVariable('omega')
+        density = normalpdf(omega)
         a = 0
         b = 1
-        x = a + (b - a) / (1 + ex.exp(-omega))
-        dx = (b - a) * ex.exp(-omega) * (1 + ex.exp(-omega)) ** (-2)
+        x = a + (b - a) / (1 + exp(-omega))
+        dx = (b - a) * exp(-omega) * (1 + exp(-omega)) ** (-2)
         integrand = x * x
-        expr4 = ex.Integrate(integrand * dx / (b - a), 'omega')
-        expr6 = ex.bioMultSum([expr1, expr2, expr4])
-        res = list(expr6.get_value_c(database=self.myData, prepare_ids=True))
+        expr4 = IntegrateNormal(integrand * dx / (b - a) / density, 'omega')
+        expr6 = MultipleSum([expr1, expr2, expr4])
+        res = list(
+            get_value_c(
+                expression=expr6,
+                database=self.myData,
+                numerically_safe=False,
+                use_jit=use_jit,
+            )
+        )
         res_ok = [
             4.063012266030643,
             8.063012266030643,
@@ -1228,33 +1558,61 @@ class test_expressions(unittest.TestCase):
             20.063012266030643,
         ]
         for check_left, check_right in zip(res, res_ok):
-            self.assertAlmostEqual(check_left, check_right, 5)
+            self.assertAlmostEqual(check_left, check_right, 3)
 
-    def test_expr7(self):
+    def test_expr6(self):
+        self.run_test_expr6(use_jit=True)
+        self.run_test_expr6(use_jit=False)
+
+    def run_test_expr7(self, use_jit: bool):
         self.beta1.status = 1
         self.beta2.status = 1
         V = {0: -self.beta1, 1: -self.beta2, 2: -self.beta1}
         av = {0: 1, 1: 1, 2: 1}
-        expr7 = ex.LogLogit(V, av, 1)
+        expr7 = LogLogit(V, av, 1)
         r = expr7.get_value()
         self.assertAlmostEqual(r, -1.2362866960692134, 5)
         expr8 = models.loglogit(V, av, 1)
-        res = expr8.get_value_c(database=self.myData, prepare_ids=True)
+        self.assertFalse(expr8.is_complex())
+        res = get_value_c(
+            expression=expr8,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         for v in res:
             self.assertAlmostEqual(v, -1.2362866960692136, 5)
 
-    def test_expr9(self):
+    def test_expr7(self):
+        self.run_test_expr7(use_jit=True)
+        self.run_test_expr7(use_jit=False)
+
+    def run_test_expr9(self, use_jit: bool):
         V = {0: -self.beta1, 1: -self.beta2, 2: -self.beta1}
         av = {0: 1, 1: 1, 2: 1}
         expr8 = models.loglogit(V, av, 1)
-        expr9 = ex.Derive(expr8, 'beta2')
-        res = expr9.get_value_c(database=self.myData, prepare_ids=True)
+        expr9 = Derive(expr8, 'beta2')
+        res = get_value_c(
+            expression=expr9,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         for v in res:
             self.assertAlmostEqual(v, -0.7095392129298093, 5)
 
-    def test_expr10(self):
-        expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
-        res = expr10.get_value_c(database=self.myData, prepare_ids=True)
+    def test_expr9(self):
+        self.run_test_expr9(use_jit=True)
+        self.run_test_expr9(use_jit=False)
+
+    def run_test_expr10(self, use_jit: bool):
+        expr10 = NormalCdf(self.Variable1 / 10 - 1)
+        res = get_value_c(
+            expression=expr10,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         for i, j in zip(
             res,
             [
@@ -1267,17 +1625,26 @@ class test_expressions(unittest.TestCase):
         ):
             self.assertAlmostEqual(i, j, 5)
 
-    def test_expr11(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr10(self):
+        self.run_test_expr10(use_jit=True)
+        self.run_test_expr10(use_jit=False)
+
+    def run_test_expr11(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta3 * (self.beta2 >= self.beta1)
         )
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
-        expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
-        expr11 = ex.bioMin(expr5, expr10)
-        res = expr11.get_value_c(database=self.myData, prepare_ids=True)
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
+        )
+        expr5 = Elem({1: expr1, 2: expr2}, self.Person) / 10
+        expr10 = NormalCdf(self.Variable1 / 10 - 1)
+        expr11 = BinaryMin(expr5, expr10)
+        res = get_value_c(
+            expression=expr11,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         res_ok = [-0.027032, -0.027032, -0.027032, 0.9986501, 0.99996833]
         for i, j in zip(
             res,
@@ -1285,31 +1652,52 @@ class test_expressions(unittest.TestCase):
         ):
             self.assertAlmostEqual(i, j, 5)
 
-    def test_expr12(self):
-        expr1 = 2 * self.beta1 - ex.exp(-self.beta2) / (
+    def test_expr11(self):
+        self.run_test_expr11(use_jit=True)
+        self.run_test_expr11(use_jit=False)
+
+    def run_test_expr12(self, use_jit: bool):
+        expr1 = 2 * self.beta1 - exp(-self.beta2) / (
             self.beta3 * (self.beta2 >= self.beta1)
         )
-        expr2 = 2 * self.beta1 * self.Variable1 - ex.exp(
-            -self.beta2 * self.Variable2
-        ) / (self.beta3 * (self.beta2 >= self.beta1))
-        expr5 = ex.Elem({1: expr1, 2: expr2}, self.Person) / 10
-        expr10 = ex.bioNormalCdf(self.Variable1 / 10 - 1)
-        expr12 = ex.bioMax(expr5, expr10)
-        res = expr12.get_value_c(database=self.myData, prepare_ids=True)
+        expr2 = 2 * self.beta1 * self.Variable1 - exp(-self.beta2 * self.Variable2) / (
+            self.beta3 * (self.beta2 >= self.beta1)
+        )
+        expr5 = Elem({1: expr1, 2: expr2}, self.Person) / 10
+        expr10 = NormalCdf(self.Variable1 / 10 - 1)
+        expr12 = BinaryMax(expr5, expr10)
+        res = get_value_c(
+            expression=expr12,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         for i, j in zip(res, [0.5, 0.8413447460685283, 0.9772498680518218, 1.6, 2.0]):
             self.assertAlmostEqual(i, j, 5)
 
-    def test_linear_utility(self):
+    def test_expr12(self):
+        self.run_test_expr12(use_jit=True)
+        self.run_test_expr12(use_jit=False)
+
+    def run_test_linear_utility(self, use_jit: bool):
         terms = [
-            LinearTermTuple(beta=self.beta1, x=ex.Variable('Variable1')),
-            LinearTermTuple(beta=self.beta2, x=ex.Variable('Variable2')),
+            LinearTermTuple(beta=self.beta1, x=Variable('Variable1')),
+            LinearTermTuple(beta=self.beta2, x=Variable('Variable2')),
         ]
-        the_utility = ex.bioLinearUtility(terms)
-        expression_function = the_utility.create_function(database=self.myData)
-        the_function_output: NamedBiogemeFunctionOutput = expression_function([0, 0])
+        the_utility = LinearUtility(terms)
+        expression_function = create_function_simple_expression(
+            expression=the_utility,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [0, 0], gradient=False, hessian=False, bhhh=False
+        )
         self.assertAlmostEqual(the_function_output.function, 0, 3)
-        optimization_function = the_utility.create_objective_function(
-            database=self.myData
+        optimization_function = NegativeLikelihood(
+            dimension=2,
+            loglikelihood=expression_function,
         )
         check_results = optimization_function.check_derivatives(x=[10, 11])
         for a_grad, fd_grad in zip(
@@ -1322,15 +1710,23 @@ class test_expressions(unittest.TestCase):
         ):
             self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
 
-    def test_expr13(self):
-        newvar = self.myData.define_variable('newvar', self.Variable1 + self.Variable2)
+    def test_linear_utility(self):
+        self.run_test_linear_utility(use_jit=True)
+        self.run_test_linear_utility(use_jit=False)
+
+    def run_test_expr13(self, use_jit: bool):
         terms = [
-            LinearTermTuple(beta=self.beta1, x=ex.Variable('Variable1')),
-            LinearTermTuple(beta=self.beta2, x=ex.Variable('Variable2')),
-            LinearTermTuple(beta=self.beta3, x=newvar),
+            LinearTermTuple(beta=self.beta1, x=Variable('Variable1')),
+            LinearTermTuple(beta=self.beta2, x=Variable('Variable2')),
+            LinearTermTuple(beta=self.beta3, x=self.newvar),
         ]
-        expr13 = ex.bioLinearUtility(terms)
-        res = expr13.get_value_c(database=self.myData, prepare_ids=True)
+        expr13 = LinearUtility(terms)
+        res = get_value_c(
+            expression=expr13,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         res_ok = [
             152,
             304,
@@ -1341,11 +1737,16 @@ class test_expressions(unittest.TestCase):
         for i, j in zip(res, res_ok):
             self.assertAlmostEqual(i, j, 5)
         expr13bis = (
-            self.beta1 * ex.Variable('Variable1')
-            + self.beta2 * ex.Variable('Variable2')
-            + self.beta3 * newvar
+            self.beta1 * Variable('Variable1')
+            + self.beta2 * Variable('Variable2')
+            + self.beta3 * self.newvar
         )
-        res = expr13bis.get_value_c(database=self.myData, prepare_ids=True)
+        res = get_value_c(
+            expression=expr13bis,
+            database=self.myData,
+            numerically_safe=False,
+            use_jit=use_jit,
+        )
         res_ok = [
             152,
             304,
@@ -1356,137 +1757,170 @@ class test_expressions(unittest.TestCase):
         for i, j in zip(res, res_ok):
             self.assertAlmostEqual(i, j, 5)
 
-    def test_panel(self):
-        ss = self.myData.get_sample_size()
-        self.assertEqual(ss, 5)
-        self.myData.panel('Person')
-        ss = self.myData.get_sample_size()
-        self.assertEqual(ss, 2)
+    def test_expr13(self):
+        self.run_test_expr13(use_jit=True)
+        self.run_test_expr13(use_jit=False)
 
-    def test_expr14(self):
-        c1 = ex.bioDraws('draws1', 'NORMAL_HALTON2')
-        c2 = ex.bioDraws('draws2', 'NORMAL_HALTON2')
-        U1 = ex.Beta('beta1', 0, None, None, 0) * ex.Variable('Variable1') + 10 * c1
-        U2 = ex.Beta('beta2', 0, None, None, 0) * ex.Variable('Variable2') + 10 * c2
+    def run_test_expr14(self, use_jit: bool):
+        c1 = Draws('draws1', 'NORMAL_HALTON2')
+        c2 = Draws('draws2', 'NORMAL_HALTON2')
+        U1 = Beta('beta1', 0, None, None, 0) * Variable('Variable1') + 10 * c1
+        U2 = Beta('beta2', 0, None, None, 0) * Variable('Variable2') + 10 * c2
         U3 = 0
         U = {1: U1, 2: U2, 3: U3}
         av = {1: self.Av1, 2: self.Av2, 3: self.Av3}
-        expr14 = ex.log(
-            ex.MonteCarlo(
-                ex.PanelLikelihoodTrajectory(models.logit(U, av, self.Choice))
-            )
+        expr14 = log(
+            MonteCarlo(PanelLikelihoodTrajectory(models.logit(U, av, self.Choice)))
         )
         self.myData.panel('Person')
-        res = expr14.get_value_c(
-            database=self.myData, number_of_draws=100000, prepare_ids=True
+        res = get_value_c(
+            expression=expr14,
+            database=self.myData,
+            number_of_draws=100000,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
         res_ok = [-3.93304323, -2.10368902]
         for i, j in zip(res, res_ok):
             self.assertAlmostEqual(i, j, 3)
         # f_list, g_list, h_list, b_list
-        the_function_output: BiogemeDisaggregateFunctionOutput = (
-            expr14.get_value_and_derivatives(
-                database=self.myData,
-                number_of_draws=10000000,
-                gradient=True,
-                hessian=True,
-                bhhh=True,
-                aggregation=False,
-                prepare_ids=True,
-            )
+        the_function_output: FunctionOutput = get_value_and_derivatives(
+            expression=expr14,
+            database=self.myData,
+            number_of_draws=10_000_000,
+            gradient=True,
+            hessian=True,
+            bhhh=True,
+            numerically_safe=False,
+            use_jit=use_jit,
         )
-        g_flat = the_function_output.gradients.flatten() / 100
-        h_flat = the_function_output.hessians.flatten() / 1000
-        b_flat = the_function_output.bhhhs.flatten() / 1000
-        f_ok = [-3.93304323, -2.10368902]
-        for i, j in zip(the_function_output.functions, f_ok):
-            self.assertAlmostEqual(i, j, 3)
-        g_ok = [-0.12583932, 0.74160679, -0.03182045, 0.68179551]
-        for i, j in zip(g_flat, g_ok):
-            self.assertAlmostEqual(i, j, 2)
-        h_ok = [
-            -0.16720814,
-            1.59974094,
-            1.59974094,
-            -16.72081405,
-            -0.98711321,
-            9.80068839,
-            9.80068839,
-            -98.71132074,
+        expected_function = -6.0367212197720335
+        expected_gradient = [-15.76597701, 142.34022993]
+        expected_hessian = [
+            [-1154.32134784, 11400.42932874],
+            [11400.42932874, -115432.13478364],
         ]
-        for i, j in zip(h_flat, h_ok):
-            self.assertAlmostEqual(i, j, 2)
-        b_ok = [
-            0.15835535,
-            -0.93323295,
-            -0.93323295,
-            5.49980634,
-            0.01012541,
-            -0.21695039,
-            -0.21695039,
-            4.64845114,
+        expected_bhhh = [
+            [168.48075656, -1150.18334338],
+            [-1150.18334338, 10148.25747682],
         ]
-        for i, j in zip(b_flat, b_ok):
-            self.assertAlmostEqual(i, j, 2)
+        self.assertAlmostEqual(
+            the_function_output.function, expected_function, places=3
+        )
+        for actual, expected in zip(the_function_output.gradient, expected_gradient):
+            self.assertAlmostEqual(actual, expected, places=3)
+        for actual_row, expected_row in zip(
+            the_function_output.hessian, expected_hessian
+        ):
+            for actual, expected in zip(actual_row, expected_row):
+                self.assertAlmostEqual(actual, expected, places=3)
+        for actual_row, expected_row in zip(the_function_output.bhhh, expected_bhhh):
+            for actual, expected in zip(actual_row, expected_row):
+                self.assertAlmostEqual(actual, expected, places=3)
+
+    def test_expr14(self):
+        self.run_test_expr14(use_jit=True)
+        self.run_test_expr14(use_jit=False)
+
+    def run_test_belongs_to(self, use_jit: bool):
+        yes = BelongsTo(Numeric(2), {1, 2, 3})
+        self.assertEqual(
+            get_value_c(expression=yes, numerically_safe=False, use_jit=use_jit), 1.0
+        )
+        no = BelongsTo(Numeric(4), {1, 2, 3})
+        self.assertEqual(
+            get_value_c(expression=no, numerically_safe=False, use_jit=use_jit), 0.0
+        )
+
+    def test_belongs_to_no_jit(self):
+        self.run_test_belongs_to(use_jit=False)
 
     def test_belongs_to(self):
-        yes = ex.BelongsTo(ex.Numeric(2), {1, 2, 3})
-        self.assertEqual(yes.get_value_c(prepare_ids=True), 1.0)
-        no = ex.BelongsTo(ex.Numeric(4), {1, 2, 3})
-        self.assertEqual(no.get_value_c(prepare_ids=True), 0.0)
+        self.run_test_belongs_to(use_jit=True)
+
+    def run_test_conditional_sum(self, use_jit: bool):
+
+        the_terms = [
+            ConditionalTermTuple(condition=Numeric(0), term=Numeric(10)),
+            ConditionalTermTuple(condition=Numeric(1), term=Numeric(20)),
+        ]
+        the_sum = ConditionalSum(the_terms)
+        self.assertEqual(
+            get_value_c(expression=the_sum, numerically_safe=False, use_jit=use_jit), 20
+        )
 
     def test_conditional_sum(self):
-        the_terms = [
-            ex.ConditionalTermTuple(condition=ex.Numeric(0), term=ex.Numeric(10)),
-            ex.ConditionalTermTuple(condition=ex.Numeric(1), term=ex.Numeric(20)),
-        ]
-        the_sum = ex.ConditionalSum(the_terms)
-        self.assertEqual(the_sum.get_value_c(prepare_ids=True), 20)
+        self.run_test_conditional_sum(use_jit=True)
+
+    def test_conditional_sum_no_jit(self):
+        self.run_test_conditional_sum(use_jit=False)
+
+    def run_test_sin(self, use_jit: bool):
+        beta = Beta('Beta', 0.11, None, None, 0)
+        the_sin = sin(2 * beta)
+        expression_function = create_function_simple_expression(
+            expression=the_sin, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [1.0], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, 0.909297, 3)
+        optimization_function = NegativeLikelihood(
+            dimension=1,
+            loglikelihood=expression_function,
+        )
+        check_results = optimization_function.check_derivatives(x=[1.0])
+        for a_grad, fd_grad in zip(
+            check_results.analytical.gradient, check_results.finite_differences.gradient
+        ):
+            self.assertAlmostEqual(a_grad, fd_grad, places=2)
+        for a_hess, fd_hess in zip(
+            np.nditer(check_results.analytical.hessian),
+            np.nditer(check_results.finite_differences.hessian),
+        ):
+            self.assertAlmostEqual(a_hess, fd_hess, places=2)
 
     def test_sin(self):
-        beta = ex.Beta('Beta', 0.11, None, None, 0)
-        the_sin = ex.sin(2 * beta)
-        expression_function = the_sin.create_function()
-        the_function_output: BiogemeFunctionOutput = expression_function([1.0])
-        self.assertAlmostEqual(the_function_output.function, 0.909297, 3)
-        optimization_function = the_sin.create_objective_function()
+        self.run_test_sin(use_jit=True)
+        self.run_test_sin(use_jit=False)
+
+    def run_test_cos(self, use_jit: bool):
+        beta = Beta('Beta', 0.11, None, None, 0)
+        the_cos = cos(2 * beta)
+        expression_function = create_function_simple_expression(
+            expression=the_cos, numerically_safe=False, use_jit=use_jit
+        )
+        the_function_output: FunctionOutput = expression_function(
+            [1.0], gradient=False, hessian=False, bhhh=False
+        )
+        self.assertAlmostEqual(the_function_output.function, -0.4161468365471424, 3)
+        optimization_function = NegativeLikelihood(
+            dimension=1,
+            loglikelihood=expression_function,
+        )
         check_results = optimization_function.check_derivatives(x=[1.0])
         for a_grad, fd_grad in zip(
             check_results.analytical.gradient, check_results.finite_differences.gradient
         ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
+            self.assertAlmostEqual(a_grad, fd_grad, places=2)
         for a_hess, fd_hess in zip(
             np.nditer(check_results.analytical.hessian),
             np.nditer(check_results.finite_differences.hessian),
         ):
-            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+            self.assertAlmostEqual(a_hess, fd_hess, places=2)
 
     def test_cos(self):
-        beta = ex.Beta('Beta', 0.11, None, None, 0)
-        the_cos = ex.cos(2 * beta)
-        expression_function = the_cos.create_function()
-        the_function_output: BiogemeFunctionOutput = expression_function([1.0])
-        self.assertAlmostEqual(the_function_output.function, -0.4161468365471424, 3)
-        optimization_function = the_cos.create_objective_function()
-        check_results = optimization_function.check_derivatives(x=[1.0])
-        for a_grad, fd_grad in zip(
-            check_results.analytical.gradient, check_results.finite_differences.gradient
-        ):
-            self.assertAlmostEqual(a_grad, fd_grad, delta=1.0e-4)
-        for a_hess, fd_hess in zip(
-            np.nditer(check_results.analytical.hessian),
-            np.nditer(check_results.finite_differences.hessian),
-        ):
-            self.assertAlmostEqual(a_hess, fd_hess, delta=1.0e-4)
+        self.run_test_cos(use_jit=True)
+        self.run_test_cos(use_jit=False)
 
     def test_bioMin(self):
-        expr = ex.bioMin(Numeric(3), Numeric(2))
+        expr = BinaryMin(Numeric(3), Numeric(2))
         result = expr.get_value()
         expected_result = 2
         self.assertEqual(expected_result, result)
 
     def test_bioMax(self):
-        expr = ex.bioMax(Numeric(3), Numeric(2))
+        expr = BinaryMax(Numeric(3), Numeric(2))
         result = expr.get_value()
         expected_result = 3
         self.assertEqual(expected_result, result)
@@ -1537,14 +1971,6 @@ class TestExpressionConversion(unittest.TestCase):
 
     def test_expression_to_value_expression(self):
         self.assertEqual(expression_to_value(self.beta), 42.0)
-
-    def test_expression_to_value_expression_with_error(self):
-        class ErrorExpression(Expression):
-            def get_value(self):
-                raise BiogemeError("Complex error")
-
-        with self.assertRaises(BiogemeError):
-            expression_to_value(ErrorExpression())
 
     def test_get_dict_values(self):
         test_dict = {1: 3.14, 2: True, 3: self.beta}

@@ -1,17 +1,14 @@
 """File translated_specification.py
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Apr 20 17:50:11 2024
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 17:59:01
 
 Specification of the "translated utility" MDCEV model.
 """
 
 from biogeme.expressions import Beta
 from biogeme.mdcev import Translated
-from specification import (
-    weight,
-    baseline_utilities,
-)
+from specification import baseline_utilities, weight
 
 # %
 # Gamma parameters. Must be positive.

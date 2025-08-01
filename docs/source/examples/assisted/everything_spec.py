@@ -45,34 +45,33 @@ This leads to a total of 432 specifications.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Sat Jul 15 15:40:33 2023
-
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 09:52:30
 """
 
 import numpy as np
-from biogeme import models
-from biogeme.expressions import Expression, Beta
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
+
 from biogeme.catalog import (
     Catalog,
-    segmentation_catalogs,
     generic_alt_specific_catalogs,
+    segmentation_catalogs,
 )
-
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta, Expression
+from biogeme.models import boxcox, loglogit, lognested
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 # %%
 # Read the data
@@ -95,7 +94,7 @@ segmentation_first = database.generate_segmentation(
 # %%
 # We consider two trip purposes: 'commuters' and anything else. We
 # need to define a binary variable first.
-database.data['COMMUTERS'] = np.where(database.data['PURPOSE'] == 1, 1, 0)
+database.dataframe['COMMUTERS'] = np.where(database.dataframe['PURPOSE'] == 1, 1, 0)
 
 segmentation_purpose = database.generate_segmentation(
     variable='COMMUTERS', mapping={0: 'non_commuters', 1: 'commuters'}
@@ -103,14 +102,14 @@ segmentation_purpose = database.generate_segmentation(
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Parameter of the Box-Cox transform.
-ell_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
+lambda_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
 
 # %%
 # Coefficients of the power series.
@@ -141,7 +140,7 @@ linear_train_tt = TRAIN_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_train_tt = models.boxcox(TRAIN_TT_SCALED, ell_travel_time)
+boxcox_train_tt = boxcox(TRAIN_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.
@@ -167,7 +166,7 @@ linear_sm_tt = SM_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_sm_tt = models.boxcox(SM_TT_SCALED, ell_travel_time)
+boxcox_sm_tt = boxcox(SM_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.
@@ -194,7 +193,7 @@ linear_car_tt = CAR_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_car_tt = models.boxcox(CAR_TT_SCALED, ell_travel_time)
+boxcox_car_tt = boxcox(CAR_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.
@@ -215,9 +214,9 @@ car_tt_catalog = Catalog.from_dict(
 
 # %%
 # Catalogs for the alternative specific constants.
-ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
-    generic_name='ASC',
-    beta_parameters=[ASC_TRAIN, ASC_CAR],
+asc_train_catalog, asc_car_catalog = segmentation_catalogs(
+    generic_name='asc',
+    beta_parameters=[asc_train, asc_car],
     potential_segmentations=(
         segmentation_ga,
         segmentation_luggage,
@@ -228,10 +227,10 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 
 # %%
 # Catalog for the travel time coefficient.
-(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
-    generic_name='B_TIME',
-    beta_parameters=[B_TIME],
-    alternatives=('TRAIN', 'SM', 'CAR'),
+(b_time_catalog_dict,) = generic_alt_specific_catalogs(
+    generic_name='b_time',
+    beta_parameters=[b_time],
+    alternatives=('train', 'swissmetro', 'car'),
     potential_segmentations=(
         segmentation_first,
         segmentation_purpose,
@@ -241,30 +240,32 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 
 # %%
 # Catalog for the travel cost coefficient.
-(B_COST_catalog_dict,) = generic_alt_specific_catalogs(
-    generic_name='B_COST', beta_parameters=[B_COST], alternatives=('TRAIN', 'SM', 'CAR')
+(b_cost_catalog_dict,) = generic_alt_specific_catalogs(
+    generic_name='b_cost',
+    beta_parameters=[b_cost],
+    alternatives=('train', 'swissmetro', 'car'),
 )
 
 # %%
 # Definition of the utility functions.
-V1 = (
-    ASC_TRAIN_catalog
-    + B_TIME_catalog_dict['TRAIN'] * train_tt_catalog
-    + B_COST_catalog_dict['TRAIN'] * TRAIN_COST_SCALED
+v_train = (
+    asc_train_catalog
+    + b_time_catalog_dict['train'] * train_tt_catalog
+    + b_cost_catalog_dict['train'] * TRAIN_COST_SCALED
 )
-V2 = (
-    B_TIME_catalog_dict['SM'] * sm_tt_catalog
-    + B_COST_catalog_dict['SM'] * SM_COST_SCALED
+v_swissmetro = (
+    b_time_catalog_dict['swissmetro'] * sm_tt_catalog
+    + b_cost_catalog_dict['swissmetro'] * SM_COST_SCALED
 )
-V3 = (
-    ASC_CAR_catalog
-    + B_TIME_catalog_dict['CAR'] * car_tt_catalog
-    + B_COST_catalog_dict['CAR'] * CAR_CO_SCALED
+v_car = (
+    asc_car_catalog
+    + b_time_catalog_dict['car'] * car_tt_catalog
+    + b_cost_catalog_dict['car'] * CAR_CO_SCALED
 )
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -273,7 +274,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the logit model. This is the contribution of each
 # observation to the log likelihood function.
-logprob_logit = models.loglogit(V, av, CHOICE)
+log_probability_logit = loglogit(v, av, CHOICE)
 
 # %%
 # Nested logit model: nest with existing alternatives.
@@ -282,8 +283,8 @@ existing = OneNestForNestedLogit(
     nest_param=mu_existing, list_of_alternatives=[1, 3], name='Existing'
 )
 
-nests_existing = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
-logprob_nested_existing = models.lognested(V, av, nests_existing, CHOICE)
+nests_existing = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(existing,))
+log_probability_nested_existing = lognested(v, av, nests_existing, CHOICE)
 
 # %%
 # Nested logit model: nest with public transportation alternatives.
@@ -292,16 +293,16 @@ public = OneNestForNestedLogit(
     nest_param=mu_public, list_of_alternatives=[1, 2], name='Public'
 )
 
-nests_public = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(public,))
-logprob_nested_public = models.lognested(V, av, nests_public, CHOICE)
+nests_public = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(public,))
+log_probability_nested_public = lognested(v, av, nests_public, CHOICE)
 
 # %%
-# Catalo for models.
+# Catalog for models.
 model_catalog = Catalog.from_dict(
     catalog_name='model_catalog',
     dict_of_expressions={
-        'logit': logprob_logit,
-        'nested existing': logprob_nested_existing,
-        'nested public': logprob_nested_public,
+        'logit': log_probability_logit,
+        'nested existing': log_probability_nested_existing,
+        'nested public': log_probability_nested_public,
     },
 )

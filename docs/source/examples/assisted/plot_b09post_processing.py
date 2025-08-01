@@ -4,16 +4,20 @@ Re-estimation of best models
 ============================
 
 After running the assisted specification algorithm for the 432
-specifications in :ref:`everything_spec_section`, we use post processing to
+specifications in :ref:`everything_spec_section`, we use post-processing to
 re-estimate all Pareto optimal models, and display some information
 about the algorithm.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Jul 20 17:15:37 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 18:38:57
 """
+
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 try:
     import matplotlib.pyplot as plt
@@ -22,7 +26,6 @@ try:
 except ModuleNotFoundError:
     can_plot = False
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
 from biogeme.assisted import ParetoPostProcessing
 
 from everything_spec import model_catalog, database
@@ -34,11 +37,11 @@ PARETO_FILE_NAME = 'saved_results/b07everything_assisted.pareto'
 
 # %%
 # Create the biogeme object from the catalog.
-the_biogeme = bio.BIOGEME(database, model_catalog)
-the_biogeme.modelName = 'b09post_processing'
+the_biogeme = BIOGEME(database, model_catalog)
+the_biogeme.model_name = 'b09post_processing'
 
 # %%
-# Create the post processing object.
+# Create the post-processing object.
 post_processing = ParetoPostProcessing(
     biogeme_object=the_biogeme, pareto_file_name=PARETO_FILE_NAME
 )
@@ -58,8 +61,8 @@ print(spec)
 print(results.short_summary())
 
 # %%
-results.get_estimated_parameters()
-
+estimated_parameters = get_pandas_estimated_parameters(estimation_results=results)
+display(estimated_parameters)
 
 # %%
 # The following plot illustrates all models that have been

@@ -11,7 +11,7 @@ from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
     exp,
-    bioMultSum,
+    MultipleSum,
     logzero,
     log,
     ExpressionOrNumeric,
@@ -132,14 +132,14 @@ def get_mev_for_cross_nested(
             gi_terms[i] = []
     for m in nests:
         if availability is None:
-            biosum = bioMultSum(
+            biosum = MultipleSum(
                 [
                     a**m.nest_param * exp(m.nest_param * (util[i]))
                     for i, a in m.dict_of_alpha.items()
                 ]
             )
         else:
-            biosum = bioMultSum(
+            biosum = MultipleSum(
                 [
                     availability[i] * a**m.nest_param * exp(m.nest_param * (util[i]))
                     for i, a in m.dict_of_alpha.items()
@@ -152,7 +152,7 @@ def get_mev_for_cross_nested(
                 * biosum ** ((1.0 - m.nest_param) / m.nest_param)
             ]
     for k, G in gi_terms.items():
-        log_gi[k] = logzero(bioMultSum(G))
+        log_gi[k] = logzero(MultipleSum(G))
     return log_gi
 
 
@@ -277,14 +277,14 @@ def get_mev_for_cross_nested_mu(
             gi_terms[i] = []
     for m in nests:
         if availability is None:
-            biosum = bioMultSum(
+            biosum = MultipleSum(
                 [
                     a ** (m.nest_param / mu) * exp(m.nest_param * (util[i]))
                     for i, a in m.dict_of_alpha.items()
                 ]
             )
         else:
-            biosum = bioMultSum(
+            biosum = MultipleSum(
                 [
                     availability[i]
                     * a ** (m.nest_param / mu)
@@ -299,7 +299,7 @@ def get_mev_for_cross_nested_mu(
                 * biosum ** ((mu / m.nest_param) - 1.0)
             ]
     for k, G in gi_terms.items():
-        log_gi[k] = log(mu * bioMultSum(G))
+        log_gi[k] = log(mu * MultipleSum(G))
     return log_gi
 
 

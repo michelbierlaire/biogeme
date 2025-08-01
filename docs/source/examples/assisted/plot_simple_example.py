@@ -6,64 +6,67 @@ Example of a catalog
 Illustration of the concept of catalog. See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Aug  6 18:13:18 2023
-
+Michel Bierlaire, EPFL
+Sun Apr 27 2025, 18:39:23
 """
 
 import numpy as np
-from biogeme import models
-from biogeme.expressions import Beta, Variable, Expression
-from biogeme.models import boxcox
+
 from biogeme.catalog import (
     Catalog,
+    CentralController,
     generic_alt_specific_catalogs,
     segmentation_catalogs,
 )
-from biogeme.nests import OneNestForNestedLogit, NestsForNestedLogit
-
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO,
+    CAR_CO_SCALED,
+    CAR_TT,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST,
+    TRAIN_COST_SCALED,
+    TRAIN_TT,
+    TRAIN_TT_SCALED,
+    read_data,
 )
+from biogeme.expressions import Beta, Expression
+from biogeme.models import boxcox, loglogit, lognested
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 
 # %%
 # Function printing all configurations of an expression.
 def print_all_configurations(expression: Expression) -> None:
     """Prints all configurations that an expression can take"""
-    expression.set_central_controller()
-    total = expression.central_controller.number_of_configurations()
+    the_central_controller = CentralController(expression=expression)
+    total = the_central_controller.number_of_configurations()
     print(f'Total: {total} configurations')
-    for config_id in expression.central_controller.all_configurations_ids:
+    for config_id in the_central_controller.all_configurations_ids:
         print(config_id)
 
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -72,18 +75,18 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob_logit = models.loglogit(V, av, CHOICE)
+log_probability_logit = loglogit(v, av, CHOICE)
 
 # %%
 # Nest definition.
 
 mu_existing = Beta('mu_existing', 1, 1, 10, 0)
 existing = OneNestForNestedLogit(nest_param=mu_existing, list_of_alternatives=[1, 3])
-nests = NestsForNestedLogit(choice_set=list(V), tuple_of_nests=(existing,))
+nests = NestsForNestedLogit(choice_set=list(v), tuple_of_nests=(existing,))
 
 # %%
 # Contribution to the log-likelihood.
-logprob_nested = models.lognested(V, av, nests, CHOICE)
+log_probability_nested = lognested(v, av, nests, CHOICE)
 
 # %%
 # Definition of the catalog containing two models specifications:
@@ -91,8 +94,8 @@ logprob_nested = models.lognested(V, av, nests, CHOICE)
 model_catalog = Catalog.from_dict(
     catalog_name='model_catalog',
     dict_of_expressions={
-        'logit': logprob_logit,
-        'nested': logprob_nested,
+        'logit': log_probability_logit,
+        'nested': log_probability_nested,
     },
 )
 
@@ -114,12 +117,10 @@ for specification in model_catalog:
 # All configurations.
 print_all_configurations(model_catalog)
 
-# %% Non linear specifications.
-TRAIN_TT = Variable('TRAIN_TT')
-TRAIN_COST = Variable('TRAIN_COST')
-ell_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
+# %% Non-linear specifications.
+lambda_travel_time = Beta('lambda_travel_time', 1, -10, 10, 0)
 linear_train_tt = TRAIN_TT
-boxcox_train_tt = boxcox(TRAIN_TT, ell_travel_time)
+boxcox_train_tt = boxcox(TRAIN_TT, lambda_travel_time)
 squared_train_tt = TRAIN_TT * TRAIN_TT
 train_tt_catalog = Catalog.from_dict(
     catalog_name='train_tt_catalog',
@@ -132,19 +133,17 @@ train_tt_catalog = Catalog.from_dict(
 
 # %%
 # Define a utility function involving the catalog.
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, 0, 0)
-V_TRAIN = ASC_TRAIN + B_TIME * train_tt_catalog
+asc_train = Beta('ASC_TRAIN', 0, None, None, 0)
+b_time = Beta('B_TIME', 0, None, 0, 0)
+v_train_catalog = asc_train + b_time * train_tt_catalog
 
 # %%
-print_all_configurations(V_TRAIN)
+print_all_configurations(v_train_catalog)
 
 # %%
 # Unsynchronized catalogs
-CAR_TT = Variable('CAR_TT')
-CAR_COST = Variable('CAR_COST')
 linear_car_tt = CAR_TT
-boxcox_car_tt = boxcox(CAR_TT, ell_travel_time)
+boxcox_car_tt = boxcox(CAR_TT, lambda_travel_time)
 squared_car_tt = CAR_TT * CAR_TT
 car_tt_catalog = Catalog.from_dict(
     catalog_name='car_tt_catalog',
@@ -164,10 +163,8 @@ print_all_configurations(dummy_expression)
 
 # %%
 # Synchronized catalogs.
-CAR_TT = Variable('CAR_TT')
-CAR_COST = Variable('CAR_COST')
 linear_car_tt = CAR_TT
-boxcox_car_tt = boxcox(CAR_TT, ell_travel_time)
+boxcox_car_tt = boxcox(CAR_TT, lambda_travel_time)
 squared_car_tt = CAR_TT * CAR_TT
 car_tt_catalog = Catalog.from_dict(
     catalog_name='car_tt_catalog',
@@ -189,51 +186,54 @@ print_all_configurations(dummy_expression)
 # %%
 # Alternative specific specification.
 
-(B_TIME_catalog_dict, B_COST_catalog_dict) = generic_alt_specific_catalogs(
+(b_time_catalog_dict, b_cost_catalog_dict) = generic_alt_specific_catalogs(
     generic_name='coefficients',
-    beta_parameters=[B_TIME, B_COST],
-    alternatives=('TRAIN', 'CAR'),
+    beta_parameters=[b_time, b_cost],
+    alternatives=('train', 'car'),
 )
 
 # %%
 # Create utility functions involving those catalogs.
-V_TRAIN = (
-    B_TIME_catalog_dict['TRAIN'] * TRAIN_TT + B_COST_catalog_dict['TRAIN'] * TRAIN_COST
+v_train_catalog = (
+    b_time_catalog_dict['train'] * TRAIN_TT + b_cost_catalog_dict['train'] * TRAIN_COST
 )
-V_CAR = B_TIME_catalog_dict['CAR'] * CAR_TT + B_COST_catalog_dict['CAR'] * CAR_COST
+v_car_catalog = (
+    b_time_catalog_dict['car'] * CAR_TT + b_cost_catalog_dict['car'] * CAR_CO
+)
 
 # %%
 # Create a dummy expression involving the utility functions.
-dummy_expression = V_TRAIN + V_CAR
+dummy_expression = v_train_catalog + v_car_catalog
 
 # %%
 print_all_configurations(dummy_expression)
 
 # %%
 # Alternative specific - not synchronized.
-
-(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
+(b_time_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='time_coefficient',
-    beta_parameters=[B_TIME],
-    alternatives=('TRAIN', 'CAR'),
+    beta_parameters=[b_time],
+    alternatives=('train', 'car'),
 )
 
-(B_COST_catalog_dict,) = generic_alt_specific_catalogs(
+(b_cost_catalog_dict,) = generic_alt_specific_catalogs(
     generic_name='cost_coefficient',
-    beta_parameters=[B_COST],
-    alternatives=('TRAIN', 'CAR'),
+    beta_parameters=[b_cost],
+    alternatives=('train', 'car'),
 )
 
 # %%
 # Create utility functions involving those catalogs.
-V_TRAIN = (
-    B_TIME_catalog_dict['TRAIN'] * TRAIN_TT + B_COST_catalog_dict['TRAIN'] * TRAIN_COST
+v_train_catalog = (
+    b_time_catalog_dict['train'] * TRAIN_TT + b_cost_catalog_dict['train'] * TRAIN_COST
 )
-V_CAR = B_TIME_catalog_dict['CAR'] * CAR_TT + B_COST_catalog_dict['CAR'] * CAR_COST
+v_car_catalog = (
+    b_time_catalog_dict['car'] * CAR_TT + b_cost_catalog_dict['car'] * CAR_CO
+)
 
 # %%
 # Create a dummy expression involving the utility functions.
-dummy_expression = V_TRAIN + V_CAR
+dummy_expression = v_train_catalog + v_car_catalog
 
 # %%
 print_all_configurations(dummy_expression)
@@ -248,7 +248,7 @@ database = read_data()
 # %%
 # We consider two trip purposes: `commuters` and anything else. We
 # need to define a binary variable first.
-database.data['COMMUTERS'] = np.where(database.data['PURPOSE'] == 1, 1, 0)
+database.dataframe['COMMUTERS'] = np.where(database.dataframe['PURPOSE'] == 1, 1, 0)
 
 # %%
 # Segmentation on trip purpose.
@@ -269,9 +269,9 @@ segmentation_luggage = database.generate_segmentation(
 # %%
 # Catalog of segmented alternative specific constants, allows a maximum
 # of two segmentations.
-ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
-    generic_name='ASC',
-    beta_parameters=[ASC_TRAIN, ASC_CAR],
+asc_train_catalog, asc_car_catalog = segmentation_catalogs(
+    generic_name='asc',
+    beta_parameters=[asc_train, asc_car],
     potential_segmentations=(
         segmentation_purpose,
         segmentation_luggage,
@@ -281,7 +281,7 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 
 # %%
 # Create a dummy expression.
-dummy_expression = ASC_TRAIN_catalog + ASC_CAR_catalog
+dummy_expression = asc_train_catalog + asc_car_catalog
 
 # %%
 print_all_configurations(dummy_expression)
@@ -289,9 +289,9 @@ print_all_configurations(dummy_expression)
 # %%
 # Catalog of segmented alternative specific constants, allows a maximum
 # of one segmentation.
-ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
-    generic_name='ASC',
-    beta_parameters=[ASC_TRAIN, ASC_CAR],
+asc_train_catalog, asc_car_catalog = segmentation_catalogs(
+    generic_name='asc',
+    beta_parameters=[asc_train, asc_car],
     potential_segmentations=(
         segmentation_purpose,
         segmentation_luggage,
@@ -301,7 +301,7 @@ ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
 
 # %%
 # Create a dummy expression.
-dummy_expression = ASC_TRAIN_catalog + ASC_CAR_catalog
+dummy_expression = asc_train_catalog + asc_car_catalog
 
 # %%
 print_all_configurations(dummy_expression)
@@ -309,10 +309,10 @@ print_all_configurations(dummy_expression)
 # %%
 # Segmentation and alternative specific
 # Maximum one segmentation.
-(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
-    generic_name='B_TIME',
-    beta_parameters=[B_TIME],
-    alternatives=['TRAIN', 'CAR'],
+(b_time_catalog_dict,) = generic_alt_specific_catalogs(
+    generic_name='b_time',
+    beta_parameters=[b_time],
+    alternatives=('train', 'car'),
     potential_segmentations=(
         segmentation_purpose,
         segmentation_luggage,
@@ -321,14 +321,14 @@ print_all_configurations(dummy_expression)
 )
 
 # %%
-print_all_configurations(B_TIME_catalog_dict['TRAIN'])
+print_all_configurations(b_time_catalog_dict['train'])
 
 # %%
 # Maximum two segmentations.
-(B_TIME_catalog_dict,) = generic_alt_specific_catalogs(
-    generic_name='B_TIME',
-    beta_parameters=[B_TIME],
-    alternatives=['TRAIN', 'CAR'],
+(b_time_catalog_dict,) = generic_alt_specific_catalogs(
+    generic_name='b_time',
+    beta_parameters=[b_time],
+    alternatives=('train', 'car'),
     potential_segmentations=(
         segmentation_purpose,
         segmentation_luggage,
@@ -337,4 +337,4 @@ print_all_configurations(B_TIME_catalog_dict['TRAIN'])
 )
 
 # %%
-print_all_configurations(B_TIME_catalog_dict['TRAIN'])
+print_all_configurations(b_time_catalog_dict['train'])

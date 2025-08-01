@@ -13,24 +13,25 @@ Ortelli, 2023
 for a detailed description of the use of the assisted specification
 algorithm.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 17:05:40 2023
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 12:25:12
 
 
 """
 
 import biogeme.biogeme_logging as blog
-from biogeme.results import compile_estimation_results
-from biogeme.multiobjectives import aic_bic_dimension
 from biogeme.assisted import AssistedSpecification
-from plot_b22multiple_models_spec import the_biogeme, PARETO_FILE_NAME
+from biogeme.catalog import count_number_of_specifications
+from biogeme.multiobjectives import aic_bic_dimension
+from biogeme.results_processing import compile_estimation_results
 
+from plot_b22multiple_models_spec import PARETO_FILE_NAME, the_biogeme
 
 logger = blog.get_screen_logger(blog.INFO)
 logger.info('Example b22multiple_models')
 
 # %%
-nbr = the_biogeme.log_like.number_of_multiple_expressions()
+nbr = count_number_of_specifications(the_biogeme.log_like)
 if nbr is None:
     print('There are too many possible specifications to be enumerated')
 else:
@@ -44,7 +45,7 @@ else:
 #    - the biogeme object containing the specifications and the
 #      database,
 #    - an object defining the objectives to minimize. Here, we use
-#      three objectives: AIC, BIC and numner of parameters.
+#      three objectives: AIC, BIC and number of parameters.
 #    - the name of the file where the estimated are saved, and
 #      organized into a Pareto set.
 assisted_specification = AssistedSpecification(

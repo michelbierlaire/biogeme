@@ -5,81 +5,104 @@ Simulation of a cross-nested logit model
 
 Illustration of the application of an estimated model.
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 18:08:29 2023
+Michel Bierlaire, EPFL
+Sat Jun 21 2025, 16:53:57
 """
 
 import sys
 
-import biogeme.biogeme as bio
-import biogeme.exceptions as excep
-import biogeme.results as res
-from biogeme import models
+from IPython.core.display_functions import display
+from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
-from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
+from biogeme.models import cnl
+from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
-    SM_AV,
     CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT,
-    TRAIN_COST_SCALED,
-    SM_TT,
-    SM_COST_SCALED,
-    CAR_TT,
     CAR_CO_SCALED,
+    CAR_TT,
+    GA,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_HE,
+    SM_TT,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_HE,
+    TRAIN_TT,
+    database,
 )
 
 # %%
-# Simulation must be done with estimated value of the
-# parameters. We set them to zero here , and read the values from the
-# file created after estimation.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+# Parameters to be estimated.
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_time_swissmetro = Beta('b_time_swissmetro', 0, None, None, 0)
+b_time_train = Beta('b_time_train', 0, None, None, 0)
+b_time_car = Beta('b_time_car', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
+b_headway_swissmetro = Beta('b_headway_swissmetro', 0, None, None, 0)
+b_headway_train = Beta('b_headway_train', 0, None, None, 0)
+ga_train = Beta('ga_train', 0, None, None, 0)
+ga_swissmetro = Beta('ga_swissmetro', 0, None, None, 0)
 
-# %%
-# Nest parameters.
-MU_EXISTING = Beta('MU_EXISTING', 1, 1, None, 0)
-MU_PUBLIC = Beta('MU_PUBLIC', 1, 1, None, 0)
+# %% Nest parameters.
+existing_nest_parameter = Beta('existing_nest_parameter', 1, 1, 5, 0)
+public_nest_parameter = Beta('public_nest_parameter', 1, 1, 5, 0)
 
 # %%
 # Nest membership parameters.
-ALPHA_EXISTING = Beta('ALPHA_EXISTING', 0.5, 0, 1, 0)
-ALPHA_PUBLIC = 1 - ALPHA_EXISTING
+alpha_existing = Beta('alpha_existing', 0.5, 0, 1, 0)
+alpha_public = 1 - alpha_existing
 
 # %%
-# Definition of the utility functions. Note that we need to have
-# explicitly the unscaled variables if we want to calculate the
-# elasticities.
-V1 = ASC_TRAIN + B_TIME * TRAIN_TT / 100 + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME * SM_TT / 100 + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME * CAR_TT / 100 + B_COST * CAR_CO_SCALED
+# Definition of the utility functions. Note that in order to calculate the derivative with respect to the travel
+# time variables, they need to explicitly appear in the specification. Therefore, we have replaced the scaled
+# versions of the variables by their original definition.
+v_train = (
+    asc_train
+    + b_time_train * TRAIN_TT / 100
+    + b_cost * TRAIN_COST_SCALED
+    + b_headway_train * TRAIN_HE
+    + ga_train * GA
+)
+v_swissmetro = (
+    asc_sm
+    + b_time_swissmetro * SM_TT / 100
+    + b_cost * SM_COST_SCALED
+    + b_headway_swissmetro * SM_HE
+    + ga_swissmetro * GA
+)
+v_car = asc_car + b_time_car * CAR_TT / 100 + b_cost * CAR_CO_SCALED
 
 # %%
-# Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+# Associate utility functions with the numbering of alternatives
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
-# Associate the availability conditions with the alternatives.
+# Associate the availability conditions with the alternatives
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Definition of nests.
 
 nest_existing = OneNestForCrossNestedLogit(
-    nest_param=MU_EXISTING,
-    dict_of_alpha={1: ALPHA_EXISTING, 2: 0.0, 3: 1.0},
+    nest_param=existing_nest_parameter,
+    dict_of_alpha={1: alpha_existing, 2: 0.0, 3: 1.0},
     name='existing',
 )
 
 nest_public = OneNestForCrossNestedLogit(
-    nest_param=MU_PUBLIC, dict_of_alpha={1: ALPHA_PUBLIC, 2: 1.0, 3: 0.0}, name='public'
+    nest_param=public_nest_parameter,
+    dict_of_alpha={1: alpha_public, 2: 1.0, 3: 0.0},
+    name='public',
 )
 
 nests = NestsForCrossNestedLogit(
@@ -89,13 +112,19 @@ nests = NestsForCrossNestedLogit(
 # %%
 # Read the estimation results from the pickle file.
 try:
-    results = res.bioResults(pickle_file='saved_results/b11cnl.pickle')
-except excep.BiogemeError:
-    print('Run first the script b11cnl.py in order to generate the file 11cnl.pickle.')
+    results = EstimationResults.from_yaml_file(filename='saved_results/b11cnl.yaml')
+except FileNotFoundError:
+    print(
+        'Run first the script b11cnl.py in order to generate the file b11cnl.yaml, and move it to the directory '
+        'saved_results.'
+    )
     sys.exit()
 
+
 # %%
-print('Estimation results: ', results.get_estimated_parameters())
+print(
+    'Estimation results: ', get_pandas_estimated_parameters(estimation_results=results)
+)
 
 # %%
 print('Calculating correlation matrix. It may generate numerical warnings from scipy.')
@@ -103,45 +132,53 @@ corr = nests.correlation(
     parameters=results.get_beta_values(),
     alternatives_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'},
 )
-corr
+display(corr)
 
 # %%
 # The choice model is a cross-nested logit, with availability conditions.
-prob1 = models.cnl(V, av, nests, 1)
-prob2 = models.cnl(V, av, nests, 2)
-prob3 = models.cnl(V, av, nests, 3)
+probability_train = cnl(v, av, nests, 1)
+probability_swissmetro = cnl(v, av, nests, 2)
+probability_car = cnl(v, av, nests, 3)
 
 # %%
 # We calculate elasticities. It is important that the variables
 # explicitly appear as such in the model. If not, the derivative will
 # be zero, as well as the elasticities.
-genelas1 = Derive(prob1, 'TRAIN_TT') * TRAIN_TT / prob1
-genelas2 = Derive(prob2, 'SM_TT') * SM_TT / prob2
-genelas3 = Derive(prob3, 'CAR_TT') * CAR_TT / prob3
+general_time_eslaticity_train = (
+    Derive(probability_train, 'TRAIN_TT') * TRAIN_TT / probability_train
+)
+general_time_elasticity_swissmetro = (
+    Derive(probability_swissmetro, 'SM_TT') * SM_TT / probability_swissmetro
+)
+general_time_elasticity_car = (
+    Derive(probability_car, 'CAR_TT') * CAR_TT / probability_car
+)
 
 # %%
 # We report the probability of each alternative and the elasticities.
 simulate = {
-    'Prob. train': prob1,
-    'Prob. Swissmetro': prob2,
-    'Prob. car': prob3,
-    'Elas. 1': genelas1,
-    'Elas. 2': genelas2,
-    'Elas. 3': genelas3,
+    'Prob. train': probability_train,
+    'Prob. Swissmetro': probability_swissmetro,
+    'Prob. car': probability_car,
+    'Elas. 1': general_time_eslaticity_train,
+    'Elas. 2': general_time_elasticity_swissmetro,
+    'Elas. 3': general_time_elasticity_car,
 }
 
 # %%
 # Create the Biogeme object.
-biosim = bio.BIOGEME(database, simulate)
-biosim.modelName = 'b11cnl_simul'
+biosim = BIOGEME(database, simulate)
+biosim.model_name = 'b11cnl_simul'
 
 # %%
 # Perform the simulation.
-simresults = biosim.simulate(results.get_beta_values())
+simulation_results = biosim.simulate(results.get_beta_values())
 
 # %%
 print('Simulation results')
-simresults
+display(simulation_results)
 
 # %%
-print(f'Aggregate share of train: {100*simresults["Prob. train"].mean():.1f}%')
+print(
+    f'Aggregate share of train: {100 * simulation_results["Prob. train"].mean():.1f}%'
+)

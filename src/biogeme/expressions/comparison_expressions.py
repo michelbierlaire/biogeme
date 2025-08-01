@@ -1,18 +1,18 @@
-""" Arithmetic expressions accepted by Biogeme: comparison operators
+"""Arithmetic expressions accepted by Biogeme: comparison operators
 
-:author: Michel Bierlaire
-
-:date: Sat Sep  9 15:20:12 2023Tue Mar 26 16:47:49 2019
+Michel Bierlaire
+Wed Mar 26 13:17:40 2025
 """
 
 from __future__ import annotations
 
 import logging
 
-from . import ExpressionOrNumeric
+from jax import Array, lax
+
+from .base_expressions import ExpressionOrNumeric
 from .binary_expressions import BinaryOperator
-from ..database import Database
-from ..deprecated import deprecated
+from .jax_utils import JaxFunctionType
 
 logger = logging.getLogger(__name__)
 
@@ -29,24 +29,7 @@ class ComparisonOperator(BinaryOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        BinaryOperator.__init__(self, left, right)
-
-    def audit(self, database: Database = None) -> tuple[list[str], list[str]]:
-        """Performs various checks on the expression."""
-        list_of_errors = []
-        list_of_warnings = []
-        if isinstance(self.left, ComparisonOperator) or isinstance(
-            self.right, ComparisonOperator
-        ):
-            the_warning = (
-                f'The following expression may potentially be ambiguous: [{self}] '
-                f'if it contains the chaining of two comparisons expressions. '
-                f'Keep in mind that, for Biogeme (like for Pandas), the '
-                f'expression (a <= x <= b) is not equivalent to (a <= x) '
-                f'and (x <= b).'
-            )
-            list_of_warnings.append(the_warning)
-        return list_of_errors, list_of_warnings
+        super().__init__(left, right)
 
 
 class Equal(ComparisonOperator):
@@ -63,10 +46,22 @@ class Equal(ComparisonOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        ComparisonOperator.__init__(self, left, right)
+        super().__init__(left, right)
+
+    def deep_flat_copy(self) -> Equal:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
 
     def __str__(self) -> str:
         return f'({self.left} == {self.right})'
+
+    def __repr__(self) -> str:
+        return f'Equal({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -77,10 +72,28 @@ class Equal(ComparisonOperator):
         r = 1 if self.left.get_value() == self.right.get_value() else 0
         return r
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(self, numerically_safe: bool):
+        import jax.numpy as jnp
+
+        left_fn = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ):
+            is_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) == right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_equal, lambda _: 1.0, lambda _: 0.0, operand=None)
+
+        return the_jax_function
 
 
 class NotEqual(ComparisonOperator):
@@ -97,10 +110,22 @@ class NotEqual(ComparisonOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        ComparisonOperator.__init__(self, left, right)
+        super().__init__(left, right)
+
+    def deep_flat_copy(self) -> NotEqual:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
 
     def __str__(self) -> str:
         return f'({self.left} != {self.right})'
+
+    def __repr__(self) -> str:
+        return f'NotEqual({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -111,10 +136,30 @@ class NotEqual(ComparisonOperator):
         r = 1 if self.left.get_value() != self.right.get_value() else 0
         return r
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
+        import jax.numpy as jnp
+
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> Array:
+            is_not_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) != right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_not_equal, lambda _: 1.0, lambda _: 0.0, operand=None)
+
+        return the_jax_function
 
 
 class LessOrEqual(ComparisonOperator):
@@ -132,10 +177,22 @@ class LessOrEqual(ComparisonOperator):
         :type right: biogeme.expressions.Expression
 
         """
-        ComparisonOperator.__init__(self, left, right)
+        super().__init__(left, right)
+
+    def deep_flat_copy(self) -> LessOrEqual:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
 
     def __str__(self) -> str:
         return f'({self.left} <= {self.right})'
+
+    def __repr__(self) -> str:
+        return f'LessOrEqual({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -146,10 +203,32 @@ class LessOrEqual(ComparisonOperator):
         r = 1 if self.left.get_value() <= self.right.get_value() else 0
         return r
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
+        import jax.numpy as jnp
+
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ):
+            is_less_or_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) <= right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(
+                is_less_or_equal, lambda _: 1.0, lambda _: 0.0, operand=None
+            )
+
+        return the_jax_function
 
 
 class GreaterOrEqual(ComparisonOperator):
@@ -166,10 +245,22 @@ class GreaterOrEqual(ComparisonOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        ComparisonOperator.__init__(self, left, right)
+        super().__init__(left, right)
+
+    def deep_flat_copy(self) -> GreaterOrEqual:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
 
     def __str__(self) -> str:
         return f'({self.left} >= {self.right})'
+
+    def __repr__(self) -> str:
+        return f'GreaterOrEqual({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -180,10 +271,32 @@ class GreaterOrEqual(ComparisonOperator):
         r = 1 if self.left.get_value() >= self.right.get_value() else 0
         return r
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
+        import jax.numpy as jnp
+
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ):
+            is_greater_or_equal = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) >= right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(
+                is_greater_or_equal, lambda _: 1.0, lambda _: 0.0, operand=None
+            )
+
+        return the_jax_function
 
 
 class Less(ComparisonOperator):
@@ -200,10 +313,22 @@ class Less(ComparisonOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        ComparisonOperator.__init__(self, left, right)
+        super().__init__(left, right)
+
+    def deep_flat_copy(self) -> Less:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
 
     def __str__(self) -> str:
         return f'({self.left} < {self.right})'
+
+    def __repr__(self) -> str:
+        return f'Less({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -214,10 +339,30 @@ class Less(ComparisonOperator):
         r = 1 if self.left.get_value() < self.right.get_value() else 0
         return r
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
+        import jax.numpy as jnp
+
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ):
+            is_less = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) < right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_less, lambda _: 1.0, lambda _: 0.0, operand=None)
+
+        return the_jax_function
 
 
 class Greater(ComparisonOperator):
@@ -234,10 +379,22 @@ class Greater(ComparisonOperator):
         :param right: second arithmetic expression
         :type right: biogeme.expressions.Expression
         """
-        ComparisonOperator.__init__(self, left, right)
+        super().__init__(left, right)
+
+    def deep_flat_copy(self) -> Greater:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(left=left_copy, right=right_copy)
 
     def __str__(self) -> str:
         return f'({self.left} > {self.right})'
+
+    def __repr__(self) -> str:
+        return f'Greater({repr(self.left)}, {repr(self.right)})'
 
     def get_value(self) -> float:
         """Evaluates the value of the expression
@@ -248,7 +405,27 @@ class Greater(ComparisonOperator):
         r = 1 if self.left.get_value() > self.right.get_value() else 0
         return r
 
-    @deprecated(get_value)
-    def getValue(self) -> float:
-        """Kept for backward compatibility"""
-        pass
+    def recursive_construct_jax_function(
+        self, numerically_safe: bool
+    ) -> JaxFunctionType:
+        import jax.numpy as jnp
+
+        left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+        right_fn: JaxFunctionType = self.right.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
+        )
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ):
+            is_greater = left_fn(
+                parameters, one_row, the_draws, the_random_variables
+            ) > right_fn(parameters, one_row, the_draws, the_random_variables)
+            return lax.cond(is_greater, lambda _: 1.0, lambda _: 0.0, operand=None)
+
+        return the_jax_function

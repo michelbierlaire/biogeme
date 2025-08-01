@@ -1,8 +1,7 @@
 """File gamma_forecasting.py
 
-:author: Michel Bierlaire, EPFL
-:date: Fri Apr 26 18:20:45 2024
-
+Michel Bierlaire, EPFL
+Fri Jul 25 2025, 16:38:12
 Forecasting with a MDCEV model and the "gamma_profile" specification.
 """
 
@@ -15,20 +14,17 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.database import Database
-from biogeme.exceptions import BiogemeError
-from biogeme.results import bioResults
-from specification import (
-    database,
-)
+from biogeme.results_processing import EstimationResults
 from gamma_specification import the_gamma_profile
+from process_data import database
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example: gamma profile utility')
 
-result_file = 'saved_results/gamma_profile.pickle'
+result_file = 'saved_results/gamma_profile.yaml'
 try:
-    results = bioResults(pickle_file=result_file)
-except BiogemeError as e:
+    results = EstimationResults.from_yaml_file(filename=result_file)
+except FileNotFoundError as e:
     print(e)
     print(f'File {result_file} is missing.')
     sys.exit()
@@ -63,7 +59,7 @@ epsilons = [
     np.random.gumbel(
         loc=0, scale=1, size=(number_of_draws, the_gamma_profile.number_of_alternatives)
     )
-    for _ in range(two_rows_of_database.get_sample_size())
+    for _ in range(two_rows_of_database.num_rows())
 ]
 
 # %
@@ -85,7 +81,7 @@ epsilons = [
     np.random.gumbel(
         loc=0, scale=1, size=(number_of_draws, the_gamma_profile.number_of_alternatives)
     )
-    for _ in range(two_rows_of_database.get_sample_size())
+    for _ in range(two_rows_of_database.num_rows())
 ]
 
 # %

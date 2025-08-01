@@ -13,9 +13,9 @@ syntax. They do not correspond to any meaningful model.
 :date: Thu Dec  7 15:18:45 2023
 """
 
+from biogeme.expressions import Beta, Variable
+from biogeme.segmentation import DiscreteSegmentationTuple, Segmentation
 from biogeme.version import get_text
-import biogeme.segmentation as seg
-from biogeme.expressions import Variable, Beta
 
 # %%
 # Version of Biogeme.
@@ -25,7 +25,7 @@ print(get_text())
 socio_eco_1 = Variable('socio_eco_1')
 
 # %%
-segmentation_1 = seg.DiscreteSegmentationTuple(
+segmentation_1 = DiscreteSegmentationTuple(
     variable=socio_eco_1,
     mapping={
         1: 'high',
@@ -38,7 +38,7 @@ segmentation_1 = seg.DiscreteSegmentationTuple(
 socio_eco_2 = Variable('socio_eco_2')
 
 # %%
-segmentation_2 = seg.DiscreteSegmentationTuple(
+segmentation_2 = DiscreteSegmentationTuple(
     variable=socio_eco_2,
     mapping={
         1: 'level_1',
@@ -52,7 +52,7 @@ segmentation_2 = seg.DiscreteSegmentationTuple(
 beta_x = Beta('beta_x', 0, None, None, 0)
 
 # %%
-segmented_parameter = seg.Segmentation(beta_x, (segmentation_1,))
+segmented_parameter = Segmentation(beta_x, (segmentation_1,))
 
 # %%
 # The expressions for the segmented parameter is obtained as follows:
@@ -64,11 +64,11 @@ print(segmented_parameter.segmented_code())
 
 # %%
 # The code of the original Beta is also available:
-print(segmented_parameter.beta_code())
+print(segmented_parameter.beta_ref_code())
 
 # %%
 # Same with the second segmentation
-segmented_parameter = seg.Segmentation(beta_x, (segmentation_2,))
+segmented_parameter = Segmentation(beta_x, (segmentation_2,))
 
 # %%
 segmented_parameter.segmented_beta()
@@ -78,7 +78,7 @@ print(segmented_parameter.segmented_code())
 
 # %%
 # The two segmentations can be combined.
-segmented_parameter = seg.Segmentation(
+segmented_parameter = Segmentation(
     beta_x,
     (
         segmentation_1,

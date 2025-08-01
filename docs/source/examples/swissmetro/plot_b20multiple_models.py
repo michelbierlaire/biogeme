@@ -5,44 +5,46 @@ Estimation of several models
 
 Example of the estimation of several specifications of the model.
 
-:author: Michel Bierlaire, EPFL
-:date: Mon Apr 10 12:19:46 2023
-
+Michel Bierlaire, EPFL
+Thu Jun 26 2025, 16:04:27
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
+from biogeme.biogeme import BIOGEME
+from biogeme.catalog import (
+    Catalog,
+    segmentation_catalogs,
+)
 from biogeme.expressions import Beta, log
-from biogeme.results import compile_estimation_results, pareto_optimal
-from biogeme.catalog import Catalog, segmentation_catalogs
+from biogeme.models import loglogit
+from biogeme.results_processing import (
+    compare_parameters,
+    compile_estimation_results,
+    pareto_optimal,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
-    CHOICE,
-    SM_AV,
     CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
-    SM_COST_SCALED,
-    CAR_TT_SCALED,
     CAR_CO_SCALED,
+    CAR_TT_SCALED,
+    CHOICE,
     MALE,
+    SM_AV,
+    SM_COST_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 # %%
 # Parameters to be estimated
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_CAR_MALE = Beta('ASC_CAR_MALE', 0, None, None, 0)
-ASC_CAR_FEMALE = Beta('ASC_CAR_FEMALE', 0, None, None, 0)
-ASC_TRAIN_MALE = Beta('ASC_TRAIN_MALE', 0, None, None, 0)
-ASC_TRAIN_FEMALE = Beta('ASC_TRAIN_FEMALE', 0, None, None, 0)
-B_TIME = Beta('B_TIME', 0, None, None, 0)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 segmentation_gender = database.generate_segmentation(
@@ -52,9 +54,9 @@ segmentation_gender = database.generate_segmentation(
 # %%
 # We define catalogs with two different specifications for the
 # ASC_CAR: non segmented, and segmented.
-ASC_TRAIN_catalog, ASC_CAR_catalog = segmentation_catalogs(
-    generic_name='ASC',
-    beta_parameters=[ASC_TRAIN, ASC_CAR],
+asc_train_catalog, asc_car_catalog = segmentation_catalogs(
+    generic_name='asc',
+    beta_parameters=[asc_train, asc_car],
     potential_segmentations=(segmentation_gender,),
     maximum_number=1,
 )
@@ -86,13 +88,13 @@ sm_tt_catalog = Catalog.from_dict(
 
 # %%
 # Definition of the utility functions with linear cost.
-V1 = ASC_TRAIN_catalog + B_TIME * train_tt_catalog + B_COST * TRAIN_COST_SCALED
-V2 = B_TIME * sm_tt_catalog + B_COST * SM_COST_SCALED
-V3 = ASC_CAR_catalog + B_TIME * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train_catalog + b_time * train_tt_catalog + b_cost * TRAIN_COST_SCALED
+v_swissmetro = b_time * sm_tt_catalog + b_cost * SM_COST_SCALED
+v_car = asc_car_catalog + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -101,11 +103,11 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # %%
 # Definition of the model. This is the contribution of each
 # observation to the log likelihood function.
-logprob = models.loglogit(V, av, CHOICE)
+log_probability = loglogit(v, av, CHOICE)
 
 # %%
-the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b20multiple_models'
+the_biogeme: BIOGEME = BIOGEME(database=database, formulas=log_probability)
+the_biogeme.model_name = 'b20multiple_models'
 
 # %%
 dict_of_results = the_biogeme.estimate_catalog()
@@ -113,7 +115,7 @@ dict_of_results = the_biogeme.estimate_catalog()
 # %%
 print(f'A total of {len(dict_of_results)} models have been estimated:')
 for config, res in dict_of_results.items():
-    print(f'{config}: LL={res.data.logLike:.2f} K={res.data.nparam}')
+    print(f'{config}: LL={res.final_log_likelihood:.2f} K={res.number_of_parameters}')
 
 # %%
 summary, description = compile_estimation_results(dict_of_results, use_short_names=True)
@@ -136,3 +138,8 @@ summary, description = compile_estimation_results(
     non_dominated_models, use_short_names=False
 )
 print(summary)
+
+# %%
+# It is possible to generate a LaTeX table comparing the results
+latex_code = compare_parameters(estimation_results=dict_of_results)
+print(latex_code)

@@ -7,37 +7,31 @@ Example of a uniform mixture of logit models, using Monte-Carlo
  integration.  The mixing distribution is uniform.  The draws are from
  the Modified Hypercube Latin Square.
 
-:author: Michel Bierlaire, EPFL
-:date: Sun Apr  9 17:50:28 2023
-
+Michel Bierlaire, EPFL
+Fri Jun 20 2025, 11:24:34
 """
 
 import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
-from biogeme.expressions import (
-    Beta,
-    bioDraws,
-    exp,
-    log,
-    MonteCarlo,
-)
-from biogeme.parameters import Parameters
+from IPython.core.display_functions import display
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Draws, MonteCarlo, log
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -45,34 +39,34 @@ logger.info('Example b06unif_mixture_MHLS')
 
 # %%
 # Parameters to be estimated.
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+asc_sm = Beta('asc_sm', 0, None, None, 1)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME = Beta('B_TIME', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
 
 # %%
 # It is advised not to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
+b_time_s = Beta('b_time_s', 1, None, None, 0)
 
 # %%
 # Define a random parameter, uniformly distributed, designed to be used
 # for Monte-Carlo simulation. The type of draws is set to ``NORMAL_MLHS``.
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL_MLHS')
+b_time_rnd = b_time + b_time_s * Draws('b_time_rnd', 'NORMAL_MLHS')
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = asc_sm + b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -80,17 +74,17 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional on b_time_rnd, we have a logit model (called the kernel).
-prob = exp(models.loglogit(V, av, CHOICE))
+conditional_probability = logit(v, av, CHOICE)
 
 # %%
 # We integrate over b_time_rnd using Monte-Carlo
-logprob = log(MonteCarlo(prob))
+log_probability = log(MonteCarlo(conditional_probability))
 
 
 # %%
 # Create the Biogeme object.
-the_biogeme = bio.BIOGEME(database, logprob, number_of_draws=100, seed=1223)
-the_biogeme.modelName = '06unif_mixture_MHLS'
+the_biogeme = BIOGEME(database, log_probability, number_of_draws=10000, seed=1223)
+the_biogeme.model_name = '06unif_mixture_MHLS'
 
 # %%
 # Estimate the parameters.
@@ -100,5 +94,5 @@ results = the_biogeme.estimate()
 print(results.short_summary())
 
 # %%
-pandas_results = results.get_estimated_parameters()
-pandas_results
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

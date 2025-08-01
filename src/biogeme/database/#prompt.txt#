@@ -1,0 +1,4 @@
+I need to implement the following.
+Consider self.child, an arithmetic Expression.
+We need to create largest_group copies of the child.
+For each copy i=1, ... largest_group, 

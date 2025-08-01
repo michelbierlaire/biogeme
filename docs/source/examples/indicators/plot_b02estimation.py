@@ -3,62 +3,73 @@
 Estimation and simulation of a nested logit model
 =================================================
 
- We estimate a nested logit model and we perform simulation using the
+ We estimate a nested logit model, and we perform simulation using the
  estimated model.
 
-:author: Michel Bierlaire, EPFL
-:date: Wed Apr 12 21:05:16 2023
-
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 16:08:07
 """
 
 from IPython.core.display_functions import display
 
-from biogeme import models
-import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.calculator import get_value_c
 from biogeme.data.optima import read_data
+from biogeme.models import lognested
+from biogeme.results_processing import get_pandas_estimated_parameters
 from scenarios import scenario
+
+logger = blog.get_screen_logger(level=blog.INFO)
+logger.info('Example plot_b02estimation')
 
 # %%
 # Obtain the specification for the default scenario.
 # The definition of the scenarios is available in :ref:`scenarios`.
-V, nests, Choice, _ = scenario()
+V, nests, choice, _ = scenario()
 
 # %%
 # The choice model is a nested logit, with availability conditions
 # For estimation, we need the log of the probability.
-logprob = models.lognested(util=V, availability=None, nests=nests, choice=Choice)
+log_probability = lognested(util=V, availability=None, nests=nests, choice=choice)
 
 # %%
 # Get the database
 database = read_data()
 # %%
 # Create the Biogeme object for estimation.
-the_biogeme = bio.BIOGEME(database, logprob)
-the_biogeme.modelName = 'b02estimation'
+the_biogeme = BIOGEME(database, log_probability)
+the_biogeme.model_name = 'b02estimation'
 
 # %%
 # Estimate the parameters. Perform bootstrapping.
-the_biogeme.bootstrap_samples = 100
 results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
 # Get the results in a pandas table
-pandas_results = results.get_estimated_parameters()
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
 display(pandas_results)
 
 
 # %%
 # Simulation
-simulated_choices = logprob.get_value_c(
-    betas=results.get_beta_values(), database=database
+simulated_choices = get_value_c(
+    expression=log_probability,
+    betas=results.get_beta_values(),
+    database=database,
+    numerically_safe=False,
+    use_jit=True,
 )
 display(simulated_choices)
 
 # %%
-loglikelihood = logprob.get_value_c(
+loglikelihood = get_value_c(
+    expression=log_probability,
     betas=results.get_beta_values(),
     database=database,
     aggregation=True,
+    numerically_safe=False,
+    use_jit=True,
 )
-print(f'Final log likelihood:     {results.data.logLike}')
+print(f'Final log likelihood:     {results.final_log_likelihood}')
 print(f'Simulated log likelihood: {loglikelihood}')

@@ -6,24 +6,25 @@ Antithetic draws
 Calculation of a simple integral using Monte-Carlo integration. It
 illustrates how to use antithetic draws.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu Apr 13 20:48:02 2023
+Michel Bierlaire, EPFL
+Sat Jun 28 2025, 21:08:23
 """
 
 import numpy as np
 import pandas as pd
-import biogeme.database as db
-import biogeme.biogeme as bio
-from biogeme import draws
-from biogeme.expressions import exp, bioDraws, MonteCarlo
-from biogeme.native_draws import RandomNumberGeneratorTuple
+from IPython.core.display_functions import display
+
+from biogeme.biogeme import BIOGEME
+from biogeme.database import Database
+from biogeme.draws import RandomNumberGeneratorTuple, get_halton_draws
+from biogeme.expressions import Draws, MonteCarlo, exp
 
 # %%
 # We create a fake database with one entry, as it is required to store
 # the draws.
 df = pd.DataFrame()
 df['FakeColumn'] = [1.0]
-database = db.Database('fake_database', df)
+database = Database('fake_database', df)
 
 
 # %%
@@ -38,7 +39,7 @@ def halton13_anti(sample_size: int, number_of_draws: int) -> np.array:
     """
 
     # We first generate half of the number of requested draws.
-    the_draws = draws.get_halton_draws(
+    the_draws = get_halton_draws(
         sample_size, int(number_of_draws / 2.0), base=13, skip=10
     )
     # We complement them with their antithetic version.
@@ -46,27 +47,26 @@ def halton13_anti(sample_size: int, number_of_draws: int) -> np.array:
 
 
 # %%
-mydraws = {
+my_draws = {
     'HALTON13_ANTI': RandomNumberGeneratorTuple(
         halton13_anti,
         'Antithetic Halton draws, base 13, skipping 10',
     )
 }
-database.set_random_number_generators(mydraws)
 
 # %%
 # Integrate with antithetic pseudo-random number generator.
-integrand = exp(bioDraws('U', 'UNIFORM_ANTI'))
+integrand = exp(Draws('U', 'UNIFORM_ANTI'))
 simulated_integral = MonteCarlo(integrand)
 
 # %%
 # Integrate with antithetic Halton draws, base 13.
-integrand_halton13 = exp(bioDraws('U_halton13', 'HALTON13_ANTI'))
+integrand_halton13 = exp(Draws('U_halton13', 'HALTON13_ANTI'))
 simulated_integral_halton13 = MonteCarlo(integrand_halton13)
 
 # %%
 # Integrate with antithetic MLHS.
-integrand_mlhs = exp(bioDraws('U_mlhs', 'UNIFORM_MLHS_ANTI'))
+integrand_mlhs = exp(Draws('U_mlhs', 'UNIFORM_MLHS_ANTI'))
 simulated_integral_mlhs = MonteCarlo(integrand_mlhs)
 
 # %%
@@ -75,7 +75,7 @@ true_integral = exp(1.0) - 1.0
 
 # %%
 # Number of draws.
-R = 20000
+R = 2_000_000
 
 # %%
 error = simulated_integral - true_integral
@@ -99,10 +99,12 @@ simulate = {
 
 
 # %%
-biosim = bio.BIOGEME(database, simulate)
+biosim = BIOGEME(
+    database, simulate, random_number_generators=my_draws, number_of_draws=R
+)
 biosim.modelName = 'b03antithetic'
 results = biosim.simulate(the_beta_values={})
-results
+display(results)
 
 # %%
 # Reorganize the results.

@@ -18,6 +18,7 @@ Optimization algorithms for Biogeme
 
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -25,11 +26,22 @@ import scipy.optimize as sc
 from biogeme_optimization.bounds import Bounds
 from biogeme_optimization.diagnostics import OptimizationResults
 from biogeme_optimization.function import FunctionToMinimize
-from biogeme_optimization.linesearch import newton_line_search, bfgs_line_search
+from biogeme_optimization.linesearch import bfgs_line_search, newton_line_search
 from biogeme_optimization.simple_bounds import simple_bounds_newton_algorithm
-from biogeme_optimization.trust_region import newton_trust_region, bfgs_trust_region
+from biogeme_optimization.trust_region import bfgs_trust_region, newton_trust_region
 
 logger = logging.getLogger(__name__)
+
+OptimizationAlgorithm = Callable[
+    [
+        FunctionToMinimize,
+        np.ndarray,
+        list[tuple[float, float]],
+        list[str],
+        dict[str, Any] | None,
+    ],
+    OptimizationResults,
+]
 
 
 def scipy(
@@ -83,8 +95,9 @@ def scipy(
     # Absolute tolerance
     absgtol = 1.0e-7
     opts = {'ftol': np.finfo(np.float64).eps, 'gtol': absgtol}
+    allowed_scipy_opts = {'gtol', 'ftol', 'maxiter', 'disp', 'eps'}
     if parameters is not None:
-        opts = {**opts, **parameters}
+        opts.update({k: v for k, v in parameters.items() if k in allowed_scipy_opts})
 
     if 'gtol' in opts.keys():
         logger.info(f'Minimize with tol {opts["gtol"]}')
@@ -673,7 +686,7 @@ def bio_bfgs(
     )
 
 
-algorithms = {
+algorithms: dict[str, OptimizationAlgorithm] = {
     'scipy': scipy,
     'LS-newton': newton_linesearch_for_biogeme,
     'TR-newton': newton_trust_region_for_biogeme,

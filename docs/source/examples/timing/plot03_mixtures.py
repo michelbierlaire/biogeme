@@ -7,52 +7,52 @@ Michel Bierlaire
 Tue Jul 2 14:48:52 2024
 """
 
-from biogeme import models
+from tabulate import tabulate
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from biogeme.data.swissmetro import (
-    read_data,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    read_data,
 )
-from biogeme.expressions import Beta, MonteCarlo, log, bioDraws
-from biogeme.tools.time import Timing
+from biogeme.expressions import Beta, Draws, MonteCarlo, log
+from biogeme.models import logit
+from timing_expression import timing_expression
 
 # %%
 # Parameters to be estimated
-ASC_CAR = Beta('ASC_CAR', 0, None, None, 0)
-ASC_TRAIN = Beta('ASC_TRAIN', 0, None, None, 0)
-ASC_SM = Beta('ASC_SM', 0, None, None, 1)
-B_COST = Beta('B_COST', 0, None, None, 0)
+asc_car = Beta('asc_car', 0, None, None, 0)
+asc_train = Beta('asc_train', 0, None, None, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # Define a random parameter, normally distributed, designed to be used
 # for Monte-Carlo simulation.
-B_TIME = Beta('B_TIME', 0, None, None, 0)
+b_time = Beta('b_time', 0, None, None, 0)
 
 # %%
 # It is advised *not* to use 0 as starting value for the following parameter.
-B_TIME_S = Beta('B_TIME_S', 1, None, None, 0)
-B_TIME_RND = B_TIME + B_TIME_S * bioDraws('b_time_rnd', 'NORMAL')
+b_time_s = Beta('b_time_s', 1, None, None, 0)
+b_time_rnd = b_time + b_time_s * Draws('b_time_rnd', 'NORMAL')
 
 # %%
 # Definition of the utility functions.
-V1 = ASC_TRAIN + B_TIME_RND * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
-V2 = ASC_SM + B_TIME_RND * SM_TT_SCALED + B_COST * SM_COST_SCALED
-V3 = ASC_CAR + B_TIME_RND * CAR_TT_SCALED + B_COST * CAR_CO_SCALED
+v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
+v_swissmetro = b_time_rnd * SM_TT_SCALED + b_cost * SM_COST_SCALED
+v_car = asc_car + b_time_rnd * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
 # Associate utility functions with the numbering of alternatives.
-V = {1: V1, 2: V2, 3: V3}
+V = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
 # Associate the availability conditions with the alternatives.
@@ -60,92 +60,42 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
 # Conditional to b_time_rnd, we have a logit model (called the kernel).
-prob = models.logit(V, av, CHOICE)
+prob = logit(V, av, CHOICE)
 
 # %%
 # We integrate over b_time_rnd using Monte-Carlo.
-logprob = log(MonteCarlo(prob))
-
-# %%
-# Number of draws
-number_of_draws = 100
+log_probability = log(MonteCarlo(prob))
 
 # %%
 database = read_data()
 
 # %%
-# Create a Timing object
-the_timing = Timing(warm_up_runs=3, num_runs=10)
+# Number of draws
+number_of_draws = 100
+
 
 # %%
-# Timing when only the log likelihood is needed
-average_time_function_only = the_timing.time_function(
-    logprob.get_value_and_derivatives,
-    kwargs={
-        'gradient': False,
-        'hessian': False,
-        'bhhh': False,
-        'prepare_ids': True,
-        'database': database,
-        'number_of_draws': number_of_draws,
-    },
+# Timing
+timing_results = timing_expression(
+    the_expression=log_probability,
+    the_database=database,
+    number_of_draws=number_of_draws,
 )
-
-print(
-    f'Logit model, log likelihood for one iteration: {average_time_function_only:.3g} seconds'
-)
+results = [[k, f'{v:.3g}'] for k, v in timing_results.items()]
+print(f'With {number_of_draws} draws...')
+print(tabulate(results, headers=['', 'Time (in sec.)'], tablefmt='github'))
 
 # %%
-# Timing when the log likelihood and the gradient
-average_time_function_gradient = the_timing.time_function(
-    logprob.get_value_and_derivatives,
-    kwargs={
-        'gradient': True,
-        'hessian': False,
-        'bhhh': False,
-        'prepare_ids': True,
-        'database': database,
-        'number_of_draws': number_of_draws,
-    },
-)
-print(
-    f'Logit model, log likelihood and gradient for one iteration: {average_time_function_gradient:.3g} seconds'
-)
-relative_gradient = (
-    average_time_function_gradient - average_time_function_only
-) / average_time_function_only
-print(
-    f'Calculating the gradient means a {100*relative_gradient:.2f}% increase of the calculation time.'
-)
+# Number of draws
+number_of_draws = 1000
 
 # %%
-# Timing when the log likelihood, the gradient and hessian are needed
-average_time_function_gradient_hessian = the_timing.time_function(
-    logprob.get_value_and_derivatives,
-    kwargs={
-        'gradient': True,
-        'hessian': True,
-        'bhhh': False,
-        'prepare_ids': True,
-        'database': database,
-        'number_of_draws': number_of_draws,
-    },
+# Timing
+timing_results = timing_expression(
+    the_expression=log_probability,
+    the_database=database,
+    number_of_draws=number_of_draws,
 )
-print(
-    f'Logit model, log likelihood, gradient and hessian for one iteration: '
-    f'{average_time_function_gradient_hessian:.3g} seconds'
-)
-relative_to_function = (
-    average_time_function_gradient_hessian - average_time_function_only
-) / average_time_function_only
-relative_to_gradient = (
-    average_time_function_gradient_hessian - average_time_function_gradient
-) / average_time_function_gradient
-print(
-    f'Calculating the hessian means a {100*relative_to_function:.2f}% increase of the calculation time compare to '
-    f'calculating the function only.'
-)
-print(
-    f'Calculating the hessian means a {100*relative_to_gradient:.2f}% increase of the calculation time compare to '
-    f'calculating the function and the gradient only.'
-)
+results = [[k, f'{v:.3g}'] for k, v in timing_results.items()]
+print(f'With {number_of_draws} draws...')
+print(tabulate(results, headers=['', 'Time (in sec.)'], tablefmt='github'))

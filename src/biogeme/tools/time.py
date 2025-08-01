@@ -1,6 +1,8 @@
 import time
 from datetime import timedelta
-from typing import Callable, Any
+from typing import Any, Callable
+
+from tqdm import tqdm
 
 
 def format_timedelta(td: timedelta) -> str:
@@ -73,7 +75,7 @@ class Timing:
 
         # Timing the function
         start_time = time.time()
-        for _ in range(self.num_runs):
+        for _ in tqdm(range(self.num_runs)):
             callable_func(**kwargs)
         end_time = time.time()
 

@@ -4,7 +4,9 @@
 :date: Thu Mar 23 17:53:22 2023
 
 """
+
 import logging
+from contextlib import contextmanager
 
 DEBUG = logging.DEBUG
 INFO = logging.INFO
@@ -61,3 +63,30 @@ def get_file_logger(filename: str, level: int = WARNING) -> logging.Logger:
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
     return loggers[0]
+
+
+@contextmanager
+def suppress_logs(level=logging.WARNING):
+    """Temporarily suppress logs below a certain level."""
+
+    old_levels = [logger.getEffectiveLevel() for logger in loggers]
+
+    # Apply a filter
+    class MaxLevelFilter(logging.Filter):
+        def filter(self, record):
+            return record.levelno >= level
+
+    filters = []
+    for logger in loggers:
+        for handler in logger.handlers:
+            filt = MaxLevelFilter()
+            handler.addFilter(filt)
+            filters.append((handler, filt))
+
+    try:
+        yield
+    finally:
+        for handler, filt in filters:
+            handler.removeFilter(filt)
+        for logger, old_level in zip(loggers, old_levels):
+            logger.setLevel(old_level)

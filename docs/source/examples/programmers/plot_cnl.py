@@ -7,18 +7,19 @@ Example of usage of the cnl module.  This is for programmers who need
 examples of use of the functions of the class. The examples are
 designed to illustrate the syntax.
 
-:author: Michel Bierlaire
-:date: Fri Nov 17 08:27:24 2023
+Michel Bierlaire
+Sun Jun 29 2025, 02:25:16
 
 """
 
 import numpy as np
 import pandas as pd
-import biogeme.cnl as cnl
-import biogeme.tools as tools
+from IPython.core.display_functions import display
+
 import biogeme.biogeme_logging as blog
-import biogeme.tools.derivatives
-from biogeme.nests import OneNestForCrossNestedLogit, NestsForCrossNestedLogit
+from biogeme.cnl import cnl_cdf, cnl_g
+from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
+from biogeme.tools import CheckDerivativesResults, check_derivatives
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Logging on')
@@ -43,56 +44,44 @@ nests = NestsForCrossNestedLogit(choice_set=choice_set, tuple_of_nests=(nest_1, 
 # numerically the implementation of the derivatives.
 
 # %%
-G = cnl.cnl_g(choice_set, nests)
+G = cnl_g(choice_set, nests)
 
 # %%
 # Draw a random point where to evaluate the function.
 y = np.random.uniform(low=0.01, high=2, size=4)
-y
+display(y)
 
 # %%
-f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
-    G, y, names=None, logg=True
-)
-f
+check_results: CheckDerivativesResults = check_derivatives(G, y, names=None, logg=True)
 
 # %%
-pd.DataFrame(g)
-
+print(f'f = {check_results.function}')
 # %%
-pd.DataFrame(h)
-
+# We display the differences between the entries of the analytical gradient and the finite differences gradient
+display(pd.DataFrame(check_results.errors_gradient))
 # %%
-pd.DataFrame(gdiff)
-
-# %%
-pd.DataFrame(hdiff)
-
+# We display the differences between the entries of the analytical hessian and the finite differences hessian
+display(pd.DataFrame(check_results.errors_hessian))
 
 # %%
 # We do the same for the CDF.
 
 # %%
 xi = np.random.uniform(low=-10, high=10, size=4)
-xi
+display(xi)
 
 # %%
-F = cnl.cnl_cdf(choice_set, nests)
+F = cnl_cdf(choice_set, nests)
 
 # %%
-f, g, h, gdiff, hdiff = biogeme.tools.derivatives.check_derivatives(
+check_cdf_results: CheckDerivativesResults = check_derivatives(
     F, y, names=None, logg=True
 )
-f
-
 # %%
-pd.DataFrame(g)
-
+print(f'f = {check_cdf_results.function}')
 # %%
-pd.DataFrame(h)
-
+# We display the differences between the entries of the analytical gradient and the finite differences gradient
+display(pd.DataFrame(check_cdf_results.errors_gradient))
 # %%
-pd.DataFrame(gdiff)
-
-# %%
-pd.DataFrame(hdiff)
+# We display the differences between the entries of the analytical hessian and the finite differences hessian
+display(pd.DataFrame(check_cdf_results.errors_hessian))

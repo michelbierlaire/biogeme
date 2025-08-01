@@ -1,42 +1,72 @@
+# from .validation import validate_expression_type
+from .add_prefix_suffix import add_prefix_suffix_to_all_variables
+from .audit import audit_expression
 from .base_expressions import (
     Expression,
     ExpressionOrNumeric,
 )
-from .catalog_iterator import SelectedExpressionsIterator
-from .numeric_tools import is_numeric
-from .numeric_expressions import Numeric
+from .belongs_to import BelongsTo
+from .beta_parameters import Beta
+from .binary_max import BinaryMax
+from .binary_min import BinaryMin
+from .collectors import (
+    ExpressionCollector,
+    collect_init_values,
+    list_of_all_betas_in_expression,
+    list_of_draws_in_expression,
+    list_of_fixed_betas_in_expression,
+    list_of_free_betas_in_expression,
+    list_of_random_variables_in_expression,
+    list_of_variables_in_expression,
+)
+from .conditional_sum import ConditionalSum, ConditionalTermTuple
 from .convert import (
-    validate_and_convert,
     expression_to_value,
     get_dict_expressions,
     get_dict_values,
+    validate_and_convert,
+)
+from .cos import cos
+from .deprecated import (
+    Integrate,
+    bioDraws,
+    bioLinearUtility,
+    bioMax,
+    bioMin,
+    bioMultSum,
+    bioNormalCdf,
+)
+from .derive import Derive
+from .draws import Draws
+from .elem import Elem
+from .elementary_expressions import (
+    Elementary,
 )
 from .elementary_types import TypeOfElementaryExpression
-from .elementary_expressions import bioDraws, Variable, RandomVariable
-from .beta_parameters import Beta
-from .unary_expressions import (
-    log,
-    sin,
-    cos,
-    logzero,
-    exp,
-    MonteCarlo,
-    bioNormalCdf,
-    PanelLikelihoodTrajectory,
-    Derive,
-    Integrate,
-    BelongsTo,
+from .exp import exp
+from .integrate import IntegrateNormal
+from .jax_utils import build_vectorized_function
+from .linear_utility import LinearTermTuple, LinearUtility
+from .log import log
+from .logit_expressions import LogLogit
+from .logzero import logzero
+from .montecarlo import MonteCarlo
+from .multiple_expressions import (
+    CatalogItem,
+    MultipleExpression,
+    NamedExpression,
+    SELECTION_SEPARATOR,
+    SEPARATOR,
 )
-from .binary_expressions import bioMin, bioMax
-from .nary_expressions import (
-    bioMultSum,
-    Elem,
-    bioLinearUtility,
-    LinearTermTuple,
-    ConditionalSum,
-    ConditionalTermTuple,
-)
-from .logit_expressions import LogLogit, _bioLogLogit, _bioLogLogitFullChoiceSet
-from .idmanager import IdManager
-from .multiple_expressions import NamedExpression, MultipleExpression, CatalogItem
-from .named_expression import named_expression
+from .multiple_product import MultipleProduct
+from .multiple_sum import MultipleSum
+from .named_expression import named_function_output
+from .normalcdf import NormalCdf
+from .numeric_expressions import Numeric
+from .numeric_tools import is_numeric
+from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
+from .random_variable import RandomVariable
+from .rename_variables import OldNewName, rename_all_variables
+from .sin import sin
+from .variable import Variable
+from .visitor import ExpressionVisitor

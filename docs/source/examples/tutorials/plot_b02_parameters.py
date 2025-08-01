@@ -5,18 +5,20 @@ Configuring Biogeme with parameters
 
 We illustrate how to obtain information about configuration parameters, and how to modify them.
 
-:author: Michel Bierlaire, EPFL
-:date: Thu May 16 13:24:56 2024
+Michel Bierlaire, EPFL
+Thu May 16 13:24:56 2024
 
 """
 
 import os
 
 import pandas as pd
+from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
+from biogeme.default_parameters import print_list_of_parameters
 from biogeme.expressions import Beta
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -130,3 +132,7 @@ print(f'Max. number of iterations: {biogeme_object.max_iterations}')
 os.remove(default_toml_file_name)
 os.remove(another_toml_file_name)
 os.remove(yet_another_toml_file_name)
+
+# %%
+# Finally, we display the list of all parameters
+display(print_list_of_parameters())

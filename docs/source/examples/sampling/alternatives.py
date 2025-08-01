@@ -5,16 +5,18 @@ List of alternatives
 
 Script reading the list of alternatives and identifying subsets
 
-:author: Michel Bierlaire
-:date: Mon Oct  9 10:53:03 2023
+Michel Bierlaire
+Fri Jul 25 2025, 17:43:34
 """
 
 import pandas as pd
+from IPython.core.display_functions import display
+
 from biogeme.partition import Partition
 
 # %%
 alternatives = pd.read_csv('restaurants.dat')
-alternatives
+display(alternatives)
 
 # %%
 ID_COLUMN = 'ID'
