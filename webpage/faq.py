@@ -1,6 +1,22 @@
 faq = {}
 
 faq[
+    'What was new in Biogeme 3.2.14?'
+] = """
+<p>
+In this release, various improvements have been made, including code
+reorganization and documentation, bug fixes, and new functionalities. In particular, the name of several objects and functions have been modified for a better compliance with the Python recommendations. The old syntax has been maintained, but is tagged as deprecated.
+</p>
+<ul>
+    <li>The implementation of the arithmetic expressions (cythonbiogeme) has been optimized for better numerical stability. See the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier24.pdf">technical report</a> for details.</li>
+    <li>The management of the parameters has been simplified. Indeed, it can be done either using the <code>biogeme.toml</code> file, or directlywhen constructing the BIOGEME object.</li>
+    <li>The Multiple Discrete Continuous Extreme Value (MDCEV) model has been validated. It is possible to estimate its parameters, and to use the estimated model for forecasting. See the <a href="https://transp-or.epfl.ch/documents/technicalReports/BierWang24.pdf">technical report</a> for details.</li>
+    <li>The files preparing the data for Swissmetro, Optima and the MDCEV data set are included in the distribution.</li>
+</ul>
+"""
+
+
+faq[
     'What was new in Biogeme 3.2.13?'
 ] = """
 <dl>

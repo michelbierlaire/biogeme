@@ -9,10 +9,12 @@ documentation = {}
 archives = {}
 resources = {}
 
+
+special['New release'] = 'The new version of Biogeme is substantially faster. Try it.'
 # special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
-special['EPFL Short Course'] = (
-    'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. January 26-30, 2025 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
-)
+# special['EPFL Short Course'] = (
+#    'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. January 26-30, 2025 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
+# )
 # special['Other special'] = 'Other special as well'
 
 # special['ChatGPT'] = (
@@ -59,18 +61,89 @@ about['Links'] = (
 """,
 )
 
-about['What\'s new in Biogeme 3.2.14?'] = (
+about['What\'s new in Biogeme 3.3.0?'] = (
     """
 <p>
-In this release, various improvements have been made, including code
-reorganization and documentation, bug fixes, and new functionalities. In particular, the name of several objects and functions have been modified for a better compliance with the Python recommendations. The old syntax has been maintained, but is tagged as deprecated.
+  In this major release, arithmetic expressions and their derivatives are no longer evaluated using <code>cythonbiogeme</code>.
+  Instead, Biogeme now relies on 
+  <a href="https://docs.jax.dev" target="_blank" rel="noopener noreferrer">JAX</a>, 
+  a high-performance numerical computing library for Python.
 </p>
-<ul>
-    <li>The implementation of the arithmetic expressions (cythonbiogeme) has been optimized for better numerical stability. See the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier24.pdf">technical report</a> for details.</li>
-    <li>The management of the parameters has been simplified. Indeed, it can be done either using the <code>biogeme.toml</code> file, or directlywhen constructing the BIOGEME object.</li>
-    <li>The Multiple Discrete Continuous Extreme Value (MDCEV) model has been validated. It is possible to estimate its parameters, and to use the estimated model for forecasting. See the <a href="https://transp-or.epfl.ch/documents/technicalReports/BierWang24.pdf">technical report</a> for details.</li>
-    <li>The files preparing the data for Swissmetro, Optima and the MDCEV data set are included in the distribution.</li>
-</ul>
+
+<p>
+  This transition required substantial changes to the underlying codebase. A large portion had to be re-implemented from scratch. 
+  Although the release has undergone extensive testing, some issues may still persist. 
+  If you encounter any problems, please report them on the 
+  <a href="https://groups.google.com/d/forum/biogeme" target="_blank" rel="noopener noreferrer">user group</a>.
+</p>
+
+<p>
+  To the extent possible, the user interface, namely the syntax for model specification, remains consistent with previous versions. 
+  As a result, we anticipate only minor adjustments will be needed in existing code. 
+  However, some updates may be necessary.
+</p>
+
+<p>
+  The impact on computation time is substantial. Preliminary tests on the Swissmetro dataset show the following improvements:
+</p>
+<p>
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Computation</th>
+      <th>Speedup (3.3.0 vs 3.2.14)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Logit</td>
+      <td>Function only</td>
+      <td>60.0×</td>
+    </tr>
+    <tr>
+      <td>Logit</td>
+      <td>Function + Gradient</td>
+      <td>164.8×</td>
+    </tr>
+    <tr>
+      <td>Logit</td>
+      <td>Function + Gradient + Hessian</td>
+      <td>54.7×</td>
+    </tr>
+    <tr>
+      <td>CNL</td>
+      <td>Function only</td>
+      <td>120.0×</td>
+    </tr>
+    <tr>
+      <td>CNL</td>
+      <td>Function + Gradient</td>
+      <td>42.7×</td>
+    </tr>
+    <tr>
+      <td>CNL</td>
+      <td>Function + Gradient + Hessian</td>
+      <td>2.7×</td>
+    </tr>
+    <tr>
+      <td>Mixtures_100</td>
+      <td>Function only</td>
+      <td>29.0×</td>
+    </tr>
+    <tr>
+      <td>Mixtures_100</td>
+      <td>Function + Gradient</td>
+      <td>89.2×</td>
+    </tr>
+    <tr>
+      <td>Mixtures_100</td>
+      <td>Function + Gradient + Hessian</td>
+      <td>13.2×</td>
+    </tr>
+  </tbody>
+</table>
+</p>
 """,
 )
 
@@ -304,7 +377,7 @@ Python 3.12.4 (v3.12.4:8e8a4baf65, Jun  6 2024, 17:33:18) [Clang 13.0.0 (clang-1
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from biogeme.version import get_text
 >>> print(get_text())
-biogeme 3.2.14 [2024-08-05]
+biogeme 3.3.0 [2025-08-01]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
