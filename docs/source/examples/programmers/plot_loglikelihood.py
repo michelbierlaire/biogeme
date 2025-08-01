@@ -116,6 +116,7 @@ lr = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Likelihood evaluated by Biogeme: {lr}')
 
@@ -128,5 +129,6 @@ log_lr = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Log likelihood evaluated by Biogeme: {log_lr}')

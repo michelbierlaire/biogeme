@@ -180,6 +180,7 @@ prob_1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Probability of alternative 1: {prob_1_value}')
 
@@ -191,6 +192,7 @@ prob_2_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Probability of alternative 2: {prob_2_value}')
 
@@ -202,6 +204,7 @@ prob_3_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Probability of alternative 3: {prob_3_value}')
 
@@ -216,6 +219,7 @@ log_prob_1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Log probability of alternative 1: {log_prob_1_value}')
 
@@ -227,6 +231,7 @@ log_prob_2_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Log probability of alternative 2: {log_prob_2_value}')
 
@@ -238,6 +243,7 @@ log_prob_3_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Log probability of alternative 3: {log_prob_3_value}')
 
@@ -272,6 +278,7 @@ boxcox_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Box-Cox transform of Variable2: {boxcox_value}')
 
@@ -342,6 +349,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Nested logit probability of alternative 1: {p1_value}')
 
@@ -352,6 +360,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(
     f'Nested logit probability of alternative 1, all alternatives are available: {p1_value}'
@@ -365,6 +374,7 @@ p2_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Nested logit log probability of alternative 1: {p2_value}')
 
@@ -375,6 +385,7 @@ p2_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(
     f'Nested logit log probability of alternative 1, all alternatives are available: {p2_value}'
@@ -391,6 +402,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Nested logit probability of alternative 1, mu=1.1: {p1_value}')
 
@@ -401,6 +413,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Nested logit log probability of alternative 1, mu=1.1: {p1_value}')
 
@@ -479,6 +492,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Cross-Nested logit probability of alternative 1: {p1_value}')
 
@@ -490,6 +504,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(
     f'Cross-Nested logit probability of alternative 1, all alternatives are available: {p1_value}'
@@ -506,6 +521,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'Cross-Nested logit probability of alternative 1, mu = 1.1: {p1_value}')
 
@@ -527,6 +543,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'MEV model probability with correction: {p1_value}')
 
@@ -538,6 +555,7 @@ p1_value = evaluate_simple_expression_per_row(
     database=my_data,
     numerically_safe=False,
     second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 display(f'MEV model log probability with correction: {p1_value}')
 

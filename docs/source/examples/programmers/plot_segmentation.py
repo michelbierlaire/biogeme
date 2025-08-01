@@ -13,9 +13,9 @@ syntax. They do not correspond to any meaningful model.
 :date: Thu Dec  7 15:18:45 2023
 """
 
+from biogeme.expressions import Beta, Variable
 from biogeme.segmentation import DiscreteSegmentationTuple, Segmentation
 from biogeme.version import get_text
-from biogeme.expressions import Variable, Beta
 
 # %%
 # Version of Biogeme.
@@ -64,7 +64,7 @@ print(segmented_parameter.segmented_code())
 
 # %%
 # The code of the original Beta is also available:
-print(segmented_parameter.beta_code())
+print(segmented_parameter.beta_ref_code())
 
 # %%
 # Same with the second segmentation

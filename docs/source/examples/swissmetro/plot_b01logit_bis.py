@@ -10,8 +10,11 @@ Wed Jun 18 2025, 10:57:53
 
 """
 
-import biogeme.biogeme_logging as blog
+import os
+
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, LinearTermTuple, LinearUtility
@@ -181,6 +184,9 @@ for description, message in results.optimization_messages.items():
 # matrix is not calculated.
 try:
     robust_html_filename = f'{the_biogeme.model_name}_robust.html'
+    # The following function assumes that the file does not exist.
+    if os.path.exists(robust_html_filename):
+        os.remove(robust_html_filename)
     generate_html_file(
         filename=robust_html_filename,
         estimation_results=results,
@@ -195,6 +201,9 @@ except BiogemeError as e:
 # %%
 # Generate the html output with the BHHH variance-covariance matrix
 bhhh_html_filename = f'{the_biogeme.model_name}_bhhh.html'
+# The following function assumes that the file does not exist.
+if os.path.exists(bhhh_html_filename):
+    os.remove(bhhh_html_filename)
 generate_html_file(
     filename=bhhh_html_filename,
     estimation_results=results,

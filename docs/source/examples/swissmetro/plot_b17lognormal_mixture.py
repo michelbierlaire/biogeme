@@ -11,12 +11,16 @@ Michel Bierlaire, EPFL
 Thu Jun 26 2025, 15:31:41
 """
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Draws, MonteCarlo, exp, log
 from biogeme.models import logit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -84,12 +88,17 @@ log_probability = log(MonteCarlo(conditional_probability))
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(database, log_probability, number_of_draws=10_000ope, seed=1223)
+the_biogeme = BIOGEME(database, log_probability, number_of_draws=10_000, seed=1223)
 the_biogeme.model_name = '17lognormal_mixture'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/17lognormal_mixture.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

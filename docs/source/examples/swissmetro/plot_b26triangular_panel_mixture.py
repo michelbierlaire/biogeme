@@ -11,9 +11,10 @@ Michel Bierlaire, EPFL
 
 """
 
-import biogeme.biogeme_logging as blog
 import numpy as np
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.expressions import (
@@ -24,7 +25,10 @@ from biogeme.expressions import (
     log,
 )
 from biogeme.models import logit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -140,7 +144,12 @@ the_biogeme.model_name = 'b26triangular_panel_mixture'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename='saved_results/b26triangular_panel_mixture.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

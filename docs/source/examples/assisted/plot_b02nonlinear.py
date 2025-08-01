@@ -111,7 +111,7 @@ linear_sm_tt = SM_TT_SCALED
 
 # %%
 # Box-Cox transform.
-boxcox_sm_tt = boxcox(SM_TT_SCALED, ell_travel_time)
+boxcox_sm_tt = boxcox(SM_TT_SCALED, lambda_travel_time)
 
 # %%
 # Power series.

@@ -10,14 +10,14 @@ Michel Bierlaire, EPFL
 Sat Jun 28 2025, 16:08:07
 """
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.calculator import get_value_c
 from biogeme.data.optima import read_data
 from biogeme.models import lognested
 from biogeme.results_processing import get_pandas_estimated_parameters
-
 from scenarios import scenario
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -58,6 +58,7 @@ simulated_choices = get_value_c(
     betas=results.get_beta_values(),
     database=database,
     numerically_safe=False,
+    use_jit=True,
 )
 display(simulated_choices)
 
@@ -68,6 +69,7 @@ loglikelihood = get_value_c(
     database=database,
     aggregation=True,
     numerically_safe=False,
+    use_jit=True,
 )
 print(f'Final log likelihood:     {results.final_log_likelihood}')
 print(f'Simulated log likelihood: {loglikelihood}')

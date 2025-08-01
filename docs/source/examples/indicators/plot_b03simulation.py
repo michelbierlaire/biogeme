@@ -13,12 +13,12 @@ import sys
 import time
 
 import pandas as pd
+
 from biogeme.biogeme import BIOGEME
 from biogeme.calculator import get_value_c
 from biogeme.data.optima import normalized_weight, read_data
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
-
 from scenarios import scenario
 
 # %%
@@ -63,42 +63,49 @@ simulate_formulas = {
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
     'Utility PT': get_value_c(
         expression=v_pt,
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
     'Utility car': get_value_c(
         expression=v_car,
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
     'Utility SM': get_value_c(
         expression=v_sm,
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
     'Prob. PT': get_value_c(
         expression=prob_pt,
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
     'Prob. car': get_value_c(
         expression=prob_car,
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
     'Prob. SM': get_value_c(
         expression=prob_sm,
         betas=results.get_beta_values(),
         database=database,
         numerically_safe=False,
+        use_jit=True,
     ),
 }
 

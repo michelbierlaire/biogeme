@@ -11,6 +11,7 @@ Sat Jun 28 2025, 15:54:00
 """
 
 import numpy as np
+
 from biogeme.calculator import (
     CallableExpression,
     create_function_simple_expression,
@@ -45,7 +46,7 @@ print(f'exp(-b * b + 1) = {z}')
 # derivative, and the BHHH, which in this case is the square of the
 # first derivatives
 the_function_output: FunctionOutput = get_value_and_derivatives(
-    expression, numerically_safe=False
+    expression, numerically_safe=False, use_jit=True
 )
 
 # %%
@@ -62,7 +63,7 @@ print(f'BHHH = {the_function_output.bhhh}')
 # argument the value of the free parameters, and returns the function,
 # the first, the second derivatives, and the BHHH.
 fct: CallableExpression = create_function_simple_expression(
-    expression, numerically_safe=False, named_output=True
+    expression, numerically_safe=False, named_output=True, use_jit=True
 )
 
 

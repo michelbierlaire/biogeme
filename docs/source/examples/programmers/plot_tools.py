@@ -21,12 +21,13 @@ import biogeme.biogeme_logging as blog
 from biogeme.exceptions import BiogemeError
 from biogeme.function_output import FunctionOutput
 from biogeme.tools import (
+    CheckDerivativesResults,
+    calculate_prime_numbers,
+    check_derivatives,
+    count_number_of_groups,
     findiff_g,
     findiff_h,
-    check_derivatives,
-    calculate_prime_numbers,
     get_prime_numbers,
-    count_number_of_groups,
     likelihood_ratio,
 )
 from biogeme.version import get_text
@@ -109,21 +110,31 @@ pd.DataFrame(the_output.hessian - h_fd)
 # %%
 # There is a function that checks the analytical derivatives by
 # comparing them to their finite difference approximation.
-f, g, h, gdiff, hdiff = check_derivatives(my_function, x, names=None, logg=True)
+results: CheckDerivativesResults = check_derivatives(
+    my_function, x, names=None, logg=True
+)
+
+# %%
+# Difference between analytical and finite difference gradient
+display(results.errors_gradient)
+
+# %%
+# Difference between analytical and finite difference hessian
+display(results.errors_hessian)
 
 # %%
 # To help reading the reporting, it is possible to give names to variables.
 
 # %%
-f, g, h, gdiff, hdiff = check_derivatives(
+named_results: CheckDerivativesResults = check_derivatives(
     my_function, x, names=['First', 'Second'], logg=True
 )
 
 # %%
-pd.DataFrame(gdiff)
+pd.DataFrame(named_results.errors_gradient)
 
 # %%
-display(hdiff)
+display(named_results.errors_hessian)
 
 # %%
 # Prime numbers: calculate prime numbers lesser or equal to an upper bound.

@@ -308,12 +308,14 @@ try:
 except BiogemeError as e:
     print(e)
 
-value = evaluate_simple_expression(expression=z, database=None, numerically_safe=False)
+value = evaluate_simple_expression(
+    expression=z, database=None, numerically_safe=False, use_jit=True
+)
 display(f'NormalCdf({x.get_value()}) = {value}')
 
 # %%
 value = evaluate_simple_expression(
-    expression=NormalCdf(0), database=None, numerically_safe=False
+    expression=NormalCdf(0), database=None, numerically_safe=False, use_jit=True
 )
 display(f'NormalCdf(0) = {value}')
 
@@ -333,11 +335,17 @@ dz_dvariable = Derive(z, 'variable')
 simple_dataframe = pd.DataFrame.from_dict({'variable': [1]})
 simple_database = Database(dataframe=simple_dataframe, name='simple')
 value_parameter = evaluate_simple_expression(
-    expression=dz_dparameter, database=simple_database, numerically_safe=False
+    expression=dz_dparameter,
+    database=simple_database,
+    numerically_safe=False,
+    use_jit=True,
 )
 display(f'dz/dparameter = {value_parameter}')
 value_variable = evaluate_simple_expression(
-    expression=dz_dvariable, database=simple_database, numerically_safe=False
+    expression=dz_dvariable,
+    database=simple_database,
+    numerically_safe=False,
+    use_jit=True,
 )
 display(f'dz/variable = {value_variable}')
 
@@ -354,7 +362,7 @@ display(f'dz/variable = {value_variable}')
 omega = RandomVariable('omega')
 z = IntegrateNormal(omega / omega, 'omega')
 value = evaluate_simple_expression(
-    expression=z, database=simple_database, numerically_safe=False
+    expression=z, database=simple_database, numerically_safe=False, use_jit=True
 )
 display(f'The integral between -inf and +inf of the normal pdf is {value}')
 
@@ -391,7 +399,7 @@ list_of_terms = [
 ]
 z = LinearUtility(list_of_terms)
 value = evaluate_simple_expression(
-    expression=z, database=my_data, numerically_safe=False
+    expression=z, database=my_data, numerically_safe=False, use_jit=True
 )
 display(f'beta1 * v1 + beta2 * v2 = {value}')
 
@@ -399,7 +407,7 @@ display(f'beta1 * v1 + beta2 * v2 = {value}')
 # It is equivalent to the following, but implemented in a more efficient way.
 z = beta1 * v1 + beta2 * v2
 value = evaluate_simple_expression(
-    expression=z, database=my_data, numerically_safe=False
+    expression=z, database=my_data, numerically_safe=False, use_jit=True
 )
 display(f'beta1 * v1 + beta2 * v2 = {value}')
 
@@ -420,6 +428,7 @@ value = calculate_single_formula_from_expression(
     the_betas={},
     second_derivatives_mode=SecondDerivativesMode.NEVER,
     numerically_safe=False,
+    use_jit=True,
 )
 display(
     f'The Monte-Carlo approximation of the integral with {number_of_draws:_} draws is equal to {value}.'
@@ -504,6 +513,7 @@ value_and_derivatives: FunctionOutput = get_value_and_derivatives(
     hessian=True,
     bhhh=True,
     named_results=False,
+    use_jit=True,
 )
 
 # %%
@@ -549,6 +559,7 @@ value_and_derivatives: FunctionOutput = get_value_and_derivatives(
     hessian=True,
     bhhh=True,
     named_results=True,
+    use_jit=True,
 )
 
 # %%
@@ -576,6 +587,7 @@ the_function: CallableExpression = function_from_expression(
     expression=expr1,
     database=simple_database,
     numerically_safe=False,
+    use_jit=True,
     the_betas={},
 )
 
@@ -602,6 +614,7 @@ the_function: CallableExpression = function_from_expression(
     numerically_safe=False,
     the_betas={},
     named_output=True,
+    use_jit=True,
 )
 
 # %%

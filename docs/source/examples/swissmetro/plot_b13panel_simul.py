@@ -13,13 +13,15 @@ Sat Jun 21 2025, 17:06:31
 
 import sys
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.calculator.single_formula import calculate_single_formula_from_expression
 from biogeme.expressions import Beta, Draws, MonteCarlo, PanelLikelihoodTrajectory, log
 from biogeme.models import logit
 from biogeme.results_processing import EstimationResults
+from biogeme.second_derivatives import SecondDerivativesMode
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -122,8 +124,9 @@ simulated_loglike = calculate_single_formula_from_expression(
     database=database,
     number_of_draws=NUMBER_OF_DRAWS,
     the_betas=results.get_beta_values(),
-    avoid_analytical_second_derivatives=False,
     numerically_safe=False,
+    second_derivatives_mode=SecondDerivativesMode.NEVER,
+    use_jit=True,
 )
 
 # %%

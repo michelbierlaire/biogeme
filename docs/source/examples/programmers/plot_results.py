@@ -18,14 +18,19 @@ from IPython.core.display_functions import display
 
 from biogeme.biogeme import BIOGEME
 from biogeme.database import Database
+from biogeme.expressions import Beta, Variable, exp
 from biogeme.results_processing import (
+    EstimateVarianceCovariance,
     EstimationResults,
     calc_p_value,
     compile_estimation_results,
+    get_f12,
+    get_html_estimated_parameters,
+    get_latex_estimated_parameters,
+    get_pandas_correlation_results,
+    get_pandas_estimated_parameters,
 )
 from biogeme.version import get_text
-from biogeme.expressions import Beta, Variable, exp
-
 
 # %%
 # Version of Biogeme.
@@ -62,9 +67,8 @@ dict_of_expressions = {'log_like': likelihood, 'beta1': beta1, 'simul': simul}
 
 # %%
 # Creation of the BIOGEME object
-my_biogeme = BIOGEME(my_data, dict_of_expressions)
-my_biogeme.modelName = 'simple_example'
-my_biogeme.bootstrap_samples = 10
+my_biogeme = BIOGEME(my_data, dict_of_expressions, bootstrap_samples=100)
+my_biogeme.model_name = 'simple_example'
 results = my_biogeme.estimate(run_bootstrap=True)
 print(results)
 
@@ -81,11 +85,11 @@ print(read_results)
 
 # %%
 # Results can be formatted in LaTeX
-print(read_results.get_latex())
+print(get_latex_estimated_parameters(estimation_results=read_results))
 
 # %%
 # Results can be formatted in HTML
-print(read_results.get_html())
+print(get_html_estimated_parameters(estimation_results=read_results))
 
 # %%
 # General statistics, including a suggested format.
@@ -93,41 +97,44 @@ statistics = read_results.get_general_statistics()
 display(statistics)
 
 # %%
-# The suggested format can be used as follows
-for k, (v, p) in statistics.items():
-    print(f'{k}:\t{v:{p}}')
-
-# %%
-# This result can be generated directly with the following function
-print(results.print_general_statistics())
-
-# %%
 # Estimated parameters as pandas dataframe
-read_results.get_estimated_parameters()
+pandas_parameters = get_pandas_estimated_parameters(estimation_results=read_results)
+display(pandas_parameters)
 
 # %%
 # Correlation results
-read_results.get_correlation_results()
+pandas_correlation = get_pandas_correlation_results(estimation_results=read_results)
+display(pandas_correlation)
 
 # %%
 # Obtain the values of the parameters
-read_results.get_beta_values()
+beta_values = read_results.get_beta_values()
+display(beta_values)
 
 # %%
 # Obtain the value of one or several specific parameters
-read_results.get_beta_values(my_betas=['beta2'])
+some_beta_values = read_results.get_beta_values(my_betas=['beta2'])
+display(some_beta_values)
 
 # %%
 # Variance-covariance matrix (Rao-Cramer)
-read_results.get_var_covar()
-
+rao_cramer = read_results.get_variance_covariance_matrix(
+    variance_covariance_type=EstimateVarianceCovariance.RAO_CRAMER
+)
+display(rao_cramer)
 # %%
 # Variance-covariance matrix (robust)
-read_results.get_robust_var_covar()
+robust = read_results.get_variance_covariance_matrix(
+    variance_covariance_type=EstimateVarianceCovariance.ROBUST
+)
+display(robust)
 
 # %%
 # Variance-covariance matrix (bootstrap)
-read_results.get_bootstrap_var_covar()
+bootstrap = read_results.get_variance_covariance_matrix(
+    variance_covariance_type=EstimateVarianceCovariance.BOOTSTRAP
+)
+display(bootstrap)
 
 # %%
 # Draws for sensitivity analysis are generated using
@@ -137,7 +144,7 @@ read_results.get_betas_for_sensitivity_analysis(['beta1', 'beta2'], size=10)
 
 # %%
 # Results can be produced in the ALOGIT F12 format
-print(read_results.get_f12())
+print(get_f12(estimation_results=read_results))
 
 # %%
 # Miscellaneous functions
@@ -153,7 +160,7 @@ likelihood_constrained = (
     - beta2_constrained**4
 )
 my_biogeme_constrained = BIOGEME(my_data, likelihood_constrained)
-my_biogeme_constrained.modelName = 'simple_example_constrained'
+my_biogeme_constrained.model_name = 'simple_example_constrained'
 results_constrained = my_biogeme_constrained.estimate()
 print(results_constrained.short_summary())
 
