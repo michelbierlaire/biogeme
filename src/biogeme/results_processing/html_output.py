@@ -9,10 +9,10 @@ import logging
 import os
 from datetime import datetime
 
-import biogeme.version as version
 import numpy as np
-from biogeme.exceptions import BiogemeError
 
+import biogeme.version as version
+from biogeme.exceptions import BiogemeError
 from .estimation_results import (
     EstimateVarianceCovariance,
     EstimationResults,
@@ -255,7 +255,7 @@ def get_html_one_parameter(
 
 def get_html_estimated_parameters(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
     renaming_parameters: dict[str, str] | None = None,
     sort_by_name: bool = False,
 ) -> str:
@@ -267,6 +267,10 @@ def get_html_estimated_parameters(
     :param sort_by_name: if True, parameters are sorted alphabetically by name.
     :return: HTML code
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
     if renaming_parameters is not None:
         # Verify that the renaming is well-defined.
         name_values = list(renaming_parameters.values())
@@ -383,7 +387,7 @@ def get_html_one_pair_of_parameters(
 
 def get_html_correlation_results(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
     involved_parameters: dict[str, str] | None = None,
 ) -> str:
     """Get the correlation results in an HTML format
@@ -394,6 +398,10 @@ def get_html_correlation_results(
         reporting.
     :return: HTML code
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
     covar_header = str(variance_covariance_type)
 
     if involved_parameters is None:

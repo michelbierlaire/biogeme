@@ -109,14 +109,7 @@ class CompiledFormulaEvaluator:
                 values *= weights
             return jnp.asarray(jnp.sum(values), dtype=JAX_FLOAT), values
 
-        if self.use_jit:
-            logger.info('Just-in-time compilation.')
-        else:
-            logger.info('Just-in-time compilation skipped.')
-
         self.sum_function = jax.jit(sum_function) if self.use_jit else sum_function
-        if self.use_jit:
-            logger.info('Just-in-time compilation: done.')
 
     def evaluate(
         self,

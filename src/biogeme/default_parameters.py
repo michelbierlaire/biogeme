@@ -371,7 +371,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='number_of_jobs',
-            value=-1,
+            value=2,
             type=int,
             section='Bootstrap',
             description=(

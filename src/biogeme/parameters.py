@@ -201,13 +201,35 @@ class Parameters:
                 logger.debug(f'Parameter file: {os.path.abspath(self.file_name)}')
                 content = f.read()
                 self.document = tk.parse(content)
-                self.import_document()
+                parameters_read_from_file = self.import_document()
                 logger.info(f'Biogeme parameters read from {self.file_name}.')
-
+                all_parameters = set(
+                    key.name for key in self.all_parameters_dict.keys()
+                )
+                not_defined_in_file = all_parameters - parameters_read_from_file
+                irrelevant_in_file = parameters_read_from_file - all_parameters
+                if not_defined_in_file:
+                    warning_msg = f'The following parameters are not defined in file {self.file_name}: {not_defined_in_file}.'
+                    logger.warning(warning_msg)
+                if irrelevant_in_file:
+                    warning_msg = (
+                        f'The following parameters defined in file {self.file_name} are ignored by '
+                        f'Biogeme {get_version()}: {irrelevant_in_file}.'
+                    )
+                    logger.warning(warning_msg)
         except FileNotFoundError:
             info_msg = f'Default values of the Biogeme parameters are used.'
             logger.info(info_msg)
             self.dump_file(self.file_name)
+
+        biogeme_version_in_file = self.get_value(name='version')
+        current_biogeme_version = get_version()
+        if biogeme_version_in_file != current_biogeme_version:
+            warning_msg = (
+                f'File {self.file_name} has been created by Biogeme {biogeme_version_in_file}. The current '
+                f'version of Biogeme is {get_version()}'
+            )
+            logger.warning(warning_msg)
 
     def parameters_in_section(self, section_name: str) -> list[ParameterTuple]:
         """Returns the parameters in a section
@@ -236,10 +258,13 @@ class Parameters:
             print(tk.dumps(self.document), file=f)
         logger.warning(f'File {file_name} has been created')
 
-    def import_document(self) -> None:
+    def import_document(self) -> set[str]:
         """Record the values of the parameters in the TOML document"""
+        parameters_read_from_file = set()
+
         for section_name, entries in self.document.items():
             for entry_name, entry_value in entries.items():
+                parameters_read_from_file.add(entry_name)
                 key = NameSectionTuple(name=entry_name, section=section_name)
                 default = self.all_parameters_dict.get(key)
                 if default is None:
@@ -272,6 +297,7 @@ class Parameters:
                     check=default.check,
                 )
                 self.add_parameter(the_parameter)
+        return parameters_read_from_file
 
     def generate_document(self) -> tk.TOMLDocument:
         """Generate the  TOML document"""

@@ -227,7 +227,7 @@ def get_pandas_one_pair_of_parameters(
 
 def get_pandas_correlation_results(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
     involved_parameters: dict[str, str] | None = None,
 ) -> pd.DataFrame:
     """Get the correlation results in a Pandas data frame
@@ -238,6 +238,8 @@ def get_pandas_correlation_results(
         reporting.
     :return: a Pandas data frame
     """
+    if variance_covariance_type is None:
+        variance_covariance_type = estimation_results.get_default_variance_covariance_matrix()
     if involved_parameters is None:
         list_of_parameters = {
             index: name for index, name in enumerate(estimation_results.beta_names)

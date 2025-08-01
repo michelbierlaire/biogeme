@@ -38,9 +38,7 @@ def check_availability_of_chosen_alt(
     from biogeme.calculator import evaluate_expression
 
     choice_array = evaluate_expression(
-        expression=choice,
-        numerically_safe=False,
-        database=database,
+        expression=choice, numerically_safe=False, database=database, use_jit=True
     )
     calculated_avail = {}
     for key, expression in avail.items():
@@ -48,6 +46,7 @@ def check_availability_of_chosen_alt(
             expression=expression,
             numerically_safe=False,
             database=database,
+            use_jit=True,
         )
     try:
         avail_chosen = np.array(
@@ -82,9 +81,7 @@ def choice_availability_statistics(
     from biogeme.calculator import evaluate_expression
 
     choice_array = evaluate_expression(
-        expression=choice,
-        numerically_safe=False,
-        database=database,
+        expression=choice, numerically_safe=False, database=database, use_jit=True
     )
     calculated_avail = {}
     for key, expression in avail.items():
@@ -92,6 +89,7 @@ def choice_availability_statistics(
             expression=expression,
             numerically_safe=False,
             database=database,
+            use_jit=True,
         )
     unique = np.unique(choice_array, return_counts=True)
     choice_stat = {alt: int(unique[1][i]) for i, alt in enumerate(list(unique[0]))}

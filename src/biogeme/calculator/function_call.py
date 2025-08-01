@@ -110,6 +110,7 @@ def function_from_expression(
     expression: Expression,
     database: Database,
     numerically_safe: bool,
+    use_jit: bool,
     the_betas: dict[str, float],
     number_of_draws: int | None = None,
     named_output: bool = False,
@@ -119,6 +120,7 @@ def function_from_expression(
         expressions={LOG_LIKE: expression},
         database=database,
         number_of_draws=number_of_draws,
+        use_jit=use_jit,
     )
     compiled_formula = CompiledFormulaEvaluator(
         model_elements=model_elements,

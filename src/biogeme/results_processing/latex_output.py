@@ -11,8 +11,8 @@ from collections import Counter
 from datetime import datetime
 
 import numpy as np
-from biogeme.version import get_latex, get_version, versionDate
 
+from biogeme.version import get_latex, get_version, versionDate
 from .estimation_results import EstimateVarianceCovariance, EstimationResults
 from ..exceptions import BiogemeError
 from ..parameters import Parameters
@@ -324,7 +324,7 @@ def rename_and_renumber(
 
 def get_latex_estimated_parameters(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
     renumbering_parameters: dict[int, int] | None = None,
     renaming_parameters: dict[str, str] | None = None,
 ) -> str:
@@ -336,7 +336,8 @@ def get_latex_estimated_parameters(
     :param renaming_parameters: a dict that suggests new names for some or all parameters.
     :return: LaTeX code
     """
-
+    if variance_covariance_type is None:
+        variance_covariance_type = estimation_results.get_default_variance_covariance_matrix()
     if renumbering_parameters is not None:
         # Verify that the numbering is well-defined
         number_values = list(renumbering_parameters.values())

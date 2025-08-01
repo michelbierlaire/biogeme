@@ -43,7 +43,7 @@ def findiff_g(the_function: CallableExpression, x: np.ndarray) -> np.ndarray:
     tau = SQRT_EPS
     n = len(x)
     g = np.zeros(n)
-    f = the_function(x, gradient=False, hessian=False, bhhh=False).function
+    f = the_function(x).function
     for i in range(n):
         xi = x.item(i)
         xp = x.copy()
@@ -54,7 +54,7 @@ def findiff_g(the_function: CallableExpression, x: np.ndarray) -> np.ndarray:
         else:
             s = -tau
         xp[i] = xi + s
-        fp = the_function(xp, gradient=False, hessian=False, bhhh=False).function
+        fp = the_function(xp).function
         g[i] = (fp - f) / s
     return g
 
@@ -80,9 +80,7 @@ def findiff_h(
     tau = SQRT_EPS
     n = len(x)
     h = np.zeros((n, n))
-    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
-        x, gradient=True, hessian=False, bhhh=False
-    )
+    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
     if isinstance(the_function_output, NamedFunctionOutput):
         the_function_output = the_function_output.function_output
     g = the_function_output.gradient
@@ -97,7 +95,7 @@ def findiff_h(
             s = -tau
         ei = eye[i]
         the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
-            x + s * ei, gradient=True, hessian=False, bhhh=False
+            x + s * ei
         )
         if isinstance(the_function_output, NamedFunctionOutput):
             the_function_output = the_function_output.function_output
@@ -141,9 +139,7 @@ def check_derivatives(
 
     """
     x = np.array(x, dtype=float)
-    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
-        x, gradient=True, hessian=True, bhhh=False
-    )
+    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(x)
     if isinstance(the_function_output, NamedFunctionOutput):
         the_function_output = the_function_output.function_output
     g_num = findiff_g(the_function, x)

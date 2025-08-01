@@ -10,7 +10,6 @@ import logging
 import os
 
 from biogeme.version import get_version
-
 from .estimation_results import (
     EstimateVarianceCovariance,
     EstimationResults,
@@ -23,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def get_f12(
     estimation_results: EstimationResults,
-    variance_covariance_type: EstimateVarianceCovariance = EstimateVarianceCovariance.ROBUST,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
 ) -> str:
     """F12 is a format used by the software ALOGIT to
     report estimation results.
@@ -32,7 +31,8 @@ def get_f12(
     :param variance_covariance_type: type of variance-covariance estimate to be used.
     :return: results formatted in F12 format
     """
-
+    if variance_covariance_type is None:
+        variance_covariance_type = estimation_results.get_default_variance_covariance_matrix()
     covar_header = str(variance_covariance_type)
 
     # checkline1 = (
