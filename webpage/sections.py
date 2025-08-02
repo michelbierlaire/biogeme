@@ -78,9 +78,46 @@ about['What\'s new in Biogeme 3.3.0?'] = (
 </p>
 
 <p>
-  To the extent possible, the user interface, namely the syntax for model specification, remains consistent with previous versions. 
+  To the extent possible, the user interface — namely, the syntax for model specification — remains consistent with previous versions. 
   As a result, we anticipate only minor adjustments will be needed in existing code. 
-  However, some updates may be necessary.
+  However, some updates may be necessary. In particular, the following expressions have changed:
+</p>
+
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Old syntax</th>
+      <th>New syntax</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>bioDraws</code></td>
+      <td><code>Draws</code></td>
+    </tr>
+    <tr>
+      <td><code>bioMultSum</code></td>
+      <td><code>MultipleSum</code></td>
+    </tr>
+    <tr>
+      <td><code>bioMax</code></td>
+      <td><code>BinaryMax</code></td>
+    </tr>
+    <tr>
+      <td><code>bioMin</code></td>
+      <td><code>BinaryMin</code></td>
+    </tr>
+    <tr>
+      <td><code>Integrate</code></td>
+      <td><code>IntegrateNormal</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  The last change is more than a renaming: <code>IntegrateNormal</code> differs fundamentally from <code>Integrate</code>. 
+  While the old version computed a generic integral, the new one calculates the integral of the function multiplied by the 
+  probability density function of the normal distribution.
 </p>
 
 <p>
@@ -216,6 +253,7 @@ certainly not complete, and I apologize for those who are omitted:
 	    Emma Frejinger,
 	    Carmine Gioia,
 	    Marie-H&eacute;l&egrave;ne Godbout,
+	    Chat GPT,
         Jason Hawkins,
 	    Stephane Hess,
 	    Tim Hillel,
@@ -293,46 +331,6 @@ The command to install is simply
 <pre>
 pip install biogeme
 </pre>
-""",
-)
-
-install['CythonBiogeme on Github'] = (
-    """
-A significant part of Biogeme is coded in C++ for the sake of computational efficiency. Since version 3.2.11, this part
-of the code has been isolated in a separate package called <samp>cythonbiogeme</samp>. Binaries for Mac OSX and Windowns 
-are available for versions of Python ranging from 3.10 to 3.12. If, for some reasons, the binary distribution for your 
-system is not available, pip will attempt to compile the package from sources.
-In that case, it requires a proper
-environment to compile C++ code. In general, it is readily available on Linux, and
-MacOSX (if <a href="https://developer.apple.com/xcode/"
-target="_blank">Xcode</a> has been installed). It may be more
-complicated on Windows.
-""",
-    """
-The source code of CythonBiogeme is available on
-<a href="https://github.com/michelbierlaire/cythonbiogeme" target="_blank">GitHub</a>.
-There are several tutorials available on the internet
-such
-as <a href="https://guides.github.com/activities/hello-world/"
-target="_blank">this one</a> or
-<a href="https://youtu.be/HkdAHXoRtos"
-target="_blank">this one</a>.
-""",
-    """
-The command to install CythonBiogeme from source is
-<pre>pip install .</pre>
-""",
-    """
-that must be executed in the root directory, containing the
-file setup.py.
-""",
-    """
-Note that it requires a proper
-environment to compile C++ code. In general, it is readily available on Linux, and
-MacOSX (if <a href="https://developer.apple.com/xcode/"
-target="_blank">Xcode</a> has been
-installed). On Windows, it is possible to compile cythonbiogeme with Microsoft Visual C++. 
-See the <a href="https://wiki.python.org/moin/WindowsCompilers">Python documentation</a>.
 """,
 )
 
