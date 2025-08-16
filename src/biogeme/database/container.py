@@ -14,7 +14,7 @@ from collections.abc import Callable
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-
+from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
@@ -29,6 +29,7 @@ from biogeme.segmentation import (
     generate_segmentation,
     verify_segmentation,
 )
+
 from .sampling import sample_with_replacement
 
 logger = logging.getLogger(__name__)
@@ -219,6 +220,17 @@ class Database:
             new_values, index=self.dataframe.index, dtype=PANDAS_FLOAT
         )
         return Variable(name)
+
+    @deprecated(new_func=define_variable)
+    def DefineVariable(self, name: str, expression: Expression) -> Variable:
+        """
+        This method evaluates a Biogeme expression row by row on the database
+        and creates a new column in the internal DataFrame with the results.
+
+        :param name: Name of the new column to be added.
+        :param expression: Biogeme expression to evaluate for each row.
+        """
+        pass
 
     def remove_column(self, column: str):
         """Removes a column from the dataset"""

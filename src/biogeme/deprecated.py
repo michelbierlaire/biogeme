@@ -4,13 +4,15 @@ Michel Bierlaire
 Mon Jun 17 20:50:19 2024
 """
 
-import inspect
-import os
-import warnings
 import functools
-from typing import Callable, Any
+import inspect
+import logging
+import os
+from typing import Any, Callable
 
 from biogeme.exceptions import BiogemeError
+
+logger = logging.getLogger(__name__)
 
 RAISE_EXCEPTION = False
 
@@ -21,7 +23,7 @@ if os.environ.get('TOX_ENV_NAME') is not None and RAISE_EXCEPTION:
 
 
 def deprecated(
-    new_func: Callable[..., Any]
+    new_func: Callable[..., Any],
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator for deprecated functions. It calls the new version of the function
 
@@ -35,7 +37,7 @@ def deprecated(
             msg = f"{old_func.__name__} is deprecated; use {new_func.__name__} instead."
             if RAISE_EXCEPTION:
                 raise BiogemeError('Deprecated')
-            warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            logger.warning(msg)
             return new_func(*args, **kwargs)  # Directly call the new function
 
         wrapper.__deprecated__ = True
@@ -57,20 +59,15 @@ def deprecated_parameters(obsolete_params: dict[str, str | None]):
                 if name in obsolete_params:
                     new_name = obsolete_params[name]
                     if new_name:
-                        warnings.warn(
-                            f"Parameter '{name}' is deprecated; use '{new_name}={value}' instead.",
-                            DeprecationWarning,
-                            stacklevel=2,
-                        )
-                        # raise BiogemeError(f'Deprecated {name}. Use {new_name}')
+                        msg = f"Parameter '{name}' is deprecated; use '{new_name}={value}' instead."
+                        logger.warning(msg)
                         processed_kwargs[new_name] = value
                     else:
-                        warnings.warn(
+                        msg = (
                             f"Parameter '{name}' is deprecated and is ignored. "
                             f"It will be removed in a future version.",
-                            DeprecationWarning,
-                            stacklevel=2,
                         )
+                        logger.warning(msg)
                 else:
                     processed_kwargs[name] = value
 
@@ -82,8 +79,4 @@ def deprecated_parameters(obsolete_params: dict[str, str | None]):
 
 
 def issue_deprecation_warning(text: str) -> None:
-    warnings.warn(
-        text,
-        DeprecationWarning,
-        stacklevel=2,
-    )
+    logger.warning(text)

@@ -19,6 +19,7 @@ from biogeme.tools import likelihood_ratio
 from biogeme.tools.ellipse import Ellipse
 from numpy.linalg import LinAlgError, eigh, inv, norm, pinv
 from scipy.stats import chi2, norm as normal_distribution
+from tabulate import tabulate
 from yaml.constructor import ConstructorError
 
 from .raw_estimation_results import (
@@ -79,6 +80,8 @@ class EstimationResults:
 
         self._are_derivatives_available = True
         self._is_hessian_available = raw_estimation_results.hessian is not None
+        if self.raw_estimation_results.gradient is None:
+            self.raw_estimation_results.gradient = []
 
         if (
             self.raw_estimation_results.gradient == []
@@ -484,7 +487,9 @@ class EstimationResults:
         """Norm of the final gradient"""
         if self.raw_estimation_results is None:
             raise BiogemeError('No result available.')
-        if not self.are_derivatives_available:
+        if (not self.are_derivatives_available) or (
+            self.raw_estimation_results.gradient is None
+        ):
             raise BiogemeError('No gradient available')
         gradient_norm = float(norm(self.raw_estimation_results.gradient))
         return gradient_norm
@@ -765,6 +770,10 @@ class EstimationResults:
         if self.bootstrap is not None:
             d['Bootstrapping time'] = f'{self.bootstrap_time}'
         return d
+
+    def print_general_statistics(self):
+        general_statistics = self.get_general_statistics()
+        return tabulate(general_statistics.items(), tablefmt='plain', headers=[])
 
     def get_parameter_index(self, parameter_name: str) -> int:
         """Retrieve the index of a parameter

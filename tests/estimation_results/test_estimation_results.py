@@ -6,16 +6,16 @@ Fri Oct 4 09:52:23 2024
 """
 
 import unittest
-import numpy as np
 from datetime import timedelta
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import numpy as np
 from biogeme.exceptions import BiogemeError
 from biogeme.results_processing import (
+    EstimateVarianceCovariance,
     EstimationResults,
     RawEstimationResults,
     calc_p_value,
-    EstimateVarianceCovariance,
     get_pandas_estimated_parameters,
 )
 
@@ -223,6 +223,36 @@ class TestEstimationResults(unittest.TestCase):
         nrows, ncolumns = pandas_results.shape
         self.assertEqual(nrows, 2)
         self.assertEqual(ncolumns, 6)
+
+    def test_gradient_None(self):
+        raw_results = RawEstimationResults(
+            model_name='Test Model',
+            user_notes='Test notes',
+            beta_names=['beta1', 'beta2'],
+            beta_values=[1.0, 1.5],
+            lower_bounds=[0.0, 1.5],
+            upper_bounds=[1.5, 2.5],
+            gradient=None,
+            hessian=None,
+            bhhh=None,
+            null_log_likelihood=-300.0,
+            initial_log_likelihood=-200.0,
+            final_log_likelihood=-150.0,
+            data_name='Sample Data',
+            sample_size=1000,
+            number_of_observations=100,
+            monte_carlo=False,
+            number_of_draws=500,
+            types_of_draws={'type1': 'UNIFORM'},
+            number_of_excluded_data=10,
+            draws_processing_time=timedelta(seconds=300),
+            optimization_messages={'message': 'Optimization successful'},
+            convergence=True,
+            bootstrap=[[1.0, 2.0], [1.1, 2.1]],
+            bootstrap_time=timedelta(seconds=100),
+        )
+        with self.assertRaises(BiogemeError):
+            _ = EstimationResults(raw_results)
 
 
 if __name__ == '__main__':

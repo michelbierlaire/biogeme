@@ -1,7 +1,7 @@
 """Information about the version of Biogeme
 
-:author: Michel Bierlaire
-:date: Tue Mar 26 16:45:15 2019
+Michel Bierlaire
+Sat Aug 02 2025, 18:16:18
 
 """
 
@@ -20,7 +20,7 @@ URL_UNIVERSITY = 'http://www.epfl.ch'
 URL_BIOGEME = 'http://biogeme.epfl.ch'
 URL_FORUM = 'https://groups.google.com/d/forum/biogeme'
 
-__version__ = '3.3.0'
+__version__ = '3.3.1'
 
 
 def get_version() -> str:
