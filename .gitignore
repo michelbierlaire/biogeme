@@ -435,3 +435,7 @@ tests/estimation_results/test.yaml
 /docs/source/examples/latent/saved_html_old
 /docs/source/code
 *.bak
+dist/biogeme-3.3.0-py3-none-any.whl
+dist/biogeme-3.3.0.tar.gz
+dist/biogeme-3.3.0a1.tar.gz
+dist/biogeme-3.3.0a2.tar.gz
