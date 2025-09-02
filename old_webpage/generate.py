@@ -4,13 +4,12 @@
 :date: Sat Aug 20 17:20:35 2022
 """
 
-import os
-import shutil
-import fileinput
-import time
 import ast
+import fileinput
+import os
 import pathlib
-
+import shutil
+import time
 
 URLBINDER = 'https://mybinder.org/v2/gh/michelbierlaire/biogeme/master?filepath='
 
@@ -113,16 +112,16 @@ def generate_page(name):
     dest = f'website/{name}.html'
     shutil.copy(orig, dest)
     menu = 'sources/menu.html.orig'
-    menudata = open(menu, 'r').read()
+    menudata = open(menu).read()
     replace_in_file(dest, 'INCLUDEMENU', menudata)
     banner = 'sources/banner.html.orig'
-    bannerdata = open(banner, 'r').read()
+    bannerdata = open(banner).read()
     replace_in_file(dest, 'BANNER', bannerdata)
     header = 'sources/header.html.orig'
-    headerdata = open(header, 'r').read()
+    headerdata = open(header).read()
     replace_in_file(dest, 'HEADER', headerdata)
     footer = 'sources/footer.html.orig'
-    footerdata = open(footer, 'r').read()
+    footerdata = open(footer).read()
     replace_in_file(dest, 'FOOTER', footerdata)
     replace_in_file(dest, '__DATE', time.strftime('%c'))
     replace_in_file(dest, f'{name}ACTIVE', 'active')
@@ -141,7 +140,7 @@ def generate_examples():
             if path.is_dir(follow_symlinks=False):
                 i += 1
                 with os.scandir(path.path) as local:
-                    if not path.path in ignore_directory:
+                    if path.path not in ignore_directory:
                         print(f'----- {path.path} -----')
                         the_f = []
                         the_h = []
@@ -149,7 +148,7 @@ def generate_examples():
                             if file.name.endswith('html'):
                                 the_h += [file.name]
                             if file.is_file() and file.name.endswith('py'):
-                                if not file.name in ignore:
+                                if file.name not in ignore:
                                     print(f'Parse {file.name}')
                                     # Parse the docstrings
                                     with open(file.path) as the_file:
@@ -169,8 +168,8 @@ def generate_examples():
         ('Swissmetro', 'swissmetro'),
         ('Calculating indicators', 'indicators'),
         ('Monte-Carlo integration', 'montecarlo'),
-        ('Choice models with latent variables', 'latent'),
-        ('Choice models with latent variables: another example', 'latentbis'),
+        ('Choice models with latent_old variables', 'latent_old'),
+        ('Choice models with latent_old variables: another example', 'latentbis'),
         ('Assisted specification', 'assisted'),
     ]
 
