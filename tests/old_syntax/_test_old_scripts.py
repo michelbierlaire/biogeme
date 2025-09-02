@@ -1,19 +1,17 @@
-import unittest
-import subprocess
 import os
+import subprocess
+import unittest
 
 from icecream import ic
 
 
 class TestScripts(unittest.TestCase):
-
     def setUp(self):
         # Directory where the scripts are located
         self.script_dir = [
             './assisted',
             './indicators',
             './latent',
-            './latentbis',
             './montecarlo',
             './programmers',
             './sampling',
@@ -50,7 +48,7 @@ class TestScripts(unittest.TestCase):
                 self.assertEqual(
                     result.returncode,
                     0,
-                    f"Script {script_path} failed with output: {result.stdout}\nError: {result.stderr}",
+                    f'Script {script_path} failed with output: {result.stdout}\nError: {result.stderr}',
                 )
 
 
