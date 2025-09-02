@@ -1,6 +1,15 @@
 faq = {}
 
 faq[
+    'What was new in Biogeme 3.3.1?'
+] = """
+Biogeme 3.3.1 is a major release. In earlier versions, the computation of the likelihood function and its derivatives 
+was handled by Cythonbiogeme, a C++-based engine. Starting with this release, Biogeme now relies on JAX, a 
+high-performance numerical computing library for Python developed by Google Research. This transition brings 
+substantial performance improvements, particularly for mixture models that require Monte Carlo integration. 
+Although the transition has been designed to be seamless, some minor adjustments to existing models may still be necessary.
+"""
+faq[
     'What was new in Biogeme 3.2.14?'
 ] = """
 <p>
@@ -373,7 +382,7 @@ denoted by &alpha;), the value 0.5 is
 appropriate. Make sure to define the lower bound to 0 and
 the upper bound to 1.</li>
 <li>If the parameter captures the membership to a class of
-a latent class model, the value 0.5 is appropriate. Make
+a latent_old class model, the value 0.5 is appropriate. Make
 sure to define the lower bound to 0 and
 the upper bound to 1.</li>
 <li>If the parameter is the scale of an error component in
@@ -384,7 +393,7 @@ too close to zero. It is suggested to try first with the
 value one. If there are numerical issues, try a larger
 value, such as 10. See Section 7 in the report
 <a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf" target="_blank">
-Estimating choice models  with latent variables
+Estimating choice models  with latent_old variables
 with PandasBiogeme</a> for a detailed discussion. </li>
 </ul>
 Note that if a file <code>__mymodel.iter</code> exists, where <code>mymodel</code> is the name of the model
@@ -486,7 +495,7 @@ On Windows:
 <pre>
 pip install --upgrade pip
 </pre>
-or 
+or
 <pre>
 python -m pip install --upgrade pip
 </pre>
