@@ -95,7 +95,6 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 
 # Class membership model
-# Class membership model
 CLASS_CTE = Beta('CLASS_CTE', -0.792233, None, None, 0)
 CLASS_INC = Beta('CLASS_INC', -0.251995, None, None, 0)
 W1 = CLASS_CTE + CLASS_INC * INCOME
@@ -106,7 +105,7 @@ prob_class2 = models.logit({1: W1, 2: 0}, None, 2)
 # Conditional to the random variables, likelihood if the individual is
 # in class 1
 obs_prob_1 = [
-    models.loglogit(V1[t], av, Variable(f'CHOICE__panel__{t+1:02d}'))
+    models.loglogit(V1[t], av, Variable(f'CHOICE__panel__{t + 1:02d}'))
     for t in range(largest_group)
 ]
 prob1 = exp(MultipleSum(obs_prob_1))
@@ -115,7 +114,7 @@ prob1 = exp(MultipleSum(obs_prob_1))
 # Conditional to the random variables, likelihood if the individual is
 # in class 2
 obs_prob_2 = [
-    models.loglogit(V2[t], av, Variable(f'CHOICE__panel__{t+1:02d}'))
+    models.loglogit(V2[t], av, Variable(f'CHOICE__panel__{t + 1:02d}'))
     for t in range(largest_group)
 ]
 prob2 = exp(MultipleSum(obs_prob_2))
