@@ -76,5 +76,21 @@ biogeme = ["*/__pycache__", "*/__pycache__/*", "*/*.pyc", "__pycache__", "*.pyc"
 
 [tool.ruff]
 line-length = 88
-lint.select = ["E", "F", "I"]
+extend-exclude = ["build", "dist", ".venv"]
+lint.select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort (import sorting)
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "W",   # pycodestyle warnings
+]
+
 fix = true
+
+[tool.ruff.format]
+# Enable Ruff formatter if you want to replace Black
+quote-style = "single"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = true
