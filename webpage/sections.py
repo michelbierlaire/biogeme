@@ -404,7 +404,7 @@ target="_blank">A short introduction to Biogeme</a>.</li>
 <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf"
 target="_blank">Monte-Carlo integration with PandasBiogeme.</a></li>
 <li><a href="http://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf"
-target="_blank">Estimating choice models with latent
+target="_blank">Estimating choice models with latent_old
 variables with PandasBiogeme.</a></li>
 <li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf" target="_blank">Assisted specification with Biogeme 3.2.12.</a></li>
 <li><a href="https://transp-or.epfl.ch/documents/technicalReports/BierPasc23.pdf" target="_blank">Estimating MEV models with samples of alternatives.</a></li>
