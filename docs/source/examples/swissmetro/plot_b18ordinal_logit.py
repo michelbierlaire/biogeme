@@ -59,7 +59,7 @@ utility = b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
 the_probability = ordered_logit(
     continuous_value=utility,
     list_of_discrete_values=[1, 2, 3],
-    tau_parameter=tau1,
+    reference_threshold_parameter=tau1,
 )
 
 # %%

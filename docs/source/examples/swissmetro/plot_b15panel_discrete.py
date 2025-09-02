@@ -4,7 +4,7 @@
 Discrete mixture with panel data
 ================================
 
-Example of a discrete mixture of logit models, also called latent
+Example of a discrete mixture of logit models, also called latent_old
  class model.  The datafile is organized as panel data.
 
 Michel Bierlaire, EPFL
@@ -12,19 +12,7 @@ Sat Jun 21 2025, 17:16:14
 
 """
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import (
-    Beta,
-    Draws,
-    ExpressionOrNumeric,
-    MonteCarlo,
-    PanelLikelihoodTrajectory,
-    log,
-)
-from biogeme.models import logit
-from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -42,11 +30,24 @@ from swissmetro_panel import (
     database,
 )
 
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import (
+    Beta,
+    Draws,
+    ExpressionOrNumeric,
+    MonteCarlo,
+    PanelLikelihoodTrajectory,
+    log,
+)
+from biogeme.models import logit
+from biogeme.results_processing import get_pandas_estimated_parameters
+
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b15panel_discrete.py')
 
 # %%
-# Parameters to be estimated. One version for each latent class.
+# Parameters to be estimated. One version for each latent_old class.
 NUMBER_OF_CLASSES = 2
 b_cost = [Beta(f'b_cost_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)]
 
