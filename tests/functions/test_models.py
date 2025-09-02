@@ -1,17 +1,26 @@
 """
 Test the models module
 
-:author: Michel Bierlaire
-:date: Fri Jul 21 17:17:37 2023
+Michel Bierlaire
+Mon Aug 18 2025, 10:00:14
 """
 
 import unittest
 
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Beta, BinaryMax, BinaryMin, Expression, Variable
+from biogeme.expressions import (
+    Beta,
+    BinaryMax,
+    BinaryMin,
+    Expression,
+    Numeric,
+    Variable,
+)
 from biogeme.models import (
     ordered_logit,
+    ordered_logit_from_thresholds,
     ordered_probit,
+    ordered_probit_from_thresholds,
     piecewise_as_variable,
     piecewise_formula,
     piecewise_function,
@@ -22,50 +31,140 @@ from biogeme.models import (
 class TestOrderedLogit(unittest.TestCase):
     def test_two_discrete_values(self):
         result = ordered_logit(
-            continuous_value=10,
+            continuous_value=Numeric(10),
             list_of_discrete_values=[1, 2],
-            tau_parameter=Beta('tau', 0, None, None, 0),
+            reference_threshold_parameter=Beta('tau', 0, None, None, 0),
+            scale_parameter=1.0,
         )
         self.assertIsInstance(result, dict)
 
     def test_multiple_discrete_values(self):
         result = ordered_logit(
-            continuous_value=10,
+            continuous_value=Numeric(10),
             list_of_discrete_values=[1, 2, 3, 4],
-            tau_parameter=Beta('tau', 0, None, None, 0),
+            reference_threshold_parameter=Beta('tau', 0, None, None, 0),
+            scale_parameter=1.0,
         )
         self.assertIsInstance(result, dict)
 
     def test_not_a_parameter(self):
         with self.assertRaises(BiogemeError):
-            ordered_logit(10, [1, 2, 3], 1)
+            ordered_logit(
+                continuous_value=Numeric(10),
+                list_of_discrete_values=[1, 2, 3],
+                reference_threshold_parameter=1,
+                scale_parameter=1.0,
+            )
 
 
 class TestOrderedProbit(unittest.TestCase):
     def test_two_discrete_values(self):
         result = ordered_probit(
-            continuous_value=10,
+            continuous_value=Numeric(10),
             list_of_discrete_values=[1, 2],
-            tau_parameter=Beta('tau', 0, None, None, 0),
+            reference_threshold_parameter=Beta('tau', 0, None, None, 0),
+            scale_parameter=1.0,
         )
         self.assertIsInstance(result, dict)
 
     def test_multiple_discrete_values(self):
         result = ordered_probit(
-            continuous_value=10,
+            continuous_value=Numeric(10),
             list_of_discrete_values=[1, 2, 3, 4],
-            tau_parameter=Beta('tau', 0, None, None, 0),
+            reference_threshold_parameter=Beta('tau', 0, None, None, 0),
+            scale_parameter=1.0,
         )
         self.assertIsInstance(result, dict)
 
     def test_not_a_parameter(self):
         with self.assertRaises(BiogemeError):
-            ordered_probit(10, [1, 2, 3], 1)
+            ordered_probit(
+                continuous_value=Numeric(10),
+                list_of_discrete_values=[1, 2, 3],
+                reference_threshold_parameter=1,
+                scale_parameter=1.0,
+            )
+
+
+class TestOrderedFromThresholds(unittest.TestCase):
+    def test_logit_two_discrete_values_from_thresholds(self):
+        thresholds = [Beta('tau1', 0, None, None, 0)]
+        result = ordered_logit_from_thresholds(
+            continuous_value=Numeric(10),
+            list_of_discrete_values=[1, 2],
+            threshold_parameters=thresholds,
+            scale_parameter=Numeric(1.0),
+        )
+        self.assertIsInstance(result, dict)
+
+    def test_logit_multiple_discrete_values_from_thresholds(self):
+        thresholds = [
+            Beta('tau1', 0, None, None, 0),
+            Beta('tau2', 0, None, None, 0),
+            Beta('tau3', 0, None, None, 0),
+        ]
+        result = ordered_logit_from_thresholds(
+            continuous_value=Numeric(10),
+            list_of_discrete_values=[1, 2, 3, 4],
+            threshold_parameters=thresholds,
+            scale_parameter=Numeric(1.0),
+        )
+        self.assertIsInstance(result, dict)
+
+    def test_logit_threshold_length_mismatch_raises(self):
+        thresholds = [
+            Beta('tau1', 0, None, None, 0),
+            Beta('tau2', 0, None, None, 0),
+        ]
+        with self.assertRaises(BiogemeError):
+            ordered_logit_from_thresholds(
+                continuous_value=Numeric(10),
+                list_of_discrete_values=[1, 2, 3, 4],
+                threshold_parameters=thresholds,
+                scale_parameter=Numeric(1.0),
+            )
+
+    def test_probit_two_discrete_values_from_thresholds(self):
+        thresholds = [Beta('tau1', 0, None, None, 0)]
+        result = ordered_probit_from_thresholds(
+            continuous_value=Numeric(10),
+            list_of_discrete_values=[1, 2],
+            threshold_parameters=thresholds,
+            scale_parameter=Numeric(1.0),
+        )
+        self.assertIsInstance(result, dict)
+
+    def test_probit_multiple_discrete_values_from_thresholds(self):
+        thresholds = [
+            Beta('tau1', 0, None, None, 0),
+            Beta('tau2', 0, None, None, 0),
+            Beta('tau3', 0, None, None, 0),
+        ]
+        result = ordered_probit_from_thresholds(
+            continuous_value=Numeric(10),
+            list_of_discrete_values=[1, 2, 3, 4],
+            threshold_parameters=thresholds,
+            scale_parameter=Numeric(1.0),
+        )
+        self.assertIsInstance(result, dict)
+
+    def test_probit_threshold_length_mismatch_raises(self):
+        thresholds = [
+            Beta('tau1', 0, None, None, 0),
+            Beta('tau2', 0, None, None, 0),
+        ]
+        with self.assertRaises(BiogemeError):
+            ordered_probit_from_thresholds(
+                continuous_value=Numeric(10),
+                list_of_discrete_values=[1, 2, 3, 4],
+                threshold_parameters=thresholds,
+                scale_parameter=Numeric(1.0),
+            )
 
 
 class TestPiecewiseVariables(unittest.TestCase):
     def test_correct_input(self):
-        variable = "x"
+        variable = 'x'
         thresholds = [None, 10, 20, None]
         expected_number_of_variables = len(thresholds) - 1
         result = piecewise_variables(variable, thresholds)
@@ -82,13 +181,13 @@ class TestPiecewiseVariables(unittest.TestCase):
             )
 
     def test_all_none_thresholds(self):
-        variable = "x"
+        variable = 'x'
         thresholds = [None, None, None]
         with self.assertRaises(BiogemeError):
             piecewise_variables(variable, thresholds)
 
     def test_invalid_none_thresholds(self):
-        variable = "x"
+        variable = 'x'
         thresholds = [None, None, 20, 30]
         with self.assertRaises(BiogemeError):
             piecewise_variables(variable, thresholds)
@@ -101,7 +200,7 @@ class TestPiecewiseVariables(unittest.TestCase):
             piecewise_variables(variable, thresholds)
 
     def test_edge_case_empty_thresholds(self):
-        variable = "x"
+        variable = 'x'
         thresholds = []
         expected_error_msg = 'No threshold has been provided.'
         with self.assertRaisesRegex(BiogemeError, expected_error_msg):
@@ -109,10 +208,9 @@ class TestPiecewiseVariables(unittest.TestCase):
 
 
 class TestPiecewiseFormula(unittest.TestCase):
-
     def test_valid_input_without_betas(self):
         # Test to ensure function returns correct Expression with valid inputs and no betas
-        variable = "x"
+        variable = 'x'
         thresholds = [None, 10, 20, None]
         result = piecewise_formula(variable, thresholds)
         expected_result = 'MultipleSum'
@@ -120,7 +218,7 @@ class TestPiecewiseFormula(unittest.TestCase):
 
     def test_valid_input_with_betas(self):
         # Test to ensure function returns correct Expression with valid inputs and betas
-        variable = "x"
+        variable = 'x'
         thresholds = [None, 10, 20, None]
         beta_1 = Beta('beta_1', 0, None, None, 0)
         beta_2 = Beta('beta_2', 0, None, None, 0)
@@ -144,7 +242,7 @@ class TestPiecewiseFormula(unittest.TestCase):
 
     def test_all_none_thresholds(self):
         # Test to check function raises an error if all thresholds are None
-        variable = "x"
+        variable = 'x'
         thresholds = [None, None, None]
         with self.assertRaisesRegex(
             BiogemeError,
@@ -154,7 +252,7 @@ class TestPiecewiseFormula(unittest.TestCase):
 
     def test_invalid_none_in_thresholds(self):
         # Test to check function raises an error if None is used incorrectly in thresholds
-        variable = "x"
+        variable = 'x'
         thresholds = [None, None, 20, 30]
         with self.assertRaisesRegex(
             BiogemeError, 'only the first and the last thresholds can be None'
@@ -163,7 +261,7 @@ class TestPiecewiseFormula(unittest.TestCase):
 
     def test_incorrect_betas_length(self):
         # Test to check function raises an error if the length of betas does not match the expected
-        variable = "x"
+        variable = 'x'
         thresholds = [None, 10, 20, None]
         beta_1 = Beta('beta_1', 0, None, None, 0)
         beta_2 = Beta('beta_2', 0, None, None, 0)
@@ -174,7 +272,6 @@ class TestPiecewiseFormula(unittest.TestCase):
 
 
 class TestPiecewiseAsVariable(unittest.TestCase):
-
     def test_valid_input_without_betas(self):
         variable = Variable('x')
         thresholds = [None, 10, 20, None]
@@ -224,7 +321,6 @@ class TestPiecewiseAsVariable(unittest.TestCase):
 
 
 class TestPiecewiseFunction(unittest.TestCase):
-
     def test_single_interval(self):
         x = 5
         thresholds = [None, 10]  # -inf to 10
@@ -242,7 +338,7 @@ class TestPiecewiseFunction(unittest.TestCase):
         betas = [1, 2, 0.5]  # Different betas for each interval
         result = piecewise_function(x, thresholds, betas)
         self.assertEqual(
-            10 + 5 * 2, result, "Should accumulate values across intervals correctly."
+            10 + 5 * 2, result, 'Should accumulate values across intervals correctly.'
         )
 
     def test_below_first_threshold(self):
@@ -250,7 +346,7 @@ class TestPiecewiseFunction(unittest.TestCase):
         thresholds = [0, 10]  # 0 to 10
         betas = [1]  # Only one beta, as there's only one interval
         result = piecewise_function(x, thresholds, betas)
-        self.assertEqual(result, 0, "Should be 0 as x is below the first threshold.")
+        self.assertEqual(result, 0, 'Should be 0 as x is below the first threshold.')
 
     def test_above_last_threshold(self):
         x = 25
@@ -260,7 +356,7 @@ class TestPiecewiseFunction(unittest.TestCase):
         self.assertEqual(
             result,
             10 + 20 + 15,
-            "Should handle values above the last threshold correctly.",
+            'Should handle values above the last threshold correctly.',
         )
 
     def test_all_none_thresholds(self):
