@@ -7,10 +7,11 @@ Test executing all examples and verifying that they run properly
 """
 
 import os
-import subprocess
 import shutil
-import unittest
+import subprocess
 import tempfile
+import unittest
+
 from biogeme.parameters import biogeme_parameters
 
 ROOT_DIR = (
@@ -47,7 +48,6 @@ def clean_directory(directory):
 
 class ScriptExecutionTests(unittest.TestCase):
     def setUp(self):
-
         self.filename = tempfile.mktemp()
         biogeme_parameters.set_value(
             name='number_of_draws', value=4, section='MonteCarlo'
@@ -79,7 +79,6 @@ class ScriptExecutionTests(unittest.TestCase):
             os.remove(self.filename)
 
     def test_script_execution(self):
-
         # Iterate over all directories
         for directory in examples_dirs:
             # Clean the directory
@@ -114,7 +113,7 @@ class ScriptExecutionTests(unittest.TestCase):
                     )
                 except subprocess.CalledProcessError as e:
                     self.fail(
-                        f"Script {file_name} failed with error: {e.output.decode()}"
+                        f'Script {file_name} failed with error: {e.output.decode()}'
                     )
             if orig_file_exists:
                 shutil.move(backup_file, toml_file)
