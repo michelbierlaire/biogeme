@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import logging
+import math
 
 import jax.numpy as jnp
 from jax.scipy.stats import norm
@@ -74,3 +75,12 @@ class NormalCdf(UnaryOperator):
             return result
 
         return the_jax_function
+
+    def get_value(self) -> float:
+        """Evaluates the value of the expression
+
+        :return: value of the expression
+        :rtype: float
+        """
+        child_value = self.child.get_value()
+        return 0.5 * (1.0 + math.erf(child_value / math.sqrt(2.0)))

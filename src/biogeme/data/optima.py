@@ -13,9 +13,8 @@ Prepare data for the Optima case study.
 
 import os
 
-import pandas as pd
-
 import biogeme.database as db
+import pandas as pd
 from biogeme.expressions import Variable
 
 # Get the directory of the current file
@@ -42,17 +41,40 @@ def read_data() -> db.Database:
     number_of_rows = df.shape[0]
     df['normalized_weight'] = df['Weight'] * number_of_rows / sum_weight
     database = db.Database(name=data_file_path, dataframe=df)
+    _ = database.define_variable('livesInUrbanArea', UrbRur == 2)
+    _ = database.define_variable('owningHouse', OwnHouse == 1)
     _ = database.define_variable('ScaledIncome', CalculatedIncome / 1000)
     _ = database.define_variable('age_65_more', age >= 65)
+    _ = database.define_variable('age_30_less', age <= 30)
+    _ = database.define_variable('age_category', 2 - (age <= 30) + (age >= 65))
+    _ = database.define_variable(
+        'household_size', 3 - 2 * (NbHousehold == 1) - (NbHousehold == 2)
+    )
+    # 15% / 50% / 85 % quantiles of the income distribution in the data
+    _ = database.define_variable(
+        'income_category',
+        1
+        + (CalculatedIncome >= 3250)
+        + (CalculatedIncome >= 7000)
+        + (CalculatedIncome >= 15000),
+    )
+
     _ = database.define_variable('moreThanOneCar', NbCar > 1)
     _ = database.define_variable('moreThanOneBike', NbBicy > 1)
     _ = database.define_variable('individualHouse', HouseType == 1)
     _ = database.define_variable('male', Gender == 1)
+    _ = database.define_variable('single', ((FamilSitu == 1) + (FamilSitu == 4)) > 0)
     _ = database.define_variable(
         'haveChildren', ((FamilSitu == 3) + (FamilSitu == 4)) > 0
     )
     _ = database.define_variable('haveGA', GenAbST == 1)
     _ = database.define_variable('highEducation', Education >= 6)
+    _ = database.define_variable('artisans', SocioProfCat == 5)
+    _ = database.define_variable('employees', SocioProfCat == 6)
+    _ = database.define_variable(
+        'occupation_status',
+        4 - 3 * (OccupStat == 1) - 2 * (OccupStat == 2) - (OccupStat == 9),
+    )
     _ = database.define_variable(
         'childCenter', ((ResidChild == 1) + (ResidChild == 2)) > 0
     )
@@ -61,18 +83,23 @@ def read_data() -> db.Database:
         'childSuburb', ((ResidChild == 3) + (ResidChild == 4)) > 0
     )
     _ = database.define_variable('TimePT_scaled', TimePT / 200)
+    _ = database.define_variable('TimePT_hour', TimePT / 60)
     _ = database.define_variable('TimeCar_scaled', TimeCar / 200)
+    _ = database.define_variable('TimeCar_hour', TimeCar / 60)
     _ = database.define_variable('MarginalCostPT_scaled', MarginalCostPT / 10)
     _ = database.define_variable('CostCarCHF_scaled', CostCarCHF / 10)
     _ = database.define_variable('distance_km_scaled', distance_km / 5)
     _ = database.define_variable('PurpHWH', TripPurpose == 1)
     _ = database.define_variable('PurpOther', TripPurpose != 1)
+    _ = database.define_variable(
+        'number_of_trips',
+        (NbTrajects == 1) + 2 * (NbTrajects == 2) + 3 * (NbTrajects >= 3),
+    )
+    # urbanization: 1 = urban, 2 = mixed, 3 = rural
+    _ = database.define_variable(
+        'urbanization', 2 - 1 * (TypeCommune <= 3) + 1 * (TypeCommune >= 8)
+    )
 
-    import numpy as np
-
-    nan_positions = np.where(database.dataframe.isna())
-    for row, col in zip(*nan_positions):
-        ic(f"NaN at row {row}, column '{database.dataframe.columns[col]}'")
     return database
 
 
@@ -122,6 +149,8 @@ LineRelST = Variable('LineRelST')
 GenAbST = Variable('GenAbST')
 AreaRelST = Variable('AreaRelST')
 OtherST = Variable('OtherST')
+urbanization = Variable('urbanization')
+three_trips_or_more = Variable('three_trips_or_more')
 CarAvail = Variable('CarAvail')
 Envir01 = Variable('Envir01')
 Envir02 = Variable('Envir02')
@@ -195,6 +224,7 @@ ModeToSchool = Variable('ModeToSchool')
 ReportedDuration = Variable('ReportedDuration')
 CoderegionCAR = Variable('CoderegionCAR')
 age = Variable('age')
+age_category = Variable('age_category')
 normalized_weight = Variable('normalized_weight')
 
 ScaledIncome = Variable('ScaledIncome')
@@ -209,9 +239,15 @@ highEducation = Variable('highEducation')
 childCenter = Variable('childCenter')
 childSuburb = Variable('childSuburb')
 TimePT_scaled = Variable('TimePT_scaled')
+TimePT_hour = Variable('TimePT_hour')
 TimeCar_scaled = Variable('TimeCar_scaled')
+TimeCar_hour = Variable('TimeCar_hour')
 MarginalCostPT_scaled = Variable('MarginalCostPT_scaled')
 CostCarCHF_scaled = Variable('CostCarCHF_scaled')
 distance_km_scaled = Variable('distance_km_scaled')
 PurpHWH = Variable('PurpHWH')
 PurpOther = Variable('PurpOther')
+livesInUrbanArea = Variable('livesInUrbanArea')
+household_size = Variable('household_size')
+income_category = Variable('income_category')
+occupation_status = Variable('occupation_status')

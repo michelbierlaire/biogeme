@@ -860,12 +860,22 @@ class BIOGEME:
             some_starting_values=starting_values,
             save_iterations_filename=save_iteration_file_name,
         )
+        if algorithm_results.convergence:
+            logger.info('Optimization algorithm has converged.')
+        else:
+            logger.info('Optimization algorithm has *not* converged.')
+        for key, msg in algorithm_results.optimization_messages.items():
+            logger.info(f'{key}: {msg}')
 
         optimal_betas = self.expressions_registry.get_named_betas_values(
             algorithm_results.solution
         )
 
         calculate_hessian = self.second_derivatives_mode != SecondDerivativesMode.NEVER
+        if calculate_hessian:
+            logger.info('Calculate second derivatives and BHHH')
+        else:
+            logger.info('Calculate BHHH')
         f_g_h_b: FunctionOutput = self.function_evaluator.evaluate(
             the_betas=optimal_betas,
             gradient=True,

@@ -144,9 +144,38 @@ class Database:
 
         :param condition: Boolean Series of same length as the data
         """
-
-        self._df = self._df[~condition].reset_index(drop=True)
-        condition_index = condition[condition].index
+        # Build a boolean mask aligned to the current DataFrame index without
+        # triggering pandas' future warning about silent downcasting on fillna.
+        cond = pd.Series(condition)
+        # Align to index first
+        cond = cond.reindex(self._df.index)
+        # Ensure we are not on object dtype before filling NAs:
+        # Prefer pandas' nullable boolean, then downcast to plain bool.
+        try:
+            cond = cond.astype("boolean")  # BoolDtype with NA support
+        except (TypeError, ValueError):
+            # Fallbacks if values are heterogeneous: try to infer objects
+            # and coerce typical truthy patterns; final fallback: nonzero test.
+            cond = cond.infer_objects(copy=False)
+            if cond.dtype == object:
+                # Map common textual/numeric truthy/falsey to booleans, leave others as NA
+                _TRUE = {True, 1, 1.0, "True", "true", "TRUE"}
+                _FALSE = {False, 0, 0.0, "False", "false", "FALSE", ""}
+                cond = cond.map(
+                    lambda v: True if v in _TRUE else (False if v in _FALSE else pd.NA)
+                )
+                cond = cond.astype("boolean")
+            else:
+                cond = cond != 0
+                cond = cond.astype("boolean")
+        # Now safely fill NA and convert to plain bool
+        cond = cond.fillna(False).astype(bool)
+        if len(cond) != len(self._df):
+            raise ValueError(
+                f"Condition length {len(cond)} != dataframe length {len(self._df)}"
+            )
+        self._df = self._df.loc[~cond].reset_index(drop=True)
+        condition_index = cond[cond].index
         for callback in self._listeners:
             callback(condition_index)
 

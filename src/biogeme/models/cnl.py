@@ -1,4 +1,4 @@
-""" Implements the cross-nested logit model.
+"""Implements the cross-nested logit model.
 
 :author: Michel Bierlaire
 :date: Wed Oct 25 11:08:59 2023
@@ -10,14 +10,15 @@ from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
-    exp,
-    MultipleSum,
-    logzero,
-    log,
     ExpressionOrNumeric,
+    MultipleSum,
+    exp,
+    log,
+    logzero,
 )
-from biogeme.models import logmev
 from biogeme.nests import NestsForCrossNestedLogit, OldNestsForCrossNestedLogit
+
+from .mev import logmev
 
 logger = logging.getLogger(__name__)
 

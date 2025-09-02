@@ -1,4 +1,4 @@
-""" Implementation of the pdf and CDF of common distributions
+"""Implementation of the pdf and CDF of common distributions
 
 :author: Michel Bierlaire
 
@@ -6,16 +6,18 @@
 
 """
 
+import math
 from typing import Union
+
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
-    log,
-    exp,
-    Numeric,
     MultipleSum,
+    Numeric,
+    exp,
+    log,
     validate_and_convert,
 )
-from biogeme.exceptions import BiogemeError
 
 
 def normalpdf(
@@ -61,6 +63,57 @@ def normalpdf(
     den = s_expr * Numeric(2.506628275)
     p = num / den
     return p
+
+
+def normal_logpdf(
+    x: Union[float, Expression],
+    mu: Union[float, Expression] = Numeric(0.0),
+    s: Union[float, Expression] = Numeric(1.0),
+) -> Expression:
+    """
+    Logarithm of the Normal pdf
+
+    .. math:: \\log f(x;\\mu, \\sigma) =
+        -\\tfrac{1}{2}\\log(2\\pi) - \\log(\\sigma)
+        - \\frac{(x-\\mu)^2}{2\\sigma^2}
+
+    :param x: value at which the log-pdf is evaluated.
+
+    :param mu: location parameter :math:`\\mu` of the Normal distribution.
+
+    :param s: scale parameter :math:`\\sigma` of the Normal distribution.
+
+    :note: It is assumed that :math:`\\sigma > 0`.
+
+    :return: value of the log of the Normal pdf.
+
+    :raise ValueError: if :math:`\\sigma \\leq 0`.
+    """
+    x_expr = validate_and_convert(x)
+    mu_expr = validate_and_convert(mu)
+    s_expr = validate_and_convert(s)
+
+    try:
+        s_value = s_expr.get_value()
+    except NotImplementedError:
+        s_value = None
+
+    if (s_value is not None) and (s_value <= 0):
+        raise ValueError(f"Scale parameter must be positive and not {s_value}")
+
+    # (x - mu)^2
+    diff_sq = (x_expr - mu_expr) * (x_expr - mu_expr)
+
+    # -0.5 * log(2π)
+    c = Numeric(-0.5) * log(Numeric(2.0 * math.pi))
+
+    # - log(s)
+    term_scale = -log(s_expr)
+
+    # - (x - mu)^2 / (2 * s^2)
+    term_quad = -diff_sq / (Numeric(2.0) * s_expr * s_expr)
+
+    return c + term_scale + term_quad
 
 
 def lognormalpdf(
