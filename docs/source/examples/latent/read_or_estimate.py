@@ -29,6 +29,6 @@ def read_or_estimate(
         results = EstimationResults.from_yaml_file(filename=filename)
         print(f'Results are read from the file {filename}.')
     except FileNotFoundError:
-        print('Parameters are estimated.')
+        print('Parameters are being estimated.')
         results = the_biogeme.estimate(run_bootstrap=run_bootstrap)
     return results
