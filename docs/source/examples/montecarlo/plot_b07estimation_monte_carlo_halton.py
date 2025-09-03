@@ -33,7 +33,6 @@ the_biogeme = get_biogeme(the_draws=the_draws, number_of_draws=R)
 the_biogeme.model_name = 'b07estimation_monte_carlo_halton'
 results_file = f'saved_results/{the_biogeme.model_name}.yaml'
 
-
 # %%
 try:
     results = EstimationResults.from_yaml_file(filename=results_file)

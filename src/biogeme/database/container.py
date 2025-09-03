@@ -29,7 +29,6 @@ from biogeme.segmentation import (
     generate_segmentation,
     verify_segmentation,
 )
-
 from .sampling import sample_with_replacement
 
 logger = logging.getLogger(__name__)
