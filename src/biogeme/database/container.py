@@ -151,27 +151,27 @@ class Database:
         # Ensure we are not on object dtype before filling NAs:
         # Prefer pandas' nullable boolean, then downcast to plain bool.
         try:
-            cond = cond.astype("boolean")  # BoolDtype with NA support
+            cond = cond.astype('boolean')  # BoolDtype with NA support
         except (TypeError, ValueError):
             # Fallbacks if values are heterogeneous: try to infer objects
             # and coerce typical truthy patterns; final fallback: nonzero test.
             cond = cond.infer_objects(copy=False)
             if cond.dtype == object:
                 # Map common textual/numeric truthy/falsey to booleans, leave others as NA
-                _TRUE = {True, 1, 1.0, "True", "true", "TRUE"}
-                _FALSE = {False, 0, 0.0, "False", "false", "FALSE", ""}
+                _TRUE = {True, 1, 1.0, 'True', 'true', 'TRUE'}
+                _FALSE = {False, 0, 0.0, 'False', 'false', 'FALSE', ''}
                 cond = cond.map(
                     lambda v: True if v in _TRUE else (False if v in _FALSE else pd.NA)
                 )
-                cond = cond.astype("boolean")
+                cond = cond.astype('boolean')
             else:
                 cond = cond != 0
-                cond = cond.astype("boolean")
+                cond = cond.astype('boolean')
         # Now safely fill NA and convert to plain bool
         cond = cond.fillna(False).astype(bool)
         if len(cond) != len(self._df):
             raise ValueError(
-                f"Condition length {len(cond)} != dataframe length {len(self._df)}"
+                f'Condition length {len(cond)} != dataframe length {len(self._df)}'
             )
         self._df = self._df.loc[~cond].reset_index(drop=True)
         condition_index = cond[cond].index
@@ -236,12 +236,12 @@ class Database:
             nan_indices = np.where(np.isnan(new_values))[0].tolist()
 
             message = f"The evaluated values for '{name}' contain NaN entries.\n"
-            message += f"Total values: {num_total}, NaN values: {num_nan}.\n"
+            message += f'Total values: {num_total}, NaN values: {num_nan}.\n'
 
             if num_nan == num_total:
-                message += "All values are NaN."
+                message += 'All values are NaN.'
             else:
-                message += f"Indices with NaN: {nan_indices}"
+                message += f'Indices with NaN: {nan_indices}'
 
             raise BiogemeError(message)
         self.dataframe[name] = pd.Series(
