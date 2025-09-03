@@ -3,7 +3,7 @@
 Discrete mixture with panel data
 ================================
 
-Example of a discrete mixture of logit models, also called latent class model.
+Example of a discrete mixture of logit models, also called latent_old class model.
 The class membership model includes socio-economic variables.
 The datafile is organized as panel data.
 
@@ -12,35 +12,34 @@ The datafile is organized as panel data.
 
 """
 
-import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
-
-from biogeme.expressions import (
-    Beta,
-    Variable,
-    bioDraws,
-    MonteCarlo,
-    log,
-    exp,
-    bioMultSum,
-)
-
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
 from swissmetro_panel import (
-    flat_database,
-    SM_AV,
     CAR_AV_SP,
-    TRAIN_AV_SP,
     INCOME,
+    SM_AV,
+    TRAIN_AV_SP,
+    flat_database,
+)
+
+import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
+from biogeme import models
+from biogeme.expressions import (
+    Beta,
+    MonteCarlo,
+    Variable,
+    bioDraws,
+    bioMultSum,
+    exp,
+    log,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b16panel_discrete_socio_eco.py')
 
 # %%
-# Parameters to be estimated. One version for each latent class.
+# Parameters to be estimated. One version for each latent_old class.
 NUMBER_OF_CLASSES = 2
 B_COST = [Beta(f'B_COST_class{i}', 0, None, None, 0) for i in range(NUMBER_OF_CLASSES)]
 

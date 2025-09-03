@@ -12,19 +12,14 @@ sake of it, that the alternatives are ordered as 1->2->3
 
 """
 
-import biogeme.biogeme_logging as blog
 import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
+from biogeme.expressions import Beta, Elem, log
 from biogeme.models import ordered_logit
-from biogeme.expressions import Beta, log, Elem
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
-from swissmetro_data import (
-    database,
-    CHOICE,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-)
+from swissmetro_data import CHOICE, TRAIN_COST_SCALED, TRAIN_TT_SCALED, database
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b18ordinal_logit.py')
@@ -62,7 +57,7 @@ U = B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 the_proba = ordered_logit(
     continuous_value=U,
     list_of_discrete_values=[1, 2, 3],
-    tau_parameter=tau1,
+    reference_threshold_parameter=tau1,
 )
 
 # %%

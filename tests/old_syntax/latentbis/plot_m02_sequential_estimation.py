@@ -1,6 +1,6 @@
 """
 
-Choice model with latent variable: sequential estimation
+Choice model with latent_old variable: sequential estimation
 ========================================================
 
 Mixture of logit.
@@ -13,40 +13,40 @@ Sequential estimation.
 """
 
 import sys
-import biogeme.biogeme_logging as blog
-import biogeme.exceptions as excep
+
+from optima import (
+    Choice,
+    CostCarCHF_scaled,
+    MarginalCostPT_scaled,
+    PurpHWH,
+    PurpOther,
+    SocioProfCat,
+    TimeCar_scaled,
+    TimePT_scaled,
+    WaitingTimePT,
+    age,
+    childCenter,
+    childSuburb,
+    database,
+    distance_km_scaled,
+    haveChildren,
+    highEducation,
+    male,
+)
+from read_or_estimate import read_or_estimate
+
 import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
 import biogeme.distributions as dist
+import biogeme.exceptions as excep
 import biogeme.results as res
 from biogeme import models
 from biogeme.expressions import (
     Beta,
+    Integrate,
     RandomVariable,
     exp,
     log,
-    Integrate,
-)
-
-from read_or_estimate import read_or_estimate
-
-from optima import (
-    database,
-    male,
-    age,
-    haveChildren,
-    highEducation,
-    childCenter,
-    childSuburb,
-    SocioProfCat,
-    WaitingTimePT,
-    Choice,
-    TimePT_scaled,
-    TimeCar_scaled,
-    MarginalCostPT_scaled,
-    CostCarCHF_scaled,
-    distance_km_scaled,
-    PurpHWH,
-    PurpOther,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -114,7 +114,7 @@ BETA_TIME_PT_REF = Beta('BETA_TIME_PT_REF', 0, None, 0, 0)
 BETA_WAITING_TIME = Beta('BETA_WAITING_TIME', -0.075, None, None, 0)
 
 # %%
-# The coefficient of the latent variable should be initialized to
+# The coefficient of the latent_old variable should be initialized to
 # something different from zero. If not, the algorithm may be trapped
 # in a local optimum, and never change the value.
 BETA_TIME_PT_AL = Beta('BETA_TIME_PT_AL', 1.5, None, None, 0)

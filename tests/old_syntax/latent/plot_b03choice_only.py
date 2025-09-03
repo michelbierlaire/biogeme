@@ -3,49 +3,47 @@
 Mixture of logit
 ================
 
-Choice model with latent variable. No measurement equation for the indicators.
+Choice model with latent_old variable. No measurement equation for the indicators.
 
 :author: Michel Bierlaire, EPFL
 :date: Thu Apr 13 16:58:21 2023
 
 """
 
-import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-from biogeme import models
-import biogeme.distributions as dist
-from biogeme.expressions import (
-    Beta,
-    RandomVariable,
-    Integrate,
-    exp,
-    log,
-)
-
-from read_or_estimate import read_or_estimate
-
 from optima import (
-    database,
-    age_65_more,
+    Choice,
+    CostCarCHF_scaled,
+    MarginalCostPT_scaled,
+    PurpHWH,
+    PurpOther,
     ScaledIncome,
-    moreThanOneCar,
-    moreThanOneBike,
-    individualHouse,
-    male,
+    TimeCar_scaled,
+    TimePT_scaled,
+    WaitingTimePT,
+    age_65_more,
+    database,
+    distance_km_scaled,
     haveChildren,
     haveGA,
     highEducation,
-    WaitingTimePT,
-    Choice,
-    TimePT_scaled,
-    TimeCar_scaled,
-    MarginalCostPT_scaled,
-    CostCarCHF_scaled,
-    distance_km_scaled,
-    PurpHWH,
-    PurpOther,
+    individualHouse,
+    male,
+    moreThanOneBike,
+    moreThanOneCar,
 )
+from read_or_estimate import read_or_estimate
 
+import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
+import biogeme.distributions as dist
+from biogeme import models
+from biogeme.expressions import (
+    Beta,
+    Integrate,
+    RandomVariable,
+    exp,
+    log,
+)
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b03choice_only.py')

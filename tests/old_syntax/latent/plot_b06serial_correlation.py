@@ -3,7 +3,7 @@
 Serial correlation
 ==================
 
-Choice model with the latent variable.
+Choice model with the latent_old variable.
 Mixture of logit, with agent effect to deal with serial correlation.
 Measurement equation for the indicators.
 Maximum likelihood (full information) estimation.
@@ -14,49 +14,50 @@ Maximum likelihood (full information) estimation.
 """
 
 import sys
-import biogeme.biogeme_logging as blog
-import biogeme.biogeme as bio
-import biogeme.exceptions as excep
-from biogeme import models
-import biogeme.results as res
-from biogeme.expressions import (
-    Beta,
-    bioDraws,
-    MonteCarlo,
-    Elem,
-    bioNormalCdf,
-    exp,
-    log,
-)
-from read_or_estimate import read_or_estimate
 
 from optima import (
-    database,
-    age_65_more,
-    moreThanOneCar,
-    moreThanOneBike,
-    individualHouse,
-    male,
-    haveChildren,
-    haveGA,
-    highEducation,
-    WaitingTimePT,
+    Choice,
+    CostCarCHF_scaled,
     Envir01,
     Envir02,
     Envir03,
+    MarginalCostPT_scaled,
     Mobil11,
     Mobil14,
     Mobil16,
     Mobil17,
-    Choice,
-    TimePT_scaled,
-    TimeCar_scaled,
-    MarginalCostPT_scaled,
-    CostCarCHF_scaled,
     PurpHWH,
     PurpOther,
-    distance_km_scaled,
     ScaledIncome,
+    TimeCar_scaled,
+    TimePT_scaled,
+    WaitingTimePT,
+    age_65_more,
+    database,
+    distance_km_scaled,
+    haveChildren,
+    haveGA,
+    highEducation,
+    individualHouse,
+    male,
+    moreThanOneBike,
+    moreThanOneCar,
+)
+from read_or_estimate import read_or_estimate
+
+import biogeme.biogeme as bio
+import biogeme.biogeme_logging as blog
+import biogeme.exceptions as excep
+import biogeme.results as res
+from biogeme import models
+from biogeme.expressions import (
+    Beta,
+    Elem,
+    MonteCarlo,
+    bioDraws,
+    bioNormalCdf,
+    exp,
+    log,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
