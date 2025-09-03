@@ -2,36 +2,67 @@ name: Run tox on multiple OS
 
 on:
   push:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
   pull_request:
-    branches:
-      - master
-      - develop
+    branches: [master, develop]
   workflow_dispatch:
   schedule:
-    - cron: '0 6 * * 1'
+    - cron: '0 6 * * 1'   # Mondays at 06:00 UTC
+
+# Avoid burning minutes on superseded runs
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    name: Tests
+    name: Tests (${{ matrix.os }}, py${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.12', '3.11', '3.10']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install tox tox-gh-actions
-    - name: Test with tox
-      run: tox
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'              # pip cache for faster installs
+
+      # Cache tox environments, keyed by OS, Python, and lockfiles
+      - name: Cache .tox
+        uses: actions/cache@v4
+        with:
+          path: .tox
+          key: tox-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'tox.ini', 'requirements*.txt', 'setup.cfg') }}
+          restore-keys: |
+            tox-${{ runner.os }}-${{ matrix.python-version }}-
+
+      # Install tooling with pipx (isolated, fast)
+      - name: Install test tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade wheel
+          python -m pip install tox tox-gh-actions
+
+      # If your tox.ini maps envs via tox-gh-actions this just works
+      - name: Run test suite
+        run: tox -p auto
+
+      # Optional: upload junit/coverage if you generate them in tox
+      # - name: Upload test reports
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-reports-${{ matrix.os }}-py${{ matrix.python-version }}
+      #     path: |
+      #       .tox/**/junit*.xml
+      #       .tox/**/coverage*.xml
