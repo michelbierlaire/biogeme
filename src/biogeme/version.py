@@ -47,12 +47,10 @@ def get_html() -> str:
     """
     html = f'<p>biogeme {get_version()} [{versionDate}]</p>\n'
     html += (
-        '<p><a href="https://www.python.org/" '
-        'target="_blank">Python</a> package</p>\n'
+        '<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>\n'
     )
     html += (
-        f'<p>Home page: <a href="{URL_BIOGEME}" '
-        f'target="_blank">{URL_BIOGEME}</a></p>\n'
+        f'<p>Home page: <a href="{URL_BIOGEME}" target="_blank">{URL_BIOGEME}</a></p>\n'
     )
     html += (
         f'<p>Submit questions to <a href="{URL_FORUM}" '

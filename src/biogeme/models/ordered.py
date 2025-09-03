@@ -30,16 +30,16 @@ def build_ordered_thresholds(
     :return: list of Expression thresholds (length len(list_of_discrete_values) - 1)
     """
     if len(list_of_discrete_values) < 2:
-        raise BiogemeError("Need at least two discrete values for ordered model.")
+        raise BiogemeError('Need at least two discrete values for ordered model.')
     if not isinstance(first_threshold_parameter, Beta):
         raise BiogemeError(
-            f"first_tau must be a Beta expression, and not a {type(first_threshold_parameter)}."
+            f'first_tau must be a Beta expression, and not a {type(first_threshold_parameter)}.'
         )
     thresholds = [first_threshold_parameter]
     tau = first_threshold_parameter
     for val in list_of_discrete_values[1:-1]:
         diff = Beta(
-            f"{first_threshold_parameter.name}_diff_{val}",
+            f'{first_threshold_parameter.name}_diff_{val}',
             1,
             0,
             None,
@@ -67,11 +67,11 @@ def ordered_likelihood_from_thresholds(
     :return: dict mapping discrete values to probabilities
     """
     if len(list_of_discrete_values) < 2:
-        raise BiogemeError("Need at least two discrete values for ordered model.")
+        raise BiogemeError('Need at least two discrete values for ordered model.')
     if len(threshold_parameters) != len(list_of_discrete_values) - 1:
         raise BiogemeError(
-            f"tau_parameters must have length len(list_of_discrete_values)-1, "
-            f"got {len(threshold_parameters)} and {len(list_of_discrete_values)}."
+            f'tau_parameters must have length len(list_of_discrete_values)-1, '
+            f'got {len(threshold_parameters)} and {len(list_of_discrete_values)}.'
         )
     J = len(list_of_discrete_values)
     the_proba = {
@@ -143,7 +143,7 @@ def ordered_logit(
 
 def ordered_probit(
     continuous_value: Expression,
-    scale_parameter: Expression | float ,
+    scale_parameter: Expression | float,
     list_of_discrete_values: list[int],
     reference_threshold_parameter: Beta,
 ) -> dict[int, Expression]:
