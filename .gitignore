@@ -19,6 +19,10 @@ archive/*
 stamp-h1
 docs/source/auto_examples
 docs.keep/*
+dist/
+*.egg
+*.egg-info/
+build/
 #############################################
 #                                           #
 #                Compilation                #
