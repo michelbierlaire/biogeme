@@ -12,6 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clean dist
+          run: rm -rf dist && mkdir -p dist   # 👈 this ensures it's empty
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
