@@ -1,4 +1,4 @@
-    """
+"""
 
 Comparison of execution times
 =============================
