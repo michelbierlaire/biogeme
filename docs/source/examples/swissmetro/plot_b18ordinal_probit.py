@@ -11,16 +11,17 @@ Michel Bierlaire, EPFL
 Thu Jun 26 2025, 15:54:37
 """
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, Elem, log
-from biogeme.models import ordered_probit
-from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import CHOICE, TRAIN_COST_SCALED, TRAIN_TT_SCALED, database
+
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Elem, log
+from biogeme.models import ordered_probit
+from biogeme.results_processing import get_pandas_estimated_parameters
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b18ordinal_probit.py')
@@ -59,6 +60,7 @@ the_probability = ordered_probit(
     continuous_value=utility,
     list_of_discrete_values=[1, 2, 3],
     reference_threshold_parameter=tau1,
+    scale_parameter=1.0,
 )
 
 # %%
