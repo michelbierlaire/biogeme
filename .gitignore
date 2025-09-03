@@ -383,8 +383,6 @@ docs/source/code/toml.rst
 docs/source/sg_execution_times.rst
 tests/functions/biogemeModelDefaultName.html
 tests/functions/myfile.toml
-tests/old_syntax/swissmetro/b01logit_bis.toml
-tests/old_syntax/swissmetro/few_draws.toml
 docs/source/examples/assisted/b07everything_assisted.pareto
 dist/biogeme-3.2.14.tar.gz
 dist/biogeme-3.2.14-py3-none-any.whl
@@ -427,7 +425,6 @@ docs/source/examples/latent/data_investigator.ipynb
 /docs/source/examples/latent_v1
 /old_webpage
 /working
-/tests/old_syntax
 /tests/old_syntax
 reports/latent_book/latent_book.ps
 reports/latent_book/latent_book.toc
