@@ -1,9 +1,11 @@
 import os
 import shutil
+
 import tomlkit as tk
 from faq import faq
-from sections import about, install, documentation, archives, resources, special
+from sections import about, archives, documentation, install, resources, special
 
+BIOGEME_VERSION = '3.3.1'
 TARGET_FILE = 'index.html'
 DATA_FILE = 'data.toml'
 PORTFOLIO_MODAL = 'portfolio_modal.html'
@@ -23,20 +25,20 @@ def replace(orig_text, dictionary):
 
 def get_section(content):
     all_html = ''
-    id = 0
     for card_title, card_paragraphs in content.items():
         with open(CARD_FILE, encoding='utf-8') as f:
             html = f.read()
-        text = ''
+        text_cards = ''
         for p in card_paragraphs:
-            text += '<p class="card-text">'
-            text += p
-            text += '</p>\n'
-        replacements = {
+            text_cards += '<p class="card-text">'
+            text_cards += p
+            text_cards += '</p>\n'
+        replacements_section = {
             '__TITLE__': card_title,
-            '__CONTENT__': text,
+            '__CONTENT__': text_cards,
+            '__VERSION__': BIOGEME_VERSION,
         }
-        all_html += replace(html, replacements) + '\n'
+        all_html += replace(html, replacements_section) + '\n'
     return all_html
 
 
@@ -139,6 +141,7 @@ replacements = {
     '__RES__': get_section(resources),
     '__ARCHIVES__': get_section(archives),
     '__SPECIAL__': get_special(special),
+    '__VERSION__': BIOGEME_VERSION,
 }
 
 html = replace(html, replacements)

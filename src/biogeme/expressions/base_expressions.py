@@ -577,6 +577,31 @@ class Expression:
         for child in self.get_children():
             child.change_init_values(betas=betas)
 
+    def fix_betas(
+        self,
+        beta_values: dict[str, float],
+        prefix: str | None = None,
+        suffix: str | None = None,
+    ):
+        """Fix all the values of the Beta parameters appearing in the
+        dictionary
+
+        :param beta_values: dictionary containing the betas to be
+            fixed (as key) and their value.
+        :type beta_values: dict(str: float)
+
+        :param prefix: if not None, the parameter is renamed, with a
+            prefix defined by this argument.
+        :type prefix: str
+
+        :param suffix: if not None, the parameter is renamed, with a
+            suffix defined by this argument.
+        :type suffix: str
+
+        """
+        for child in self.get_children():
+            child.fix_betas(beta_values=beta_values, prefix=prefix, suffix=suffix)
+
     def requires_draws(self):
         from .draws import Draws
 

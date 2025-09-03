@@ -11,6 +11,8 @@ from typing import Generic, Iterable, NamedTuple, TYPE_CHECKING, TypeVar
 
 import numpy as np
 
+from biogeme.exceptions import BiogemeError
+
 if TYPE_CHECKING:
     from biogeme.database import Database
 from biogeme.expressions import (
@@ -252,7 +254,17 @@ class ExpressionRegistry:
         }
 
     def get_betas_array(self, betas_dict: dict[str, float]) -> np.ndarray:
-        return np.array([float(betas_dict[beta.name]) for beta in self.free_betas])
+        try:
+            result = np.array(
+                [float(betas_dict[beta.name]) for beta in self.free_betas]
+            )
+            return result
+        except KeyError:
+            betas_input = set(betas_dict.keys())
+            betas_names = set([beta.name for beta in self.free_betas])
+            unknown_betas = betas_input - betas_names
+            err_msg = f'Unknown parameters: {unknown_betas}. List of known parameters: {betas_names}'
+            raise BiogemeError(err_msg)
 
     def get_complete_betas_array(self, betas_dict: dict[str, float]) -> np.ndarray:
         complete_dict = self.complete_dict_of_free_beta_values(the_betas=betas_dict)

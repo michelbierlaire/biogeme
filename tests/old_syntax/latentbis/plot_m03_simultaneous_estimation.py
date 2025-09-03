@@ -1,6 +1,6 @@
 """
 
-Choice model with the latent variable: maximum likelihood estimation
+Choice model with the latent_old variable: maximum likelihood estimation
 ====================================================================
 
 Mixture of logit.
@@ -13,43 +13,43 @@ Maximum likelihood (full information) estimation.
 
 import sys
 from functools import reduce
-import biogeme.biogeme_logging as blog
+
+from optima import (
+    Choice,
+    CostCarCHF_scaled,
+    MarginalCostPT_scaled,
+    PurpHWH,
+    PurpOther,
+    SocioProfCat,
+    TimeCar_scaled,
+    TimePT_scaled,
+    WaitingTimePT,
+    age,
+    childCenter,
+    childSuburb,
+    database,
+    distance_km_scaled,
+    haveChildren,
+    highEducation,
+    male,
+)
+from read_or_estimate import read_or_estimate
+
 import biogeme.biogeme as bio
-import biogeme.exceptions as excep
+import biogeme.biogeme_logging as blog
 import biogeme.distributions as dist
+import biogeme.exceptions as excep
 import biogeme.results as res
 from biogeme import models
 from biogeme.expressions import (
     Beta,
-    Variable,
-    log,
-    RandomVariable,
-    Integrate,
     Elem,
+    Integrate,
+    RandomVariable,
+    Variable,
     bioNormalCdf,
     exp,
-)
-
-from read_or_estimate import read_or_estimate
-
-from optima import (
-    database,
-    male,
-    age,
-    haveChildren,
-    highEducation,
-    childCenter,
-    childSuburb,
-    SocioProfCat,
-    WaitingTimePT,
-    Choice,
-    TimePT_scaled,
-    TimeCar_scaled,
-    MarginalCostPT_scaled,
-    CostCarCHF_scaled,
-    distance_km_scaled,
-    PurpHWH,
-    PurpOther,
+    log,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)

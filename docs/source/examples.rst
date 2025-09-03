@@ -52,7 +52,6 @@ explained in details in `Bierlaire (2018b) <https://transp-or.epfl.ch/documents/
   :maxdepth: 2
 
   auto_examples/latent/index.rst
-  auto_examples/latentbis/index.rst
 
 Assisted specification algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,7 +76,8 @@ and continues to be test. It is described in `Bierlaire and Paschalidis (2023) <
 Multiple Discrete Continuous Extreme Value models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 It is possible to estimate the parameters of Multiple Discrete Continuous Extreme Value (MDCEV) models with Biogeme,
-and to use the estimated model for forecasting. This is described in n upcoming report.
+and to use the estimated model for forecasting. This is described in `Bierlaire and Wang (2024) <https://transp-or.epfl.ch/documents/technicalReports/BierWang24.pdf>`_
+
 
 .. toctree::
   :maxdepth: 2

@@ -1,4 +1,4 @@
-""" Implements various models.
+"""Implements the nested logit model.
 
 :author: Michel Bierlaire
 :date: Fri Mar 29 17:13:14 2019
@@ -11,14 +11,14 @@ import logging
 import biogeme.exceptions as excep
 from biogeme.deprecated import deprecated
 from biogeme.expressions import (
+    ConditionalSum,
+    ConditionalTermTuple,
     Expression,
     ExpressionOrNumeric,
-    exp,
-    log,
     MultipleSum,
     Numeric,
-    ConditionalTermTuple,
-    ConditionalSum,
+    exp,
+    log,
 )
 from biogeme.models import logmev, mev
 from biogeme.nests import NestsForNestedLogit, OldNestsForNestedLogit

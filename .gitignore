@@ -49,8 +49,6 @@ examples/notebooks/.ipynb_checkpoints/*
 examples/notebooks/output_directory/*
 examples/workingNotToDistribute
 examples/sampling_experiment
-examples/latent/diagnostics
-examples/latent/*.tex
 videos
 sphinx
 
@@ -213,18 +211,10 @@ examples/swissmetro/scitas.csh
 examples/swissmetro/scitas.py
 examples/swissmetro/.ipynb_checkpoints/Untitled-checkpoint.ipynb
 examples/swissmetro/__savedIterations.txt
-examples/latent/01oneLatentRegression.tex
-examples/latent/scitas.py
 examples/montecarlo/scitas.py
 examples/swissmetro/02weight~00.html
 examples/swissmetro/01logit~00.html
 examples/swissmetro/01logit~01.html
-examples/latent/02oneLatentOrdered.tex
-examples/latent/__savedIterations.txt
-examples/latent/.#03choiceOnly_mc.py
-examples/latent/02oneLatentOrdered~00.tex
-examples/latent/04latentChoiceSeq.tex
-examples/latent/04latentChoiceSeq~00.tex
 examples/notebooks/simpleExample~05.html
 examples/notebooks/simpleExample~06.html
 examples/notebooks/simpleExample~07.html
@@ -298,13 +288,6 @@ examples/vns/.ipynb_checkpoints/knapsack-checkpoint.ipynb
 examples/swissmetro/sbatch.csh
 examples/swissmetro/run.csh
 examples/swissmetro/run.csh
-examples/latent/run.csh
-examples/latent/sbatch.csh
-examples/latent/scitas.ipynb
-examples/latent/scitas.ipynb
-examples/latentbis/sbatch.csh
-examples/latent/scitas.ipynb
-examples/latent/scitas.ipynb
 examples/swissmetro_panel/12panel_p.run
 examples/swissmetro/run.csh
 examples/swissmetro_panel/12panel_p.run
@@ -383,7 +366,6 @@ reports/specAssistance_v2/pareto.png
 reports/mdcev/mdcev.ps
 clean_all.py
 docs/examples/assisted/b07everything_assisted.pareto
-docs/examples/latent/*.tex
 docs/examples/montecarlo/*.html
 docs/examples/programmers/*.html
 docs/examples/programmers/test*.dat
@@ -401,8 +383,6 @@ docs/source/code/toml.rst
 docs/source/sg_execution_times.rst
 tests/functions/biogemeModelDefaultName.html
 tests/functions/myfile.toml
-tests/old_syntax/swissmetro/b01logit_bis.toml
-tests/old_syntax/swissmetro/few_draws.toml
 docs/source/examples/assisted/b07everything_assisted.pareto
 dist/biogeme-3.2.14.tar.gz
 dist/biogeme-3.2.14-py3-none-any.whl
@@ -430,8 +410,21 @@ src/biogeme/data/data/Untitled.ipynb
 src/biogeme/results_keep.py
 tests/estimation_results/test.yaml
 /docs/source/examples.old
-/docs/source/examples/latent/keep
-/docs/source/examples/latent/saved_results_old
-/docs/source/examples/latent/saved_html_old
 /docs/source/code
 *.bak
+dist/biogeme-3.3.0-py3-none-any.whl
+dist/biogeme-3.3.0.tar.gz
+dist/biogeme-3.3.0a1.tar.gz
+dist/biogeme-3.3.0a2.tar.gz
+reports/latent_book/latent_book.out
+reports/latent_book/latent_book.out
+reports/latent_book/latent_book copy.pdf
+/docs/source/examples/latent/.ipynb_checkpoints
+docs/source/examples/latent/data_investigator.ipynb
+/docs/source/examples/latent_old
+/docs/source/examples/latent_v1
+/old_webpage
+/working
+/tests/old_syntax
+reports/latent_book/latent_book.ps
+reports/latent_book/latent_book.toc

@@ -3,32 +3,32 @@
 Latent class model
 ==================
 
-Example of a discrete mixture of logit (or latent class model).
+Example of a discrete mixture of logit (or latent_old class model).
 
 :author: Michel Bierlaire, EPFL
 :date: Sun Apr  9 17:57:07 2023
 
 """
 
-import biogeme.biogeme as bio
-from biogeme import models
-from biogeme.expressions import Beta, log
-
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
-    database,
+    CAR_AV_SP,
+    CAR_CO_SCALED,
+    CAR_TT_SCALED,
     CHOICE,
     SM_AV,
-    CAR_AV_SP,
-    TRAIN_AV_SP,
-    TRAIN_TT_SCALED,
-    TRAIN_COST_SCALED,
-    SM_TT_SCALED,
     SM_COST_SCALED,
-    CAR_TT_SCALED,
-    CAR_CO_SCALED,
+    SM_TT_SCALED,
+    TRAIN_AV_SP,
+    TRAIN_COST_SCALED,
+    TRAIN_TT_SCALED,
+    database,
 )
+
+import biogeme.biogeme as bio
+from biogeme import models
+from biogeme.expressions import Beta, log
 
 # %%
 # Parameters to be estimated.
@@ -44,7 +44,7 @@ PROB_CLASS1 = Beta('PROB_CLASS1', 0.5, 0, 1, 0)
 PROB_CLASS2 = 1 - PROB_CLASS1
 
 # %%
-# Definition of the utility functions for latent class 1, where the
+# Definition of the utility functions for latent_old class 1, where the
 # time coefficient is zero.
 V11 = ASC_TRAIN + B_COST * TRAIN_COST_SCALED
 V12 = ASC_SM + B_COST * SM_COST_SCALED
@@ -55,7 +55,7 @@ V13 = ASC_CAR + B_COST * CAR_CO_SCALED
 V1 = {1: V11, 2: V12, 3: V13}
 
 # %%
-# Definition of the utility functions for latent class 2, whete the
+# Definition of the utility functions for latent_old class 2, whete the
 # time coefficient is estimated.
 V21 = ASC_TRAIN + B_TIME * TRAIN_TT_SCALED + B_COST * TRAIN_COST_SCALED
 V22 = ASC_SM + B_TIME * SM_TT_SCALED + B_COST * SM_COST_SCALED

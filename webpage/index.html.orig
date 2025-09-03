@@ -17,6 +17,13 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" >
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" >
+
+    <!-- Custom style override for <code> tag -->
+    <style>
+        code {
+        color: inherit; /* or use color: black; */
+        }
+    </style>
   </head>
   <body id="page-top">
     <!-- Navigation-->
@@ -86,7 +93,7 @@
         <p class="text-muted">Read the <a href="https://transp-or.epfl.ch/documents/technicalReports/Bier23.pdf" target="_blank">primer</a>.</p>
         <p class="text-muted">Watch the <a href="https://youtu.be/lhbpra2dILA" target="_blank">video on data</a>.</p>
         <p class="text-muted">Watch the <a href="https://youtu.be/jIAIsqh_g0E" target="_blank">video on model specification</a>.</p>
-        <p class="text-muted">Use the <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" target="_blank">Biogeme Assistant from ChatGPT</a>.</p>
+        <p class="text-muted">Use the <a href="https://chatgpt.com/g/g-68b6bf61e2308191a3adf09688800f84-assistant-for-biogeme-3-3-1" target="_blank">Biogeme Assistant from ChatGPT</a>.</p>
       </div>
 
       <div class="col-auto mb-4">
@@ -118,7 +125,7 @@
         </span>
         <h4 class="my-3">ChatGPT Biogeme assistant</h4>
         <p class="text-muted">
-          <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" target="_blank">
+          <a href="https://chatgpt.com/g/g-68b6bf61e2308191a3adf09688800f84-assistant-for-biogeme-3-3-1" target="_blank">
             Ask ChatGPT to help you
           </a>.
         </p>
@@ -158,7 +165,7 @@
 		<p class="card-text">
 		  It is still experimental, but there is an instance of ChatGPT dedicated to Biogeme:
 		</p>
-		<p class="card-text text-center"><a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant"
+		<p class="card-text text-center"><a href="https://chatgpt.com/g/g-68b6bf61e2308191a3adf09688800f84-assistant-for-biogeme-3-3-1"
 					  target="_blank">Biogeme Assistant</a>
 		</p>
 	      </div>

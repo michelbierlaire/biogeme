@@ -26,12 +26,12 @@ def readme_file(filename: str) -> None:
 
 def draws_documentation(filename: str) -> None:
     header = """
-The generation of draws is performed using the command ``bioDraws(’var’, ’DRAW_TYPE’)``, where the first argument, ``var``, 
+The generation of draws is performed using the command ``Draws(’var’, ’DRAW_TYPE’)``, where the first argument, ``var``, 
 provides the name of the random variable associated with the draws, and the second argument, ``DRAW_TYPE``, provides the 
-distribution of the random variable (see the :class:`~biogeme.expressions.elementary_expressions.bioDraws` documentation). 
+distribution of the random variable (see the :class:`~biogeme.expressions.elementary_expressions.Draws` documentation). 
 The draw type can either be a user-defined type 
 (see `Bierlaire (2019) <http://transp-or.epfl.ch/documents/technicalReports/Bier19.pdf>`_ for details)
-or native draws provided with Biogeme. The list if native doraws is provided in the following table.
+or native draws provided with Biogeme. The list if native draws is provided in the following table.
     """
 
     description: dict[str, str] = description_of_native_draws()

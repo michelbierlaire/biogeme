@@ -3,87 +3,92 @@
 Relevant data for the hybrid choice model
 =========================================
 
-This file identifies the relevant data for the hybrid choice model, that are shared by several specifications.
+This file identifies the relevant data for the hybrid choice model, that are shared by
+several specifications.
+
 Michel Bierlaire, EPFL
 Thu May 15 2025, 15:47:42
 """
 
-from biogeme.data.optima import (
-    HouseType,
-    ScaledIncome,
-    SocioProfCat,
-    UrbRur,
-    age,
-    age_65_more,
-    childCenter,
-    childSuburb,
-    haveChildren,
-    haveGA,
-    highEducation,
-    individualHouse,
-    moreThanOneBike,
-    moreThanOneCar,
-)
-from biogeme.expressions import Expression
+# %%
+# Latent variables
+car_centric_name = 'car_centric_attitude'
+urban_preference_name = 'urban_preference_attitude'
 
 # %%
 # Indicators for the car centric attitude.
 
-car_indicators = {
+car_likert_indicators = {
     'Envir01',
     'Envir02',
-    'Envir03',
-    'Envir04',
+    'Envir06',
+    'Mobil03',
+    'Mobil04',
+    'Mobil05',
+    'Mobil06',
+    'Mobil07',
+    'Mobil08',
     'Mobil09',
-    'Mobil11',
-    'Mobil14',
-    'Mobil16',
-    'Mobil17',
+    'Mobil10',
+    'LifSty07',
     'LifSty08',
 }
 normalized_car = 'Envir01'
 
+# car_binary_indicators = {'moreThanOneCar', 'moreThanOneBike', 'haveGA'}
+car_binary_indicators = set()
+
 # %%
 # indicators for the urban preference attitude
-urban_indicators = {
+urban_likert_indicators = {
     'ResidCh01',
     'ResidCh02',
     'ResidCh03',
     'ResidCh05',
     'ResidCh06',
     'ResidCh07',
-    'Mobil07',
-    'Mobil24',
+    'LifSty07',
 }
 normalized_urban = 'ResidCh01'
+
+# urban_binary_indicators = {'individualHouse'}
+urban_binary_indicators = set()
 
 
 # %%
 # Latent variable for the car centric attitude
-car_explanatory_variables: dict[str, Expression] = {
-    'age_65_more': age_65_more,
-    'ScaledIncome': ScaledIncome,
-    'moreThanOneCar': moreThanOneCar,
-    'moreThanOneBike': moreThanOneBike,
-    'individualHouse': individualHouse,
-    'haveChildren': haveChildren,
-    'haveGA': haveGA,
-    'highEducation': highEducation,
-}
-# %%
-# Latent variable for the urban preference attitude
-urban_explanatory_variables: dict[str, Expression] = {
-    'childCenter': childCenter,
-    'childSuburb': childSuburb,
-    'highEducation': highEducation,
-    'artisans': SocioProfCat == 5,
-    'employees': SocioProfCat == 6,
-    'age_30_less': age <= 30,
-    'haveChildren': haveChildren,
-    'UrbRur': UrbRur,
-    'IndividualHouse': HouseType == 1,
-}
+car_explanatory_variables: list[str] = [
+    'highEducation',
+    'top_manager',
+    'employees',
+    'age_30_less',
+    'ScaledIncome',
+    'car_oriented_parents',
+]
+
+
+normalized = {'Envir01': -1, 'ResidCh01': 1}
 
 # %%
-# Dict of all explanatory variables
-all_explanatory_variables = car_explanatory_variables | urban_explanatory_variables
+# Latent variable for the urban preference attitude
+urban_explanatory_variables: list[str] = [
+    'childSuburb',
+    'age_30_less',
+    'haveChildren',
+    'individualHouse',
+    'owningHouse',
+    'single',
+    'ScaledIncome',
+    'city_center_as_kid',
+]
+
+# %%
+# List of all explanatory variables
+all_explanatory_variables = car_explanatory_variables + urban_explanatory_variables
+
+# %%
+# All indicators
+latent_variables_indicators = {
+    car_centric_name: car_likert_indicators,
+    urban_preference_name: urban_likert_indicators,
+}

@@ -4,10 +4,9 @@ import logging
 from typing import NamedTuple, TYPE_CHECKING
 
 import numpy as np
-from tabulate import tabulate
-
 from biogeme.floating_point import SQRT_EPS
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
+from tabulate import tabulate
 
 if TYPE_CHECKING:
     from biogeme.calculator import CallableExpression
@@ -141,11 +140,11 @@ def check_derivatives(
 
     """
     x = np.array(x, dtype=float)
-    the_function_output: FunctionOutput | NamedFunctionOutput = the_function(
+    the_function_output: FunctionOutput = the_function(
         x, gradient=True, hessian=True, bhhh=False
     )
-    if isinstance(the_function_output, NamedFunctionOutput):
-        the_function_output = the_function_output.function_output
+    # if isinstance(the_function_output, NamedFunctionOutput):
+    #    the_function_output = the_function_output.function_output
     g_num = findiff_g(the_function, x)
     gdiff = the_function_output.gradient - g_num
     if logg:

@@ -11,11 +11,6 @@ Sat Jun 28 2025, 21:12:42
 """
 
 from IPython.core.display_functions import display
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, IntegrateNormal, RandomVariable, log
-from biogeme.models import logit
-from biogeme.results_processing import get_pandas_estimated_parameters
-
 from swissmetro import (
     CAR_AV_SP,
     CAR_CO_SCALED,
@@ -28,6 +23,14 @@ from swissmetro import (
     TRAIN_COST_SCALED,
     TRAIN_TT_SCALED,
     database,
+)
+
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, IntegrateNormal, RandomVariable, log
+from biogeme.models import logit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
 )
 
 # %%
@@ -67,9 +70,14 @@ log_prob = log(prob)
 # %%
 the_biogeme = BIOGEME(database, log_prob)
 the_biogeme.model_name = '06estimation_integral'
+results_file = f'saved_results/{the_biogeme.model_name}.yaml'
+
 
 # %%
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(filename=results_file)
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

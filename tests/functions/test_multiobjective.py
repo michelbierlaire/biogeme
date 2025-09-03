@@ -1,13 +1,14 @@
+import logging
 import unittest
-import warnings
 
 import numpy as np
-
 from biogeme.multiobjectives import (
     AIC_BIC_dimension,
     aic_bic_dimension,
     loglikelihood_dimension,
 )
+
+logger = logging.getLogger("biogeme.deprecated")
 
 
 class DummyResults:
@@ -55,12 +56,12 @@ class TestMultiObjectives(unittest.TestCase):
 
     def test_deprecated_AIC_BIC_dimension(self):
         res = DummyResults()
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+        with self.assertLogs(logger, level="WARNING") as cm:
             AIC_BIC_dimension(res)
-            self.assertTrue(
-                any("deprecated" in str(warning.message).lower() for warning in w)
-            )
+
+            # exactly one WARNING; message contains both names
+            self.assertEqual(len(cm.records), 1)
+            self.assertEqual(cm.records[0].levelno, logging.WARNING)
 
 
 if __name__ == "__main__":

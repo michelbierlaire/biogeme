@@ -16,8 +16,6 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-
 from biogeme.biogeme_logging import suppress_logs
 from biogeme.calculator import (
     CallableExpression,
@@ -35,7 +33,11 @@ from biogeme.constants import LOG_LIKE, WEIGHT
 from biogeme.database import Database
 from biogeme.default_parameters import ParameterValue
 from biogeme.deprecated import deprecated_parameters
-from biogeme.dict_of_formulas import check_validity, get_expression
+from biogeme.dict_of_formulas import (
+    check_validity,
+    get_expression,
+    insert_valid_keyword,
+)
 from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.exceptions import BiogemeError, ValueOutOfRange
 from biogeme.expressions import (
@@ -70,6 +72,7 @@ from biogeme.tools import (
 )
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult, cross_validate_model
+from tqdm import tqdm
 
 DEFAULT_MODEL_NAME = 'biogeme_model_default_name'
 logger = logging.getLogger(__name__)
@@ -322,6 +325,14 @@ class BIOGEME:
         setattr(self.__class__, name, prop)
 
     @property
+    def sample_size(self):
+        return self.model_elements.sample_size
+
+    @property
+    def number_of_observations(self):
+        return self.model_elements.number_of_observations
+
+    @property
     def generate_pickle(self) -> bool:
         warnings.warn(
             "'generate_pickle' is deprecated. Use 'generate_yaml' instead.",
@@ -392,7 +403,11 @@ class BIOGEME:
             return {self.log_like_name: formulas}
         if isinstance(formulas, dict):
             check_validity(formulas)
-            return formulas
+            return insert_valid_keyword(
+                dict_of_formulas=formulas,
+                reference_keyword=self.log_like_name,
+                valid_keywords=self.log_like_valid_names,
+            )
         raise BiogemeError(
             f'Invalid type for formulas: {type(formulas)}. Expected Expression or dict.'
         )
@@ -845,12 +860,22 @@ class BIOGEME:
             some_starting_values=starting_values,
             save_iterations_filename=save_iteration_file_name,
         )
+        if algorithm_results.convergence:
+            logger.info('Optimization algorithm has converged.')
+        else:
+            logger.info('Optimization algorithm has *not* converged.')
+        for key, msg in algorithm_results.optimization_messages.items():
+            logger.info(f'{key}: {msg}')
 
         optimal_betas = self.expressions_registry.get_named_betas_values(
             algorithm_results.solution
         )
 
         calculate_hessian = self.second_derivatives_mode != SecondDerivativesMode.NEVER
+        if calculate_hessian:
+            logger.info('Calculate second derivatives and BHHH')
+        else:
+            logger.info('Calculate BHHH')
         f_g_h_b: FunctionOutput = self.function_evaluator.evaluate(
             the_betas=optimal_betas,
             gradient=True,
@@ -1287,15 +1312,8 @@ class BIOGEME:
             the_betas=starting_values,
         )
 
-        def the_function(x: np.ndarray) -> FunctionOutput:
-            """Wrapper function to use tools.checkDerivatives"""
-            the_function_output: FunctionOutput = the_log_likelihood(
-                x, gradient=True, hessian=True, bhhh=False
-            )
-            return the_function_output
-
         return check_derivatives(
-            the_function,
+            the_log_likelihood,
             np.asarray(
                 self.model_elements.expressions_registry.list_of_free_betas_init_values
             ),

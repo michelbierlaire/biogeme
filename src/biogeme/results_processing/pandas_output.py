@@ -239,7 +239,9 @@ def get_pandas_correlation_results(
     :return: a Pandas data frame
     """
     if variance_covariance_type is None:
-        variance_covariance_type = estimation_results.get_default_variance_covariance_matrix()
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
     if involved_parameters is None:
         list_of_parameters = {
             index: name for index, name in enumerate(estimation_results.beta_names)

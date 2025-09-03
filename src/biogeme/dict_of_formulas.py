@@ -7,13 +7,13 @@
 
 """
 
+import difflib
 import logging
 from typing import Any
 
-from fuzzywuzzy import fuzz
-
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression
+from fuzzywuzzy import fuzz
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,42 @@ def check_validity(dict_of_formulas: dict[str, Any]) -> None:
 def is_similar_to(word_1: str, word_2: str) -> bool:
     """Checks if two words are similar."""
     return fuzz.ratio(word_1, word_2) >= 80
+
+
+def insert_valid_keyword(
+    dict_of_formulas: dict[str, Expression],
+    reference_keyword: str,
+    valid_keywords: list[str],
+) -> dict[str, Expression]:
+    """Insert the reference keyword if a valid keyword is used."""
+    key_log_like_expression: str | None = None
+    for key in dict_of_formulas:
+        if key == reference_keyword:
+            continue
+        if key in valid_keywords:
+            if reference_keyword in dict_of_formulas:
+                warning_msg = f'Both {reference_keyword} and {key} are defined. Only {reference_keyword} is considered.'
+            else:
+                warning_msg = (
+                    f'As {key} is defined, it is used to define {reference_keyword}.'
+                )
+                key_log_like_expression = key
+            logger.warning(warning_msg)
+
+        else:
+            matches = difflib.get_close_matches(
+                reference_keyword, [key], n=1, cutoff=0.8
+            )
+            if matches:
+                logger.warning(
+                    f'Formula key "{key}" is similar to "{reference_keyword}". '
+                    f'Did you mean to use "{reference_keyword}"?',
+                )
+    if key_log_like_expression is not None:
+        dict_of_formulas[reference_keyword] = dict_of_formulas.pop(
+            key_log_like_expression
+        )
+    return dict_of_formulas
 
 
 def get_expression(

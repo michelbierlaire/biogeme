@@ -6,12 +6,12 @@ Test the "deprecated" decorators"
 
 """
 
-import warnings
-
-from biogeme.deprecated import deprecated, deprecated_parameters
-
+import logging
 import unittest
-from unittest.mock import patch
+
+from biogeme.deprecated import deprecated_parameters
+
+logger = logging.getLogger("biogeme.deprecated")
 
 
 class TestValidateParamsDecorator(unittest.TestCase):
@@ -34,12 +34,15 @@ class TestValidateParamsDecorator(unittest.TestCase):
         def func(new_name):
             return new_name * 2
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertLogs(logger, level="WARNING") as cm:
             result = func(old_name=5)
+
             self.assertEqual(result, 10)
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+            # exactly one WARNING; message contains both names
+            self.assertEqual(len(cm.records), 1)
+            self.assertEqual(cm.records[0].levelno, logging.WARNING)
+            self.assertIn("old_name", cm.output[0])
+            self.assertIn("new_name", cm.output[0])
 
     def test_deprecated_parameters_mixed(self):
         @deprecated_parameters(
@@ -48,32 +51,36 @@ class TestValidateParamsDecorator(unittest.TestCase):
         def func(new_name_a, new_name_b):
             return new_name_a * new_name_b
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertLogs(logger, level="WARNING") as cm:
             result = func(old_name_a=5, new_name_b=2)
             self.assertEqual(result, 10)
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+            # exactly one WARNING; message contains both names
+            self.assertEqual(len(cm.records), 1)
+            self.assertEqual(cm.records[0].levelno, logging.WARNING)
+            self.assertIn("old_name_a", cm.output[0])
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertLogs(logger, level="WARNING") as cm:
             result = func(old_name_a=5, old_name_b=2)
             self.assertEqual(result, 10)
-            self.assertEqual(len(w), 2)
-            self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+            # exactly one WARNING; message contains both names
+            self.assertEqual(len(cm.records), 2)
+            self.assertEqual(cm.records[0].levelno, logging.WARNING)
+            self.assertIn("old_name_a", cm.output[0])
+            self.assertIn("old_name_b", cm.output[1])
 
     def test_deprecated_parameters_None(self):
         @deprecated_parameters(obsolete_params={'old_name': None})
         def func(x):
             return 2 * x
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+        with self.assertLogs(logger, level="WARNING") as cm:
             result = func(x=3, old_name=5)
-            self.assertEqual(result, 6)
 
-            self.assertEqual(len(w), 1)
-            self.assertTrue(issubclass(w[-1].category, DeprecationWarning))
+        self.assertEqual(result, 6)
+        # exactly one WARNING; message contains both names
+        self.assertEqual(len(cm.records), 1)
+        self.assertEqual(cm.records[0].levelno, logging.WARNING)
+        self.assertIn("old_name", cm.output[0])
 
         with self.assertRaises(TypeError):
             result = func(old_name=5)

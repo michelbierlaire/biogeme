@@ -1,8 +1,10 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 
 from biogeme.database import Database
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, Variable
 from biogeme.expressions_registry import ExpressionRegistry
 
@@ -82,6 +84,18 @@ class TestExpressionRegistry(unittest.TestCase):
         self.registry.broadcast()
         self.assertIsNotNone(self.registry.free_betas[0].specific_id)
         self.assertIsInstance(self.registry.free_betas[0].specific_id, int)
+
+    def test_get_betas_array_valid_input(self):
+        betas_dict = {'beta1': 0.5, 'beta2': 1.5}
+        result = self.registry.get_betas_array(betas_dict)
+        expected = np.array([0.5, 1.5])
+        np.testing.assert_array_equal(result, expected)
+
+    def test_get_betas_array_raises_error(self):
+        betas_dict = {'beta1': 0.5, 'unknown_beta': 1.5}
+        with self.assertRaises(BiogemeError) as context:
+            self.registry.get_betas_array(betas_dict)
+        self.assertIn('Unknown parameters', str(context.exception))
 
 
 if __name__ == '__main__':

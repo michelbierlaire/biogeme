@@ -13,11 +13,10 @@ syntax. They do not correspond to any meaningful model.
 :date: Sat Dec  2 13:09:42 2023
 """
 
+import biogeme.biogeme_logging as blog
 import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
 from biogeme.exceptions import BiogemeError
 from biogeme.function_output import FunctionOutput
 from biogeme.tools import (
@@ -50,7 +49,9 @@ logger = blog.get_screen_logger(level=blog.INFO)
 #
 # .. math:: h=\left(\begin{array}{cc} -\frac{1}{x_0^2} & 0 \\ 0 &
 #     \exp(x_1)\end{array}\right).
-def my_function(x: np.ndarray) -> FunctionOutput:
+def my_function(
+    x: np.ndarray, gradient: bool, hessian: bool, bhhh: bool
+) -> FunctionOutput:
     """Implementation of the test function.
 
     :param x: point at which the function and its derivatives must be evaluated.
@@ -64,7 +65,12 @@ def my_function(x: np.ndarray) -> FunctionOutput:
     h[0, 1] = 0.0
     h[1, 0] = 0.0
     h[1, 1] = np.exp(x[1])
-    return FunctionOutput(function=f, gradient=g, hessian=h)
+    return FunctionOutput(
+        function=float(f),
+        gradient=g if gradient else None,
+        hessian=h if hessian else None,
+        bhhh=None,
+    )
 
 
 # %%
@@ -73,7 +79,7 @@ def my_function(x: np.ndarray) -> FunctionOutput:
 # .. math:: x = \left( \begin{array}{c}1.1 \\ 1.1 \end{array}\right).
 #
 x = np.array([1.1, 1.1])
-the_output = my_function(x)
+the_output = my_function(x, gradient=True, hessian=True, bhhh=False)
 
 # %%
 display(the_output.function)
