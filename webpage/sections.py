@@ -61,7 +61,7 @@ about['Links'] = (
 """,
 )
 
-about['What\'s new in Biogeme 3.3.0?'] = (
+about["What's new in Biogeme 3.3.0 and 3.3.1?"] = (
     """
 <p>
   In this major release, arithmetic expressions and their derivatives are no longer evaluated using <code>cythonbiogeme</code>.
@@ -129,7 +129,7 @@ about['What\'s new in Biogeme 3.3.0?'] = (
     <tr>
       <th>Model</th>
       <th>Computation</th>
-      <th>Speedup (3.3.0 vs 3.2.14)</th>
+      <th>Speedup (3.3.1 vs 3.2.14)</th>
     </tr>
   </thead>
   <tbody>
