@@ -1,4 +1,22 @@
+"""
+
+Specification of the structural equations
+=========================================
+
+Structural equations as functions of the latent variables.
+
+Michel Bierlaire
+Wed Sept 03 2025, 08:13:37
+"""
+
 from typing import NamedTuple
+
+from relevant_data import (
+    car_centric_name,
+    car_explanatory_variables,
+    urban_explanatory_variables,
+    urban_preference_name,
+)
 
 from biogeme.expressions import (
     Beta,
@@ -7,13 +25,6 @@ from biogeme.expressions import (
     LinearTermTuple,
     LinearUtility,
     Variable,
-)
-
-from relevant_data import (
-    car_centric_name,
-    car_explanatory_variables,
-    urban_explanatory_variables,
-    urban_preference_name,
 )
 
 

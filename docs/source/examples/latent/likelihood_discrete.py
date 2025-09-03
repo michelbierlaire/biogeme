@@ -1,12 +1,19 @@
 """
+
+Likelihood function
+===================
+
 Calculates the contributions to the log likelihood of each indicator
+
+Michel Bierlaire
+Wed Sept 03 2025, 08:15:53
 """
+
+from measurement_equations_continuous import MeasurementEquation
 
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Elem, Expression, MultipleProduct, Numeric, Variable
 from biogeme.models import ordered_probit_from_thresholds
-
-from measurement_equations_continuous import MeasurementEquation
 
 
 def likelihood_discrete_mimic(

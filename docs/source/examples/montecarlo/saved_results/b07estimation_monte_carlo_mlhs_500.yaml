@@ -1,0 +1,112 @@
+# File b07estimation_monte_carlo_mlhs_500.yaml has automatically been generated on 2025-09-02 18:06:56.672622
+# biogeme 3.3.1 [2025-09-02]
+
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.46876959326703455
+- -1.8509225533136509
+- 1.1856197881450472
+- -0.8452296531825609
+- 0.17774696415249486
+bhhh:
+- - 1016.2178526559331
+  - 470.00044609195527
+  - 196.6547978787592
+  - -29.12461247900525
+  - -277.26697440036514
+- - 470.00044609195527
+  - 836.7373180608482
+  - 375.2007921138428
+  - -263.86366097189256
+  - 425.99470374754657
+- - 196.6547978787592
+  - 375.2007921138428
+  - 283.50133293986664
+  - 7.830045637075119
+  - 46.80954163564621
+- - -29.12461247900525
+  - -263.86366097189256
+  - 7.830045637075119
+  - 1537.379217217208
+  - -538.6610181751117
+- - -277.26697440036514
+  - 425.99470374754657
+  - 46.80954163564621
+  - -538.6610181751117
+  - 1516.3077493798687
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '2.116056'
+final_log_likelihood: -8571.372149509041
+gradient:
+- 0.01865230903120363
+- 0.007193982295442325
+- -0.00863065121464146
+- 0.03927149293826915
+- 0.024004491303458053
+hessian:
+- - -1066.1972571326523
+  - -516.6584304989274
+  - -239.19516653464825
+  - 73.73839020685443
+  - 378.027275755894
+- - -516.6584304989273
+  - -839.5463219808792
+  - -398.3066040652673
+  - 193.4236242948636
+  - -337.9525095192119
+- - -239.1951665346482
+  - -398.3066040652673
+  - -324.4808362792769
+  - 36.873946824122214
+  - -16.886213805256922
+- - 73.73839020685442
+  - 193.42362429486363
+  - 36.87394682412221
+  - -711.0195881505415
+  - 236.66533506939945
+- - 378.027275755894
+  - -337.95250951921196
+  - -16.886213805256922
+  - 236.66533506939945
+  - -1534.2233990630525
+initial_log_likelihood: -10981.043806990638
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b07estimation_monte_carlo_mlhs_500
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 500
+number_of_excluded_data: 9
+number_of_observations: 10719
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 3.6e-06 <= 6.1e-06
+  Number of function evaluations: 82
+  Number of gradient evaluations: 45
+  Number of hessian evaluations: 0
+  Number of iterations: '37'
+  Optimization time: '6.424106'
+  Proportion of Hessian calculation: 0/22 = 0.0%
+  Relative gradient: 3.576298722469842e-06
+sample_size: 10719
+types_of_draws:
+  b_time_rnd: NORMAL_MLHS
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

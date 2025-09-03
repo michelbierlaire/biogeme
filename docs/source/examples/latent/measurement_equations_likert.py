@@ -1,3 +1,14 @@
+"""
+
+Specification of the discrete measurement equations
+===================================================
+
+Measurement equations for the Likert indicators as functions of the latent variables.
+
+Michel Bierlaire
+Wed Sept 03 2025, 08:15:52
+"""
+
 import numpy as np
 from likelihood_discrete import likelihood_discrete_mimic
 from measurement_equations_continuous import generate_continuous_measurement_equations

@@ -1,3 +1,15 @@
+"""
+
+Specification of the continuous measurement equations
+=====================================================
+
+Measurement equations for the (latent) indicators associated with the Likert scale,
+as functions of the latent variables.
+
+Michel Bierlaire
+Wed Sept 03 2025, 08:15:52
+"""
+
 from itertools import chain
 from typing import NamedTuple
 
@@ -22,7 +34,6 @@ def generate_continuous_measurement_equations(
     all_indicators = set(chain.from_iterable(latent_variables_indicators.values()))
     result_dict = {}
     for indicator in all_indicators:
-
         # Intercept
         intercept = Beta(f'meas_intercept_{indicator}', 0, None, None, 0)
 

@@ -3,7 +3,9 @@
 Relevant data for the hybrid choice model
 =========================================
 
-This file identifies the relevant data for the hybrid choice model, that are shared by several specifications.
+This file identifies the relevant data for the hybrid choice model, that are shared by
+several specifications.
+
 Michel Bierlaire, EPFL
 Thu May 15 2025, 15:47:42
 """

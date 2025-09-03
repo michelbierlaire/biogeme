@@ -1,4 +1,14 @@
-from biogeme.expressions import Beta, exp
+"""
+
+Specification of the choice model
+=================================
+
+Implementation of the utility functions
+
+Michel Bierlaire, EPFL
+Wed Sept 03 2025, 08:13:34
+
+"""
 
 from optima import (
     CostCarCHF,
@@ -9,6 +19,8 @@ from optima import (
     distance_category,
     distance_km,
 )
+
+from biogeme.expressions import Beta, exp
 
 # %%
 # Choice model: parameters
