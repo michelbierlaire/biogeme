@@ -52,7 +52,6 @@ explained in details in `Bierlaire (2018b) <https://transp-or.epfl.ch/documents/
   :maxdepth: 2
 
   auto_examples/latent/index.rst
-  auto_examples/latentbis/index.rst
 
 Assisted specification algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
