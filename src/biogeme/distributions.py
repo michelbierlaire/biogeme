@@ -99,7 +99,7 @@ def normal_logpdf(
         s_value = None
 
     if (s_value is not None) and (s_value <= 0):
-        raise ValueError(f"Scale parameter must be positive and not {s_value}")
+        raise ValueError(f'Scale parameter must be positive and not {s_value}')
 
     # (x - mu)^2
     diff_sq = (x_expr - mu_expr) * (x_expr - mu_expr)

@@ -252,17 +252,17 @@ class BIOGEME:
             # We verify that the configuration is valid
             the_set = central_controller.all_configurations_ids
             if not the_set:
-                error_msg = "No configuration found in the expression"
+                error_msg = 'No configuration found in the expression'
                 raise BiogemeError(error_msg)
             if config_id not in the_set:
                 close_matches = difflib.get_close_matches(config_id, the_set)
                 if close_matches:
                     error_msg = (
-                        f"Unknown configuration: [{config_id}]. "
-                        f"Did you mean [{close_matches[0]}]?"
+                        f'Unknown configuration: [{config_id}]. '
+                        f'Did you mean [{close_matches[0]}]?'
                     )
                 else:
-                    error_msg = f"Unknown configuration: {config_id}."
+                    error_msg = f'Unknown configuration: {config_id}.'
                 raise BiogemeError(error_msg)
         the_configuration = Configuration.from_string(config_id)
         central_controller.set_configuration(the_configuration)
@@ -317,7 +317,7 @@ class BIOGEME:
         def setter(obj, value):
             error_msg = (
                 f"Direct assignment to '{name}' is not allowed. Please set the value in the "
-                f"constructor or in the .toml file."
+                f'constructor or in the .toml file.'
             )
             raise BiogemeError(error_msg)
 
@@ -425,8 +425,8 @@ class BIOGEME:
     def function_parameters(self) -> dict[str, ParameterValue]:
         """Prepare the parameters for the function"""
         return {
-            "tolerance": self.biogeme_parameters.get_value('tolerance'),
-            "steptol": self.biogeme_parameters.get_value('steptol'),
+            'tolerance': self.biogeme_parameters.get_value('tolerance'),
+            'steptol': self.biogeme_parameters.get_value('steptol'),
         }
 
     @property
@@ -455,7 +455,7 @@ class BIOGEME:
                     'to "simple_bounds" in the TOML file.'
                 )
                 algo_parameters = common_bounds_params | {
-                    "proportionAnalyticalHessian": 0,
+                    'proportionAnalyticalHessian': 0,
                 }
             else:
                 logger.info(
@@ -463,13 +463,13 @@ class BIOGEME:
                     'To change this behavior, modify the algorithm to "simple_bounds" in the TOML file.'
                 )
                 algo_parameters = common_bounds_params | {
-                    "proportionAnalyticalHessian": 1,
+                    'proportionAnalyticalHessian': 1,
                 }
             return algo_parameters
 
-        if self.optimization_algorithm == "simple_bounds":
+        if self.optimization_algorithm == 'simple_bounds':
             algo_parameters = common_bounds_params | {
-                "proportionAnalyticalHessian": self.biogeme_parameters.get_value(
+                'proportionAnalyticalHessian': self.biogeme_parameters.get_value(
                     'second_derivatives'
                 ),
             }
@@ -493,20 +493,20 @@ class BIOGEME:
             return algo_parameters
 
         if self.optimization_algorithm in {
-            "simple_bounds_newton",
-            "simple_bounds_BFGS",
+            'simple_bounds_newton',
+            'simple_bounds_BFGS',
         }:
             return common_bounds_params
 
-        if self.optimization_algorithm in {"TR-newton", "TR-BFGS"}:
+        if self.optimization_algorithm in {'TR-newton', 'TR-BFGS'}:
             algo_parameters = common_bounds_params | {
-                "dogleg": self.biogeme_parameters.get_value('dogleg'),
-                "radius": self.biogeme_parameters.get_value('initial_radius'),
-                "maxiter": self.biogeme_parameters.get_value('max_iterations'),
+                'dogleg': self.biogeme_parameters.get_value('dogleg'),
+                'radius': self.biogeme_parameters.get_value('initial_radius'),
+                'maxiter': self.biogeme_parameters.get_value('max_iterations'),
             }
             return algo_parameters
 
-        if self.optimization_algorithm in {"LS-newton", "LS-BFGS"}:
+        if self.optimization_algorithm in {'LS-newton', 'LS-BFGS'}:
             return common_bounds_params
 
         return common_bounds_params
@@ -520,7 +520,7 @@ class BIOGEME:
         :return: The name of the file where the iterations are saved.
         :rtype: str
         """
-        return f"__{self.model_name}.iter"
+        return f'__{self.model_name}.iter'
 
     @property
     def free_betas_names(self) -> list[str]:
@@ -605,14 +605,14 @@ class BIOGEME:
         )
         if with_names:
             names = self.expressions_registry.free_betas_names
-            report = ", ".join(
+            report = ', '.join(
                 [
-                    f"{name}={value:.2g}"
+                    f'{name}={value:.2g}'
                     for name, value in zip(names[:length], array[:length])
                 ]
             )
             return report
-        report = ", ".join([f"{value:.2g}" for value in array[:length]])
+        report = ', '.join([f'{value:.2g}' for value in array[:length]])
         return report
 
     def _load_saved_iteration(self) -> dict[str, float]:
@@ -624,15 +624,15 @@ class BIOGEME:
         filename = self._save_iterations_file_name()
         betas = {}
         try:
-            with open(filename, encoding="utf-8") as fp:
+            with open(filename, encoding='utf-8') as fp:
                 for line in fp:
-                    ell = line.split("=")
+                    ell = line.split('=')
                     betas[ell[0].strip()] = float(ell[1])
             self.change_init_values(betas)
-            logger.info(f"Parameter values restored from {filename}")
+            logger.info(f'Parameter values restored from {filename}')
             return betas
         except OSError:
-            logger.info(f"Cannot read file {filename}. Statement is ignored.")
+            logger.info(f'Cannot read file {filename}. Statement is ignored.')
             return {}
 
     def set_random_init_values(self, default_bound: float = 100.0) -> None:
@@ -677,10 +677,10 @@ class BIOGEME:
             yaml_to_read = yaml_files[-1]
             if len(yaml_files) > 1:
                 warning_msg = (
-                    f"Several files .yaml are available for "
-                    f"this model: {yaml_files}. "
-                    f"The file {yaml_to_read} "
-                    f"is used to load the results."
+                    f'Several files .yaml are available for '
+                    f'this model: {yaml_files}. '
+                    f'The file {yaml_to_read} '
+                    f'is used to load the results.'
                 )
                 logger.warning(warning_msg)
             results = EstimationResults.from_yaml_file(filename=yaml_to_read)
@@ -700,8 +700,8 @@ class BIOGEME:
             return []
 
         logger.info(
-            f"Re-estimate the model {self.biogeme_parameters.get_value('bootstrap_samples')} "
-            f"times for bootstrapping"
+            f'Re-estimate the model {self.biogeme_parameters.get_value("bootstrap_samples")} '
+            f'times for bootstrapping'
         )
         with suppress_logs(level=logging.WARNING):
             # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
@@ -755,7 +755,7 @@ class BIOGEME:
         Example::
 
             # Create an instance of biogeme
-            biogeme  = bio.BIOGEME(database, logprob)
+            biogeme = bio.BIOGEME(database, logprob)
 
             # Gives a name to the model
             biogeme.modelName = 'mymodel'
@@ -768,36 +768,36 @@ class BIOGEME:
 
         """
 
-        if kwargs.get("bootstrap") is not None:
+        if kwargs.get('bootstrap') is not None:
             error_msg = (
                 'Parameter "bootstrap" is deprecated. In order to perform '
-                "bootstrapping, bootstrap_samples=100 to a positive number in the biogeme.toml file ["
-                "e.g. bootstrap_samples=100]."
+                'bootstrapping, bootstrap_samples=100 to a positive number in the biogeme.toml file ['
+                'e.g. bootstrap_samples=100].'
             )
             raise BiogemeError(error_msg)
-        if kwargs.get("algorithm") is not None:
+        if kwargs.get('algorithm') is not None:
             error_msg = (
                 'The parameter "algorithm" is deprecated. Instead, define the '
                 'parameter "optimization_algorithm" in section "[Estimation]" '
-                "of the TOML parameter file"
+                'of the TOML parameter file'
             )
             raise BiogemeError(error_msg)
 
-        if kwargs.get("algo_parameters") is not None:
+        if kwargs.get('algo_parameters') is not None:
             error_msg = (
                 'The parameter "algo_parameters" is deprecated. Instead, define the '
                 'parameters "max_iterations" and "tolerance" in section '
                 '"[SimpleBounds]" '
-                "of the TOML parameter file"
+                'of the TOML parameter file'
             )
             raise BiogemeError(error_msg)
 
-        if kwargs.get("algoParameters") is not None:
+        if kwargs.get('algoParameters') is not None:
             error_msg = (
                 'The parameter "algoParameters" is deprecated. Instead, define the '
                 'parameters "max_iterations" and "tolerance" in section '
                 '"[SimpleBounds]" '
-                "of the TOML parameter file"
+                'of the TOML parameter file'
             )
             raise BiogemeError(error_msg)
 
@@ -809,7 +809,7 @@ class BIOGEME:
             )
 
         if self.log_like is None:
-            raise BiogemeError("No log likelihood function has been specified")
+            raise BiogemeError('No log likelihood function has been specified')
 
         if recycle:
             try:
@@ -826,16 +826,15 @@ class BIOGEME:
 
         if self.expressions_registry.number_of_free_betas == 0:
             raise BiogemeError(
-                f"There is no parameter to estimate"
-                f" in the formula: {self.log_like}."
+                f'There is no parameter to estimate in the formula: {self.log_like}.'
             )
 
         save_iteration_file_name = None
         saved_starting_values = {}
         if self.biogeme_parameters.get_value('save_iterations'):
             logger.info(
-                f"*** Initial values of the parameters are "
-                f"obtained from the file {self._save_iterations_file_name()}"
+                f'*** Initial values of the parameters are '
+                f'obtained from the file {self._save_iterations_file_name()}'
             )
             save_iteration_file_name = self._save_iterations_file_name()
             saved_starting_values = self._load_saved_iteration()
@@ -970,7 +969,7 @@ class BIOGEME:
         Example::
 
             # Create an instance of biogeme
-            biogeme  = bio.BIOGEME(database, logprob)
+            biogeme = bio.BIOGEME(database, logprob)
 
             # Gives a name to the model
             biogeme.modelName = 'mymodel'
@@ -988,8 +987,8 @@ class BIOGEME:
         starting_values = {}
         if self.biogeme_parameters.get_value('save_iterations'):
             logger.info(
-                f"*** Initial values of the parameters are "
-                f"obtained from the file {self._save_iterations_file_name()}"
+                f'*** Initial values of the parameters are '
+                f'obtained from the file {self._save_iterations_file_name()}'
             )
             save_iteration_file_name = self._save_iterations_file_name()
             starting_values = self._load_saved_iteration()
@@ -1083,7 +1082,7 @@ class BIOGEME:
             self.short_names = ModelNames(prefix=self.modelName)
 
         if self.log_like is None:
-            raise BiogemeError("No log likelihood function has been specified")
+            raise BiogemeError('No log likelihood function has been specified')
 
         central_controller = CentralController(
             expression=self.log_like,
@@ -1100,14 +1099,14 @@ class BIOGEME:
                 or number_of_specifications > self.maximum_number_catalog_expressions
             ):
                 error_msg = (
-                    f"There are too many [{number_of_specifications}] different "
-                    f"specifications for the log likelihood function. This is "
-                    f"above the maximum number: "
-                    f"{self.maximum_number_catalog_expressions}. Simplify "
-                    f"the specification, change the value of the parameter "
-                    f"maximum_number_catalog_expressions, or consider using "
+                    f'There are too many [{number_of_specifications}] different '
+                    f'specifications for the log likelihood function. This is '
+                    f'above the maximum number: '
+                    f'{self.maximum_number_catalog_expressions}. Simplify '
+                    f'the specification, change the value of the parameter '
+                    f'maximum_number_catalog_expressions, or consider using '
                     f'the AssistedSpecification object in the "biogeme.assisted" '
-                    f"module."
+                    f'module.'
                 )
                 raise ValueOutOfRange(error_msg)
 
@@ -1182,7 +1181,7 @@ class BIOGEME:
         )
 
     def _algorithm_configuration(self) -> OptimizationAlgorithm:
-        if self.biogeme_parameters.get_value('optimization_algorithm') == "automatic":
+        if self.biogeme_parameters.get_value('optimization_algorithm') == 'automatic':
             self.biogeme_parameters.set_value('optimization_algorithm', 'simple_bounds')
         return algorithms.get(self.optimization_algorithm)
 
@@ -1248,13 +1247,13 @@ class BIOGEME:
             Example::
 
                 # Read the estimation results from a file
-                results = EstimationEResults.from_yaml_file(filename = 'my_model.yaml')
+                results = EstimationEResults.from_yaml_file(filename='my_model.yaml')
                 # Retrieve the names of the betas parameters that have been
                 # estimated
                 betas = biogeme.freeBetaNames
 
                 # Draw 100 realization of the distribution of the estimators
-                b = results.getBetasForSensitivityAnalysis(betas, size = 100)
+                b = results.getBetasForSensitivityAnalysis(betas, size=100)
 
                 # Simulate the formulas using the nominal values
                 simulatedValues = biogeme.simulate(beta_values)
@@ -1276,7 +1275,7 @@ class BIOGEME:
         return left, right
 
     def __str__(self) -> str:
-        r = f"{self.model_name}: database [{self.model_elements.database.name}]"
+        r = f'{self.model_name}: database [{self.model_elements.database.name}]'
         r += str(self.formulas)
         return r
 

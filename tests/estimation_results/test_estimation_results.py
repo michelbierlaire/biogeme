@@ -21,7 +21,6 @@ from biogeme.results_processing import (
 
 
 class TestEstimationResults(unittest.TestCase):
-
     def setUp(self):
         """Set up the test fixtures."""
         self.raw_results = RawEstimationResults(
@@ -176,10 +175,10 @@ class TestEstimationResults(unittest.TestCase):
         # Mock the likelihood ratio function
         with patch(
             'biogeme.tools.likelihood_ratio.likelihood_ratio_test',
-            return_value=("Pass", 2.0, 3.84),
+            return_value=('Pass', 2.0, 3.84),
         ):
             result = self.estimation_results.likelihood_ratio_test(other_model)
-            self.assertEqual(result, ("Pass", 2.0, 3.84))
+            self.assertEqual(result, ('Pass', 2.0, 3.84))
 
     def test_get_beta_values(self):
         """Test retrieval of beta values."""

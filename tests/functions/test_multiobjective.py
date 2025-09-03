@@ -8,7 +8,7 @@ from biogeme.multiobjectives import (
     loglikelihood_dimension,
 )
 
-logger = logging.getLogger("biogeme.deprecated")
+logger = logging.getLogger('biogeme.deprecated')
 
 
 class DummyResults:
@@ -56,7 +56,7 @@ class TestMultiObjectives(unittest.TestCase):
 
     def test_deprecated_AIC_BIC_dimension(self):
         res = DummyResults()
-        with self.assertLogs(logger, level="WARNING") as cm:
+        with self.assertLogs(logger, level='WARNING') as cm:
             AIC_BIC_dimension(res)
 
             # exactly one WARNING; message contains both names
@@ -64,5 +64,5 @@ class TestMultiObjectives(unittest.TestCase):
             self.assertEqual(cm.records[0].levelno, logging.WARNING)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
