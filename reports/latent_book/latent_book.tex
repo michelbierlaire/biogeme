@@ -143,6 +143,7 @@ where $\lambda_{\ell k}$ are unknown parameters to be estimated, $\sigma_{\upsil
 
 If we observe a vector of continuous indicators \( I_n = (I_{n1}, \ldots, I_{nL_n}) \) for individual \( n \), the contribution to the likelihood function, \emph{conditional on the latent variables} \( x^*_{n} \), is given by the product:
 \begin{equation}
+  \label{eq:conditional_likelihood_continuous}
 \prod_{\ell=1}^{L_n} \phi\left( \frac{I_{n\ell} - \lambda_{\ell 0} - \sum_k \lambda_{\ell k} x_{nk}^*}{\sigma_{\upsilon \ell}} \right),
 \end{equation}
 where \( \phi(\cdot) \) denotes the probability density function (pdf) of the standard normal distribution.
@@ -151,6 +152,7 @@ If other types of observations are available for the same individual (such as di
 
 If the continuous indicators are the only data available for individual \( n \), the contribution to the unconditional likelihood becomes:
 \begin{equation}
+  \label{eq:likelihood_continuous}
 \int_{x_n^*} \left[ \prod_{\ell=1}^{L_n} \phi\left( \frac{I_{n\ell} - \lambda_{\ell 0} - \sum_k \lambda_{\ell k} x_{nk}^*}{\sigma_{\upsilon \ell}} \right) \right] f(x_n^*) \, dx_n^*,
 \end{equation}
 where \( f(x_n^*) \) is the pdf of the vector of latent variables \( x_n^* \).
@@ -225,16 +227,28 @@ example, when \( M_\ell = 4 \), the thresholds can be defined as
 follows:
 \[
 \begin{aligned}
-  \tau_1 &= -\delta_1 - \delta_2, \\
+  \tau_1 &= -\delta_1 -\delta_2, \\
   \tau_2 &= -\delta_1, \\
-  \tau_3 &= \delta_1, \\
-  \tau_4 &= \delta_1 + \delta_2,
+  \tau_3 &= \phantom{-}\delta_1, \\
+  \tau_4 &= \phantom{-}\delta_1 + \delta_2,
 \end{aligned}
 \]
 where \( \delta_1 > 0 \) and \( \delta_2 > 0 \) are the parameters to
-be estimated. This formulation ensures that the thresholds are ordered
-and symmetrically centered around zero, which can facilitate
-identification and interpretation.
+be estimated.
+This parameterization guarantees that the thresholds are strictly ordered 
+and symmetrically centered around zero, which facilitates both 
+identification and interpretation. To enforce positivity, we estimate the 
+logarithm of the underlying parameters, that is 
+$\delta'_i = \ln(\delta_i)$, so that
+\[
+\begin{aligned}
+  \tau_1 &= -\exp(\delta'_1) - \exp(\delta'_2), \\
+  \tau_2 &= -\exp(\delta'_1), \\
+  \tau_3 &= \phantom{-}\exp(\delta'_1), \\
+  \tau_4 &=  \phantom{-}\exp(\delta'_1) + \exp(\delta'_2).
+\end{aligned}
+\]
+
 
 If we consider a linear specification,
 \begin{equation}
@@ -278,7 +292,7 @@ If the continuous indicators are the only data available for individual \( n \),
 \right] f(x_n^*) \, dx_n^*,
 \end{equation}
 where \( f(x_n^*) \) is the pdf of the vector of latent variables \( x_n^* \).
-Again, this integral is approximatied using Monte-Carlo integration.
+Again, this integral is approximated using Monte-Carlo integration.
 
 
 \section{The MIMIC model}
@@ -295,11 +309,65 @@ A seminal introduction to the MIMIC model is provided by
 \citeasnoun{Joreskog:1975aa}, who formalized its use within the
 broader class of structural equation models.
 
-We investigate the model specifciation that involves the structural equations \req{eq:linearStructural} and the measurement equations \req{eq:measurement_latent} and \req{eq:discreteMeas-d}.
-Using \req{eq:linearStructural} into  \req{eq:measurement_latent}, we obtain
+
+Under the  specifications in \eqref{eq:linearStructural} and 
+\eqref{eq:linearMeasurement}, the latent vector and indicators are jointly normal, 
+so the latent variables can be integrated out analytically. 
+Let $\boldsymbol{\nu}=(\lambda_{\ell 0})_{\ell}$, 
+$\Lambda=[\lambda_{\ell k}]_{\ell,k}$, 
+$\Theta=\mathrm{diag}(\sigma_{\upsilon\ell}^2)_{\ell}$, 
+and $\Psi=\mathrm{diag}(\sigma_{\omega k}^2)_{k}$. 
+Write the structural part as 
+$\boldsymbol{x}_n^*=\Gamma \boldsymbol{x}_n+\boldsymbol{\zeta}_n$ 
+with $\boldsymbol{\zeta}_n\sim\mathcal N(\mathbf{0},\Psi)$ 
+(so $\Gamma_{ks}=\psi_{sk}$). 
+Then, conditionally on $\boldsymbol{x}_n^*$, we have 
+$\boldsymbol{I}_n\mid \boldsymbol{x}_n^* \sim 
+\mathcal N(\boldsymbol{\nu}+\Lambda \boldsymbol{x}_n^*,\,\Theta)$. 
+Marginalizing $\boldsymbol{x}_n^*$ yields the multivariate normal
+\[
+\boldsymbol{I}_n\mid \boldsymbol{x}_n \sim 
+\mathcal N\!\big(\;\boldsymbol{\mu}_n,\;\Sigma\;\big),
+\qquad
+\boldsymbol{\mu}_n=\boldsymbol{\nu}+\Lambda\Gamma \boldsymbol{x}_n,\quad
+\Sigma=\Lambda\Psi\Lambda^\top+\Theta.
+\]
+Therefore, the contribution of individual $n$ to the likelihood is
+\begin{equation}
+\label{eq:marginal_likelihood_continuous_closed}
+L_n \;=\; (2\pi)^{-L_n/2}\,|\Sigma|^{-1/2}\,
+\exp\!\left(-\tfrac{1}{2}\big(\boldsymbol{I}_n-\boldsymbol{\mu}_n\big)^{\!\top}
+\Sigma^{-1}\big(\boldsymbol{I}_n-\boldsymbol{\mu}_n\big)\right),
+\end{equation}
+and the sample likelihood is $\prod_n L_n$. 
+Hence, no Monte-Carlo integration is required for the continuous-indicator part: 
+the conjugate normal--normal structure delivers a closed form. 
+(If additional non-Gaussian components---e.g., discrete choices---are included, 
+their likelihood terms multiply \eqref{eq:marginal_likelihood_continuous_closed}; 
+only those non-Gaussian parts may require numerical integration.)
+
+----
+We first investigate the continuous case, that is, the model specification that involves the structural equations \req{eq:linearStructural} and the measurement equations \req{eq:continuousMeasurement}.
+
+In this specific context, the formulation
+\eqref{eq:likelihood_continuous} of the likelihood happens to
+simplify.  Indeed, both the structural and measurement equations are
+linear and the error terms are assumed to be normally distributed.  Because linear
+transformations and sums of normal random variables remain normal,
+the pair $(x_n^*, I_n)$ is jointly normal. Integrating out the latent
+variables $x_n^*$ therefore yields a closed-form multivariate normal
+distribution for the indicators $I_n$, with a mean shifted according
+to the structural equation and a covariance matrix equal to the sum of
+the measurement-error variances and the variance propagated from the
+latent variables. In other words, the integral in
+\eqref{eq:likelihood_continuous} collapses to the standard
+multivariate normal density, without requiring any numerical
+approximation.
+
+It can be seen by using \req{eq:linearStructural} into  \req{eq:continuousMeasurement}, to obtain
 \begin{equation}
   \begin{aligned}
-    I^*_{n\ell} &= \lambda_{\ell 0}  + \sum_k \lambda_{\ell k}  (\sum_s \psi_{sk} x_{ns} + \sigma_{\omega k} \omega_{nk}) + \sigma_{\upsilon \ell} \upsilon_{n\ell}, \quad \forall \ell, \\
+    I_{n\ell} &= \lambda_{\ell 0}  + \sum_k \lambda_{\ell k}  (\sum_s \psi_{sk} x_{ns} + \sigma_{\omega k} \omega_{nk}) + \sigma_{\upsilon \ell} \upsilon_{n\ell}, \quad \forall \ell, \\
     &= \lambda_{\ell 0} + \sum_s \lambda'_{\ell s} x_{ns} + \sigma'_{\upsilon \ell} \upsilon'_{n\ell}, \quad \forall \ell, 
   \end{aligned}
 \end{equation}
@@ -315,68 +383,16 @@ The following normalization can be done:
 \end{itemize}
 Note that the structural equations do not include an intercept, so that there is no need to mormalize the intercept of the corresponding measurement equation. 
 
-Following the derivation \req{eq:discreteMeas-d}, the
-probability of observing category $j_m$ for individual $n$ and indicator $\ell$ becomes:
-\begin{equation}
-\renewcommand{\arraystretch}{1.5}
-\begin{array}{rcl}
-\prob(I_{n\ell} = j_m| x^*_n, x_n ; \lambda_\ell, \Sigma_{\upsilon \ell}) &=&\prob(I_{n\ell} = j_m| x_n ; \lambda'_\ell, \sigma'_{\upsilon \ell}) \\&=& \prob(I^*_{n\ell} \leq \tau_m) - \prob(I^*_{n\ell} \leq \tau_{m-1}) \\
-&=& \prob\left( \upsilon'_{n\ell} \leq \dfrac{\tau_m -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right) \\
-& &- \prob\left( \upsilon'_{n\ell} \leq \dfrac{\tau_{m-1} -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right) \\
-&=& \Phi\left(\dfrac{\tau_m -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right) \\
-& &- \Phi\left( \dfrac{\tau_{m-1} -\lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}}{\sigma'_{\upsilon \ell}} \right), \\
-\end{array}
-\end{equation}
-where $\Phi(\cdot)$ denotes the cumulative distribution function (CDF) of the standard normal distribution.
 
-
-The likelihood function is therefore:
-\[
-\mathcal{L}^*(\lambda', \sigma', \tau) = 
-\prod_n \prod_\ell \prod_m 
-\left(
-\begin{aligned}
-&\Phi\left(
-\dfrac{
-\tau_m - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
-}{
-\sigma'_{\upsilon \ell}
-}
-\right) \\
-&\quad - \Phi\left(
-\dfrac{
-\tau_{m-1} - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
-}{
-\sigma'_{\upsilon \ell}
-}
-\right)
-\end{aligned}
-\right)^{y_{n\ell m}},
-\]
-where $\tau_0=-\infty$, $\tau_{M_\ell}=+\infty$ and $y_{n\ell m}=1$ if individual $n$ has selected level $m$ to question $\ell$, and 0 otherwise. Therefore, the log likelihood function $\log \LL^*(\lambda', \sigma')$ is 
-\begin{equation}
-  \label{eq:loglikelihood}
-\LL(\lambda', \sigma', \tau) = 
-\sum_n \sum_\ell \sum_m y_{n\ell m}\log 
-\left(
-\begin{aligned}
-&\Phi\left(
-\dfrac{
-\tau_m - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
-}{
-\sigma'_{\upsilon \ell}
-}
-\right) \\
-&\quad - \Phi\left(
-\dfrac{
-\tau_{m-1} - \lambda'_{\ell 0} - \sum_s \lambda'_{\ell s} x_{ns}
-}{
-\sigma'_{\upsilon \ell}
-}
-\right)
-\end{aligned}
-\right).
-\end{equation}
+In contrast, this simplification does not apply when the indicators
+are discrete. In that case, the measurement equations involve
+threshold-crossing representations that express the probability
+\req{eq:discreteMeas-d} of each observed category as differences of
+normal cumulative distribution functions. These nonlinear functions of
+the latent variables break the convenient normal–linear structure:
+the conditional distribution of the indicators given $x_n^*$ is no
+longer Gaussian. As a consequence, the integral over $x_n^*$ in the
+likelihood cannot be evaluated in closed form.
 
 \section{Choice Model with Latent Variables}
 
