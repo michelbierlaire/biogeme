@@ -14,8 +14,8 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.calculator import get_value_c
 from biogeme.data.optima import read_data
+from biogeme.jax_calculator import get_value_c
 from biogeme.models import lognested
 from biogeme.results_processing import get_pandas_estimated_parameters
 from scenarios import scenario
