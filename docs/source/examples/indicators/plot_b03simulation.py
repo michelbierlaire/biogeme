@@ -15,8 +15,8 @@ import time
 import pandas as pd
 
 from biogeme.biogeme import BIOGEME
-from biogeme.calculator import get_value_c
 from biogeme.data.optima import normalized_weight, read_data
+from biogeme.jax_calculator import get_value_c
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
 from scenarios import scenario
