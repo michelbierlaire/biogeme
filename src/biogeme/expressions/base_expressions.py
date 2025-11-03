@@ -11,6 +11,7 @@ from itertools import chain
 from typing import NamedTuple, TYPE_CHECKING, TypeAlias
 
 from biogeme.exceptions import BiogemeError, NotImplementedError
+from .bayesian import PymcModelBuilderType
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
 from .numeric_tools import is_numeric
@@ -70,6 +71,14 @@ class Expression:
         """
         Generates recursively a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
+        """
+        raise NotImplementedError(f'{repr(self)}')
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :param inside_trajectory: True if the expression is within a trajectory for panel data
+        :return: the expression in TensorVariable format, suitable for PyMc
         """
         raise NotImplementedError(f'{repr(self)}')
 

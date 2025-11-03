@@ -8,10 +8,13 @@ from __future__ import annotations
 
 import logging
 
-import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+import pytensor.tensor as pt
+from jax import numpy as jnp
 
 from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 
@@ -76,3 +79,16 @@ class cos(UnaryOperator):
             return jnp.cos(child_value)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_pymc = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            child_value = child_pymc(dataframe=dataframe)
+            return pt.cos(child_value)
+
+        return builder

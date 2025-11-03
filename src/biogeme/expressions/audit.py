@@ -156,6 +156,6 @@ def audit_randomvariable(expr: RandomVariable, context: dict[str, list[str]]) ->
 @register_audit(Draws)
 def audit_draws(expr: Draws, context: dict[str, list[str]]) -> None:
     if not any(isinstance(ancestor, MonteCarlo) for ancestor in context['ancestors']):
-        context['errors'].append(
-            f'Draws {repr(expr)} is not embedded inside a MonteCarlo expression.'
+        context['warnings'].append(
+            f'Draws {repr(expr)} is not embedded inside a MonteCarlo expression. For maximum likelihood estimation, it is a fatal error. For Bayesian estimation, it is not a problem.'
         )

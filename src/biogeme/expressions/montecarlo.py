@@ -9,7 +9,10 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
+import pandas as pd
+from biogeme.expressions.bayesian import PymcModelBuilderType
 from jax import vmap
+from pytensor.tensor import TensorVariable
 
 from .base_expressions import ExpressionOrNumeric
 from .jax_utils import JaxFunctionType
@@ -75,3 +78,17 @@ class MonteCarlo(UnaryOperator):
             return mean
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        In PyMC, the MonteCarlo integration must not be performed. It will be handled by the Gibbs sampling.
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_tensor = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            child_value = child_tensor(dataframe=dataframe)
+            return child_value
+
+        return builder

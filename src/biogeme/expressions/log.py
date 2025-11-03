@@ -9,11 +9,14 @@ from __future__ import annotations
 import logging
 
 import jax
-import jax.numpy as jnp
 import numpy as np
-from biogeme.floating_point import EPSILON
+import pandas as pd
+import pytensor.tensor as pt
+from jax import numpy as jnp
 
+from biogeme.floating_point import EPSILON
 from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 
@@ -108,3 +111,16 @@ class log(UnaryOperator):
             return jnp.log(child_value)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_pymc = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            child_value = child_pymc(dataframe=dataframe)
+            return pt.log(child_value)
+
+        return builder

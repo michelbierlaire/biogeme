@@ -51,7 +51,7 @@ def audit_chosen_alternative(
     use_jit: bool,
 ) -> AuditTuple:
     from .model_elements import ModelElements
-    from biogeme.calculator import MultiRowEvaluator
+    from biogeme.jax_calculator import MultiRowEvaluator
 
     """Checks all the rows in the database such that the chosen alternative is not available"""
 

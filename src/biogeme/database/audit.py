@@ -35,7 +35,7 @@ def check_availability_of_chosen_alt(
     :raise BiogemeError: if the chosen alternative does not appear
         in the availability dict
     """
-    from biogeme.calculator import evaluate_expression
+    from biogeme.jax_calculator import evaluate_expression
 
     choice_array = evaluate_expression(
         expression=choice, numerically_safe=False, database=database, use_jit=True
@@ -78,7 +78,7 @@ def choice_availability_statistics(
 
     :raise BiogemeError: if the database is empty.
     """
-    from biogeme.calculator import evaluate_expression
+    from biogeme.jax_calculator import evaluate_expression
 
     choice_array = evaluate_expression(
         expression=choice, numerically_safe=False, database=database, use_jit=True

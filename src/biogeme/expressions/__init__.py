@@ -37,6 +37,7 @@ from .deprecated import (
     bioNormalCdf,
 )
 from .derive import Derive
+from .distributed_parameter import DistributedParameter
 from .draws import Draws
 from .elem import Elem
 from .elementary_expressions import (

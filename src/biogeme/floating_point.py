@@ -7,9 +7,8 @@ Mon Mar 31 09:57:37 2025
 import logging
 import os
 
-import jax.numpy as jnp
 import numpy as np
-from jax import config
+from jax import config, numpy as jnp
 
 from biogeme.exceptions import BiogemeError
 

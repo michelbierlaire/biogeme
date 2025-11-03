@@ -9,8 +9,12 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
+import pandas as pd
+import pymc as pm
+from pytensor.tensor import TensorVariable
 
 from biogeme.exceptions import BiogemeError
+from .bayesian import Dimension, PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -67,3 +71,32 @@ class Variable(Elementary):
             # return one_row[self.variableId]
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            model = pm.modelcontext(None)  # active model
+            try:
+                values = dataframe[self.name].to_numpy()
+            except KeyError as e:
+                raise BiogemeError(
+                    f"Column '{self.name}' not found in the dataframe."
+                ) from e
+
+            existing = model.named_vars.get(self.name)
+            if existing is not None:
+                # Ensure the pm.Data is refreshed with the current values
+                pm.set_data({self.name: values}, model=model)
+                return existing
+
+            return pm.Data(
+                self.name,
+                values,
+                dims=Dimension.OBSERVATIONS,
+            )
+
+        return builder

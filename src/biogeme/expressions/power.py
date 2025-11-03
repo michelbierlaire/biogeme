@@ -10,9 +10,12 @@ import logging
 
 import jax
 import jax.numpy as jnp
-from biogeme.floating_point import JAX_FLOAT
+import pandas as pd
+import pytensor.tensor as pt
 
+from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .binary_expressions import BinaryOperator
 from .jax_utils import JaxFunctionType
 from .numeric_expressions import Numeric
@@ -135,3 +138,18 @@ class Power(BinaryOperator):
             return jnp.power(base, exponent)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return left_value**right_value
+
+        return builder

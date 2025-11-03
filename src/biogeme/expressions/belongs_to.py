@@ -8,9 +8,12 @@ from __future__ import annotations
 
 import logging
 
-import jax.numpy as jnp
+import pandas as pd
+import pytensor.tensor as pt
+from jax import numpy as jnp
 
 from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 
@@ -73,3 +76,26 @@ class BelongsTo(UnaryOperator):
             )
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_builder = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            child_val: pt.TensorVariable = child_builder(dataframe)
+
+            # Make a constant tensor of the set values, matching dtype for safety
+            set_vals = pt.constant(set_values_np, dtype=child_val.dtype)
+
+            # Membership test:
+            membership = pt.any(pt.eq(child_val[..., None], set_vals), axis=-1)
+
+            # Return 1.0 where in set, else 0.0, with correct dtype/shape
+            return pt.where(
+                membership, pt.ones_like(child_val), pt.zeros_like(child_val)
+            )
+
+        return builder

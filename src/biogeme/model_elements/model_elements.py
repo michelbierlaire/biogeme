@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pandas as pd
-
 from biogeme.audit_tuple import AuditTuple, display_messages, merge_audit_tuples
 from biogeme.constants import LOG_LIKE, WEIGHT
 from biogeme.database import Database, PanelDatabase, audit_dataframe
@@ -16,6 +15,10 @@ from biogeme.model_elements.audit import audit_chosen_alternative, audit_variabl
 
 
 class ModelElements:
+
+    loglikelihood_name: str = LOG_LIKE
+    weight_name: str = WEIGHT
+
     """
     Container for all key components required to define and estimate a model.
 
@@ -93,6 +96,15 @@ class ModelElements:
         return self._is_panel
 
     @property
+    def free_betas_names(self) -> list[str]:
+        """Returns the names of the parameters that must be estimated
+
+        :return: list of names of the parameters
+        :rtype: list(str)
+        """
+        return self.expressions_registry.free_betas_names
+
+    @property
     def database(self) -> Database:
         if not self.is_panel():
             return self._database
@@ -121,9 +133,9 @@ class ModelElements:
         :param draws_management: Optional object managing the draws.
         """
         expressions = (
-            {LOG_LIKE: log_like}
+            {cls.loglikelihood_name: log_like}
             if weight is None
-            else {LOG_LIKE: log_like, WEIGHT: weight}
+            else {cls.loglikelihood_name: log_like, cls.weight_name: weight}
         )
         return cls(
             expressions=expressions,
@@ -169,11 +181,11 @@ class ModelElements:
 
     @property
     def loglikelihood(self) -> Expression | None:
-        return self.expressions.get(LOG_LIKE)
+        return self.expressions.get(self.loglikelihood_name)
 
     @property
     def weight(self) -> Expression | None:
-        return self.expressions.get(WEIGHT)
+        return self.expressions.get(self.weight_name)
 
     @property
     def formula_names(self) -> list[str]:

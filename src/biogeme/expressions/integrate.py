@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 
 import jax
-import jax.numpy as jnp
+from jax import numpy as jnp
 from numpy.polynomial.hermite import hermgauss
 
 from biogeme.floating_point import JAX_FLOAT

@@ -13,10 +13,13 @@ from typing import TYPE_CHECKING
 import jax
 import jax.numpy as jnp
 import numpy as np
-from biogeme.floating_point import JAX_FLOAT
+import pandas as pd
+import pytensor.tensor as pt
 from jax.scipy.special import logsumexp
 
+from biogeme.floating_point import JAX_FLOAT, MIN_EXP_ARG
 from .base_expressions import Expression, LogitTuple
+from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
 from ..deprecated import deprecated
@@ -25,6 +28,15 @@ from ..exceptions import BiogemeError
 if TYPE_CHECKING:
     from . import ExpressionOrNumeric
 logger: logging.Logger = logging.getLogger(__name__)
+
+
+MASKED_UTILITY_PT = pt.as_tensor_variable(float(MIN_EXP_ARG))
+
+
+# PyTensor does not have isfinite, so define our own
+def _isfinite(x: pt.TensorVariable) -> pt.TensorVariable:
+    """Elementwise finite check for PyTensor: True iff not NaN and not Inf."""
+    return ~(pt.isnan(x) | pt.isinf(x))
 
 
 def index_of(key: float, keys: list[int]):
@@ -320,3 +332,72 @@ class LogLogit(Expression):
                 return result
 
             return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """Return a *vectorized* PyTensor builder computing per-observation
+        log-likelihoods for the multinomial logit, compatible with PyMC.
+
+        Shapes (vectorized over observations):
+          - util_keys_vec: (K,)
+          - choice:        (N,)  arbitrary codes (mapped to column indices)
+          - U / AV:        (N, K)
+          - output ll:     (N,)
+        """
+        util_keys = list(self.util.keys())
+        util_builders = [
+            self.util[k].recursive_construct_pymc_model_builder() for k in util_keys
+        ]
+        choice_builder = self.choice.recursive_construct_pymc_model_builder()
+        av_builders = (
+            [self.av[k].recursive_construct_pymc_model_builder() for k in util_keys]
+            if self.av is not None
+            else None
+        )
+
+        util_keys_vec = pt.constant(np.asarray(util_keys, dtype=np.int32))
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            choice_i32 = pt.cast(choice_builder(dataframe), "int32")  # (N,)
+
+            utilities = pt.stack(
+                [ub(dataframe) for ub in util_builders], axis=1
+            )  # (N, K)
+            # Sanitize upstream NaN/Inf in utilities to a very small finite value
+            utilities = pt.where(_isfinite(utilities), utilities, MASKED_UTILITY_PT)
+
+            if av_builders is None:
+                U_masked = utilities
+                availabilities = None
+            else:
+                availabilities = pt.stack(
+                    [ab(dataframe) for ab in av_builders], axis=1
+                )  # (N, K)
+                # Treat non-finite availability as unavailable (0.0)
+                availabilities = pt.where(
+                    _isfinite(availabilities), availabilities, 0.0
+                )
+                U_masked = pt.where(
+                    pt.neq(availabilities, 0.0), utilities, MASKED_UTILITY_PT
+                )
+
+            matches = pt.eq(choice_i32[:, None], util_keys_vec[None, :])  # (N, K)
+            idx = pt.argmax(matches, axis=1)  # (N,)
+            any_match = pt.any(matches, axis=1)  # (N,)
+
+            n_obs = choice_i32.shape[0]
+            row_idx = pt.arange(n_obs)
+            # Safe index: use column 0 when there is no match; penalize later
+            idx_safe = pt.where(any_match, idx, 0)
+            chosen_logits = U_masked[row_idx, idx_safe]  # (N,)
+            ll = chosen_logits - pt.logsumexp(U_masked, axis=1)  # (N,)
+
+            neg_large = pt.cast(pt.as_tensor_variable(-1.0e30), utilities.dtype)
+
+            if availabilities is not None:
+                chosen_av = availabilities[row_idx, idx_safe]
+                ll = pt.where(pt.eq(chosen_av, 0.0), neg_large, ll)
+
+            ll = pt.where(any_match, ll, neg_large)
+            return ll
+
+        return builder

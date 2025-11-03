@@ -8,9 +8,9 @@ Wed Apr 2 13:10:17 2025
 """
 
 import jax
-import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+from jax import numpy as jnp
 
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import build_vectorized_function

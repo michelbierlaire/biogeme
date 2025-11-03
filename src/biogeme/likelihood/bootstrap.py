@@ -4,8 +4,8 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 from tqdm_joblib import tqdm_joblib
 
-from biogeme.calculator import CompiledFormulaEvaluator
 from biogeme.default_parameters import ParameterValue
+from biogeme.jax_calculator import CompiledFormulaEvaluator
 from biogeme.model_elements import ModelElements
 from biogeme.optimization import OptimizationAlgorithm
 from biogeme.second_derivatives import SecondDerivativesMode

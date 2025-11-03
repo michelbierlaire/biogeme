@@ -4,12 +4,13 @@ import logging
 from typing import NamedTuple, TYPE_CHECKING
 
 import numpy as np
-from biogeme.floating_point import SQRT_EPS
-from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 from tabulate import tabulate
 
+from biogeme.floating_point import SQRT_EPS
+from biogeme.function_output import FunctionOutput, NamedFunctionOutput
+
 if TYPE_CHECKING:
-    from biogeme.calculator import CallableExpression
+    from biogeme.jax_calculator import CallableExpression
 
 logger = logging.getLogger(__name__)
 

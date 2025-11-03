@@ -9,11 +9,12 @@ implemented to verify the analytical derivatives of these functions.
 """
 
 import numpy as np
-from biogeme.calculator import CallableExpression
+
 from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import get_dict_values
 from biogeme.function_output import FunctionOutput
+from biogeme.jax_calculator import CallableExpression
 from biogeme.nests import NestsForCrossNestedLogit
 
 

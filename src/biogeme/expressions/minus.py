@@ -9,6 +9,9 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
+import pandas as pd
+from biogeme.expressions.bayesian import PymcModelBuilderType
+from pytensor.tensor import TensorVariable
 
 from .base_expressions import ExpressionOrNumeric
 from .binary_expressions import BinaryOperator
@@ -93,3 +96,18 @@ class Minus(BinaryOperator):
             return left_value - right_value
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return left_value - right_value
+
+        return builder

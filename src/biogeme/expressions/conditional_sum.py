@@ -10,9 +10,12 @@ import logging
 from typing import Iterable, NamedTuple
 
 import jax
-from biogeme.exceptions import BiogemeError
+import pandas as pd
+import pytensor.tensor as pt
 
+from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression, ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
 
@@ -120,6 +123,30 @@ class ConditionalSum(Expression):
             return result
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        pymc_terms = [
+            (
+                cond.recursive_construct_pymc_model_builder(),
+                term.recursive_construct_pymc_model_builder(),
+            )
+            for cond, term in self.list_of_terms
+        ]
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            # Build all (condition, term) once
+            built = [(c_fn(dataframe), t_fn(dataframe)) for c_fn, t_fn in pymc_terms]
+            # Stack conditions as booleans and terms with a single zeros_like
+            conds = pt.stack([pt.neq(c, 0) for c, _ in built], axis=0)
+            terms = pt.stack([t for _, t in built], axis=0)
+            masked = pt.where(conds, terms, pt.zeros_like(terms))
+            return masked.sum(axis=0)
+
+        return builder
 
     def __str__(self) -> str:
         s = (

@@ -8,10 +8,10 @@ from functools import lru_cache
 
 import numpy as np
 
-from biogeme.calculator import evaluate_expression
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Expression, exp, log
+from biogeme.jax_calculator import evaluate_expression
 from biogeme.mdcev.mdcev import Mdcev
 from biogeme.tools.checks import validate_dict_types
 

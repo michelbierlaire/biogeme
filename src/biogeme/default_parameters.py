@@ -13,14 +13,13 @@ from __future__ import annotations
 
 from typing import Callable, NamedTuple
 
-import numpy as np
-from tabulate import tabulate
-
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
+import numpy as np
 from biogeme.floating_point import NUMPY_FLOAT
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_version
+from tabulate import tabulate
 
 ParameterValue = bool | int | float | str
 
@@ -80,6 +79,16 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             section='Output',
             description=(
                 'bool: "True" if the yaml file with the results must be generated.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='generate_netcdf',
+            value=True,
+            type=bool,
+            section='Output',
+            description=(
+                'bool: "True" if the netcdf file with the Bayesian estimation results must be generated.'
             ),
             check=(cp.is_boolean,),
         ),
@@ -351,7 +360,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             type=int,
             section='AssistedSpecification',
             description=(
-                'int: size of the largest neighborhood copnsidered by the Variable '
+                'int: size of the largest neighborhood considered by the Variable '
                 'Neighborhood Search (VNS) algorithm.'
             ),
             check=(cp.is_integer, cp.is_non_negative),
@@ -386,6 +395,38 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             section='Biogeme',
             description='Version of Biogeme that created the TOML file. Do not modify this value.',
             check=(),
+        ),
+        ParameterTuple(
+            name='bayesian_draws',
+            value=2000,
+            type=int,
+            section='Bayesian',
+            description='Number of draws per chain from the posterior distribution',
+            check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='warmup',
+            value=2000,
+            type=int,
+            section='Bayesian',
+            description='Number of warm-up / burn-in iterations per chain that are used only to adapt the sampler, not to estimate the posterior.',
+            check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='chains',
+            value=4,
+            type=int,
+            section='Bayesian',
+            description='Number of independent Markov chains to run in parallel.',
+            check=(cp.is_integer, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='target_accept',
+            value=0.9,
+            type=float,
+            section='Bayesian',
+            description='Target acceptance probability for the No-U-Turn Sampler (NUTS) algorithm. Higher values like 0.9 or 0.95 often work better for problematic posteriors.',
+            check=(cp.is_number, cp.zero_one),
         ),
     )
 

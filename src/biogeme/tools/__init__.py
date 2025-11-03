@@ -7,8 +7,10 @@ from .derivatives import (
 )
 from .files import TemporaryFile, create_backup, is_valid_filename
 from .formatting import format_memory_size
+from .jax_multicore import report_jax_cpu_devices, warning_cpu_devices
 from .likelihood_ratio import LRTuple, likelihood_ratio_test
 from .primes import calculate_prime_numbers, get_prime_numbers
+from .pymc_utils import pretty_model
 from .serialize_numpy import safe_deserialize_array, safe_serialize_array
 from .simulate import simulate
 from .time import format_timedelta

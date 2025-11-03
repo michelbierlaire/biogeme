@@ -9,14 +9,21 @@ from __future__ import annotations
 
 import logging
 
-import jax.numpy as jnp
-from biogeme.exceptions import BiogemeError
+import pandas as pd
+import pymc as pm
+from jax import numpy as jnp
+from pymc.distributions import continuous
+from pytensor.tensor import TensorVariable
 
+from biogeme.exceptions import BiogemeError
+from .bayesian import PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_SIGMA_PRIOR = 10.0
 
 
 class Beta(Elementary):
@@ -31,6 +38,7 @@ class Beta(Elementary):
         lowerbound: float | None,
         upperbound: float | None,
         status: int,
+        prior: continuous | None = None,
     ):
         """Constructor
 
@@ -42,6 +50,7 @@ class Beta(Elementary):
           bound on the value of the parameter during the optimization.
         :param status: if different from 0, the parameter is fixed to
           its default value, and not modified by the optimization algorithm.
+        :param prior: prior distribution for Bayesian estimation. If None, it will be based on the bounds.
 
         :raise BiogemeError: if the first parameter is not a str.
 
@@ -65,6 +74,7 @@ class Beta(Elementary):
         self.lower_bound = lowerbound
         self.upper_bound = upperbound
         self.status = status
+        self.prior = prior
 
     def deep_flat_copy(self) -> Beta:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
@@ -193,3 +203,36 @@ class Beta(Elementary):
             return jnp.asarray(self.init_value)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            model = pm.modelcontext(None)  # Get current active model context
+            if self.name in model.named_vars:
+                return model.named_vars[self.name]
+
+            # If the parameter is fixed, return a scalar constant (no prior)
+            if self.is_fixed:
+                # Use pm.Data so it is a TensorVariable and can broadcast in formulas
+                return pm.Data(self.name, float(self.init_value))
+
+            # Free parameter: either reuse existing RV or create it once
+            prior = (
+                self.prior
+                if self.prior
+                else pm.TruncatedNormal(
+                    self.name,
+                    mu=self.init_value,
+                    sigma=DEFAULT_SIGMA_PRIOR,
+                    lower=self.lower_bound,
+                    upper=self.upper_bound,
+                )
+            )
+
+            return prior
+
+        return builder

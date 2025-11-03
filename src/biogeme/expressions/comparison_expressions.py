@@ -8,9 +8,13 @@ from __future__ import annotations
 
 import logging
 
+import pandas as pd
+import pytensor.tensor as pt
 from jax import Array, lax
+from pytensor.tensor import TensorVariable
 
 from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .binary_expressions import BinaryOperator
 from .jax_utils import JaxFunctionType
 
@@ -73,7 +77,7 @@ class Equal(ComparisonOperator):
         return r
 
     def recursive_construct_jax_function(self, numerically_safe: bool):
-        import jax.numpy as jnp
+        from jax import numpy as jnp
 
         left_fn = self.left.recursive_construct_jax_function(
             numerically_safe=numerically_safe
@@ -94,6 +98,21 @@ class Equal(ComparisonOperator):
             return lax.cond(is_equal, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return pt.eq(left_value, right_value)
+
+        return builder
 
 
 class NotEqual(ComparisonOperator):
@@ -139,7 +158,7 @@ class NotEqual(ComparisonOperator):
     def recursive_construct_jax_function(
         self, numerically_safe: bool
     ) -> JaxFunctionType:
-        import jax.numpy as jnp
+        from jax import numpy as jnp
 
         left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
             numerically_safe=numerically_safe
@@ -160,6 +179,21 @@ class NotEqual(ComparisonOperator):
             return lax.cond(is_not_equal, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return pt.neq(left_value, right_value)
+
+        return builder
 
 
 class LessOrEqual(ComparisonOperator):
@@ -206,7 +240,7 @@ class LessOrEqual(ComparisonOperator):
     def recursive_construct_jax_function(
         self, numerically_safe: bool
     ) -> JaxFunctionType:
-        import jax.numpy as jnp
+        from jax import numpy as jnp
 
         left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
             numerically_safe=numerically_safe
@@ -229,6 +263,21 @@ class LessOrEqual(ComparisonOperator):
             )
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return pt.le(left_value, right_value)
+
+        return builder
 
 
 class GreaterOrEqual(ComparisonOperator):
@@ -274,7 +323,7 @@ class GreaterOrEqual(ComparisonOperator):
     def recursive_construct_jax_function(
         self, numerically_safe: bool
     ) -> JaxFunctionType:
-        import jax.numpy as jnp
+        from jax import numpy as jnp
 
         left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
             numerically_safe=numerically_safe
@@ -297,6 +346,21 @@ class GreaterOrEqual(ComparisonOperator):
             )
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return pt.ge(left_value, right_value)
+
+        return builder
 
 
 class Less(ComparisonOperator):
@@ -342,7 +406,7 @@ class Less(ComparisonOperator):
     def recursive_construct_jax_function(
         self, numerically_safe: bool
     ) -> JaxFunctionType:
-        import jax.numpy as jnp
+        from jax import numpy as jnp
 
         left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
             numerically_safe=numerically_safe
@@ -363,6 +427,21 @@ class Less(ComparisonOperator):
             return lax.cond(is_less, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return pt.lt(left_value, right_value)
+
+        return builder
 
 
 class Greater(ComparisonOperator):
@@ -408,7 +487,7 @@ class Greater(ComparisonOperator):
     def recursive_construct_jax_function(
         self, numerically_safe: bool
     ) -> JaxFunctionType:
-        import jax.numpy as jnp
+        from jax import numpy as jnp
 
         left_fn: JaxFunctionType = self.left.recursive_construct_jax_function(
             numerically_safe=numerically_safe
@@ -429,3 +508,18 @@ class Greater(ComparisonOperator):
             return lax.cond(is_greater, lambda _: 1.0, lambda _: 0.0, operand=None)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+            return pt.gt(left_value, right_value)
+
+        return builder

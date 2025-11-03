@@ -8,9 +8,15 @@ from __future__ import annotations
 
 import logging
 
-import jax.numpy as jnp
-
+import pandas as pd
+import pymc as pm
+from biogeme.bayesian_estimation import Dimension
+from biogeme.draws import get_distribution, get_list_of_available_distributions
 from biogeme.exceptions import BiogemeError
+from jax import numpy as jnp
+from pytensor.tensor import TensorVariable
+
+from .bayesian import PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -25,7 +31,7 @@ class Draws(Elementary):
 
     expression_type = TypeOfElementaryExpression.DRAWS
 
-    def __init__(self, name: str, draw_type: str):
+    def __init__(self, name: str, draw_type: str = 'NORMAL'):
         """Constructor
 
         :param name: name of the random variable with a series of draws.
@@ -71,3 +77,28 @@ class Draws(Elementary):
             return jnp.take(the_draws, self.safe_draw_id, axis=-1)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+
+        selected_distribution = get_distribution(self.draw_type)
+        if selected_distribution is None:
+            error_msg = (
+                f'{self.draw_type} is not a valid distribution. Available distributions are '
+                f'{get_list_of_available_distributions()}'
+            )
+            raise ValueError(error_msg)
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            model = pm.modelcontext(None)  # Get current active model context
+            if self.name in model.named_vars:
+                return model.named_vars[self.name]
+            # return pm.Normal(name=self.name, mu=0, sigma=1)
+            the_distribution = selected_distribution(name=self.name, dims=Dimension.OBS)
+            # ic(self.name, the_distribution)
+            return the_distribution
+
+        return builder

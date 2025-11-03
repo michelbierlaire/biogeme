@@ -9,8 +9,12 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
+import pandas as pd
+import pytensor.tensor as pt
+from pytensor.tensor import TensorVariable
 
 from .base_expressions import Expression
+from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from ..floating_point import JAX_FLOAT
 
@@ -69,3 +73,14 @@ class Numeric(Expression):
             return jnp.array(self.value, dtype=JAX_FLOAT)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            return pt.as_tensor_variable(self.value)
+
+        return builder

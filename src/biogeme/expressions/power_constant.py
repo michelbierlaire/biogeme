@@ -11,10 +11,12 @@ import logging
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+
 from biogeme.exceptions import BiogemeError
 from biogeme.floating_point import JAX_FLOAT
-
 from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 
@@ -156,3 +158,16 @@ class PowerConstant(UnaryOperator):
             return jnp.power(child_value, self.exponent)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_pymc = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            child_value = child_pymc(dataframe=dataframe)
+            return child_value**self.exponent
+
+        return builder

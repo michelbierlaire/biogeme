@@ -8,13 +8,14 @@ from __future__ import annotations
 
 import logging
 
-import jax.numpy as jnp
 import numpy as np
-from biogeme.floating_point import MAX_EXP_ARG, MIN_EXP_ARG
+import pandas as pd
+import pytensor.tensor as pt
+from jax import numpy as jnp
 
-from . import (
-    ExpressionOrNumeric,
-)
+from biogeme.floating_point import MAX_EXP_ARG, MIN_EXP_ARG
+from .base_expressions import ExpressionOrNumeric
+from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 
@@ -99,3 +100,16 @@ class exp(UnaryOperator):
             return result
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_pymc = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            child_value = child_pymc(dataframe=dataframe)
+            return pt.exp(child_value)
+
+        return builder

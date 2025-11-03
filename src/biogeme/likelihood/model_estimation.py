@@ -15,12 +15,12 @@ from typing import Any, NamedTuple
 import numpy as np
 from biogeme_optimization.function import FunctionToMinimize
 
-from biogeme.calculator import (
+from biogeme.default_parameters import ParameterValue
+from biogeme.jax_calculator import (
     CallableExpression,
     CompiledFormulaEvaluator,
     function_from_compiled_formula,
 )
-from biogeme.default_parameters import ParameterValue
 from biogeme.likelihood.negative_likelihood import NegativeLikelihood
 from biogeme.optimization import OptimizationAlgorithm
 

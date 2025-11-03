@@ -19,14 +19,14 @@ import pandas as pd
 from scipy.optimize import minimize
 
 from biogeme.biogeme import BIOGEME
-from biogeme.calculator import (
-    evaluate_expression,
-    get_value_and_derivatives,
-)
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, Elem, Expression, Numeric, bioMultSum, exp, log
 from biogeme.function_output import FunctionOutput
+from biogeme.jax_calculator import (
+    evaluate_expression,
+    get_value_and_derivatives,
+)
 from biogeme.results_processing import EstimationResults
 from biogeme.tools.checks import validate_dict_types
 from .database_utils import mdcev_row_split

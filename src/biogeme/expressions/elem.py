@@ -10,9 +10,11 @@ import logging
 from typing import TYPE_CHECKING
 
 import jax
-import jax.numpy as jnp
-from biogeme.exceptions import BiogemeError
+import numpy as np
+import pytensor.tensor as pt
+from jax import numpy as jnp
 
+from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
 from .beta_parameters import Beta
 from .convert import validate_and_convert
@@ -150,3 +152,44 @@ class Elem(Expression):
             return result
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self):
+        """Return a PyTensor builder that selects the expression associated with
+        the evaluated integer key.
+
+        Implementation detail: build a stack of branch tensors (one per key)
+        and use an index derived from `argmax(key_vec == key)` to pick the
+        correct slice. If the key does not match any provided key, the result
+        is zero-like (same shape/dtype as a branch).
+        """
+        compiled_dict = {
+            k: v.recursive_construct_pymc_model_builder()
+            for k, v in self.dict_of_expressions.items()
+        }
+        key_builder = self.key_expression.recursive_construct_pymc_model_builder()
+
+        # Fixed order of keys for stacking and indexing
+        sorted_keys = sorted(compiled_dict)
+
+        def builder(dataframe):
+            # Evaluate the key and ensure integer type
+            key_val = key_builder(dataframe)
+            key_int = pt.cast(key_val, "int32")
+
+            # Vector of keys as a constant tensor
+            keys_vec = pt.constant(np.asarray(sorted_keys, dtype=np.int32))
+
+            # Compute the index of the matching key
+            matches = pt.eq(keys_vec, key_int)  # shape: (K,)
+            idx = pt.argmax(matches)  # int index in 0..K-1
+            # Build the stack of branch tensors (same shape per branch)
+            terms = [compiled_dict[k](dataframe) for k in sorted_keys]
+            terms_stack = pt.stack(terms, axis=0)  # shape: (K, ...)
+
+            selected = terms_stack[idx]  # shape: (...)
+
+            # Safety: if no key matches, return zeros_like instead of an arbitrary branch
+            any_match = pt.any(matches)
+            return pt.where(any_match, selected, pt.zeros_like(selected))
+
+        return builder

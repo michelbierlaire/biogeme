@@ -11,9 +11,10 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
-import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+from jax import numpy as jnp
+
 from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
@@ -192,7 +193,7 @@ class Database:
                                   for each row in the dataset. Rows where the result is
                                   True (nonzero) will be excluded.
         """
-        from biogeme.calculator import evaluate_simple_expression_per_row
+        from biogeme.jax_calculator import evaluate_simple_expression_per_row
 
         exclude_condition: Expression = validate_and_convert(exclude_condition)
         condition = evaluate_simple_expression_per_row(
@@ -221,7 +222,7 @@ class Database:
             error_msg = 'Empty database.'
             raise BiogemeError(error_msg)
 
-        from biogeme.calculator import evaluate_simple_expression_per_row
+        from biogeme.jax_calculator import evaluate_simple_expression_per_row
 
         new_values = evaluate_simple_expression_per_row(
             expression=expression,

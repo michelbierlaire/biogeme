@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 
 import jax
-import jax.numpy as jnp
+from jax import numpy as jnp
 
 from .base_expressions import ExpressionOrNumeric
 from .collectors import list_of_all_betas_in_expression, list_of_variables_in_expression
