@@ -12,12 +12,12 @@ Sat Jun 28 2025, 15:54:00
 
 import numpy as np
 
-from biogeme.calculator import (
+from biogeme.function_output import FunctionOutput, NamedFunctionOutput
+from biogeme.jax_calculator import (
     CallableExpression,
     create_function_simple_expression,
     get_value_and_derivatives,
 )
-from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 
 try:
     import matplotlib.pyplot as plt
