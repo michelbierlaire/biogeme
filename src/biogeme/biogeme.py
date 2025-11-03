@@ -13,17 +13,22 @@ import difflib
 import logging
 import warnings
 from datetime import datetime
+from multiprocessing import cpu_count
 
 import numpy as np
 import pandas as pd
-from biogeme.biogeme_logging import suppress_logs
-from biogeme.calculator import (
-    CallableExpression,
-    CompiledFormulaEvaluator,
-    MultiRowEvaluator,
-    function_from_compiled_formula,
+import pymc as pm
+import pytensor.tensor as pt
+from biogeme.bayesian_estimation import (
+    BayesianResults,
+    Dimension,
+    FigureSize,
+    RawBayesianResults,
+    SamplerPlanner,
+    generate_html_file as generate_bayesian_html_file,
+    run_sampling,
 )
-from biogeme.calculator.simple_formula import evaluate_simple_expression
+from biogeme.biogeme_logging import suppress_logs
 from biogeme.catalog import (
     CentralController,
     Configuration,
@@ -50,6 +55,13 @@ from biogeme.filenames import get_new_file_name
 from biogeme.function_output import (
     FunctionOutput,
 )
+from biogeme.jax_calculator import (
+    CallableExpression,
+    CompiledFormulaEvaluator,
+    MultiRowEvaluator,
+    function_from_compiled_formula,
+)
+from biogeme.jax_calculator.simple_formula import evaluate_simple_expression
 from biogeme.likelihood import AlgorithmResults, model_estimation
 from biogeme.likelihood.bootstrap import bootstrap
 from biogeme.model_elements import ModelElements
@@ -58,6 +70,7 @@ from biogeme.parameters import (
     DEFAULT_FILE_NAME as DEFAULT_PARAMETER_FILE_NAME,
     Parameters,
 )
+from biogeme.pymc_calculator import pymc_formula_evaluator
 from biogeme.results_processing import (
     RawEstimationResults,
     generate_html_file,
@@ -72,6 +85,7 @@ from biogeme.tools import (
 )
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult, cross_validate_model
+from icecream import ic
 from tqdm import tqdm
 
 DEFAULT_MODEL_NAME = 'biogeme_model_default_name'
@@ -105,6 +119,7 @@ class BIOGEME:
         'save_iterations': bool,
         'generate_html': bool,
         'generate_yaml': bool,
+        'generate_netcdf': bool,
         'optimization_algorithm': str,
         'maximum_number_catalog_expressions': int,
         'max_number_parameters_to_report': int,
@@ -162,6 +177,9 @@ class BIOGEME:
         self.parameter_file: str = self.biogeme_parameters.file_name
         self.html_filename: str | None = None
         self.yaml_filename: str | None = None
+        self.netcdf_filename: str | None = (
+            None  # Network Common Data Form, for the posterior draws in Bayesian.
+        )
 
         # We allow the values of the parameters to be set with arguments
         self.biogeme_parameters.set_several_parameters(dict_of_parameters=kwargs)
@@ -739,6 +757,69 @@ class BIOGEME:
         except BiogemeError as e:
             logger.warning(e)
             return None
+
+    def bayesian_estimation(self) -> BayesianResults:
+        bayesian_draws = self.biogeme_parameters.get_value('bayesian_draws')
+        warmup = self.biogeme_parameters.get_value('warmup')
+        chains = self.biogeme_parameters.get_value('chains')
+        ic(chains)
+        target_accept = self.biogeme_parameters.get_value('target_accept')
+
+        start_time = datetime.now()
+        obs_coord = np.arange(self.model_elements.number_of_observations)
+        with pm.Model(coords={Dimension.OBS: obs_coord}) as model:
+            loglike_total = pymc_formula_evaluator(model_elements=self.model_elements)
+            pm.Deterministic(self.log_like_name, loglike_total, dims=Dimension.OBS)
+            pm.Potential("choice_logp", pt.sum(loglike_total))
+
+            # Decide how to run the chains (vectorized vs parallel, numpyro vs pm.sample)
+            planner = SamplerPlanner(
+                number_of_threads=(
+                    cpu_count()
+                    if self.number_of_threads == 0
+                    else self.number_of_threads
+                ),
+                prefer_vectorized_single_device=True,
+                allow_pymc_multiprocessing_fallback=False,
+            )
+            # ic(pretty_model(model))
+            # graph = pm.model_to_graphviz(model)
+            # graph.view(filename="model_graph", cleanup=True)
+            # sys.exit()
+            idata, used_numpyro = run_sampling(
+                model=model,
+                draws=int(bayesian_draws),
+                tune=int(warmup),
+                chains=int(chains),
+                target_accept=float(target_accept),
+                planner=planner,
+            )
+
+        sampling_time = datetime.now() - start_time
+
+        bayes_results = RawBayesianResults(
+            idata=idata,
+            model_name=self.model_name,
+            log_like_name=self.log_like_name,
+            user_notes=self.user_notes,
+            data_name=self.database.name,
+            beta_names=self.free_betas_names,
+            sampler='NUTS',
+            target_accept=float(target_accept),
+            run_time=sampling_time,
+        )
+        final_results = BayesianResults(raw=bayes_results)
+        if self.biogeme_parameters.get_value('generate_html'):
+            self.html_filename = get_new_file_name(self.model_name, 'html')
+            generate_bayesian_html_file(
+                filename=self.html_filename,
+                estimation_results=final_results,
+                figure_size=FigureSize.LARGE,
+            )
+        if self.biogeme_parameters.get_value('generate_netcdf'):
+            self.netcdf_filename = get_new_file_name(self.model_name, 'nc')
+            final_results.dump(path=self.netcdf_filename)
+        return final_results
 
     def estimate(
         self,
