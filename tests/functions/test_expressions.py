@@ -14,12 +14,6 @@ from scipy.stats import norm
 
 from biogeme import models
 from biogeme.audit_tuple import AuditTuple
-from biogeme.calculator import (
-    CallableExpression,
-    create_function_simple_expression,
-    get_value_and_derivatives,
-    get_value_c,
-)
 from biogeme.database import Database
 from biogeme.distributions import normalpdf
 from biogeme.exceptions import BiogemeError
@@ -69,6 +63,12 @@ from biogeme.function_output import (
     FunctionOutput,
     NamedFunctionOutput,
     convert_to_dict,
+)
+from biogeme.jax_calculator import (
+    CallableExpression,
+    create_function_simple_expression,
+    get_value_and_derivatives,
+    get_value_c,
 )
 from biogeme.likelihood.negative_likelihood import NegativeLikelihood
 from biogeme.tools import check_derivatives

@@ -9,13 +9,13 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from biogeme.calculator import (
+from biogeme.database import Database
+from biogeme.expressions import Beta, Variable
+from biogeme.jax_calculator import (
     CallableExpression,
     CompiledFormulaEvaluator,
     function_from_compiled_formula,
 )
-from biogeme.database import Database
-from biogeme.expressions import Beta, Variable
 from biogeme.model_elements import ModelElements
 from biogeme.second_derivatives import SecondDerivativesMode
 

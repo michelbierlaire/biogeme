@@ -14,7 +14,6 @@ import pandas as pd
 from scipy.integrate import quad
 from scipy.stats import norm
 
-from biogeme.calculator import calculate_single_formula
 from biogeme.database import Database
 from biogeme.draws import DrawsManagement
 from biogeme.expressions import (
@@ -35,6 +34,7 @@ from biogeme.expressions import (
     sin,
 )
 from biogeme.expressions.power_constant import PowerConstant
+from biogeme.jax_calculator import calculate_single_formula
 from biogeme.model_elements import ModelElements
 from biogeme.second_derivatives import SecondDerivativesMode
 

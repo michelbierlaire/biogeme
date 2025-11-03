@@ -1,8 +1,8 @@
 import unittest
 
-from biogeme.calculator import get_value_and_derivatives
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, Elem, Numeric
+from biogeme.jax_calculator import get_value_and_derivatives
 
 
 class TestElemExpression(unittest.TestCase):

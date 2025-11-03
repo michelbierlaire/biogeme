@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
-from biogeme.calculator import create_function_simple_expression
 from biogeme.expressions import Beta, log, logzero
 from biogeme.function_output import FunctionOutput
+from biogeme.jax_calculator import create_function_simple_expression
 from biogeme.likelihood.negative_likelihood import NegativeLikelihood
 
 

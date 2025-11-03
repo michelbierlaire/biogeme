@@ -9,10 +9,10 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from biogeme.calculator import CompiledFormulaEvaluator, calculate_single_formula
-from biogeme.calculator.single_formula import evaluate_model_per_row
 from biogeme.database import Database
 from biogeme.expressions import Beta, Variable
+from biogeme.jax_calculator import CompiledFormulaEvaluator, calculate_single_formula
+from biogeme.jax_calculator.single_formula import evaluate_model_per_row
 from biogeme.model_elements import ModelElements
 from biogeme.second_derivatives import SecondDerivativesMode
 
