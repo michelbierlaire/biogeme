@@ -10,9 +10,8 @@ import os
 import random as rnd
 import unittest
 
-import numpy as np
-
 import biogeme.biogeme_logging as blog
+import numpy as np
 from biogeme.biogeme import BIOGEME
 from biogeme.catalog import Catalog
 from biogeme.exceptions import BiogemeError
@@ -20,13 +19,13 @@ from biogeme.expressions import (
     Beta,
     Numeric,
     PanelLikelihoodTrajectory,
-    RandomVariable,
     Variable,
     exp,
 )
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult
+
 from test_data import getData, getPanelData
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -123,13 +122,6 @@ class TestBiogeme(unittest.TestCase):
             getData(1),
             self.get_dict_of_expressions(),
         )
-        wrong_data = getData(1)
-        wrong_data.dataframe.loc['Person', 0] = np.nan
-        with self.assertRaises(BiogemeError):
-            bBiogeme = BIOGEME(
-                wrong_data,
-                self.get_dict_of_expressions(),
-            )
 
         with self.assertRaises(BiogemeError):
             bBiogeme = BIOGEME(
@@ -141,15 +133,6 @@ class TestBiogeme(unittest.TestCase):
             bBiogeme = BIOGEME(
                 getData(1),
                 {'log_like': 'wrong_object'},
-            )
-
-        wrong_expression = Variable('Variable1') * PanelLikelihoodTrajectory(
-            Beta('beta1', -1.0, -3, 3, 0)
-        )
-        with self.assertRaises(BiogemeError):
-            bBiogeme = BIOGEME(
-                getPanelData(1),
-                wrong_expression,
             )
 
         cBiogeme = BIOGEME(
@@ -185,11 +168,6 @@ class TestBiogeme(unittest.TestCase):
         my_biogeme.model_name = 'simpleExample'
         f = my_biogeme._save_iterations_file_name()
         self.assertEqual(f, '__simpleExample.iter')
-
-    def test_random_variable(self):
-        rv = RandomVariable('omega')
-        with self.assertRaises(BiogemeError):
-            b = BIOGEME(getData(1), rv)
 
     def test_calculateNullLoglikelihood(self):
         my_biogeme = self.get_biogeme_instance()

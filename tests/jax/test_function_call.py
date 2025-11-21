@@ -16,7 +16,7 @@ from biogeme.jax_calculator import (
     CompiledFormulaEvaluator,
     function_from_compiled_formula,
 )
-from biogeme.model_elements import ModelElements
+from biogeme.model_elements import FlatPanelAdapter, ModelElements, RegularAdapter
 from biogeme.second_derivatives import SecondDerivativesMode
 
 
@@ -28,8 +28,13 @@ class TestFunctionFromExpression(unittest.TestCase):
         self.beta = Beta('beta', 1.0, None, None, 0)
         self.expression = self.beta * self.x
         self.initial_betas = {'beta': 1.0}
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         compiled_function = CompiledFormulaEvaluator(
             model_elements=model_elements,

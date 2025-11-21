@@ -13,7 +13,7 @@ from biogeme.database import Database
 from biogeme.expressions import Beta, Variable
 from biogeme.jax_calculator import CompiledFormulaEvaluator, calculate_single_formula
 from biogeme.jax_calculator.single_formula import evaluate_model_per_row
-from biogeme.model_elements import ModelElements
+from biogeme.model_elements import FlatPanelAdapter, ModelElements, RegularAdapter
 from biogeme.second_derivatives import SecondDerivativesMode
 
 
@@ -29,8 +29,13 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
         self.draws = None
 
     def test_function_only(self):
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -48,8 +53,13 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
         self.assertIsNone(output.bhhh)
 
     def test_function_and_gradient(self):
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -64,8 +74,13 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
         self.assertAlmostEqual(output.gradient[0], expected_gradient, places=6)
 
     def test_function_gradient_hessian(self):
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -78,8 +93,13 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
         self.assertTrue(np.allclose(output.hessian, expected_hessian))
 
     def test_function_bhhh(self):
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -93,8 +113,13 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
 
     def test_missing_beta_uses_default(self):
         betas_missing = {}
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         evaluator = CompiledFormulaEvaluator(
             model_elements=model_elements,
@@ -110,8 +135,13 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
         self.assertAlmostEqual(output.function, expected_value, places=6)
 
     def test_legacy_calculate_single_formula(self):
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         output = calculate_single_formula(
             model_elements=model_elements,
@@ -140,8 +170,13 @@ class TestEvaluateExpressionPerRow(unittest.TestCase):
 
     def test_evaluate_expression_per_row_with_specified_beta(self):
         betas = {'beta': 2.0}
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
 
         results = evaluate_model_per_row(
@@ -156,8 +191,13 @@ class TestEvaluateExpressionPerRow(unittest.TestCase):
     def test_evaluate_expression_per_row_with_default_beta(self):
         # No beta passed, should use default (1.0)
         betas = {}
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=self.expression, weight=None, database=self.database, use_jit=True
+            log_like=self.expression, weight=None, adapter=adapter, use_jit=True
         )
         results = evaluate_model_per_row(
             model_elements=model_elements,

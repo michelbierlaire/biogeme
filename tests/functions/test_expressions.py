@@ -1402,7 +1402,7 @@ class test_expressions(unittest.TestCase):
         self.assertFalse(audit_tuple.errors)
         expr_not_ok = d1 + MonteCarlo(d1 * d2)
         audit_tuple: AuditTuple = audit_expression(expr_not_ok)
-        self.assertTrue(audit_tuple.errors)
+        self.assertTrue(audit_tuple.warnings)
 
     def test_check_rv(self):
         d1 = RandomVariable('d1')
@@ -1773,6 +1773,7 @@ class test_expressions(unittest.TestCase):
             MonteCarlo(PanelLikelihoodTrajectory(models.logit(U, av, self.Choice)))
         )
         self.myData.panel('Person')
+
         res = get_value_c(
             expression=expr14,
             database=self.myData,

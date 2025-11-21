@@ -35,7 +35,7 @@ from biogeme.expressions import (
 )
 from biogeme.expressions.power_constant import PowerConstant
 from biogeme.jax_calculator import calculate_single_formula
-from biogeme.model_elements import ModelElements
+from biogeme.model_elements import FlatPanelAdapter, ModelElements, RegularAdapter
 from biogeme.second_derivatives import SecondDerivativesMode
 
 logging.basicConfig(level=logging.WARNING)
@@ -62,8 +62,14 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_1': 0.5}  # Example parameters
 
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
+
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=self.beta_1, weight=None, database=self.database, use_jit=True
+            log_like=self.beta_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -100,8 +106,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         the_expression = fixed_beta + self.beta_1
 
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=the_expression, weight=None, database=self.database, use_jit=True
+            log_like=the_expression, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -126,8 +137,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         self.assertEqual(jax_1.hessian, expected_hessian)
         expected_bhhh = [[3]]
         self.assertEqual(jax_1.bhhh, expected_bhhh)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=fixed_beta, weight=None, database=self.database, use_jit=True
+            log_like=fixed_beta, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -154,11 +170,15 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {}
         expression_income = Variable('income')
-
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_income = ModelElements.from_expression_and_weight(
             log_like=expression_income,
             weight=None,
-            database=self.database,
+            adapter=adapter,
             use_jit=True,
         )
         jax_income = calculate_single_formula(
@@ -180,7 +200,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expression_age = Variable('age')
 
         model_elements_age = ModelElements.from_expression_and_weight(
-            log_like=expression_age, weight=None, database=self.database, use_jit=True
+            log_like=expression_age, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_age = calculate_single_formula(
@@ -200,7 +220,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         model_elements_choice = ModelElements.from_expression_and_weight(
             log_like=expression_choice,
             weight=None,
-            database=self.database,
+            adapter=adapter,
             use_jit=True,
         )
 
@@ -219,8 +239,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_plus(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 + self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -245,7 +270,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 + Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -270,7 +295,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') + self.beta_2 + Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database, use_jit=True
+            log_like=expression_3, weight=None, adapter=adapter, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -295,8 +320,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_minus(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 - self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -320,7 +350,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 - Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -343,7 +373,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') - self.beta_2 - Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database, use_jit=True
+            log_like=expression_3, weight=None, adapter=adapter, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -367,8 +397,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_times(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 * self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -393,7 +428,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 * Variable('age')
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -419,7 +454,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = Variable('income') * self.beta_2 * Variable('age')
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database, use_jit=True
+            log_like=expression_3, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_3 = calculate_single_formula(
@@ -445,8 +480,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_divide(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 / self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -472,8 +512,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 / Variable('age')
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -496,8 +541,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         self.assertTrue(jnp.allclose(jax_2.bhhh, expected_bhhh))
 
         expression_3 = Variable('income') / self.beta_2 / Variable('age')
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database, use_jit=True
+            log_like=expression_3, weight=None, adapter=adapter, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -526,8 +576,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_power(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1**self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -581,8 +636,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_2': 1.5}
         expression_2 = self.beta_2 ** Variable('age')
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -623,8 +683,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_min(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = BinaryMin(self.beta_1, self.beta_2)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -651,8 +716,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_2': 1.5}
         expression_2 = BinaryMin(self.beta_2, Variable('age'))
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -679,8 +749,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_max(self):
         parameters = {'beta_1': 0.9, 'beta_2': 1.5}  # Example parameters
         expression_1 = BinaryMax(self.beta_1, self.beta_2)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -708,7 +783,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': 1.5}
         expression_2 = BinaryMax(self.beta_2, Variable('age'))
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -737,8 +812,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_and(self):
         parameters = {'beta_1': 0, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 & self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -764,8 +844,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_1': 1.5}  # Example parameters
         expression_2 = self.beta_1 * (Variable('age') & Variable('income'))
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -790,8 +875,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_1': 1, 'beta_2': 1.5}  # Example parameters
         expression_3 = self.beta_1 & self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database, use_jit=True
+            log_like=expression_3, weight=None, adapter=adapter, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -818,8 +908,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_or(self):
         parameters = {'beta_1': 0, 'beta_2': 1.5}  # Example parameters
         expression_1 = self.beta_1 | self.beta_2
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -845,8 +940,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_1': 1.5}  # Example parameters
         expression_2 = self.beta_1 * (Variable('age') | Variable('income'))
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -873,8 +973,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
     def test_unary_minus(self):
         parameters = {'beta_1': -1}  # Example parameters
         expression_1 = -self.beta_1
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -899,8 +1004,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         self.assertTrue(jnp.allclose(jax_1.bhhh, expected_bhhh))
 
         expression_2 = -Variable('age')
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -924,8 +1034,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         pdf_2 = norm.pdf(value_2)
         parameters = {'beta_1': value_1}
         expression_1 = NormalCdf(self.beta_1)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -950,8 +1065,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_2': value_2}
         expression_2 = NormalCdf(self.beta_2)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -981,8 +1101,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         exp_2 = np.exp(value_2)
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = exp(self.beta_1)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1008,7 +1133,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_2 = exp(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1031,8 +1156,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         # Test sin(beta_1)
         expression_1 = sin(self.beta_1)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1057,7 +1187,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = sin(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -1086,8 +1216,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         cos_2 = np.cos(value_2)
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = cos(self.beta_1)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1103,7 +1238,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_2': value_2}
         expression_2 = cos(self.beta_2)
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_2 = calculate_single_formula(
@@ -1125,8 +1260,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         log_2 = np.log(value_2)
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = log(self.beta_1)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1147,8 +1287,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_2': value_2}
         expression_2 = log(self.beta_2)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1174,8 +1319,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         log_2 = np.log(value_2)
         parameters = {'beta_1': value_1}  # Example parameters
         expression_1 = logzero(self.beta_1)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1196,8 +1346,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         parameters = {'beta_2': value_2}
         expression_2 = logzero(self.beta_2)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1220,8 +1375,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         parameters = {'beta_1': -2}  # Example parameters
 
         expression_1 = PowerConstant(self.beta_1, 2)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
-            log_like=expression_1, weight=None, database=self.database, use_jit=True
+            log_like=expression_1, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements_1,
@@ -1236,8 +1396,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         self.assertTrue(jnp.allclose(jax_1.function, expected_result))
 
         expression_2 = PowerConstant(self.beta_1, 3)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_2 = ModelElements.from_expression_and_weight(
-            log_like=expression_2, weight=None, database=self.database, use_jit=True
+            log_like=expression_2, weight=None, adapter=adapter, use_jit=True
         )
         jax_2 = calculate_single_formula(
             model_elements=model_elements_2,
@@ -1254,7 +1419,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
 
         expression_3 = PowerConstant(self.beta_2, -3.1)
         model_elements_3 = ModelElements.from_expression_and_weight(
-            log_like=expression_3, weight=None, database=self.database, use_jit=True
+            log_like=expression_3, weight=None, adapter=adapter, use_jit=True
         )
         jax_3 = calculate_single_formula(
             model_elements=model_elements_3,
@@ -1272,8 +1437,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         beta = Beta('beta', 1, -10, 10, 0)
         omega = RandomVariable('omega')
         integral = IntegrateNormal(omega - omega + beta, name='omega')
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=integral, weight=None, database=self.database, use_jit=True
+            log_like=integral, weight=None, adapter=adapter, use_jit=True
         )
         jax_1 = calculate_single_formula(
             model_elements=model_elements,
@@ -1347,10 +1517,15 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         draws = Draws('draws', 'NORMAL_HALTON3')
         formula_mc = beta_1 * beta_2 * exp(draws)
         integral_mc = MonteCarlo(formula_mc)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_mc = ModelElements.from_expression_and_weight(
             log_like=integral_mc,
             weight=None,
-            database=self.database,
+            adapter=adapter,
             number_of_draws=1000000,
             use_jit=True,
         )
@@ -1377,8 +1552,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         omega = RandomVariable('omega')
         formula_rv = beta_1 * beta_2 * exp(omega)
         integral_rv = IntegrateNormal(formula_rv, name='omega')
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=integral_rv, weight=None, database=self.database, use_jit=True
+            log_like=integral_rv, weight=None, adapter=adapter, use_jit=True
         )
 
         jax_rv = calculate_single_formula(
@@ -1444,10 +1624,15 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         random_term = Draws('random_term', 'UNIFORM')
         second_term = Draws('second_term', 'NORMAL')
         expression_1 = MonteCarlo(random_term + second_term)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements_1 = ModelElements.from_expression_and_weight(
             log_like=expression_1,
             weight=None,
-            database=self.database,
+            adapter=adapter,
             number_of_draws=10,
             use_jit=True,
         )
@@ -1478,7 +1663,7 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         model_elements_2 = ModelElements.from_expression_and_weight(
             log_like=expression_2,
             weight=None,
-            database=self.database,
+            adapter=adapter,
             number_of_draws=10,
             use_jit=True,
         )
@@ -1550,8 +1735,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expected_g = np.array([1.5, -1.5])
         expected_h = np.array([[-0.75, 0.75], [0.75, -0.75]])
         expected_bhhh = 3 * np.outer([0.5, -0.5], [0.5, -0.5])
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=the_logit, weight=None, database=self.database, use_jit=True
+            log_like=the_logit, weight=None, adapter=adapter, use_jit=True
         )
         jax = calculate_single_formula(
             model_elements=model_elements,
@@ -1581,8 +1771,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         expected_gradient = np.array([1.5749376, -1.5749376])
         expected_hessian = np.array([[-0.7481281, 0.7481281], [0.7481281, -0.7481281]])
         expected_bhhh = np.array([[0.82680964, -0.8268095], [-0.8268095, 0.8268094]])
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=the_logit, weight=None, database=self.database, use_jit=True
+            log_like=the_logit, weight=None, adapter=adapter, use_jit=True
         )
         jax = calculate_single_formula(
             model_elements=model_elements,
@@ -1610,8 +1805,13 @@ class TestBetaConstructJaxFunction(unittest.TestCase):
         utilities = {12: beta_1, 23: beta_2}
         av = {12: 1, 23: 0}
         the_logit = LogLogit(utilities, av, 12)
+        adapter = (
+            FlatPanelAdapter(database=self.database)
+            if self.database.is_panel()
+            else RegularAdapter(database=self.database)
+        )
         model_elements = ModelElements.from_expression_and_weight(
-            log_like=the_logit, weight=None, database=self.database, use_jit=True
+            log_like=the_logit, weight=None, adapter=adapter, use_jit=True
         )
         jax = calculate_single_formula(
             model_elements=model_elements,
