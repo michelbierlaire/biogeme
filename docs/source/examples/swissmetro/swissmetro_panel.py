@@ -64,6 +64,7 @@ CAR_CO_SCALED = database.define_variable('CAR_CO_SCALED', CAR_CO / 100)
 # Qualify the data as panel. ID identifies the individuals.
 database.panel('ID')
 
+
 # %%
 # We flatten the database, so that each row corresponds to one individual.
 # flat_df = database.generate_flat_panel_dataframe(identical_columns=None)
