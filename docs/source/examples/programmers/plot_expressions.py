@@ -18,15 +18,6 @@ import pandas as pd
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-from biogeme.calculator.function_call import (
-    CallableExpression,
-    function_from_expression,
-)
-from biogeme.calculator.simple_formula import evaluate_simple_expression
-from biogeme.calculator.single_formula import (
-    calculate_single_formula_from_expression,
-    get_value_and_derivatives,
-)
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
@@ -56,6 +47,15 @@ from biogeme.expressions import (
     sin,
 )
 from biogeme.function_output import FunctionOutput
+from biogeme.jax_calculator.function_call import (
+    CallableExpression,
+    function_from_expression,
+)
+from biogeme.jax_calculator.simple_formula import evaluate_simple_expression
+from biogeme.jax_calculator.single_formula import (
+    calculate_single_formula_from_expression,
+    get_value_and_derivatives,
+)
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_text
 

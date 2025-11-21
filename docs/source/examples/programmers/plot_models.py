@@ -18,9 +18,9 @@ import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
 
-from biogeme.calculator import evaluate_simple_expression_per_row
 from biogeme.database import Database
 from biogeme.expressions import Beta, Variable
+from biogeme.jax_calculator import evaluate_simple_expression_per_row
 from biogeme.models import (
     boxcox,
     cnl,

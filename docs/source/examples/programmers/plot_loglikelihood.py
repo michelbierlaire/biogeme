@@ -19,11 +19,11 @@ import pandas as pd
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-from biogeme.calculator.simple_formula import (
-    evaluate_simple_expression_per_row,
-)
 from biogeme.database import Database
 from biogeme.expressions import Beta, Draws, MonteCarlo, Variable
+from biogeme.jax_calculator.simple_formula import (
+    evaluate_simple_expression_per_row,
+)
 from biogeme.loglikelihood import (
     likelihoodregression,
     loglikelihood,

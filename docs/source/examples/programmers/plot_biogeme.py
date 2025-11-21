@@ -18,10 +18,10 @@ from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
-from biogeme.calculator import evaluate_formula
 from biogeme.database import Database
 from biogeme.expressions import Beta, Variable, exp
 from biogeme.function_output import FunctionOutput
+from biogeme.jax_calculator import evaluate_formula
 from biogeme.results_processing import get_pandas_estimated_parameters
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.tools import CheckDerivativesResults
