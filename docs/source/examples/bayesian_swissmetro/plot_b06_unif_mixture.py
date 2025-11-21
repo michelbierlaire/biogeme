@@ -1,20 +1,22 @@
 """
-.. _plot_b05normal_mixture:
 
-Mixture of logit models
-=======================
+6. Mixture of logit models: uniform distribution
+================================================
 
-Example of a normal mixture of logit models, using Monte-Carlo integration.
+Example of a uniform mixture of logit models, using Bayesian inference.
 
 Michel Bierlaire, EPFL
-Wed Jun 18 2025, 11:28:46
+Thu Nov 20 2025, 11:30:45
+
 """
+
+from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, DistributedParameter, Draws
 from biogeme.models import loglogit
-
+from biogeme.results_processing import get_pandas_estimated_parameters
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -32,24 +34,21 @@ from swissmetro_data import (
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b05normal_mixtures.py')
+logger.info('Example b06_unif_mixture.py')
 
 # %%
-# Parameters to be estimated
+# Parameters to be estimated.
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_train = Beta('asc_train', 0, None, None, 0)
 asc_sm = Beta('asc_sm', 0, None, None, 1)
-b_cost = Beta('b_cost', 0, None, 0, 0)
+b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
-# Define a random parameter, normally distributed, designed to be used
+# Define a random parameter, uniformly distributed, designed to be used
 # for Monte-Carlo simulation.
-b_time = Beta('b_time', 0, None, 0, 0)
-
-# %%
-# It is advised *not* to use 0 as starting value for the following parameter.
-b_time_s = Beta('b_time_s', 10, 0.000001, None, 0)
-b_time_eps = Draws('b_time_eps', 'NORMAL')
+b_time = Beta('b_time', 0, None, None, 0)
+b_time_s = Beta('b_time_s', 1, None, None, 0)
+b_time_eps = Draws('b_time_eps', 'UNIFORMSYM')
 b_time_rnd = DistributedParameter('b_time_rnd', b_time + b_time_s * b_time_eps)
 
 # %%
@@ -67,29 +66,25 @@ v = {1: v_train, 2: v_swissmetro, 3: v_car}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# In order to obtain the loglikelihood, we would first calculate the kernek conditional on b_time_rnd,
+# In order to obtain the loglikelihood, we would first calculate the kernel conditional on b_time_rnd,
 # and the integrate over b_time_rnd using Monte-Carlo.
-# prob = logit(v, av, CHOICE)
-# log_likelihood = log(MonteCarlo(prob))
-
-# %%
 # However, when performing Bayesian estimation, the random parameters will be explicitly simulated. Therefore,
 # what the algorithm needs is the *conditional* log likelihood, which is simply a (log) logit here.
 conditional_log_likelihood = loglogit(v, av, CHOICE)
 
-# %%
-# These notes will be included as such in the report file.
-USER_NOTES = 'Example of a mixture of logit models with three alternatives'
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(
-    database,
-    conditional_log_likelihood,
-    user_notes=USER_NOTES,
-)
-the_biogeme.model_name = 'b05normal_mixture'
+the_biogeme = BIOGEME(database, conditional_log_likelihood)
+the_biogeme.model_name = 'b06_unif_mixture'
 
 # %%
 # Estimate the parameters
-bayesian_results = the_biogeme.bayesian_estimation()
+results = the_biogeme.bayesian_estimation()
+
+# %%
+print(results.short_summary())
+
+# %%
+pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+display(pandas_results)

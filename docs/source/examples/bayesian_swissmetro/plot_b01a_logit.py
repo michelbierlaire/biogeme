@@ -1,7 +1,7 @@
 """
 
-1. Estimation of a logit model (Bayesian)
-=========================================
+1a. Estimation of a logit model (Bayesian)
+==========================================
 
  Three alternatives:
 
@@ -15,13 +15,15 @@ Michel Bierlaire, EPFL
 Thu Oct 30 2025, 10:15:52
 """
 
-import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
-from biogeme.bayesian_estimation import get_pandas_estimated_parameters
+
+import biogeme.biogeme_logging as blog
+from biogeme.bayesian_estimation import (
+    get_pandas_estimated_parameters,
+)
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
-
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -39,14 +41,16 @@ from swissmetro_data import (
 )
 
 # %%
-# The logger sets the verbosity of Biogeme. By default, Biogem eis quite silent and generates only warnings.
+# The logger sets the verbosity of Biogeme. By default, Biogeme is quite silent and generates only warnings.
 # To have more information about what it happening behind the scene, the level should be set to `blog.INFO`.
 logger = blog.get_screen_logger(level=blog.DEBUG)
-logger.info('Example b01logit.py')
+logger.info('Example b01a_logit.py')
 
 
 # %%
-# Parameters to be estimated: alternative specific constants
+# Parameters to be estimated: alternative specific constants.
+# By default, the prior distribution is normal, possibly truncated if bounds are defined, with the mean
+# defined by the user, and scale parameter 10.
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_train = Beta('asc_train', 0, None, None, 0)
 
@@ -57,9 +61,10 @@ asc_train = Beta('asc_train', 0, None, None, 0)
 asc_sm = Beta('asc_sm', 0, None, None, 1)
 
 # %%
-# Coefficients of the attributes
-b_time = Beta('b_time', 0, None, None, 0)
-b_cost = Beta('b_cost', 0, None, None, 0)
+# Coefficients of the attributes. It is useful to set the upper bound to 0 to reflect the prior assumption about
+# the sign of those parameters.
+b_time = Beta('b_time', 0, None, 0, 0)
+b_cost = Beta('b_cost', 0, None, 0, 0)
 
 
 # %%
@@ -84,11 +89,7 @@ log_probability = loglogit(v, av, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, log_probability)
-the_biogeme.model_name = 'b01logit'
-
-# %%
-# Calculate the null log likelihood for reporting.
-the_biogeme.calculate_null_loglikelihood(av)
+the_biogeme.model_name = 'b01a_logit'
 
 # %%
 # Estimate the parameters.

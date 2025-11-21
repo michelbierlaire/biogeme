@@ -1,21 +1,22 @@
 """
 
-1b Simulation of a logit model
-==============================
+1c. Simulation of a logit model (traditional and Bayesian)
+==========================================================
 
 Example of simulation with a logit model
-
 
 Michel Bierlaire, EPFL
 Thu Oct 30 2025, 14:03:15
 """
 
+import pandas as pd
 from IPython.core.display_functions import display
+
+import biogeme.biogeme_logging as blog
 from biogeme.bayesian_estimation import BayesianResults
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
 from biogeme.models import logit
-
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -30,6 +31,8 @@ from swissmetro_data import (
     TRAIN_TT,
     database,
 )
+
+logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
 # Parameters.
@@ -59,50 +62,19 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # Choice probability.
 #
 prob_train = logit(v, av, 1)
-prob_swissmetro = logit(v, av, 2)
-prob_car = logit(v, av, 3)
 
 # %%
-# Elasticities.
+# Elasticity.
 #
-# Elasticities can be computed. We illustrate below two
-# formulas. Check in the output file that they produce the same
-# result.
-
-# %%
-# First, the general definition of elasticities. This illustrates the
-# use of the Derive expression, and can be used with any model,
-# however complicated it is. Note the quotes in the Derive operator.
-
-general_time_elasticity_train = Derive(prob_train, 'TRAIN_TT') * TRAIN_TT / prob_train
-general_time_elasticity_swissmetro = (
-    Derive(prob_swissmetro, 'SM_TT') * SM_TT / prob_swissmetro
-)
-general_time_elasticity_car = Derive(prob_car, 'CAR_TT') * CAR_TT / prob_car
-
-# %%
-# Second, the elasticity of logit models. See Ben-Akiva and Lerman for
-# the formula
-
-logit_time_elasticity_train = TRAIN_AV_SP * (1.0 - prob_train) * TRAIN_TT * b_time / 100
-logit_time_elasticity_swissmetro = (
-    SM_AV * (1.0 - prob_swissmetro) * SM_TT * b_time / 100
-)
-logit_time_elasticity_car = CAR_AV_SP * (1.0 - prob_car) * CAR_TT * b_time / 100
+time_elasticity_train = Derive(prob_train, 'TRAIN_TT') * TRAIN_TT / prob_train
 
 # %%
 # Quantities to be simulated.
 #
 simulate = {
     'Prob. train': prob_train,
-    'Prob. Swissmetro': prob_swissmetro,
-    'Prob. car': prob_car,
-    'logit elas. 1': logit_time_elasticity_train,
-    'generic elas. 1': general_time_elasticity_train,
-    'logit elas. 2': logit_time_elasticity_swissmetro,
-    'generic elas. 2': general_time_elasticity_swissmetro,
-    'logit elas. 3': logit_time_elasticity_car,
-    'generic elas. 3': general_time_elasticity_car,
+    'train time elasticity': time_elasticity_train,
+    'Value of time': b_time / b_cost,
 }
 
 
@@ -112,17 +84,28 @@ simulate = {
 # As we simulate the probability for all alternatives, even when one of
 # them is not available, Biogeme may trigger some warnings.
 biosim = BIOGEME(database, simulate)
-biosim.model_name = 'b01logit_simul'
+biosim.model_name = 'b01_logit_simul'
 
 # %%
 # Retrieve the estimated values of the parameters.
-RESULTS_FILE_NAME = 'saved_results/b01logit.nc'
+RESULTS_FILE_NAME = 'saved_results/b01a_logit.nc'
 estimation_results = BayesianResults.from_netcdf(filename=RESULTS_FILE_NAME)
 betas = estimation_results.get_beta_values()
 
 
 # %%
-# Simulation
-#
+# Simulation using the posterior mean of each parameter
+
+print('Simulation using the posterior mean of each parameter')
 results = biosim.simulate(the_beta_values=betas)
-display(results.describe())
+display(results)
+
+# %%
+# Bayesian simulation using the posterior draws
+#
+print('Bayesian simulation')
+bayesian_results = biosim.simulate_bayesian(
+    bayesian_estimation_results=estimation_results, percentage_of_draws_to_use=3
+)
+with pd.option_context('display.max_columns', None, 'display.expand_frame_repr', False):
+    display(bayesian_results)
