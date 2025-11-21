@@ -1,357 +1,236 @@
-# biogeme/tests/bayesian/test_sampling_strategy.py
-"""
-Comprehensive tests for biogeme/bayesian_estimation/sampling_strategy.py
-
-Covers:
-- SamplerPlan constructors: from_name, from_mapping, from_user_plan
-- SamplerPlanner.plan across all hardware permutations:
-  * No JAX/NumPyro available  -> PyMC fallback
-  * JAX CPU single device     -> NumPyro vectorized
-  * JAX CPU multi devices >= chains -> NumPyro parallel
-  * JAX CPU multi devices <  chains -> NumPyro vectorized
-  * JAX GPU single device + chains > guard -> still vectorized (warn)
-  * prefer_vectorized_single_device=False + allow_pymc_multiprocessing_fallback=True -> PyMC
-  * prefer_vectorized_single_device=False + fallback=False -> NumPyro vectorized (if JAX present)
-  * chains == 1 -> NumPyro vectorized when JAX present
-"""
-
-from __future__ import annotations
-
-import importlib
-import logging
-import sys
-import types
 import unittest
+from unittest.mock import patch
 
-MOD_NAME = "biogeme.bayesian_estimation.sampling_strategy"
-LOGGER_NAME = MOD_NAME  # module uses logging.getLogger(__name__)
-
-
-def _reload_module():
-    """Reload the module under test so it sees the current mocked environment."""
-    if MOD_NAME in sys.modules:
-        return importlib.reload(sys.modules[MOD_NAME])
-    return importlib.import_module(MOD_NAME)
+from biogeme.bayesian_estimation import sampling_strategy as m
 
 
-# --------------------------
-# Lightweight environment stubs
-# --------------------------
+class TestDescribeStrategies(unittest.TestCase):
+    def test_describe_strategies_format_and_content(self) -> None:
+        """
+        describe_strategies should return a comma-separated string of
+        'name (desc)' entries, matching SAMPLER_STRATEGIES_DESCRIPTION.
+        """
+        text = m.describe_strategies()
+        # Basic format: entries separated by ", "
+        parts = [p.strip() for p in text.split(",")]
+        self.assertEqual(len(parts), len(m.SAMPLER_STRATEGIES_DESCRIPTION))
+
+        for name, desc in m.SAMPLER_STRATEGIES_DESCRIPTION.items():
+            expected_piece = f"'{name}' ({desc})"
+            self.assertIn(expected_piece, parts)
 
 
-def _install_numpyro_and_pymc_sampling_jax() -> None:
-    """Install minimal numpyro + pymc.sampling.jax so imports in planner succeed."""
-    sys.modules["numpyro"] = sys.modules.get("numpyro") or types.ModuleType("numpyro")
+class TestSelectChainMethod(unittest.TestCase):
+    def test_select_chain_method_parallel_when_multiple_devices(self) -> None:
+        self.assertEqual(m._select_chain_method(2), "parallel")
+        self.assertEqual(m._select_chain_method(8), "parallel")
 
-    # Ensure parent packages are importable
-    pymc_pkg = sys.modules.get("pymc") or types.ModuleType("pymc")
-    pymc_pkg.__path__ = []  # type: ignore[attr-defined]
-    sys.modules["pymc"] = pymc_pkg
+    def test_select_chain_method_vectorized_when_single_or_zero_device(self) -> None:
+        self.assertEqual(m._select_chain_method(1), "vectorized")
+        self.assertEqual(m._select_chain_method(0), "vectorized")
 
-    sampling_pkg = sys.modules.get("pymc.sampling") or types.ModuleType("pymc.sampling")
-    sampling_pkg.__path__ = []  # type: ignore[attr-defined]
-    sys.modules["pymc.sampling"] = sampling_pkg
 
-    sampling_jax = sys.modules.get("pymc.sampling.jax") or types.ModuleType(
-        "pymc.sampling.jax"
+class TestMakeSamplingConfigAutomatic(unittest.TestCase):
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=True,
     )
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_devices_summary",
+        return_value=(4, ["cpu"]),
+    )
+    def test_automatic_jax_available_multiple_devices(
+        self, mock_devices_summary, mock_jax_available
+    ) -> None:
+        cfg = m.make_sampling_config(strategy="automatic", target_accept=0.9)
 
-    def _dummy_sample_numpyro_nuts(*_args, **_kwargs):
-        return None
+        self.assertEqual(cfg.backend, "numpyro")
+        self.assertEqual(cfg.chain_method, "parallel")  # >1 device
+        self.assertIsNone(cfg.cores)
+        self.assertEqual(cfg.target_accept, 0.9)
+        self.assertIsNone(cfg.init)
+        self.assertIsNone(cfg.max_treedepth)
+        self.assertIsNone(cfg.nuts_kwargs)
 
-    sampling_jax.sample_numpyro_nuts = _dummy_sample_numpyro_nuts
-    sys.modules["pymc.sampling.jax"] = sampling_jax
+        mock_jax_available.assert_called_once()
+        mock_devices_summary.assert_called_once()
 
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=True,
+    )
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_devices_summary",
+        return_value=(1, ["cpu"]),
+    )
+    def test_automatic_jax_available_single_device_vectorized(
+        self, mock_devices_summary, mock_jax_available
+    ) -> None:
+        cfg = m.make_sampling_config(strategy="automatic", target_accept=0.8)
 
-def _install_dummy_jax(devices: list[types.SimpleNamespace]) -> None:
-    """Install a tiny 'jax' module with devices() and local_device_count()."""
-    jax = sys.modules.get("jax") or types.ModuleType("jax")
+        self.assertEqual(cfg.backend, "numpyro")
+        self.assertEqual(cfg.chain_method, "vectorized")  # 1 device
+        self.assertIsNone(cfg.cores)
+        self.assertEqual(cfg.target_accept, 0.8)
 
-    def devices_fn():
-        return devices
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=True,
+    )
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_devices_summary",
+        return_value=(0, []),
+    )
+    def test_automatic_jax_available_zero_devices_fallback_to_vectorized(
+        self, mock_devices_summary, mock_jax_available
+    ) -> None:
+        """
+        Even if JAX is importable, if devices list is empty we treat it as 1 device
+        and choose 'vectorized'.
+        """
+        cfg = m.make_sampling_config(strategy="automatic", target_accept=0.7)
 
-    def local_device_count():
-        return len(devices)
+        self.assertEqual(cfg.backend, "numpyro")
+        self.assertEqual(cfg.chain_method, "vectorized")
+        self.assertIsNone(cfg.cores)
 
-    jax.devices = devices_fn
-    jax.local_device_count = local_device_count
-    sys.modules["jax"] = jax
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=False,
+    )
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._cpu_core_count", return_value=16
+    )
+    def test_automatic_jax_not_available_falls_back_to_pymc(
+        self, mock_core_count, mock_jax_available
+    ) -> None:
+        cfg = m.make_sampling_config(strategy="automatic", target_accept=0.95)
 
+        self.assertEqual(cfg.backend, "pymc")
+        self.assertIsNone(cfg.chain_method)
+        self.assertEqual(cfg.cores, 16)
+        self.assertEqual(cfg.target_accept, 0.95)
+        self.assertIsNone(cfg.init)
+        self.assertIsNone(cfg.max_treedepth)
+        self.assertIsNone(cfg.nuts_kwargs)
 
-def _uninstall_jax_stack() -> None:
-    """Remove jax / numpyro / pymc.sampling.jax to trigger PyMC fallback."""
-    for m in ("jax", "numpyro", "pymc.sampling.jax", "pymc.sampling", "pymc"):
-        sys.modules.pop(m, None)
-
-
-def _device(platform: str, id_: int, kind: str = "Device") -> types.SimpleNamespace:
-    d = types.SimpleNamespace()
-    d.platform = platform
-    d.id = id_
-    d.device_kind = kind
-    return d
-
-
-# --------------------------
-# Tests: SamplerPlan constructors
-# --------------------------
-
-
-class TestSamplerPlanConstructors(unittest.TestCase):
-    def setUp(self):
-        # Snapshot sys.modules so we can restore after each test
-        self._snapshot = sys.modules.copy()
-
-        # Ensure biogeme.tools exists (the module under test imports & logs via it).
-        # We don't fabricate packages; we only attach a tools submodule if biogeme exists.
-        try:
-            import biogeme.tools  # noqa: F401
-        except Exception:
-            try:
-                import biogeme  # noqa: F401
-
-                tools_mod = types.ModuleType("biogeme.tools")
-
-                def report_jax_cpu_devices():
-                    return "dummy report"
-
-                def warning_cpu_devices():
-                    return None
-
-                tools_mod.report_jax_cpu_devices = report_jax_cpu_devices
-                tools_mod.warning_cpu_devices = warning_cpu_devices
-                sys.modules["biogeme.tools"] = tools_mod
-                setattr(sys.modules["biogeme"], "tools", tools_mod)
-            except Exception:
-                # If there's no biogeme on sys.path, the import of the module under test will fail anyway.
-                pass
-
-    def tearDown(self):
-        sys.modules.clear()
-        sys.modules.update(self._snapshot)
-
-    def test_from_name_valid(self):
-        m = _reload_module()
-        SP = m.SamplerPlan
-
-        self.assertEqual(
-            SP.from_name("numpyro-parallel"),
-            SP("numpyro", "parallel", None, "user-defined"),
-        )
-        self.assertEqual(
-            SP.from_name("parallel"), SP("numpyro", "parallel", None, "user-defined")
-        )
-        self.assertEqual(
-            SP.from_name("numpyro-vectorized"),
-            SP("numpyro", "vectorized", None, "user-defined"),
-        )
-        self.assertEqual(
-            SP.from_name("vectorized"),
-            SP("numpyro", "vectorized", None, "user-defined"),
-        )
-        self.assertEqual(SP.from_name("pymc"), SP("pymc", None, None, "user-defined"))
-        self.assertEqual(SP.from_name("pm"), SP("pymc", None, None, "user-defined"))
-
-    def test_from_name_invalid(self):
-        m = _reload_module()
-        SP = m.SamplerPlan
-        with self.assertRaises(ValueError):
-            SP.from_name("auto")
-        with self.assertRaises(ValueError):
-            SP.from_name("unknown-plan")
-
-    def test_from_mapping_valid_numpyro(self):
-        m = _reload_module()
-        SP = m.SamplerPlan
-
-        p = SP.from_mapping({"backend": "numpyro", "chain_method": "parallel"})
-        self.assertEqual(
-            (p.backend, p.chain_method, p.cores), ("numpyro", "parallel", None)
-        )
-
-        p2 = SP.from_mapping(
-            {"backend": "numpyro", "chain_method": "vectorized", "cores": None}
-        )
-        self.assertEqual(
-            (p2.backend, p2.chain_method, p2.cores), ("numpyro", "vectorized", None)
-        )
-
-    def test_from_mapping_valid_pymc(self):
-        m = _reload_module()
-        SP = m.SamplerPlan
-
-        p = SP.from_mapping({"backend": "pymc", "cores": 4})
-        self.assertEqual((p.backend, p.chain_method, p.cores), ("pymc", None, 4))
-
-        p2 = SP.from_mapping(
-            {"backend": "pymc", "cores": 2, "chain_method": "parallel"}
-        )
-        self.assertEqual((p2.backend, p2.chain_method, p2.cores), ("pymc", None, 2))
-
-    def test_from_mapping_invalid(self):
-        m = _reload_module()
-        SP = m.SamplerPlan
-        with self.assertRaises(ValueError):
-            SP.from_mapping({"backend": "other"})
-        with self.assertRaises(ValueError):
-            SP.from_mapping({"backend": "numpyro", "chain_method": "something"})
-
-    def test_from_user_plan_dispatch(self):
-        m = _reload_module()
-        SP = m.SamplerPlan
-
-        passthrough = SP("pymc", None, 3, "u")
-        self.assertIs(SP.from_user_plan(passthrough), passthrough)
-
-        from_name = SP.from_user_plan("numpyro-parallel")
-        self.assertEqual(
-            (from_name.backend, from_name.chain_method), ("numpyro", "parallel")
-        )
-
-        from_dict = SP.from_user_plan({"backend": "pymc", "cores": 5})
-        self.assertEqual((from_dict.backend, from_dict.cores), ("pymc", 5))
-
-        with self.assertRaises(TypeError):
-            SP.from_user_plan(123)  # type: ignore[arg-type
+        mock_jax_available.assert_called_once()
+        mock_core_count.assert_called_once()
 
 
-# --------------------------
-# Tests: SamplerPlanner.plan (auto selection)
-# --------------------------
+class TestMakeSamplingConfigExplicitStrategies(unittest.TestCase):
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=True,
+    )
+    def test_numpyro_parallel_with_jax_available(self, mock_jax_available) -> None:
+        cfg = m.make_sampling_config(strategy="numpyro-parallel", target_accept=0.9)
+
+        self.assertEqual(cfg.backend, "numpyro")
+        self.assertEqual(cfg.chain_method, "parallel")
+        self.assertIsNone(cfg.cores)
+        self.assertEqual(cfg.target_accept, 0.9)
+        mock_jax_available.assert_called_once()
+
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=False,
+    )
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._cpu_core_count", return_value=8
+    )
+    def test_numpyro_parallel_without_jax_falls_back_to_pymc(
+        self, mock_core_count, mock_jax_available
+    ) -> None:
+        cfg = m.make_sampling_config(strategy="numpyro-parallel", target_accept=0.9)
+
+        self.assertEqual(cfg.backend, "pymc")
+        self.assertIsNone(cfg.chain_method)
+        self.assertEqual(cfg.cores, 8)
+        self.assertEqual(cfg.target_accept, 0.9)
+        mock_jax_available.assert_called_once()
+        mock_core_count.assert_called_once()
+
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=True,
+    )
+    def test_numpyro_vectorized_with_jax_available(self, mock_jax_available) -> None:
+        cfg = m.make_sampling_config(strategy="numpyro-vectorized", target_accept=0.75)
+
+        self.assertEqual(cfg.backend, "numpyro")
+        self.assertEqual(cfg.chain_method, "vectorized")
+        self.assertIsNone(cfg.cores)
+        self.assertEqual(cfg.target_accept, 0.75)
+        mock_jax_available.assert_called_once()
+
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+        return_value=False,
+    )
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._cpu_core_count", return_value=4
+    )
+    def test_numpyro_vectorized_without_jax_falls_back_to_pymc(
+        self, mock_core_count, mock_jax_available
+    ) -> None:
+        cfg = m.make_sampling_config(strategy="numpyro-vectorized", target_accept=0.88)
+
+        self.assertEqual(cfg.backend, "pymc")
+        self.assertIsNone(cfg.chain_method)
+        self.assertEqual(cfg.cores, 4)
+        self.assertEqual(cfg.target_accept, 0.88)
+        mock_jax_available.assert_called_once()
+        mock_core_count.assert_called_once()
+
+    @patch(
+        "biogeme.bayesian_estimation.sampling_strategy._cpu_core_count", return_value=12
+    )
+    def test_pymc_strategy_uses_cpu_core_count(self, mock_core_count) -> None:
+        cfg = m.make_sampling_config(strategy="pymc", target_accept=0.99)
+
+        self.assertEqual(cfg.backend, "pymc")
+        self.assertIsNone(cfg.chain_method)
+        self.assertEqual(cfg.cores, 12)
+        self.assertEqual(cfg.target_accept, 0.99)
+        mock_core_count.assert_called_once()
 
 
-class TestSamplerPlannerPlan(unittest.TestCase):
-    def setUp(self):
-        self._snapshot = sys.modules.copy()
+class TestMakeSamplingConfigMisc(unittest.TestCase):
+    def test_strategy_is_case_and_whitespace_insensitive(self) -> None:
+        """
+        Strategy string should be trimmed and case-insensitive.
+        """
+        with patch(
+            "biogeme.bayesian_estimation.sampling_strategy._jax_available",
+            return_value=True,
+        ), patch(
+            "biogeme.bayesian_estimation.sampling_strategy._jax_devices_summary",
+            return_value=(2, ["cpu"]),
+        ):
+            cfg1 = m.make_sampling_config(
+                strategy="numpyro-parallel", target_accept=0.5
+            )
+            cfg2 = m.make_sampling_config(
+                strategy="  NUmPyRO-PaRalLel  ", target_accept=0.5
+            )
 
-        # Ensure biogeme.tools exists if the real package is importable
-        try:
-            import biogeme.tools  # noqa: F401
-        except Exception:
-            try:
-                import biogeme  # noqa: F401
+        self.assertEqual(cfg1.backend, cfg2.backend)
+        self.assertEqual(cfg1.chain_method, cfg2.chain_method)
+        self.assertEqual(cfg1.cores, cfg2.cores)
+        self.assertEqual(cfg1.target_accept, cfg2.target_accept)
 
-                tools_mod = types.ModuleType("biogeme.tools")
+    def test_invalid_strategy_raises_value_error(self) -> None:
+        with self.assertRaises(ValueError) as ctx:
+            m.make_sampling_config(strategy="unknown-strategy", target_accept=0.5)
 
-                def report_jax_cpu_devices():
-                    return "dummy report"
-
-                def warning_cpu_devices():
-                    return None
-
-                tools_mod.report_jax_cpu_devices = report_jax_cpu_devices
-                tools_mod.warning_cpu_devices = warning_cpu_devices
-                sys.modules["biogeme.tools"] = tools_mod
-                setattr(sys.modules["biogeme"], "tools", tools_mod)
-            except Exception:
-                pass
-
-    def tearDown(self):
-        sys.modules.clear()
-        sys.modules.update(self._snapshot)
-
-    def test_no_jax_stack_fallback_to_pymc(self):
-        """If no JAX/NumPyro/pymc.sampling.jax, plan must fallback to PyMC with cores=chains."""
-        _uninstall_jax_stack()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(number_of_threads=4)
-        plan = planner.plan(chains=5)
-        self.assertEqual(plan.backend, "pymc")
-        self.assertEqual(plan.cores, 5)
-        self.assertIsNone(plan.chain_method)
-
-    def test_cpu_single_device_vectorized(self):
-        """Single CPU device -> vectorized (default)."""
-        _install_dummy_jax([_device("cpu", 0)])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(number_of_threads=4)
-        plan = planner.plan(chains=3)
-        self.assertEqual(plan.backend, "numpyro")
-        self.assertEqual(plan.chain_method, "vectorized")
-        self.assertIsNone(plan.cores)
-
-    def test_cpu_multi_devices_parallel(self):
-        """n_dev >= chains > 1 -> parallel."""
-        _install_dummy_jax([_device("cpu", 0), _device("cpu", 1), _device("cpu", 2)])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(number_of_threads=4)
-        plan = planner.plan(chains=3)
-        self.assertEqual(plan.backend, "numpyro")
-        self.assertEqual(plan.chain_method, "parallel")
-
-    def test_cpu_multi_devices_but_less_than_chains_vectorized(self):
-        """n_dev < chains -> vectorized (since parallel branch doesn't match)."""
-        _install_dummy_jax([_device("cpu", 0), _device("cpu", 1)])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(number_of_threads=4)
-        plan = planner.plan(
-            chains=4
-        )  # 2 devices, 4 chains -> not parallel, expect vectorized
-        self.assertEqual(plan.backend, "numpyro")
-        self.assertEqual(plan.chain_method, "vectorized")
-
-    def test_gpu_single_device_guardrail_warning_and_vectorized(self):
-        """Single GPU device + many chains -> still vectorized, with a warning."""
-        _install_dummy_jax([_device("gpu", 0, "A100")])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(number_of_threads=4, max_vectorized_chains_on_gpu=1)
-        with self.assertLogs(LOGGER_NAME, level="WARNING") as cm:
-            plan = planner.plan(chains=3)
-        self.assertEqual(plan.backend, "numpyro")
-        self.assertEqual(plan.chain_method, "vectorized")
-        self.assertTrue(any("Single GPU detected" in rec for rec in cm.output))
-
-    def test_disable_vectorized_enable_pymc_fallback(self):
-        """prefer_vectorized_single_device=False + allow_pymc_multiprocessing_fallback=True -> PyMC."""
-        _install_dummy_jax([_device("cpu", 0)])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(
-            number_of_threads=4,
-            prefer_vectorized_single_device=False,
-            allow_pymc_multiprocessing_fallback=True,
-        )
-        plan = planner.plan(chains=3)
-        self.assertEqual(plan.backend, "pymc")
-        self.assertIsNone(plan.chain_method)
-        self.assertEqual(plan.cores, 3)
-
-    def test_disable_vectorized_without_fallback_keeps_numpyro(self):
-        """prefer_vectorized_single_device=False + fallback=False -> default NumPyro vectorized (if JAX present)."""
-        _install_dummy_jax([_device("cpu", 0)])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        planner = m.SamplerPlanner(
-            number_of_threads=4,
-            prefer_vectorized_single_device=False,
-            allow_pymc_multiprocessing_fallback=False,
-        )
-        plan = planner.plan(chains=2)
-        self.assertEqual(plan.backend, "numpyro")
-        self.assertEqual(plan.chain_method, "vectorized")
-
-    def test_chains_equal_one_edge_case(self):
-        """chains == 1 -> parallel branch not applicable, expect vectorized if JAX present."""
-        _install_dummy_jax([_device("cpu", 0), _device("cpu", 1)])
-        _install_numpyro_and_pymc_sampling_jax()
-        m = _reload_module()
-
-        plan = m.SamplerPlanner(number_of_threads=4).plan(chains=1)
-        self.assertEqual(plan.backend, "numpyro")
-        self.assertEqual(plan.chain_method, "vectorized")
+        msg = str(ctx.exception)
+        self.assertIn("Unknown sampling strategy", msg)
+        self.assertIn("automatic", msg)
+        self.assertIn("numpyro-parallel", msg)
+        self.assertIn("numpyro-vectorized", msg)
+        self.assertIn("pymc", msg)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    unittest.main(verbosity=2)
+    unittest.main()
