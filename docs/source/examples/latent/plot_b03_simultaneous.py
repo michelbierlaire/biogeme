@@ -11,79 +11,81 @@ Michel Bierlaire, EPFL
 Fri May 16 2025, 15:53:52
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
-from biogeme.data.optima import (
-    Choice,
-    CostCarCHF_scaled,
-    MarginalCostPT_scaled,
-    PurpHWH,
-    PurpOther,
-    TimeCar_scaled,
-    TimePT_scaled,
-    WaitingTimePT,
-    distance_km_scaled,
-    read_data,
-)
 from biogeme.expressions import (
     Beta,
-    Draws,
-    Elem,
     MonteCarlo,
-    MultipleProduct,
-    Variable,
+    exp,
     log,
 )
-from biogeme.models import logit
+from biogeme.models import boxcox, logit
 from biogeme.results_processing import (
     get_pandas_estimated_parameters,
 )
-from measurement_equations import all_indicators, generate_measurement_equations
-from read_or_estimate import read_or_estimate
-from structural_equations import (
-    build_car_centric_attitude,
-    build_urban_preference_attitude,
+
+from measurement_equations_indicators import likert_likelihood_indicator
+from measurement_equations_number_cars import number_cars_likelihood
+from optima import (
+    Choice,
+    CostCarCHF,
+    MarginalCostPT,
+    PurpHWH,
+    TimeCar_hour,
+    TimePT_hour,
+    WaitingTimePT,
+    distance_km,
+    distance_km_scaled,
+    read_data,
 )
+from read_or_estimate import read_or_estimate
+from structural_equations import car_centric_attitude, urban_preference_attitude
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
 # %%
-# Structural equation: car centric attitude
-sigma_car_structural = Beta('sigma_car_structural', 0.1, None, None, 0)
-car_centric_attitude = build_car_centric_attitude() + sigma_car_structural * Draws(
-    'car_error_term', 'NORMAL_MLHS_ANTI'
-)
-
-
-# %%
-# Latent variable for the urban preference
-
-sigma_urban_structural = Beta('sigma_urban_structural', 0.1, None, None, 0)
-urban_preference_attitude = (
-    build_urban_preference_attitude()
-    + sigma_urban_structural * Draws('urban_error_term', 'NORMAL_MLHS_ANTI')
-)
-
-# %%
 # Choice model
 
-# %%
-# Parameter from the  choice model
-choice_asc_car = Beta('choice_asc_car', 0, None, None, 0)
+
+work_trip = PurpHWH == 1
+other_trip_purposes = PurpHWH != 1
+
+lambda_distance = Beta('lambda_distance', 1, -10, 10, 0)
+boxcox_distance = boxcox(distance_km_scaled, lambda_distance)
+
+# Choice model: parameters
+choice_beta_cost = Beta('choice_beta_cost', -1, None, None, 1)
+
+choice_asc_car = Beta('choice_asc_car', 0.0, None, None, 0)
+
 choice_asc_pt = Beta('choice_asc_pt', 0, None, None, 0)
-choice_beta_cost_hwh = -1.0
-choice_beta_cost_other = Beta('choice_beta_cost_other', 0, None, None, 0)
-choice_beta_dist = Beta('choice_beta_dist', 0, None, None, 0)
-choice_beta_waiting_time = Beta('choice_beta_waiting_time', 0, None, None, 0)
-choice_beta_time_car = Beta('choice_beta_time_car', 0, None, 0, 0)
-choice_beta_time_pt = Beta('choice_beta_time_pt', 0, None, 0, 0)
-scale_choice_model = Beta('scale_choice_model', 1, 1.0e-5, None, 0)
 
+choice_beta_dist_work = Beta('choice_beta_dist_work', 0, None, None, 0)
+choice_beta_dist_other_purposes = Beta(
+    'choice_beta_dist_other_purposes', 0, None, None, 0
+)
+choice_beta_dist = (
+    choice_beta_dist_work * work_trip
+    + choice_beta_dist_other_purposes * other_trip_purposes
+)
 
-# %%
-# Parameter affected by the latent variables.
+choice_beta_time_car = Beta('choice_beta_time_car', 0, None, None, 0)
+
+choice_beta_time_pt = Beta('choice_beta_time_pt', 0, None, None, 0)
+
+choice_beta_waiting_time_work = Beta('choice_beta_waiting_time_work', 0, None, None, 0)
+choice_beta_waiting_time_other_purposes = Beta(
+    'choice_beta_waiting_time_other_purposes', 0, None, None, 0
+)
+choice_beta_waiting_time = (
+    choice_beta_waiting_time_work * work_trip
+    + choice_beta_waiting_time_other_purposes * other_trip_purposes
+)
+
+log_scale_choice_model = Beta('log_scale_choice_model', 0, None, None, 0)
+
+scale_choice_model = exp(log_scale_choice_model)
 
 # %%
 # Alternative specific constants
@@ -94,48 +96,35 @@ choice_urban_life_pt_cte = Beta('choice_urban_life_pt_cte', 1, None, None, 0)
 
 # %%
 # Definition of utility functions:
-V0 = scale_choice_model * (
+v_public_transport = scale_choice_model * (
     choice_asc_pt
-    + choice_beta_time_pt * TimePT_scaled
-    + choice_beta_waiting_time * WaitingTimePT
-    + choice_beta_cost_hwh * MarginalCostPT_scaled * PurpHWH
-    + choice_beta_cost_other * MarginalCostPT_scaled * PurpOther
+    + choice_beta_time_pt * TimePT_hour
+    + choice_beta_waiting_time * WaitingTimePT / 60
+    + choice_beta_cost * MarginalCostPT
     + choice_car_centric_pt_cte * car_centric_attitude
     + choice_urban_life_pt_cte * urban_preference_attitude
 )
 
-V1 = scale_choice_model * (
+v_car = scale_choice_model * (
     choice_asc_car
-    + choice_beta_time_car * TimeCar_scaled
-    + choice_beta_cost_hwh * CostCarCHF_scaled * PurpHWH
-    + choice_beta_cost_other * CostCarCHF_scaled * PurpOther
+    + choice_beta_time_car * TimeCar_hour
+    + choice_beta_cost * CostCarCHF
     + choice_car_centric_car_cte * car_centric_attitude
     + choice_urban_life_car_cte * urban_preference_attitude
 )
 
-V2 = scale_choice_model * choice_beta_dist * distance_km_scaled
+v_slow_modes = scale_choice_model * (choice_beta_dist * distance_km)
 
 # %%
 # Associate utility functions with the numbering of alternatives
-V = {0: V0, 1: V1, 2: V2}
+v = {0: v_public_transport, 1: v_car, 2: v_slow_modes}
 
-# %%
-# Measurement equations
-dict_prob_indicators = generate_measurement_equations(
-    car_centric_attitude=car_centric_attitude,
-    urban_preference_attitude=urban_preference_attitude,
-)
 
-# %%
-# We calculate the joint probability of all indicators
-proba = {
-    indicator: Elem(dict_prob_indicators[indicator], Variable(indicator))
-    for indicator in all_indicators
-}
-likelihood_indicator = MultipleProduct(proba)
 # %%
 # Conditional on the latent variables, we have a logit model (called the kernel)
-cond_prob = logit(V, None, Choice) * likelihood_indicator
+cond_prob = (
+    logit(v, None, Choice) * likert_likelihood_indicator * number_cars_likelihood
+)
 
 # %%
 # We integrate over omega using numerical integration
@@ -155,7 +144,7 @@ the_biogeme = BIOGEME(
     numerically_safe=True,
     max_iterations=5000,
 )
-the_biogeme.model_name = 'b03_simultaneous'
+the_biogeme.model_name = 'b03_simultaneous_ordered'
 
 # %%
 # If estimation results are saved on file, we read them to speed up the process.

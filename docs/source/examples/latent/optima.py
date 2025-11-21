@@ -30,22 +30,25 @@ def read_data() -> db.Database:
     # Exclude tours with 1 trip
     df.drop(df[df["NbTrajects"] == 1].index, inplace=True)
     # Exclude tours longer than 100km
-    df.drop(df[df["distance_km"] > 100].index, inplace=True)
+    # df.drop(df[df["distance_km"] > 100].index, inplace=True)
     # Exclude zero travel time
     df.drop(df[df["TimePT"] == 0].index, inplace=True)
     df.drop(df[df["TimeCar"] == 0].index, inplace=True)
-    # Exclude very short trips
-    df.drop(df[df["distance_km"] < 5].index, inplace=True)
+    df.drop(df[df["distance_km"] == 0].index, inplace=True)
 
     car_not_available = df['CarAvail'] == 3
     car_is_chosen = df['Choice'] == 1
     incompatible = car_is_chosen & car_not_available
     df.drop(df[incompatible].index, inplace=True)
 
+    df['worker'] = df['OccupStat'].isin([1, 2]).astype(int)
+    df['car_is_available'] = df['CarAvail'] != 3
     # Normalize the weights
     sum_weight = df['Weight'].sum()
     number_of_rows = df.shape[0]
     df['normalized_weight'] = df['Weight'] * number_of_rows / sum_weight
+    # Group car ownership: 3, 4, and 6 cars are grouped as 3
+    df['number_of_cars'] = df['NbCar'].replace({3: 3, 4: 3, 6: 3})
     database = db.Database(name=data_file_path, dataframe=df)
     _ = database.define_variable('livesInUrbanArea', UrbRur == 2)
     _ = database.define_variable('owningHouse', OwnHouse == 1)
@@ -132,6 +135,7 @@ CostCar = Variable('CostCar')
 NbHousehold = Variable('NbHousehold')
 NbChild = Variable('NbChild')
 NbCar = Variable('NbCar')
+number_of_cars = Variable('number_of_cars')
 NbMoto = Variable('NbMoto')
 NbBicy = Variable('NbBicy')
 NbBicyChild = Variable('NbBicyChild')
@@ -259,3 +263,5 @@ livesInUrbanArea = Variable('livesInUrbanArea')
 household_size = Variable('household_size')
 income_category = Variable('income_category')
 distance_category = Variable('distance_category')
+worker = Variable('worker')
+car_is_available = Variable('car_is_available')

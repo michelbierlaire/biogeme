@@ -18,6 +18,7 @@ from biogeme.results_processing import (
     EstimationResults,
 )
 
+from fixed_latent import car_centric_attitude, urban_preference_attitude
 from optima import (
     Choice,
     CostCarCHF,
@@ -75,18 +76,36 @@ log_scale_choice_model = Beta('log_scale_choice_model', 0, None, None, 0)
 
 scale_choice_model = exp(log_scale_choice_model)
 
+choice_car_centric_car_cte = Beta('choice_car_centric_car_cte', 1, None, None, 0)
+choice_car_centric_pt_cte = Beta('choice_car_centric_pt_cte', 1, None, None, 0)
+choice_urban_life_car_cte = Beta('choice_urban_life_car_cte', 0, None, None, 1)
+choice_urban_life_pt_cte = Beta('choice_urban_life_pt_cte', 0, None, None, 1)
+
+lambda_urban_preference = Beta('lambda_urban_preference', -1, None, None, 0)
+
+
 # %%
 # Definition of utility functions:
 v_public_transport = scale_choice_model * (
     choice_asc_pt
     + choice_beta_time_pt * TimePT_hour
-    + choice_beta_waiting_time * WaitingTimePT / 60
+    + choice_beta_waiting_time
+    * exp(lambda_urban_preference * urban_preference_attitude)
+    * WaitingTimePT
+    / 60
     + choice_beta_cost * MarginalCostPT
+    + choice_car_centric_pt_cte * car_centric_attitude
+    + choice_urban_life_pt_cte * urban_preference_attitude
 )
 
 v_car = scale_choice_model * (
-    choice_asc_car + choice_beta_time_car * TimeCar_hour + choice_beta_cost * CostCarCHF
+    choice_asc_car
+    + choice_beta_time_car * TimeCar_hour
+    + choice_beta_cost * CostCarCHF
+    + choice_car_centric_car_cte * car_centric_attitude
+    + choice_urban_life_car_cte * urban_preference_attitude
 )
+
 
 v_slow_modes = scale_choice_model * (choice_beta_dist * distance_km)
 
@@ -104,7 +123,7 @@ log_likelihood = loglogit(v, None, Choice)
 # Create the Biogeme object
 print('Create the biogeme object')
 the_biogeme = BIOGEME(database, log_likelihood)
-the_biogeme.model_name = 'b02_choice_model'
+the_biogeme.model_name = 'fixed_choice'
 
 
 print('--- Estimate ---')

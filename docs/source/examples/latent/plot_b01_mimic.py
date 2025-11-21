@@ -1,69 +1,55 @@
 """
 
-MIMIC (Multiple Indicators Multiple Causes) model
-=================================================
+Multiple Indicators, Multiple Causes (MIMIC)
+============================================
 
-THe MIMIC model involves two latent variables: "car centric" attitude, and "urban preference" attitude.
+MIMIC model with two latent variables.
+
 Michel Bierlaire, EPFL
-Fri May 16 2025, 10:32:30
-
+Sat Nov 08 2025, 15:31:49
 """
 
 import biogeme.biogeme_logging as blog
 from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
-from biogeme.data.optima import (
-    read_data,
-)
-from biogeme.database import Database
 from biogeme.expressions import (
-    Elem,
-    MultipleSum,
-    Variable,
+    MonteCarlo,
     log,
 )
 from biogeme.results_processing import (
     get_pandas_estimated_parameters,
 )
 
-from measurement_equations import all_indicators, generate_measurement_equations
-from read_or_estimate import read_or_estimate
-from structural_equations import (
-    build_car_centric_attitude,
-    build_urban_preference_attitude,
+from measurement_equations import likert_likelihood_indicator
+from optima import (
+    read_data,
 )
-
-# %%
-# Structural equation: car centric attitude
-car_centric_attitude = build_car_centric_attitude()
-
-# %%
-# Structural equation: urban preference
-urban_preference_attitude = build_urban_preference_attitude()
+from read_or_estimate import read_or_estimate
 
 logger = blog.get_screen_logger(level=blog.INFO)
-logger.info('Example b01one_latent_regression.py')
-
-dict_prob_indicators = generate_measurement_equations(
-    car_centric_attitude=car_centric_attitude,
-    urban_preference_attitude=urban_preference_attitude,
-)
 
 # %%
-# We calculate the joint probability of all indicators
-log_proba = {
-    indicator: log(Elem(dict_prob_indicators[indicator], Variable(indicator)))
-    for indicator in all_indicators
-}
-log_likelihood = MultipleSum(log_proba)
+# Conditional on the latent variables, we have a logit model (called the kernel)
+cond_prob = likert_likelihood_indicator
+
+# %%
+# We integrate over omega using numerical integration
+log_likelihood = log(MonteCarlo(cond_prob))
 
 # %%
 # Read the data
-database: Database = read_data()
+database = read_data()
 
 # %%
-# Create the Biogeme object.
-the_biogeme = BIOGEME(database, log_likelihood)
+# Create the Biogeme object
+the_biogeme = BIOGEME(
+    database,
+    log_likelihood,
+    number_of_draws=10_000,
+    calculating_second_derivatives='never',
+    numerically_safe=True,
+    max_iterations=5000,
+)
 the_biogeme.model_name = 'b01_mimic'
 
 # %%
@@ -72,10 +58,11 @@ the_biogeme.model_name = 'b01_mimic'
 results = read_or_estimate(the_biogeme=the_biogeme, directory='saved_results')
 
 # %%
-print(f'Estimated betas: {results.number_of_parameters}')
-print(f'final log likelihood: {results.final_log_likelihood:.3f}')
-print(f'Output file: {the_biogeme.html_filename}')
+print(results.short_summary())
 
 # %%
-pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+# Get the results in a pandas table
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+)
 display(pandas_results)
