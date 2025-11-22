@@ -1,0 +1,415 @@
+\documentclass[12pt,a4paper]{article}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{michel}
+%\usepackage[hyphens]{url}
+\usepackage[dcucite,abbr]{harvard}
+\harvardparenthesis{none}\harvardyearparenthesis{round}
+\usepackage{varioref}
+\usepackage{longtable}
+\usepackage{siunitx}
+\usepackage{pgfplots}
+% Fix for matplotlib PGF output: define \mathdefault if missing
+\providecommand{\mathdefault}[1]{#1}
+\pgfplotsset{compat=newest}
+\sisetup{
+  parse-numbers=false,      % Prevents automatic parsing (needed for parentheses & superscripts)
+  detect-inline-weight=math,% Ensures proper formatting in tables
+  tight-spacing=true        % Keeps spacing consistent
+}
+% Package to include code
+\usepackage{listings}
+\usepackage{color}
+\lstset{language=Python}
+\lstset{numbers=none, basicstyle=\footnotesize,
+  numberstyle=\tiny,keywordstyle=\color{blue},stringstyle=\ttfamily,showstringspaces=false}
+\lstset{backgroundcolor=\color[rgb]{0.95 0.95 0.95}}
+\lstdefinestyle{numbers}{numbers=left, stepnumber=1,
+  numberstyle=\tiny,basicstyle=\tiny, numbersep=10pt}
+\lstdefinestyle{nonumbers}{numbers=none}
+\lstset{
+  breaklines=true,
+  breakatwhitespace=true,
+}
+\usepackage{geometry}
+\geometry{left=2cm, top=1.5cm, right=2cm, bottom=1.5cm}
+
+\title{Bayesian inference with Biogeme}
+\author{Michel Bierlaire} 
+\date{\today}
+
+
+\begin{document}
+
+
+\begin{titlepage}
+\pagestyle{empty}
+
+\maketitle
+\vspace{2cm}
+
+\begin{center}
+\small Report TRANSP-OR xxxxxx  \\ Transport and Mobility Laboratory \\ School of Architecture, Civil and Environmental Engineering \\ Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+\begin{center}
+\textsc{Series on Biogeme}
+\end{center}
+\end{center}
+
+
+\clearpage
+\end{titlepage}
+
+\begin{titlepage}
+\tableofcontents
+\end{titlepage}
+
+The package Biogeme (\texttt{biogeme.epfl.ch}) is designed to estimate
+the parameters of various models. It is particularly designed for
+discrete choice models. Originally designed to use maximum likelihood
+estimation, it is also possible to use Bayesian inference to estimate
+the parameters of the model. It is particularly useful for mixtures
+models, as it allows to avoid the calculation of complex Monte-Carlo
+integrals.
+
+We assume that the reader is already familiar with discrete choice
+models, and has successfully installed Biogeme. This document has
+been written using Biogeme 3.3.2.
+
+It is also highly recommended to review foundational concepts such as
+simulation methods, Bayesian inference, and Markov chain Monte
+Carlo. Although these topics are briefly introduced here, a solid
+understanding of them greatly helps in fully appreciating the power
+and flexibility of Bayesian estimation for discrete choice models.
+
+
+\section{Bayesian inference}
+
+Bayesian inference consists of fitting a probabilistic model to observed data
+and representing the outcome by a probability distribution over the model
+parameters.
+
+Bayesian inference differs fundamentally from frequentist inference in
+the way uncertainty about model parameters is represented and
+quantified. In the frequentist framework, parameters are treated as
+fixed but unknown constants, and uncertainty arises solely from the
+randomness of the data-generating process. In contrast, the Bayesian
+approach treats parameters as random variables endowed with a prior
+distribution, which encodes the information available before observing
+the data. This modeling choice does not imply that parameters are
+intrinsically random, but rather reflects epistemic uncertainty: the
+distribution represents our state of knowledge about plausible
+parameter values given the information at hand. After observing data,
+Bayes' theorem updates this prior into a posterior distribution, which
+synthesizes both prior beliefs and empirical evidence. The posterior
+distribution is therefore the central object of Bayesian inference,
+providing coherent measures of uncertainty, enabling probabilistic
+predictions, and allowing for direct probability statements about
+parameters themselves.
+
+Consider a discrete choice model characterized by a vector of
+parameters $\boldsymbol{\theta}$ and a likelihood function
+$L(\mathcal{D} \mid \boldsymbol{\theta})$, where $\mathcal{D}$ denotes
+the observed data: for each individual in the sample, it contains the
+values of the explanatory variables as well as the observed choice.
+The likelihood function represents the probability that the model,
+with parameters $\boldsymbol{\theta}$, reproduces exactly all the
+observations in the sample\footnote{Rigorously, this interpretation
+holds when the model involves only discrete variables. When the model
+includes continuous variables, the likelihood is obtained by
+evaluating the joint probability \emph{density} of the data at the
+observed values. Although this quantity is not itself a probability,
+it plays an analogous role.}.
+
+In the frequentist framework, estimation consists of finding a point estimate 
+$\hat{\boldsymbol{\theta}}$ that maximizes the likelihood or the log-likelihood.
+In the Bayesian framework, however, the parameters are treated as unknown 
+quantities described by a prior density $p(\boldsymbol{\theta})$, reflecting 
+the information available before observing the data.
+
+Once the data are observed, inference is performed through Bayes' theorem, 
+which combines the prior with the likelihood to obtain the posterior 
+distribution of the parameters:
+\begin{equation}
+  \label{eq:posterior}
+p(\boldsymbol{\theta}\mid \mathcal{D})
+= 
+\frac{L(\mathcal{D}\mid\boldsymbol{\theta} )\, p(\boldsymbol{\theta})}
+     {\int L(\mathcal{D}\mid \boldsymbol{\theta}')\, 
+            p(\boldsymbol{\theta}')\, d\boldsymbol{\theta}'}.
+\end{equation}
+The denominator ensures that the 
+posterior integrates to one. The bad news is that it is not available in closed form for
+choice models. The good news is that it is not needed in practice. 
+
+This distribution is inherently difficult to work with
+analytically. For that reason, we rely on simulation to generate
+realizations --- referred to as \emph{draws} --- from it. Before explaining how such
+draws can be produced in practice, we first provide some intuition for
+why simulation is necessary.
+
+\section{Simulation}
+
+The arithmetic of random variables can quickly become intricate. Even in the simple case of two independent random variables $X$ and $Y$, with respective probability density functions (pdf) $f_X$ and $f_Y$, the distribution of their sum is not straightforward. If we define $Z = X + Y$, the pdf of $Z$ is obtained through a transformation known as \emph{convolution}:
+\[
+f_Z(z) = \int_{-\infty}^{\infty} f_X(x)\, f_Y(z - x)\, dx.
+\]
+For instance, assume that both $X$  and $Y$ follow a uniform distribution:
+ \[
+X \sim \mathrm{U}(0,1), 
+\qquad
+Y \sim \mathrm{U}(0,1).
+\]
+Then, the calculation of the convolution shows that $Z$ follows a triangular distribution:
+\[
+f_Z(z) =
+\begin{cases}
+0, & z < 0, \\[6pt]
+z, & 0 \le z \le 1, \\[6pt]
+2 - z, & 1 < z \le 2, \\[6pt]
+0, & z > 2.
+\end{cases}
+\]
+However, in practice, the convolution integral rarely has a closed form, making it difficult to handle.
+
+The idea of simulation consists in generating concrete numerical
+values produced according to the probability law of the random
+variables of interest.  Regular arithmetic can then be applied on
+those values.
+
+Let $X$ be a random variable with probability density function (pdf)
+$f_X$. A \emph{draw from $X$} is a numerical value obtained from a
+random mechanism whose outcomes follow exactly the distribution of $X$.
+
+Formally, consider a sequence of independent draws
+$X_1, X_2, \dots, X_R$ from $X$. For any fixed $R$, the empirical
+distribution of these draws can be represented by a histogram. As
+$R$ becomes large, the histogram provides an increasingly accurate
+approximation of the true pdf $f_X$.
+
+More precisely, for any interval $[a,b]$,
+\begin{equation}
+  \label{eq:simulation_convergence}
+  \frac{1}{R}\sum_{i=1}^R \mathbf{1}\{X_i \in [a,b]\}
+  \;\xrightarrow[R\to\infty]{\text{a.s.}}\;
+  \int_a^b f_X(x)\,dx,
+\end{equation}
+where $\mathbf{1}\{\cdot\}$ denotes the indicator function, and “a.s.” stands
+for almost surely, meaning that the convergence holds with probability
+1.  This
+property demonstrates that the draws reproduce the probability
+structure of $X$: the relative frequency with which the draws fall in
+any region converges to the probability mass assigned to that region
+by the pdf $f_X$.
+
+In this sense, a draw from $X$ is not merely a number, but a realization
+generated according to $f_X$, and repeated draws allow us to recover the
+shape of the density through their empirical distribution.
+
+This is illustrated in Figure~\ref{fig:triangular}, which displays histograms of 100'000 independent draws from two uniform random variables \(X \sim \mathrm{U}(0,1)\) and \(Y \sim \mathrm{U}(0,1)\), together with the histogram of their sum \(Z = X + Y\). The first two panels show that the empirical distributions of \(X\) and \(Y\) closely match the flat density of the uniform distribution. The third panel presents the resulting distribution of \(Z\), whose histogram approaches the theoretical triangular density obtained by the convolution of the two uniforms. This confirms that, as the number of draws increases, the simulated empirical distributions converge to their corresponding probability density functions.
+
+\begin{figure}
+  \centering
+  \resizebox{0.7\textwidth}{!}{%
+    \input{example_triangular.pgf}
+  }
+  \caption{\label{fig:triangular}Histograms of $X$, $Y$, and $Z=X+Y$ with theoretical density of $Z$.}
+\end{figure}
+
+Most programming languages and numerical libraries provide a built-in
+function for generating draws from the uniform distribution \(\mathrm
+U(0,1)\). Although the sequence returned by such a function is
+deterministic (a pseudo-random number generator), it nonetheless
+exhibits all the statistical properties of a truly random sequence ---
+in particular the convergence property
+\req{eq:simulation_convergence}.  Once we have uniform draws, a
+variety of simple algorithms exist for transforming them into draws from
+other distributions (normal, extreme value, gamma, etc.) For a
+comprehensive treatment of these methods, the reader is referred to
+the standard text by \citeasnoun{Ross12}.
+
+Unfortunately, sampling from the posterior distribution
+\req{eq:posterior} of the parameters of a choice model cannot be
+achieved through simple transformations of uniform draws. Instead, it
+requires more advanced simulation techniques, known as Markov chain
+Monte--Carlo (MCMC) methods. As those methods are the core of Bayesian
+inference, we provide a brief introduction in the next section. We
+invite the interested reader to consult the literature for a more
+comprehensive description (\cite{Wang_2022}, \cite{Gelman:2013aa}).
+
+\section{Markov Chain Monte--Carlo methods}
+
+The term \emph{Monte-Carlo} refers to the city of Monte-Carlo in the
+Principality of Monaco, famous for its casino. In mathematics and
+statistics, the expression ``Monte-Carlo'' is used whenever randomness is
+used as a computational tool, typically to approximate integrals,
+expectations, or probability distributions.
+
+A \emph{Markov chain} is a stochastic process, that is, a sequence of
+random variables, with specific mathematical properties that make their
+long-run behavior analytically tractable. Under appropriate conditions
+(irreducibility, aperiodicity, and [WHAT IS IT???]positive recurrence), a Markov chain
+converges to a distribution called its \emph{stationary distribution}.
+Intuitively, \emph{stationarity} means that, once the chain has run long
+enough, the distribution of its state no longer changes over time.
+Rigorously, if $X_t$ denotes the state at iteration $t$, then
+stationarity means that there exists a distribution $\pi$ such that
+\[
+  \prob(X_{t+1} = j) = \prob(X_t = j) = \pi_j
+  \qquad \text{for all states } j \text{ and all } t \text{ large enough}.
+\]
+Equivalently, if the chain is initiated with $X_0 \sim \pi$, then all
+future states $X_t$ also follow the same distribution.
+
+The idea behind \emph{Markov Chain Monte-Carlo} (MCMC) methods is to
+construct a Markov chain whose stationary distribution is precisely the
+distribution from which we wish to draw samples (for example, the
+posterior distribution of model parameters). By simulating the chain for
+a sufficiently large number of iterations, the generated sequence
+approximates draws from the target distribution.
+
+Formally, a Markov chain $(X_t)_{t \ge 0}$ is defined on a state space
+(which may be discrete or continuous) together with a
+\emph{transition probability}. For simplicity, we introduce the concept
+in the discrete case; the continuous version is entirely analogous, with
+probability density functions replacing probabilities, and integrals
+replacing sums.
+
+For each pair of states $i$ and $j$, the transition probability is
+\begin{equation}
+  \label{eq:transition}
+  P_{ij} = \prob(X_{t+1} = j \mid X_t = i).
+\end{equation}
+A key property of Markov chains is that the transition probabilities do
+not depend on the iteration index $t$. Moreover, for each state $i$,
+\[
+  \sum_{j} P_{ij} = 1,
+\]
+so that $P_{ij}$ defines a proper probability distribution over the next
+state.
+
+A stationary distribution is a vector $\pi = (\pi_j)_j$ satisfying the
+system
+\begin{equation}
+  \label{eq:stationary-1}
+  \pi_j = \sum_i \pi_i P_{ij} \qquad \text{for all states } j,
+\end{equation}
+with the normalization condition
+\begin{equation}
+  \label{eq:stationary-2}
+  \sum_j \pi_j = 1.
+\end{equation}
+Equation~\eqref{eq:stationary-1} states that if $X_t$ has distribution
+$\pi$, then $X_{t+1}$ also has distribution $\pi$. Thus the chain is in
+equilibrium.
+
+In many MCMC algorithms, the Markov chains used to generate samples
+satisfy an additional property known as \emph{time reversibility}. A
+chain is time reversible with respect to a distribution $\pi$ if
+\begin{equation}
+  \label{eq:time_reversible}
+  \pi_i P_{ij} = \pi_j P_{ji} \qquad \text{for all } i \neq j.
+\end{equation}
+This condition is also known as \emph{detailed balance}, and implies
+that $\pi$ is stationary. Indeed, summing~\eqref{eq:time_reversible}
+over all $i$ directly yields \eqref{eq:stationary-1}. Many classical
+MCMC algorithms, such as the Metropolis--Hastings method, are
+explicitly designed to satisfy detailed balance with respect to the
+target distribution.
+
+We illustrate the notion of stationary and time-reversible Markov chains
+with a simple example involving customer engagement on an online service
+(e.g., a subscription-based platform).
+
+We consider a single user observed once per day. On any given day,
+the user is in exactly one of the following three engagement states:
+\begin{itemize}
+  \item State~1: low engagement (rarely logs in, uses very few features),
+  \item State~2: medium engagement (uses the service somewhat regularly),
+  \item State~3: high engagement (uses the service intensively and frequently).
+\end{itemize}
+We assume that the evolution of the user's engagement from day to day
+can be modeled as a homogeneous Markov chain $(X_t)_{t \geq 0}$ taking
+values in $\{1,2,3\}$, with the following transition matrix:
+\[
+P
+=
+\begin{pmatrix}
+0.7 & 0.2 & 0.1 \\
+0.2 & 0.5 & 0.3 \\
+0.1 & 0.3 & 0.6
+\end{pmatrix}.
+\]
+Each entry $P_{ij}$ denotes the probability that the user moves from
+state $i$ on day $t$ to state $j$ on day $t+1$.
+The entries of $P$ can be read as follows:
+\begin{itemize}
+  \item From low engagement (state~1):
+    \begin{itemize}
+      \item the user stays low-engagement the next day with probability $0.7$,
+      \item moves up to medium engagement with probability $0.2$,
+      \item jumps directly to high engagement with probability $0.1$.
+    \end{itemize}
+  \item From medium engagement (state~2):
+    \begin{itemize}
+      \item the user drops to low engagement with probability $0.2$,
+      \item remains at medium engagement with probability $0.5$,
+      \item increases to high engagement with probability $0.3$.
+    \end{itemize}
+  \item From high engagement (state~3):
+    \begin{itemize}
+      \item the user cools down to medium engagement with probability $0.3$,
+      \item remains highly engaged with probability $0.6$,
+      \item drops directly to low engagement with probability $0.1$.
+    \end{itemize}
+\end{itemize}
+
+It is easy to verify that the Markov chain admits the uniform stationary distribution
+\[
+\pi = \bigl(\pi_1, \pi_2, \pi_3\bigr)
+= \left( \tfrac{1}{3}, \tfrac{1}{3}, \tfrac{1}{3} \right).
+\]
+The Markov chain is also time-reversible with respect to
+$\pi$. This follows from the fact that $\pi_i = \pi_j = 1/3$ for all $i,j$, and that $P$ is symmetric
+
+The behavior of the Markov chain introduced above is illustrated in
+Figure~\ref{fig:markov}.  The figure displays the empirical frequency
+of each state as the simulation evolves over time. At the beginning of
+the run, these empirical frequencies fluctuate widely and do not yet
+reflect the target distribution.  As the number of iterations
+increases, however, the proportions stabilize and gradually approach
+the theoretical stationary distribution $\pi = (1/3,\,1/3,\,1/3)$
+derived earlier.  A crucial practical implication is that the draws
+generated during the early iterations---before the chain has
+approached stationarity---should not be used as representative samples
+from the target distribution.  Only after the chain has ``settled''
+near equilibrium do the simulated states behave as valid draws from
+the desired stationary distribution.  Typically, in this example, we
+would simply discard all the 1000 draws displayed in
+Figure~\ref{fig:markov}, and start using the chain to generate more
+draws (Figure~\ref{fig:markov_2} illustrates the chain from step 1000 to step 2000).
+
+\begin{figure}
+  \centering
+  \resizebox{\textwidth}{!}{%
+    \input{markov_convergence.pgf}
+  }
+  \caption{\label{fig:markov}Simulation of the three–state Markov chain (t=0,\ldots, 1000)}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \resizebox{\textwidth}{!}{%
+    \input{markov_convergence_2.pgf}
+  }
+  \caption{\label{fig:markov_2}Simulation of the three–state Markov chain  (t=1000,\ldots, 2000)}
+\end{figure}
+
+
+
+
+\clearpage
+\bibliographystyle{dcudoi}
+\bibliography{transpor}
+
+\end{document}
+
+
