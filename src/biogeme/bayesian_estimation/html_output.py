@@ -11,14 +11,18 @@ from datetime import datetime
 from enum import Enum
 
 import arviz as az
-import biogeme.version as version
 import matplotlib
 import matplotlib.pyplot as plt
 
+import biogeme.version as version
+from biogeme.exceptions import BiogemeError
 from .bayesian_results import BayesianResults, EstimatedBeta
 
 logger = logging.getLogger(__name__)
 matplotlib.use("Agg")  # headless backend
+
+
+class EmptyListOfParameters(BiogemeError): ...
 
 
 def format_real_number(value: float) -> str:
@@ -367,8 +371,11 @@ def get_html_one_parameter(
     # hdi_low: float | None
     # hdi_high: float | None
 
-    # Value
-    value = estimated_value.estimate
+    # Value (mean)
+    value = estimated_value.mean
+    output += f'<td>{format_real_number(value)}</td>'
+    # Value (mode)
+    value = estimated_value.mode
     output += f'<td>{format_real_number(value)}</td>'
     # std err
     std_err = estimated_value.std_err
@@ -426,7 +433,8 @@ def get_html_estimated_parameters(
     html += '<tr class=biostyle>'
     html += '<th>Id</th>'
     html += '<th>Name</th>'
-    html += '<th>Value</th>'
+    html += '<th>Value (mean)</th>'
+    html += '<th>Value (mode)</th>'
     html += '<th>std err.</th>'
     html += '<th>z-value</th>'
     html += '<th>p-value</th>'
@@ -459,6 +467,10 @@ def get_html_estimated_parameters(
             + '\n'
         )
         rows.append((parameter_index, name, row_html))
+
+    if not rows:
+        error_msg = 'Empty list of parameters'
+        raise EmptyListOfParameters(error_msg)
 
     if sort_by_name:
         rows.sort(key=lambda x: x[1])
@@ -496,39 +508,47 @@ def generate_html_file(
 
     with open(filename, 'w') as file:
         header = get_html_header(estimation_results=estimation_results)
+        print(header, file=file)
+
         preamble = get_html_preamble(
             estimation_results=estimation_results, file_name=filename
         )
+        print(preamble, file=file)
+        print('<h1>Bayesian estimation report</h1>', file=file)
         general_statistics = get_html_general_statistics(
             estimation_results=estimation_results
         )
-        parameters = get_html_estimated_parameters(
-            estimation_results=estimation_results,
-            estimated_parameters=True,
-            sort_by_name=True,
-        )
-        other_variables = get_html_estimated_parameters(
-            estimation_results=estimation_results,
-            estimated_parameters=False,
-            sort_by_name=True,
-        )
+        print(general_statistics, file=file)
+        try:
+            parameters = get_html_estimated_parameters(
+                estimation_results=estimation_results,
+                estimated_parameters=True,
+                sort_by_name=True,
+            )
+            print('<h1>Estimated parameters</h1>', file=file)
+            print(parameters, file=file)
+        except EmptyListOfParameters:
+            logger.warning('No parameter to report.')
+
+        try:
+            other_variables = get_html_estimated_parameters(
+                estimation_results=estimation_results,
+                estimated_parameters=False,
+                sort_by_name=True,
+            )
+            print('<h1>Other simulated variables</h1>', file=file)
+            print(other_variables, file=file)
+        except EmptyListOfParameters:
+            pass
+
         diagnostics = get_html_arviz_diagnostics(
             estimation_results=estimation_results,
             html_filename=filename,
             figure_size=figure_size,
         )
-
-        footer = get_html_footer()
-
-        print(header, file=file)
-        print(preamble, file=file)
-        print('<h1>Bayesian estimation report</h1>', file=file)
-        print(general_statistics, file=file)
-        print('<h1>Estimated parameters</h1>', file=file)
-        print(parameters, file=file)
-        print('<h1>Other simulated variables</h1>', file=file)
-        print(other_variables, file=file)
         if diagnostics:
             print(diagnostics, file=file)
+
+        footer = get_html_footer()
         print(footer, file=file)
     logger.info(f'File {filename} has been generated.')

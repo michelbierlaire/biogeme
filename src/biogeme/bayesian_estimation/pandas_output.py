@@ -48,7 +48,8 @@ def _build_parameters_dataframe(
             {
                 "Id": param_idx,
                 "Name": display_name,
-                "Value": est.estimate,
+                "Value (mean)": est.mean,
+                "Value (mode)": est.mode,
                 "std err.": est.std_err,
                 "z-value": est.z_value,
                 "p-value": est.p_value,
@@ -65,7 +66,8 @@ def _build_parameters_dataframe(
         columns=[
             "Id",
             "Name",
-            "Value",
+            "Value (mean)",
+            "Value (mode)",
             "std err.",
             "z-value",
             "p-value",

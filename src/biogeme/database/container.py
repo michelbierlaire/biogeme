@@ -13,8 +13,6 @@ from collections.abc import Callable
 
 import numpy as np
 import pandas as pd
-from jax import numpy as jnp
-
 from biogeme.deprecated import deprecated
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
@@ -30,6 +28,8 @@ from biogeme.segmentation import (
     generate_segmentation,
     verify_segmentation,
 )
+from jax import numpy as jnp
+
 from .sampling import sample_with_replacement
 
 logger = logging.getLogger(__name__)

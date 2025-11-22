@@ -12,4 +12,9 @@ from .native_draws import (
     description_of_native_draws,
     native_random_number_generators,
 )
-from .pymc_draws import get_distribution, get_list_of_available_distributions
+from .pymc_draws import (
+    PyMcDistributionFactory,
+    get_distribution,
+    get_list_of_available_distributions,
+    pymc_distributions,
+)

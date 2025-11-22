@@ -12,9 +12,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-
+import pytensor.tensor as pt
 from biogeme.exceptions import BiogemeError
 from biogeme.floating_point import JAX_FLOAT
+
 from .base_expressions import ExpressionOrNumeric
 from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
@@ -165,9 +166,31 @@ class PowerConstant(UnaryOperator):
         :return: the expression in TensorVariable format, suitable for PyMc
         """
         child_pymc = self.child.recursive_construct_pymc_model_builder()
+        integer_exponent = self.integer_exponent
+        exponent = self.exponent
+        epsilon = np.finfo(float).eps
 
         def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
             child_value = child_pymc(dataframe=dataframe)
-            return child_value**self.exponent
+
+            # Integer exponent: keep the simple, exact behaviour
+            if integer_exponent is not None:
+                return child_value**integer_exponent
+
+            # Non-integer exponent: use a numerically safe branch similar to the JAX version
+            zeros = pt.zeros_like(child_value)
+            nan_tensor = zeros + np.nan
+
+            # 0 ** exponent  -> 0 (even if exponent is negative)
+            is_zero = pt.eq(child_value, 0.0)
+            # negative base with non-integer exponent -> NaN
+            is_negative = pt.lt(child_value, 0.0)
+
+            safe_val = pt.clip(child_value, epsilon, np.inf)
+            powered = pt.exp(exponent * pt.log(safe_val))
+
+            result_nonpos = pt.switch(is_zero, zeros, nan_tensor)
+            result = pt.switch(is_negative | is_zero, result_nonpos, powered)
+            return result
 
         return builder

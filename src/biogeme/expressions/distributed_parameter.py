@@ -11,6 +11,7 @@ import logging
 import pandas as pd
 import pymc as pm
 import pytensor.tensor as pt
+from jax import numpy as jnp
 
 from . import (
     ExpressionOrNumeric,
@@ -18,7 +19,6 @@ from . import (
 from .bayesian import PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
-from ..exceptions import BiogemeError
 
 logger = logging.getLogger(__name__)
 
@@ -58,16 +58,25 @@ class DistributedParameter(UnaryOperator):
         self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
-        Generates a function to be used by biogeme_jax. Must be overloaded by each
-            expression
-        :return: the function takes two parameters: the parameters, and one row
-            of the database.
+        Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+        :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        error_msg = (
-            'Expression of type {type(self)} are designed for Bayesian estimation only. For maximum likelihood'
-            ' estimation, use Draws instead.'
+        child_jax = self.child.recursive_construct_jax_function(
+            numerically_safe=numerically_safe
         )
-        raise BiogemeError(error_msg)
+
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            child_value = child_jax(
+                parameters, one_row, the_draws, the_random_variables
+            )
+            return child_value
+
+        return the_jax_function
 
     def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
         """

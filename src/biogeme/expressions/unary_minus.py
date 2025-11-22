@@ -9,6 +9,9 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
+import pandas as pd
+import pytensor.tensor as pt
+from biogeme.expressions.bayesian import PymcModelBuilderType
 
 from .base_expressions import ExpressionOrNumeric
 from .jax_utils import JaxFunctionType
@@ -76,3 +79,16 @@ class UnaryMinus(UnaryOperator):
             return -child_value
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
+        :return: the expression in TensorVariable format, suitable for PyMc
+        """
+        child_pymc = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            child_value = child_pymc(dataframe=dataframe)
+            return -child_value
+
+        return builder

@@ -10,7 +10,10 @@ import logging
 from typing import Any
 
 import jax.numpy as jnp
+import pandas as pd
+import pytensor.tensor as pt
 from biogeme.exceptions import BiogemeError
+from biogeme.expressions.bayesian import PymcModelBuilderType
 
 from .base_expressions import Expression, ExpressionOrNumeric
 from .convert import validate_and_convert
@@ -107,3 +110,27 @@ class MultipleProduct(Expression):
             return result
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMC.
+        Mirrors the JAX logic for MultipleProduct: evaluate each child and take the product.
+        """
+        child_builders = [
+            child.recursive_construct_pymc_model_builder()
+            for child in self.get_children()
+        ]
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            terms = [cb(dataframe=dataframe) for cb in child_builders]
+
+            # Empty product defaults to 1.0
+            if not terms:
+                return pt.as_tensor_variable(1.0)
+
+            result = terms[0]
+            for t in terms[1:]:
+                result = result * t
+            return result
+
+        return builder

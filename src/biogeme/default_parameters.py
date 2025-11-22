@@ -13,13 +13,15 @@ from __future__ import annotations
 
 from typing import Callable, NamedTuple
 
+import numpy as np
+from tabulate import tabulate
+
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
-import numpy as np
+from biogeme.bayesian_estimation import describe_strategies
 from biogeme.floating_point import NUMPY_FLOAT
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_version
-from tabulate import tabulate
 
 ParameterValue = bool | int | float | str
 
@@ -397,6 +399,16 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(),
         ),
         ParameterTuple(
+            name='mcmc_sampling_strategy',
+            value='automatic',
+            type=str,
+            section='Bayesian',
+            description=(
+                f"Defines how MCMC sampling is performed: 'automatic' (selected based on hardware), {describe_strategies()}"
+            ),
+            check=(cp.check_sampling_strategy,),
+        ),
+        ParameterTuple(
             name='bayesian_draws',
             value=2000,
             type=int,
@@ -427,6 +439,30 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             section='Bayesian',
             description='Target acceptance probability for the No-U-Turn Sampler (NUTS) algorithm. Higher values like 0.9 or 0.95 often work better for problematic posteriors.',
             check=(cp.is_number, cp.zero_one),
+        ),
+        ParameterTuple(
+            name='calculate_waic',
+            value=True,
+            type=bool,
+            section='Bayesian',
+            description='Calculates the Widely Applicable Information Criterion (WAIC)',
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='calculate_loo',
+            value=True,
+            type=bool,
+            section='Bayesian',
+            description='Calculates the Leave-One-Out Cross-Validation (LOO)',
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='calculate_likelihood',
+            value=True,
+            type=bool,
+            section='Bayesian',
+            description='Calculates likelihood-based statistics from the posterior draws',
+            check=(cp.is_boolean,),
         ),
     )
 

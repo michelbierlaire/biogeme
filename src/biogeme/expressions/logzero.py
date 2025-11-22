@@ -11,6 +11,9 @@ import logging
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+import pytensor.tensor as pt
+from biogeme.expressions.bayesian import PymcModelBuilderType
 from biogeme.floating_point import EPSILON, JAX_FLOAT
 
 from .base_expressions import ExpressionOrNumeric
@@ -118,3 +121,23 @@ class logzero(UnaryOperator):
             )
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        child_pymc = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            x = child_pymc(dataframe=dataframe)
+
+            # Boolean mask for zeros
+            is_zero = pt.eq(x, 0.0)
+            m = pt.cast(is_zero, x.dtype)  # 1 where x==0, else 0
+            one_minus_m = 1.0 - m
+
+            # Safe log: for x==0, we evaluate log(EPSILON), otherwise log(x)
+            # (No branching: just add EPSILON exactly where x==0)
+            safe_log = pt.log(x + m * EPSILON)
+
+            # Enforce exact 0 when x==0, and log(x) otherwise (still branch-free)
+            return one_minus_m * safe_log
+
+        return builder

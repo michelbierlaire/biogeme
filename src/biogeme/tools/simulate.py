@@ -11,9 +11,8 @@ from typing import TYPE_CHECKING
 
 from pandas import DataFrame
 
-from biogeme.expressions import Expression
-
 if TYPE_CHECKING:
+    from biogeme.expressions import Expression
     from biogeme.database import Database
     from biogeme.results_processing import EstimationResults
 

@@ -11,6 +11,8 @@ import logging
 import jax.numpy as jnp
 import pandas as pd
 import pytensor.tensor as pt
+from biogeme.bayesian_estimation import check_shape
+from pytensor import config as pt_config
 from pytensor.tensor import TensorVariable
 
 from .base_expressions import Expression
@@ -80,7 +82,10 @@ class Numeric(Expression):
         :return: the expression in TensorVariable format, suitable for PyMc
         """
 
+        @check_shape
         def builder(dataframe: pd.DataFrame) -> TensorVariable:
-            return pt.as_tensor_variable(self.value)
+            # Produce a constant vector of length len(dataframe) with the numeric value
+            n = len(dataframe)
+            return pt.full((n,), self.value, dtype=pt_config.floatX)
 
         return builder

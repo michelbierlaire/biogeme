@@ -2,6 +2,7 @@ from .function_call import CallableExpression, function_from_compiled_formula
 from .multiple_formula import MultiRowEvaluator
 from .simple_formula import (
     create_function_simple_expression,
+    evaluate_simple_expression,
     evaluate_simple_expression_per_row,
 )
 from .single_formula import (

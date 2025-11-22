@@ -13,6 +13,7 @@ from .function_call import (
     function_from_compiled_formula,
 )
 from .single_formula import evaluate_formula, evaluate_model_per_row
+from ..model_elements.database_adapter import RegularAdapter
 
 if TYPE_CHECKING:
     from biogeme.expressions import Expression
@@ -26,7 +27,10 @@ def evaluate_simple_expression_per_row(
     second_derivatives_mode: SecondDerivativesMode,
 ) -> np.ndarray:
     model_elements = ModelElements.from_expression_and_weight(
-        log_like=expression, weight=None, database=database, use_jit=use_jit
+        log_like=expression,
+        weight=None,
+        adapter=RegularAdapter(database=database),
+        use_jit=use_jit,
     )
     return evaluate_model_per_row(
         model_elements=model_elements,
@@ -43,7 +47,10 @@ def evaluate_simple_expression(
     use_jit: bool,
 ) -> float:
     model_elements = ModelElements.from_expression_and_weight(
-        log_like=expression, weight=None, database=database, use_jit=use_jit
+        log_like=expression,
+        weight=None,
+        adapter=RegularAdapter(database=database),
+        use_jit=use_jit,
     )
 
     return evaluate_formula(
@@ -64,7 +71,10 @@ def create_function_simple_expression(
     if database is None:
         database = Database.dummy_database()
     model_elements = ModelElements.from_expression_and_weight(
-        log_like=expression, weight=None, database=database, use_jit=use_jit
+        log_like=expression,
+        weight=None,
+        adapter=RegularAdapter(database=database),
+        use_jit=use_jit,
     )
 
     the_evaluator = CompiledFormulaEvaluator(

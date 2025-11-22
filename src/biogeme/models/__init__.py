@@ -35,7 +35,10 @@ from .nested import (
     nested_mev_mu,
 )
 from .ordered import (
-    ordered_likelihood,
+    log_ordered_logit,
+    log_ordered_logit_from_thresholds,
+    log_ordered_probit,
+    log_ordered_probit_from_thresholds,
     ordered_logit,
     ordered_logit_from_thresholds,
     ordered_probit,

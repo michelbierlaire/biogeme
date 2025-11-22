@@ -13,6 +13,7 @@ import pandas as pd
 import pymc as pm
 from pytensor.tensor import TensorVariable
 
+from biogeme.bayesian_estimation import check_shape
 from biogeme.exceptions import BiogemeError
 from .bayesian import Dimension, PymcModelBuilderType
 from .elementary_expressions import Elementary
@@ -78,6 +79,7 @@ class Variable(Elementary):
         :return: the expression in TensorVariable format, suitable for PyMc
         """
 
+        @check_shape
         def builder(dataframe: pd.DataFrame) -> TensorVariable:
             model = pm.modelcontext(None)  # active model
             try:
@@ -96,7 +98,7 @@ class Variable(Elementary):
             return pm.Data(
                 self.name,
                 values,
-                dims=Dimension.OBSERVATIONS,
+                dims=Dimension.OBS,
             )
 
         return builder

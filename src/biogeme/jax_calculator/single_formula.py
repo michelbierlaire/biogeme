@@ -22,7 +22,7 @@ from biogeme.expressions import (
 )
 from biogeme.floating_point import JAX_FLOAT, NUMPY_FLOAT
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
-from biogeme.model_elements import ModelElements
+from biogeme.model_elements import FlatPanelAdapter, ModelElements, RegularAdapter
 from biogeme.second_derivatives import SecondDerivativesMode
 
 logger = logging.getLogger(__name__)
@@ -375,10 +375,15 @@ def calculate_single_formula_from_expression(
     numerically_safe: bool,
     use_jit: bool,
 ) -> float:
+    adapter = (
+        FlatPanelAdapter(database=database)
+        if database.is_panel()
+        else RegularAdapter(database=database)
+    )
     model_elements = ModelElements.from_expression_and_weight(
         log_like=expression,
         weight=None,
-        database=database,
+        adapter=adapter,
         number_of_draws=number_of_draws,
         use_jit=use_jit,
     )
@@ -471,10 +476,15 @@ def evaluate_expression(
     """
     if database is None:
         database = Database.dummy_database()
+    adapter = (
+        FlatPanelAdapter(database=database)
+        if database.is_panel()
+        else RegularAdapter(database=database)
+    )
     model_elements = ModelElements.from_expression_and_weight(
         log_like=expression,
         weight=None,
-        database=database,
+        adapter=adapter,
         number_of_draws=number_of_draws,
         use_jit=use_jit,
     )
@@ -512,10 +522,16 @@ def get_value_and_derivatives(
         from biogeme.database import Database
 
         database = Database.dummy_database()
+    adapter = (
+        FlatPanelAdapter(database=database)
+        if database.is_panel()
+        else RegularAdapter(database=database)
+    )
+
     model_elements = ModelElements.from_expression_and_weight(
         log_like=expression,
         weight=None,
-        database=database,
+        adapter=adapter,
         number_of_draws=number_of_draws,
         use_jit=use_jit,
     )

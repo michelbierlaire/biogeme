@@ -8,13 +8,13 @@ section must have different names
 
 """
 
+import difflib
 import logging
 import os
 from datetime import datetime
 from typing import NamedTuple
 
 import tomlkit as tk
-
 from biogeme.default_parameters import (
     ParameterTuple,
     ParameterValue,
@@ -394,6 +394,31 @@ class Parameters:
                 )
         return ok, messages
 
+    def _suggest_parameter_names(
+        self,
+        name: str,
+        section: str | None = None,
+        *,
+        n: int = 5,
+        cutoff: float = 0.6,
+    ) -> list[str]:
+        """
+        Suggest parameter names similar to `name`.
+
+        If `section` is provided and known, suggestions are restricted to that section.
+        Otherwise, draw from all known parameter names.
+
+        n:     maximum number of suggestions to return
+        cutoff: similarity threshold in [0,1]; higher = stricter
+        """
+        if section is not None and section in self.sections:
+            candidates = [p.name for p in self.parameters_in_section(section)]
+        else:
+            candidates = self.parameter_names
+        # unique + sorted for stable output
+        candidates = sorted(set(candidates))
+        return difflib.get_close_matches(name, candidates, n=n, cutoff=cutoff)
+
     def set_value(self, name: str, value: ParameterValue, section: str | None = None):
         """Set a value of a parameter. If the parameter appears in
         only one section, the name of the section can be omitted.
@@ -408,7 +433,10 @@ class Parameters:
         :type section: str
         """
         if not self.parameter_exists(name):
-            raise BiogemeError(f'Parameter [{name}] does not exist.')
+            hints = self._suggest_parameter_names(name, section)
+            hint_msg = f" Did you mean: {', '.join(hints)}?" if hints else ""
+            raise BiogemeError(f'Parameter [{name}] does not exist.{hint_msg}')
+
         the_tuple = self.get_param_tuple(name, section)
         the_parameter = ParameterTuple(
             name=the_tuple.name,

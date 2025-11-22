@@ -8,11 +8,11 @@
 from __future__ import annotations
 
 import logging
+from typing import Protocol
 
 import pandas as pd
 import pymc as pm
 from jax import numpy as jnp
-from pymc.distributions import continuous
 from pytensor.tensor import TensorVariable
 
 from biogeme.exceptions import BiogemeError
@@ -24,6 +24,77 @@ from .jax_utils import JaxFunctionType
 logger = logging.getLogger(__name__)
 
 DEFAULT_SIGMA_PRIOR = 10.0
+
+
+class PriorFactory(Protocol):
+    """
+    Protocol for user-defined priors used with :class:`Beta`.
+
+    A prior factory is a callable that receives:
+
+    :param name:
+        The PyMC name of the parameter (string).
+
+    :param initial_value:
+        The initial value provided by the Biogeme model.
+
+    :param lower_bound:
+        The lower bound of the truncation or None if no lower bound
+
+    :param upper_bound:
+        The upper bound of the truncation, or None if no upper bound.
+
+    and must return a **PyMC distribution** (RandomVariable) suitable as a prior
+    for that parameter. The returned object must be a valid PyMC *distribution
+    node*, not a sampled value.
+
+    Example
+    -------
+
+    Below is an example of a custom prior that uses a **Student-t distribution**
+    and truncates it to enforce **negative support**. This is useful for
+    parameters such as cost or travel-time sensitivities, where the coefficient
+    is known a priori to be negative.
+
+    .. code-block:: python
+
+        import pymc as pm
+        from pytensor.tensor import TensorVariable
+
+        def negative_student_prior(
+            name: str,
+            initial_value: float,
+            lower_bound: float | None,
+            upper_bound: float | None,
+        ) -> TensorVariable:
+            base = pm.StudentT.dist(mu=0.0, sigma=10.0, nu=5.0)
+            # Lower bound is ignored.
+            # Upper bound is enforced to 0, provided or not.
+            upper = 0.0 if upper_bound is None else min(0.0, upper_bound)
+            return pm.Truncated(
+                name=name,
+                dist=base,
+                upper=upper,
+                initval=initial_value,
+            )
+
+    This function can then be passed to :class:`Beta` as:
+
+    .. code-block:: python
+
+        b_cost = Beta(
+            'b_cost',
+            value=-1.0,
+            lowerbound=None,
+            upperbound=None,
+            status=0,
+            prior=negative_student_prior,
+        )
+    """
+
+    def __call__(
+        self, name: str, initial_value: float, lower_bound: float, upper_bound: float
+    ) -> TensorVariable: ...
 
 
 class Beta(Elementary):
@@ -38,7 +109,8 @@ class Beta(Elementary):
         lowerbound: float | None,
         upperbound: float | None,
         status: int,
-        prior: continuous | None = None,
+        sigma_prior: float = DEFAULT_SIGMA_PRIOR,
+        prior: PriorFactory | None = None,
     ):
         """Constructor
 
@@ -74,6 +146,7 @@ class Beta(Elementary):
         self.lower_bound = lowerbound
         self.upper_bound = upperbound
         self.status = status
+        self.sigma_prior = sigma_prior
         self.prior = prior
 
     def deep_flat_copy(self) -> Beta:
@@ -206,33 +279,46 @@ class Beta(Elementary):
 
     def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
         """
-        Generates recursively a function to be used by PyMc. Must be overloaded by each expression
-        :return: the expression in TensorVariable format, suitable for PyMc
+        Build a PyMC node for a Beta parameter:
+        - If free: return the (scalar) RV named `self.name` (create it if missing).
+        - If fixed: return a scalar constant tensor (no named var collision).
         """
 
         def builder(dataframe: pd.DataFrame) -> TensorVariable:
-            model = pm.modelcontext(None)  # Get current active model context
-            if self.name in model.named_vars:
+            model = pm.modelcontext(None)
+
+            if self.is_fixed:
+                # Return a plain scalar constant; do NOT register a pm.Data with the same name.
+                return pm.math.constant(float(self.init_value))
+
+            # Free parameter path
+            # Check whether a FREE RV with this name already exists
+            free_names = {rv.name for rv in model.free_RVs}
+            if self.name in free_names:
+                # Return the existing scalar RV
                 return model.named_vars[self.name]
 
-            # If the parameter is fixed, return a scalar constant (no prior)
-            if self.is_fixed:
-                # Use pm.Data so it is a TensorVariable and can broadcast in formulas
-                return pm.Data(self.name, float(self.init_value))
-
-            # Free parameter: either reuse existing RV or create it once
-            prior = (
-                self.prior
-                if self.prior
-                else pm.TruncatedNormal(
+            # Create the prior according to bounds/prior
+            if self.prior is not None:
+                rv = self.prior(
                     self.name,
-                    mu=self.init_value,
-                    sigma=DEFAULT_SIGMA_PRIOR,
-                    lower=self.lower_bound,
-                    upper=self.upper_bound,
+                    initial_value=self.init_value,
+                    lower_bound=self.lower_bound,
+                    upper_bound=self.upper_bound,
                 )
-            )
-
-            return prior
+            else:
+                if self.lower_bound is None and self.upper_bound is None:
+                    rv = pm.Normal(
+                        self.name, mu=self.init_value, sigma=self.sigma_prior
+                    )
+                else:
+                    rv = pm.TruncatedNormal(
+                        self.name,
+                        mu=self.init_value,
+                        sigma=self.sigma_prior,
+                        lower=self.lower_bound,
+                        upper=self.upper_bound,
+                    )
+            return rv
 
         return builder

@@ -10,6 +10,9 @@ import logging
 import math
 
 import jax.numpy as jnp
+import pandas as pd
+import pytensor.tensor as pt
+from biogeme.expressions.bayesian import PymcModelBuilderType
 from jax.scipy.stats import norm
 
 from .base_expressions import ExpressionOrNumeric
@@ -84,3 +87,18 @@ class NormalCdf(UnaryOperator):
         """
         child_value = self.child.get_value()
         return 0.5 * (1.0 + math.erf(child_value / math.sqrt(2.0)))
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        PyMC builder for NormalCdf:
+        - evaluate the child expression
+        - apply Φ(x) = 0.5 * (1 + erf(x / √2)) elementwise
+        """
+        child_builder = self.child.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            x = child_builder(dataframe=dataframe)
+            # Φ(x) = 0.5 * (1 + erf(x / sqrt(2)))
+            return 0.5 * (1.0 + pt.erf(x / pt.sqrt(pt.as_tensor_variable(2.0))))
+
+        return builder

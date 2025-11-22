@@ -10,13 +10,12 @@ import logging
 
 import pandas as pd
 import pymc as pm
-from biogeme.bayesian_estimation import Dimension
-from biogeme.draws import get_distribution, get_list_of_available_distributions
+from biogeme.draws import PyMcDistributionFactory, get_distribution, pymc_distributions
 from biogeme.exceptions import BiogemeError
 from jax import numpy as jnp
 from pytensor.tensor import TensorVariable
 
-from .bayesian import PymcModelBuilderType
+from .bayesian import Dimension, PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -31,7 +30,12 @@ class Draws(Elementary):
 
     expression_type = TypeOfElementaryExpression.DRAWS
 
-    def __init__(self, name: str, draw_type: str = 'NORMAL'):
+    def __init__(
+        self,
+        name: str,
+        draw_type: str = 'NORMAL',
+        dict_of_distributions: dict[str, PyMcDistributionFactory] | None = None,
+    ):
         """Constructor
 
         :param name: name of the random variable with a series of draws.
@@ -41,7 +45,23 @@ class Draws(Elementary):
         """
         super().__init__(name)
         self.draw_type = draw_type
+        self._draw_dimension = Dimension.OBS
         self._is_complex = True
+        self.dict_of_distributions: dict[str, PyMcDistributionFactory] = (
+            dict_of_distributions
+            if dict_of_distributions is not None
+            else pymc_distributions
+        )
+
+    @property
+    def draw_dimension(self) -> Dimension:
+        return self._draw_dimension
+
+    def set_draw_per_observation(self) -> None:
+        self._draw_dimension = Dimension.OBS
+
+    def set_draw_per_individual(self) -> None:
+        self._draw_dimension = Dimension.INDIVIDUALS
 
     def deep_flat_copy(self) -> Draws:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
@@ -83,21 +103,18 @@ class Draws(Elementary):
         Generates recursively a function to be used by PyMc. Must be overloaded by each expression
         :return: the expression in TensorVariable format, suitable for PyMc
         """
-
-        selected_distribution = get_distribution(self.draw_type)
-        if selected_distribution is None:
-            error_msg = (
-                f'{self.draw_type} is not a valid distribution. Available distributions are '
-                f'{get_list_of_available_distributions()}'
-            )
-            raise ValueError(error_msg)
+        selected_distribution = get_distribution(
+            name=self.draw_type, the_dict=self.dict_of_distributions
+        )
 
         def builder(dataframe: pd.DataFrame) -> TensorVariable:
             model = pm.modelcontext(None)  # Get current active model context
             if self.name in model.named_vars:
                 return model.named_vars[self.name]
             # return pm.Normal(name=self.name, mu=0, sigma=1)
-            the_distribution = selected_distribution(name=self.name, dims=Dimension.OBS)
+            the_distribution = selected_distribution(
+                name=self.name, dims=self.draw_dimension
+            )
             # ic(self.name, the_distribution)
             return the_distribution
 

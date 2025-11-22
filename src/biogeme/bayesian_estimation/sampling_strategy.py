@@ -12,205 +12,208 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from biogeme.tools import report_jax_cpu_devices, warning_cpu_devices
-
 logger = logging.getLogger(__name__)
 
 
+SAMPLER_STRATEGIES_DESCRIPTION = {
+    "numpyro-parallel": "one chain per device",
+    "numpyro-vectorized": "all chains on one device",
+    "pymc": "default PyMC sampler on CPU",
+}
+
+
+def describe_strategies() -> str:
+    return ', '.join(
+        [f"'{name}' ({desc})" for name, desc in SAMPLER_STRATEGIES_DESCRIPTION.items()]
+    )
+
+
 @dataclass(frozen=True)
-class SamplerPlan:
-    """Plan describing how to run MCMC."""
-
-    backend: str  # 'numpyro' or 'pymc'
-    chain_method: str | None  # 'vectorized' | 'parallel' | None (ignored for pm.sample)
+class SamplingConfig:
+    backend: str
+    chain_method: str | None
     cores: int | None
-    note: str = ""
-
-    # ---------- Constructors ----------
-
-    @classmethod
-    def from_name(cls, name: str) -> SamplerPlan:
-        """Create a plan from a short human-friendly string."""
-        key = name.strip().lower()
-        if key in {"auto", "automatic"}:
-            raise ValueError(
-                "Use plan=None for automatic planning; 'auto' is not a concrete plan."
-            )
-
-        lut: dict[str, tuple[str, str | None, int | None]] = {
-            "numpyro-parallel": ("numpyro", "parallel", None),
-            "parallel": ("numpyro", "parallel", None),
-            "numpyro-vectorized": ("numpyro", "vectorized", None),
-            "vectorized": ("numpyro", "vectorized", None),
-            "pymc": ("pymc", None, None),
-            "pm": ("pymc", None, None),
-        }
-        try:
-            backend, chain_method, cores = lut[key]
-        except KeyError as e:
-            raise ValueError(f"Unknown plan string: {name!r}") from e
-        return cls(
-            backend=backend, chain_method=chain_method, cores=cores, note="user-defined"
-        )
-
-    @classmethod
-    def from_mapping(cls, spec: dict[str, Any]) -> SamplerPlan:
-        """Create a plan from a dict, e.g. {'backend':'pymc','cores':4}."""
-        backend = spec.get("backend")
-        chain_method = spec.get("chain_method")
-        cores = spec.get("cores")
-
-        allowed_backends = {"numpyro", "pymc"}
-        if backend not in allowed_backends:
-            raise ValueError("User plan must include backend in {'numpyro','pymc'}.")
-
-        if backend == "numpyro":
-            allowed_methods = {"parallel", "vectorized", None}
-            if chain_method not in allowed_methods:
-                raise ValueError(
-                    "For 'numpyro', chain_method must be 'parallel', 'vectorized', or None."
-                )
-        else:
-            # 'pymc' ignores chain_method
-            if chain_method is not None:
-                logger.warning("Ignoring chain_method for 'pymc' backend.")
-                chain_method = None
-
-        return cls(
-            backend=str(backend),
-            chain_method=chain_method,
-            cores=int(cores) if cores is not None else None,
-            note="user-defined",
-        )
-
-    @classmethod
-    def from_user_plan(cls, plan: SamplerPlan | str | dict[str, Any]) -> SamplerPlan:
-        """Dispatch to the appropriate constructor (pattern matching)."""
-        match plan:
-            case SamplerPlan() as p:
-                return p
-            case str() as s:
-                return cls.from_name(s)
-            case dict() as d:
-                return cls.from_mapping(d)
-            case _:
-                raise TypeError("User plan must be SamplerPlan, str, or dict.")
+    target_accept: float
+    init: str | None
+    max_treedepth: int | None
+    nuts_kwargs: dict[str, Any] | None
 
 
-class SamplerPlanner:
-    """Choose a good default configuration for running chains."""
+# ------------------------- Hardware helpers (single responsibility) -------------------------
 
-    def __init__(
-        self,
-        *,
-        number_of_threads: int,
-        prefer_vectorized_single_device: bool = True,
-        allow_pymc_multiprocessing_fallback: bool = False,
-        max_vectorized_chains_on_gpu: int = 2,  # warn if vectorizing more than this on a single GPU
-    ) -> None:
-        """
-        Initialize the sampling planner.
 
-        Assumes JAX is already imported and therefore does NOT attempt to modify
-        environment variables. It only reports devices and gives hints.
-        """
-        self.number_of_threads = number_of_threads
-        self.prefer_vectorized_single_device = prefer_vectorized_single_device
-        self.allow_pymc_multiprocessing_fallback = allow_pymc_multiprocessing_fallback
-        self.max_vectorized_chains_on_gpu = max_vectorized_chains_on_gpu
+def _jax_available() -> bool:
+    """
+    Return whether JAX/NumPyro sampling is importable.
 
-        # Device reporting (non-intrusive)
-        logger.info(report_jax_cpu_devices())
-        warning_cpu_devices()
+    :returns: ``True`` if both JAX and NumPyro sampling can be imported, ``False`` otherwise.
+    :rtype: bool
+    """
+    try:
+        import jax  # noqa: F401
+        from pymc.sampling.jax import sample_numpyro_nuts  # noqa: F401
+        import numpyro  # noqa: F401
+    except (ImportError, ModuleNotFoundError):
+        return False
+    return True
 
-    def plan(self, chains: int) -> SamplerPlan:
-        """Return an automatically chosen plan for how to run `chains`."""
-        try:
-            import jax
-            from pymc.sampling.jax import sample_numpyro_nuts  # noqa: F401
-            import numpyro  # noqa: F401
 
-            devices = jax.devices()
-            n_dev = len(devices)
-            platforms = sorted({d.platform for d in devices})
-            dev_summary = " | ".join(
-                f"{d.platform}:{getattr(d, 'id', '?')}({getattr(d, 'device_kind', getattr(d, 'device', 'Device'))})"
-                for d in devices
-            )
+def _jax_devices_summary() -> tuple[int, list[str]]:
+    """
+    Get a summary of available JAX devices.
 
+    :returns: A pair ``(n_devices, platforms)`` where ``n_devices`` is the number of devices detected and ``platforms`` is the list of platform names.
+    :rtype: tuple[int, list[str]]
+    """
+    try:
+        import jax
+    except (ImportError, ModuleNotFoundError):
+        return 0, []
+    devices = jax.devices()
+    n_dev = len(devices)
+    platforms = sorted({getattr(d, "platform", "unknown") for d in devices})
+    return n_dev, platforms
+
+
+def _cpu_core_count() -> int:
+    """
+    Best-effort CPU core count.
+
+    :returns: The detected CPU core count, falling back to ``1`` if it cannot be determined.
+    :rtype: int
+    """
+    try:
+        import os
+
+        return os.cpu_count() or 1
+    except ImportError:
+        return 1
+
+
+def _select_chain_method(n_dev: int) -> str:
+    """
+    Select a NumPyro chain method given the number of devices.
+
+    :param n_dev: Number of available JAX devices.
+    :type n_dev: int
+    :returns: ``'parallel'`` if more than one device is available, otherwise ``'vectorized'``.
+    :rtype: str
+    """
+    return "parallel" if n_dev > 1 else "vectorized"
+
+
+# ------------------------- Public factory -------------------------
+
+
+def make_sampling_config(
+    strategy: str,
+    target_accept: float,
+) -> SamplingConfig:
+    """
+    Create a :class:`SamplingConfig` from a short strategy string.
+
+    :param strategy: One of ``'automatic'``, ``'numpyro-parallel'``, ``'numpyro-vectorized'``, or ``'pymc'``.
+    :type strategy: str
+    :param target_accept: Target acceptance rate.
+    :type target_accept: float
+    :returns: A ready-to-use configuration object.
+    :rtype: SamplingConfig
+    :raises ValueError: If ``strategy`` is not one of the allowed values.
+    """
+    key = (strategy or "").strip().lower()
+
+    if key == "automatic":
+        # Prefer JAX/NumPyro when available. If multiple devices → parallel chains; else vectorized.
+        if _jax_available():
+            n_dev, platforms = _jax_devices_summary()
+            method = _select_chain_method(n_dev if n_dev else 1)
             logger.info(
-                "JAX detected %d device(s) across platform(s): %s. Chains requested: %d",
+                "Auto sampling: JAX available (devices=%s, platforms=%s) → numpyro/%s",
                 n_dev,
-                ", ".join(platforms) if platforms else "unknown",
-                chains,
+                ",".join(platforms) if platforms else "unknown",
+                method,
             )
-            logger.info("Devices: %s", dev_summary if dev_summary else "n/a")
-
-            # Hint: single CPU device but multiple chains
-            if platforms == ["cpu"] and n_dev == 1 and chains > 1:
-                logger.warning(
-                    "Single CPU device detected with chains=%d. "
-                    "To parallelize across CPU devices, set XLA_FLAGS before starting Python.",
-                    chains,
-                )
-
-            # GPU VRAM guardrail: vectorizing many chains on a single GPU can OOM
-            if (
-                "gpu" in platforms
-                and n_dev == 1
-                and chains > self.max_vectorized_chains_on_gpu
-            ):
-                logger.warning(
-                    "Single GPU detected with chains=%d; vectorizing many chains can exhaust VRAM. "
-                    "Prefer parallel across multiple devices (if available), or reduce chains to <= %d.",
-                    chains,
-                    self.max_vectorized_chains_on_gpu,
-                )
-
-        except (ImportError, ModuleNotFoundError) as e:
-            logger.info(
-                "NumPyro/JAX backend not available (%s); using PyMC multiprocessing (cores=%d).",
-                e,
-                chains,
+            return SamplingConfig(
+                backend="numpyro",
+                chain_method=method,
+                cores=None,
+                target_accept=target_accept,
+                init=None,
+                max_treedepth=None,
+                nuts_kwargs=None,
             )
-            return SamplerPlan(
+        # Fallback to PyMC with a sensible cores default
+        cores_count = _cpu_core_count()
+        logger.info("Auto sampling: JAX not available → PyMC (cores=%s)", cores_count)
+        return SamplingConfig(
+            backend="pymc",
+            chain_method=None,
+            cores=cores_count,
+            target_accept=target_accept,
+            init=None,
+            max_treedepth=None,
+            nuts_kwargs=None,
+        )
+
+    if key == "numpyro-parallel":
+        if not _jax_available():
+            logger.warning(
+                "Requested numpyro-parallel but JAX/NumPyro not available; falling back to PyMC."
+            )
+            return SamplingConfig(
                 backend="pymc",
                 chain_method=None,
-                cores=int(chains),
-                note="No JAX+NumPyro; pm.sample cores",
+                cores=_cpu_core_count(),
+                target_accept=target_accept,
+                init=None,
+                max_treedepth=None,
+                nuts_kwargs=None,
             )
+        return SamplingConfig(
+            backend="numpyro",
+            chain_method="parallel",
+            cores=None,
+            target_accept=target_accept,
+            init=None,
+            max_treedepth=None,
+            nuts_kwargs=None,
+        )
 
-        # Multiple devices available → parallel across devices
-        if n_dev >= int(chains) and chains > 1:
-            return SamplerPlan(
-                backend="numpyro",
-                chain_method="parallel",
-                cores=None,
-                note=f"JAX devices={n_dev} >= chains={chains}; numpyro parallel",
+    if key == "numpyro-vectorized":
+        if not _jax_available():
+            logger.warning(
+                "Requested numpyro-vectorized but JAX/NumPyro not available; falling back to PyMC."
             )
-
-        # Single device → vectorized (usually fastest on a single GPU/TPU or CPU)
-        if self.prefer_vectorized_single_device and n_dev >= 1:
-            return SamplerPlan(
-                backend="numpyro",
-                chain_method="vectorized",
-                cores=None,
-                note=f"Single JAX device (n={n_dev}); numpyro vectorized",
-            )
-
-        # Optional: prefer 1 process per chain on CPU
-        if self.allow_pymc_multiprocessing_fallback:
-            return SamplerPlan(
+            return SamplingConfig(
                 backend="pymc",
                 chain_method=None,
-                cores=int(chains),
-                note="Fallback to pm.sample cores",
+                cores=_cpu_core_count(),
+                target_accept=target_accept,
+                init=None,
+                max_treedepth=None,
+                nuts_kwargs=None,
             )
-
-        # Default
-        return SamplerPlan(
+        return SamplingConfig(
             backend="numpyro",
             chain_method="vectorized",
             cores=None,
-            note=f"Defaulting to numpyro vectorized (devices={n_dev})",
+            target_accept=target_accept,
+            init=None,
+            max_treedepth=None,
+            nuts_kwargs=None,
         )
+
+    if key == "pymc":
+        return SamplingConfig(
+            backend="pymc",
+            chain_method=None,
+            cores=_cpu_core_count(),
+            target_accept=target_accept,
+            init=None,
+            max_treedepth=None,
+            nuts_kwargs=None,
+        )
+
+    raise ValueError(
+        f"Unknown sampling strategy: {strategy!r}. Allowed values are: 'automatic', 'numpyro-parallel', 'numpyro-vectorized', 'pymc'."
+    )

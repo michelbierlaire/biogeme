@@ -10,11 +10,9 @@ import logging
 from typing import TYPE_CHECKING
 
 import jax
-import numpy as np
-import pytensor.tensor as pt
+from biogeme.exceptions import BiogemeError
 from jax import numpy as jnp
 
-from biogeme.exceptions import BiogemeError
 from .base_expressions import Expression
 from .beta_parameters import Beta
 from .convert import validate_and_convert
@@ -172,24 +170,66 @@ class Elem(Expression):
         sorted_keys = sorted(compiled_dict)
 
         def builder(dataframe):
-            # Evaluate the key and ensure integer type
+            import pytensor.tensor as pt
+            import numpy as np
+
+            N = len(dataframe)
+
+            # 1) Evaluate key: must be a 1-D per-observation vector of length N
             key_val = key_builder(dataframe)
-            key_int = pt.cast(key_val, "int32")
+            key_shape = getattr(getattr(key_val, "type", None), "shape", None)
+            key_ndim = getattr(key_val, "ndim", None)
+            if key_ndim != 1:
+                raise BiogemeError(
+                    f"Elem key expression must be a 1-D vector (N,), got shape {key_shape}."
+                )
+            # If static length is known and mismatches N, fail with a clear message
+            if key_shape and key_shape[0] is not None and key_shape[0] != N:
+                raise BiogemeError(
+                    f"Elem key expression length mismatch: expected ({N},), got {key_shape}."
+                )
+            key_vec = pt.cast(key_val, "int32")  # shape: (N,)
 
-            # Vector of keys as a constant tensor
-            keys_vec = pt.constant(np.asarray(sorted_keys, dtype=np.int32))
+            # 2) Build each branch and verify shapes
+            terms = []
+            ref_shape = None
+            for k in sorted_keys:
+                term = compiled_dict[k](dataframe)
+                t_shape = getattr(getattr(term, "type", None), "shape", None)
+                t_ndim = getattr(term, "ndim", None)
+                if t_ndim != 1:
+                    raise BiogemeError(
+                        f"Elem branch {k} must return a 1-D vector (N,), got shape {t_shape}."
+                    )
+                if t_shape and t_shape[0] is not None and t_shape[0] != N:
+                    raise BiogemeError(
+                        f"Elem branch {k} length mismatch: expected ({N},), got {t_shape}."
+                    )
+                if ref_shape is None:
+                    ref_shape = t_shape
+                terms.append(term)
 
-            # Compute the index of the matching key
-            matches = pt.eq(keys_vec, key_int)  # shape: (K,)
-            idx = pt.argmax(matches)  # int index in 0..K-1
-            # Build the stack of branch tensors (same shape per branch)
-            terms = [compiled_dict[k](dataframe) for k in sorted_keys]
-            terms_stack = pt.stack(terms, axis=0)  # shape: (K, ...)
+            if not terms:
+                raise BiogemeError("Elem has no branches to select from.")
 
-            selected = terms_stack[idx]  # shape: (...)
+            # 3) Map key values to branch indices via broadcasting comparison (N,K)
+            keys_vec = pt.constant(np.asarray(sorted_keys, dtype=np.int32))  # (K,)
+            matches = pt.eq(key_vec[:, None], keys_vec[None, :])  # (N,K)
+            idx = pt.argmax(matches, axis=1)  # (N,)
 
-            # Safety: if no key matches, return zeros_like instead of an arbitrary branch
-            any_match = pt.any(matches)
-            return pt.where(any_match, selected, pt.zeros_like(selected))
+            # 4) Stack branches and select per observation
+            try:
+                terms_stack = pt.stack(terms, axis=0)  # (K,N)
+            except (TypeError, ValueError) as e:
+                shapes = [
+                    getattr(getattr(t, "type", None), "shape", None) for t in terms
+                ]
+                raise BiogemeError(
+                    "Elem branches are not shape-compatible. "
+                    f"Expected each branch to return (N,), got {shapes}."
+                ) from e
+
+            out = terms_stack[idx, pt.arange(N)]  # (N,)
+            return out
 
         return builder

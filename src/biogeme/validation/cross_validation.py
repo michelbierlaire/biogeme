@@ -6,9 +6,9 @@ import pymc as pm
 from biogeme.bayesian_estimation import (
     BayesianResults,
     RawBayesianResults,
+    SamplingConfig,
     run_sampling,
 )
-from biogeme.bayesian_estimation.sampling_strategy import SamplerPlanner
 from biogeme.default_parameters import ParameterValue
 from biogeme.jax_calculator import CompiledFormulaEvaluator, MultiRowEvaluator
 from biogeme.likelihood import AlgorithmResults, model_estimation
@@ -77,7 +77,7 @@ def cross_validate_model(
 
 
 def bayesian_cross_validate_model(
-    sample_planner: SamplerPlanner,
+    sampling_config: SamplingConfig,
     modeling_elements: ModelElements,
     parameters: dict[str, ParameterValue],
     starting_values: dict[str, float],
@@ -101,8 +101,7 @@ def bayesian_cross_validate_model(
                 draws=parameters['bayesian_draws'],
                 tune=parameters['warmup'],
                 chains=parameters['chains'],
-                target_accept=parameters['target_accept'],
-                planner=sample_planner,
+                config=sampling_config,
             )
         bayes_results = RawBayesianResults(
             idata=idata,
@@ -116,7 +115,7 @@ def bayesian_cross_validate_model(
         estimated_betas = one_result.get_beta_values()
         simulation_evaluator = MultiRowEvaluator(
             model_elements=fold.validation,
-            numerically_safe=numerically_safe,
+            numerically_safe=True,
             use_jit=modeling_elements.use_jit,
         )
         simulated_values: pd.DataFrame = simulation_evaluator.evaluate(

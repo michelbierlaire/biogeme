@@ -10,11 +10,6 @@ New version of the assisted specification using Catalogs
 import logging
 from typing import Callable
 
-from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
-from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
-from biogeme_optimization.vns import ParetoClass, vns
-from matplotlib.axes import Axes
-
 import biogeme.tools.unique_ids
 import biogeme.version as bv
 from biogeme.biogeme import BIOGEME
@@ -23,6 +18,10 @@ from biogeme.catalog.specification import Specification
 from biogeme.exceptions import BiogemeError
 from biogeme.parameters import Parameters
 from biogeme.results_processing import EstimationResults
+from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
+from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
+from biogeme_optimization.vns import ParetoClass, vns
+from matplotlib.axes import Axes
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ class ParetoPostProcessing:
         """
         if self.model_names is None:
             self.model_names = biogeme.tools.unique_ids.ModelNames(
-                prefix=self.biogeme_object.modelName
+                prefix=self.biogeme_object.model_name
             )
 
         all_results = {}
@@ -83,7 +82,7 @@ class ParetoPostProcessing:
                 parameters=self.biogeme_object.biogeme_parameters,
             )
             _ = Configuration.from_string(config_id)
-            the_biogeme.modelName = self.model_names(config_id)
+            the_biogeme.model_name = self.model_names(config_id)
             the_result = the_biogeme.estimate(recycle=recycle)
             all_results[config_id] = the_result
         return all_results

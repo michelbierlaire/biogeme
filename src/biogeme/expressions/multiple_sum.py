@@ -10,8 +10,11 @@ import logging
 from typing import Any, TYPE_CHECKING
 
 import jax.numpy as jnp
-
+import pandas as pd
+import pytensor.tensor as pt
 from biogeme.exceptions import BiogemeError
+from biogeme.expressions.bayesian import PymcModelBuilderType
+
 from .base_expressions import Expression, ExpressionOrNumeric
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
@@ -109,3 +112,31 @@ class MultipleSum(Expression):
             return jnp.sum(jnp.stack(terms))
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        PyMC builder for MultipleSum:
+        - evaluate all children
+        - stack along a new axis
+        - sum over that axis
+        """
+        child_builders = [
+            c.recursive_construct_pymc_model_builder() for c in self.get_children()
+        ]
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            terms = [cb(dataframe=dataframe) for cb in child_builders]
+            if len(terms) == 1:
+                return terms[0]
+            try:
+                return pt.sum(pt.stack(terms, axis=0), axis=0)
+            except (TypeError, ValueError) as e:
+                shapes = [
+                    getattr(getattr(t, "type", None), "shape", None) for t in terms
+                ]
+                raise BiogemeError(
+                    f"MultipleSum terms are not shape-compatible. Got shapes: {shapes}. "
+                    "All terms must be broadcastable to a common shape."
+                ) from e
+
+        return builder

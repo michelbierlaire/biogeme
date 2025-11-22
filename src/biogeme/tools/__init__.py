@@ -14,4 +14,5 @@ from .pymc_utils import pretty_model
 from .serialize_numpy import safe_deserialize_array, safe_serialize_array
 from .simulate import simulate
 from .time import format_timedelta
+from .timeit_decorator import timeit
 from .unique_ids import ModelNames, generate_unique_ids, unique_product

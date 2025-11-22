@@ -77,6 +77,6 @@ class Elementary(Expression):
         return 0
 
     def set_specific_id(self, name, specific_id, the_type: TypeOfElementaryExpression):
-        """The elementary IDs identify the position of each element in the corresponding datab"""
+        """The elementary IDs identify the position of each element in the corresponding database"""
         if the_type == self.expression_type and name == self.name:
             self.specific_id = specific_id

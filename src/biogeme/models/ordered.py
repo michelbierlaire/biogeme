@@ -5,11 +5,17 @@
 """
 
 import logging
-from typing import Callable
+from typing import Type
 
-from biogeme.distributions import logisticcdf
 from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Beta, Expression, NormalCdf, validate_and_convert
+from biogeme.expressions import Beta, Expression, validate_and_convert
+from biogeme.expressions.ordered import (
+    OrderedBase,
+    OrderedLogLogit as OrderedLogLogitExpr,
+    OrderedLogProbit as OrderedLogProbitExpr,
+    OrderedLogit as OrderedLogitExpr,
+    OrderedProbit as OrderedProbitExpr,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,72 +56,63 @@ def build_ordered_thresholds(
     return thresholds
 
 
-def ordered_likelihood_from_thresholds(
+def _ordered_probs_from_thresholds(
     continuous_value: Expression,
-    scale_parameter: Expression,
+    scale_parameter: Expression | float,
     list_of_discrete_values: list[int],
     threshold_parameters: list[Expression],
-    cdf: Callable[[Expression], Expression],
+    expr_cls: Type[OrderedBase],
 ) -> dict[int, Expression]:
-    """Computes category probabilities for the ordered model, given thresholds.
+    """Internal helper to build ordered logit/probit probabilities (or log-probabilities).
 
-    :param continuous_value: continuous value to map
-    :param scale_parameter: scale parameter of the continuous value
-    :param list_of_discrete_values: list of discrete values (length J)
-    :param threshold_parameters: list of threshold Expressions (length J-1)
-    :param cdf: CDF function
-    :return: dict mapping discrete values to probabilities
+    The scale parameter is absorbed by dividing both the latent variable and
+    the thresholds by the scale, so that the probability formula matches the
+    standard ordered-response specification used in the original implementation.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param threshold_parameters: List of threshold expressions (length J-1).
+    :param expr_cls: Ordered expression class to use
+        (e.g. :class:`OrderedLogitExpr`, :class:`OrderedProbitExpr`,
+        :class:`OrderedLogLogitExpr`, or :class:`OrderedLogProbitExpr`).
+    :return: Dict mapping each category to its (log-)probability expression.
+    :raises BiogemeError: If input lengths are inconsistent.
     """
     if len(list_of_discrete_values) < 2:
-        raise BiogemeError('Need at least two discrete values for ordered model.')
+        raise BiogemeError("Need at least two discrete values for ordered model.")
     if len(threshold_parameters) != len(list_of_discrete_values) - 1:
         raise BiogemeError(
-            f'tau_parameters must have length len(list_of_discrete_values)-1, '
-            f'got {len(threshold_parameters)} and {len(list_of_discrete_values)}.'
+            "threshold_parameters must have length len(list_of_discrete_values)-1, "
+            f"got {len(threshold_parameters)} and {len(list_of_discrete_values)}."
         )
-    J = len(list_of_discrete_values)
-    the_proba = {
-        list_of_discrete_values[0]: 1
-        - cdf((continuous_value - threshold_parameters[0]) / scale_parameter)
-    }
-    # First category
-    # Middle categories
-    for j in range(1, J - 1):
-        the_proba[list_of_discrete_values[j]] = cdf(
-            (continuous_value - threshold_parameters[j - 1]) / scale_parameter
-        ) - cdf((continuous_value - threshold_parameters[j]) / scale_parameter)
-    # Last category
-    the_proba[list_of_discrete_values[-1]] = cdf(
-        (continuous_value - threshold_parameters[-1]) / scale_parameter
-    )
-    return the_proba
 
+    scale_expr = validate_and_convert(scale_parameter)
 
-def ordered_likelihood(
-    continuous_value: Expression,
-    scale_parameter: Expression,
-    list_of_discrete_values: list[int],
-    reference_threshold_parameter: Beta,
-    cdf: Callable[[Expression], Expression],
-) -> dict[int, Expression]:
-    """Ordered model that maps a continuous quantity with a list of
-    discrete intervals (often logit or probit).
+    # Rescaling: CDF is applied to (tau / sigma - eta / sigma),
+    # matching the original formulas based on (x - tau) / sigma.
+    eta_scaled: Expression = continuous_value / scale_expr
+    cutpoints_scaled: list[Expression] = [
+        tau / scale_expr for tau in threshold_parameters
+    ]
 
-    This function builds the ordered thresholds and computes the category probabilities.
+    categories = list(list_of_discrete_values)
+    probabilities: dict[int, Expression] = {}
+    for cat in categories:
+        # Constant response equal to this category; the Ordered* expression
+        # then returns P(Y = cat) or log P(Y = cat) for each observation.
+        y_expr = validate_and_convert(cat)
+        model_expr = expr_cls(
+            eta=eta_scaled,
+            cutpoints=cutpoints_scaled,
+            y=y_expr,
+            categories=categories,
+            neutral_labels=None,
+            enforce_order=False,
+        )
+        probabilities[cat] = model_expr
 
-    :param continuous_value: continuous value to mapping
-    :param scale_parameter: scale parameter of the continuous value
-    :param list_of_discrete_values: list of discrete values
-    :param reference_threshold_parameter: parameter for the first threshold (Beta)
-    :param cdf: function calculating the CDF of the random variable
-    :return: dict mapping discrete values to probabilities
-    """
-    tau_parameters = build_ordered_thresholds(
-        list_of_discrete_values, reference_threshold_parameter
-    )
-    return ordered_likelihood_from_thresholds(
-        continuous_value, scale_parameter, list_of_discrete_values, tau_parameters, cdf
-    )
+    return probabilities
 
 
 def ordered_logit(
@@ -124,20 +121,26 @@ def ordered_logit(
     list_of_discrete_values: list[int],
     reference_threshold_parameter: Beta,
 ) -> dict[int, Expression]:
-    """Ordered logit model that maps a continuous quantity with a list of discrete intervals.
+    """Ordered logit model that maps a continuous quantity with discrete intervals.
 
-    This function builds the ordered thresholds and computes the category probabilities using the logistic CDF.
+    This builds the ordered thresholds and returns per-category probabilities
+    using the :class:`OrderedLogitExpr` expression.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param reference_threshold_parameter: Parameter for the first threshold (Beta).
+    :return: Dict mapping each category to its probability expression.
     """
-    scale_parameter = validate_and_convert(scale_parameter)
     tau_parameters = build_ordered_thresholds(
         list_of_discrete_values, reference_threshold_parameter
     )
-    return ordered_likelihood_from_thresholds(
-        continuous_value,
-        scale_parameter,
-        list_of_discrete_values,
-        tau_parameters,
-        logisticcdf,
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=tau_parameters,
+        expr_cls=OrderedLogitExpr,
     )
 
 
@@ -147,73 +150,174 @@ def ordered_probit(
     list_of_discrete_values: list[int],
     reference_threshold_parameter: Beta,
 ) -> dict[int, Expression]:
-    """Ordered probit model that maps a continuous quantity with a list of discrete intervals.
+    """Ordered probit model that maps a continuous quantity with discrete intervals.
 
-    This function builds the ordered thresholds and computes the category probabilities using the normal CDF.
+    This builds the ordered thresholds and returns per-category probabilities
+    using the :class:`OrderedProbitExpr` expression.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param reference_threshold_parameter: Parameter for the first threshold (Beta).
+    :return: Dict mapping each category to its probability expression.
     """
-    scale_parameter = validate_and_convert(scale_parameter)
     tau_parameters = build_ordered_thresholds(
         list_of_discrete_values, reference_threshold_parameter
     )
-    return ordered_likelihood_from_thresholds(
-        continuous_value,
-        scale_parameter,
-        list_of_discrete_values,
-        tau_parameters,
-        NormalCdf,
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=tau_parameters,
+        expr_cls=OrderedProbitExpr,
     )
 
 
 def ordered_logit_from_thresholds(
     continuous_value: Expression,
-    scale_parameter: Expression,
+    scale_parameter: Expression | float,
     list_of_discrete_values: list[int],
     threshold_parameters: list[Expression],
 ) -> dict[int, Expression]:
-    """Ordered logit with explicit thresholds.
+    """Ordered logit with explicit thresholds using :class:`OrderedLogitExpr`.
 
-    Computes category probabilities given a list of thresholds. The number of
-    thresholds must be one less than the number of categories.
-
-    :param continuous_value: continuous value to map.
-    :param scale_parameter: scale parameter of the continuous value
-    :param list_of_discrete_values: ordered list of discrete categories (length ≥ 2).
-    :param threshold_parameters: list of threshold expressions (length = len(list_of_discrete_values) - 1).
-    :return: dict mapping each category to its probability.
-    :raises BiogemeError: if lengths are incompatible.
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param threshold_parameters: List of threshold expressions (length J-1).
+    :return: Dict mapping each category to its probability expression.
     """
-    return ordered_likelihood_from_thresholds(
-        continuous_value,
-        scale_parameter,
-        list_of_discrete_values,
-        threshold_parameters,
-        logisticcdf,
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=threshold_parameters,
+        expr_cls=OrderedLogitExpr,
     )
 
 
 def ordered_probit_from_thresholds(
     continuous_value: Expression,
-    scale_parameter: Expression,
+    scale_parameter: Expression | float,
     list_of_discrete_values: list[int],
     threshold_parameters: list[Expression],
 ) -> dict[int, Expression]:
-    """Ordered probit with explicit thresholds.
+    """Ordered probit with explicit thresholds using :class:`OrderedProbitExpr`.
 
-    Computes category probabilities given a list of thresholds. The number of
-    thresholds must be one less than the number of categories.
-
-    :param continuous_value: continuous value to map.
-    :param scale_parameter: scale parameter of the continuous value
-
-    :param list_of_discrete_values: ordered list of discrete categories (length ≥ 2).
-    :param threshold_parameters: list of threshold expressions (length = len(list_of_discrete_values) - 1).
-    :return: dict mapping each category to its probability.
-    :raises BiogemeError: if lengths are incompatible.
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param threshold_parameters: List of threshold expressions (length J-1).
+    :return: Dict mapping each category to its probability expression.
     """
-    return ordered_likelihood_from_thresholds(
-        continuous_value,
-        scale_parameter,
-        list_of_discrete_values,
-        threshold_parameters,
-        NormalCdf,
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=threshold_parameters,
+        expr_cls=OrderedProbitExpr,
+    )
+
+
+def log_ordered_logit(
+    continuous_value: Expression,
+    scale_parameter: Expression | float,
+    list_of_discrete_values: list[int],
+    reference_threshold_parameter: Beta,
+) -> dict[int, Expression]:
+    """Log-ordered logit model that maps a continuous quantity with discrete intervals.
+
+    This builds the ordered thresholds and returns per-category log-likelihood
+    contributions (log-probabilities) using :class:`OrderedLogLogitExpr`.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param reference_threshold_parameter: Parameter for the first threshold (Beta).
+    :return: Dict mapping each category to its log-probability expression.
+    """
+    tau_parameters = build_ordered_thresholds(
+        list_of_discrete_values, reference_threshold_parameter
+    )
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=tau_parameters,
+        expr_cls=OrderedLogLogitExpr,
+    )
+
+
+def log_ordered_probit(
+    continuous_value: Expression,
+    scale_parameter: Expression | float,
+    list_of_discrete_values: list[int],
+    reference_threshold_parameter: Beta,
+) -> dict[int, Expression]:
+    """Log-ordered probit model that maps a continuous quantity with discrete intervals.
+
+    This builds the ordered thresholds and returns per-category log-likelihood
+    contributions (log-probabilities) using :class:`OrderedLogProbitExpr`.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param reference_threshold_parameter: Parameter for the first threshold (Beta).
+    :return: Dict mapping each category to its log-probability expression.
+    """
+    tau_parameters = build_ordered_thresholds(
+        list_of_discrete_values, reference_threshold_parameter
+    )
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=tau_parameters,
+        expr_cls=OrderedLogProbitExpr,
+    )
+
+
+def log_ordered_logit_from_thresholds(
+    continuous_value: Expression,
+    scale_parameter: Expression | float,
+    list_of_discrete_values: list[int],
+    threshold_parameters: list[Expression],
+) -> dict[int, Expression]:
+    """Log-ordered logit with explicit thresholds using :class:`OrderedLogLogitExpr`.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param threshold_parameters: List of threshold expressions (length J-1).
+    :return: Dict mapping each category to its log-probability expression.
+    """
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=threshold_parameters,
+        expr_cls=OrderedLogLogitExpr,
+    )
+
+
+def log_ordered_probit_from_thresholds(
+    continuous_value: Expression,
+    scale_parameter: Expression | float,
+    list_of_discrete_values: list[int],
+    threshold_parameters: list[Expression],
+) -> dict[int, Expression]:
+    """Log-ordered probit with explicit thresholds using :class:`OrderedLogProbitExpr`.
+
+    :param continuous_value: Continuous quantity to be mapped.
+    :param scale_parameter: Scale parameter of the continuous value (sigma).
+    :param list_of_discrete_values: Ordered list of discrete categories.
+    :param threshold_parameters: List of threshold expressions (length J-1).
+    :return: Dict mapping each category to its log-probability expression.
+    """
+    return _ordered_probs_from_thresholds(
+        continuous_value=continuous_value,
+        scale_parameter=scale_parameter,
+        list_of_discrete_values=list_of_discrete_values,
+        threshold_parameters=threshold_parameters,
+        expr_cls=OrderedLogProbitExpr,
     )

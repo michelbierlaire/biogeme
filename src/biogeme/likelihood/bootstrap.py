@@ -6,7 +6,7 @@ from tqdm_joblib import tqdm_joblib
 
 from biogeme.default_parameters import ParameterValue
 from biogeme.jax_calculator import CompiledFormulaEvaluator
-from biogeme.model_elements import ModelElements
+from biogeme.model_elements import ModelElements, RegularAdapter
 from biogeme.optimization import OptimizationAlgorithm
 from biogeme.second_derivatives import SecondDerivativesMode
 from .model_estimation import AlgorithmResults, model_estimation
@@ -52,7 +52,7 @@ def bootstrap(
     def run_one_bootstrap_estimation(_):
         bootstrap_modeling_elements = ModelElements(
             expressions=modeling_elements.expressions,
-            database=the_database.bootstrap_sample(),
+            adapter=RegularAdapter(database=the_database.bootstrap_sample()),
             number_of_draws=modeling_elements.number_of_draws,
             draws_management=None,
             user_defined_draws=modeling_elements.user_defined_draws,

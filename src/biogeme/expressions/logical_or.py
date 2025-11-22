@@ -9,8 +9,11 @@ from __future__ import annotations
 import logging
 
 import jax.numpy as jnp
-
+import pandas as pd
+from biogeme.expressions import PymcModelBuilderType
 from biogeme.floating_point import JAX_FLOAT
+from pytensor.tensor import TensorVariable, neq, switch
+
 from .base_expressions import ExpressionOrNumeric
 from .binary_expressions import BinaryOperator
 from .jax_utils import JaxFunctionType
@@ -89,3 +92,27 @@ class Or(BinaryOperator):
             return condition.astype(JAX_FLOAT)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        Generates recursively a function to be used by PyMC.
+        Implements logical OR using numeric convention:
+        - 0   → False
+        - ≠0  → True
+        Returns 0.0 if both sides are zero, else 1.0.
+        """
+        left_pymc = self.left.recursive_construct_pymc_model_builder()
+        right_pymc = self.right.recursive_construct_pymc_model_builder()
+
+        def builder(dataframe: pd.DataFrame) -> TensorVariable:
+            left_value = left_pymc(dataframe=dataframe)
+            right_value = right_pymc(dataframe=dataframe)
+
+            # Convert to boolean using nonzero test
+            left_bool = neq(left_value, 0.0)
+            right_bool = neq(right_value, 0.0)
+
+            # Logical and, then convert back to float (0.0 or 1.0)
+            return switch(left_bool | right_bool, 1.0, 0.0)
+
+        return builder

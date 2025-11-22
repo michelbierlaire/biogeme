@@ -5,10 +5,13 @@ from .base_expressions import (
     Expression,
     ExpressionOrNumeric,
 )
+from .bayesian import Dimension, PymcModelBuilderType
 from .belongs_to import BelongsTo
 from .beta_parameters import Beta
 from .binary_max import BinaryMax
 from .binary_min import BinaryMin
+
+# from .boxcox import BoxCox as boxcox
 from .collectors import (
     ExpressionCollector,
     collect_init_values,
@@ -45,6 +48,7 @@ from .elementary_expressions import (
 )
 from .elementary_types import TypeOfElementaryExpression
 from .exp import exp
+from .expm1 import expm1
 from .integrate import IntegrateNormal
 from .jax_utils import build_vectorized_function
 from .linear_utility import LinearTermTuple, LinearUtility
@@ -65,6 +69,7 @@ from .named_expression import named_function_output
 from .normalcdf import NormalCdf
 from .numeric_expressions import Numeric
 from .numeric_tools import is_numeric
+from .ordered import OrderedLogLogit, OrderedLogProbit, OrderedLogit, OrderedProbit
 from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
 from .random_variable import RandomVariable
 from .rename_variables import OldNewName, rename_all_variables

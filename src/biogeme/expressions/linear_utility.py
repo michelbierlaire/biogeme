@@ -10,8 +10,11 @@ import logging
 from typing import NamedTuple, TYPE_CHECKING
 
 import jax.numpy as jnp
-
+import pandas as pd
+import pytensor.tensor as pt
 from biogeme.exceptions import BiogemeError
+from biogeme.expressions.bayesian import PymcModelBuilderType
+
 from .base_expressions import Expression
 from .beta_parameters import Beta
 from .jax_utils import JaxFunctionType
@@ -124,3 +127,48 @@ class LinearUtility(Expression):
             return jnp.dot(beta_values, variable_values)
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """
+        PyMC builder for LinearUtility:
+        - evaluate Beta (scalar) and Variable (per-observation) children
+        - form elementwise products beta_k * x_k
+        - stack along a new axis and sum to get the linear utility per observation
+        """
+        # Builders for each Beta and Variable term (preserve pairing order)
+        beta_builders = [b.recursive_construct_pymc_model_builder() for b in self.betas]
+        var_builders = [
+            v.recursive_construct_pymc_model_builder() for v in self.variables
+        ]
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            # Evaluate all terms on the dataframe
+            betas = [bb(dataframe=dataframe) for bb in beta_builders]
+            vars_ = [vb(dataframe=dataframe) for vb in var_builders]
+
+            if len(betas) != len(vars_):
+                raise BiogemeError(
+                    f"LinearUtility mismatch: {len(betas)} betas for {len(vars_)} variables."
+                )
+
+            # Form beta*x for each pair; broadcasting handles scalar beta with vector x
+            try:
+                products = [b * x for b, x in zip(betas, vars_)]
+                if len(products) == 1:
+                    return products[0]
+                return pt.sum(pt.stack(products, axis=0), axis=0)
+            except (TypeError, ValueError) as e:
+                shape_pairs = [
+                    (
+                        getattr(getattr(b, "type", None), "shape", None),
+                        getattr(getattr(x, "type", None), "shape", None),
+                    )
+                    for b, x in zip(betas, vars_)
+                ]
+                raise BiogemeError(
+                    "LinearUtility terms are not shape-compatible. "
+                    f"Got (beta_shape, var_shape) pairs: {shape_pairs}. "
+                    "Each product beta_k * x_k must broadcast to a common per-observation shape."
+                ) from e
+
+        return builder

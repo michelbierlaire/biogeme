@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
 from biogeme.database import Database
-from biogeme.model_elements import ModelElements
+from biogeme.model_elements import ModelElements, RegularAdapter
 from biogeme.validation.prepare_validation import split
 
 
@@ -38,7 +38,7 @@ def split_databases(
         )
         estimation_model_elements = ModelElements(
             expressions=model_elements.expressions,
-            database=estimation_data,
+            adapter=RegularAdapter(database=estimation_data),
             draws_management=estimation_draws_management,
             use_jit=model_elements.use_jit,
         )
@@ -55,7 +55,7 @@ def split_databases(
                 f'{name} [validation fold {index}]': expression
                 for name, expression in model_elements.expressions.items()
             },
-            database=validation_data,
+            adapter=RegularAdapter(database=validation_data),
             draws_management=validation_draws_management,
             use_jit=model_elements.use_jit,
         )
