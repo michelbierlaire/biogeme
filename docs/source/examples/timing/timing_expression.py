@@ -7,10 +7,9 @@ Michel Bierlaire
 Sun Jul 27 2025, 16:55:31
 """
 
-from biogeme.calculator import CompiledFormulaEvaluator
 from biogeme.database import Database
-
 from biogeme.expressions import Expression, collect_init_values
+from biogeme.jax_calculator import CompiledFormulaEvaluator
 from biogeme.model_elements import ModelElements
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.tools.time import Timing
