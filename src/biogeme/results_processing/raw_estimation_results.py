@@ -106,6 +106,12 @@ def deserialize_from_yaml(filename) -> RawEstimationResults:
         if data['bootstrap_time'] is not None
         else None
     )
+    if data['optimization_messages'] is not None:
+        if 'Optimization time' in data['optimization_messages']:
+            optimization_time = timedelta(
+                seconds=float(data['optimization_messages']['Optimization time'])
+            )
+            data['optimization_messages']['Optimization time'] = optimization_time
     return RawEstimationResults(
         model_name=data['model_name'],
         user_notes=data['user_notes'],
