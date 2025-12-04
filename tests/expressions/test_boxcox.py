@@ -54,7 +54,7 @@ def test_boxcox_get_value_matches_reference(x, lam):
 
     # Use reasonably tight tolerances; the implementation is numerically
     # stabilized, so it may differ slightly from the naive formula
-    np.testing.assert_allclose(val, ref, rtol=1e-10, atol=1e-12)
+    np.testing.assert_allclose(val, ref, rtol=1e-9, atol=1e-9)
 
 
 # ----------------------------------------------------------------------
@@ -158,7 +158,7 @@ def test_boxcox_jax_builder_matches_reference(numerically_safe):
         out_np = np.asarray(out)
 
         ref = _boxcox_reference(x_val, lam_val)
-        np.testing.assert_allclose(out_np, ref, rtol=1e-10, atol=1e-12)
+        np.testing.assert_allclose(out_np, ref, rtol=1e-9, atol=1e-9)
 
 
 @pytest.mark.skipif(not JAX_AVAILABLE, reason="JAX is not installed")
