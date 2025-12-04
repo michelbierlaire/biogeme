@@ -7,183 +7,180 @@ Mon Nov 03 2025, 17:16:46
 from __future__ import annotations
 
 import logging
+import math
 
 import jax
 import jax.numpy as jnp
-import numpy as np
 import pandas as pd
 import pytensor.tensor as pt
+from biogeme.expressions import Beta
 
-from biogeme.floating_point import JAX_FLOAT
-from .base_expressions import ExpressionOrNumeric
 from .bayesian import PymcModelBuilderType
 from .binary_expressions import BinaryOperator
+from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
-from .numeric_expressions import Numeric
 
 logger = logging.getLogger(__name__)
 
 
 class BoxCox(BinaryOperator):
     """
-    Box–Cox transform with robust control-flow for PyMC/JAX backends.
+    Box–Cox transform with McLaurin expansion near :math:`\\ell = 0`.
 
-    For x > 0:
-        BC(x, λ) = log(x) * expm1(λ log x) / (λ log x)
-        with the z = λ log x -> 0 limit handled by a short Taylor expansion.
+    .. math::
 
-    For x = 0:
-        BC(0, λ) = 0    (by convention)
+        B(x, \\ell) = \\frac{x^{\\ell} - 1}{\\ell}
+
+    with the limit
+
+    .. math::
+
+        \\lim_{\\ell \\to 0} B(x, \\ell) = \\log(x).
+
+    To avoid numerical issues, we use a McLaurin expansion for small
+    :math:`\\ell`:
+
+    .. math::
+
+        \\log(x)
+        + \\ell \\log(x)^2
+        + \\frac{1}{6} \\ell^2 \\log(x)^3
+        + \\frac{1}{24} \\ell^3 \\log(x)^4.
+
+    and a special case :math:`B(0, \\ell) = 0`.
+
+    This class reproduces the behaviour of ``boxcox_old`` but implements
+    the piecewise logic with JAX / PyTensor control flow instead of
+    :class:`Elem`, so it is compatible with JAX and PyMC backends.
     """
 
-    def __init__(self, left: ExpressionOrNumeric, right: ExpressionOrNumeric):
-        """Constructor
-
-        :param left: x (the data/expression to transform)
-        :type left: biogeme.expressions.Expression
-
-        :param right: lambda (shape parameter)
-        :type right: biogeme.expressions.Expression
-        """
-        super().__init__(left, right)
-
-    def deep_flat_copy(self) -> BoxCox:
-        """Provides a deep copy of the expression (flat semantics as in other operators)."""
-        copy_left = self.left.deep_flat_copy()
-        copy_right = self.right.deep_flat_copy()
-        return type(self)(left=copy_left, right=copy_right)
-
-    def __str__(self) -> str:
-        return f'BoxCox({self.left}, {self.right})'
-
-    def __repr__(self) -> str:
-        return f'BoxCox({repr(self.left)}, {repr(self.right)})'
+    def __init__(self, x: Expression, ell: Expression):
+        super().__init__(left=x, right=ell)
+        self.x = validate_and_convert(x)
+        self.ell = validate_and_convert(ell)
+        self.children += [self.x, self.ell]
 
     def get_value(self) -> float:
-        """Evaluates the value of the expression for the current row (NumPy path).
-
-        :return: Box–Cox transform value
-        :rtype: float
         """
-        x = self.left.get_value()
-        lam = self.right.get_value()
+        Evaluate the Box–Cox transform for scalar values.
 
-        if x == 0.0:
+        - If ``x == 0``, returns 0.0.
+        - If ``|ell| < 1e-5``, uses the McLaurin expansion around ``ell = 0``.
+        - Otherwise, uses the standard Box–Cox formula.
+
+        :return: Scalar value of the Box–Cox transform.
+        """
+        # Retrieve scalar values; will raise if not possible
+        x_value = float(self.x.get_value())
+        ell_value = float(self.ell.get_value())
+
+        # Convention: B(0, ell) = 0 for any ell
+        if x_value == 0.0:
             return 0.0
 
-        # Compute z = λ log x; handle the z→0 limit with a Taylor series
-        lx = np.log(x)
-        z = lam * lx
+        # McLaurin expansion around ell = 0 for numerical stability
+        if abs(ell_value) < 1.0e-5:
+            lx = math.log(x_value)
+            return (
+                lx
+                + ell_value * lx**2
+                + (ell_value**2) * lx**3 / 6.0
+                + (ell_value**3) * lx**4 / 24.0
+            )
 
-        az = abs(z)
-        if az < 1e-6:
-            ratio = 1.0 + z / 2.0 + (z * z) / 6.0 + (z * z * z) / 24.0
-        else:
-            ratio = np.expm1(z) / z
+        # Regular Box–Cox formula
+        return (x_value**ell_value - 1.0) / ell_value
 
-        return lx * ratio
-
-    # ---------------------- JAX BACKEND ---------------------- #
-
+    # ------------------------------------------------------------------
+    # JAX builder
+    # ------------------------------------------------------------------
     def recursive_construct_jax_function(
         self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
-        Generates a function to be used by biogeme_jax.
-        :return: callable(parameters, one_row, the_draws, the_random_variables) -> array
+        JAX implementation of the Box–Cox transform.
+
+        Uses:
+        - regular formula when ``|ell| >= 1e-5``,
+        - McLaurin expansion when ``|ell| < 1e-5``,
+        - value 0.0 when ``x == 0``.
         """
-        x_jax: JaxFunctionType = self.left.recursive_construct_jax_function(
+        get_x = self.x.recursive_construct_jax_function(
             numerically_safe=numerically_safe
         )
-        lam_jax: JaxFunctionType = self.right.recursive_construct_jax_function(
+        get_ell = self.ell.recursive_construct_jax_function(
             numerically_safe=numerically_safe
         )
 
-        tol = jnp.array(1e-6, dtype=JAX_FLOAT)
+        def the_jax(theta, one_row, draws, rvars):
+            x = get_x(theta, one_row, draws, rvars)
+            ell = get_ell(theta, one_row, draws, rvars)
 
-        if numerically_safe:
-            eps = jnp.finfo(JAX_FLOAT).eps
+            # regular branch
+            def regular_branch(_):
+                return (jnp.power(x, ell) - 1.0) / ell
 
-            def the_jax_function(
-                parameters: jnp.ndarray,
-                one_row: jnp.ndarray,
-                the_draws: jnp.ndarray,
-                the_random_variables: jnp.ndarray,
-            ) -> jnp.ndarray:
-                x = x_jax(parameters, one_row, the_draws, the_random_variables)
-                lam = lam_jax(parameters, one_row, the_draws, the_random_variables)
+            # McLaurin expansion branch
+            def mclaurin_branch(_):
+                lx = jnp.log(x)
+                return (
+                    lx + ell * lx**2 + (ell**2) * lx**3 / 6.0 + (ell**3) * lx**4 / 24.0
+                )
 
-                # x==0 -> 0
-                is_zero_x = x == 0.0
+            # choose between regular and McLaurin based on |ell|
+            def inner(_):
+                return jax.lax.cond(
+                    jnp.abs(ell) < 1.0e-5,
+                    mclaurin_branch,
+                    regular_branch,
+                    operand=None,
+                )
 
-                # For log computation, replace zeros by 1.0 (log(1)=0), then mask later
-                x_pos = jnp.where(is_zero_x, jnp.array(1.0, dtype=JAX_FLOAT), x)
-                lx = jnp.log(jnp.clip(x_pos, a_min=eps))  # safe log
-                z = lam * lx
-                az = jnp.abs(z)
+            # top-level: x == 0 -> 0.0, else inner
+            val = jax.lax.cond(x == 0.0, lambda _: 0.0, inner, operand=None)
+            return val
 
-                # Taylor near zero (up to cubic term)
-                taylor = 1.0 + z / 2.0 + (z * z) / 6.0 + (z * z * z) / 24.0
-                ratio = jnp.where(az < tol, taylor, jnp.expm1(z) / z)
+        return the_jax
 
-                bc = lx * ratio
-
-                # Enforce BC(0, λ) = 0 exactly
-                return jnp.where(is_zero_x, jnp.array(0.0, dtype=JAX_FLOAT), bc)
-
-            return the_jax_function
-
-        def the_jax_function(
-            parameters: jnp.ndarray,
-            one_row: jnp.ndarray,
-            the_draws: jnp.ndarray,
-            the_random_variables: jnp.ndarray,
-        ) -> jnp.ndarray:
-            x = x_jax(parameters, one_row, the_draws, the_random_variables)
-            lam = lam_jax(parameters, one_row, the_draws, the_random_variables)
-
-            is_zero_x = x == 0.0
-            x_pos = jnp.where(is_zero_x, jnp.array(1.0, dtype=JAX_FLOAT), x)
-            lx = jnp.log(x_pos)
-            z = lam * lx
-            az = jnp.abs(z)
-
-            taylor = 1.0 + z / 2.0 + (z * z) / 6.0 + (z * z * z) / 24.0
-            ratio = jnp.where(az < 1e-6, taylor, jnp.expm1(z) / z)
-
-            bc = lx * ratio
-            return jnp.where(is_zero_x, jnp.array(0.0, dtype=JAX_FLOAT), bc)
-
-        return the_jax_function
-
-    # ---------------------- PyMC BACKEND ---------------------- #
-
+    # ------------------------------------------------------------------
+    # PyMC / PyTensor builder
+    # ------------------------------------------------------------------
     def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
         """
-        Generates recursively a function to be used by PyMC.
-        :return: the expression in TensorVariable format, suitable for PyMC
+        PyTensor implementation of the Box–Cox transform, mirroring the
+        original ``boxcox_old`` piecewise logic with ``pt.switch``.
         """
-        x_pymc = self.left.recursive_construct_pymc_model_builder()
-        lam_pymc = self.right.recursive_construct_pymc_model_builder()
+        x_b = self.x.recursive_construct_pymc_model_builder()
+        ell_b = self.ell.recursive_construct_pymc_model_builder()
 
         def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
-            x = x_pymc(dataframe=dataframe)  # expected (N,) or broadcastable
-            lam = lam_pymc(dataframe=dataframe)  # scalar or (N,)
+            x = x_b(dataframe)
+            ell = ell_b(dataframe)
 
-            # x == 0 -> 0 (use switch so the dangerous path is not evaluated)
-            is_zero_x = pt.eq(x, 0.0)
+            # Warn if ell is a Beta without bounds, as in boxcox_old
+            # (we inspect the expression tree statically, so do this outside
+            # builder if you prefer; left here for simplicity)
+            # NOTE: if ell is not a Beta, this does nothing.
+            # You can drop this if you already warn elsewhere.
+            if isinstance(self.ell, Beta) and (
+                self.ell.upper_bound is None or self.ell.lower_bound is None
+            ):
+                warning_msg = (
+                    f'It is advised to set the bounds on parameter {self.ell.name}. '
+                    f'A value of -10 and 10 should be appropriate: '
+                    f'Beta("{self.ell.name}", {self.ell.init_value}, -10, 10, '
+                    f'{self.ell.status})'
+                )
+                logger.warning(warning_msg)
 
-            # For log, replace zeros by 1.0 (log(1)=0); we mask result later
-            x_pos = pt.switch(is_zero_x, 1.0, x)
-            lx = pt.log(x_pos)
-            z = lam * lx
-            az = pt.abs(z)
+            lx = pt.log(x)  # your Expression log, which maps to pt.log
 
-            # Near zero, use Taylor; else expm1(z)/z. Use switch to avoid 0/0 when z==0.
-            taylor = 1.0 + z / 2.0 + (z * z) / 6.0 + (z * z * z) / 24.0
-            ratio = pt.switch(pt.lt(az, 1.0e-6), taylor, pt.expm1(z) / z)
+            regular = (x**ell - 1.0) / ell
+            mclaurin = lx + ell * lx**2 + ell**2 * lx**3 / 6.0 + ell**3 * lx**4 / 24.0
+            close_to_zero = pt.lt(ell, 1.0e-5) & pt.gt(ell, -1.0e-5)
 
-            bc = lx * ratio
-            return pt.switch(is_zero_x, 0.0, bc)
+            smooth = pt.switch(close_to_zero, mclaurin, regular)
+            result = pt.switch(pt.eq(x, 0.0), 0.0, smooth)
+            return result
 
         return builder
