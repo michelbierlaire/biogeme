@@ -440,3 +440,4 @@ docs/source/examples/latent/Untitled.ipynb
 reports/bayesian/bayesian.out
 reports/bayesian/bayesian.ps
 reports/bayesian/bayesian.toc
+src/biogeme/models/boxcox_old.py
