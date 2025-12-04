@@ -11,15 +11,13 @@ from datetime import datetime
 from enum import Enum
 
 import arviz as az
-import matplotlib
-import matplotlib.pyplot as plt
-
 import biogeme.version as version
+import matplotlib.pyplot as plt
 from biogeme.exceptions import BiogemeError
+
 from .bayesian_results import BayesianResults, EstimatedBeta
 
 logger = logging.getLogger(__name__)
-matplotlib.use("Agg")  # headless backend
 
 
 class EmptyListOfParameters(BiogemeError): ...
