@@ -10,6 +10,7 @@ from .belongs_to import BelongsTo
 from .beta_parameters import Beta
 from .binary_max import BinaryMax
 from .binary_min import BinaryMin
+from .boxcox import BoxCox
 
 # from .boxcox import BoxCox as boxcox
 from .collectors import (
