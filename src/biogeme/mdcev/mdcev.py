@@ -30,10 +30,9 @@ from biogeme.jax_calculator import (
 from biogeme.results_processing import EstimationResults
 from biogeme.tools.checks import validate_dict_types
 from .database_utils import mdcev_row_split
+from ..floating_point import SMALL_POSITIVE
 
 logger = logging.getLogger(__name__)
-
-SMALLEST_NON_ZERO_NUMBER = 1.0e-6
 
 
 @dataclass(frozen=True)
@@ -481,7 +480,7 @@ class Mdcev(ABC):
         ]
 
         if self.outside_good_index is not None:
-            bounds[self.outside_good_index] = (SMALLEST_NON_ZERO_NUMBER, total_budget)
+            bounds[self.outside_good_index] = (SMALL_POSITIVE, total_budget)
 
         # Starting point
         # We split the budget equally across alternatives
