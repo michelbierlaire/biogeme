@@ -13,7 +13,6 @@ from datetime import timedelta
 
 import arviz as az
 import xarray as xr
-
 from biogeme.tools import print_file_size, timeit
 
 logger = logging.getLogger(__name__)
@@ -203,7 +202,7 @@ class RawBayesianResults:
             idata.posterior.attrs.update(posterior_attrs)
         except (AttributeError, KeyError, TypeError, ValueError) as e:
             logger.warning("Could not set posterior attrs metadata cleanly: %s", e)
-        az.to_netcdf(idata, path)
+        az.to_netcdf(idata, path, engine="h5netcdf")
         logger.info(f'Saved Bayesian results (posterior + metadata) to {path}')
 
     @classmethod
@@ -217,7 +216,7 @@ class RawBayesianResults:
         anymore.
         """
         logger.debug(f"Read file {path}")
-        idata = az.from_netcdf(path)
+        idata = az.from_netcdf(path, engine="h5netcdf")
         logger.info(f"Loaded NetCDF file size: {print_file_size(path)}")
         # Defaults
         model_name = ""
