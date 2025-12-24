@@ -1,6 +1,7 @@
 \documentclass[12pt,a4paper]{article}
 \PassOptionsToPackage{hyphens}{url}
 \usepackage{michel}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathmorphing}
 %\usepackage[hyphens]{url}
 \usepackage[dcucite,abbr]{harvard}
 \harvardparenthesis{none}\harvardyearparenthesis{round}
@@ -112,12 +113,7 @@ the observed data: for each individual in the sample, it contains the
 values of the explanatory variables as well as the observed choice.
 The likelihood function represents the probability that the model,
 with parameters $\boldsymbol{\theta}$, reproduces exactly all the
-observations in the sample\footnote{Rigorously, this interpretation
-holds when the model involves only discrete variables. When the model
-includes continuous variables, the likelihood is obtained by
-evaluating the joint probability \emph{density} of the data at the
-observed values. Although this quantity is not itself a probability,
-it plays an analogous role.}.
+observations in the sample.
 
 In the frequentist framework, estimation consists of finding a point estimate 
 $\hat{\boldsymbol{\theta}}$ that maximizes the likelihood or the log-likelihood.
@@ -137,17 +133,16 @@ p(\boldsymbol{\theta}\mid \mathcal{D})
             p(\boldsymbol{\theta}')\, d\boldsymbol{\theta}'}.
 \end{equation}
 The denominator ensures that the 
-posterior integrates to one. The bad news is that it is not available in closed form for
-choice models. The good news is that it is not needed in practice. 
+posterior integrates to one. 
 
-This distribution is inherently difficult to work with
-analytically. For that reason, we rely on simulation to generate
-realizations --- referred to as \emph{draws} --- from it. Before explaining how such
-draws can be produced in practice, we first provide some intuition for
-why simulation is necessary.
+The distribution \req{eq:posterior} is too complex to be
+computed in closed form for realistic choice models. Consequently, we resort to
+simulation-based approximations. We briefly introduce the concept of simulation,  first for simple distributions
+(Section~\ref{sec:simulation}) and then using Markov Chain Monte Carlo
+(Section~\ref{sec:mcmc_intro}).
 
-\section{Simulation}
-
+\section{Simulation and Monte Carlo approximation}
+\label{sec:simulation}
 The arithmetic of random variables can quickly become intricate. Even in the simple case of two independent random variables $X$ and $Y$, with respective probability density functions (pdf) $f_X$ and $f_Y$, the distribution of their sum is not straightforward. If we define $Z = X + Y$, the pdf of $Z$ is obtained through a transformation known as \emph{convolution}:
 \[
 f_Z(z) = \int_{-\infty}^{\infty} f_X(x)\, f_Y(z - x)\, dx.
@@ -169,11 +164,10 @@ z, & 0 \le z \le 1, \\[6pt]
 \end{cases}
 \]
 However, in practice, the convolution integral rarely has a closed form, making it difficult to handle.
-
 The idea of simulation consists in generating concrete numerical
 values produced according to the probability law of the random
 variables of interest.  Regular arithmetic can then be applied on
-those values.
+those values, without the need to use complex transformations such as convolutions.
 
 Let $X$ be a random variable with probability density function (pdf)
 $f_X$. A \emph{draw from $X$} is a numerical value obtained from a
@@ -204,7 +198,8 @@ In this sense, a draw from $X$ is not merely a number, but a realization
 generated according to $f_X$, and repeated draws allow us to recover the
 shape of the density through their empirical distribution.
 
-This is illustrated in Figure~\ref{fig:triangular}, which displays histograms of 100'000 independent draws from two uniform random variables \(X \sim \mathrm{U}(0,1)\) and \(Y \sim \mathrm{U}(0,1)\), together with the histogram of their sum \(Z = X + Y\). The first two panels show that the empirical distributions of \(X\) and \(Y\) closely match the flat density of the uniform distribution. The third panel presents the resulting distribution of \(Z\), whose histogram approaches the theoretical triangular density obtained by the convolution of the two uniforms. This confirms that, as the number of draws increases, the simulated empirical distributions converge to their corresponding probability density functions.
+This is illustrated in Figure~\ref{fig:triangular}, which displays histograms of 100'000 independent draws from two uniform random variables \(X \sim \mathrm{U}(0,1)\) and \(Y \sim \mathrm{U}(0,1)\), together with the histogram of their sum \(Z = X + Y\). The first two panels show that the empirical distributions of \(X\) and \(Y\) closely match the flat density of the uniform distribution. The third panel presents the resulting distribution of \(Z\), whose histogram approaches the theoretical triangular density obtained by the convolution of the two uniforms.
+This confirms that, as the number of draws increases, the simulated empirical distributions converge to their corresponding probability density functions.  Here,  no integral was involved in the calculation. Only simple additions of draws.
 
 \begin{figure}
   \centering
@@ -213,6 +208,12 @@ This is illustrated in Figure~\ref{fig:triangular}, which displays histograms of
   }
   \caption{\label{fig:triangular}Histograms of $X$, $Y$, and $Z=X+Y$ with theoretical density of $Z$.}
 \end{figure}
+
+In the Bayesian context, many quantities of interest are expectations
+under the posterior, such as $\mathbb{E}[\theta \mid \mathcal{D}]$ or
+predictive probabilities. Simulation plays the same role: Monte Carlo
+averages of draws from the posterior approximate these expectations
+without requiring analytical integration.
 
 Most programming languages and numerical libraries provide a built-in
 function for generating draws from the uniform distribution \(\mathrm
@@ -233,87 +234,1075 @@ requires more advanced simulation techniques, known as Markov chain
 Monte--Carlo (MCMC) methods. As those methods are the core of Bayesian
 inference, we provide a brief introduction in the next section. We
 invite the interested reader to consult the literature for a more
-comprehensive description (\cite{Wang_2022}, \cite{Gelman:2013aa}).
+comprehensive description (\cite{Wang_2022}, \cite{Gelman2014}).
 
-\section{Markov Chain Monte--Carlo methods}
+
+\section{Markov Chain Monte Carlo (MCMC)}
+\label{sec:mcmc_intro}
+
+Bayesian estimation of discrete choice models requires working with
+posterior distributions that rarely have a closed-form expression.
+Markov Chain Monte Carlo (MCMC) methods provide a practical way to
+approximate such posteriors numerically: they generate a sequence of
+parameter values whose empirical distribution mimics the posterior.
 
 The term \emph{Monte-Carlo} refers to the city of Monte-Carlo in the
 Principality of Monaco, famous for its casino. In mathematics and
-statistics, the expression ``Monte-Carlo'' is used whenever randomness is
-used as a computational tool, typically to approximate integrals,
-expectations, or probability distributions.
+statistics, ``Monte-Carlo'' is used whenever randomness is employed as
+a computational tool, typically to approximate integrals, expectations,
+or probability distributions.
 
-A \emph{Markov chain} is a stochastic process, that is, a sequence of
-random variables, with specific mathematical properties that make their
-long-run behavior analytically tractable. Under appropriate conditions
-(irreducibility, aperiodicity, and [WHAT IS IT???]positive recurrence), a Markov chain
-converges to a distribution called its \emph{stationary distribution}.
-Intuitively, \emph{stationarity} means that, once the chain has run long
-enough, the distribution of its state no longer changes over time.
-Rigorously, if $X_t$ denotes the state at iteration $t$, then
-stationarity means that there exists a distribution $\pi$ such that
+In this section, we emphasize the main ideas behind MCMC and its role
+in Bayesian estimation. A detailed description of the numerical output,
+diagnostics, and practical advice for model interpretation is provided
+in Section~\ref{sec:interpreting}.
+
+\subsection{From posterior to Markov chain}
+
+For  choice models, the posterior \req{eq:posterior} cannot be written in a simple
+analytic form, nor can it be sampled from directly.
+
+An MCMC algorithm addresses this by constructing a \emph{Markov chain}
 \[
-  \prob(X_{t+1} = j) = \prob(X_t = j) = \pi_j
-  \qquad \text{for all states } j \text{ and all } t \text{ large enough}.
+\theta^{(1)}, \theta^{(2)}, \theta^{(3)}, \ldots
 \]
-Equivalently, if the chain is initiated with $X_0 \sim \pi$, then all
-future states $X_t$ also follow the same distribution.
+such that, after a sufficiently long run, the distribution of
+$\theta^{(t)}$ stabilizes and coincides with the posterior
+$p(\theta \mid y)$.  This limiting distribution is called the
+\emph{stationary distribution} of the chain.
 
-The idea behind \emph{Markov Chain Monte-Carlo} (MCMC) methods is to
-construct a Markov chain whose stationary distribution is precisely the
-distribution from which we wish to draw samples (for example, the
-posterior distribution of model parameters). By simulating the chain for
-a sufficiently large number of iterations, the generated sequence
-approximates draws from the target distribution.
+For this to hold, the chain must satisfy three mathematical properties:
+\begin{itemize}
+  \item \textbf{Irreducibility}: it can eventually reach any region of
+        the parameter space with positive posterior probability.
+  \item \textbf{Aperiodicity}: it does not get trapped in deterministic
+        cycles.
+  \item \textbf{Positive recurrence}: it returns often enough to
+        important regions of the space, so that a stable long-run
+        distribution exists.
+\end{itemize}
+Modern samplers such as the No-U-Turn Sampler (NUTS), used by PyMC and
+therefore by Biogeme, are designed so that these conditions hold for a
+broad class of models (see Appendix~\ref{sec:hmc}).
 
-Formally, a Markov chain $(X_t)_{t \ge 0}$ is defined on a state space
-(which may be discrete or continuous) together with a
-\emph{transition probability}. For simplicity, we introduce the concept
-in the discrete case; the continuous version is entirely analogous, with
-probability density functions replacing probabilities, and integrals
-replacing sums.
+\subsection{Burn-in, adaptation, and warm-up}
 
-For each pair of states $i$ and $j$, the transition probability is
-\begin{equation}
-  \label{eq:transition}
-  P_{ij} = \prob(X_{t+1} = j \mid X_t = i).
-\end{equation}
-A key property of Markov chains is that the transition probabilities do
-not depend on the iteration index $t$. Moreover, for each state $i$,
+The early iterations of an MCMC chain are not representative of the
+posterior. The chain typically starts from arbitrary initial values,
+far from the region where the posterior density is high, and must
+first ``find'' this region. This is illustrated on a simple example in Appendix~\ref{sec:example}. In addition, advanced samplers automatically
+tune internal parameters (step sizes, mass matrices, etc.) in the
+first phase of the run.
+
+Conceptually, one can distinguish:
+\begin{description}
+  \item[Burn-in] the period during which the chain moves from its
+    initial position to the typical region of the posterior;
+  \item[Adaptation] the period during which the algorithm adjusts its
+    own tuning parameters.
+\end{description}
+Draws produced during these phases do not follow the stationary
+distribution and are discarded.  In practice, these phases are merged
+into a single warm-up period that PyMC and Biogeme handle
+automatically.  The user only needs to be aware that early iterations
+are meant for tuning, not for inference.  Only the draws produced
+after warm-up are used for inference and diagnostics.
+
+\subsection{Why multiple chains?}
+
+Instead of running a single long chain, it is standard practice to run
+several independent chains (for instance, four), each starting from a
+different initial value. If all chains target the same posterior
+distribution and have run long enough:
+\begin{itemize}
+  \item they should explore the same region of the parameter space,
+  \item their trajectories should look similar (after burn-in),
+  \item and their empirical distributions should agree.
+\end{itemize}
+Comparing chains is a powerful way to detect non-convergence or poor
+exploration. The formal diagnostics (such as $\widehat{R}$ and
+effective sample sizes) and their interpretation are discussed in
+Section~\ref{sec:interpreting}.
+
+\subsection{Autocorrelation and effective information}
+
+Unlike independent Monte-Carlo draws, MCMC samples are correlated:
+$\theta^{(t)}$ and $\theta^{(t+1)}$ tend to be similar. This
+\emph{autocorrelation} means that $N$ MCMC draws do not contain as much
+information as $N$ independent draws would. Intuitively, if the chain
+moves slowly, many consecutive draws look alike and bring little new
+information.
+
+To account for this, one often reports an \emph{effective sample size}
+(ESS), which answers the question: ``How many independent draws would
+contain the same information as the correlated draws produced by the
+Markov chain?''  High autocorrelation implies a smaller ESS for a given
+number of iterations. The precise formulas and thresholds used in
+Biogeme are described later, in Section~\ref{sec:interpreting}.
+
+A larger effective sample size implies smaller Monte Carlo error for
+posterior summaries; for example, the Monte Carlo standard error of a
+posterior mean scales approximately as $1/\sqrt{\text{ESS}}$.
+
+\subsection{From chains to posterior summaries}
+
+Once the chains have converged and a sufficiently large number of
+post-burn-in draws is available, the posterior distribution can be
+approximated by the empirical distribution of these draws. Any
+posterior quantity of interest can then be estimated by Monte-Carlo
+averages:
+\begin{itemize}
+  \item posterior means and modes of parameters (e.g., taste
+        coefficients, scale parameters);
+  \item posterior uncertainties (standard deviations, credible
+        intervals, Highest Density Intervals);
+  \item posterior predictive quantities (choice probabilities,
+        elasticities, value of time, etc.);
+  \item model comparison metrics such as WAIC and LOO.
+\end{itemize}
+
+The next section (\emph{Interpreting the Bayesian Estimation Output in
+Biogeme}) explains  which summaries are reported by Biogeme,
+how they are computed from the chains, and how they should be used in
+practice to assess convergence, goodness-of-fit, and the reliability
+of the estimated choice model.
+
+\section{Quickstart: running Bayesian estimation in Biogeme}
+\label{sec:quickstart}
+
+This section provides the minimal steps to run a Bayesian estimation in
+\textsc{Biogeme}, and explains the key configuration options available in
+\texttt{biogeme.toml}. We assume that the model is already specified in Python
+using standard \textsc{Biogeme} expressions (as for maximum likelihood), and that
+you have a working installation of Biogeme.
+
+\subsection{Minimal workflow}
+
+Bayesian estimation in Biogeme follows the same high-level workflow as maximum
+likelihood estimation:
+\begin{enumerate}
+  \item specify the model (utilities, likelihood or log-likelihood expression, parameters);
+  \item configure the estimation algorithm in \texttt{biogeme.toml};
+  \item run the estimation script;
+  \item interpret the HTML report and, when available, inspect the \texttt{.nc}
+        file containing posterior (and optional prior) draws.
+\end{enumerate}
+
+In the Bayesian case, Biogeme relies on MCMC sampling (NUTS) to approximate the
+posterior distribution. As a result, the main practical difference with maximum
+likelihood is that the estimation produces \emph{draws} from the posterior
+distribution rather than a single point estimate. All reported summaries (means,
+medians, HDIs, diagnostics, information criteria) are computed from these draws.
+
+\subsection{Bayesian configuration in \texttt{biogeme.toml}}
+\label{sec:bayesian_config}
+
+Biogeme reads Bayesian settings from the \texttt{[Bayesian]} section of
+\texttt{biogeme.toml}. The most important options control:
+(i) which sampler backend is used (PyMC vs NumPyro/JAX),
+(ii) the amount of MCMC computation (warm-up, draws, chains),
+and (iii) which additional diagnostics and criteria are computed.
+
+\paragraph{Sampler backend and sampling strategy.}
+The option \texttt{mcmc\_sampling\_strategy} controls how sampling is performed:
+\begin{itemize}
+  \item \texttt{"automatic"}: Biogeme selects a suitable strategy depending on
+  available hardware and installed libraries.
+  \item \texttt{"pymc"}: use the standard PyMC NUTS sampler on CPU.
+  \item \texttt{"numpyro-parallel"}: use NumPyro/JAX and run one chain per
+  device (e.g., multiple CPU devices, GPUs, or TPUs).
+  \item \texttt{"numpyro-vectorized"}: use NumPyro/JAX and run all chains
+  vectorized on a single device.
+\end{itemize}
+When JAX is available, NumPyro-based strategies can be significantly faster,
+especially on accelerators or when multiple devices can be used.
+
+\paragraph{Number of chains, warm-up, and posterior draws.}
+The following options determine the MCMC effort:
+\begin{description}
+  \item[\texttt{chains}.]
+  Number of independent MCMC chains. A common default is 4. Multiple chains are
+  essential for convergence diagnostics (e.g.\ $\widehat{R}$).
+
+  \item[\texttt{warmup}.]
+  Number of warm-up iterations per chain. These iterations are used to adapt
+  the sampler (step size, mass matrix) and are not used for posterior summaries.
+  For difficult posteriors, increasing warm-up is often more effective than
+  increasing the number of retained draws.
+
+  \item[\texttt{bayesian\_draws}.]
+  Number of post-warm-up draws \emph{per chain} retained for inference. Increasing
+  this number reduces Monte Carlo error (once the chains mix well), but does not
+  fix non-convergence.
+\end{description}
+
+\paragraph{Target acceptance rate.}
+The option \texttt{target\_accept} is the target acceptance probability for the
+NUTS algorithm. Typical values are 0.8--0.9; values such as 0.9 or 0.95 often
+improve robustness for challenging posteriors (at the cost of smaller step
+sizes and therefore longer run times). If you observe divergences or unstable
+sampling, increasing \texttt{target\_accept} is a common first adjustment.
+
+\paragraph{Saving prior draws (recommended for identification diagnostics).}
+If \texttt{sample\_from\_prior = "True"}, Biogeme generates prior draws and saves
+them alongside posterior draws. This is particularly useful to diagnose weak
+identification, because it enables direct comparisons between prior and posterior
+dispersion (see Section~\ref{sec:interpreting}, Identification diagnostics).
+Generating prior draws adds computation and increases storage, but is often
+worth it when developing or validating a model.
+
+\paragraph{Likelihood-based summaries and model comparison criteria.}
+Biogeme can compute likelihood-based diagnostics from posterior draws:
+\begin{description}
+  \item[\texttt{calculate\_likelihood}.]
+  If \texttt{"True"}, Biogeme computes likelihood-based statistics derived from
+  posterior draws. This typically requires storing or evaluating pointwise
+  log-likelihood contributions.
+
+  \item[\texttt{calculate\_waic}.]
+  If \texttt{"True"}, Biogeme computes WAIC. WAIC relies on pointwise
+  log-likelihood values across posterior draws.
+
+  \item[\texttt{calculate\_loo}.]
+  If \texttt{"True"}, Biogeme computes LOO (Pareto-smoothed leave-one-out).
+  Like WAIC, LOO relies on pointwise log-likelihood values.
+\end{description}
+
+\subsection{Recommended starting configuration}
+
+A reasonable baseline configuration for many discrete choice models is:
+\begin{itemize}
+  \item \texttt{chains = 4},
+  \item \texttt{warmup = 1000} to \texttt{2000},
+  \item \texttt{bayesian\_draws = 1000} to \texttt{2000},
+  \item \texttt{target\_accept = 0.9},
+  \item \texttt{sample\_from\_prior = "True"} during model development.
+\end{itemize}
+For complex models (mixtures, latent variables, strong posterior correlations),
+longer warm-up and more draws are often required, and careful monitoring of
+convergence diagnostics is essential.
+
+\subsection{Example \texttt{[Bayesian]} section}
+
+The following excerpt illustrates the main options:
+\begin{lstlisting}[language=,basicstyle=\ttfamily\footnotesize]
+[Bayesian]
+mcmc_sampling_strategy = "automatic"
+sample_from_prior = "True"
+bayesian_draws = 2000
+warmup = 2000
+chains = 4
+target_accept = 0.9
+calculate_waic = "True"
+calculate_loo = "True"
+calculate_likelihood = "True"
+\end{lstlisting}
+
+\noindent
+\emph{Practical advice.}
+If you are mainly interested in parameter inference, you may disable WAIC/LOO
+initially to reduce computation and storage. When comparing models, enable WAIC
+and/or LOO and ensure that pointwise log-likelihood values are available in the
+output.
+
+\subsection{Troubleshooting Bayesian estimation}
+
+Bayesian estimation may occasionally produce warnings or diagnostics that
+require intervention. The most common issues and corresponding remedies
+are summarized below.
+
+\paragraph{Chains do not converge ($\widehat{R} > 1.01$).}
+This indicates that different chains are exploring different regions of
+the parameter space.
+\begin{itemize}
+  \item Increase \texttt{warmup} to allow better adaptation.
+  \item Check identification diagnostics: near-linear dependencies or
+        redundant parameters often prevent convergence.
+  \item Consider reparameterizing the model (e.g., remove redundant
+        constants, rescale variables).
+\end{itemize}
+
+\paragraph{Low effective sample size (ESS).}
+Low ESS means that draws are highly autocorrelated.
+\begin{itemize}
+  \item Increase \texttt{bayesian\_draws}.
+  \item Increase \texttt{target\_accept} (e.g., from 0.8 to 0.9 or 0.95).
+  \item Inspect posterior correlations and consider reparameterization.
+\end{itemize}
+
+\paragraph{Divergent transitions reported.}
+Divergences indicate numerical instability in the Hamiltonian dynamics
+and should not be ignored.
+\begin{itemize}
+  \item Increase \texttt{target\_accept}.
+  \item Check scale parameters and ensure positivity constraints are
+        correctly enforced.
+  \item Look for extreme posterior correlations or heavy-tailed priors.
+\end{itemize}
+
+\paragraph{Very slow sampling or excessive run time.}
+\begin{itemize}
+  \item Reduce model complexity during development (fewer random
+        coefficients, fewer latent variables).
+  \item Disable WAIC/LOO temporarily.
+  \item Use NumPyro/JAX if available, especially on machines with multiple
+        devices.
+\end{itemize}
+
+\paragraph{Posterior resembles the prior.}
+If posterior uncertainty is close to prior uncertainty, the data are not
+informative for some parameters.
+\begin{itemize}
+  \item Check identification diagnostics and prior/posterior dispersion ratios.
+  \item Reconsider model specification or availability of identifying variation.
+\end{itemize}
+
+\paragraph{Practical rule of thumb.}
+Bayesian computation does not fix identification problems.
+If a model is weakly identified under maximum likelihood, the Bayesian
+posterior will typically be wide, highly correlated, or slow to explore.
+Identification diagnostics should therefore be interpreted jointly with
+convergence diagnostics.
+
+\subsection{Maximum likelihood vs Bayesian estimation in Biogeme}
+
+Although maximum likelihood (ML) and Bayesian estimation rely on the same
+underlying behavioral model, they differ fundamentally in interpretation,
+numerical treatment, and diagnostics. Table~\ref{tab:ml_vs_bayes} summarizes
+the most important differences from a practical Biogeme user’s perspective.
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of maximum likelihood and Bayesian estimation in Biogeme}
+\label{tab:ml_vs_bayes}
+\begin{tabular}{p{4cm} p{5.5cm} p{5.5cm}}
+\hline
+ & \textbf{Maximum likelihood (ML)} & \textbf{Bayesian estimation} \\
+\hline
+Unknown parameters
+&
+Fixed but unknown constants
+&
+Random variables with prior distributions
+\\[6pt]
+
+Main output
+&
+Point estimate (MLE) and asymptotic covariance
+&
+Posterior distribution (draws)
+\\[6pt]
+
+Uncertainty interpretation
+&
+Asymptotic (large-sample) approximation
+&
+Exact finite-sample uncertainty (conditional on priors)
+\\[6pt]
+
+Estimation algorithm
+&
+Deterministic optimization (BFGS, Newton, etc.)
+&
+Stochastic simulation (MCMC via NUTS)
+\\[6pt]
+
+Identification issues
+&
+Singular or ill-conditioned Hessian
+&
+Flat or highly correlated posterior directions
+\\[6pt]
+
+Random coefficients
+&
+Require Monte--Carlo integration
+&
+Treated as latent variables, no explicit integration
+\\[6pt]
+
+Panel data with mixtures
+&
+Likelihood must be written at individual level
+&
+Handled automatically via latent random coefficients
+\\[6pt]
+
+Convergence diagnostics
+&
+Gradient norm, Hessian eigenvalues
+&
+$\widehat{R}$, ESS, divergences, trace plots
+\\[6pt]
+
+Model comparison
+&
+Likelihood ratio tests, AIC, BIC
+&
+WAIC, LOO, posterior predictive fit
+\\[6pt]
+
+Computational cost
+&
+Usually fast
+&
+Often much slower, especially for complex models
+\\[6pt]
+
+Sensitivity to scaling
+&
+Moderate
+&
+High (poor scaling harms HMC efficiency)
+\\[6pt]
+
+Role of priors
+&
+None
+&
+Essential for regularization and identification
+\\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Key takeaways.}
+\begin{itemize}
+  \item Bayesian estimation generalizes ML: with weakly informative priors
+        and large samples, posterior means often resemble MLEs.
+  \item Bayesian estimation excels for mixture models, latent variables,
+        and panel data, where ML becomes analytically or numerically costly.
+  \item Bayesian estimation requires more care in model specification,
+        scaling, and diagnostics, but provides richer uncertainty
+        information and stronger diagnostic tools.
+\end{itemize}
+
+\paragraph{When to use which?}
+\begin{itemize}
+  \item Use \textbf{ML} for simple models, fast estimation, and classical
+        hypothesis testing.
+  \item Use \textbf{Bayesian estimation} for complex models, random
+        coefficients, latent variables, panel data, and when full
+        uncertainty quantification is required.
+\end{itemize}
+
+\section{Model specification in Biogeme}
+
+The specification of the choice models in Biogeme for Bayesian
+estimation is very similar as the specification of the models for
+maximum likelihood estimation, with some important differences.
+
+\subsection{Prior distributions}
+
+Biogeme allows the user to assign a Bayesian prior distribution to any
+parameter defined with the \texttt{Beta} class.  A prior is specified by
+providing a user-defined \emph{prior factory}, that is, a Python
+callable following a simple protocol: it receives the PyMC variable
+name of the parameter, the initial value supplied in the Biogeme model,
+and (when applicable) the lower and upper bounds imposed on the
+parameter.  The function must return a valid PyMC distribution object,
+which Biogeme will use as the prior in the Bayesian estimation.
+Typical applications include enforcing sign constraints or expressing
+expert knowledge about plausible parameter magnitudes.  
+If no user-defined prior is supplied, Biogeme automatically constructs a
+default prior: an unbounded Normal distribution centered at the initial
+value if no bounds are provided, or a truncated Normal distribution
+whenever lower or upper bounds are specified.  
+Custom priors, such as heavy-tailed distributions, asymmetric shapes,
+or sign-restricted distributions, can easily be implemented by defining
+a suitable prior factory and passing it as an argument when declaring
+the parameter.
+
+The example below defines a prior factory that
+constructs a Student-\textit{t} distribution (allowing for heavier tails
+than a Gaussian prior) and truncates it so that the parameter can only
+take negative values. The function returns a PyMC distribution object
+that Biogeme will use when building the Bayesian model. Once defined,
+this prior can be supplied directly to a \texttt{Beta} parameter through
+its \texttt{prior} argument.
+
+\begin{lstlisting}
+import pymc as pm
+from pytensor.tensor import TensorVariable
+
+def negative_student_prior(
+    name: str,
+    initial_value: float,
+    lower_bound: float | None,
+    upper_bound: float | None,
+) -> TensorVariable:
+    base = pm.StudentT.dist(mu=0.0, sigma=10.0, nu=5.0)
+    # Lower bound ignored; enforce upper bound at 0.
+    upper = 0.0 if upper_bound is None else min(0.0, upper_bound)
+    return pm.Truncated(
+        name=name,
+        dist=base,
+        upper=upper,
+        initval=initial_value,
+    )
+\end{lstlisting}
+
+The prior is then passed to a Biogeme parameter as follows:
+
+\begin{lstlisting}[language=Python]
+b_cost = Beta(
+    'b_cost',
+    value=-1.0,
+    lowerbound=None,
+    upperbound=None,
+    status=0,
+    prior=negative_student_prior,
+)
+\end{lstlisting}
+
+In most applications, the default priors used by Biogeme --- a Normal
+distribution (when no bounds are specified) or a Truncated Normal
+distribution (when lower or upper bounds are provided) --- are
+entirely adequate and require no user intervention.  Custom priors
+should be introduced only when specific prior knowledge, such as
+heavy-tailed behavior, is substantively justified.
+
+Note that it is generally not recommended to use uniform priors for
+parameters in models estimated with NUTS. Uniform distributions have flat
+density over their support and do not provide meaningful curvature for the
+Hamiltonian dynamics. As a result, they often lead to poor exploration of the
+posterior, divergent transitions, and slow or unstable convergence.
+
+\subsection{Random coefficients and Monte-Carlo integration}
+
+A major practical advantage of Bayesian estimation in \textsc{Biogeme}
+is that \emph{mixture models do not require any numerical integration
+over random parameters}.  This stands in sharp contrast with classical
+maximum likelihood estimation, where mixtures of logit models involve
+integrals which do not admit closed-form solutions,  and require Monte--Carlo integration.
+
+Under Bayesian estimation, the random parameters themselves are treated as
+\emph{latent variables}. Instead of integrating them out, the MCMC sampler
+\emph{simulates} them jointly with the structural parameters. Conditional on a
+specific draw of the random parameters, the contribution of each observation is
+simply the log-likelihood of the elementary model (typically a logit).
+The integral no longer appears explicitly. MCMC approximates it automatically by
+randomly sampling from the posterior distribution of the latent coefficients.
+
+\begin{itemize}
+  \item It eliminates the need for high-dimensional numerical integration.
+  \item It avoids Monte--Carlo noise in the likelihood, which improves numerical
+        stability and often speeds up convergence.
+  \item It allows complex hierarchical and latent-structure models to be
+        estimated with essentially no additional analytical effort.
+\end{itemize}
+
+Because the sampler takes care of integrating over the random parameters, the
+analyst must provide only the \emph{conditional} log-likelihood,
+that is, the log likelihood of the model \emph{given} a specific realization of
+the random coefficients. In most discrete choice settings, this is simply the
+log of a logit probability. There is no need to write a mixed logit formula or
+to manually integrate over the mixing distribution.
+
+This simplification is one of the most important practical benefits of Bayesian
+estimation of mixture models: \emph{the algorithm handles all the integration
+implicitly, while the user works with only the elementary likelihood.}
+
+Some more details about how it is actually done are available in Appendix~\ref{sec:pymc_random}.
+
+In many applications, it is useful to retain the simulated draws of random coefficients in the estimation output, for instance to analyze heterogeneity, compute individual-level effects, or perform post-estimation simulations.
+
+The following instruction tells Biogeme to explicitly store the draws of a random coefficient as part of the estimation results:
+\begin{lstlisting}
+b_time_rnd = DistributedParameter('b_time_rnd', b_time + b_time_s * b_time_eps)
+\end{lstlisting}
+Here, \lstinline+b_time_rnd+ represents the individual-specific realization of the time coefficient, constructed from its mean, scale, and random disturbance, and stored for later inspection.
+
+\subsection{Scale parameters and identification}
+
+When estimating a mixture of logit models by maximum likelihood, the scale of a
+normally distributed random coefficient is identified only up to its absolute
+value: because the normal distribution is symmetric, a positive or negative
+estimate of the scale parameter yields exactly the same likelihood. For this
+reason, analysts sometimes allow the scale parameter to be unconstrained during
+optimization, giving the numerical algorithm more freedom to move in the
+parameter space.
+
+In Bayesian estimation, however, such unconstrained specification is highly
+problematic. If the prior does not enforce a positivity constraint on the scale
+parameter, the sampler will explore both the positive and negative regions of
+the parameter space, even though these correspond to the \emph{same} underlying
+model. As a consequence, the posterior distribution becomes artificially
+bimodal, with symmetric modes around zero and a mean tending toward zero, even
+when the true scale is large. This phenomenon severely degrades mixing,
+inflates posterior uncertainty, and can render posterior summaries essentially
+meaningless. Therefore, it is \emph{critical} to impose a positivity constraint
+when defining the prior of any scale parameter or truncated distribution). This ensures that the
+sampler explores only the meaningful region of the parameter space and avoids
+the spurious bimodality that would otherwise arise.
+
+In practice, enforcing the required positivity constraint for scale parameters
+is straightforward in Biogeme. The \texttt{Beta} constructor includes optional
+\texttt{lowerbound} and \texttt{upperbound} arguments, which can be used to
+restrict the parameter domain. To ensure that a scale parameter remains strictly
+positive during Bayesian estimation, one simply specifies a small positive lower
+bound, for example \texttt{lowerbound = 1e-6}. This prevents the sampler from
+crossing zero, thereby eliminating the artificial sign ambiguity and ensuring
+that the posterior distribution remains unimodal and interpretable. Such a small
+bound has no practical impact on the model but is essential for stable and
+meaningful Bayesian inference.
+
+\subsection{Mixtures  with panel data.}
+A major advantage of Bayesian estimation becomes particularly clear in the
+context of mixture models with panel data.  
+Under maximum likelihood estimation, the likelihood contribution of an
+individual must account for the full sequence of choices in the panel.
+This requires computing the joint probability of the entire trajectory,
+conditional on the random coefficients, and then performing Monte-Carlo
+integration over the distribution of these coefficients.  
+
+In the Bayesian framework, the situation is much simpler.  
+Biogeme treats the random parameters as explicit latent variables that are
+sampled by the MCMC algorithm, and therefore \emph{no Monte-Carlo integration is
+required}.  
+Just as importantly, when the data are organized in panels, Biogeme assumes
+that the random parameters are drawn \emph{per individual}, not per observation.
+This means that all observations belonging to the same person share the same
+realization of the random coefficients.
+
+From the user's perspective, this structure greatly simplifies the model
+definition.  
+Conditional on the random parameters, the contribution of a \emph{single}
+observation is simply the logit kernel:
+\begin{lstlisting}[language=Python]
+log_probability_one_observation = loglogit(v, av, CHOICE)
+\end{lstlisting}
+Biogeme automatically aggregates these contributions over the observations
+belonging to the same panel and handles the sampling of the random
+coefficients internally.  
+Thus, the analyst only needs to specify the per-observation likelihood, and
+Biogeme takes care of both the panel structure and the integration over the
+random parameters.  
+This is considerably simpler than maximum likelihood estimation, while
+providing a fully coherent Bayesian treatment of random heterogeneity.
+
+Note that, although the specification itself becomes simpler, mixture models with
+panel data remain computationally demanding.  
+Because the posterior distribution of random coefficients can be complex
+and highly correlated, these models typically require:
+\begin{itemize}
+  \item substantially longer estimation times than simple logit models,
+  \item more MCMC iterations to ensure good mixing,
+  \item and careful monitoring of convergence diagnostics.
+\end{itemize}
+Users should therefore anticipate heavier computational requirements,
+especially when estimating models with many random parameters or long
+individual trajectories.
+
+\subsection{Simulation after Bayesian estimation}
+
+Once the posterior distribution of the model parameters has been obtained,
+Biogeme offers two complementary approaches for conducting simulations.
+These correspond to two different interpretations of uncertainty and allow the
+analyst either to work with a single representative parameter vector or to
+propagate full posterior uncertainty into the simulated quantities.
+
+\paragraph{Simulation using posterior means.}
+The first approach consists of replacing each parameter by its posterior mean
+and running a deterministic simulation of the model. In Biogeme, this is
+performed by providing the vector of posterior means to the simulator:
+\begin{lstlisting}[language=Python]
+results = biosim.simulate(the_beta_values=betas)
+\end{lstlisting}
+This corresponds to evaluating the model at a single point estimate,
+analogous to using maximum likelihood estimates in classical estimation.
+It is simple, fast, and produces easily interpretable results.  
+However, it does not reflect the uncertainty contained in the posterior
+distribution: all variability across draws is ignored.  
+This method is appropriate when a single ``typical'' prediction is desired.
+
+\paragraph{Bayesian simulation using posterior draws.}
+The second approach incorporates full parameter uncertainty by repeatedly
+simulating the model for multiple posterior draws:
+\begin{lstlisting}[language=Python]
+bayesian_results = biosim.simulate_bayesian(
+    bayesian_estimation_results=estimation_results,
+    percentage_of_draws_to_use=3
+)
+\end{lstlisting}
+Here, Biogeme samples a subset of the posterior draws (e.g., 3\% of them) and
+computes the simulation for each draw.  
+The final output is therefore a distribution of simulated quantities, not a
+single value.  
+This method fully reflects posterior uncertainty and is essential when one
+wishes to obtain prediction intervals, Bayesian credible regions, or a
+quantification of the robustness of policy scenarios.
+
+In summary, simulation using posterior means yields a single-point prediction,
+while Bayesian simulation propagates the entire uncertainty about the
+parameters into the results.  
+Both approaches are useful, and the choice between them depends on whether
+the analysis calls for deterministic predictions or uncertainty-aware
+decision support.
+
+\section{Interpreting the Bayesian Estimation Output in Biogeme}
+\label{sec:interpreting}
+
+
+Biogeme performs Bayesian estimation by relying internally on the PyMC
+probabilistic programming library.  
+The output produced by Biogeme therefore mirrors the standard PyMC
+diagnostics while presenting them in a unified  report.  
+This section provides a short explanation of the quantities that
+appear in Biogeme’s Bayesian output, together with practical tips for
+interpretation. We refer the reader to the online documentation of PyMC and ArviZ, as well as \citeasnoun{Vehtari_2016}, \citeasnoun{watanabe2010asymptoticequivalencebayescross} for more information.
+
+\subsection{General Information About the Estimation}
+
+\begin{description}
+
+\item[Sample size.]
+Number of observations used in the estimation.  
+
+\item[Sampler.]  Biogeme automatically chooses an appropriate MCMC
+  sampling method based on the computational resources available on
+  the machine. When the JAX and NumPyro libraries are installed,
+  Biogeme prefers the NumPyro implementation of the No-U-Turn Sampler
+  (NUTS), which can exploit modern accelerators. If multiple
+  computational devices (such as GPUs or TPUs) are detected, Biogeme
+  uses a \emph{parallel} sampling strategy, running one Markov chain
+  on each device. If a single device is available, Biogeme instead
+  uses a \emph{vectorized} strategy in which all chains are processed
+  simultaneously on the same device, enabling efficient batched
+  computation.
+
+If JAX or NumPyro is not available, Biogeme falls back to the standard
+PyMC implementation of NUTS, running on the CPU and typically
+parallelizing chains across the available CPU cores. This approach is
+robust and ensures reproducible results even in environments without
+specialized hardware. Although the automatic selection mechanism
+generally provides the most efficient configuration, users may also
+specify the sampling method manually when needed, for example to force
+CPU-based sampling or to explicitly select NumPyro’s parallel or
+vectorized modes.
+  
+\item[Number of chains.]
+Biogeme runs multiple independent MCMC chains (usually 4).  
+Agreement between these chains is essential for diagnosing convergence.
+
+\item[Number of draws per chain.]
+Number of samples retained from each chain after any warm-up phase.
+The total number of draws equals ``(draws per chain) × (number of
+chains).''  
+More draws improve precision but do not fix convergence issues if chains do
+not mix properly.
+
+\item[Acceptance rate target.]
+The NUTS sampler adapts to reach a target acceptance rate (typically
+between 0.8 and 0.95).  
+If the adaptive procedure cannot achieve this value, it may indicate
+difficult posterior geometry (e.g., strong correlations, heavy tails).
+
+\item[Run time.]
+Total wall-clock time used to obtain the posterior sample.
+
+\end{description}
+
+\subsection{Posterior Log-Likelihood and Predictive Fit}
+
+Biogeme computes several quantities evaluating how well the estimated
+parameters explain the observed data.
+
+\begin{description}
+
+\item[Log-likelihood at posterior mean.]
+An approximation of 
 \[
-  \sum_{j} P_{ij} = 1,
+\log p(Y \mid \mathbb{E}[\theta]),
 \]
-so that $P_{ij}$ defines a proper probability distribution over the next
-state.
+that is, the log-likelihood evaluated at the posterior mean.  
+Higher (less negative) values indicate better fit.  
+This is similar in spirit to evaluating the log-likelihood at MLEs in
+frequentist estimation.
 
-A stationary distribution is a vector $\pi = (\pi_j)_j$ satisfying the
-system
-\begin{equation}
-  \label{eq:stationary-1}
-  \pi_j = \sum_i \pi_i P_{ij} \qquad \text{for all states } j,
-\end{equation}
-with the normalization condition
-\begin{equation}
-  \label{eq:stationary-2}
-  \sum_j \pi_j = 1.
-\end{equation}
-Equation~\eqref{eq:stationary-1} states that if $X_t$ has distribution
-$\pi$, then $X_{t+1}$ also has distribution $\pi$. Thus the chain is in
-equilibrium.
+\item[Expected log-likelihood.]
+Biogeme averages the log-likelihood across all posterior draws:
+\[
+\mathbb{E}\!\left[\log L(Y \mid \theta)\right].
+\]
+This reflects the model's typical predictive performance across the
+entire posterior, not just at a single representative point.
 
-In many MCMC algorithms, the Markov chains used to generate samples
-satisfy an additional property known as \emph{time reversibility}. A
-chain is time reversible with respect to a distribution $\pi$ if
-\begin{equation}
-  \label{eq:time_reversible}
-  \pi_i P_{ij} = \pi_j P_{ji} \qquad \text{for all } i \neq j.
-\end{equation}
-This condition is also known as \emph{detailed balance}, and implies
-that $\pi$ is stationary. Indeed, summing~\eqref{eq:time_reversible}
-over all $i$ directly yields \eqref{eq:stationary-1}. Many classical
-MCMC algorithms, such as the Metropolis--Hastings method, are
-explicitly designed to satisfy detailed balance with respect to the
-target distribution.
+\item[Best-draw log-likelihood.]
+The highest log-likelihood found among all draws.  
+It provides an upper bound on predictive fit under the estimated posterior.
+
+\end{description}
+
+\noindent
+\emph{Practical advice:}
+If the posterior predictive log-likelihood and the expected
+log-likelihood differ substantially, the posterior may be wide or
+skewed, or the model could be sensitive to specific parameter values.
+
+\subsection{Information Criteria for Model Comparison}
+
+Biogeme computes WAIC and LOO using PyMC's built-in functions.
+
+\begin{description}
+
+\item[WAIC (Widely Applicable Information Criterion).]
+A fully Bayesian generalization of the Akaike Information Criterion (AIC).  
+WAIC estimates expected predictive performance on new data.  
+Lower values indicate a better model.
+
+\item[Effective number of parameters $p_{\text{WAIC}}$.]
+  This quantity measures the degree of flexibility that the model displays when fitting the data, as inferred from the variability of the log-likelihood across the posterior distribution.
+If $p_{\text{WAIC}}$ is much larger than the number of free parameters,
+the model may be overfitting.
+
+\item[LOO (Pareto-smoothed Leave-One-Out cross-validation).]
+A Bayesian approximation of leave-one-out predictive performance using
+importance sampling.  
+As with WAIC, lower values indicate better predictive accuracy.
+
+\item[Standard errors.]
+Both WAIC and LOO come with standard errors, useful for comparing two
+models.  
+If the difference in criteria is smaller than twice the standard
+error, the evidence does not favor one model over the other.
+
+\end{description}
+
+\noindent
+\emph{Practical advice}: 
+For Bayesian model selection in Biogeme, LOO is typically the most
+robust criterion, especially for models with latent variables or
+hierarchical structures.
+
+\subsection{Posterior Parameter Summaries}
+
+For each parameter $\theta$, Biogeme reports statistics derived from
+the posterior draws.
+
+\begin{description}
+
+\item[Name.] Identifier of the parameter.
+
+\item[Value (Posterior mean).]  
+Expected value under the posterior distribution.  
+This is often used as the ``Bayesian point estimate.''
+
+\item[Median.]  
+Posterior median, that is, the value such that half of the posterior mass
+lies below and half above.  
+The median is a robust measure of central tendency and can differ
+substantially from the mean when the posterior distribution is skewed.
+
+\item[Mode.]  
+Posterior mode, computed from kernel density estimation.  
+Useful when the posterior is skewed or multimodal.
+
+\item[Std err.]  
+Posterior standard deviation, measuring uncertainty around the mean.
+
+\item[$z$-value.]  
+Mean divided by standard deviation.  
+Large absolute values signal that the posterior mass is far from zero.
+
+\item[$p$-value.]  
+Two-sided posterior probability that the parameter has the opposite
+sign from its mean.  
+Extremely small values (e.g.\ $<0.01$) indicate high confidence in the
+sign of the effect.
+
+\item[HDI (Highest Density Interval).]  
+Biogeme provides the lower and upper bounds of the highest-density
+interval (typically 95\%).  
+This interval contains the most probable values of the parameter.
+
+\end{description}
+
+\noindent
+\emph{Practical interpretation:}
+If the HDI includes zero, the effect is not credibly different from
+zero.  
+Unlike frequentist confidence intervals, HDIs directly correspond
+to probability statements about the parameter.
+
+\subsection{Identification diagnostics}
+
+This section provides numerical diagnostics intended to detect
+non-identification or weak identification of model parameters.
+Intuitively, identification problems arise when some linear combinations
+of parameters can vary substantially without affecting the likelihood,
+leading to a very flat (or nearly flat) posterior in certain directions.
+The diagnostics are based on the posterior draws and, when available,
+on the prior draws.
+
+\paragraph{Posterior covariance diagnostics.}
+The posterior covariance matrix summarizes the dispersion of the posterior
+distribution in parameter space. Its eigenstructure is particularly
+informative.
+
+\begin{itemize}
+\item \emph{Minimum and maximum eigenvalues.}
+  The eigenvalues measure posterior variance along orthogonal directions.
+A very \emph{large} eigenvalue corresponds to a very wide (nearly flat)
+direction of the posterior, indicating weak or non-identification along
+a linear combination of parameters.
+Conversely, a very small eigenvalue indicates a tightly concentrated,
+well-identified direction.
+
+\item \emph{Condition number.}  
+Defined as the ratio of the largest to the smallest eigenvalue, it
+measures the anisotropy of the posterior covariance.
+Large values indicate near-dependencies among parameters.
+As a rule of thumb, values around $10^3$ deserve attention, while values
+of $10^5$ or more are a strong warning sign.
+
+\item \emph{Effective rank.}  
+This quantity can be interpreted as the effective dimensionality of the
+posterior variability (between 0 and the number of parameters).
+If it is much smaller than the total number of parameters, the posterior
+mass concentrates in a lower-dimensional subspace, which is consistent
+with (near) linear dependencies among parameters.
+\end{itemize}
+
+\paragraph{Prior covariance diagnostics.}
+The same diagnostics are reported for the prior distribution.
+They provide a reference scale: if the prior covariance is well behaved
+(full rank, moderate condition number) but the posterior covariance
+becomes ill-conditioned, the identification issue is typically due to
+the likelihood or the model specification rather than the prior.
+
+\paragraph{Identified by the prior.}
+When prior draws are available, Biogeme compares prior and posterior
+dispersion at the parameter level. For each parameter, the ratio of the
+posterior standard deviation to the prior standard deviation is reported.
+
+\begin{itemize}
+\item A ratio close to 1 indicates that the data have not substantially
+reduced uncertainty, suggesting that the likelihood is weakly
+informative for that parameter.
+\item A ratio well below 1 (for example 0.1 or 0.01) indicates that the
+data are informative and that the parameter is well identified by the
+likelihood.
+\end{itemize}
+
+\subsection{Convergence Diagnostics}
+
+Biogeme reports standard PyMC diagnostics:
+
+\begin{description}
+
+\item[$\widehat{R}$ (Gelman--Rubin statistic).]  
+Values close to 1 indicate that chains are mixing well.
+Threshold: $\widehat{R} \leq 1.01$ is generally considered good.
+
+\item[ESS (bulk).]  
+Effective sample size for the main mass of the posterior.  
+Values above 400 indicate reliable estimation of means and variances.
+
+\item[ESS (tail).]  
+Effective sample size for the tails.  
+Values above 100 are necessary for stable estimation of extreme quantiles.
+
+\end{description}
+
+\noindent
+\emph{Practical advice.}  
+If $\widehat{R} > 1.01$ or ESS values are low, the sampler did not
+explore the posterior well. Consider:
+\begin{itemize}
+    \item reparameterizing the model,
+    \item increasing the number of tuning steps,
+    \item checking for strong correlations or identifiability issues.
+\end{itemize}
+
+\subsection{Simulated quantities}
+
+This section lists all quantities stored in the simulation output file
+(\texttt{.nc}), together with their dimensions and shapes. These objects
+correspond to the contents of the \texttt{InferenceData} structure produced
+by PyMC and used internally by Biogeme for diagnostics and reporting.
+
+Each quantity is identified by a \emph{group}, a \emph{variable name}, its
+\emph{dimensions}, and its \emph{shape}. The most important groups are
+described below.
+
+\begin{description}
+
+\item[constant\_data.]  
+Observed data passed to the model and treated as fixed.
+Each variable is indexed by the observation dimension
+(\texttt{Dimension.OBS}) and has length equal to the sample size.
+These variables are not random and are included for completeness and
+traceability of the estimation.
+
+\item[posterior.]  
+Posterior draws of model parameters and derived quantities.
+For scalar parameters (e.g.\ alternative-specific constants or taste
+coefficients), the dimensions are \texttt{(chain, draw)}.
+Observation-level quantities, such as the pointwise log-likelihood,
+add the observation dimension \texttt{Dimension.OBS}.
+These draws are the basis for posterior summaries, credible intervals,
+and identification diagnostics.
+
+\item[prior.]  
+Prior draws for the same parameters and derived quantities.
+These are generated independently of the data and are stored when prior
+sampling is enabled.
+Comparing prior and posterior dispersion helps assess whether parameters
+are identified by the data or mainly constrained by the prior.
+
+\item[log\_likelihood.]  
+Pointwise log-likelihood contributions by observation, chain, and draw.
+These quantities are used for model comparison and diagnostics
+(e.g.\ WAIC, LOO), and allow inspection of how individual observations
+contribute to the fit.
+
+\item[sample\_stats.]  
+Sampler diagnostics produced by the MCMC algorithm.
+They include acceptance rates, step sizes, number of leapfrog steps,
+tree depth, energy, and divergence indicators.
+These statistics are essential to assess the numerical reliability of
+the simulation and to detect pathologies such as poor adaptation or
+divergent transitions.
+
+\end{description}
+
+\subsection{Graphical Diagnostics}
+
+Biogeme displays several plots produced by PyMC:
+
+\begin{description}
+
+\item[Trace plots.]  
+Show per-chain evolution of draws.  
+\textit{Good:} overlapping chains with no visible drift.  
+\textit{Bad:} chains stuck at different levels or showing trends.
+
+\item[Rank plots.]  
+Rank-normalized distributions across chains.  
+Close agreement across chains indicates good mixing.
+
+\item[Energy plots (NUTS).]  
+Show the Hamiltonian energy distribution.  
+Separated energy distributions or low BFMI signal poor exploration.
+
+\item[Autocorrelation plots.]  
+Show lag dependence.  
+Fast decay indicates good mixing; slow decay suggests high parameter correlation.
+
+\end{description}
+
+\noindent
+\emph{Practical advice:}  
+Even when numerical diagnostics look good, graphical verification is essential.  
+Graphs often reveal subtle issues (e.g., multimodality, slow transitions)
+that summary statistics cannot detect.
+
+\clearpage
+\appendix
+
+\section{Example of the simulation of a Markov chain}
+\label{sec:example}
 
 We illustrate the notion of stationary and time-reversible Markov chains
 with a simple example involving customer engagement on an online service
@@ -403,9 +1392,446 @@ draws (Figure~\ref{fig:markov_2} illustrates the chain from step 1000 to step 20
   \caption{\label{fig:markov_2}Simulation of the three–state Markov chain  (t=1000,\ldots, 2000)}
 \end{figure}
 
+Although this example is purely illustrative, it captures the key idea
+of MCMC: by simulating a Markov chain whose stationary distribution is
+the target distribution, the empirical frequencies of the chain
+approximate that distribution as the number of iterations increases.
+
+\section{Hamiltonian Monte Carlo}
+\label{sec:hmc}
+
+PyMC relies on \emph{Hamiltonian Monte Carlo} (HMC) and its adaptive
+variant, the \emph{No-U-Turn Sampler} (NUTS), to generate draws from the
+posterior distribution of the model parameters.  
+This section provides a conceptual description of the algorithm, assuming
+that the reader is already familiar with the Metropolis--Hastings (MH)
+algorithm and the idea of proposing candidate states through a Markov
+chain with an accept--reject mechanism.
+
+\subsection{Target distribution}
+
+Let $\boldsymbol{\theta} \in \mathbb{R}^d$ denote the vector of model
+parameters, and let
+\[
+f(\boldsymbol{\theta}) \propto p(\boldsymbol{\theta} \mid \mathcal{D})
+\]
+be the posterior density given the observed data $\mathcal{D}$.  
+As in standard MH, the goal is to construct a Markov chain whose stationary
+distribution is $f(\boldsymbol{\theta})$.
+
+The main difficulty addressed by HMC is that, in high-dimensional models,
+simple random-walk proposals lead to very slow exploration of the
+parameter space. HMC overcomes this limitation by exploiting the
+\emph{geometry} of the posterior distribution through its derivatives.
+
+\subsection{Augmenting the state space: momentum variables}
+
+The key idea of HMC is to introduce an auxiliary \emph{momentum variable}
+\[
+\boldsymbol{p} \in \mathbb{R}^d,
+\]
+and to define a joint density over $(\boldsymbol{\theta}, \boldsymbol{p})$:
+\begin{equation}
+\label{eq:joint_density}
+\pi(\boldsymbol{\theta}, \boldsymbol{p})
+=
+f(\boldsymbol{\theta}) \,
+\mathcal{N}(\boldsymbol{p} \mid \boldsymbol{0}, \mathbf{M}),
+\end{equation}
+where $\mathbf{M}$ is a symmetric positive definite \emph{mass matrix}.
+
+The momentum variable has no direct statistical interpretation; it is an
+algorithmic device inspired by classical mechanics. Its role is to allow
+the sampler to generate coherent, directed moves across the parameter
+space, rather than diffusive random walks.
+
+\subsection{Hamiltonian formulation}
+
+Define the \emph{potential energy}
+\[
+U(\boldsymbol{\theta}) = - \log f(\boldsymbol{\theta}),
+\]
+and the \emph{kinetic energy}
+\[
+K(\boldsymbol{p}) = \frac{1}{2}\boldsymbol{p}^\top \mathbf{M}^{-1}\boldsymbol{p}.
+\]
+
+The sum
+\begin{equation}
+\label{eq:hamiltonian}
+H(\boldsymbol{\theta}, \boldsymbol{p})
+=
+U(\boldsymbol{\theta}) + K(\boldsymbol{p})
+\end{equation}
+is called the \emph{Hamiltonian}.  
+With this definition, the joint density \eqref{eq:joint_density} can be
+written as
+\[
+\pi(\boldsymbol{\theta}, \boldsymbol{p})
+\propto
+\exp\!\bigl(-H(\boldsymbol{\theta}, \boldsymbol{p})\bigr).
+\]
+
+Sampling from the posterior $f(\boldsymbol{\theta})$ can therefore be
+achieved by sampling from $\pi(\boldsymbol{\theta}, \boldsymbol{p})$ and
+discarding the momentum variable.
 
 
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.80\textwidth,
+    height=6cm,
+    xlabel={$\theta$},
+    ylabel={$U(\theta) = -\log f(\theta)$},
+    xmin=-4, xmax=4,
+    ymin=-0.2, ymax=8.5,
+    axis lines=left,
+    ticks=none,
+    domain=-4:4,
+    samples=200,
+]
+% A smooth "potential energy" curve (illustrative)
+\addplot[thick] {0.6*(x^2) + 1.2*sin(deg(1.2*x)) + 0.8};
 
+% Mark a current state and a proposed far state along a "trajectory"
+\addplot[only marks, mark=*, mark size=2pt] coordinates {(-2.4, {0.6*(2.4^2) + 1.2*sin(deg(1.2*(-2.4))) + 0.8})};
+\addplot[only marks, mark=*, mark size=2pt] coordinates {( 1.9, {0.6*(1.9^2) + 1.2*sin(deg(1.2*( 1.9))) + 0.8})};
+
+\node[anchor=south west] at (axis cs:-2.4, {0.6*(2.4^2) + 1.2*sin(deg(1.2*(-2.4))) + 0.8})
+{\small current $\theta$};
+
+\node[anchor=south east] at (axis cs:1.9, {0.6*(1.9^2) + 1.2*sin(deg(1.2*(1.9))) + 0.8})
+{\small proposed $\theta'$};
+
+% A stylized guided path (not exact dynamics; pedagogical)
+\addplot[
+  thick,
+  -{Stealth[length=3mm]},
+] coordinates {
+  (-2.4, {0.6*(2.4^2) + 1.2*sin(deg(1.2*(-2.4))) + 0.8})
+  (-1.3, {0.6*(1.3^2) + 1.2*sin(deg(1.2*(-1.3))) + 0.8})
+  (-0.2, {0.6*(0.2^2) + 1.2*sin(deg(1.2*(-0.2))) + 0.8})
+  ( 0.8, {0.6*(0.8^2) + 1.2*sin(deg(1.2*( 0.8))) + 0.8})
+  ( 1.9, {0.6*(1.9^2) + 1.2*sin(deg(1.2*( 1.9))) + 0.8})
+};
+
+\end{axis}
+\end{tikzpicture}
+\caption{Illustration of the HMC intuition in one dimension. The posterior density
+$f(\theta)$ is converted into a potential energy $U(\theta)=-\log f(\theta)$.
+Hamiltonian dynamics use gradients of $U(\theta)$ (equivalently, of $\log f(\theta)$)
+to propose long, coherent moves from a current value $\theta$ to a distant candidate
+$\theta'$, avoiding the diffusive behavior of random-walk proposals.}
+\label{fig:hmc_potential_intuition}
+\end{figure}
+
+\subsection{Hamiltonian dynamics and the proposal mechanism}
+
+HMC generates proposals by simulating \emph{Hamiltonian dynamics},
+defined by the system of differential equations
+\begin{align}
+\frac{d\boldsymbol{\theta}}{dt}
+&=
+\phantom{-}\frac{\partial H}{\partial \boldsymbol{p}}
+=
+\mathbf{M}^{-1}\boldsymbol{p},
+\\[4pt]
+\frac{d\boldsymbol{p}}{dt}
+&=
+-\frac{\partial H}{\partial \boldsymbol{\theta}}
+=
+-\nabla_{\boldsymbol{\theta}} U(\boldsymbol{\theta})
+=
+\nabla_{\boldsymbol{\theta}} \log f(\boldsymbol{\theta}).
+\end{align}
+
+These equations show explicitly how the \emph{gradient of the log posterior}
+is exploited. The dynamics push the parameter vector $\boldsymbol{\theta}$
+toward regions of high posterior density while preserving the total
+energy $H$.
+
+Two fundamental properties of Hamiltonian dynamics are essential for MCMC:
+\begin{itemize}
+  \item they are \emph{volume preserving}, meaning that the transformation
+        has unit Jacobian;
+  \item they are \emph{time reversible}.
+\end{itemize}
+These properties ensure that the resulting proposal can be embedded
+within a Metropolis--Hastings accept--reject step.
+
+\subsection{The leapfrog integrator}
+
+In practice, the differential equations above cannot be solved exactly.
+HMC therefore relies on a numerical scheme known as the
+\emph{leapfrog integrator}, which approximates the dynamics using a step
+size $\varepsilon$.
+
+Given a current state $(\boldsymbol{\theta}, \boldsymbol{p})$, one leapfrog
+step consists of:
+\begin{align*}
+\boldsymbol{p}\!\left(t + \tfrac{\varepsilon}{2}\right)
+&=
+\boldsymbol{p}(t)
++
+\tfrac{\varepsilon}{2}\,
+\nabla_{\boldsymbol{\theta}} \log f(\boldsymbol{\theta}(t)),
+\\
+\boldsymbol{\theta}(t + \varepsilon)
+&=
+\boldsymbol{\theta}(t)
++
+\varepsilon\, \mathbf{M}^{-1}
+\boldsymbol{p}\!\left(t + \tfrac{\varepsilon}{2}\right),
+\\
+\boldsymbol{p}(t + \varepsilon)
+&=
+\boldsymbol{p}\!\left(t + \tfrac{\varepsilon}{2}\right)
++
+\tfrac{\varepsilon}{2}\,
+\nabla_{\boldsymbol{\theta}} \log f(\boldsymbol{\theta}(t + \varepsilon)).
+\end{align*}
+
+The leapfrog scheme is carefully designed to preserve reversibility and
+volume, and to approximately conserve the Hamiltonian. As a result,
+large moves in parameter space can be proposed with high acceptance
+probability.
+
+
+\subsection{Metropolis correction}
+
+After $L$ leapfrog steps, the algorithm produces a proposal
+$(\boldsymbol{\theta}', \boldsymbol{p}')$. Because numerical integration
+introduces small errors, the Hamiltonian is not exactly preserved. The
+proposal is therefore accepted with probability
+\begin{equation}
+\alpha
+=
+\min\!\left(
+1,
+\exp\!\left[
+- H(\boldsymbol{\theta}', \boldsymbol{p}')
++ H(\boldsymbol{\theta}, \boldsymbol{p})
+\right]
+\right).
+\end{equation}
+
+If the proposal is accepted, the new state of the chain is
+$\boldsymbol{\theta}'$; otherwise, the chain remains at
+$\boldsymbol{\theta}$. This correction step guarantees that the Markov
+chain has the desired stationary distribution.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  arr/.style={-{Stealth[length=3mm]}, thick},
+  pt/.style={circle, fill, inner sep=1.3pt},
+  lab/.style={font=\small}
+]
+
+% Axes
+\draw[-latex] (-4.2,0) -- (4.6,0) node[below] {$\theta$};
+\draw[-latex] (0,-3.6) -- (0,3.8) node[left] {$p$};
+
+% "Energy" level sets (ellipses): H(theta,p)=U(theta)+K(p)
+% Interpretable as constant-energy orbits in phase space.
+\foreach \a/\b in {1.2/0.9, 2.2/1.6, 3.2/2.3} {
+  \draw[thick] (0,0) ellipse (\a cm and \b cm);
+}
+
+\node[lab] at (3.4,2.9) {constant $H(\theta,p)$};
+
+% Ideal continuous Hamiltonian trajectory: stays on one ellipse
+\draw[arr] (2.2,0) arc[start angle=0, end angle=80, x radius=2.2, y radius=1.6];
+\node[lab, align=left] at (3.0,1.1)
+{ideal dynamics\\(exact energy conservation)};
+
+% Leapfrog numerical trajectory: slightly off the ellipse (energy error)
+% Draw a nearby "numerical" curve with a small radial drift
+\draw[arr, dashed] (2.2,0.15)
+  .. controls (1.9,0.95) and (1.2,1.55) .. (0.2,1.75)
+  .. controls (-0.8,1.95) and (-1.6,1.55) .. (-2.1,0.8);
+
+\node[lab, align=left] at (-3.9,2.9)
+{leapfrog path\\(small energy error)};
+
+% Mark start and end points
+\node[pt, label={[lab]below right:{$(\theta_0,p_0)$}}] (s) at (2.2,0) {};
+\node[pt, label={[lab]above left:{$(\theta',p')$}}] (e) at (-2.1,0.8) {};
+
+% Explain acceptance rule
+\node[lab, align=left] at (0.2,-3.0)
+{Metropolis correction uses the Hamiltonian change\\
+$\Delta H = H(\theta',p') - H(\theta_0,p_0)$ and accepts with\\
+$\alpha = \min\!\bigl(1, \exp(-\Delta H)\bigr)$.};
+
+% Add a small "rejection" arrow to show return to start (conceptual)
+\draw[arr, gray] (-1.0,-1.8) -- (1.6,-0.3);
+\node[lab, gray, align=left] at (-2.9,-2.0)
+{if rejected,\\keep $(\theta_0,p_0)$};
+
+\end{tikzpicture}
+\caption{Phase-space view of HMC in one dimension. By introducing a momentum
+variable $p$, the sampler simulates (approximate) Hamiltonian dynamics in the
+augmented space $(\theta,p)$. Exact dynamics would conserve the Hamiltonian
+$H(\theta,p)=U(\theta)+K(p)$ and move along a constant-energy contour. The leapfrog
+integrator is reversible and volume preserving but introduces a small numerical
+energy error $\Delta H$. The Metropolis accept/reject step corrects for this error,
+accepting the proposed state with probability $\alpha=\min(1,e^{-\Delta H})$.
+As the step size decreases, $\Delta H$ tends to be smaller and acceptance tends
+to increase.}
+\label{fig:hmc_phase_space}
+\end{figure}
+
+\subsection{Automatic tuning with NUTS}
+
+Choosing the number of leapfrog steps $L$ is difficult in practice.
+PyMC therefore uses the \emph{No-U-Turn Sampler} (NUTS), which dynamically
+extends the Hamiltonian trajectory forward and backward in time until
+it detects that the path is starting to reverse direction.
+
+NUTS eliminates the need for manual tuning of $L$ while preserving the
+same theoretical guarantees as HMC. From the user’s perspective, only a
+target acceptance rate must be specified, and the sampler adapts
+internally to the geometry of the posterior distribution.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[
+  arr/.style={-{Stealth[length=3mm]}, thick},
+  pt/.style={circle, fill, inner sep=1.2pt},
+  lab/.style={font=\small}
+]
+% Axes
+\draw[-latex] (-0.2,0) -- (8.2,0) node[below] {$\theta_1$};
+\draw[-latex] (0,-0.2) -- (0,4.6) node[left] {$\theta_2$};
+
+% A stylized trajectory
+\draw[thick] (0.8,0.8)
+  .. controls (2.0,3.8) and (4.2,4.2) .. (5.2,3.1)
+  .. controls (6.3,1.8) and (6.8,1.0) .. (6.1,0.9)
+  .. controls (5.2,0.8) and (4.1,1.2) .. (3.4,2.0)
+  .. controls (2.6,2.9) and (2.0,3.1) .. (1.6,2.4);
+
+% Mark points: start, intermediate, end
+\node[pt, label={[lab]below left:{$\boldsymbol{\theta}_0$}}] (t0) at (0.8,0.8) {};
+\node[pt, label={[lab]above:{$\boldsymbol{\theta}_{\text{mid}}$}}] (tm) at (5.2,3.1) {};
+\node[pt, label={[lab]below:{$\boldsymbol{\theta}_{\text{end}}$}}] (te) at (1.6,2.4) {};
+
+% A chord vector (start to end)
+\draw[arr] (t0) -- node[lab, below, pos=0.55] {$\boldsymbol{\theta}_{\text{end}}-\boldsymbol{\theta}_0$} (te);
+
+% A momentum direction at the end (stylized)
+\draw[arr] (te) -- ++(-1.2,0.3) node[lab, left] {$\boldsymbol{p}_{\text{end}}$};
+
+% U-turn condition illustration (dot product)
+\node[lab, align=left] at (4.7,0.6)
+{$\text{Stop when }(\boldsymbol{\theta}_{\text{end}}-\boldsymbol{\theta}_0)^\top \mathbf{M}^{-1}\boldsymbol{p}_{\text{end}} < 0,$\\
+meaning the path starts turning back.};
+
+\end{tikzpicture}
+\caption{Geometric intuition for the NUTS stopping rule. NUTS grows a Hamiltonian
+trajectory and stops when the direction of travel (represented by the momentum)
+starts pointing back toward earlier states, indicating a ``U-turn.'' This avoids
+wasting computation on trajectories that retrace their steps, and removes the need
+to manually choose the number of leapfrog steps.}
+\label{fig:nuts_uturn}
+\end{figure}
+\subsection{Implications for Bayesian estimation}
+
+Compared to standard Metropolis--Hastings algorithms, HMC and NUTS:
+\begin{itemize}
+  \item exploit gradients of the log posterior to guide proposals,
+  \item generate long-distance moves with high acceptance rates,
+  \item handle strong posterior correlations efficiently,
+  \item scale well to high-dimensional parameter spaces.
+\end{itemize}
+
+These properties explain why PyMC can reliably estimate complex Bayesian
+choice models, latent-variable models, and mixture models that would be
+computationally prohibitive with simpler MCMC methods.
+
+
+\paragraph{Bibliographic pointers.}
+
+The Metropolis--Hastings accept--reject framework dates to \citeasnoun{Metropolis1953} and \citeasnoun{Hastings1970}. The
+original ``hybrid/Hamiltonian'' Monte Carlo construction in statistics
+and lattice field theory is due to \citeasnoun{Duane1987}. A
+widely cited modern reference that derives HMC from Hamiltonian
+mechanics, explains the role of momentum variables and the mass
+matrix, and connects energy conservation to high acceptance rates is
+Neal’s handbook chapter (\cite{Neal2011}). Practical and geometric
+intuition about HMC diagnostics (energy error, divergences, tuning,
+mass-matrix adaptation) is emphasized by
+\citeasnoun{Betancourt2017}. The No-U-Turn Sampler (NUTS), which
+removes the need to hand-tune the path length, is introduced by
+\citeasnoun{HoffmanGelman2014}. The leapfrog
+(Störmer--Verlet) integrator used in HMC is a standard symplectic,
+reversible, volume-preserving method; a canonical reference on
+symplectic integrators and geometric numerical integration is \citeasnoun{HairerLubichWanner2006}. For extensions that
+exploit local curvature via Riemannian geometry (conceptually related
+to mass-matrix design), see \citeasnoun{GirolamiCalderhead2011}.
+
+\section{How PyMC implements implicit integration over random parameters.}
+\label{sec:pymc_random}
+The key reason why Bayesian estimation in \textsc{Biogeme}, via PyMC, does not require explicit Monte--Carlo integration lies in the way the probabilistic model is constructed and sampled. In PyMC, all unknown quantities are represented as random variables within a single joint probabilistic model. This includes both the structural parameters (such as mean taste coefficients) and the random parameters associated with individual heterogeneity. In other words, the random coefficients that would traditionally be integrated out in a mixture of logit likelihood are explicitly introduced as latent variables in the model.
+
+Formally, let $\boldsymbol{\beta}$ denote the population-level parameters and let
+$\boldsymbol{\eta}_n$ denote the individual-specific random coefficients for individual $n$.
+Instead of defining a marginal likelihood of the form
+\[
+p(y_n \mid \boldsymbol{\beta})
+=
+\int p(y_n \mid \boldsymbol{\eta}_n)\,
+p(\boldsymbol{\eta}_n \mid \boldsymbol{\beta})\,
+d\boldsymbol{\eta}_n,
+\]
+PyMC defines the joint posterior
+\[
+p(\boldsymbol{\beta}, \boldsymbol{\eta}_{1:N} \mid \mathcal{D})
+\propto
+\left[
+\prod_{n=1}^N
+p(y_n \mid \boldsymbol{\eta}_n)
+\, p(\boldsymbol{\eta}_n \mid \boldsymbol{\beta})
+\right]
+p(\boldsymbol{\beta}),
+\]
+where $\mathcal{D}$ denotes the observed choices. The individual-level random
+coefficients $\boldsymbol{\eta}_n$ are treated exactly like any other unknown
+parameter and are sampled jointly with $\boldsymbol{\beta}$ by the MCMC
+algorithm.
+
+During sampling, PyMC repeatedly generates draws
+\[
+\bigl(\boldsymbol{\beta}^{(s)}, \boldsymbol{\eta}_{1:N}^{(s)}\bigr),
+\qquad s = 1, \dots, S,
+\]
+from this joint posterior distribution. Conditional on a given draw
+$\boldsymbol{\eta}_n^{(s)}$, the likelihood contribution of observation $n$
+is simply the kernel of the elementary discrete choice model, typically a
+logit probability. The role that numerical integration plays in classical
+maximum likelihood estimation is thus replaced by averaging over posterior
+draws:
+\[
+p(y_n \mid \boldsymbol{\beta})
+\approx
+\frac{1}{S} \sum_{s=1}^S
+p\!\left(y_n \mid \boldsymbol{\eta}_n^{(s)}\right),
+\]
+where the averaging is performed implicitly by the MCMC procedure itself.
+
+From the user's perspective, this has an important practical implication.
+When specifying a mixture model in \textsc{Biogeme}, one does not write the
+integrated (mixed) likelihood. Instead, one provides only the conditional
+log-likelihood of the elementary model, given a realization of the random
+coefficients. PyMC handles the sampling of the latent random parameters and,
+through Monte--Carlo averaging over the posterior draws, automatically
+approximates the required integrals. This approach is both theoretically
+exact in the limit of an infinite number of draws and numerically stable,
+as it avoids introducing simulation noise directly into the likelihood
+evaluation.
 \clearpage
 \bibliographystyle{dcudoi}
 \bibliography{transpor}
