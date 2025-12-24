@@ -16,7 +16,6 @@ from biogeme.biogeme import BIOGEME
 from biogeme.catalog import CentralController, Configuration, ControllerOperator
 from biogeme.catalog.specification import Specification
 from biogeme.exceptions import BiogemeError
-from biogeme.parameters import Parameters
 from biogeme.results_processing import EstimationResults
 from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
 from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
@@ -143,7 +142,6 @@ class AssistedSpecification(Neighborhood):
         multi_objectives: Callable[[EstimationResults | None], list[float]],
         pareto_file_name: str,
         validity: Callable[[EstimationResults], bool] | None = None,
-        parameter_file: str | None = None,
     ):
         """Ctor
 
@@ -155,12 +153,11 @@ class AssistedSpecification(Neighborhood):
             why if it is invalid, or None otherwise
 
         """
-        self.biogeme_parameters: Parameters = Parameters()
-        self.biogeme_parameters.read_file(parameter_file)
-        self.parameter_file: str = self.biogeme_parameters.file_name
         self.multi_objectives = multi_objectives
         logger.debug('Ctor assisted specification')
         self.biogeme_object = biogeme_object
+        self.biogeme_parameters = biogeme_object.biogeme_parameters
+
         self.central_controller = CentralController(
             expression=self.biogeme_object.log_like,
             maximum_number_of_configurations=self.biogeme_parameters.get_value(
@@ -188,7 +185,9 @@ class AssistedSpecification(Neighborhood):
             error_msg = 'No log likelihood function is defined'
             raise BiogemeError(error_msg)
         self.database = biogeme_object.database
-        Specification.biogeme_parameters = self.biogeme_parameters
+        Specification.maximum_number_parameters = self.biogeme_parameters.get_value(
+            name='maximum_number_parameters', section='AssistedSpecification'
+        )
         Specification.expression = self.expression
         Specification.database = self.database
         self.operators = {
