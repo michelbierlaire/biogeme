@@ -15,15 +15,14 @@ from __future__ import annotations
 import logging
 from typing import Callable
 
-from biogeme_optimization.pareto import SetElement
-
 from biogeme.catalog import CentralController, Configuration
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
-from biogeme.parameters import Parameters, get_default_value
+from biogeme.parameters import get_default_value
 from biogeme.results_processing import EstimationResults
 from biogeme.tools import ModelNames
 from biogeme.validity import Validity
+from biogeme_optimization.pareto import SetElement
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +42,14 @@ class Specification:
     function that checks the validity of the results
     """
     generic_name = 'default_name'  #: short name for file names
-    biogeme_parameters: Parameters | None = None
+    maximum_number_parameters: int = get_default_value(
+        name='maximum_number_parameters', section='AssistedSpecification'
+    )
     model_names: ModelNames | None = None
 
     def __init__(
         self,
         configuration: Configuration,
-        biogeme_parameters: Parameters | None = None,
     ):
         """Creates a specification from a  configuration
 
@@ -60,16 +60,6 @@ class Specification:
             raise BiogemeError(error_msg)
         self.configuration = configuration
         self.validity = None
-        self.biogeme_parameters = biogeme_parameters
-        self.maximum_number_parameters = (
-            get_default_value(
-                name='maximum_number_parameters', section='AssistedSpecification'
-            )
-            if biogeme_parameters is None
-            else biogeme_parameters.get_value(
-                name='maximum_number_parameters', section='AssistedSpecification'
-            )
-        )
         logger.debug(f'{self.maximum_number_parameters=}')
 
         self._estimate()
