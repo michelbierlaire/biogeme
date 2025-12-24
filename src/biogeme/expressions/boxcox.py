@@ -13,7 +13,7 @@ import jax
 import jax.numpy as jnp
 import pandas as pd
 import pytensor.tensor as pt
-from biogeme.expressions import Beta
+from biogeme.expressions import Beta, Expression
 
 from .bayesian import PymcModelBuilderType
 from .binary_expressions import BinaryOperator
@@ -55,12 +55,22 @@ class BoxCox(BinaryOperator):
     """
 
     def __init__(self, x: Expression, ell: Expression):
-        super().__init__(left=x, right=ell)
-        self.x = validate_and_convert(x)
-        self.ell = validate_and_convert(ell)
-        self.children += [self.x, self.ell]
+        # Always store the validated/converted children and pass them to the
+        # parent constructor. This avoids keeping both raw and converted
+        # references and prevents duplicating children in the expression tree.
+        x_c = validate_and_convert(x)
+        ell_c = validate_and_convert(ell)
+        super().__init__(left=x_c, right=ell_c)
+        self.x = x_c
+        self.ell = ell_c
 
-    def deep_flat_copy(self) -> BinaryMax:
+    def __str__(self) -> str:
+        return f'BoxCox({self.left}, {self.right})'
+
+    def __repr__(self) -> str:
+        return f'BoxCox({repr(self.left)}, {repr(self.right)})'
+
+    def deep_flat_copy(self) -> BoxCox:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
         It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
         The flat part is irrelevant for this expression.
