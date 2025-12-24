@@ -379,6 +379,8 @@ native_random_number_generators = {
     ),
 }
 
+assert all(k == k.upper() for k in native_random_number_generators)
+
 
 def description_of_native_draws() -> dict[str, str]:
     """
