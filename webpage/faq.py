@@ -1,6 +1,25 @@
 faq = {}
 
 faq[
+    'What was new in Biogeme 3.3.2?'
+] = """
+The main new features introduced in Biogeme 3.3.2 are the integration
+of PyMC for Bayesian estimation and the introduction of a set
+of dedicated Python classes designed to facilitate the specification
+and estimation of hybrid choice models. The PyMC interface enables
+full Bayesian inference for complex models involving latent variables,
+providing access to posterior distributions, credible intervals, and
+diagnostic tools for convergence and model assessment. In parallel,
+the new object-oriented specification framework allows analysts to
+define structural equations, measurement equations, normalization
+rules, and choice models in a modular and transparent way. This
+significantly reduces boilerplate code, improves readability and
+maintainability of model specifications, and makes it easier to
+combine or compare different model variants (such as choice-only,
+MIMIC, and full hybrid choice models) within a unified and consistent
+framework."""
+
+faq[
     'What was new in Biogeme 3.3.1?'
 ] = """
 Biogeme 3.3.1 is a major release. In earlier versions, the computation of the likelihood function and its derivatives 
