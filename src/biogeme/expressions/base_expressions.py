@@ -94,15 +94,6 @@ class Expression:
             f"deep_flat_copy not implemented for {type(self).__name__}"
         )
 
-    def __repr__(self) -> str:
-        """built-in function used to compute the 'official' string reputation
-        of an object
-
-        :return: description of the expression
-
-        """
-        return self.__str__()
-
     def __add__(self, other: ExpressionOrNumeric) -> Expression:
         """
         Operator overloading. Generate an expression for addition.
