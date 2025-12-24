@@ -11,11 +11,13 @@ from datetime import datetime
 from enum import Enum
 
 import arviz as az
-import biogeme.version as version
 import matplotlib.pyplot as plt
+import numpy as np
+from biogeme import version
 from biogeme.exceptions import BiogemeError
 
 from .bayesian_results import BayesianResults, EstimatedBeta
+from ..parameters import Parameters
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +25,146 @@ logger = logging.getLogger(__name__)
 class EmptyListOfParameters(BiogemeError): ...
 
 
+# --- Identification diagnostics section ---
+def _flatten_draws_to_matrix(idata_group, var_names: list[str]) -> np.ndarray:
+    """
+    Return a 2D array of shape (n_draws_total, n_params) from an ArviZ group.
+
+    The group is expected to be an xarray Dataset (for example, ``idata.posterior`` or
+    ``idata.prior``) containing scalar parameters stored with dimensions
+    ``(chain, draw)``.
+
+    Missing variables are ignored.
+
+    :param idata_group: ArviZ/xarray dataset (for example, ``idata.posterior`` or ``idata.prior``).
+    :param var_names: Names of the scalar parameters to extract.
+    :return: A 2D NumPy array with one column per parameter and one row per draw.
+    """
+    cols: list[np.ndarray] = []
+    for name in var_names:
+        if name not in idata_group:
+            continue
+        da = idata_group[name]
+        # Expected dims: (chain, draw). Flatten to (chain*draw,)
+        values = np.asarray(da.values)
+        if values.ndim != 2:
+            # Only support scalar parameters stored as (chain, draw)
+            continue
+        cols.append(values.reshape(-1))
+    if not cols:
+        return np.empty((0, 0), dtype=float)
+    return np.column_stack(cols).astype(float, copy=False)
+
+
+def _cov_eigen_diagnostics(
+    draws_2d: np.ndarray,
+    var_names: list[str] | None = None,
+    *,
+    near_singular_tol_ratio: float = 1e-10,
+    top_eigenvector_loadings: int = 10,
+) -> dict:
+    """
+    Compute covariance eigen-structure diagnostics from posterior/prior draws.
+
+    The input must be a 2D array of draws with shape ``(n_draws, n_parameters)``.
+    The function computes the covariance matrix and reports the smallest and largest
+    (nonnegative-clipped) eigenvalues, a condition number, and an effective rank
+    (Shannon entropy of normalized eigenvalues).
+
+    If the covariance is detected as ill-conditioned (large anisotropy), the eigenvector associated with the
+    *largest* eigenvalue (largest posterior-variance direction) is also reported. This direction is the covariance
+    analogue of the near-null Hessian direction used in maximum-likelihood identification checks.
+
+    :param draws_2d: Draws arranged as a 2D array of shape ``(n_draws, n_parameters)``.
+    :param var_names: Optional parameter names used to label the eigenvector entries.
+    :param near_singular_tol_ratio: Threshold on ``min_eigenvalue / max_eigenvalue`` below which
+        the covariance is considered near singular (used to flag large condition number: cond >= 1/tol).
+    :param top_eigenvector_loadings: Maximum number of largest-magnitude coefficients to report in
+        ``max_eigenvector_top``.
+    :return: A dictionary of diagnostics. Always includes basic scalar metrics when possible.
+        When ill-conditioned, also includes ``max_eigenvector`` and ``max_eigenvector_top``.
+    """
+    if draws_2d.size == 0:
+        return {}
+
+    n_draws, n_params = draws_2d.shape
+    if n_draws < 2 or n_params < 1:
+        return {"n_parameters": int(n_params), "n_draws": int(n_draws)}
+
+    # Center and covariance
+    x = draws_2d - np.mean(draws_2d, axis=0, keepdims=True)
+    cov = (x.T @ x) / float(n_draws - 1)
+    cov = 0.5 * (cov + cov.T)
+
+    # Need eigenvectors -> eigh (symmetric)
+    eigvals, eigvecs = np.linalg.eigh(cov)
+
+    eigvals = np.asarray(eigvals, dtype=float)
+    eig_clipped = np.clip(eigvals, 0.0, None)
+
+    min_eig = float(np.min(eig_clipped))
+    max_eig = float(np.max(eig_clipped))
+
+    cond_ratio = float(max_eig / min_eig) if min_eig > 0.0 else float("inf")
+
+    # Effective rank (Shannon)
+    total = float(np.sum(eig_clipped))
+    if total > 0.0:
+        p = eig_clipped / total
+        p = p[p > 0.0]
+        h = float(-np.sum(p * np.log(p)))
+        eff_rank = float(np.exp(h))
+    else:
+        eff_rank = 0.0
+
+    out: dict = {
+        "n_parameters": int(n_params),
+        "n_draws": int(n_draws),
+        "min_eigenvalue": min_eig,
+        "max_eigenvalue": max_eig,
+        "condition_number": cond_ratio,
+        "effective_rank": eff_rank,
+    }
+
+    if max_eig > 0.0:
+        ratio = float(min_eig / max_eig)
+        out["min_eigenvalue_ratio"] = ratio
+        out["condition_number"] = cond_ratio
+
+        # Ill-conditioned => report the eigenvector for largest eigenvalue (weak identification direction)
+        if cond_ratio >= (1.0 / float(near_singular_tol_ratio)):
+            v = np.asarray(eigvecs[:, -1], dtype=float)  # column for largest eigenvalue
+
+            # Stabilize sign so output is reproducible/readable
+            idx = int(np.argmax(np.abs(v)))
+            if v[idx] < 0:
+                v = -v
+
+            names = (
+                var_names
+                if (var_names is not None and len(var_names) == n_params)
+                else [f"param_{i}" for i in range(n_params)]
+            )
+
+            mapping = {names[i]: float(v[i]) for i in range(n_params)}
+
+            order = np.argsort(np.abs(v))[::-1]
+            k = int(min(max(top_eigenvector_loadings, 1), n_params))
+            top = [(names[int(i)], float(v[int(i)])) for i in order[:k]]
+
+            out["max_eigenvector"] = mapping
+            out["max_eigenvector_top"] = top
+
+    return out
+
+
 def format_real_number(value: float) -> str:
-    """Format a real number to be included in the HTML table"""
+    """
+    Format a real number for inclusion in an HTML table.
+
+    :param value: Number to format.
+    :return: A short string representation (currently using ``.3g`` formatting).
+    """
     formatted_value = f'{value:.3g}'
     return formatted_value
 
@@ -99,10 +239,17 @@ def get_html_arviz_diagnostics(
     var_names: list[str] | None = None,
     figure_size: FigureSize = FigureSize.MEDIUM,
 ) -> str:
-    """Generate ArviZ diagnostic figures (trace, rank, energy, autocorr) and
-    return an HTML snippet embedding them as <img> tags.
+    """
+    Generate ArviZ diagnostic figures and return an HTML snippet embedding them.
 
-    Figures are saved next to the HTML file in a 'figs' subfolder.
+    The figures (trace, rank, energy, autocorrelation) are saved next to the HTML file
+    in a sibling folder named ``<html_basename>_figs``.
+
+    :param estimation_results: Bayesian estimation results holding the ``InferenceData``.
+    :param html_filename: Target HTML filename (used to locate the figures directory).
+    :param var_names: Optional list of variables to include in the diagnostics.
+    :param figure_size: Size level controlling figure sizes and embedded image width.
+    :return: An HTML snippet containing ``<img>`` tags (or an empty string if disabled).
     """
     # Early exit if diagnostics should not be rendered
     if figure_size == FigureSize.NONE:
@@ -323,6 +470,13 @@ def get_html_preamble(estimation_results: BayesianResults, file_name: str) -> st
 
 
 def generate_one_row(description: str, value: str) -> str:
+    """
+    Generate a single HTML table row with a description/value pair.
+
+    :param description: Label shown in the left column.
+    :param value: Value shown in the right column.
+    :return: HTML code for one ``<tr>`` row.
+    """
     return (
         f'<tr class=biostyle><td align=right >'
         f'<strong>{description}</strong>: </td> '
@@ -340,6 +494,228 @@ def get_html_general_statistics(estimation_results: BayesianResults) -> str:
     for description, value in estimation_results.generate_general_information().items():
         html += generate_one_row(description=description, value=f'{value}')
     html += '</table>\n'
+    return html
+
+
+# --- Identification diagnostics section ---
+def get_html_identification_diagnostics(estimation_results: BayesianResults) -> str:
+    """
+    Generate an HTML section reporting identification diagnostics.
+
+    The goal is to help detect (i) non-identification / weak identification
+    and (ii) cases where parameters appear to be primarily determined by the
+    prior rather than by the likelihood.
+
+    The section is based on the posterior (and, if present in the
+    ``InferenceData``, the prior) draws.
+
+    Interpretation guide (heuristics):
+
+    - **Posterior covariance eigenvalues / condition number**: a very small
+      minimum eigenvalue or a very large condition number suggests directions
+      in parameter space that are nearly flat (non-identified or weakly
+      identified). This typically manifests as strong posterior correlations,
+      slow mixing, divergent transitions, and sensitivity to priors.
+
+    - **Effective rank**: an effective rank substantially smaller than the
+      number of parameters indicates that the posterior variability is
+      concentrated in a lower-dimensional subspace, which is consistent with
+      linear (or nearly linear) dependencies among parameters.
+
+    - **Prior vs posterior dispersion** (only if prior draws were saved):
+      if a parameter's posterior standard deviation is close to its prior
+      standard deviation, the data may be providing little information about
+      that parameter ("identified by the prior"). Conversely, a much smaller
+      posterior standard deviation indicates that the likelihood is informative.
+
+    These diagnostics are *not* formal proofs of non-identification; they are
+    practical signals to investigate the model specification (normalizations,
+    redundant parameters, collinearity, and coding).
+
+    :param estimation_results: Bayesian estimation results.
+    :return: HTML code for the identification diagnostics section, or an empty string if unavailable.
+    """
+
+    # If the BayesianResults object does not expose diagnostics, fail gracefully.
+    if not hasattr(estimation_results, "identification_diagnostics"):
+        return ""
+
+    try:
+        identification_threshold = Parameters().get_value('identification_threshold')
+        diag = estimation_results.identification_diagnostics(
+            identification_threshold=identification_threshold
+        )
+    except Exception as e:  # pragma: no cover
+        logger.warning(f"Identification diagnostics failed: {e}")
+        return ""
+
+    if not isinstance(diag, dict) or not diag:
+        return ""
+
+    # Ensure covariance/eigen diagnostics are present for HTML reporting.
+    # Some implementations may only return per-parameter prior/posterior dispersion.
+    idata = estimation_results.idata
+
+    # Use the model's reported parameter names as defaults
+    default_names = list(estimation_results.parameters.keys())
+
+    posterior_block = diag.get("posterior")
+    if not isinstance(posterior_block, dict):
+        posterior_block = {}
+        diag["posterior"] = posterior_block
+
+    if not posterior_block:
+        try:
+            draws = _flatten_draws_to_matrix(idata.posterior, default_names)
+            diag["posterior"] = _cov_eigen_diagnostics(draws, var_names=default_names)
+        except Exception as e:  # pragma: no cover
+            logger.warning(f"Posterior covariance diagnostics failed: {e}")
+
+    prior_block = diag.get("prior")
+    if not isinstance(prior_block, dict):
+        prior_block = {}
+        diag["prior"] = prior_block
+
+    # Only compute prior diagnostics if a prior group is present.
+    if hasattr(idata, "prior") and (not prior_block):
+        try:
+            draws = _flatten_draws_to_matrix(idata.prior, default_names)
+            diag["prior"] = _cov_eigen_diagnostics(draws, var_names=default_names)
+        except Exception as e:  # pragma: no cover
+            logger.warning(f"Prior covariance diagnostics failed: {e}")
+
+    html = '<h1>Identification diagnostics</h1>\n'
+
+    # Explanatory text
+    html += (
+        '<p class="biostyle">'
+        'This section reports quick numerical checks for <em>non-identification</em> or <em>weak identification</em>. '
+        'Intuitively, identification problems mean that some combinations of parameters can change without changing '
+        'the likelihood much, so the posterior is very wide (or nearly flat) in some directions. '
+        'These checks use the posterior draws (and the prior draws, if available).'
+        '</p>\n'
+        '<h2>How to read the numbers</h2>\n'
+        '<ul class="biostyle">'
+        '<li><strong>Posterior covariance diagnostics</strong> (eigenvalues, condition number, effective rank): '
+        'these describe the <em>shape</em> of the posterior cloud in parameter space.'
+        '<ul class="biostyle">'
+        '<li><strong>max_eigenvalue</strong>: the <em>largest posterior-variance</em> direction (widest direction of the posterior). When identification is weak, the posterior can become extremely wide along some linear combination of parameters; this often shows up as a very large <code>max_eigenvalue</code> together with a large condition number. If reported, the <code>max_eigenvector_top</code> loadings indicate which parameters contribute most to that weakly identified linear combination.</li>'
+        '<li><strong>condition_number = max_eigenvalue / min_eigenvalue</strong>: anisotropy of the posterior covariance. Larger values indicate stronger near-dependencies among parameters. Rough rule of thumb: around <strong>10^3</strong> deserves attention; <strong>10^5</strong> or more is a strong red flag.</li>'
+        '<li><strong>effective_rank</strong>: an “effective dimension” of posterior variability (between 0 and <code>n_parameters</code>). If it is much smaller than <code>n_parameters</code>, the posterior variability concentrates in a lower-dimensional subspace, consistent with (near) linear dependencies among parameters.</li>'
+        '</ul></li>'
+        '<li><strong>Prior covariance diagnostics</strong>: same metrics, but for the prior. '
+        'If the prior has normal scale and full rank but the posterior becomes ill-conditioned, '
+        'the issue is typically in the likelihood/model specification (not in the prior).</li>'
+        '<li><strong>Identified by the prior</strong> (requires prior draws): '
+        'compare prior vs posterior dispersion. For each parameter, '
+        '<code>std_ratio_post_over_prior ≈ 1</code> means the data did not shrink uncertainty much (likelihood weakly informative for that parameter). '
+        'A ratio <strong>well below 1</strong> (say 0.1 or 0.01) means the likelihood is informative for that parameter.</li>'
+        '</ul>\n'
+        '</p>\n'
+    )
+
+    # Flags (if any)
+    flags = diag.get("flags")
+    if flags:
+        html += (
+            '<p class="biostyle"><strong>Flags:</strong> '
+            + ", ".join([str(f) for f in flags])
+            + "</p>\n"
+        )
+
+    # Helper to render a small dict as a 2-col table
+    def _render_kv_table(title: str, dct: dict) -> str:
+        if not dct:
+            return ""
+
+        def _fmt(v) -> str:
+            # list of (name, coeff) for compact eigenvector display
+            if isinstance(v, list) and v and isinstance(v[0], tuple) and len(v[0]) == 2:
+                parts: list[str] = []
+                for name, coef in v:
+                    coef_str = (
+                        format_real_number(float(coef))
+                        if isinstance(coef, (float, np.floating))
+                        else str(coef)
+                    )
+                    parts.append(f"{coef_str}·{name}")
+                return ", ".join(parts)
+
+            # dict of {name: coeff}: show only top contributors
+            if isinstance(v, dict):
+                items = list(v.items())
+                items.sort(key=lambda t: abs(float(t[1])), reverse=True)
+                parts: list[str] = []
+                for name, coef in items[:10]:
+                    parts.append(f"{format_real_number(float(coef))}·{name}")
+                return ", ".join(parts)
+
+            if isinstance(v, float):
+                if np.isinf(v):
+                    return "inf"
+                if np.isnan(v):
+                    return "nan"
+                return format_real_number(v)
+
+            return str(v)
+
+        out = '<h2>' + title + '</h2>\n'
+        out += '<table border="0">\n'
+        for k, v in dct.items():
+            out += generate_one_row(description=str(k), value=_fmt(v))
+        out += '</table>\n'
+        return out
+
+    html += _render_kv_table(
+        "Posterior covariance diagnostics", diag.get("posterior", {})
+    )
+    html += _render_kv_table("Prior covariance diagnostics", diag.get("prior", {}))
+
+    # Per-parameter table (if available)
+    per_param = diag.get("per_parameter")
+    if per_param is not None:
+        html += '<h2>Per-parameter prior/posterior dispersion</h2>\n'
+        html += (
+            '<p class="biostyle">'
+            'The table below compares posterior and prior standard deviations when prior draws are available. '
+            'A ratio close to 1 suggests the prior dominates; a ratio well below 1 suggests the data are informative. '
+            '</p>\n'
+        )
+        # If it is a pandas DataFrame (or any object providing to_html), use it.
+        if hasattr(per_param, "to_html"):
+            html += per_param.to_html(
+                index=True,
+                border=0,
+                classes=["table", "table-striped", "table-sm"],
+                justify="left",
+            )
+            html += "\n"
+        else:
+            # Fallback: try to interpret as an iterable of mappings
+            try:
+                rows = list(per_param)
+            except TypeError:
+                rows = []
+            if rows:
+                # Determine columns
+                if isinstance(rows[0], dict):
+                    cols = list(rows[0].keys())
+                else:
+                    cols = []
+                html += '<table border="1">\n'
+                html += '<tr class=biostyle>'
+                for c in cols:
+                    html += f'<th>{c}</th>'
+                html += '</tr>\n'
+                for r in rows:
+                    if not isinstance(r, dict):
+                        continue
+                    html += '<tr class=biostyle>'
+                    for c in cols:
+                        html += f'<td>{r.get(c, "")}</td>'
+                    html += '</tr>\n'
+                html += '</table>\n'
+
     return html
 
 
@@ -371,6 +747,9 @@ def get_html_one_parameter(
 
     # Value (mean)
     value = estimated_value.mean
+    output += f'<td>{format_real_number(value)}</td>'
+    # Value (median)
+    value = estimated_value.median
     output += f'<td>{format_real_number(value)}</td>'
     # Value (mode)
     value = estimated_value.mode
@@ -432,6 +811,7 @@ def get_html_estimated_parameters(
     html += '<th>Id</th>'
     html += '<th>Name</th>'
     html += '<th>Value (mean)</th>'
+    html += '<th>Value (median)</th>'
     html += '<th>Value (mode)</th>'
     html += '<th>std err.</th>'
     html += '<th>z-value</th>'
@@ -488,6 +868,16 @@ def get_html_estimated_parameters(
     return html
 
 
+def generate_html_simulated_data(estimation_results: BayesianResults) -> str:
+    simulated_data = estimation_results.report_stored_variables()
+    return simulated_data.to_html(
+        index=False,
+        border=0,
+        classes=["table", "table-striped", "table-sm"],
+        justify="left",
+    )
+
+
 def generate_html_file(
     estimation_results: BayesianResults,
     filename: str,
@@ -528,16 +918,17 @@ def generate_html_file(
         except EmptyListOfParameters:
             logger.warning('No parameter to report.')
 
-        try:
-            other_variables = get_html_estimated_parameters(
-                estimation_results=estimation_results,
-                estimated_parameters=False,
-                sort_by_name=True,
-            )
-            print('<h1>Other simulated variables</h1>', file=file)
-            print(other_variables, file=file)
-        except EmptyListOfParameters:
-            pass
+        identification_section = get_html_identification_diagnostics(
+            estimation_results=estimation_results
+        )
+        if identification_section:
+            print(identification_section, file=file)
+
+        print('<h1>Simulated quantities</h1>', file=file)
+        simulated_quantities = generate_html_simulated_data(
+            estimation_results=estimation_results
+        )
+        print(simulated_quantities, file=file)
 
         diagnostics = get_html_arviz_diagnostics(
             estimation_results=estimation_results,

@@ -20,7 +20,7 @@ def _build_parameters_dataframe(
     Return a pandas DataFrame with the same content as the HTML table of parameters.
 
     Columns:
-        Id, Name, Value, std err., z-value, p-value, HDI low, HDI high, R hat, ESS (bulk), ESS (tail)
+        Id, Name, Value (mean), Value (median), Value (mode), std err., z-value, p-value, HDI low, HDI high, R hat, ESS (bulk), ESS (tail)
     """
     if renaming_parameters is not None:
         name_values = list(renaming_parameters.values())
@@ -49,6 +49,7 @@ def _build_parameters_dataframe(
                 "Id": param_idx,
                 "Name": display_name,
                 "Value (mean)": est.mean,
+                "Value (median)": est.median,
                 "Value (mode)": est.mode,
                 "std err.": est.std_err,
                 "z-value": est.z_value,
@@ -67,6 +68,7 @@ def _build_parameters_dataframe(
             "Id",
             "Name",
             "Value (mean)",
+            "Value (median)",
             "Value (mode)",
             "std err.",
             "z-value",

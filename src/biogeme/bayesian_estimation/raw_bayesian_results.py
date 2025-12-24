@@ -14,6 +14,8 @@ from datetime import timedelta
 import arviz as az
 import xarray as xr
 
+from biogeme.tools import print_file_size, timeit
+
 logger = logging.getLogger(__name__)
 
 
@@ -205,6 +207,7 @@ class RawBayesianResults:
         logger.info(f'Saved Bayesian results (posterior + metadata) to {path}')
 
     @classmethod
+    @timeit(label='load')
     def load(cls, path: str) -> RawBayesianResults:
         """
         Load from a single NetCDF file written by :meth:`save`.
@@ -215,7 +218,7 @@ class RawBayesianResults:
         """
         logger.debug(f"Read file {path}")
         idata = az.from_netcdf(path)
-
+        logger.info(f"Loaded NetCDF file size: {print_file_size(path)}")
         # Defaults
         model_name = ""
         user_notes = ""
