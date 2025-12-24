@@ -13,10 +13,12 @@ Thu Nov 20 2025, 11:30:45
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
+from biogeme.bayesian_estimation import BayesianResults
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, DistributedParameter, Draws
 from biogeme.models import loglogit
 from biogeme.results_processing import get_pandas_estimated_parameters
+
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -79,8 +81,13 @@ the_biogeme = BIOGEME(database, conditional_log_likelihood)
 the_biogeme.model_name = 'b06_unif_mixture'
 
 # %%
-# Estimate the parameters
-results = the_biogeme.bayesian_estimation()
+# Estimate the parameters.
+try:
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
+except FileNotFoundError:
+    results = the_biogeme.bayesian_estimation()
 
 # %%
 print(results.short_summary())

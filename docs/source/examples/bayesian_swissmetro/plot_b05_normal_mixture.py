@@ -13,7 +13,7 @@ Thu Nov 20 2025, 11:26:01
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import get_pandas_estimated_parameters
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, DistributedParameter, Draws
 from biogeme.models import loglogit
@@ -99,8 +99,13 @@ the_biogeme = BIOGEME(
 the_biogeme.model_name = 'b05_normal_mixture'
 
 # %%
-# Estimate the parameters
-bayesian_results = the_biogeme.bayesian_estimation()
+# Estimate the parameters.
+try:
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
+except FileNotFoundError:
+    results = the_biogeme.bayesian_estimation()
 
 # %%
 # Get the results in a pandas table

@@ -12,7 +12,7 @@ Mon Nov 03 2025, 13:41:40
 from IPython.core.display_functions import display
 
 import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import get_pandas_estimated_parameters
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import boxcox, loglogit
@@ -76,8 +76,13 @@ the_biogeme = BIOGEME(database, log_probability, bayesian_draws=10000, warmup=10
 the_biogeme.model_name = 'b08_boxcox'
 
 # %%
-# Estimate the parameters
-results = the_biogeme.bayesian_estimation()
+# Estimate the parameters.
+try:
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
+except FileNotFoundError:
+    results = the_biogeme.bayesian_estimation()
 
 # %%
 print(results.short_summary())

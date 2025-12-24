@@ -20,6 +20,7 @@ from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import logcnl
 from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
+
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -126,11 +127,11 @@ the_biogeme = BIOGEME(
 the_biogeme.model_name = 'b11_cnl'
 
 # %%
-already_saved_results = f'saved_results/{the_biogeme.model_name}.nc'
-# %%
 # Estimate the parameters.
 try:
-    results = BayesianResults.from_netcdf(filename=already_saved_results)
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
 except FileNotFoundError:
     results = the_biogeme.bayesian_estimation()
 

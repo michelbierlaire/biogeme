@@ -14,10 +14,11 @@ from IPython.core.display_functions import display
 from pytensor.tensor.var import TensorVariable
 
 import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import get_pandas_estimated_parameters
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
+
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -108,7 +109,12 @@ the_biogeme.model_name = 'b01b_logit'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.bayesian_estimation()
+try:
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
+except FileNotFoundError:
+    results = the_biogeme.bayesian_estimation()
 
 # %%
 print(results.short_summary())

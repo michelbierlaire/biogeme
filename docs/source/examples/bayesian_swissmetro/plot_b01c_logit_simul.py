@@ -17,6 +17,7 @@ from biogeme.bayesian_estimation import BayesianResults
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
 from biogeme.models import logit
+
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -84,7 +85,7 @@ simulate = {
 # As we simulate the probability for all alternatives, even when one of
 # them is not available, Biogeme may trigger some warnings.
 biosim = BIOGEME(database, simulate)
-biosim.model_name = 'b01_logit_simul'
+biosim.model_name = 'b01c_logit_simul'
 
 # %%
 # Retrieve the estimated values of the parameters.

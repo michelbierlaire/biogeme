@@ -13,7 +13,7 @@ Tue Nov 18 2025, 18:42:42
 
 from IPython.core.display_functions import display
 
-from biogeme.bayesian_estimation import get_pandas_estimated_parameters
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
@@ -63,9 +63,13 @@ the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b23a_binary_logit'
 
 # %%
-# Estimate the parameters
-results = the_biogeme.bayesian_estimation()
-
+# Estimate the parameters.
+try:
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
+except FileNotFoundError:
+    results = the_biogeme.bayesian_estimation()
 # %%
 print(results.short_summary())
 

@@ -9,6 +9,7 @@ Michel Bierlaire, EPFL
 Thu Oct 30 2025, 16:40:12
 """
 
+from biogeme.bayesian_estimation import BayesianResults
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
@@ -64,7 +65,12 @@ the_biogeme.model_name = 'b04validation'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.bayesian_estimation()
+try:
+    results = BayesianResults.from_netcdf(
+        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    )
+except FileNotFoundError:
+    results = the_biogeme.bayesian_estimation()
 
 # %%
 # The validation consists in organizing the data into several slices

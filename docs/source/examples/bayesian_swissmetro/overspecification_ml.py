@@ -15,16 +15,17 @@ Michel Bierlaire, EPFL
 Thu Oct 30 2025, 10:15:52
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import (
-    BayesianResults,
-    get_pandas_estimated_parameters,
-)
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
+from biogeme.filenames import get_new_file_name
 from biogeme.models import loglogit
+from biogeme.results_processing import (
+    EstimationResults,
+    generate_html_file,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -60,7 +61,7 @@ asc_train = Beta('asc_train', 0, None, None, 0)
 # The constant associated with Swissmetro is normalized to zero. It does not need to be defined at all.
 # Here, we illustrate the fact that setting the last argument of the `Beta` function to 1 fixes the parameter
 # to its default value (here, 0).
-asc_sm = Beta('asc_sm', 0, None, None, 1)
+asc_sm = Beta('asc_sm', 0, None, None, 0)
 
 # %%
 # Coefficients of the attributes. It is useful to set the upper bound to 0 to reflect the prior assumption about
@@ -91,11 +92,21 @@ log_probability = loglogit(v, av, CHOICE)
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(database, log_probability)
-the_biogeme.model_name = 'b01a_logit'
+the_biogeme.model_name = 'overspecification_ml'
 
 # %%
 # Estimate the parameters.
-results: BayesianResults = the_biogeme.bayesian_estimation()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'{the_biogeme.model_name}.yaml'
+    )
+    html_filename = get_new_file_name(the_biogeme.model_name, 'html')
+    generate_html_file(
+        filename=html_filename,
+        estimation_results=results,
+    )
+except FileNotFoundError:
+    results: EstimationResults = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())
@@ -106,7 +117,3 @@ pandas_results = get_pandas_estimated_parameters(
     estimation_results=results,
 )
 display(pandas_results)
-
-# %%
-# Describe the draws stored in the PyMC report.
-display(results.report_stored_variables())
