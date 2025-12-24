@@ -11,7 +11,6 @@ import numbers
 from typing import TYPE_CHECKING
 
 import biogeme.optimization as opt
-from biogeme.bayesian_estimation import SAMPLER_STRATEGIES_DESCRIPTION
 from biogeme.second_derivatives import SecondDerivativesMode
 
 if TYPE_CHECKING:
@@ -95,6 +94,8 @@ def check_sampling_strategy(x: ParameterValue) -> tuple[bool, str | None]:
 
     :param x: value of the parameter to check
     """
+    from biogeme.bayesian_estimation import SAMPLER_STRATEGIES_DESCRIPTION
+
     if not isinstance(x, str):
         return False, f'Parameter must be a string: {x}'
     possibilities = ['automatic'] + list(SAMPLER_STRATEGIES_DESCRIPTION.keys())
