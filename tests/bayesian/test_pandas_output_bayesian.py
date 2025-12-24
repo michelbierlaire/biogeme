@@ -18,6 +18,7 @@ class DummyEstimate:
     def __init__(
         self,
         mean: float,
+        median: float,
         mode: float,
         std_err: float,
         z_value: float,
@@ -29,6 +30,7 @@ class DummyEstimate:
         ess_tail: float,
     ):
         self.mean = mean
+        self.median = median
         self.mode = mode
         self.std_err = std_err
         self.z_value = z_value
@@ -68,6 +70,7 @@ EXPECTED_COLUMNS = [
     "Id",
     "Name",
     "Value (mean)",
+    "Value (median)",
     "Value (mode)",
     "std err.",
     "z-value",
@@ -84,6 +87,7 @@ def _make_dummy_results_basic() -> DummyBayesianResults:
     params = {
         "beta_time": DummyEstimate(
             mean=-0.5,
+            median=-0.495,
             mode=-0.49,
             std_err=0.1,
             z_value=-5.0,
@@ -96,6 +100,7 @@ def _make_dummy_results_basic() -> DummyBayesianResults:
         ),
         "beta_cost": DummyEstimate(
             mean=-0.2,
+            median=-0.195,
             mode=-0.19,
             std_err=0.05,
             z_value=-4.0,
@@ -141,6 +146,7 @@ def test_build_parameters_dataframe_basic_no_rename_no_sort():
     est0 = res.parameters["beta_time"]
     assert row0["Name"] == "beta_time"
     assert row0["Value (mean)"] == est0.mean
+    assert row0["Value (median)"] == est0.median
     assert row0["Value (mode)"] == est0.mode
     assert row0["std err."] == est0.std_err
     assert row0["z-value"] == est0.z_value
@@ -257,9 +263,9 @@ def test_build_parameters_dataframe_sort_by_name_stable():
     """
     # Construct keys in "unsorted" order with names that will sort differently
     params = {
-        "beta_z": DummyEstimate(1, 1, 0, 0, 0, 0, 0, 1, 1, 1),
-        "beta_a": DummyEstimate(2, 2, 0, 0, 0, 0, 0, 1, 1, 1),
-        "beta_m": DummyEstimate(3, 3, 0, 0, 0, 0, 0, 1, 1, 1),
+        "beta_z": DummyEstimate(1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1),
+        "beta_a": DummyEstimate(2, 2, 2, 0, 0, 0, 0, 0, 1, 1, 1),
+        "beta_m": DummyEstimate(3, 3, 3, 0, 0, 0, 0, 0, 1, 1, 1),
     }
     res = DummyBayesianResults(
         est_keys=["beta_z", "beta_a", "beta_m"], other_keys=[], parameters=params

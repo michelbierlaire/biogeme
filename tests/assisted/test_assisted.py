@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
+
 from biogeme.assisted import AssistedSpecification, ParetoPostProcessing
 from biogeme.exceptions import BiogemeError
 
@@ -86,6 +87,8 @@ class FakeBiogemeParams:
             return 5
         if name == "maximum_attempts" and section == "AssistedSpecification":
             return 10
+        if name == "maximum_number_parameters" and section == "AssistedSpecification":
+            return 100
         raise KeyError(f"Missing parameter {name!r} / section {section!r}")
 
 
@@ -375,7 +378,6 @@ def test_pareto_post_processing_plot_delegates_to_pareto(monkeypatch):
 
 def test_assisted_specification_ctor_sets_up_operators(monkeypatch):
     # Patch dependencies inside biogeme.assisted
-    monkeypatch.setattr("biogeme.assisted.Parameters", FakeBiogemeParams)
     monkeypatch.setattr("biogeme.assisted.CentralController", FakeCentralController)
     monkeypatch.setattr("biogeme.assisted.Specification", FakeSpecification)
     monkeypatch.setattr("biogeme.assisted.ParetoClass", FakeParetoClass)
@@ -397,7 +399,6 @@ def test_assisted_specification_ctor_sets_up_operators(monkeypatch):
         multi_objectives=multi_obj,
         pareto_file_name="fake.pareto",
         validity=None,
-        parameter_file=None,
     )
 
     # One operator defined by FakeCentralController.prepare_operators
@@ -406,7 +407,6 @@ def test_assisted_specification_ctor_sets_up_operators(monkeypatch):
 
 
 def test_assisted_generate_operator_wraps_controller_operator(monkeypatch):
-    monkeypatch.setattr("biogeme.assisted.Parameters", FakeBiogemeParams)
     monkeypatch.setattr("biogeme.assisted.CentralController", FakeCentralController)
     monkeypatch.setattr("biogeme.assisted.Specification", FakeSpecification)
     monkeypatch.setattr("biogeme.assisted.ParetoClass", FakeParetoClass)
@@ -427,7 +427,6 @@ def test_assisted_generate_operator_wraps_controller_operator(monkeypatch):
         multi_objectives=multi_obj,
         pareto_file_name="fake.pareto",
         validity=None,
-        parameter_file=None,
     )
 
     # Take the only operator we created in FakeCentralController
@@ -444,7 +443,6 @@ def test_assisted_generate_operator_wraps_controller_operator(monkeypatch):
 
 
 def test_assisted_is_valid_delegates_to_specification(monkeypatch):
-    monkeypatch.setattr("biogeme.assisted.Parameters", FakeBiogemeParams)
     monkeypatch.setattr("biogeme.assisted.CentralController", FakeCentralController)
     monkeypatch.setattr("biogeme.assisted.Specification", FakeSpecification)
     monkeypatch.setattr("biogeme.assisted.ParetoClass", FakeParetoClass)
@@ -468,7 +466,6 @@ def test_assisted_is_valid_delegates_to_specification(monkeypatch):
         multi_objectives=multi_obj,
         pareto_file_name="fake.pareto",
         validity=None,
-        parameter_file=None,
     )
 
     elem = FakeSetElement("CONF_X")
@@ -480,7 +477,6 @@ def test_assisted_is_valid_delegates_to_specification(monkeypatch):
 def test_assisted_run_when_all_configurations_enumerated(monkeypatch, caplog):
     """Path where number_of_specifications <= maximum_number_catalog_expressions."""
     # Patch
-    monkeypatch.setattr("biogeme.assisted.Parameters", FakeBiogemeParams)
 
     def small_cc_factory(expression, maximum_number_of_configurations):
         # pretend the catalogue has only 3 configurations,
@@ -514,7 +510,6 @@ def test_assisted_run_when_all_configurations_enumerated(monkeypatch, caplog):
         multi_objectives=multi_obj,
         pareto_file_name="fake.pareto",
         validity=None,
-        parameter_file=None,
     )
 
     # Patch ParetoPostProcessing so run() doesn't try to actually estimate models
@@ -540,7 +535,6 @@ def test_assisted_run_when_all_configurations_enumerated(monkeypatch, caplog):
 
 def test_assisted_run_when_heuristic_vns_used(monkeypatch):
     """Path where number_of_specifications > maximum_number_catalog_expressions."""
-    monkeypatch.setattr("biogeme.assisted.Parameters", FakeBiogemeParams)
 
     # CentralController with many configurations to trigger VNS branch
     def central_controller_factory(expression, maximum_number_of_configurations):
@@ -597,7 +591,6 @@ def test_assisted_run_when_heuristic_vns_used(monkeypatch):
         multi_objectives=multi_obj,
         pareto_file_name="fake.pareto",
         validity=None,
-        parameter_file=None,
     )
 
     results = assisted.run()
