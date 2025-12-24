@@ -10,7 +10,9 @@ archives = {}
 resources = {}
 
 
-special['New release'] = 'The new version of Biogeme is substantially faster. Try it.'
+special['New release'] = (
+    'The new version of Biogeme allows Bayesian estimation of the models.'
+)
 # special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
 # special['EPFL Short Course'] = (
 #    'Discrete Choice Analysis: Predicting Individual Behavior and Market Demand. January 26-30, 2025 <a href="https://transp-or-academia.epfl.ch/dca">Click here to register.</a>'
@@ -61,126 +63,23 @@ about['Links'] = (
 """,
 )
 
-about["What's new in Biogeme 3.3.0 and 3.3.1?"] = (
+about["What's new in Biogeme 3.3.2?"] = (
     """
-<p>
-  In this major release, arithmetic expressions and their derivatives are no longer evaluated using <code>cythonbiogeme</code>.
-  Instead, Biogeme now relies on 
-  <a href="https://docs.jax.dev" target="_blank" rel="noopener noreferrer">JAX</a>, 
-  a high-performance numerical computing library for Python.
-</p>
-
-<p>
-  This transition required substantial changes to the underlying codebase. A large portion had to be re-implemented from scratch. 
-  Although the release has undergone extensive testing, some issues may still persist. 
-  If you encounter any problems, please report them on the 
-  <a href="https://groups.google.com/d/forum/biogeme" target="_blank" rel="noopener noreferrer">user group</a>.
-</p>
-
-<p>
-  To the extent possible, the user interface — namely, the syntax for model specification — remains consistent with previous versions. 
-  As a result, we anticipate only minor adjustments will be needed in existing code. 
-  However, some updates may be necessary. In particular, the following expressions have changed:
-</p>
-
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Old syntax</th>
-      <th>New syntax</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code>bioDraws</code></td>
-      <td><code>Draws</code></td>
-    </tr>
-    <tr>
-      <td><code>bioMultSum</code></td>
-      <td><code>MultipleSum</code></td>
-    </tr>
-    <tr>
-      <td><code>bioMax</code></td>
-      <td><code>BinaryMax</code></td>
-    </tr>
-    <tr>
-      <td><code>bioMin</code></td>
-      <td><code>BinaryMin</code></td>
-    </tr>
-    <tr>
-      <td><code>Integrate</code></td>
-      <td><code>IntegrateNormal</code></td>
-    </tr>
-  </tbody>
-</table>
-
-<p>
-  The last change is more than a renaming: <code>IntegrateNormal</code> differs fundamentally from <code>Integrate</code>. 
-  While the old version computed a generic integral, the new one calculates the integral of the function multiplied by the 
-  probability density function of the normal distribution.
-</p>
-
-<p>
-  The impact on computation time is substantial. Preliminary tests on the Swissmetro dataset show the following improvements:
-</p>
-<p>
-<table border="1" cellpadding="6" cellspacing="0">
-  <thead>
-    <tr>
-      <th>Model</th>
-      <th>Computation</th>
-      <th>Speedup (3.3.1 vs 3.2.14)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Logit</td>
-      <td>Function only</td>
-      <td>60.0×</td>
-    </tr>
-    <tr>
-      <td>Logit</td>
-      <td>Function + Gradient</td>
-      <td>164.8×</td>
-    </tr>
-    <tr>
-      <td>Logit</td>
-      <td>Function + Gradient + Hessian</td>
-      <td>54.7×</td>
-    </tr>
-    <tr>
-      <td>CNL</td>
-      <td>Function only</td>
-      <td>120.0×</td>
-    </tr>
-    <tr>
-      <td>CNL</td>
-      <td>Function + Gradient</td>
-      <td>42.7×</td>
-    </tr>
-    <tr>
-      <td>CNL</td>
-      <td>Function + Gradient + Hessian</td>
-      <td>2.7×</td>
-    </tr>
-    <tr>
-      <td>Mixtures_100</td>
-      <td>Function only</td>
-      <td>29.0×</td>
-    </tr>
-    <tr>
-      <td>Mixtures_100</td>
-      <td>Function + Gradient</td>
-      <td>89.2×</td>
-    </tr>
-    <tr>
-      <td>Mixtures_100</td>
-      <td>Function + Gradient + Hessian</td>
-      <td>13.2×</td>
-    </tr>
-  </tbody>
-</table>
-</p>
+The main new features introduced in Biogeme 3.3.2 are the integration
+of PyMC for Bayesian estimation and the introduction of a set
+of dedicated Python classes designed to facilitate the specification
+and estimation of hybrid choice models. The PyMC interface enables
+full Bayesian inference for complex models involving latent variables,
+providing access to posterior distributions, credible intervals, and
+diagnostic tools for convergence and model assessment. In parallel,
+the new object-oriented specification framework allows analysts to
+define structural equations, measurement equations, normalization
+rules, and choice models in a modular and transparent way. This
+significantly reduces boilerplate code, improves readability and
+maintainability of model specifications, and makes it easier to
+combine or compare different model variants (such as choice-only,
+MIMIC, and full hybrid choice models) within a unified and consistent
+framework.
 """,
 )
 
@@ -268,6 +167,7 @@ certainly not complete, and I apologize for those who are omitted:
 	    Nicola Ortelli,
 	    Carolina Osorio,
 	    Meritxell Pacheco Paneque,
+	    Evangelos Paschalidis,
 	    Thomas Robin,
 	    Pascal Scheiben,
 	    Matteo Sorci,
@@ -371,11 +271,11 @@ following commands in Python:
 </ul>
 The result should look like the following:
 <pre>
-Python 3.12.4 (v3.12.4:8e8a4baf65, Jun  6 2024, 17:33:18) [Clang 13.0.0 (clang-1300.0.29.30)] on darwin
+Python 3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from biogeme.version import get_text
 >>> print(get_text())
-biogeme 3.3.0 [2025-08-01]
+biogeme 3.3.2 [2025-12-24]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)
@@ -591,6 +491,8 @@ Package Index</a> repository.
     """
 Previous webpages:
 <ul>
+<li><a href="https://transp-or.epfl.ch/biogeme-3.3.1/"
+target="blank">Webpage for Pandasbiogeme 3.3.1</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.12/"
 target="blank">Webpage for Pandasbiogeme 3.2.12</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.11/"
