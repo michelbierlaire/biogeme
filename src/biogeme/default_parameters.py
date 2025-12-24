@@ -18,7 +18,6 @@ from tabulate import tabulate
 
 import biogeme.check_parameters as cp
 import biogeme.optimization as opt
-from biogeme.bayesian_estimation import describe_strategies
 from biogeme.floating_point import NUMPY_FLOAT
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_version
@@ -38,6 +37,8 @@ class ParameterTuple(NamedTuple):
 
 
 def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
+    from biogeme.bayesian_estimation import describe_strategies
+
     return (
         ParameterTuple(
             name='identification_threshold',
@@ -407,6 +408,16 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
                 f"Defines how MCMC sampling is performed: 'automatic' (selected based on hardware), {describe_strategies()}"
             ),
             check=(cp.check_sampling_strategy,),
+        ),
+        ParameterTuple(
+            name='sample_from_prior',
+            value=True,
+            type=bool,
+            section='Bayesian',
+            description=(
+                'bool: if "True", samples from the prior distributions are generated. This may help in the diagnostic of indentification issues.'
+            ),
+            check=(cp.is_boolean,),
         ),
         ParameterTuple(
             name='bayesian_draws',
