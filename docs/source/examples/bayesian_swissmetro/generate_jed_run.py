@@ -5,7 +5,7 @@ from pathlib import Path
 # Directory containing the Python scripts (current directory)
 BASE_DIR = Path(".")
 
-JED_DIRECTORY = 'swissmetro'
+JED_DIRECTORY = 'bayesian_swissmetro'
 
 # Template for the .run file
 SLURM_TEMPLATE = """#!/bin/bash -l
