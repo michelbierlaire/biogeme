@@ -8,6 +8,7 @@ Mon Oct 20 2025, 17:18:07
 
 from __future__ import annotations
 
+import contextlib
 import logging
 from datetime import timedelta
 
@@ -216,7 +217,45 @@ class RawBayesianResults:
         anymore.
         """
         logger.debug(f"Read file {path}")
-        idata = az.from_netcdf(path, engine="h5netcdf")
+        # On Windows, NetCDF backends may keep the file handle open via xarray's
+        # file-manager cache. We therefore (i) reduce/disable caching when possible,
+        # (ii) eagerly load all groups into memory, and (iii) close datasets.
+        # Some xarray versions reject file_cache_maxsize=0, so we fall back safely.
+        try:
+            cache_ctx = xr.set_options(file_cache_maxsize=1)
+        except Exception:
+            cache_ctx = contextlib.nullcontext()
+
+        with cache_ctx:
+            idata = az.from_netcdf(path, engine="h5netcdf")
+
+        # Detach from disk: load all datasets and close any open file handles.
+        # This makes it safe to delete the NetCDF file immediately after loading.
+        try:
+            for group_name in idata.groups():
+                ds = getattr(idata, group_name, None)
+                if ds is None:
+                    continue
+                # Ensure arrays are in memory (not lazy on-disk)
+                try:
+                    ds.load()
+                except Exception:
+                    pass
+                # Close backend resources if supported
+                try:
+                    ds.close()
+                except Exception:
+                    pass
+        except Exception:
+            # If anything goes wrong, keep behavior backward compatible.
+            pass
+        # Best-effort: clear xarray's global file cache to ensure no lingering handles.
+        try:
+            from xarray.backends.file_manager import FILE_CACHE
+
+            FILE_CACHE.clear()
+        except Exception:
+            pass
         logger.info(f"Loaded NetCDF file size: {print_file_size(path)}")
         # Defaults
         model_name = ""
