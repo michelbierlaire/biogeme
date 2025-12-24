@@ -44,7 +44,9 @@ dependencies = [
     "joblib >= 1.5.1",
     "tqdm_joblib >= 0.0.4",
     "pymc >= 5.25.1",
-    "numpyro >= 0.19.0"
+    "numpyro >= 0.19.0",
+    "h5netcdf>=1.7.3",
+    "h5py>=3.15.1",
 ]
 
 [project.optional-dependencies]
