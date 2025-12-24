@@ -14,13 +14,13 @@ Michel Bierlaire, EPFL
 Sun Apr 27 2025, 15:59:08
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.assisted import AssistedSpecification
 from biogeme.biogeme import BIOGEME
 from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.results_processing import EstimationResults, compile_estimation_results
+
 from everything_spec import database, model_catalog
 
 logger = blog.get_screen_logger(level=blog.INFO)
