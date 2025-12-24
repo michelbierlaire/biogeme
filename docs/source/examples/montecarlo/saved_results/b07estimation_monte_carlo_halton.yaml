@@ -1,0 +1,112 @@
+# File b07estimation_monte_carlo_halton.yaml has automatically been generated on 2025-12-24 11:40:07.736680
+# biogeme 3.3.2 [2025-12-24]
+
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.4673525515490473
+- -1.8631795460374867
+- 1.2077434138223213
+- -0.8456519898869321
+- 0.18017820026095693
+bhhh:
+- - 1012.3690161378167
+  - 464.74796526365003
+  - 195.95360736810105
+  - -28.679128775281406
+  - -278.56174284221515
+- - 464.74796526365003
+  - 825.641913092812
+  - 374.24881028227446
+  - -261.2706573669753
+  - 420.60596941457356
+- - 195.95360736810105
+  - 374.24881028227446
+  - 284.3003527579891
+  - 8.487853244796787
+  - 45.7966918530453
+- - -28.679128775281406
+  - -261.2706573669753
+  - 8.487853244796787
+  - 1533.633067647036
+  - -536.9143924119895
+- - -278.56174284221515
+  - 420.60596941457356
+  - 45.7966918530453
+  - -536.9143924119895
+  - 1511.7222274274877
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '22.519446'
+final_log_likelihood: -8570.984885813541
+gradient:
+- 0.01993075850297288
+- 0.008478091228067974
+- 0.004056258583300831
+- 0.0039607782402839575
+- -0.025225843912025425
+hessian:
+- - -1061.9307648022227
+  - -511.92226714202417
+  - -239.5559281149562
+  - 73.09914551853097
+  - 378.65199423732895
+- - -511.92226714202417
+  - -825.6680636363218
+  - -390.3442258650226
+  - 191.29601393658515
+  - -334.0200252820587
+- - -239.55592811495623
+  - -390.34422586502257
+  - -313.8211989844609
+  - 37.121949222731885
+  - -16.053937452392322
+- - 73.09914551853097
+  - 191.29601393658518
+  - 37.12194922273188
+  - -707.9739010381843
+  - 235.0893417237241
+- - 378.65199423732895
+  - -334.0200252820587
+  - -16.05393745239233
+  - 235.0893417237241
+  - -1529.461166092117
+initial_log_likelihood: -10979.66057198499
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b07estimation_monte_carlo_halton
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 9
+number_of_observations: 10719
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2.3e-06 <= 6.1e-06
+  Number of function evaluations: 106
+  Number of gradient evaluations: 63
+  Number of hessian evaluations: 0
+  Number of iterations: '43'
+  Optimization time: '221.061598'
+  Proportion of Hessian calculation: 0/31 = 0.0%
+  Relative gradient: 2.2975067167783803e-06
+sample_size: 10719
+types_of_draws:
+  b_time_rnd: NORMAL_HALTON2
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null
