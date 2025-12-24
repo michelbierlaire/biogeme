@@ -12,16 +12,13 @@ Michel Bierlaire
 Wed Mar 26 19:30:36 2025
 """
 
-from dataclasses import dataclass
 from collections.abc import Callable
+from dataclasses import dataclass
 
 import numpy as np
 
 from biogeme.exceptions import BiogemeError
-from .native_draws import (
-    native_random_number_generators,
-    RandomNumberGeneratorTuple,
-)
+from .native_draws import RandomNumberGeneratorTuple, native_random_number_generators
 
 
 @dataclass
@@ -57,7 +54,11 @@ class DrawFactory:
         :raises ValueError: if any user generator name collides with native keywords.
         """
         self.native_generators = native_random_number_generators
-        self.user_generators = {} if user_generators is None else user_generators
+        self.user_generators = (
+            {k.upper(): v for k, v in user_generators.items()}
+            if user_generators is not None
+            else {}
+        )
         self._validate_reserved_keywords()
 
     def _validate_reserved_keywords(self) -> None:
@@ -80,10 +81,12 @@ class DrawFactory:
         :return: A function that generates a NumPy array of draws.
         :raises BiogemeError: if the draw type is not recognized.
         """
-        if draw_type in self.native_generators:
-            return self.native_generators[draw_type].generator
-        if draw_type in self.user_generators:
-            return self.user_generators[draw_type].generator
+        key = draw_type.upper()
+        if key in self.native_generators:
+            return self.native_generators[key].generator
+        if key in self.user_generators:
+            return self.user_generators[key].generator
+
         raise BiogemeError(
             f"Unknown draw type '{draw_type}' for variable '{name}'. "
             f"Available native types: {list(self.native_generators.keys())}. "
