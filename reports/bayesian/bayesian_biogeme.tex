@@ -1,0 +1,805 @@
+\documentclass[12pt,a4paper]{article}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{michel}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathmorphing}
+\usepackage[dcucite,abbr]{harvard}
+\harvardparenthesis{none}\harvardyearparenthesis{round}
+\usepackage{varioref}
+\usepackage{longtable}
+\usepackage{siunitx}
+\usepackage{pgfplots}
+\providecommand{\mathdefault}[1]{#1}
+\pgfplotsset{compat=newest}
+\sisetup{
+  parse-numbers=false,
+  detect-inline-weight=math,
+  tight-spacing=true
+}
+
+\usepackage{listings}
+\usepackage{color}
+\lstset{language=Python}
+\lstset{numbers=none, basicstyle=\footnotesize,
+  numberstyle=\tiny,keywordstyle=\color{blue},stringstyle=\ttfamily,showstringspaces=false}
+\lstset{backgroundcolor=\color[rgb]{0.95 0.95 0.95}}
+\lstdefinestyle{numbers}{numbers=left, stepnumber=1,
+  numberstyle=\tiny,basicstyle=\tiny, numbersep=10pt}
+\lstdefinestyle{nonumbers}{numbers=none}
+\lstset{
+  breaklines=true,
+  breakatwhitespace=true,
+}
+
+\usepackage{geometry}
+\geometry{left=2cm, top=1.5cm, right=2cm, bottom=1.5cm}
+
+\title{Bayesian Estimation with Biogeme: User Guide}
+\author{Michel Bierlaire}
+\date{\today}
+
+\begin{document}
+
+%======================================================================
+% Title page
+%======================================================================
+
+\begin{titlepage}
+\pagestyle{empty}
+
+\maketitle
+\vspace{2cm}
+
+\begin{center}
+\small Report TRANSP-OR xxxxxx  \\ Transport and Mobility Laboratory \\
+School of Architecture, Civil and Environmental Engineering \\
+Ecole Polytechnique F\'ed\'erale de Lausanne \\ \verb+transp-or.epfl.ch+
+
+\vspace{0.5cm}
+\textsc{Series on Biogeme}
+\end{center}
+
+\clearpage
+\end{titlepage}
+
+\begin{titlepage}
+\tableofcontents
+\end{titlepage}
+
+%======================================================================
+\section{Introduction}
+%======================================================================
+
+Biogeme (\texttt{biogeme.epfl.ch}) is designed to estimate the parameters of
+discrete choice models. Although originally built around maximum likelihood
+estimation, Biogeme also supports Bayesian estimation based on Markov chain
+Monte Carlo (MCMC), producing draws from the posterior distribution rather than
+a single point estimate.
+
+This user guide assumes that the reader is familiar with discrete choice models
+and has successfully installed Biogeme. It focuses on \emph{how to run Bayesian
+estimation in Biogeme, how to specify models appropriately, and how to interpret
+the output}. Methodological background (MCMC, HMC, NUTS) is intentionally kept
+to a minimum.
+
+\subsection{When and why Bayesian estimation in Biogeme}
+
+Bayesian estimation is particularly useful for:
+\begin{itemize}
+  \item mixture models and random coefficients, where classical maximum
+  likelihood requires Monte--Carlo integration;
+  \item latent variable models and complex hierarchical structures;
+  \item applications where full uncertainty propagation is needed
+  (credible intervals, predictive distributions, Bayesian simulation).
+\end{itemize}
+
+\subsection{Maximum likelihood vs Bayesian estimation in Biogeme}
+
+Although maximum likelihood (ML) and Bayesian estimation rely on the same
+underlying behavioral model, they differ in interpretation, numerical treatment,
+and diagnostics. Table~\ref{tab:ml_vs_bayes} summarizes the practical
+differences from a Biogeme user’s perspective.
+
+\begin{table}[ht]
+\centering
+\caption{Comparison of maximum likelihood and Bayesian estimation in Biogeme}
+\label{tab:ml_vs_bayes}
+\begin{tabular}{p{4cm} p{5.5cm} p{5.5cm}}
+\hline
+ & \textbf{Maximum likelihood (ML)} & \textbf{Bayesian estimation} \\
+\hline
+Unknown parameters
+&
+Fixed but unknown constants
+&
+Random variables with prior distributions
+\\[6pt]
+
+Main output
+&
+Point estimate (MLE) and asymptotic covariance
+&
+Posterior distribution (draws)
+\\[6pt]
+
+Uncertainty interpretation
+&
+Asymptotic (large-sample) approximation
+&
+Finite-sample uncertainty (conditional on priors)
+\\[6pt]
+
+Estimation algorithm
+&
+Deterministic optimization (BFGS, Newton, etc.)
+&
+Stochastic simulation (MCMC via NUTS)
+\\[6pt]
+
+Identification issues
+&
+Singular or ill-conditioned Hessian
+&
+Wide/correlated posterior directions
+\\[6pt]
+
+Random coefficients
+&
+Require Monte--Carlo integration
+&
+Treated as latent variables (no explicit integration)
+\\[6pt]
+
+Convergence diagnostics
+&
+Gradient norm, Hessian eigenvalues
+&
+$\widehat{R}$, ESS, divergences, trace plots
+\\[6pt]
+
+Model comparison
+&
+Likelihood ratio tests, AIC, BIC
+&
+WAIC, LOO, posterior predictive fit
+\\[6pt]
+\hline
+\end{tabular}
+\end{table}
+
+\noindent
+\textbf{Rule of thumb.}
+Bayesian computation does not fix identification problems. If a model is weakly
+identified under ML, the Bayesian posterior will typically be wide, highly
+correlated, or slow to explore. Identification diagnostics should therefore be
+interpreted jointly with convergence diagnostics.
+
+%======================================================================
+\section{Quickstart}
+%======================================================================
+
+This section provides the minimal steps to run a Bayesian estimation in
+\textsc{Biogeme} and explains key configuration options in
+\texttt{biogeme.toml}. We assume that the model is already specified in Python
+using standard Biogeme expressions.
+
+\subsection{Minimal workflow}
+
+Bayesian estimation in Biogeme follows the same high-level workflow as maximum
+likelihood estimation:
+\begin{enumerate}
+  \item specify the model (utilities, likelihood or log-likelihood expression, parameters);
+  \item configure the estimation algorithm in \texttt{biogeme.toml};
+  \item run the estimation script;
+  \item interpret the HTML report and inspect the \texttt{.nc} file containing
+        posterior (and optional prior) draws.
+\end{enumerate}
+
+In the Bayesian case, Biogeme relies on MCMC sampling (NUTS) to approximate the
+posterior distribution. The estimation therefore produces \emph{draws} from the
+posterior distribution rather than a single point estimate. Reported summaries
+(means, medians, HDIs, diagnostics, information criteria) are computed from
+these draws.
+
+\subsection{Bayesian configuration in \texttt{biogeme.toml}}
+\label{sec:bayesian_config_userguide}
+
+Biogeme reads Bayesian settings from the \texttt{[Bayesian]} section of
+\texttt{biogeme.toml}. The most important options control:
+(i) which sampler backend is used (PyMC vs NumPyro/JAX),
+(ii) the amount of MCMC computation (warm-up, draws, chains),
+and (iii) which additional diagnostics and criteria are computed.
+
+\paragraph{Sampler backend and sampling strategy.}
+The option \texttt{mcmc\_sampling\_strategy} controls how sampling is performed:
+\begin{itemize}
+  \item \texttt{"automatic"}: Biogeme selects a suitable strategy depending on
+  available hardware and installed libraries.
+  \item \texttt{"pymc"}: use the standard PyMC NUTS sampler on CPU.
+  \item \texttt{"numpyro-parallel"}: use NumPyro/JAX and run one chain per
+  device (multiple CPU devices, GPUs, or TPUs).
+  \item \texttt{"numpyro-vectorized"}: use NumPyro/JAX and run all chains
+  vectorized on a single device.
+\end{itemize}
+When JAX is available, NumPyro-based strategies can be significantly faster,
+especially on accelerators or when multiple devices can be used.
+
+\paragraph{Number of chains, warm-up, and posterior draws.}
+\begin{description}
+  \item[\texttt{chains}.]
+  Number of independent MCMC chains. A common default is 4. Multiple chains are
+  essential for convergence diagnostics (e.g.\ $\widehat{R}$).
+
+  \item[\texttt{warmup}.]
+  Number of warm-up iterations per chain. These iterations are used to adapt
+  the sampler (step size, mass matrix) and are not used for posterior summaries.
+  For difficult posteriors, increasing warm-up is often more effective than
+  increasing the number of retained draws.
+
+  \item[\texttt{bayesian\_draws}.]
+  Number of post-warm-up draws \emph{per chain} retained for inference. Increasing
+  this number reduces Monte Carlo error (once the chains mix well), but does not
+  fix non-convergence.
+\end{description}
+
+\paragraph{Target acceptance rate.}
+The option \texttt{target\_accept} is the target acceptance probability for NUTS.
+Typical values are 0.8--0.9; values such as 0.9 or 0.95 often improve robustness
+for challenging posteriors (at the cost of smaller step sizes and longer run
+times). If divergences occur, increasing \texttt{target\_accept} is a common
+first adjustment.
+
+\paragraph{Saving prior draws (recommended for identification diagnostics).}
+If \texttt{sample\_from\_prior = "True"}, Biogeme generates prior draws and saves
+them alongside posterior draws. This is useful to diagnose weak identification,
+because it enables direct comparisons between prior and posterior dispersion.
+
+\paragraph{Likelihood-based summaries and model comparison criteria.}
+\begin{description}
+  \item[\texttt{calculate\_likelihood}.]
+  If \texttt{"True"}, Biogeme computes likelihood-based statistics derived from
+  posterior draws.
+
+  \item[\texttt{calculate\_waic}.]
+  If \texttt{"True"}, Biogeme computes WAIC (see Section~\ref{sec:information}).
+
+  \item[\texttt{calculate\_loo}.]
+  If \texttt{"True"}, Biogeme computes LOO (Pareto-smoothed leave-one-out, see Section~\ref{sec:information}).
+\end{description}
+
+\subsection{Recommended starting configuration}
+
+A reasonable baseline configuration for many discrete choice models is:
+\begin{itemize}
+  \item \texttt{chains = 4},
+  \item \texttt{warmup = 1000} to \texttt{2000},
+  \item \texttt{bayesian\_draws = 1000} to \texttt{2000},
+  \item \texttt{target\_accept = 0.9},
+  \item \texttt{sample\_from\_prior = "True"} during model development.
+\end{itemize}
+
+\subsection{Example \texttt{[Bayesian]} section}
+
+\begin{lstlisting}[language=,basicstyle=\ttfamily\footnotesize]
+[Bayesian]
+mcmc_sampling_strategy = "automatic"
+sample_from_prior = "True"
+bayesian_draws = 2000
+warmup = 2000
+chains = 4
+target_accept = 0.9
+calculate_waic = "True"
+calculate_loo = "True"
+calculate_likelihood = "True"
+\end{lstlisting}
+
+\noindent
+\emph{Practical advice.}
+If you are mainly interested in parameter inference, you may disable WAIC/LOO
+initially to reduce computation and storage. When comparing models, enable WAIC
+and/or LOO and ensure that pointwise log-likelihood values are available in the
+output.
+
+%======================================================================
+\section{Model specification}
+%======================================================================
+
+Model specification for Bayesian estimation is very similar to maximum
+likelihood specification, with important differences regarding priors and (for
+mixtures) the treatment of random coefficients.
+
+\subsection{Prior distributions}
+
+In Biogeme, all unknown model parameters that may be estimated from data are
+represented by objects of class \texttt{Beta}. In the Bayesian context, a
+\texttt{Beta} object plays two simultaneous roles:
+(i) it defines an unknown quantity appearing in the model expressions (utilities,
+log-likelihood, etc.), and
+(ii) it defines how this quantity is treated by the Bayesian sampler through a
+prior distribution and (optionally) bounds.
+
+\paragraph{The \texttt{Beta} constructor.}
+A parameter is created as
+\begin{lstlisting}[language=Python]
+b_cost = Beta(
+    name='b_cost',
+    value=-1.0,
+    lowerbound=None,
+    upperbound=None,
+    status=0,
+    sigma_prior=10.0,
+    prior=None,
+)
+\end{lstlisting}
+The arguments have the following meaning in Bayesian estimation:
+\begin{description}
+  \item[\texttt{name}] Identifier of the parameter, used in outputs and as the
+  underlying PyMC variable name.
+
+  \item[\texttt{value}] Default value.
+  In Bayesian estimation, this value is used as an initial value for the sampler
+  (via PyMC's \texttt{initval}) and as the center of the default prior when no
+  user-defined prior is supplied.
+
+  \item[\texttt{lowerbound}, \texttt{upperbound}] Optional bounds on the support
+  of the parameter.
+  In Bayesian estimation, these bounds matter \emph{twice}: they restrict the
+  admissible parameter space and they also determine whether Biogeme uses a
+  truncated default prior.
+
+  \item[\texttt{status}] If different from 0, the parameter is fixed to its
+  default value \texttt{value} and is not sampled. If \texttt{status=0}, the
+  parameter is unknown and is estimated/sampled.
+
+  \item[\texttt{sigma\_prior}] Scale used by Biogeme for the \emph{default} prior
+  when \texttt{prior=None}. It controls how informative the default Normal (or
+  truncated Normal) prior is. Larger values yield weaker regularization.
+
+  \item[\texttt{prior}] User-supplied prior distribution, provided as a
+  \emph{prior factory} (a Python callable). If \texttt{prior=None}, Biogeme builds
+  a default prior using \texttt{value}, \texttt{sigma\_prior} and the bounds.
+\end{description}
+
+\paragraph{Default priors constructed by Biogeme.}
+If no user-defined prior is provided (\texttt{prior=None}), Biogeme constructs:
+\begin{itemize}
+  \item an unbounded Normal prior centered at \texttt{value} when both bounds are
+  \texttt{None};
+  \item a truncated Normal prior whenever at least one bound is specified.
+\end{itemize}
+The prior scale is governed by \texttt{sigma\_prior}. This default behavior is
+typically appropriate for most applications and provides mild regularization and
+numerical stability.
+
+\paragraph{Custom priors via a prior factory.}
+A custom prior is specified by providing a callable that receives:
+(i) the PyMC variable name,
+(ii) the initial value,
+(iii) the lower bound (if any),
+(iv) the upper bound (if any),
+and returns a valid PyMC distribution object.
+
+The example below defines a prior factory that constructs a Student-\textit{t}
+distribution and truncates it so that the parameter can only take negative
+values:
+\begin{lstlisting}
+import pymc as pm
+from pytensor.tensor import TensorVariable
+
+def negative_student_prior(
+    name: str,
+    initial_value: float,
+    lower_bound: float | None,
+    upper_bound: float | None,
+) -> TensorVariable:
+    base = pm.StudentT.dist(mu=0.0, sigma=10.0, nu=5.0)
+    # Enforce negativity through an upper bound at 0.
+    upper = 0.0 if upper_bound is None else min(0.0, upper_bound)
+    return pm.Truncated(
+        name=name,
+        dist=base,
+        upper=upper,
+        initval=initial_value,
+    )
+\end{lstlisting}
+
+The prior is then passed to a Biogeme parameter as follows:
+\begin{lstlisting}[language=Python]
+b_cost = Beta(
+    'b_cost',
+    value=-1.0,
+    lowerbound=None,
+    upperbound=None,
+    status=0,
+    prior=negative_student_prior,
+)
+\end{lstlisting}
+
+\paragraph{Practical recommendations.}
+\begin{itemize}
+  \item \textbf{Avoid uniform priors with NUTS.} Flat densities provide little
+  curvature and can lead to poor exploration, divergences, and slow or unstable
+  convergence.
+  \item \textbf{Use bounds to encode identification constraints.} In particular,
+  scale parameters (standard deviations) should be constrained to be positive
+  (e.g.\ \texttt{lowerbound=1e-6}) to avoid artificial sign symmetry and
+  spurious bimodal posteriors.
+  \item \textbf{Tune informativeness via \texttt{sigma\_prior}.} When using the
+  default priors, \texttt{sigma\_prior} controls the degree of regularization.
+\end{itemize}
+
+
+\subsection{Random coefficients and mixtures}
+
+A major practical advantage of Bayesian estimation in \textsc{Biogeme} is that
+mixture models do not require explicit numerical integration over random
+parameters. Random coefficients are treated as latent variables and are sampled
+jointly with structural parameters.
+
+Because integration is handled implicitly by the sampler, the analyst specifies
+only the \emph{conditional} log-likelihood given a realization of the random
+coefficients (typically the log of a logit probability). There is no need to
+write a mixture of logit likelihoods or to manually integrate over the mixing
+distribution.
+
+In many applications, it is useful to retain simulated draws of random
+coefficients in the estimation output (heterogeneity analysis,
+post-estimation simulation, etc.). The following statement tells Biogeme to store
+the draws of a random coefficient:
+\begin{lstlisting}
+b_time_rnd = DistributedParameter('b_time_rnd', b_time + b_time_s * b_time_eps)
+\end{lstlisting}
+Here, \lstinline+b_time_rnd+ is the individual-specific realization of the time
+coefficient, stored for later inspection.
+
+\subsection{Scale parameters and identification constraints}
+
+In mixture models, scale parameters (e.g.\ standard deviations of normally
+distributed random coefficients) must be constrained to avoid artificial sign
+ambiguities. Without a positivity constraint, the sampler may explore both
+positive and negative regions that correspond to the same model, producing a
+spurious bimodal posterior and poor mixing.
+
+In Biogeme, enforce positivity by specifying a small positive lower bound, for
+example \texttt{lowerbound = 1e-6}, when defining the corresponding \texttt{Beta}
+parameter.
+
+\subsection{Mixtures with panel data}
+
+With panel data, Biogeme assumes that random parameters are drawn \emph{per
+individual}, not per observation, so all observations belonging to the same
+person share the same realization of the random coefficients.
+
+From the user's perspective, the model is specified at the observation level.
+Conditional on random parameters, the contribution of a single observation is
+simply the logit kernel:
+\begin{lstlisting}[language=Python]
+log_probability_one_observation = loglogit(v, av, CHOICE)
+\end{lstlisting}
+Biogeme automatically aggregates contributions over the observations belonging
+to the same panel and handles sampling of random coefficients internally.
+
+%======================================================================
+\section{Running Bayesian estimation}
+%======================================================================
+
+In practice, running Bayesian estimation consists of setting the \texttt{[Bayesian]}
+configuration in \texttt{biogeme.toml} (Section~\ref{sec:bayesian_config_userguide})
+and executing the same estimation script as for ML. Biogeme produces:
+(i) an HTML report with posterior summaries and diagnostics, and
+(ii) an \texttt{.nc} file containing posterior draws (and optional prior draws).
+
+\subsection{Troubleshooting common issues}
+
+\paragraph{Chains do not converge ($\widehat{R} > 1.01$).}
+\begin{itemize}
+  \item Increase \texttt{warmup}.
+  \item Check identification diagnostics (near-linear dependencies, redundancy).
+  \item Consider reparameterization (remove redundant constants, rescale variables).
+\end{itemize}
+
+\paragraph{Low effective sample size (ESS).}
+\begin{itemize}
+  \item Increase \texttt{bayesian\_draws}.
+  \item Increase \texttt{target\_accept}.
+  \item Inspect posterior correlations and consider reparameterization.
+\end{itemize}
+
+\paragraph{Divergent transitions reported.}
+\begin{itemize}
+  \item Increase \texttt{target\_accept}.
+  \item Ensure positivity constraints for scale parameters.
+  \item Check for extreme posterior correlations or heavy-tailed priors.
+\end{itemize}
+
+\paragraph{Very slow sampling or excessive run time.}
+\begin{itemize}
+  \item Reduce complexity during model development.
+  \item Disable WAIC/LOO temporarily.
+  \item Use NumPyro/JAX if available.
+\end{itemize}
+
+\paragraph{Posterior resembles the prior.}
+\begin{itemize}
+  \item Inspect prior/posterior dispersion ratios.
+  \item Reconsider specification or identifying variation in the data.
+\end{itemize}
+
+%======================================================================
+\section{Interpreting the output}
+%======================================================================
+
+Biogeme performs Bayesian estimation by relying internally on PyMC (and
+optionally NumPyro/JAX). The output mirrors standard PyMC diagnostics and is
+reported in a unified HTML report. This section summarizes how to interpret the
+main outputs.
+ We refer the reader to the online documentation of PyMC and ArviZ, as well as \citeasnoun{Vehtari_2016}, \citeasnoun{watanabe2010asymptoticequivalencebayescross} for more information.
+
+\subsection{General information about the estimation}
+
+\begin{description}
+\item[Sample size.] Number of observations used in the estimation.
+
+\item[Sampler.] Biogeme selects an appropriate sampling method depending on
+hardware and installed libraries. Users can also force a sampling strategy via
+\texttt{mcmc\_sampling\_strategy}.
+
+\item[Number of chains.] Number of independent MCMC chains (typically 4).
+
+\item[Number of draws per chain.] Retained post-warm-up draws per chain.
+
+\item[Acceptance rate target.] Target acceptance probability for NUTS.
+
+\item[Run time.] Total wall-clock time used to obtain the posterior sample.
+\end{description}
+
+\subsection{Posterior log-likelihood and predictive fit}
+
+\begin{description}
+\item[Log-likelihood at posterior mean.]
+Log-likelihood evaluated at the posterior mean.
+
+\item[Expected log-likelihood.]
+Average of the log-likelihood across posterior draws.
+
+\item[Best-draw log-likelihood.]
+Highest log-likelihood value encountered among posterior draws.
+\end{description}
+
+\noindent
+\emph{Practical advice.}
+If the log-likelihood at posterior mean and expected log-likelihood differ
+substantially, the posterior may be wide, skewed, or the model may be sensitive
+to specific parameter regions.
+
+\subsection{Information criteria for model comparison}
+\label{sec:information}
+Biogeme reports two fully Bayesian criteria for model comparison:
+the Widely Applicable Information Criterion (WAIC) and
+Pareto-smoothed Leave-One-Out cross-validation (LOO).
+Both criteria estimate a model’s expected predictive performance on new,
+unobserved data, while accounting for model complexity.
+
+\subsubsection*{Widely Applicable Information Criterion (WAIC)}
+
+WAIC is a Bayesian generalization of the Akaike Information Criterion (AIC).
+It is based on the \emph{pointwise} log-likelihood contributions and averages
+predictive performance over the posterior distribution rather than evaluating
+it at a single point estimate.
+
+Let $\ell_n(\boldsymbol{\theta}) = \log p(y_n \mid \boldsymbol{\theta})$ denote
+the log-likelihood contribution of observation $n$.
+Given posterior draws $\boldsymbol{\theta}^{(s)}$, $s=1,\dots,S$, define:
+\[
+\text{lppd}
+=
+\sum_{n=1}^N
+\log\!\left(
+\frac{1}{S}
+\sum_{s=1}^S
+\exp\!\bigl(\ell_n(\boldsymbol{\theta}^{(s)})\bigr)
+\right),
+\]
+the \emph{log pointwise predictive density}.
+The effective number of parameters is estimated as
+\[
+p_{\text{WAIC}}
+=
+\sum_{n=1}^N
+\mathrm{Var}_{s}
+\!\left(
+\ell_n(\boldsymbol{\theta}^{(s)})
+\right),
+\]
+where the variance is taken across posterior draws.
+
+WAIC is then defined as
+\[
+\text{WAIC}
+=
+-2 \left( \text{lppd} - p_{\text{WAIC}} \right).
+\]
+
+Lower WAIC values indicate better expected out-of-sample predictive
+performance.  
+Because WAIC relies on posterior draws, it is valid for a wide class of
+models, including hierarchical and latent-variable models commonly
+estimated in Biogeme.
+
+\subsubsection*{Leave-One-Out Cross-Validation (LOO)}
+
+LOO estimates predictive performance by repeatedly leaving out one
+observation and evaluating how well the model predicts it.
+Formally, it targets
+\[
+\sum_{n=1}^N \log p(y_n \mid \mathcal{D}_{-n}),
+\]
+where $\mathcal{D}_{-n}$ denotes the data set with observation $n$ removed.
+
+Exact LOO would require refitting the model $N$ times, which is
+computationally infeasible.  
+Biogeme therefore relies on \emph{Pareto-smoothed importance sampling}
+(PSIS-LOO), which approximates leave-one-out predictive densities using
+the posterior draws from the full data set.
+
+LOO is reported on the deviance scale:
+\[
+\text{LOO}
+=
+-2 \sum_{n=1}^N \log \widehat{p}(y_n \mid \mathcal{D}_{-n}),
+\]
+where $\widehat{p}$ denotes the PSIS approximation.
+
+LOO also provides diagnostic measures (Pareto $k$ values) that assess the
+reliability of the importance-sampling approximation. Large $k$ values
+signal influential observations or model misspecification.
+
+\subsubsection*{Practical interpretation}
+
+\begin{itemize}
+  \item Lower WAIC or LOO values indicate better predictive performance.
+  \item Differences should be interpreted relative to their standard errors.
+        As a rule of thumb, differences smaller than about twice the standard
+        error are not decisive.
+  \item LOO is generally more robust than WAIC, especially for complex
+        models with latent variables or weak identification.
+\end{itemize}
+
+In Biogeme, both WAIC and LOO are computed from pointwise log-likelihood
+values stored in the estimation output. When available, LOO is typically
+recommended as the primary criterion for Bayesian model comparison.
+
+
+
+\subsection{Posterior parameter summaries}
+
+For each parameter, Biogeme reports statistics derived from posterior draws:
+\begin{description}
+\item[Name.] Identifier of the parameter.
+
+\item[Value (posterior mean).] Expected value under the posterior distribution.
+
+\item[Median.] Posterior median (robust measure of central tendency).
+
+\item[Mode.] Posterior mode (kernel density estimation), useful for skewed or
+multimodal posteriors.
+
+\item[Std err.] Posterior standard deviation.
+
+\item[$z$-value.] Mean divided by standard deviation.
+
+\item[$p$-value.] Two-sided posterior probability that the parameter has the
+opposite sign from its mean.
+
+\item[HDI.] Highest Density Interval bounds (typically 95\%).
+\end{description}
+
+\subsection{Convergence diagnostics}
+
+\begin{description}
+\item[$\widehat{R}$.] Values close to 1 indicate good mixing. A common threshold
+is $\widehat{R} \le 1.01$.
+
+\item[ESS (bulk).] Effective sample size for the main mass of the posterior.
+Values above 400 support reliable estimation of means and variances.
+
+\item[ESS (tail).] Effective sample size for tail behavior. Values above 100 help
+stabilize extreme quantiles.
+\end{description}
+
+\subsection{Identification diagnostics}
+
+These diagnostics detect non-identification or weak identification. Intuitively,
+identification problems arise when some linear combinations of parameters can vary
+substantially without affecting the likelihood, leading to very wide posterior
+directions. Diagnostics use posterior draws and (when available) prior draws.
+
+\paragraph{Posterior covariance diagnostics.}
+\begin{itemize}
+\item \emph{Minimum and maximum eigenvalues.}
+Eigenvalues measure posterior variance along orthogonal directions.
+A very \emph{large} eigenvalue corresponds to a very wide (nearly flat) direction,
+indicating weak or non-identification along a linear combination of parameters.
+A very small eigenvalue corresponds to a tightly concentrated direction.
+
+\item \emph{Condition number.}
+Ratio of largest to smallest eigenvalue; measures anisotropy of the posterior
+covariance. Large values indicate near-dependencies among parameters. Values
+around $10^3$ deserve attention; $10^5$ or more is a strong warning sign.
+
+\item \emph{Effective rank.}
+Effective dimensionality of posterior variability (between 0 and the number of
+parameters). Values much smaller than the number of parameters suggest that
+variability concentrates in a lower-dimensional subspace.
+\end{itemize}
+
+\paragraph{Prior covariance diagnostics.}
+Same diagnostics for the prior. If the prior is well behaved but the posterior
+becomes ill-conditioned, the issue typically originates from the likelihood/model
+specification.
+
+\paragraph{Identified by the prior.}
+When prior draws are available, Biogeme reports per-parameter ratios of posterior
+standard deviation to prior standard deviation:
+\begin{itemize}
+  \item ratios close to 1 suggest weak information in the likelihood (prior dominates);
+  \item ratios well below 1 suggest that the data are informative.
+\end{itemize}
+
+\subsection{Simulated quantities (\texttt{.nc} output)}
+
+The \texttt{.nc} file stores posterior draws (and optional prior draws) in a PyMC
+\texttt{InferenceData} structure. The explicit list is provided.   Key groups include:
+\begin{description}
+\item[constant\_data.] Observed data treated as fixed (indexed by \texttt{Dimension.OBS}).
+
+\item[posterior.] Posterior draws of parameters and derived quantities (typically
+\texttt{(chain, draw)}; observation-level quantities include \texttt{Dimension.OBS}).
+
+\item[prior.] Prior draws, if enabled.
+
+\item[log\_likelihood.] Pointwise log-likelihood contributions used for WAIC/LOO.
+
+\item[sample\_stats.] Sampler diagnostics (acceptance rate, divergences, step size,
+tree depth, energy, etc.).
+\end{description}
+
+\subsection{Graphical diagnostics}
+
+Biogeme includes plots such as trace plots, rank plots, energy plots, and
+autocorrelation plots, generated by ArviZ. Even when numerical diagnostics look good, graphical
+inspection may help detect multimodality, slow transitions, or other issues. If the plots are not visible, the user should consider using ArviZ directly to regenerate them separately. 
+
+%======================================================================
+\section{Simulation and prediction}
+%======================================================================
+
+Once posterior draws are available, Biogeme supports simulation either at a
+single representative parameter vector (posterior means) or by propagating full
+posterior uncertainty.
+
+\subsection{Simulation using posterior means}
+
+Replace each parameter by its posterior mean and run a deterministic simulation:
+\begin{lstlisting}[language=Python]
+results = biosim.simulate(the_beta_values=betas)
+\end{lstlisting}
+This is fast and interpretable, but ignores posterior uncertainty.
+
+\subsection{Bayesian simulation using posterior draws}
+
+Propagate uncertainty by simulating the model for a subset of posterior draws:
+\begin{lstlisting}[language=Python]
+bayesian_results = biosim.simulate_bayesian(
+    bayesian_estimation_results=estimation_results,
+    percentage_of_draws_to_use=3
+)
+\end{lstlisting}
+The output becomes a distribution of simulated quantities, enabling credible
+regions and uncertainty-aware decision support.
+
+%======================================================================
+\clearpage
+\bibliographystyle{dcudoi}
+\bibliography{transpor}
+
+\end{document}
