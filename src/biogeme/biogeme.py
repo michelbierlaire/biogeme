@@ -19,6 +19,8 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 import pytensor.tensor as pt
+from tqdm import tqdm
+
 from biogeme.bayesian_estimation import (
     BayesianResults,
     FigureSize,
@@ -51,6 +53,7 @@ from biogeme.expressions import (
     MultipleSum,
     log,
 )
+from biogeme.expressions.prepare_for_panel import prepare_for_panel
 from biogeme.expressions.set_panel_id import set_panel_id
 from biogeme.filenames import get_new_file_name
 from biogeme.function_output import (
@@ -88,12 +91,10 @@ from biogeme.tools import (
     check_derivatives,
     report_jax_cpu_devices,
     safe_serialize_array,
-    timeit,
     warning_cpu_devices,
 )
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult, cross_validate_model
-from tqdm import tqdm
 
 DEFAULT_MODEL_NAME = 'biogeme_model_default_name'
 logger = logging.getLogger(__name__)
@@ -825,7 +826,6 @@ class BIOGEME:
             return self.bayesian_estimation_panel(starting_values=starting_values)
         return self.bayesian_estimation_non_panel(starting_values=starting_values)
 
-    @timeit(logger=logger)
     def bayesian_estimation_non_panel(
         self, starting_values: dict[str, float]
     ) -> BayesianResults:
@@ -839,6 +839,7 @@ class BIOGEME:
         calculate_likelihood = self.biogeme_parameters.get_value('calculate_likelihood')
         calculate_waic = self.biogeme_parameters.get_value('calculate_waic')
         calculate_loo = self.biogeme_parameters.get_value('calculate_loo')
+        sample_from_prior = self.biogeme_parameters.get_value('sample_from_prior')
         sampling_config = make_sampling_config(
             strategy=sampling_strategy, target_accept=target_accept
         )
@@ -850,10 +851,26 @@ class BIOGEME:
             pm.Deterministic(self.log_like_name, loglike_total, dims=Dimension.OBS)
             pm.Potential("choice_logp", pt.sum(loglike_total))
 
-            # ic(pretty_model(model))
-            # graph = pm.model_to_graphviz(model)
-            # graph.view(filename="model_graph", cleanup=True)
-            # sys.exit()
+            # --- Prior draws (stored in the .nc file if generated) ---
+            # If priors are defined in the model builder, PyMC can generate prior samples.
+            # We use the same number of draws as for the posterior by default.
+            try:
+                prior_idata = (
+                    pm.sample_prior_predictive(
+                        samples=int(bayesian_draws),
+                        return_inferencedata=True,
+                        random_seed=None if self.seed == 0 else int(self.seed),
+                    )
+                    if sample_from_prior
+                    else None
+                )
+            except Exception as e:  # pragma: no cover
+                # Prior sampling is a convenience feature. If it fails for any reason,
+                # we continue without a prior group.
+                logger.warning(
+                    f"Could not generate prior draws (they will not be saved in the NetCDF file): {e}"
+                )
+                prior_idata = None
 
             idata, used_numpyro = run_sampling(
                 model=model,
@@ -863,6 +880,11 @@ class BIOGEME:
                 config=sampling_config,
                 starting_values=starting_values,
             )
+
+            # Attach the prior group(s) to the returned InferenceData, so they are
+            # preserved when dumping to NetCDF.
+            if prior_idata is not None:
+                idata.extend(prior_idata)
 
         sampling_time = datetime.now() - start_time
 
@@ -919,6 +941,7 @@ class BIOGEME:
         calculate_ll = self.biogeme_parameters.get_value('calculate_likelihood')
         calculate_waic = self.biogeme_parameters.get_value('calculate_waic')
         calculate_loo = self.biogeme_parameters.get_value('calculate_loo')
+        sample_from_prior = self.biogeme_parameters.get_value('sample_from_prior')
 
         sampling_config = make_sampling_config(
             strategy=sampling_strategy, target_accept=target_accept
@@ -968,6 +991,7 @@ class BIOGEME:
 
         obs_coord = np.arange(self.model_elements.number_of_observations)
         individual_coord = np.arange(n_individuals)
+        prepare_for_panel(expr=self.loglike, panel_column=panel_id)
         logp_obs_builder = self.log_like.recursive_construct_pymc_model_builder()
         start_time = datetime.now()
         with pm.Model(
@@ -992,6 +1016,25 @@ class BIOGEME:
             # Sampling target: sum over individuals
             pm.Potential("panel_choice_logp", pt.sum(ll_indiv))
 
+            # --- Prior draws (stored in the .nc file if generated) ---
+            # If priors are defined in the model builder, PyMC can generate prior samples.
+            # We use the same number of draws as for the posterior by default.
+            try:
+                prior_idata = (
+                    pm.sample_prior_predictive(
+                        samples=int(bayesian_draws),
+                        return_inferencedata=True,
+                        random_seed=None if self.seed == 0 else int(self.seed),
+                    )
+                    if sample_from_prior
+                    else None
+                )
+            except Exception as e:  # pragma: no cover
+                logger.warning(
+                    f"Could not generate prior draws (they will not be saved in the NetCDF file): {e}"
+                )
+                prior_idata = None
+
             idata, used_numpyro = run_sampling(
                 model=model,
                 draws=int(bayesian_draws),
@@ -1000,6 +1043,11 @@ class BIOGEME:
                 config=sampling_config,
                 starting_values=starting_values,
             )
+
+            # Attach the prior group(s) to the returned InferenceData, so they are
+            # preserved when dumping to NetCDF.
+            if prior_idata is not None:
+                idata.extend(prior_idata)
 
         sampling_time = datetime.now() - start_time
 
@@ -1040,7 +1088,6 @@ class BIOGEME:
 
         return final_results
 
-    @timeit(logger=logger)
     def estimate(
         self,
         starting_values: dict[str, float] | None = None,
