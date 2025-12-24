@@ -4,11 +4,11 @@ Michel Bierlaire
 Fri Apr 5 11:09:39 2024
 """
 
-from typing import Any
+from typing import AbstractSet, Any, TypeVar
 
 
 def check_consistency_of_named_dicts(
-    named_dicts: dict[str, dict[Any, Any]]
+    named_dicts: dict[str, dict[Any, Any]],
 ) -> tuple[bool, str | None]:
     """Verify that all dictionaries have the same set of keys. If not, report the inconsistencies.
 
@@ -75,3 +75,42 @@ def validate_dict_types(
             raise TypeError(
                 f"Values in {name} must be of type {value_type.__name__} or None, found type {type(value).__name__}."
             )
+
+
+T = TypeVar("T")
+
+
+def assert_sets_equal(
+    name_a: str,
+    set_a: AbstractSet[T],
+    name_b: str,
+    set_b: AbstractSet[T],
+) -> None:
+    """Raise an informative exception if two sets differ.
+
+    :param name_a: Label for the first set (used in the error message).
+    :param set_a: First set-like collection.
+    :param name_b: Label for the second set (used in the error message).
+    :param set_b: Second set-like collection.
+    :raises ValueError: If the two sets do not contain exactly the same elements.
+    """
+    # Convert to real sets in case we get other Set implementations
+    sa = set(set_a)
+    sb = set(set_b)
+
+    missing_in_b = sa - sb
+    missing_in_a = sb - sa
+
+    if missing_in_b or missing_in_a:
+        msg_lines = ["Sets differ:"]
+        if missing_in_b:
+            msg_lines.append(
+                f"  Elements in {name_a} but not in {name_b}: "
+                f"{[repr(x) for x in sorted(missing_in_b, key=repr)]}"
+            )
+        if missing_in_a:
+            msg_lines.append(
+                f"  Elements in {name_b} but not in {name_a}: "
+                f"{[repr(x) for x in sorted(missing_in_a, key=repr)]}"
+            )
+        raise ValueError("\n".join(msg_lines))

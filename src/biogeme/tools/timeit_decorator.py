@@ -4,43 +4,12 @@ import logging
 import time
 from typing import Any, Callable, TypeVar, cast
 
+from biogeme.tools import format_elapsed_time
+
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def format_elapsed_time(ms: float) -> str:
-    """
-    Convert a duration in milliseconds into a human-readable string.
-
-    Examples
-    --------
-    >>> format_elapsed_time(250)
-    '250 ms'
-    >>> format_elapsed_time(3125)
-    '3.13 s'
-    >>> format_elapsed_time(65_000)
-    '1.08 min'
-    >>> format_elapsed_time(3_600_000)
-    '1.00 h'
-    >>> format_elapsed_time(172_800_000)
-    '2.00 days'
-    """
-    result = f"{ms:.0f} ms"
-    if ms < 1_000:
-        return result
-    seconds = ms / 1_000
-    if seconds < 60:
-        return result + f" ({seconds:.2f} s)"
-    minutes = seconds / 60
-    if minutes < 60:
-        return result + f" ({minutes:.2f} min)"
-    hours = minutes / 60
-    if hours < 24:
-        return result + f" ({hours:.2f} h)"
-    days = hours / 24
-    return result + f"({days:.2f} days)"
-
-
-def timeit(
+def timeit_old(
     logger: logging.Logger | None = None,
     level: int = logging.INFO,
     label: str | None = None,

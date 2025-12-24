@@ -125,3 +125,22 @@ def files_of_type(extension: str, name: str, all_files: bool = False) -> list[st
     pattern2 = f"{name}~*.{extension}"
     files = glob.glob(pattern1) + glob.glob(pattern2)
     return files
+
+
+def get_file_size(path: str) -> int:
+    # Log file size in human-readable form
+    try:
+        return os.path.getsize(path)
+    except Exception as e:
+        logger.warning(f"Could not determine file size for {path}: {e}")
+        return -1
+
+
+def print_file_size(path: str) -> str:
+
+    size = get_file_size(path)
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if size < 1024.0:
+            break
+        size /= 1024.0
+    return f'{size:.1f} {unit}'
