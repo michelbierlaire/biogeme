@@ -442,3 +442,8 @@ reports/bayesian/bayesian.ps
 reports/bayesian/bayesian.toc
 src/biogeme/models/boxcox_old.py
 *.out
+reports/bayesian/bayesian_biogeme.ps
+reports/bayesian/bayesian_biogeme.toc
+reports/bayesian/bayesian_theory.ps
+reports/bayesian/bayesian_theory.toc
+reports/latent_book/latent_book.out
