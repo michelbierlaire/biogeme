@@ -60,6 +60,15 @@ class BoxCox(BinaryOperator):
         self.ell = validate_and_convert(ell)
         self.children += [self.x, self.ell]
 
+    def deep_flat_copy(self) -> BinaryMax:
+        """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
+        It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
+        The flat part is irrelevant for this expression.
+        """
+        left_copy = self.left.deep_flat_copy()
+        right_copy = self.right.deep_flat_copy()
+        return type(self)(x=left_copy, ell=right_copy)
+
     def get_value(self) -> float:
         """
         Evaluate the Box–Cox transform for scalar values.

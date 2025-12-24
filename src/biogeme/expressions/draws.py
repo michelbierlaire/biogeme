@@ -10,11 +10,11 @@ import logging
 
 import pandas as pd
 import pymc as pm
-from biogeme.draws import PyMcDistributionFactory, get_distribution, pymc_distributions
-from biogeme.exceptions import BiogemeError
 from jax import numpy as jnp
 from pytensor.tensor import TensorVariable
 
+from biogeme.draws import PyMcDistributionFactory, get_distribution, pymc_distributions
+from biogeme.exceptions import BiogemeError
 from .bayesian import Dimension, PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
@@ -103,9 +103,13 @@ class Draws(Elementary):
         Generates recursively a function to be used by PyMc. Must be overloaded by each expression
         :return: the expression in TensorVariable format, suitable for PyMc
         """
-        selected_distribution = get_distribution(
-            name=self.draw_type, the_dict=self.dict_of_distributions
-        )
+        try:
+            selected_distribution = get_distribution(
+                name=self.draw_type, the_dict=self.dict_of_distributions
+            )
+        except ValueError as e:
+            error_msg = f'Problem generating draws for {self.name}. {e}'
+            raise BiogemeError(error_msg) from e
 
         def builder(dataframe: pd.DataFrame) -> TensorVariable:
             model = pm.modelcontext(None)  # Get current active model context

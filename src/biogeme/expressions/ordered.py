@@ -316,6 +316,9 @@ class OrderedLogit(OrderedBase):
     def _cdf_pt(self, z):
         return 1.0 / (1.0 + pt.exp(-z))
 
+    def __repr__(self):
+        return f'OrderedLogit({repr(self.eta)})'
+
 
 class OrderedProbit(OrderedBase):
     """Ordered response model using the standard normal cumulative distribution function.
@@ -331,6 +334,9 @@ class OrderedProbit(OrderedBase):
 
     def _cdf_pt(self, z):
         return 0.5 * (1.0 + pt.erf(z / pt.sqrt(pt.as_tensor_variable(2.0))))
+
+    def __repr__(self):
+        return f'OrderedProbit({repr(self.eta)})'
 
 
 class OrderedLogLogit(OrderedLogit):

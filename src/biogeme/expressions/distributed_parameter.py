@@ -16,7 +16,7 @@ from jax import numpy as jnp
 from . import (
     ExpressionOrNumeric,
 )
-from .bayesian import PymcModelBuilderType
+from .bayesian import Dimension, PymcModelBuilderType
 from .jax_utils import JaxFunctionType
 from .unary_expressions import UnaryOperator
 
@@ -39,6 +39,7 @@ class DistributedParameter(UnaryOperator):
         """
         super().__init__(child)
         self.name = name
+        self.panel_column = None
 
     def deep_flat_copy(self) -> DistributedParameter:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
@@ -90,6 +91,36 @@ class DistributedParameter(UnaryOperator):
             if self.name in model.named_vars:
                 return model.named_vars[self.name]
             child_value = child_pymc(dataframe=dataframe)
-            return pm.Deterministic(self.name, child_value)
+            # Panel case: map individuals -> observations using the panel column.
+            if self.panel_column is not None and self.panel_column in dataframe.columns:
+                # Panel ids for each observation; we map them to integer indices.
+                # Assumption: the order of individuals used to build the draws is
+                # consistent with the codes produced here (e.g., via factorize).
+                panel_ids = dataframe[self.panel_column].to_numpy()
+
+                # Map arbitrary ids to 0..(n_individuals-1).
+                codes, uniques = pd.factorize(panel_ids, sort=True)
+                # We rely on child_value having shape (n_individuals, ...) with the same
+                # ordering as `uniques`. If not, the calling code must ensure consistency.
+                idx = pt.as_tensor_variable(codes, dtype="int64")
+
+                indiv_name = f"{self.name}_per_individual"
+                if indiv_name not in model.named_vars:
+                    pm.Deterministic(
+                        indiv_name,
+                        child_value,
+                        dims=(Dimension.INDIVIDUALS.value,),
+                    )
+
+                # Broadcast from individual-level to observation-level.
+                child_value_obs = child_value[idx]
+
+                return pm.Deterministic(
+                    self.name,
+                    child_value_obs,
+                    dims=(Dimension.OBS.value,),
+                )
+
+            return pm.Deterministic(self.name, child_value, dims=(Dimension.OBS.value,))
 
         return builder

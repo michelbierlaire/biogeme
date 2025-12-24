@@ -12,10 +12,10 @@ from typing import Protocol
 
 import pandas as pd
 import pymc as pm
+from biogeme.exceptions import BiogemeError
 from jax import numpy as jnp
 from pytensor.tensor import TensorVariable
 
-from biogeme.exceptions import BiogemeError
 from .bayesian import PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
@@ -23,7 +23,7 @@ from .jax_utils import JaxFunctionType
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SIGMA_PRIOR = 10.0
+DEFAULT_SIGMA_PRIOR = 1000.0
 
 
 class PriorFactory(Protocol):

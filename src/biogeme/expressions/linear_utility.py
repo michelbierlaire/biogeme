@@ -12,9 +12,9 @@ from typing import NamedTuple, TYPE_CHECKING
 import jax.numpy as jnp
 import pandas as pd
 import pytensor.tensor as pt
+
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions.bayesian import PymcModelBuilderType
-
 from .base_expressions import Expression
 from .beta_parameters import Beta
 from .jax_utils import JaxFunctionType
@@ -59,7 +59,7 @@ class LinearUtility(Expression):
                     f'Each term must be a (Beta, Variable) pair. Got: ({b}, {v})'
                 )
 
-        if not first:
+        if not first or not list_of_terms:
             raise BiogemeError(the_error)
 
         self.betas, self.variables = zip(*list_of_terms)
@@ -68,7 +68,7 @@ class LinearUtility(Expression):
 
         self.variables = list(self.variables)  #: list of variables
 
-        self.list_of_terms = list(zip(self.betas, self.variables))
+        self.list_of_terms = list_of_terms
         """ List of terms """
 
         self.children += self.betas + self.variables

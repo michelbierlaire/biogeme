@@ -11,6 +11,7 @@ from itertools import chain
 from typing import NamedTuple, TYPE_CHECKING, TypeAlias
 
 from biogeme.exceptions import BiogemeError, NotImplementedError
+
 from .bayesian import PymcModelBuilderType
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -72,21 +73,26 @@ class Expression:
         Generates recursively a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
-        raise NotImplementedError(f'{repr(self)}')
+        raise NotImplementedError(
+            f"recursive_construct_pymc_model_builder not implemented for {type(self).__name__}"
+        )
 
-    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+    def recursive_construct_jax_function(self) -> PymcModelBuilderType:
         """
         Generates recursively a function to be used by PyMc. Must be overloaded by each expression
-        :param inside_trajectory: True if the expression is within a trajectory for panel data
         :return: the expression in TensorVariable format, suitable for PyMc
         """
-        raise NotImplementedError(f'{repr(self)}')
+        raise NotImplementedError(
+            f"recursive_construct_pymc_model_builder not implemented for {type(self).__name__}"
+        )
 
     def deep_flat_copy(self) -> Expression:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
         It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
         """
-        raise NotImplementedError(f'{repr(self)}')
+        raise NotImplementedError(
+            f"deep_flat_copy not implemented for {type(self).__name__}"
+        )
 
     def __repr__(self) -> str:
         """built-in function used to compute the 'official' string reputation
