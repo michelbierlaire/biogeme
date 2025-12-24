@@ -140,13 +140,13 @@ the_biogeme = BIOGEME(
     number_of_draws=10_000,
     seed=1223,
 )
-the_biogeme.model_name = 'b26triangular_panel_mixture'
+the_biogeme.model_name = 'b26_triangular_panel_mixture'
 
 # %%
 # Estimate the parameters.
 try:
     results = EstimationResults.from_yaml_file(
-        filename='saved_results/b26_triangular_panel_mixture.yaml'
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
     )
 except FileNotFoundError:
     results = the_biogeme.estimate()

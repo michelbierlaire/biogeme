@@ -12,6 +12,7 @@ Wed Jun 18 2025, 11:27:07
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
+from biogeme.results_processing import EstimationResults
 from biogeme.validation import ValidationResult
 
 # %%
@@ -64,7 +65,12 @@ the_biogeme.model_name = 'b04_validation'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 # The validation consists in organizing the data into several slices

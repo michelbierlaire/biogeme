@@ -15,9 +15,8 @@ Michel Bierlaire, EPFL
 Wed Jun 18 2025, 09:56:59
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit

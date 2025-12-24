@@ -1,0 +1,111 @@
+# File b14_nested_endogenous_sampling.yaml has automatically been generated on 2025-11-23 13:48:37.143301
+# biogeme 3.3.2 [2025-11-23]
+
+beta_names:
+- asc_train
+- b_time
+- b_cost
+- nest_parameter
+- asc_car
+beta_values:
+- -2.7685651811993517
+- -0.9745266807210551
+- -0.9992605659586488
+- 1.6310201876602803
+- -1.1274305042219608
+bhhh:
+- - 1313.1117223761012
+  - 568.1239209500391
+  - -131.94285961176203
+  - -1022.1026026029506
+  - -597.6786795086913
+- - 568.1239209500391
+  - 2219.077550014088
+  - -290.12003051146615
+  - -970.5862269787817
+  - 273.6876423088578
+- - -131.94285961176203
+  - -290.12003051146615
+  - 958.8884515970585
+  - -86.56852106949947
+  - -295.342414065669
+- - -1022.1026026029506
+  - -970.5862269787817
+  - -86.56852106949947
+  - 1498.966835091179
+  - 587.3126438572563
+- - -597.6786795086913
+  - 273.6876423088578
+  - -295.342414065669
+  - 587.3126438572563
+  - 1327.2953346629558
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5202.916060139588
+gradient:
+- -0.030034410982949566
+- -0.0203386567666044
+- -0.03469986143139181
+- 0.01503450590338673
+- 0.011307339416774198
+hessian:
+- - -1334.662875068995
+  - -621.4422390270216
+  - 152.35723869754037
+  - 1059.506434848801
+  - 621.5949916738241
+- - -621.4422390270216
+  - -961.76810341201
+  - 300.67095265846507
+  - 583.7817533528669
+  - -256.32699295325887
+- - 152.35723869754034
+  - 300.67095265846507
+  - -579.2927181401103
+  - -51.37898638031473
+  - 238.15906797689502
+- - 1059.506434848801
+  - 583.7817533528668
+  - -51.37898638031474
+  - -1260.7772403731599
+  - -614.0927743514093
+- - 621.5949916738242
+  - -256.32699295325887
+  - 238.15906797689496
+  - -614.0927743514094
+  - -1396.1061488417665
+initial_log_likelihood: -14995.624319879029
+lower_bounds:
+- null
+- null
+- null
+- 1
+- null
+model_name: b14_nested_endogenous_sampling
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 5.5e-06 <= 6.1e-06
+  Number of function evaluations: 92
+  Number of gradient evaluations: 53
+  Number of hessian evaluations: 0
+  Number of iterations: '39'
+  Optimization time: '0.988748'
+  Proportion of Hessian calculation: 0/26 = 0.0%
+  Relative gradient: 5.545099204372197e-06
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- 10
+- null
+user_notes: null

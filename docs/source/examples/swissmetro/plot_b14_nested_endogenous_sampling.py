@@ -107,9 +107,14 @@ log_probability = logmev_endogenous_sampling(
 the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b14_nested_endogenous_sampling'
 
-# %%
+## %%
 # Estimate the parameters.
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

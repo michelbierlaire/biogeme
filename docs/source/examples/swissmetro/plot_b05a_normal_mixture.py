@@ -10,13 +10,16 @@ Michel Bierlaire, EPFL
 Wed Jun 18 2025, 11:28:46
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Draws, MonteCarlo, log
 from biogeme.models import logit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
+from biogeme.tools import timeit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -94,8 +97,14 @@ the_biogeme.model_name = 'b05a_normal_mixture'
 print(f'Number of draws: {the_biogeme.number_of_draws:_}')
 
 # %%
-# Estimate the parameters
-results = the_biogeme.estimate()
+# Estimate the parameters.
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    with timeit(f'Estimate of nodel {the_biogeme.model_name}'):
+        results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

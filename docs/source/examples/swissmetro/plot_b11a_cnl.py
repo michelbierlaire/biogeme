@@ -20,7 +20,10 @@ from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import logcnl
 from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -123,7 +126,12 @@ the_biogeme.model_name = 'b11a_cnl'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

@@ -19,6 +19,7 @@ from biogeme.biogeme import BIOGEME
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import Beta, Draws, MonteCarlo, log
 from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
 from biogeme.tools import format_timedelta
 
 # %%
@@ -95,6 +96,18 @@ initial_radius_values = [0.1, 1.0, 10.0]
 # The percentage of iterations such that the analytical second derivatives is evaluated.
 second_derivatives_values = [0.0, 0.5, 1.0]
 
+
+# %%
+# If the result files are already available, they are recycled.
+def read_or_estimate(biogeme_object: BIOGEME) -> EstimationResults:
+    try:
+        return EstimationResults.from_yaml_file(
+            filename=f'saved_results/{biogeme_object.model_name}.yaml'
+        )
+    except FileNotFoundError:
+        return biogeme_object.estimate()
+
+
 # %%
 # We run the optimization algorithm with all possible combinations of the parameters.
 # The results are stored in a Pandas DataFrame called ``summary``.
@@ -117,7 +130,6 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
         initial_radius=initial_radius,
         second_derivatives=second_derivatives,
         generate_html=False,
-        generate_yaml=False,
     )
 
     name = (
@@ -133,9 +145,9 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     }
 
     try:
-        results[name] = the_biogeme.estimate()
+        results[name] = read_or_estimate(biogeme_object=the_biogeme)
         if first:
-            results[name] = the_biogeme.estimate()
+            results[name] = read_or_estimate(biogeme_object=the_biogeme)
             first = False
         opt_time = format_timedelta(
             results[name].optimization_messages["Optimization time"]

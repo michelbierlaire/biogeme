@@ -9,13 +9,15 @@ Michel Bierlaire, EPFL
 Sat Jun 21 2025, 15:14:39
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import boxcox, loglogit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -42,7 +44,7 @@ asc_train = Beta('asc_train', 0, None, None, 0)
 asc_sm = Beta('asc_sm', 0, None, None, 1)
 b_time = Beta('b_time', 0, None, None, 0)
 b_cost = Beta('b_cost', 0, None, None, 0)
-boxcox_parameter = Beta('boxcox_parameter', 0, -10, 10, 0)
+boxcox_parameter = Beta('boxcox_parameter', 1, -10, 10, 0)
 
 # %%
 # Definition of the utility functions.
@@ -81,8 +83,13 @@ the_biogeme.model_name = 'b08_boxcox'
 the_biogeme.check_derivatives(verbose=True)
 
 # %%
-# Estimate the parameters
-results = the_biogeme.estimate()
+# Estimate the parameters.
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

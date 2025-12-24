@@ -1,0 +1,54 @@
+# File b01c_logit.yaml has automatically been generated on 2025-11-23 13:48:20.223625
+# biogeme 3.3.2 [2025-11-23]
+
+beta_names:
+- asc_train
+- b_time
+- b_cost
+- asc_car
+beta_values:
+- -0.7011872849436405
+- -1.2778589565196714
+- -1.0837900371207712
+- -0.15463267198926295
+bhhh:
+- []
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5331.252006916163
+gradient: []
+hessian:
+- []
+initial_log_likelihood: null
+lower_bounds:
+- null
+- null
+- null
+- null
+model_name: b01c_logit
+monte_carlo: false
+null_log_likelihood: -6964.662979192191
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 1.1e-07 <= 6.1e-06
+  Number of function evaluations: 13
+  Number of gradient evaluations: 9
+  Number of hessian evaluations: 4
+  Number of iterations: '4'
+  Optimization time: '0.855051'
+  Proportion of Hessian calculation: 4/4 = 100.0%
+  Relative gradient: 1.0595595040382653e-07
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+user_notes: null

@@ -18,7 +18,10 @@ import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Draws, MonteCarlo, log
 from biogeme.models import logit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -98,8 +101,13 @@ the_biogeme = BIOGEME(
 the_biogeme.model_name = 'b24_halton_mixture'
 
 # %%
-# Estimate the parameters
-results = the_biogeme.estimate()
+# Estimate the parameters.
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

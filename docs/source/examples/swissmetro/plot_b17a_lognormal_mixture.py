@@ -89,13 +89,13 @@ log_probability = log(MonteCarlo(conditional_probability))
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
 the_biogeme = BIOGEME(database, log_probability, number_of_draws=10_000, seed=1223)
-the_biogeme.model_name = '17lognormal_mixture'
+the_biogeme.model_name = 'b17a_lognormal_mixture'
 
 # %%
 # Estimate the parameters.
 try:
     results = EstimationResults.from_yaml_file(
-        filename='saved_results/17lognormal_mixture.yaml'
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
     )
 except FileNotFoundError:
     results = the_biogeme.estimate()

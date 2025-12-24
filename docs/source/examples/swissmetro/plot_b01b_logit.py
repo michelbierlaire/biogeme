@@ -21,6 +21,7 @@ from biogeme.expressions import Beta, LinearTermTuple, LinearUtility
 from biogeme.models import loglogit
 from biogeme.results_processing import (
     EstimateVarianceCovariance,
+    EstimationResults,
     generate_html_file,
     get_pandas_estimated_parameters,
 )
@@ -153,8 +154,12 @@ the_biogeme.model_name = 'b01b_logit'
 
 # %%
 # Estimate the parameters.
-#
-results = the_biogeme.estimate(run_bootstrap=True)
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
 # Get the results in a pandas table.

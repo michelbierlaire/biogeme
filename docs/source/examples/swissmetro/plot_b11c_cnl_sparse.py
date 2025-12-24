@@ -109,7 +109,12 @@ the_biogeme.model_name = 'b11c_cnl_sparse'
 
 # %%
 # Estimate the parameters.
-results = the_biogeme.estimate()
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())

@@ -1,0 +1,112 @@
+# File b06b_unif_mixture_MHLS.yaml has automatically been generated on 2025-11-23 17:26:20.054794
+# biogeme 3.3.2 [2025-11-23]
+
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.4018585863165238
+- -2.2597540336465967
+- 1.657022936555071
+- -1.2854433011000452
+- 0.1370209001826173
+bhhh:
+- - 582.9512895408037
+  - 267.5872214929114
+  - 140.40713142688833
+  - -22.416976796349267
+  - -162.89132038697772
+- - 267.5872214929114
+  - 416.97150859737343
+  - 209.4381240016734
+  - -118.31567548750267
+  - 210.89451378924093
+- - 140.40713142688833
+  - 209.4381240016734
+  - 174.48273114597205
+  - 25.007626527214228
+  - 14.268250278743611
+- - -22.416976796349267
+  - -118.31567548750267
+  - 25.007626527214228
+  - 596.9857866836495
+  - -239.5628157338287
+- - -162.89132038697772
+  - 210.89451378924093
+  - 14.268250278743611
+  - -239.5628157338287
+  - 809.1025633192445
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '39.956369'
+final_log_likelihood: -5214.946525029556
+gradient:
+- -0.011232133945178191
+- -0.0031784685102316246
+- 0.001084593386632804
+- 0.0007836847107753897
+- 0.004701759196564126
+hessian:
+- - -611.9693476215631
+  - -286.614641408171
+  - -162.78446040757254
+  - 34.2981139739518
+  - 224.35775943450219
+- - -286.61464140817094
+  - -415.79838902238856
+  - -207.01705198791728
+  - 112.29863956932803
+  - -172.01373540925402
+- - -162.78446040757254
+  - -207.01705198791726
+  - -175.73252801331563
+  - 3.2218626004932442
+  - 14.404026205739454
+- - 34.2981139739518
+  - 112.29863956932803
+  - 3.2218626004932496
+  - -322.8848338108961
+  - 158.26507776814145
+- - 224.35775943450219
+  - -172.013735409254
+  - 14.40402620573946
+  - 158.26507776814145
+  - -828.4091721113411
+initial_log_likelihood: -6879.775116527982
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b06b_unif_mixture_MHLS
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 1.6e-06 <= 6.1e-06
+  Number of function evaluations: 98
+  Number of gradient evaluations: 55
+  Number of hessian evaluations: 0
+  Number of iterations: '43'
+  Optimization time: '108.375177'
+  Proportion of Hessian calculation: 0/27 = 0.0%
+  Relative gradient: 1.632630973388695e-06
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: NORMAL_MLHS
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

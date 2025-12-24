@@ -117,7 +117,7 @@ biosim.model_name = 'b01d_logit_simul'
 
 # %%
 # Retrieve the estimated values of the parameters.
-RESULTS_FILE_NAME = 'saved_results/b01logit.yaml'
+RESULTS_FILE_NAME = 'saved_results/b01a_logit.yaml'
 estimation_results = EstimationResults.from_yaml_file(filename=RESULTS_FILE_NAME)
 betas = estimation_results.get_beta_values()
 

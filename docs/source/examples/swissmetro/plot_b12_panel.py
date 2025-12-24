@@ -112,7 +112,9 @@ the_biogeme.model_name = 'b12_panel'
 # %%
 # Estimate the parameters.
 try:
-    results = EstimationResults.from_yaml_file(filename='saved_results/b12panel.yaml')
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
 except FileNotFoundError:
     results = the_biogeme.estimate()
 
