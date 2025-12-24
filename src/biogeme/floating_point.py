@@ -34,6 +34,7 @@ PANDAS_FLOAT = FLOAT
 JAX_FLOAT = jnp.dtype(jnp.float32) if FLOAT_TYPE == 32 else jnp.dtype(jnp.float64)
 EPSILON = jnp.finfo(JAX_FLOAT).eps
 SQRT_EPS = jnp.sqrt(EPSILON)
+SMALL_POSITIVE = 10 * EPSILON
 LOG_CLIP_MIN = SQRT_EPS
 MAX_EXP_ARG = jnp.log(jnp.finfo(JAX_FLOAT).max)
 MIN_EXP_ARG = jnp.log(jnp.finfo(JAX_FLOAT).tiny)
