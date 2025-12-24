@@ -23,7 +23,7 @@ from .jax_utils import JaxFunctionType
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SIGMA_PRIOR = 1000.0
+DEFAULT_SIGMA_PRIOR = 5.0
 
 
 class PriorFactory(Protocol):
