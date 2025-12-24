@@ -84,6 +84,11 @@ class Database:
         """Returns a reference to the internal DataFrame."""
         return self._df
 
+    def get_copy(self, name_of_copy: str | None = None) -> Database:
+        """Returns a copy of the database"""
+        the_name = f'{self.name}_copy' if name_of_copy is None else name_of_copy
+        return Database(the_name, self.dataframe.copy())
+
     def bootstrap_sample(self):
         """Returns a bootstrap sample of the data."""
         df = sample_with_replacement(self._df)
