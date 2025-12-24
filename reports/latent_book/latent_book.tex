@@ -27,7 +27,7 @@
   breakatwhitespace=true,
 }
 
-\title{Estimating choice models with latent variables with Biogeme}
+\title{Estimating hybrid choice models  with Biogeme}
 \author{Michel Bierlaire \and Moshe Ben-Akiva \and Joan Walker} 
 \date{\today}
 
@@ -59,17 +59,17 @@
 The package Biogeme (\texttt{biogeme.epfl.ch}) is designed to estimate
 the parameters of various models using maximum likelihood
 estimation. It is particularly designed for discrete choice
-models.  In this document, we present how to estimate choice
-models involving latent variables.
+models.  In this document, we present how to estimate  choice
+models involving latent variables: hybrid choice models.
 
 We assume that the reader is already familiar with discrete choice
 models, and has successfully installed Biogeme. This document has
-been written using Biogeme 3.3.0.
+been written using Biogeme 3.3.2.
 
 
 
 \section{Models and notations}
-
+\label{sec:model}
 The literature on discrete choice models with latent variables is vast
 (\cite{walker2001extended}, \cite{ashok2002extending},
 \cite{greene2003latent}, \cite{ben2002integration}, to cite just a
@@ -94,10 +94,6 @@ A common specification assumes a linear functional form   with i.i.d. normally d
  x_{nk}^* = \sum_s \psi_{sk} x_{ns} + \sigma_{\omega k} \omega_{nk},
 \end{equation}
 where $\omega_{nk} \sim N(0, 1)$, and $\sigma_{\omega k}$ is a scaling parameter for the error term. 
-
-In discrete choice models, for example, the utility $U_{in}$ that
-individual $n$ associates with alternative $i$ is a typical example of
-a latent variable.
 
 Information about latent variables is obtained indirectly through
 \emph{measurements}, which are observable manifestations of the
@@ -237,17 +233,7 @@ where \( \delta_1 > 0 \) and \( \delta_2 > 0 \) are the parameters to
 be estimated.
 This parameterization guarantees that the thresholds are strictly ordered 
 and symmetrically centered around zero, which facilitates both 
-identification and interpretation. To enforce positivity, we estimate the 
-logarithm of the underlying parameters, that is 
-$\delta'_i = \ln(\delta_i)$, so that
-\[
-\begin{aligned}
-  \tau_1 &= -\exp(\delta'_1) - \exp(\delta'_2), \\
-  \tau_2 &= -\exp(\delta'_1), \\
-  \tau_3 &= \phantom{-}\exp(\delta'_1), \\
-  \tau_4 &=  \phantom{-}\exp(\delta'_1) + \exp(\delta'_2).
-\end{aligned}
-\]
+identification and interpretation. 
 
 
 If we consider a linear specification,
@@ -295,159 +281,457 @@ where \( f(x_n^*) \) is the pdf of the vector of latent variables \( x_n^* \).
 Again, this integral is approximated using Monte-Carlo integration.
 
 
-\section{The MIMIC model}
+\subsection{Normalization and identification in latent-variable models}
+\label{sec:normalization}
 
-The Multiple Indicators Multiple Causes (MIMIC) model is a structural
-equation modeling framework designed to analyze relationships
-involving latent variables. In a MIMIC model, the latent variable is
-simultaneously influenced by a set of observed explanatory variables
-(the ``multiple causes'') and reflected in several observed indicators
-(the ``multiple indicators''). This dual structure enables the analyst
-to capture both the determinants and the manifestations of latent
-constructs, such as attitudes, preferences, or psychological traits.
-A seminal introduction to the MIMIC model is provided by
-\citeasnoun{Joreskog:1975aa}, who formalized its use within the
-broader class of structural equation models.
+Models with latent variables involve parameters that are not directly
+identified from the data without additional restrictions. These
+restrictions, known as \emph{normalizations}, are not substantive
+assumptions about behavior; rather, they fix the arbitrary units of
+measurement (location and scale) that are inherent to latent constructs.
+This section explains \emph{why} normalization is needed, \emph{where}
+non-identification arises in our notation, and provides practical
+guidelines. We emphasize the \emph{reference-indicator} strategy because
+it yields parameters with a direct interpretation and tends to be
+numerically stable, although it is not the only valid approach.
 
+Latent-variable models are invariant to certain transformations of the
+latent variables and associated parameters. Without normalization,
+multiple parameter vectors generate exactly the same probability of the
+observed data, hence the same likelihood. In such a case, maximization is
+ill-posed (flat directions), standard errors are meaningless, and
+numerical optimization or Bayesian sampling may become unstable.
 
-Under the  specifications in \eqref{eq:linearStructural} and 
-\eqref{eq:linearMeasurement}, the latent vector and indicators are jointly normal, 
-so the latent variables can be integrated out analytically. 
-Let $\boldsymbol{\nu}=(\lambda_{\ell 0})_{\ell}$, 
-$\Lambda=[\lambda_{\ell k}]_{\ell,k}$, 
-$\Theta=\mathrm{diag}(\sigma_{\upsilon\ell}^2)_{\ell}$, 
-and $\Psi=\mathrm{diag}(\sigma_{\omega k}^2)_{k}$. 
-Write the structural part as 
-$\boldsymbol{x}_n^*=\Gamma \boldsymbol{x}_n+\boldsymbol{\zeta}_n$ 
-with $\boldsymbol{\zeta}_n\sim\mathcal N(\mathbf{0},\Psi)$ 
-(so $\Gamma_{ks}=\psi_{sk}$). 
-Then, conditionally on $\boldsymbol{x}_n^*$, we have 
-$\boldsymbol{I}_n\mid \boldsymbol{x}_n^* \sim 
-\mathcal N(\boldsymbol{\nu}+\Lambda \boldsymbol{x}_n^*,\,\Theta)$. 
-Marginalizing $\boldsymbol{x}_n^*$ yields the multivariate normal
+Two systematic sources of non-identification arise:
+
+\begin{itemize}
+  \item \textbf{Location (translation) invariance}: the origin of a latent
+  variable is arbitrary.
+  \item \textbf{Scale invariance}: the unit (measurement scale) of a latent
+  variable is arbitrary.
+\end{itemize}
+
+Both must be addressed to obtain a well-identified model.
+
+We first consider the continuous measurement equation
+\eqref{eq:linearMeasurement}:
 \[
-\boldsymbol{I}_n\mid \boldsymbol{x}_n \sim 
-\mathcal N\!\big(\;\boldsymbol{\mu}_n,\;\Sigma\;\big),
-\qquad
-\boldsymbol{\mu}_n=\boldsymbol{\nu}+\Lambda\Gamma \boldsymbol{x}_n,\quad
-\Sigma=\Lambda\Psi\Lambda^\top+\Theta.
+I_{n\ell} = \lambda_{\ell 0} + \sum_k \lambda_{\ell k} x_{nk}^*
++ \sigma_{\upsilon \ell}\upsilon_{n\ell},
+\qquad \upsilon_{n\ell}\sim\mathcal N(0,1).
 \]
-Therefore, the contribution of individual $n$ to the likelihood is
+The structural equation is \eqref{eq:linearStructural}:
+\[
+x_{nk}^* = \sum_s \psi_{sk}x_{ns}+\sigma_{\omega k}\omega_{nk},
+\qquad \omega_{nk}\sim\mathcal N(0,1).
+\]
+
+Suppose that the intercept $\lambda_{\ell 0}$ is estimated for at least
+one indicator that loads on latent variable $k$. Then, for any constant
+$c_k$, define
+\[
+x_{nk}^{*'} = x_{nk}^* + c_k.
+\]
+In the measurement equation, the term $\lambda_{\ell k}x_{nk}^*$ can be
+rewritten as $\lambda_{\ell k}(x_{nk}^{*'}-c_k)$, which is the same as
+keeping $x_{nk}^{*'}$ but shifting the intercept:
+\[
+\lambda_{\ell 0}' = \lambda_{\ell 0}-\lambda_{\ell k}c_k.
+\]
+Therefore, the distribution of $I_{n\ell}$ (and hence the likelihood)
+is unchanged: the model cannot distinguish a shift in the latent variable
+from a compensating shift in intercepts. This is why the \emph{origin} of
+each latent variable must be fixed.
+
+Also, for any nonzero constant $a_k$, define
+\[
+x_{nk}^{*'} = a_k x_{nk}^*.
+\]
+Then $\lambda_{\ell k}x_{nk}^* = (\lambda_{\ell k}/a_k)x_{nk}^{*'}$.
+Hence, scaling the latent variable can be compensated by inversely
+scaling all associated loadings. On the structural side, scaling $x_{nk}^*$
+can be compensated by scaling $\sigma_{\omega k}$ and the coefficients
+$\psi_{sk}$. Again, the likelihood is unchanged: the model cannot infer
+the \emph{unit} in which $x_{nk}^*$ is measured unless we fix it.
+
+Consequently, for each latent variable $k$, the analyst must impose
+\emph{one} location normalization and \emph{one} scale normalization.
+These two restrictions remove two degrees of freedom per latent
+variable: one for translation, one for rescaling.
+
+A practical and interpretable approach is to choose, for each latent
+variable $k$, a \emph{reference indicator} $\ell(k)$ among the indicators
+intended to measure $x_{nk}^*$. The key idea is to anchor the latent
+variable to a concrete observed scale.
+
+First, we fix the location by fixing one intercept.
+For each $k$, impose
+\[
+\boxed{\lambda_{\ell(k)0}=0.}
+\]
+Because $\lambda_{\ell 0}$ can absorb any shift of
+$x_{nk}^*$, setting the intercept of one measurement equation to zero
+declares where the latent variable ``zero'' is, in a way that is tied to
+an observed indicator.
+
+Second, fix the scale by fixing one loading.
+For each $k$, impose
+\[
+\boxed{\lambda_{\ell(k)k}=1.}
+\]
+Because the product $\lambda_{\ell k}x_{nk}^*$ is all that
+matters, fixing $\lambda_{\ell(k)k}=1$ defines the unit of $x_{nk}^*$ as
+the unit that makes the reference indicator respond one-for-one (in its
+systematic part) to changes in the latent variable.
+
+Importantly, fixing the loading to $+1$ is a \emph{convention}. Since the sign of a latent variable is itself
+arbitrary, it may be equally appropriate to fix
+$\lambda_{\ell(k)k}=-1$. This choice simply reverses the orientation of
+the latent scale, without affecting the likelihood or the model fit.
+The advantage of using $-1$ arises when the natural interpretation of
+the reference indicator runs opposite to the intended interpretation of
+the latent construct.
+
+For instance, suppose $x_{nk}^*$ represents \emph{environmental
+concern}, with higher values intended to mean \emph{stronger concern}.
+Consider a reference indicator based on agreement with the statement
+``I do not care about the environmental impact of my travel,'' coded so
+that higher responses correspond to stronger agreement. In this case,
+higher values of the indicator imply \emph{lower} environmental concern.
+Fixing $\lambda_{\ell(k)k}=+1$ would force increases in $x_{nk}^*$ to
+increase the indicator, leading to a latent variable whose numerical
+interpretation runs counter to its conceptual meaning. By fixing
+$\lambda_{\ell(k)k}=-1$ instead, higher values of $x_{nk}^*$ decrease the
+expected indicator response, restoring a coherent and intuitive
+interpretation: larger $x_{nk}^*$ corresponds to stronger environmental
+concern.
+
+Thus, choosing $\lambda_{\ell(k)k}=1$ or $-1$ does not affect
+identification or statistical fit, but it greatly improves the semantic
+consistency and interpretability of the model parameters.
+
+With $\lambda_{\ell(k)0}=0$ and $\lambda_{\ell(k)k}=1$ fixed, it is
+meaningful to estimate $\sigma_{\upsilon\ell(k)}$: it quantifies the
+amount of noise in that indicator relative to the anchored latent scale.
+In other words, it is now a genuine signal-to-noise parameter rather than
+a normalization device.
+
+If the model contains multiple latent variables, the reference indicator
+for $k$ should ideally load only on $k$:
+\[
+\lambda_{\ell(k)h}=0 \quad \text{for } h\neq k.
+\]
+Inded, if the reference indicator mixes several latent variables,
+then fixing a single loading to one does not define a clean unit for a
+single construct; it anchors a linear combination instead, which
+complicates interpretation and may reintroduce weak identification.
+
+We now consider ordinal indicators (Likert-type) modeled through an
+ordered probit mechanism (Section~\ref{sec:likert}). The essential
+difference with the continuous case is that the observed indicator
+$I_{n\ell}$ is not the latent response $I^*_{n\ell}$ itself, but only
+the interval in which it lies:
+\[
+I_{n\ell}=j_m \quad \text{if} \quad
+\tau_{m-1}\le I_{n\ell}^*<\tau_m,
+\qquad m=1,\ldots,M_\ell,
+\]
+with $\tau_0=-\infty$ and $\tau_{M_\ell}=+\infty$.
+
+The latent response is given by
+\[
+I^*_{n\ell}
+= \lambda_{\ell 0}
++ \sum_k \lambda_{\ell k}x_{nk}^*
++ \sigma_{\upsilon\ell}\upsilon_{n\ell},
+\qquad \upsilon_{n\ell}\sim\mathcal N(0,1).
+\]
+
+What changes compared to the continuous case? In the ordered probit likelihood \eqref{eq:discreteMeas-d}, probabilities
+depend only on \emph{standardized differences}
+\[
+\frac{\tau_m
+- \lambda_{\ell 0}
+- \sum_k \lambda_{\ell k}x_{nk}^*}
+{\sigma_{\upsilon\ell}}.
+\]
+As a consequence, the ordered probit layer introduces \emph{two additional
+invariances} that must be addressed explicitly:
+
+\begin{itemize}
+  \item a \emph{location invariance}: adding the same constant to
+  $I^*_{n\ell}$ and to all thresholds leaves probabilities unchanged;
+  \item a \emph{scale invariance}: multiplying $I^*_{n\ell}$,
+  all thresholds, and $\sigma_{\upsilon\ell}$ by the same positive
+  constant leaves probabilities unchanged.
+\end{itemize}
+
+These invariances are specific to ordinal models and are \emph{in
+addition} to the invariances already present in the latent-variable
+structure discussed in the continuous case.
+
+We adopt the same reference-indicator philosophy as in the continuous
+case. For each latent variable $k$, one ordinal indicator $\ell(k)$ is
+chosen as its reference indicator.
+
+\begin{itemize}
+\item Step 1: anchor the latent variable.
+Exactly as in the continuous case, we fix
+\[
+\boxed{
+\lambda_{\ell(k)0}=0,
+\qquad
+\lambda_{\ell(k)k}=1
+\quad (\text{or } -1).
+}
+\]
+This fixes the \emph{location} and \emph{orientation} of the latent
+variable $x_{nk}^*$ and defines its unit through the response of the
+reference indicator. This step is conceptually identical to the
+continuous case and should always be applied first.
+
+\item Step 2: fix the location of the threshold system.
+Because only differences $\tau_m-I^*_{n\ell}$ matter, the threshold
+system has an arbitrary origin. This must be fixed \emph{once}, and only
+once.
+
+There are two principled ways to do so. For non-symmetric thresholds, fix one threshold to zero,
+  for example $\tau_c=0$. This is a pure location normalization. For symmetric thresholds, impose symmetry around zero.   In this case, location is fixed by construction.
+
+When the Likert scale is designed to be symmetric (which is typically
+the case), the symmetric parameterization is recommended, because it
+aligns the statistical model with the semantics of the survey scale and
+reduces the number of free parameters.
+
+Note that, in  the symmetric case, it is advised to re-parametrize the model.
+Let $M_\ell$ be the number of ordered categories. There are
+$M_\ell-1$ finite thresholds.
+When $M_\ell$ is odd (e.g., 5-point Likert), there is a natural central category. For
+$M_\ell=5$, there are four thresholds. A symmetric parameterization is:
+\[
+\boxed{
+\begin{aligned}
+\tau_1 &= -(\delta_1+\delta_2),\\
+\tau_2 &= -\delta_1,\\
+\tau_3 &= \phantom{-}\delta_1,\\
+\tau_4 &= \phantom{-}(\delta_1+\delta_2),
+\end{aligned}
+\qquad
+\delta_1>0,\ \delta_2>0.
+}
+\]
+This construction:
+\begin{itemize}
+  \item enforces strict ordering automatically;
+  \item fixes the location (centered at zero);
+  \item reduces dimensionality (two parameters instead of four).
+\end{itemize}
+
+When $M_\ell$ is even, there is no central category. In this case,
+$M_\ell-1$ is odd, and symmetry necessarily implies that one threshold
+lies exactly at zero. For $M_\ell=4$:
+\[
+\boxed{
+\tau_1=-\delta_1,
+\qquad
+\tau_2=0,
+\qquad
+\tau_3=\delta_1,
+\qquad
+\delta_1>0.
+}
+\]
+Here again, location is fixed by symmetry, and ordering is guaranteed.
+
+\item Step 3: fix the scale of the ordered probit layer.
+In ordered probit models, scale is not identified because
+\[
+(\tau_m,\ I^*_{n\ell},\ \sigma_{\upsilon\ell})
+\mapsto
+(a\tau_m,\ a I^*_{n\ell},\ a\sigma_{\upsilon\ell})
+\]
+leaves probabilities unchanged. Therefore, one scale normalization is
+required \emph{within the ordinal layer}.
+
+To remain consistent with the reference-indicator philosophy adopted
+for latent variables, we fix
+ the scale of the latent variable  by
+  $\lambda_{\ell(k)k}=1$; and  the scale of the ordinal response by fixing
+  $\sigma_{\upsilon\ell}=1$ for ordinal indicators.
+
+This choice has three advantages:
+\begin{enumerate}
+  \item it follows the standard ordered probit convention;
+  \item it avoids entangling threshold spacings with noise variance;
+  \item it preserves a clear interpretation of thresholds as cutpoints
+  on a standardized latent response scale.
+\end{enumerate}
+\end{itemize}
+
+In summary, for an ordinal indicator $\ell$ measuring latent variable $k$, the
+recommended normalization strategy is:
+
+\begin{enumerate}
+  \item choose $\ell(k)$ as reference indicator;
+  \item fix $\lambda_{\ell(k)0}=0$ and $\lambda_{\ell(k)k}=\pm1$;
+  \item impose an ordered threshold parameterization;
+  \item fix threshold location (preferably via symmetry);
+  \item fix $\sigma_{\upsilon\ell}=1$.
+\end{enumerate}
+
+These steps jointly remove all location and scale indeterminacies,
+without redundancy, and yield a model whose parameters have a clear,
+stable, and interpretable meaning.
+
+
+%================================================================
+\section{Hybrid choice models}
+\label{sec:hcm}
+%================================================================
+
+This section builds on the notation and model components introduced in
+Section~\ref{sec:model}. We combine the structural equations for the
+latent variables, the measurement
+equations for the indicators (continuous or ordinal), and  a
+discrete choice model, into two frameworks of increasing scope: the
+\emph{MIMIC} model and the \emph{hybrid choice model}.
+
+We use the same notations as in Section~\ref{sec:model}: $n$ indexes individuals, $x_n$ denotes the
+observed explanatory variables, $x_n^*$ the vector of latent
+variables, $I_n$ the vector of observed indicators, and
+$i_n\in\mathcal C_n$ the observed choice.
+
+%----------------------------------------------------------------
+\subsection{The MIMIC model}
+\label{sec:mimic}
+%----------------------------------------------------------------
+
+A \emph{Multiple Indicators Multiple Causes} (MIMIC) model is obtained by
+combining:
+\begin{itemize}
+  \item the structural part (``multiple causes''), which explains
+  each latent variable as a function of observed covariates through the
+  structural equations \req{eq:linearStructural}; and
+  \item the measurement part (``multiple indicators''), which
+  explains each indicator as a function of the latent variables through
+  measurement equations (continuous indicators: \req{eq:linearMeasurement};
+  ordinal indicators: ordered probit, \req{eq:discreteMeas-d}).
+\end{itemize}
+
+The purpose of the MIMIC model is to infer latent variables from their
+observable manifestations (the indicators) while simultaneously
+explaining how these latent constructs vary with observed covariates.
+
+For a given individual $n$, the contribution of the indicators to the
+likelihood \emph{conditional on the latent variables} $x_n^*$
+is obtained by multiplying the indicator-specific contributions:
 \begin{equation}
-\label{eq:marginal_likelihood_continuous_closed}
-L_n \;=\; (2\pi)^{-L_n/2}\,|\Sigma|^{-1/2}\,
-\exp\!\left(-\tfrac{1}{2}\big(\boldsymbol{I}_n-\boldsymbol{\mu}_n\big)^{\!\top}
-\Sigma^{-1}\big(\boldsymbol{I}_n-\boldsymbol{\mu}_n\big)\right),
+  \label{eq:mimic_conditional_indicator_likelihood}
+  L_n^{I}\!\left(I_n \mid x_n^*,x_n\right)
+  \;=\;
+  \prod_{\ell=1}^{L_n}
+  \begin{cases}
+    \text{density of Eq.~\eqref{eq:conditional_likelihood_continuous}}, &
+    \text{if indicator $\ell$ is continuous},\\
+    \text{probability of Eq.~\eqref{eq:discreteMeas-d}}, &
+    \text{if indicator $\ell$ is ordinal}.
+  \end{cases}
 \end{equation}
-and the sample likelihood is $\prod_n L_n$. 
-Hence, no Monte-Carlo integration is required for the continuous-indicator part: 
-the conjugate normal--normal structure delivers a closed form. 
-(If additional non-Gaussian components---e.g., discrete choices---are included, 
-their likelihood terms multiply \eqref{eq:marginal_likelihood_continuous_closed}; 
-only those non-Gaussian parts may require numerical integration.)
 
-----
-We first investigate the continuous case, that is, the model specification that involves the structural equations \req{eq:linearStructural} and the measurement equations \req{eq:continuousMeasurement}.
-
-In this specific context, the formulation
-\eqref{eq:likelihood_continuous} of the likelihood happens to
-simplify.  Indeed, both the structural and measurement equations are
-linear and the error terms are assumed to be normally distributed.  Because linear
-transformations and sums of normal random variables remain normal,
-the pair $(x_n^*, I_n)$ is jointly normal. Integrating out the latent
-variables $x_n^*$ therefore yields a closed-form multivariate normal
-distribution for the indicators $I_n$, with a mean shifted according
-to the structural equation and a covariance matrix equal to the sum of
-the measurement-error variances and the variance propagated from the
-latent variables. In other words, the integral in
-\eqref{eq:likelihood_continuous} collapses to the standard
-multivariate normal density, without requiring any numerical
-approximation.
-
-It can be seen by using \req{eq:linearStructural} into  \req{eq:continuousMeasurement}, to obtain
+Because $x_n^*$ is not observed, the individual likelihood
+contribution integrates the conditional indicator likelihood over the
+distribution of the latent variables implied by the structural equations:
 \begin{equation}
+  \label{eq:mimic_likelihood}
+  L_n^{\text{MIMIC}}
+  \;=\;
+  \int_{x_n^*}
+  L_n^{I}\!\left(I_n \mid x_n^*,x_n\right)\;
+  f(x_n^*\mid x_n)\;
+  dx_n^*,
+\end{equation}
+where $f(x_n^*\mid x_n)$ is the conditional
+density implied by Eq.~\eqref{eq:linearStructural}.
+
+%----------------------------------------------------------------
+\subsection{Hybrid choice model (choice model with latent variables)}
+\label{sec:hybrid_choice_model}
+%----------------------------------------------------------------
+
+A \emph{hybrid choice model} extends the MIMIC model by adding a discrete
+choice component in which latent variables enter the systematic utilities.
+The key modeling idea is that attitudes or perceptions (latent variables)
+may influence choices, while being measured only indirectly through the
+indicators.
+
+Let $V_{in}(x_n,x_n^*;\beta)$ denote the
+systematic utility of alternative $i$ for individual $n$. The probability of the
+observed choice $i_n$ conditional on the latent variables is
+\begin{equation}
+  \label{eq:hcm_choice_conditional}
+  P(i_n \mid x_n^*,x_n;\beta)
+  \;=\;
+  \frac{\exp\!\left(\mu\,V_{in}(x_n,x_n^*;\beta)\right)}
+  {\sum_{j\in\mathcal C_n}\exp\!\left(\mu\,V_{jn}(x_n,x_n^*;\beta)\right)},
+\end{equation}
+where $\mu$ is the scale parameter of the logit model and $\beta$ is the
+vector of utility parameters. Note that the logit model is adopted here for expositional convenience and because it is a widely used specification. However, the framework is fully general and can accommodate alternative discrete choice models, such as nested logit or cross-nested logit models, without any conceptual modification.
+
+
+
+For a given individual $n$, the full observation is
+$(i_n,I_n)$. Conditional on $x_n^*$, the hybrid
+choice model contribution to the likelihood is the product of:
+\begin{itemize}
+  \item the conditional choice probability from Eq.~\eqref{eq:hcm_choice_conditional},
+  \item the conditional indicator likelihood from
+  Eq.~\eqref{eq:mimic_conditional_indicator_likelihood}.
+\end{itemize}
+That is,
+\begin{equation}
+  \label{eq:hcm_joint_conditional_likelihood}
+  L_n\!\left(i_n,I_n \mid x_n^*,x_n\right)
+  \;=\;
+  P(i_n\mid x_n^*,x_n;\beta)\;
+  L_n^{I}\!\left(I_n \mid x_n^*,x_n\right).
+\end{equation}
+
+Because $x_n^*$ is latent, the individual likelihood
+contribution integrates \eqref{eq:hcm_joint_conditional_likelihood} over
+$f(x_n^*\mid x_n)$ implied by the structural
+equations \req{eq:linearStructural}:
+\begin{equation}
+  \label{eq:hcm_likelihood}
+  L_n^{\text{HCM}}
+  \;=\;
+  \int_{x_n^*}
+  P(i_n\mid x_n^*,x_n;\beta)\;
+  L_n^{I}\!\left(I_n \mid x_n^*,x_n\right)\;
+  f(x_n^*\mid x_n)\;
+  dx_n^*.
+\end{equation}
+
+Let $\theta$ denote the full parameter vector, including the parameters
+of the choice model, structural equations, and measurement equations (and
+thresholds for ordinal indicators). The sample log-likelihood is
+\begin{equation}
+  \label{eq:hcm_loglikelihood}
   \begin{aligned}
-    I_{n\ell} &= \lambda_{\ell 0}  + \sum_k \lambda_{\ell k}  (\sum_s \psi_{sk} x_{ns} + \sigma_{\omega k} \omega_{nk}) + \sigma_{\upsilon \ell} \upsilon_{n\ell}, \quad \forall \ell, \\
-    &= \lambda_{\ell 0} + \sum_s \lambda'_{\ell s} x_{ns} + \sigma'_{\upsilon \ell} \upsilon'_{n\ell}, \quad \forall \ell, 
+  \LL(\theta) & =
+  \sum_n \ln L_n^{\text{HCM}} \\
+  &=
+  \sum_n \ln \left[
+  \int_{x_n^*}
+  P(i_n\mid x_n^*,x_n;\beta)\;
+  L_n^{I}\!\left(I_n \mid x_n^*,x_n\right)\;
+  f(x_n^*\mid x_n)\;
+  dx_n^*
+  \right].
   \end{aligned}
 \end{equation}
-where  $\lambda'_{\ell s}=\sum_k \lambda_{\ell k}  \psi_{sk}$, and $\sigma'_{\upsilon \ell} \upsilon'_{n\ell}= \sigma_{\upsilon \ell} \upsilon_{n\ell} + \sum_k \lambda_{\ell k}\sigma_{\omega k} \omega_{nk}$.
 
-
-
-In order to normalize the model, we associate each latent variable $k$ with one specific indicator $\ell_k$,  different across latent variables.
-The following normalization can be done:
-\begin{itemize}
-\item As the error terms of the structural and measurement equations are confounded, we set $\sigma_{\omega k}=0$, for each latent variable $k$.
-\item As the units of the latent variables are arbitrary, we set the coefficient of latent variable to one\footnote{Or $-1$ if the statement implies a decrease of the latent variable, as illustrated in the case study.}  in the corresponding measurement equation, and the scale parameter to zero: $\lambda_{\ell_k k}=1$, $\sigma_{\upsilon \ell_k}=0$ for each latent variable $k$.
-\end{itemize}
-Note that the structural equations do not include an intercept, so that there is no need to mormalize the intercept of the corresponding measurement equation. 
-
-
-In contrast, this simplification does not apply when the indicators
-are discrete. In that case, the measurement equations involve
-threshold-crossing representations that express the probability
-\req{eq:discreteMeas-d} of each observed category as differences of
-normal cumulative distribution functions. These nonlinear functions of
-the latent variables break the convenient normal–linear structure:
-the conditional distribution of the indicators given $x_n^*$ is no
-longer Gaussian. As a consequence, the integral over $x_n^*$ in the
-likelihood cannot be evaluated in closed form.
-
-\section{Choice Model with Latent Variables}
-
-Consider a discrete choice model. We illustrate the methodology using a logit specification for the choice component, although other models --- such as the nested logit or cross-nested logit --- could also be employed. Under the logit framework, the probability that individual \( n \) chooses alternative \( i \) is given by
-\begin{equation}
-  \label{eq:logit}
-  P(i \mid x_n; \beta) = \frac{e^{\mu V_{in}(x_n; \beta)}}{\sum_{j \in \mathcal{C}_n} e^{\mu V_{jn}(x_n; \beta)}},
-\end{equation}
-where \( \mu \) is the (unknown) scale parameter, and \( V_{in}(x_n; \beta) \) denotes the systematic utility associated with alternative \( i \) for individual \( n \), as a function of observed explanatory variables \( x_n \) and a parameter vector \( \beta \).
-
-To enhance the behavioral realism of the model, we extend the utility specification by incorporating latent variables. This leads to the following choice probability conditional on the latent variables \( x_n^* \):
-\begin{equation}
-  \label{eq:choice_latent}
-  P(i \mid x_n^*, x_n; \beta) = \frac{e^{\mu V_{in}(x_n^*, x_n; \beta)}}{\sum_{j \in \mathcal{C}_n} e^{\mu V_{jn}(x_n^*, x_n; \beta)}},
-\end{equation}
-where \( x_n^* \) denotes the vector of latent psychological constructs influencing choice behavior.
-
-From a modeling perspective, the latent variables are included in the utility function in the same way as observed covariates. For this reason, it is useful to first specify the choice model assuming that the latent variables are observed. Once this conditional model is established, the latent nature of these variables can be addressed.
-
-The first approach relies on the structural equations defined in Equation~\eqref{eq:linearStructural}, with parameter values estimated from the MIMIC model:
-\begin{equation}
- \widehat{x}_{nk}^* = \widehat{\psi}_{0k} + \sum_s \widehat{\psi}_{sk} x_{ns} + \sigma_{\omega k} \omega_{nk},
-\end{equation}
-where \( \widehat{\psi} \) is the vector of estimated parameters of the structural equations. Note that the scale parameters \( \sigma_{\omega k} \) cannot be identified in the MIMIC model and are therefore normalized to 1, as they are confounded with the scale of the choice model.
-
-Given this specification, the choice model becomes, conditional on the structural error terms \( \omega_n \):
-\begin{equation}
-P(i \mid \omega_n, x_n; \beta) = \frac{e^{\mu V_{in}(\omega_n, x_n; \beta)}}{\sum_{j \in \mathcal{C}_n} e^{\mu V_{jn}(\omega_n, x_n; \beta)}},
-\end{equation}
-where \( \omega_n \) is the vector of normally distributed structural errors.
-
-To obtain the unconditional choice probability, we integrate over the distribution of the latent variables. This results in a mixture of logit models:
-\begin{equation}
-P(i \mid x_n; \beta) = \int_{\omega_n} \frac{e^{\mu V_{in}(\omega_n, x_n; \beta)}}{\sum_{j \in \mathcal{C}_n} e^{\mu V_{jn}(\omega_n, x_n; \beta)}} \phi(\omega_n) \, d\omega_n,
-\end{equation}
-where \( \phi(\cdot) \) is the probability density function of the standard normal distribution.
-This integral is approximatied using Monte-Carlo integration.
-
-This sequential estimation approach --- first estimating the MIMIC model, then the choice model --- yields consistent parameter estimates. However, it is not statistically efficient. Intuitively, observed choices provide additional information about the latent variables, which is not exploited in a two-step procedure. We now turn to the simultaneous estimation of all components --- structural equations, measurement equations, and the choice model --- based on the full likelihood function. This integrated approach leverages all available information and improves the statistical efficiency of the estimates.
-
-In this context, the likelihood function incorporates the complete set of observations for each individual. This includes not only the observed choice but also responses to the psychometric indicators. Conditional on the latent variables, the contribution of individual \( n \) to the likelihood function is the product of the ordered probit probabilities for each indicator, as specified in Equation~\eqref{eq:discreteMeas-d}, and the choice probability given in Equation~\eqref{eq:choice_latent}:
-\[
-P(i_n \mid x_n^*, x_n; \beta) \prod_\ell \mathbb{P}(I_{n\ell} = j_m \mid x_n^*, x_n; \lambda_\ell, \Sigma_{\upsilon \ell}).
-\]
-
-Substituting the structural equations \eqref{eq:linearStructural}, the expression becomes conditional on \( \omega_n \), and involves now the parameters of the structural equations as well:
-\[
-P(i_n \mid \omega_n, x_n; \beta, \psi, \sigma) \prod_\ell \mathbb{P}(I_{n\ell} = j_m \mid \omega_n, x_n; \lambda_\ell, \Sigma_{\upsilon \ell}, \psi, \sigma).
-\]
-
-To obtain the full contribution of individual \( n \) to the likelihood function, we integrate this expression over the distribution of the latent variables:
-\[
-\int_{\omega_n} P(i_n \mid x_n^*, x_n; \beta) \prod_\ell \mathbb{P}(I_{n\ell} = j_m \mid x_n^*, x_n; \lambda_\ell, \Sigma_{\upsilon \ell}) \phi(\omega_n) \, d\omega_n,
-\]
-where \( \phi(\cdot) \) is the standard normal density. As this integral has no closed form, it is approximated via Monte Carlo integration.
+The integral in \eqref{eq:hcm_loglikelihood} typically has no closed form
+and is evaluated numerically, most often by Monte-Carlo integration.
 
 \section{A case study}
 \label{sec:example}
@@ -466,78 +750,107 @@ addition to revealed preference data, the survey includes several
 psychometric indicators, enabling the incorporation of latent
 variables into the model specification.
 
-The data file as well as its description is available on the \href{http://biogeme.epfl.ch/#data}{Biogeme webpage}.
+The data file as well as its description is available on the \href{http://biogeme.epfl.ch/#data}{Biogeme webpage}. A description of the variables is also available in Appendix~\ref{sec:variables}.
 
-We first  estimate a MIMIC model involving two latent variables. The
+We consider a  model involving two latent variables. The
 first one captures a ``car-centric'' attitude. The second one captures
-a ``urban preference attitude''. The car-centric attitude captures the
+an ``environmental attitude''. The car-centric attitude captures the
 extent to which individuals exhibit a strong preference for private
 car use as their primary mode of transportation. This latent construct
 reflects values such as independence, flexibility, comfort, and
 perceived status associated with driving. Individuals with a high
 car-centric attitude are more likely to perceive cars as the most
 practical and desirable means of travel, often resisting modal shift
-to public transport or active mobility. The urban preference attitude
-represents the degree to which individuals value characteristics
-associated with dense, mixed-use urban environments. This includes a
-positive perception of walkability, access to local services,
-efficient public transport, and vibrant public spaces. This attitude
-is typically associated with environmental awareness, social
-interaction, and a preference for compact urban living.
+to public transport or active mobility.
+The environmental attitude represents the degree to which individuals
+value environmental protection and sustainability in their mobility
+choices. It reflects concerns about issues such as climate change,
+air pollution, energy consumption, and the broader environmental
+impacts of transportation. Individuals with a strong environmental
+attitude are more likely to favor low-emission travel options, to
+support policies that reduce car use, and to accept constraints on
+private mobility when these contribute to environmental goals.
+
 
 \subsection{Psychometric indicators}
 \label{sec:psycho}
-The psychmometric indicators selected to capture the car-centric attitude are:
+The psychmometric indicators selected to be used in the model are the following:
 \begin{description}
-\item[Envir01]  Fuel price should be increased to reduce congestion and air pollution.
-\item[Envir02]   More public transportation is needed, even if taxes are set to pay the additional costs.
-\item[Envir03]  Ecology disadvantages minorities and small businesses.
-\item[Envir04]  People and employment are more important than the environment.
-\item[Mobil09]  Taking the bus helps making the city more comfortable and welcoming.
-\item[Mobil11]  It is difficult to take the public transport when I carry bags or luggage. 
-\item[Mobil14]  When I take the car I know I will be on time.
-\item[Mobil16]  I do not like changing the mean of transport when I am traveling.
-\item[Mobil17]  If I use public transportation I have to cancel certain activities I would have done if I had taken the car. 
-\item[LifSty08] For me the car is only a practical way to move.
+  \item[Envir01] Fuel price should be increased to reduce congestion and air pollution.
+  \item[Envir02] More public transportation is needed, even if taxes are set to pay the additional costs.
+  \item[Envir03] Ecology disadvantages minorities and small businesses.
+  \item[Envir04] People and employment are more important than the environment.
+  \item[Envir05] I am concerned about global warming.
+  \item[Envir06] Actions and decision making are needed to limit greenhouse gas emissions.
+  \item[Mobil03] I use the time of my trip in a productive way.
+  \item[Mobil05] I reconsider frequently my mode choice.
+  \item[Mobil08] I do not feel comfortable when I travel close to people I do not know.
+  \item[Mobil09] Taking the bus helps making the city more comfortable and welcoming.
+  \item[Mobil10] It is difficult to take the public transport when I travel with my children.
+  \item[Mobil12] It is very important to have a beautiful car.
+  \item[LifSty01] I always choose the best products regardless of price.
+  \item[LifSty07] The pleasure of having something beautiful consists in showing it.
+  \item[NbCar] Number of cars in the household.
 \end{description}
-The psychmometric indicators selected to capture the urban preference attitude are:
-\begin{description}
-\item[ResidCh01] I like living in a neighborhood where a lot of things happen. 
-\item[ResidCh02] The accessibility and mobility conditions are important for the choice of housing.
-\item[ResidCh03] Most of my friends live in the same region I live in.
-\item[ResidCh05] I would like to live in the city center of a big city.
-\item[ResidCh06] I would like to live in a town situated in the outskirts of a city. 
-\item[ResidCh07] I would like to live in the countryside.
-\item[Mobil07] In general, for my activities, I always have a usual mean of transport.
-\item[Mobil24] I have always used public transports all my life.
-\end{description}
+
+The specification of the measurement model relies on two sets of
+indicators, one for each latent variable. The \emph{car-centric}
+attitude is measured using the indicators \texttt{Envir01},
+\texttt{Envir02}, \texttt{Envir06}, \texttt{Mobil03}, \texttt{Mobil05},
+\texttt{Mobil08}, \texttt{Mobil09}, \texttt{Mobil10}, \texttt{LifSty07},
+and \texttt{NbCar}. These indicators capture aspects related to the
+perceived convenience, comfort, flexibility, and social meaning of
+private car use, as well as practical constraints associated with
+alternative modes. The \emph{environmental} attitude is measured using
+the indicators \texttt{Envir01}, \texttt{Envir02}, \texttt{Envir03},
+\texttt{Envir04}, \texttt{Envir05}, \texttt{Envir06}, \texttt{Mobil12},
+\texttt{LifSty01}, and \texttt{NbCar}, which reflect concerns about
+environmental protection, sustainability, and the trade-offs between
+environmental objectives, economic considerations, and personal
+consumption preferences.
+
+The composition of these indicator sets is not imposed \emph{a priori}
+but results from a combination of theoretical considerations and an
+iterative modeling process. Indicators were selected based on their
+conceptual relevance to each latent construct and on empirical
+performance during estimation.
+
+The indicator \texttt{NbCar} differs in nature from the other indicators
+used in the measurement model. It is not a psychometric indicator based
+on attitudinal statements evaluated on a Likert scale, but an observed
+household characteristic reporting the number of cars owned by the
+household. This variable can take the discrete values $0$, $1$, $2$,
+and $3$. Although \texttt{NbCar} does not directly measure attitudes or
+perceptions, it provides valuable information about underlying latent
+constructs related to mobility preferences and environmental values.
+In particular, car ownership reflects long-term mobility decisions and
+constraints that are strongly associated with both car-centric and
+environmental attitudes. For this reason, \texttt{NbCar} is incorporated
+into the model as an indicator.
 
 \subsection{Structural equations}
 
-For the structural equations, we use the linear specification \req{eq:linearStructural} with the following explanatory variables.
-For the car-centric attitude $x_{n,\text{car}}^*$, we have:
-\begin{itemize}
-\item \lstinline $age_65_more = age >= 65$
-\item \lstinline $ScaledIncome = CalculatedIncome / 1000$
-\item \lstinline $moreThanOneCar = NbCar > 1$
-\item \lstinline $moreThanOneBike = NbBicy > 1$
-\item \lstinline $individualHouse = HouseType == 1$
-\item \lstinline $haveChildren = (FamilSitu == 3) + (FamilSitu == 4) > 0$
-\item \lstinline $haveGA = GenAbST == 1$
-\item \lstinline $highEducation = Education >= 6$
-\end{itemize}
-And for the urban preference attitude $x_{n,\text{urban}}^*$, we have:
-\begin{itemize}
-\item \lstinline $childCenter = ((ResidChild == 1) + (ResidChild == 2)) > 0$
-\item \lstinline $childSuburb = ((ResidChild == 3) + (ResidChild == 4)) > 0$
-\item \lstinline $highEducation = Education >= 6$
-\item \lstinline $artisans = SocioProfCat == 5$
-\item \lstinline $employees = SocioProfCat == 6$
-\item \lstinline $age_30_less = age <= 30$
-\item \lstinline $haveChildren = (FamilSitu == 3) + (FamilSitu == 4) > 0$
-\item \lstinline $UrbRur$
-\item \lstinline $individualHouse = HouseType == 1$
-\end{itemize}
+For the structural equations, we use the linear specification in
+Eq.~\eqref{eq:linearStructural}. The set of explanatory variables
+included in each structural equation follows the specification used in
+the implementation. In particular, the car-centric latent variable
+$x_{n,\text{car}}^*$ is specified as a function of
+\texttt{high\_education}, \texttt{top\_manager}, \texttt{employees},
+\texttt{age\_30\_less}, \texttt{ScaledIncome}, and
+\texttt{car\_oriented\_parents}. The environmental latent variable
+$x_{n,\text{envir}}^*$ is specified as a function of \texttt{childSuburb},
+\texttt{ScaledIncome}, \texttt{city\_center\_as\_kid}, \texttt{artisans},
+\texttt{high\_education}, and \texttt{low\_education}. These variables are
+constructed from the raw survey information during data preparation
+(e.g., \texttt{ScaledIncome} is computed as \texttt{CalculatedIncome}/1000,
+\texttt{age\_30\_less} is the indicator \texttt{age} $\le 30$,
+\texttt{childSuburb} identifies individuals who lived in suburban areas
+as children, and \texttt{car\_oriented\_parents} identifies respondents
+reporting very frequent car use by parents). The final specification of
+the structural equations results from a combination of behavioral
+assumptions and empirical trial-and-error, balancing interpretability,
+parameter stability, and overall fit.
+
 
 \subsection{Measurement equations}
 
@@ -561,13 +874,13 @@ corresponding statement. Accordingly, the loading \( \lambda_{1\ell}
 construct. The scale parameter \( \lambda_{2\ell} \) is normalized to
 1 to ensure identifiability of the model.
 
-Similarly, for the indicators capturing the urban-preference attitude, we specify:
+Similarly, for the indicators capturing the environmental attitude, we specify:
 \begin{equation}
-  I^*_{n\ell} = \lambda_{0\ell} + \lambda_{1\ell} x^*_{n,\text{urban}} + \lambda_{2\ell} \upsilon_{n\ell},
+  I^*_{n\ell} = \lambda_{0\ell} + \lambda_{1\ell} x^*_{n,\text{env}} + \lambda_{2\ell} \upsilon_{n\ell},
 \end{equation}
 with analogous interpretation of the parameters.
 
-The indicator \texttt{ResidCh01} is selected for the normalization of
+The indicator \texttt{Envir02} is selected for the normalization of
 this measurement model. Individuals with a stronger urban-preference
 attitude are expected to be more likely to \emph{agree} with the
 corresponding statement. Accordingly, the loading \( \lambda_{1\ell}
@@ -576,715 +889,241 @@ direction of the latent construct. The scale parameter \(
 \lambda_{2\ell} \) is normalized to 1 to ensure identifiability of the
 model.
 
-The thresholds for the ordered probit model are defined as described in Section~\ref{sec:likert}:
+The threshold specification follows directly from the normalization and
+identification principles discussed in Section~\ref{sec:normalization}
+and from the ordered probit formulation introduced in
+Section~\ref{sec:likert}. In particular, threshold parameterizations are
+chosen so as to (i) enforce the ordering constraints, (ii) fix the
+location of the ordinal response scale exactly once, and (iii) remain
+consistent with the reference-indicator strategy adopted for the latent
+variables.
+
+For Likert-type indicators with five response categories, we use a
+symmetric threshold parameterization centered at zero:
 \[
 \begin{aligned}
-  \tau_1 &= -\delta_1 - \delta_2, \\
+  \tau_1 &= -(\delta_1 + \delta_2), \\
   \tau_2 &= -\delta_1, \\
-  \tau_3 &= \delta_1, \\
-  \tau_4 &= \delta_1 + \delta_2,
+  \tau_3 &= \phantom{-}\delta_1, \\
+  \tau_4 &= \phantom{-}(\delta_1 + \delta_2),
 \end{aligned}
 \]
-where \( \delta_1 > 0 \) and \( \delta_2 > 0 \) are estimated.
+where $\delta_1 > 0$ and $\delta_2 > 0$ are estimated. This
+parameterization has three desirable properties. First, it guarantees
+strict ordering of the thresholds by construction. Second, it fixes the
+location of the threshold system by centering it at zero, thereby
+removing the location indeterminacy inherent to ordered probit models.
+Third, it reflects the semantic symmetry of standard Likert scales
+(e.g., from ``strongly disagree'' to ``strongly agree'') while reducing
+the number of free parameters. These thresholds are shared across all
+Likert-type indicators, reflecting the modeling assumption that the
+response categories have a comparable interpretation across statements.
+
+The indicator \texttt{NbCar} is treated separately, as it is not a
+psychometric Likert-scale indicator but an observed household
+characteristic reporting the number of cars owned. Although it is used
+as an indicator of the latent constructs, its response scale is
+inherently asymmetric and quantitative. Since \texttt{NbCar} takes four
+ordered values, three thresholds are required. For this indicator, we
+adopt a non-symmetric threshold parameterization and fix the first
+threshold to zero:
+\[
+\begin{aligned}
+  \tau^{\text{NbCar}}_1 &= 0, \\
+  \tau^{\text{NbCar}}_2 &= \tau^{\text{NbCar}}_1 + \delta^{\text{NbCar}}_1, \\
+  \tau^{\text{NbCar}}_3 &= \tau^{\text{NbCar}}_2 + \delta^{\text{NbCar}}_2,
+\end{aligned}
+\]
+where $\delta^{\text{NbCar}}_1 > 0$ and $\delta^{\text{NbCar}}_2 > 0$ are
+estimated. Fixing $\tau^{\text{NbCar}}_1=0$ provides the required
+location normalization for this indicator, while the positive
+incremental parameterization ensures ordered thresholds without
+imposing symmetry. This choice is fully consistent with the overall
+normalization strategy: location is fixed once for the ordinal layer,
+and the scale of the latent variables remains anchored through the
+reference indicators.
 
 \subsection{Implementation notes}
+\label{sec:implementation_notes}
 
-The Biogeme implementation is structured across three dedicated files:
-one defining the variables associated with each latent construct, one
-specifying the structural equations, and one containing the
-measurement equations. These files are not only used in the estimation
-of the MIMIC model, but are also employed in the subsequent estimation
-of choice models incorporating latent variables. This design ensures
-full consistency in the specification of the structural and
-measurement equations across all stages of the analysis.
+The results reported below are produced using the set of
+Python specification files included in the appendix (Sections
+\ref{sec:optima.py}--\ref{sec:plot_b06_hybrid_bayes.py}). These files
+have been developed and tested with \texttt{Biogeme~3.3.2}. As Biogeme
+evolves, minor adaptations of the syntax may be required in future
+versions. The goal of the implementation is to keep the various model
+variants (choice-only, MIMIC, and hybrid choice; maximum likelihood and
+Bayesian estimation) consistent by relying on shared specification
+components and a centralized configuration mechanism. This subsection
+summarizes the role of each file and the type of specification
+information it contains.
 
-The file defining the relevant variables is described in
-Section~\ref{sec:relevant_data.py}. It specifies two sets,
-\lstinline$car_indicators$ and \lstinline$urban_indicators$, which
-list the indicators associated with each latent variable. It also
-identifies the indicators used for the normalization of the model. In
-addition, the file defines two dictionaries, each mapping a latent
-variable to the set of explanatory variables used in its corresponding
-structural equation. These dictionaries associate variable names with
-Biogeme expressions used to compute them.
+\paragraph{Data preparation (\ref{sec:optima.py}).}
+The file in Section~\ref{sec:optima.py} is a standard Biogeme data
+preparation script. It reads the raw data, applies the sample cleaning
+rules (e.g., removal of inconsistent observations), and constructs the
+derived variables used throughout the model specification (such as
+scaled income, socio-demographic indicators, and other transformed
+covariates). The resulting \texttt{Database} object constitutes the
+common input for all estimation variants.
 
-The file defining the structural equations is described in
-Section~\ref{sec:structural_equations.py}. It includes two
-functions --- one for each latent variable --- that construct the
-corresponding structural equations. These functions operate in two
-modes. When called without arguments, they return Biogeme expressions
-involving parameters to be estimated. This mode is used, for example,
-in the MIMIC model. Alternatively, if a dictionary of parameter values
-is provided as input, the functions substitute the given values and
-treat them as fixed, enabling evaluation based on previously estimated
-parameters. This mode is used for the sequential estimation of the choice model, for example. 
+\paragraph{Indicator definitions and threshold conventions (\ref{sec:likert_indicators.py}).}
+The file in Section~\ref{sec:likert_indicators.py} provides the complete
+list of indicators used in the measurement model. For each indicator, it
+stores its identifier (name), the corresponding survey statement, and
+its type. In the present example, two indicator types are used:
+\texttt{likert} for psychometric indicators collected on a Likert scale,
+and \texttt{cars} for the discrete indicator \texttt{NbCar} (number of
+cars in the household). In addition, the file defines the list of
+indicator types and the associated threshold conventions. For each type,
+it specifies whether the thresholds are symmetric or not, the list of
+admissible response categories, and the ``neutral'' labels (if any) that
+are ignored in estimation. These definitions ensure that all measurement
+equations and threshold specifications are generated consistently across
+the model variants.
 
+\paragraph{Latent variable definitions (\ref{sec:latent_variables.py}).}
+The file in Section~\ref{sec:latent_variables.py} defines the latent
+variables used in the case study and, for each of them, the list of
+explanatory variables entering its structural equation. This file
+therefore contains the substantive specification choices for the
+structural part of the model: the names of the latent constructs and the
+observed covariates assumed to explain them.
 
-The file containing the measurement equations is described in
-Section~\ref{sec:measurement_equations.py}. It begins by organizing
-the parameters to be estimated into dictionaries: one for the
-intercepts (\lstinline$intercepts$), two for the coefficients
-associated with each latent variable (\lstinline$car_coefficients$ and
-\lstinline$urban_coefficients$), and one for the scale parameters
-(\lstinline$sigma_star$). The required normalizations are also applied
-at this stage.
-
-The function \lstinline$generate_model_terms$ is responsible for
-constructing the expression representing the contribution of the
-latent variables to the measurement equation for a given indicator. It
-is designed to accommodate the possibility that an indicator may be
-influenced by multiple latent variables, even though this situation
-does not arise in the present example.
-
-Finally, the function \lstinline$generate_measurement_equations$
-produces the complete set of measurement equations in the form of a
-dictionary. This dictionary maps each potential response value of an
-indicator to the corresponding expression for its likelihood
-contribution.
-
-
-\subsection{The MIMIC model}
-
-With all generic components defined, we now turn to the script used to
-estimate the parameters of the MIMIC model, presented in
-Section~\ref{sec:plot_b01_mimic.py}. After retrieving the relevant
-elements discussed above, the script constructs the joint log
-likelihood function of all observed indicators. This is done by first
-creating a dictionary that maps each indicator to its individual log
-likelihood contribution, which are then aggregated into a single
-expression representing the total log likelihood.
-
-This combined likelihood expression is subsequently linked to the
-database using Biogeme, enabling the maximum likelihood estimation of
-the model parameters.
-The general statistics of the
-estimation are reported in Table~\vref{tab:mimic_stats}. The estimated
-parameters of the structural equations are reported in
-Table~\vref{tab:mimic_params_struct}. The estimated parameters of the
-measurement equations are reported in
-Table~\vref{tab:mimic_params_car_meas} for the car-centric attitude,
-and in Table~\vref{tab:mimic_params_urban_meas} for the
-urban-preference attitude. Finally, the estimated values of the
-differences between thresholds are reported in
-Table~\vref{tab:mimic_thresholds}.
-\begin{table}[htb]
-  \begin{center}
-    \footnotesize
-\begin{tabular}{ll}
-Number of estimated parameters & 69 \\
-Sample size & 1899 \\
-Init log likelihood & -109217.9 \\
-Final log likelihood & -43773.72 \\
-Akaike Information Criterion & 87685.45 \\
-Bayesian Information Criterion & 88068.33 \\
-\end{tabular}
-  \caption{ \label{tab:mimic_stats}Mimic model: general statistics}
-  \end{center}
-
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & car\_struct\_age\_65\_more & 0&158 & 0&0664 & 2&38 & 0&0174 \\ 
-2 & car\_struct\_ScaledIncome & -0&0333 & 0&00707 & -4&71 & 2&53e-06 \\ 
-3 & car\_struct\_moreThanOneCar & 0&614 & 0&0584 & 10&5 & 0&0 \\ 
-4 & car\_struct\_moreThanOneBike & -0&341 & 0&0584 & -5&84 & 5&33e-09 \\ 
-5 & car\_struct\_individualHouse & -0&0939 & 0&0517 & -1&82 & 0&0693 \\ 
-6 & car\_struct\_haveChildren & -0&044 & 0&0502 & -0&875 & 0&382 \\ 
-7 & car\_struct\_haveGA & -0&599 & 0&0843 & -7&1 & 1&23e-12 \\ 
-8 & car\_struct\_highEducation & -0&328 & 0&0585 & -5&61 & 1&99e-08 \\ 
-9 & urban\_struct\_childCenter & 0&0979 & 0&0294 & 3&33 & 0&00087 \\ 
-10 & urban\_struct\_childSuburb & 0&0892 & 0&0239 & 3&72 & 0&000196 \\ 
-11 & urban\_struct\_highEducation & 0&0341 & 0&0153 & 2&24 & 0&0253 \\ 
-12 & urban\_struct\_artisans & -0&0986 & 0&035 & -2&81 & 0&00491 \\ 
-13 & urban\_struct\_employees & -0&0398 & 0&0174 & -2&28 & 0&0224 \\ 
-14 & urban\_struct\_age\_30\_less & 0&162 & 0&0594 & 2&72 & 0&00645 \\ 
-15 & urban\_struct\_haveChildren & -0&0246 & 0&0124 & -1&99 & 0&0466 \\ 
-16 & urban\_struct\_UrbRur & 0&104 & 0&0333 & 3&13 & 0&00175 \\ 
-17 & urban\_struct\_IndividualHouse & 0&0277 & 0&014 & 1&98 & 0&0475 \\ 
-\end{tabular}
-\caption{MIMIC model: estimated parameters of the structural equations\label{tab:mimic_params_struct}}
-  \end{center}
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & meas\_intercept\_Envir01 & -0&829 & 0&0739 & -11&2 & 0&0 \\ 
-2 & meas\_intercept\_Envir02 & 0&42 & 0&0309 & 13&6 & 0&0 \\ 
-3 & car\_meas\_b\_Envir02 & -0&45 & 0&0557 & -8&08 & 6&66e-16 \\ 
-4 & meas\_sigma\_star\_Envir02 & 0&945 & 0&0228 & 41&4 & 0&0 \\ 
-5 & meas\_intercept\_Envir03 & -0&393 & 0&0337 & -11&6 & 0&0 \\ 
-6 & car\_meas\_b\_Envir03 & 0&647 & 0&0592 & 10&9 & 0&0 \\ 
-7 & meas\_sigma\_star\_Envir03 & 0&879 & 0&0212 & 41&4 & 0&0 \\ 
-8 & meas\_intercept\_Envir04 & -0&543 & 0&0313 & -17&3 & 0&0 \\ 
-9 & car\_meas\_b\_Envir04 & 0&38 & 0&0601 & 6&32 & 2&67e-10 \\ 
-10 & meas\_sigma\_star\_Envir04 & 0&811 & 0&0204 & 39&7 & 0&0 \\ 
-11 & meas\_intercept\_Mobil09 & 0&822 & 0&0311 & 26&4 & 0&0 \\ 
-12 & car\_meas\_b\_Mobil09 & -0&34 & 0&0511 & -6&65 & 2&85e-11 \\ 
-13 & meas\_sigma\_star\_Mobil09 & 0&873 & 0&0241 & 36&2 & 0&0 \\ 
-14 & meas\_intercept\_Mobil11 & 0&408 & 0&035 & 11&6 & 0&0 \\ 
-15 & car\_meas\_b\_Mobil11 & 0&541 & 0&059 & 9&17 & 0&0 \\ 
-16 & meas\_sigma\_star\_Mobil11 & 0&963 & 0&0249 & 38&7 & 0&0 \\ 
-17 & meas\_intercept\_Mobil14 & -0&154 & 0&0308 & -5&0 & 5&66e-07 \\ 
-18 & car\_meas\_b\_Mobil14 & 0&615 & 0&056 & 11&0 & 0&0 \\ 
-19 & meas\_sigma\_star\_Mobil14 & 0&85 & 0&021 & 40&6 & 0&0 \\ 
-20 & meas\_intercept\_Mobil16 & 0&167 & 0&0331 & 5&04 & 4&6e-07 \\ 
-21 & car\_meas\_b\_Mobil16 & 0&478 & 0&0568 & 8&42 & 0&0 \\ 
-22 & meas\_sigma\_star\_Mobil16 & 0&93 & 0&0227 & 41&0 & 0&0 \\ 
-23 & meas\_intercept\_Mobil17 & 0&179 & 0&032 & 5&59 & 2&24e-08 \\ 
-24 & car\_meas\_b\_Mobil17 & 0&404 & 0&0567 & 7&13 & 1&01e-12 \\ 
-25 & meas\_sigma\_star\_Mobil17 & 0&934 & 0&0239 & 39&1 & 0&0 \\ 
-26 & meas\_intercept\_LifSty08 & 1&22 & 0&04 & 30&5 & 0&0 \\ 
-27 & car\_meas\_b\_LifSty08 & -0&227 & 0&062 & -3&66 & 0&000251 \\ 
-28 & meas\_sigma\_star\_LifSty08 & 0&957 & 0&0317 & 30&2 & 0&0 \\ 
-\end{tabular}
-  \caption{MIMIC model: estimated parameters of the measurement equations for the car-centric attitude\label{tab:mimic_params_car_meas}}
-  \end{center}
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & meas\_intercept\_ResidCh01 & -0&591 & 0&0682 & -8&67 & 0&0 \\ 
-2 & meas\_intercept\_ResidCh02 & 1&18 & 0&177 & 6&66 & 2&71e-11 \\ 
-3 & urban\_meas\_b\_ResidCh02 & 1&53 & 0&456 & 3&35 & 0&000815 \\ 
-4 & meas\_sigma\_star\_ResidCh02 & 0&95 & 0&0245 & 38&8 & 0&0 \\ 
-5 & meas\_intercept\_ResidCh03 & -0&284 & 0&224 & -1&27 & 0&205 \\ 
-6 & urban\_meas\_b\_ResidCh03 & -1&24 & 0&582 & -2&13 & 0&0328 \\ 
-7 & meas\_sigma\_star\_ResidCh03 & 0&959 & 0&0223 & 43&1 & 0&0 \\ 
-8 & meas\_intercept\_ResidCh05 & -0&388 & 0&298 & -1&3 & 0&194 \\ 
-9 & urban\_meas\_b\_ResidCh05 & 3&02 & 0&775 & 3&89 & 9&88e-05 \\ 
-10 & meas\_sigma\_star\_ResidCh05 & 1&15 & 0&0417 & 27&6 & 0&0 \\ 
-11 & meas\_intercept\_ResidCh06 & 0&873 & 0&407 & 2&15 & 0&0318 \\ 
-12 & urban\_meas\_b\_ResidCh06 & 3&59 & 1&05 & 3&43 & 0&000603 \\ 
-13 & meas\_sigma\_star\_ResidCh06 & 1&06 & 0&0267 & 39&8 & 0&0 \\ 
-14 & meas\_intercept\_ResidCh07 & -0&156 & 0&338 & -0&461 & 0&645 \\ 
-15 & urban\_meas\_b\_ResidCh07 & -3&25 & 0&879 & -3&69 & 0&000223 \\ 
-16 & meas\_sigma\_star\_ResidCh07 & 0&929 & 0&0283 & 32&8 & 0&0 \\ 
-17 & meas\_intercept\_Mobil07 & 0&633 & 0&117 & 5&41 & 6&41e-08 \\ 
-18 & urban\_meas\_b\_Mobil07 & -0&607 & 0&298 & -2&04 & 0&0415 \\ 
-19 & meas\_sigma\_star\_Mobil07 & 0&833 & 0&0258 & 32&4 & 0&0 \\ 
-20 & meas\_intercept\_Mobil24 & 0&841 & 0&203 & 4&14 & 3&46e-05 \\ 
-21 & urban\_meas\_b\_Mobil24 & 1&45 & 0&524 & 2&77 & 0&00566 \\ 
-22 & meas\_sigma\_star\_Mobil24 & 1&12 & 0&0288 & 38&8 & 0&0 \\ 
-\end{tabular}
-  \caption{MIMIC model: estimated parameters of the measurement equations for the urban-preference attitude\label{tab:mimic_params_urban_meas}}
-  \end{center}
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-  1 & $\delta\_1$ & 0&307 & 0&00614 & 49&9 & 0&0 \\ 
-2 & $\delta\_2$ & 0&936 & 0&0167 & 55&9 & 0&0 \\ 
-
-\end{tabular}
-  \caption{MIMIC model: thresholds of the measurement equations\label{tab:mimic_thresholds}}
-  \end{center}
-\end{table}
-
-\clearpage
-\subsection{The choice model}
-
-The transportation mode choice model developed for the case study presented in Section~\ref{sec:example} considers three alternatives:
+\paragraph{Central configuration (\ref{sec:config.py}).}
+To ensure that all model variants are generated from the same building
+blocks, the implementation relies on a configuration object defined in
+Section~\ref{sec:config.py}. This configuration determines which
+components are active and how estimation is performed. It contains the
+following entries:
 \begin{itemize}
-\item public transportation,
-\item private car,
-\item slow modes (e.g., walking, biking).
+  \item \texttt{name}: a string identifier used to label the model run
+  and its output files;
+  \item \texttt{latent\_variables} (\texttt{"zero"} or \texttt{"two"}):
+  whether the specification includes no latent variables or the two
+  latent variables of the case study;
+  \item \texttt{choice\_model} (\texttt{"yes"} or \texttt{"no"}): whether
+  the discrete choice component is included (hybrid/choice-only) or
+  omitted (pure MIMIC);
+  \item \texttt{estimation} (\texttt{"ml"} or \texttt{"bayes"}): whether
+  the model is estimated by maximum likelihood or using Bayesian
+  inference;
+  \item \texttt{number\_of\_bayesian\_draws\_per\_chain}: the number of
+  posterior draws generated per MCMC chain (relevant when
+  \texttt{estimation="bayes"});
+  \item \texttt{number\_of\_monte\_carlo\_draws}: the number of Monte-Carlo
+  draws used to approximate the integrals over the latent variables
+  (relevant \texttt{estimation="ml"}).
 \end{itemize}
-The utility functions are specified as linear combinations of explanatory variables and include alternative-specific constants (intercepts). The full specification is provided in Table~\ref{tab:spec_choice}, where
+This design avoids duplicating code across variants and makes the
+comparison between specifications transparent.
+
+\paragraph{MIMIC component and normalization (\ref{sec:mimic.py}).}
+The file in Section~\ref{sec:mimic.py} builds the MIMIC part of the
+model (structural and measurement equations) as a function of the
+configuration. It is also where the reference-indicator normalization is
+declared explicitly. In particular, the reference indicator used to
+anchor a latent variable is identified through a normalization object of
+the form \texttt{Normalization(indicator='Envir01', coefficient=-1)},
+where the \texttt{coefficient} specifies the fixed loading (e.g., $-1$)
+used for identification in the corresponding measurement equation. This
+file therefore centralizes the measurement-structure assumptions and the
+identification choices of the latent-variable system.
+
+\paragraph{Choice model component (\ref{sec:choice_model.py}).}
+The file in Section~\ref{sec:choice_model.py} contains the specification
+of the discrete choice model. Depending on the configuration, the choice
+model is defined either without latent variables (choice-only baseline)
+or with latent variables entering the utilities (hybrid choice model).
+
+\paragraph{Estimation control and caching of results (\ref{sec:read_or_estimate.py}).}
+The file in Section~\ref{sec:read_or_estimate.py} orchestrates the
+execution of the estimation in the requested mode (maximum likelihood or
+Bayesian), based on the configuration. For reproducibility and
+efficiency, it first checks whether estimation outputs already exist; if
+so, results are read from disk rather than recomputed. Otherwise, the
+file triggers a new estimation run. This file therefore handles the
+``run-or-read'' logic that supports systematic experimentation with
+multiple model variants.
+
+\paragraph{Log-likelihood assembly and estimation (\ref{sec:estimate.py}).}
+Finally, the file in Section~\ref{sec:estimate.py} assembles the full
+model implied by the configuration and generates the corresponding
+(log-)likelihood expression. This includes combining the relevant
+components (choice probability, measurement likelihood, structural
+density) and performing the required integration over latent variables
+using Monte-Carlo simulation when appropriate. The same file then calls
+the estimation routines corresponding to the selected estimation
+paradigm (maximum likelihood or Bayesian). In short, it is the entry
+point where the complete hybrid choice model likelihood is constructed
+and estimated.
+
+\paragraph{Estimation scripts
+(\ref{sec:plot_b01_choice_only_ml.py}--\ref{sec:plot_b06_hybrid_bayes.py}).}
+These are six driver scripts, each corresponding to one combination of model
+scope (choice-only, MIMIC, or full hybrid choice) and estimation method
+(maximum likelihood or Bayesian). Each script defines the appropriate
+configuration (Section~\ref{sec:config.py}) and then relies on the
+generic estimation workflow (Sections~\ref{sec:read_or_estimate.py} and
+\ref{sec:estimate.py}) to either run the estimation or read existing
+outputs. 
+
 \begin{itemize}
-\item \lstinline $MarginalCostPT_scaled = MarginalCostPT / 10$,
-\item \lstinline $CostCarCHF_scaled = CostCarCHF / 10$,
-\item \lstinline $PurpHWH = TripPurpose == 1$,
-\item \lstinline $PurpOther = TripPurpose == 1$,
-\item \lstinline $TimePT_scaled = TimePT / 200$,
-\item \lstinline $TimeCar_scaled = TimeCar / 200$,
-\item \lstinline $distance_km_scaled = distance_km / 5$.
+  \item \textbf{Choice-only, maximum likelihood}
+  (Section~\ref{sec:plot_b01_choice_only_ml.py}): the script
+  \lstinline$plot_b01_choice_only_ml.py$ estimates the discrete choice
+  model without latent variables (\lstinline$latent_variables="zero"$,
+  \lstinline$choice_model="yes"$, \lstinline$estimation="ml"$). It
+  provides a baseline choice specification used for comparison with
+  latent-variable extensions.
+
+  \item \textbf{MIMIC, maximum likelihood}
+  (Section~\ref{sec:plot_b02_mimic_ml.py}): the script
+  \lstinline$plot_b02_mimic_ml.py$ estimates the latent-variable system
+  (structural and measurement equations) without the choice component
+  (\lstinline$latent_variables="two"$, \lstinline$choice_model="no"$,
+  \lstinline$estimation="ml"$). It focuses on how the latent constructs
+  are explained by covariates and reflected in indicators.
+
+  \item \textbf{Hybrid choice, maximum likelihood}
+  (Section~\ref{sec:plot_b03_hybrid_ml.py}): the script
+  \lstinline$plot_b03_hybrid_ml.py$ estimates the full hybrid choice
+  model, combining the choice model with the latent-variable system
+  (\lstinline$latent_variables="two"$, \lstinline$choice_model="yes"$,
+  \lstinline$estimation="ml"$). The likelihood integrates the choice and
+  measurement components over the latent variables.
+
+  \item \textbf{Choice-only, Bayesian}
+  (Section~\ref{sec:plot_b04_choice_only_bayes.py}): the script
+  \lstinline$plot_b04_choice_only_bayes.py$ estimates the discrete choice
+  model without latent variables using Bayesian inference
+  (\lstinline$latent_variables="zero"$, \lstinline$choice_model="yes"$,
+  \lstinline$estimation="bayes"$). It provides the Bayesian counterpart
+  of the maximum-likelihood baseline.
+
+  \item \textbf{MIMIC, Bayesian}
+  (Section~\ref{sec:plot_b05_mimic_bayes.py}): the script
+  \lstinline$plot_b05_mimic_bayes.py$ estimates the latent-variable
+  system without the choice component using Bayesian inference
+  (\lstinline$latent_variables="two"$, \lstinline$choice_model="no"$,
+  \lstinline$estimation="bayes"$). It delivers posterior inference for
+  the structural and measurement parameters.
+
+  \item \textbf{Hybrid choice, Bayesian}
+  (Section~\ref{sec:plot_b06_hybrid_bayes.py}): the script
+  \lstinline$plot_b06_hybrid_bayes.py$ estimates the complete hybrid
+  choice model using Bayesian inference
+  (\lstinline$latent_variables="two"$, \lstinline$choice_model="yes"$,
+  \lstinline$estimation="bayes"$). It is the most comprehensive variant
+  and yields posterior distributions for both the choice parameters and
+  the latent-variable system, accounting for the full joint likelihood.
 \end{itemize}
 
-
-The choice model adopts the logit formulation \req{eq:logit}.
-The model is normalized using a moneymetric specification: the coefficient of the cost variable, interacted with the ``home–work–home'' trip purpose, is fixed to \(-1\). This ensures that the utility scale is expressed in monetary units.
-
-\begin{table}[htb]
-  \begin{tabular}{cccc}
-Parameter    & Pub. transp. & Car & Slow modes \\
-    \hline
-    \hline
-\lstinline$asc_pt$ &    1 &   0 &  0 \\
-    \hline
-\lstinline$asc_car$ &   0 &   1 &  0 \\
-    \hline
-\lstinline$beta_cost_hwh$ & \lstinline$MarginalCostPT_scaled$ & \lstinline$CostCarCHF_scaled$ & 0 \\
- & \lstinline$* PurpHWH$ & \lstinline$ * PurpHWH$ & \\
-    \hline
-\lstinline$beta_cost_other$  & \lstinline$MarginalCostPT_scaled $ & \lstinline$CostCarCHF_scaled$ & 0 \\
-& \lstinline$* PurpOther$ & \lstinline$* PurpOther$& 0 \\
-    \hline
-\lstinline$beta_time_pt$ & \lstinline$TimePT_scaled$ & 0 & 0 \\
-    \hline
-\lstinline$beta_waiting_time$ & \lstinline$WaitingTimePT$ & 0 & 0 \\
-    \hline
-\lstinline$beta_time_car$ & 0 & \lstinline$TimeCar_scaled$ & 0\\
-    \hline
-\lstinline$beta_dist$ & 0 & 0 & \lstinline$distance_km_scaled$ \\
-    \hline
-  \end{tabular}
-  \caption{\label{tab:spec_choice}Specification of the utility functions of the choice model}
-\end{table}
-
-The script is described in Section~\ref{sec:plot_b02_choice_only.py} and the results of the estimation are reported in Table~\vref{tab:choice_params}.
-
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
-number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
-\hline
-1 & choice\_asc\_pt & -0&132 & 0&262 & -0&505 & 0&614 \\ 
-2 & choice\_asc\_car & 0&408 & 0&283 & 1&44 & 0&149 \\ 
-3 & choice\_beta\_cost\_other & -0&465 & 0&142 & -3&27 & 0&00106 \\ 
-4 & choice\_beta\_time\_pt & -1&58 & 0&658 & -2&39 & 0&0167 \\ 
-5 & choice\_beta\_time\_car & -5&14 & 1&67 & -3&08 & 0&00209 \\ 
-6 & choice\_beta\_waiting\_time & -0&018 & 0&00789 & -2&28 & 0&0228 \\ 
-7 & choice\_beta\_dist & -0&983 & 0&317 & -3&1 & 0&00192 \\
-8 & scale\_choice\_model & 1&17 & 0&275 & 4&24 & 2&24e-05 \\ 
-\end{tabular}
-  \end{center}
-\begin{tabular}{ll}
-Number of estimated parameters & 8 \\
-Sample size & 1899 \\
-Final log likelihood & -1230.014 \\
-Akaike Information Criterion & 2476.028 \\
-Bayesian Information Criterion & 2520.421 \\
-\end{tabular}
-    \caption{Choice model: estimated parameters\label{tab:choice_params}}
-\end{table}
-
-\clearpage
-
-\subsection{Sequential estimation}
-\label{sec:sequential}
-The objective now is to incorporate the latent variables estimated in
-the MIMIC model into the choice model. We investigate a specification
-in which the latent variables interact with the alternative-specific
-constants. This specification, summarized in
-Table~\vref{tab:spec_choice_lv}, involves random components --- namely,
-the two latent variables --- and thus transforms the choice model into a
-\emph{mixture of logit models}.
-
-\begin{table}[htb]
-  \begin{tabular}{cccc}
-Parameter    & Pub. transp. & Car & Slow modes \\
-    \hline
-    \hline
-\lstinline$asc_pt$ &    1 &   0 &  0 \\
-    \hline
-\lstinline$asc_car$ &   0 &   1 &  0 \\
-    \hline
-\lstinline$beta_cost_hwh$ & \lstinline$MarginalCostPT_scaled$ & \lstinline$CostCarCHF_scaled$ & 0 \\
- & $\times$ \lstinline$PurpHWH$ & $\times$\lstinline$  PurpHWH$ & \\
-    \hline
-\lstinline$beta_cost_other$  & \lstinline$MarginalCostPT_scaled $ & \lstinline$CostCarCHF_scaled$ & 0 \\
-& $\times$ \lstinline$PurpOther$ & $\times$ \lstinline$PurpOther$& 0 \\
-    \hline
-\lstinline$beta_time_pt$ & \lstinline$TimePT_scaled$ & 0 & 0 \\
-    \hline
-\lstinline$beta_waiting_time$ & \lstinline$WaitingTimePT$ & 0 & 0 \\
-    \hline
-\lstinline$beta_time_car$ & 0 & \lstinline$TimeCar_scaled$ & 0\\
-    \hline
-\lstinline$beta_dist$ & 0 & 0 & \lstinline$distance_km_scaled$ \\
-\hline
-\lstinline$car_centric_pt_cte$ & $x_{n,\text{car}}^*$ & 0 & 0 \\
-\lstinline$car_centric_car_cte$ &  0 & $x_{n,\text{car}}^*$ & 0 \\
-\lstinline$urban_life_pt_cte$ & $x_{n,\text{urban}}^*$ & 0 & 0  \\
-\lstinline$urban_life_car_cte$ & 0 & $x_{n,\text{urban}}^*$ & 0\\
-  \end{tabular}
-  \caption{\label{tab:spec_choice_lv}Specification of the utility functions of the choice model with latent variables}
-\end{table}
-
-The script is presented in
-Section~\ref{sec:plot_b03_sequential.py}. The latent variables are
-constructed using two components: the deterministic part derived from
-the structural equations with parameter values estimated from the
-MIMIC model, and a stochastic term capturing unobserved heterogeneity:
-\begin{lstlisting}
-car_centric_attitude = build_car_centric_attitude(
-    estimated_parameters=struct_betas
-) + Draws('car_error_term', 'NORMAL_MLHS_ANTI')
-\end{lstlisting}
-
-Since the latent variables are integrated out via Monte Carlo methods,
-the random term is defined using a draw generator. In this case, the
-generator produces draws from a standard normal distribution using
-Modified Latin Hypercube Sampling (MLHS), a variance-reduction
-technique that ensures a more uniform coverage of the distribution's
-support (\cite{Hess:2006aa}). The keyword \lstinline$ANTI$ specifies
-the use of antithetic draws, meaning that for each draw \( \omega \),
-its symmetric counterpart \( -\omega \) is also included. This
-technique improves numerical stability and accelerates convergence by
-reducing the variance of the estimator.
-
-Once constructed, the latent variables are incorporated into the
-utility functions exactly like any other explanatory variable. The
-estimated parameters for this sequential estimation are reported in
-Table~\vref{tab:choice_sequential}.
-
-
-\begin{table}[htb]
-  \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
-number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
-\hline
-1 & choice\_asc\_pt & 0&436 & 0&417 & 1&05 & 0&295 \\ 
-2 & choice\_asc\_car & 1&55 & 0&588 & 2&64 & 0&00824 \\ 
-3 & choice\_beta\_cost\_other & -0&416 & 0&148 & -2&81 & 0&00492 \\ 
-4 & choice\_beta\_time\_pt & -1&95 & 0&865 & -2&26 & 0&024 \\ 
-5 & choice\_beta\_waiting\_time & -0&02 & 0&0101 & -1&98 & 0&0476 \\ 
-6 & choice\_beta\_time\_car & -5&58 & 2&03 & -2&75 & 0&00602 \\ 
-7 & choice\_beta\_dist & -1&13 & 0&407 & -2&77 & 0&00562 \\ 
-8 & choice\_car\_centric\_pt\_cte & 0&652 & 0&265 & 2&46 & 0&014 \\ 
-9 & choice\_urban\_life\_pt\_cte & 0&0223 & 0&0826 & 0&27 & 0&787 \\ 
-10 & choice\_car\_centric\_car\_cte & 1&62 & 0&52 & 3&11 & 0&00187 \\ 
-11 & choice\_urban\_life\_car\_cte & -0&338 & 0&18 & -1&87 & 0&061 \\ 
-12 & scale\_choice\_model & 1&11 & 0&298 & 3&72 & 0&0002 \\ 
-\end{tabular}
-  \end{center}
-\begin{flushleft}
-\begin{tabular}{ll}
-Number of estimated parameters & 12 \\
-Sample size & 1899 \\
-Final log likelihood & -1191.766 \\
-Akaike Information Criterion & 2407.532 \\
-Bayesian Information Criterion & 2474.121 \\
-Number of draws & 10000 \\
-\end{tabular}
-\end{flushleft}
-  \caption{Choice model with latent variables: sequential estimation\label{tab:choice_sequential}}
-\end{table}
-
-\clearpage
-\subsection{Simultaneous estimation}
-
-We now proceed with the simultaneous estimation of all components of
-the model: the choice model, the structural equations, and the
-measurement equations.
-
-The specifications of each component remain consistent with those
-previously described. The key difference lies in the treatment of the
-scale parameters in the structural equations, which are now estimated
-rather than fixed. This modification is motivated by the inclusion of
-the latent variables in the utility specification of the choice
-model. As a result, the error terms in the structural equations can
-now be disentangled from those in the measurement equations.
-
-The script implementing this specification is described in
-Section~\ref{sec:plot_b03_simultaneous.py}. As in the sequential case,
-the latent variables are constructed from two components: the
-deterministic part obtained from the structural equations, and a
-stochastic term capturing unobserved heterogeneity:
-\begin{lstlisting}
-sigma_car_structural = Beta('sigma_car_structural', 0.1, None, None, 0)
-car_centric_attitude = build_car_centric_attitude() +
-    sigma_car_structural * Draws('car_error_term', 'NORMAL_MLHS_ANTI')
-\end{lstlisting}
-
-Compared to the sequential estimation approach, two main differences
-arise. First, the scale parameter \lstinline$sigma_car_structural$ is
-now explicitly estimated. Second, the structural parameters are no
-longer fixed to the values obtained from the MIMIC model but are
-jointly estimated within the full model. This ensures internal
-consistency across all components.
-
-The conditional likelihood function now combines the contributions of
-both the choice model and the measurement model:
-\begin{lstlisting}
-cond_prob = logit(V, None, Choice) * likelihood_indicator
-\end{lstlisting}
-
-Simultaneous estimation presents significant numerical challenges due
-to the complexity of the composite likelihood expression. In
-particular, the computation of derivatives becomes demanding. For this
-reason, additional options are specified when instantiating the
-\lstinline$BIOGEME$ object:
-\begin{lstlisting}
-BIOGEME(
-    ...,
-    calculating_second_derivatives='never',
-    numerically_safe=True,
-    max_iterations=5000,
-)
-\end{lstlisting}
-
-The option \lstinline$calculating_second_derivatives='never'$
-instructs Biogeme to skip the calculation of second derivatives, which
-often fails due to numerical instability. As a result, statistical
-inference is performed using the BHHH approximation
-matrix (\cite{BernHallHallHaus74}) instead of the Rao-Cramer bound. The
-\lstinline$numerically_safe=True$ flag activates additional safeguards
-to avoid numerical issues, especially when computing the logarithm of
-expressions approaching zero --- typically the case when multiplying
-several small probability terms. Lastly, the number of maximum
-iterations is increased to allow the optimization algorithm sufficient
-time to converge to the desired level of precision.
-
-Although all parameters have been estimated simultaneously, they are
-reported in separate groups to improve clarity and
-readability. General estimation statistics are presented in
-Table~\vref{tab:simultaneous_stats}. The parameters of the structural
-equations are provided in Table~\vref{tab:simultaneous_params_struct},
-while those of the measurement equations are reported in
-Tables~\ref{tab:simulataneous_params_car_meas}--\ref{tab:simultaneous_thresholds}. Finally,
-the parameters of the choice model are shown in
-Table~\vref{tab:choice_simultaneous}. Finally, Table~\vref{tab:comparison} compares the parameters of the choice model (i) without latent variables, (ii) with latent variables and sequential estimation, and (iii) with latent variables and simultaneous estimation.
-
-
-
-\begin{table}[htb]
-  \begin{center}
-    \footnotesize
-    \begin{tabular}{ll}
-Number of estimated parameters & 83 \\
-Sample size & 1899 \\
-Final log likelihood & -43695.23 \\
-Akaike Information Criterion & 87556.45 \\
-Bayesian Information Criterion & 88017.03 \\      
-Number of draws & 10000 \\
-\end{tabular}
-  \caption{ \label{tab:simultaneous_stats}Simultaneous model: general statistics}
-  \end{center}
-
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & car\_struct\_age\_65\_more & 0&175 & 0&104 & 1&69 & 0&0902 \\ 
-2 & car\_struct\_ScaledIncome & -0&046 & 0&00962 & -4&78 & 1&73e-06 \\ 
-3 & car\_struct\_moreThanOneCar & 0&945 & 0&0802 & 11&8 & 0&0 \\ 
-4 & car\_struct\_moreThanOneBike & -0&505 & 0&0872 & -5&79 & 6&96e-09 \\ 
-5 & car\_struct\_individualHouse & -0&126 & 0&0775 & -1&62 & 0&104 \\ 
-6 & car\_struct\_haveChildren & -0&0314 & 0&0757 & -0&415 & 0&678 \\ 
-7 & car\_struct\_haveGA & -0&922 & 0&117 & -7&89 & 3&11e-15 \\ 
-8 & car\_struct\_highEducation & -0&451 & 0&0765 & -5&89 & 3&82e-09 \\ 
-9 & sigma\_car\_structural & 1&17 & 0&0495 & 23&7 & 0&0 \\ 
-10 & urban\_struct\_childCenter & 0&199 & 0&0499 & 3&99 & 6&73e-05 \\ 
-11 & urban\_struct\_childSuburb & 0&139 & 0&035 & 3&97 & 7&31e-05 \\ 
-12 & urban\_struct\_highEducation & 0&0112 & 0&0342 & 0&327 & 0&743 \\ 
-13 & urban\_struct\_artisans & -0&184 & 0&072 & -2&55 & 0&0107 \\ 
-14 & urban\_struct\_employees & -0&105 & 0&0309 & -3&39 & 0&000689 \\ 
-15 & urban\_struct\_age\_30\_less & 0&386 & 0&0472 & 8&18 & 2&22e-16 \\ 
-16 & urban\_struct\_haveChildren & -0&0622 & 0&0301 & -2&07 & 0&0385 \\ 
-17 & urban\_struct\_UrbRur & 0&239 & 0&0324 & 7&36 & 1&83e-13 \\ 
-18 & urban\_struct\_IndividualHouse & 0&0371 & 0&0307 & 1&21 & 0&227 \\ 
-19 & sigma\_urban\_structural & -0&456 & 0&0342 & -13&3 & 0&0 \\ 
-
-  
-\end{tabular}
-\caption{Simultaneous model: estimated parameters of the structural equations\label{tab:simultaneous_params_struct}}
-  \end{center}
-\end{table}
-
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & meas\_intercept\_Envir01 & -1&13 & 0&104 & -10&9 & 0&0 \\ 
-2 & meas\_intercept\_Envir02 & 0&0434 & 0&055 & 0&789 & 0&43 \\ 
-3 & car\_meas\_b\_Envir02 & -0&457 & 0&0294 & -15&5 & 0&0 \\ 
-4 & meas\_sigma\_star\_Envir02 & 1&11 & 0&0342 & 32&5 & 0&0 \\ 
-5 & meas\_intercept\_Envir03 & 0&0879 & 0&058 & 1&52 & 0&13 \\ 
-6 & car\_meas\_b\_Envir03 & 0&476 & 0&0296 & 16&0 & 0&0 \\ 
-7 & meas\_sigma\_star\_Envir03 & 1&04 & 0&0317 & 32&7 & 0&0 \\ 
-8 & meas\_intercept\_Envir04 & -0&332 & 0&0449 & -7&38 & 1&55e-13 \\ 
-9 & car\_meas\_b\_Envir04 & 0&33 & 0&0255 & 12&9 & 0&0 \\ 
-10 & meas\_sigma\_star\_Envir04 & 0&994 & 0&0293 & 33&9 & 0&0 \\ 
-11 & meas\_intercept\_Mobil09 & 0&709 & 0&0488 & 14&5 & 0&0 \\ 
-12 & car\_meas\_b\_Mobil09 & -0&346 & 0&0272 & -12&7 & 0&0 \\ 
-13 & meas\_sigma\_star\_Mobil09 & 1&07 & 0&0319 & 33&5 & 0&0 \\ 
-14 & meas\_intercept\_Mobil11 & 1&11 & 0&0635 & 17&5 & 0&0 \\ 
-15 & car\_meas\_b\_Mobil11 & 0&49 & 0&0317 & 15&5 & 0&0 \\ 
-16 & meas\_sigma\_star\_Mobil11 & 1&13 & 0&0363 & 31&1 & 0&0 \\ 
-17 & meas\_intercept\_Mobil14 & 0&404 & 0&0577 & 6&99 & 2&67e-12 \\ 
-18 & car\_meas\_b\_Mobil14 & 0&522 & 0&0274 & 19&1 & 0&0 \\ 
-19 & meas\_sigma\_star\_Mobil14 & 0&941 & 0&0297 & 31&6 & 0&0 \\ 
-20 & meas\_intercept\_Mobil16 & 0&736 & 0&0574 & 12&8 & 0&0 \\ 
-21 & car\_meas\_b\_Mobil16 & 0&455 & 0&027 & 16&8 & 0&0 \\ 
-22 & meas\_sigma\_star\_Mobil16 & 1&1 & 0&0345 & 31&8 & 0&0 \\ 
-23 & meas\_intercept\_Mobil17 & 0&709 & 0&0586 & 12&1 & 0&0 \\ 
-24 & car\_meas\_b\_Mobil17 & 0&439 & 0&0289 & 15&2 & 0&0 \\ 
-25 & meas\_sigma\_star\_Mobil17 & 1&1 & 0&036 & 30&7 & 0&0 \\ 
-26 & meas\_intercept\_LifSty08 & 1&45 & 0&0533 & 27&2 & 0&0 \\ 
-27 & car\_meas\_b\_LifSty08 & -0&0685 & 0&0294 & -2&33 & 0&0198 \\ 
-28 & meas\_sigma\_star\_LifSty08 & 1&25 & 0&0391 & 32&0 & 0&0 \\ 
-\end{tabular}
-  \caption{Simultaneous model: estimated parameters of the measurement equations for the car-centric attitude\label{tab:simulataneous_params_car_meas}}
-  \end{center}
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & meas\_intercept\_ResidCh01 & -0&894 & 0&0669 & -13&4 & 0&0 \\ 
-2 & meas\_intercept\_ResidCh02 & 0&425 & 0&063 & 6&75 & 1&52e-11 \\ 
-3 & urban\_meas\_b\_ResidCh02 & 0&87 & 0&107 & 8&16 & 4&44e-16 \\ 
-4 & meas\_sigma\_star\_ResidCh02 & 1&18 & 0&0407 & 29&1 & 0&0 \\ 
-5 & meas\_intercept\_ResidCh03 & 0&251 & 0&044 & 5&71 & 1&15e-08 \\ 
-6 & urban\_meas\_b\_ResidCh03 & 0&0226 & 0&0747 & 0&302 & 0&762 \\ 
-7 & meas\_sigma\_star\_ResidCh03 & 1&27 & 0&0413 & 30&7 & 0&0 \\ 
-8 & meas\_intercept\_ResidCh05 & -3&06 & 0&17 & -18&0 & 0&0 \\ 
-9 & urban\_meas\_b\_ResidCh05 & 2&44 & 0&207 & 11&8 & 0&0 \\ 
-10 & meas\_sigma\_star\_ResidCh05 & 0&954 & 0&0506 & 18&8 & 0&0 \\ 
-11 & meas\_intercept\_ResidCh06 & -1&31 & 0&0972 & -13&5 & 0&0 \\ 
-12 & urban\_meas\_b\_ResidCh06 & 1&56 & 0&144 & 10&8 & 0&0 \\ 
-13 & meas\_sigma\_star\_ResidCh06 & 1&27 & 0&0416 & 30&4 & 0&0 \\ 
-14 & meas\_intercept\_ResidCh07 & 2&25 & 0&125 & 18&0 & 0&0 \\ 
-15 & urban\_meas\_b\_ResidCh07 & -1&93 & 0&16 & -12&0 & 0&0 \\ 
-16 & meas\_sigma\_star\_ResidCh07 & 0&895 & 0&036 & 24&9 & 0&0 \\ 
-17 & meas\_intercept\_Mobil07 & 1&3 & 0&0544 & 23&8 & 0&0 \\ 
-18 & urban\_meas\_b\_Mobil07 & -0&378 & 0&0763 & -4&95 & 7&46e-07 \\ 
-19 & meas\_sigma\_star\_Mobil07 & 1&08 & 0&0299 & 36&2 & 0&0 \\ 
-20 & meas\_intercept\_Mobil24 & 0&209 & 0&0601 & 3&48 & 0&000495 \\ 
-21 & urban\_meas\_b\_Mobil24 & 0&395 & 0&101 & 3&9 & 9&56e-05 \\ 
-22 & meas\_sigma\_star\_Mobil24 & 1&46 & 0&0473 & 30&9 & 0&0 \\ 
-  
-\end{tabular}
-  \caption{Simultaneous model: estimated parameters of the measurement equations for the urban-preference attitude\label{tab:simulataneous_params_urban_meas}}
-  \end{center}
-\end{table}
-
-\begin{table}[htb]
-    \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-  &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-  Parameter & Description & \multicolumn{2}{l}{Coeff.} & \multicolumn{2}{l}{Asympt.} & \multicolumn{2}{l}{$t$-stat} & \multicolumn{2}{l}{$p$-value} \\
-  number    &             & \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error} & \multicolumn{2}{l}{} & \multicolumn{2}{l}{} \\
-  \hline
-1 & delta\_1 & 0&402 & 0&00842 & 47&8 & 0&0 \\ 
-2 & delta\_2 & 1&24 & 0&0243 & 51&0 & 0&0 \\ 
-\end{tabular}
-  \caption{Simultaneous model: thresholds of the measurement equations\label{tab:simultaneous_thresholds}}
-  \end{center}
-\end{table}
-
-
-\begin{table}[htb]
-  \footnotesize
-  \begin{center}
-\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
-          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{Robust}  &  \multicolumn{4}{l}{}  \\
-Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
-number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
-\hline
-1 & choice\_asc\_pt & -0&75 & 0&273 & -2&74 & 0&00605 \\ 
-2 & choice\_asc\_car & 0&755 & 0&241 & 3&14 & 0&0017 \\ 
-3 & choice\_beta\_cost\_other & -0&413 & 0&0802 & -5&15 & 2&6e-07 \\ 
-4 & choice\_beta\_time\_pt & -1&8 & 0&371 & -4&86 & 1&18e-06 \\ 
-5 & choice\_beta\_waiting\_time & -0&0158 & 0&00632 & -2&5 & 0&0124 \\ 
-6 & choice\_beta\_time\_car & -5&26 & 0&645 & -8&16 & 4&44e-16 \\ 
-7 & choice\_beta\_dist & -1&29 & 0&144 & -8&92 & 0&0 \\ 
-8 & choice\_car\_centric\_pt\_cte & 0&113 & 0&114 & 0&983 & 0&325 \\ 
-9 & choice\_urban\_life\_pt\_cte & 0&764 & 0&367 & 2&08 & 0&0372 \\ 
-10 & choice\_car\_centric\_car\_cte & 0&678 & 0&13 & 5&21 & 1&86e-07 \\ 
-11 & choice\_urban\_life\_car\_cte & -0&28 & 0&326 & -0&86 & 0&39 \\ 
-12 & scale\_choice\_model & 1&06 & 0&114 & 9&32 & 0&0 \\ 
-\end{tabular}
-  \end{center}
-  \caption{Choice model with latent variables: simultaneous estimation\label{tab:choice_simultaneous}}
-\end{table}
-
-\clearpage
-
-\begin{longtable}{rlSSS}
-  \caption{Comparison of the parameters of the choice model \label{tab:comparison}} \\
-& & \multicolumn{1}{c}{Choice only} & \multicolumn{1}{c}{Sequential} & \multicolumn{1}{c}{Simultaneous} \\
- & Parameter name &  \multicolumn{1}{c}{Coef./(SE)} &  \multicolumn{1}{c}{Coef./(SE)} &  \multicolumn{1}{c}{Coef./(SE)} \\
-  \hline
-  \endfirsthead
-& & \multicolumn{1}{c}{Choice only} & \multicolumn{1}{c}{Sequential} & \multicolumn{1}{c}{Simultaneous} \\
- & Parameter name &  \multicolumn{1}{c}{Coef./(SE)} &  \multicolumn{1}{c}{Coef./(SE)} &  \multicolumn{1}{c}{Coef./(SE)} \\
-  \hline
-  \endhead
-1 &choice\_asc\_pt& -0.132 & 0.436 & -0.75\textsuperscript{***}  \\
- & &(0.262)&(0.417)&(0.273) \\
-2 &choice\_asc\_car& 0.408 & 1.55\textsuperscript{***} & 0.755\textsuperscript{***}  \\
- & &(0.283)&(0.588)&(0.241) \\
-3 &choice\_beta\_cost\_other& -0.465\textsuperscript{***} & -0.416\textsuperscript{***} & -0.413\textsuperscript{***}  \\
- & &(0.142)&(0.148)&(0.0802) \\
-4 &choice\_beta\_time\_pt& -1.58\textsuperscript{**} & -1.95\textsuperscript{**} & -1.8\textsuperscript{***}  \\
- & &(0.658)&(0.865)&(0.371) \\
-5 &choice\_beta\_waiting\_time& -0.018\textsuperscript{**} & -0.02\textsuperscript{**} & -0.0158\textsuperscript{**}  \\
- & &(0.00789)&(0.0101)&(0.00632) \\
-6 &choice\_beta\_time\_car& -5.14\textsuperscript{***} & -5.58\textsuperscript{***} & -5.26\textsuperscript{***}  \\
- & &(1.67)&(2.03)&(0.645) \\
-7 &choice\_beta\_dist& -0.983\textsuperscript{***} & -1.13\textsuperscript{***} & -1.29\textsuperscript{***}  \\
- & &(0.317)&(0.407)&(0.144) \\
-8 &choice\_car\_centric\_pt\_cte & & 0.652\textsuperscript{**} & 0.113  \\
- &  & &(0.265)&(0.114) \\
-9 &choice\_urban\_life\_pt\_cte & & 0.0223 & 0.764\textsuperscript{**}  \\
- &  & &(0.0826)&(0.367) \\
-10 &choice\_car\_centric\_car\_cte & & 1.62\textsuperscript{***} & 0.678\textsuperscript{***}  \\
- &  & &(0.52)&(0.13) \\
-11 &choice\_urban\_life\_car\_cte & & -0.338\textsuperscript{*} & -0.28  \\
- &  & &(0.18)&(0.326) \\
-12 &scale\_choice\_model& 1.17\textsuperscript{***} & 1.11\textsuperscript{***} & 1.06\textsuperscript{***}  \\
- & &(0.275)&(0.298)&(0.114) \\
-\hline
-\multicolumn{2}{l}{Number of observations} &1899 & 1899 & 1899 \\
-\multicolumn{2}{l}{Number of parameters} &8 & 12 & 83 \\
-\multicolumn{2}{l}{Akaike Information Criterion} &2476.0 & 2407.7 & 87556.5 \\
-\multicolumn{2}{l}{Bayesian Information Criterion} &2520.4 & 2474.3 & 88017.0 \\
-\hline
-\multicolumn{4}{l}{\footnotesize Standard errors: \textsuperscript{***}: $p < 0.01$, \textsuperscript{**}: $p < 0.05$, \textsuperscript{*}: $p < 0.1$}
-\end{longtable}
-\clearpage
-
+All six scripts rely on the same underlying model specification files
+(Sections~\ref{sec:latent_variables.py}, \ref{sec:likert_indicators.py},
+\ref{sec:mimic.py}, and \ref{sec:choice_model.py}); the differences
+between them arise solely from the configuration settings and the chosen
+estimation paradigm.
 \section{Conclusion}
 
 Choice models with latent variables offer a powerful and flexible
@@ -1321,52 +1160,11 @@ the observed choices.
 
 
 
-\clearpage
-\section{Complete specification files}
-
-The following specification files have been used for the estimation of the presented results. They have been developed for Biogeme 3.3.0. It is possible that the syntax should be slightly adapted for future versions of Biogeme.
-
-\subsection{\lstinline$relevant_data.py$}
-\label{sec:relevant_data.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/relevant_data.py}
-
-
-\subsection{\lstinline$structural_equations.py$}
-\label{sec:structural_equations.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/structural_equations.py}
-
-\subsection{\lstinline$measurement_equations.py$}
-\label{sec:measurement_equations.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/measurement_equations.py}
-
-\subsection{\lstinline$plot_b01_mimic.py$}
-\label{sec:plot_b01_mimic.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/plot_b01_mimic.py}
-
-\subsection{\lstinline$plot_b02_choice_only.py$}
-\label{sec:plot_b02_choice_only.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/plot_b02_choice_only.py}
-
-\subsection{\lstinline$plot_b03_sequential.py$}
-\label{sec:plot_b03_sequential.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/plot_b03_sequential.py}
-
-\subsection{\lstinline$plot_b03_simultaneous.py$}
-\label{sec:plot_b03_simultaneous.py}
-
-\lstinputlisting[style=numbers]{../../docs/source/examples/latent/plot_b03_simultaneous.py}
-
-\clearpage
 
 \section{Description of the variables}
+\label{sec:variables}
 
-THe following table describes the variables involved in the models described in this document.
+The following table describes the variables involved in the models described in this document.
 
 \begin{longtable}{p{4cm}|p{10.5cm}}
 		\hline 
@@ -1425,6 +1223,112 @@ THe following table describes the variables involved in the models described in 
 		\caption{Description of variables}
 		\label{tab:variables}
 	\end{longtable}
+
+\clearpage
+\section{Complete specification files}
+
+This section presents the Python implementation of the hybrid choice
+model used in the case study. The following specification files have
+been used for the estimation of the results presented in this chapter.
+They have been developed and tested with \texttt{Biogeme~3.3.2}. It is
+possible that minor adaptations of the syntax may be required for
+future versions of Biogeme.
+
+The files are organized by \emph{role} rather than by estimation
+approach: data preparation and configuration, model specification
+(latent variables, indicators, MIMIC and choice components), estimation
+workflow, and result visualization. This structure mirrors the modeling
+logic developed in the previous sections and allows the same core model
+to be estimated under different assumptions (choice-only, MIMIC, or
+full hybrid model; maximum likelihood or Bayesian estimation).
+
+
+\subsubsection*{Data preparation and configuration}
+
+These files define the dataset, variable transformations, and global
+configuration options shared across all model variants.
+
+\subsection{\lstinline$optima.py$}
+\label{sec:optima.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/optima.py}
+
+\subsection{\lstinline$config.py$}
+\label{sec:config.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/config.py}
+
+
+\subsubsection*{Latent variables and measurement structure}
+
+The following files define the latent variables, the associated
+psychometric and non-psychometric indicators, and the MIMIC component
+(structural and measurement equations without choices).
+
+\subsection{\lstinline$latent\_variables.py$}
+\label{sec:latent_variables.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/latent_variables.py}
+
+\subsection{\lstinline$likert\_indicators.py$}
+\label{sec:likert_indicators.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/likert_indicators.py}
+
+\subsection{\lstinline$mimic.py$}
+\label{sec:mimic.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/mimic.py}
+
+
+\subsubsection*{Choice model specification}
+
+This file defines the discrete choice component and its interaction
+with the latent variables in the hybrid choice model.
+
+\subsection{\lstinline$choice\_model.py$}
+\label{sec:choice_model.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/choice_model.py}
+
+
+\subsubsection*{Estimation workflow}
+
+These scripts orchestrate model estimation, either by reading existing
+results or launching new estimation runs, and provide utilities for
+batch execution.
+
+\subsection{\lstinline$estimate.py$}
+\label{sec:estimate.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/estimate.py}
+
+\subsection{\lstinline$read\_or\_estimate.py$}
+\label{sec:read_or_estimate.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/read_or_estimate.py}
+
+
+\subsection{\lstinline$plot\_b01\_choice\_only\_ml.py$}
+\label{sec:plot_b01_choice_only_ml.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/plot_b01_choice_only_ml.py}
+
+\subsection{\lstinline$plot\_b02\_mimic\_ml.py$}
+\label{sec:plot_b02_mimic_ml.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/plot_b02_mimic_ml.py}
+
+\subsection{\lstinline$plot\_b03\_hybrid\_ml.py$}
+\label{sec:plot_b03_hybrid_ml.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/plot_b03_hybrid_ml.py}
+
+\subsection{\lstinline$plot\_b04\_choice\_only\_bayes.py$}
+\label{sec:plot_b04_choice_only_bayes.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/plot_b04_choice_only_bayes.py}
+
+\subsection{\lstinline$plot\_b05\_mimic\_bayes.py$}
+\label{sec:plot_b05_mimic_bayes.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/plot_b05_mimic_bayes.py}
+
+\subsection{\lstinline$plot\_b06\_hybrid\_bayes.py$}
+\label{sec:plot_b06_hybrid_bayes.py}
+\lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice/plot_b06_hybrid_bayes.py}
+
+\clearpage
+
+\clearpage
+
 
 \clearpage
 \bibliographystyle{dcudoi}
