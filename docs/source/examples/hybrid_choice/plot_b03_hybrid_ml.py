@@ -1,6 +1,6 @@
 """
-Hybrid choice model — maximum likelihood estimation
-===================================================
+3. Hybrid choice model - maximum likelihood estimation
+======================================================
 
 This script estimates a **hybrid choice model** that combines:
 
