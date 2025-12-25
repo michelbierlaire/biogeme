@@ -223,13 +223,13 @@ example, when \( M_\ell = 4 \), the thresholds can be defined as
 follows:
 \[
 \begin{aligned}
-  \tau_1 &= -\delta_1 -\delta_2, \\
-  \tau_2 &= -\delta_1, \\
-  \tau_3 &= \phantom{-}\delta_1, \\
-  \tau_4 &= \phantom{-}\delta_1 + \delta_2,
+  \tau_1 &= -\delta_0 -\delta_1, \\
+  \tau_2 &= -\delta_0, \\
+  \tau_3 &= \phantom{-}\delta_0, \\
+  \tau_4 &= \phantom{-}\delta_0 + \delta_1,
 \end{aligned}
 \]
-where \( \delta_1 > 0 \) and \( \delta_2 > 0 \) are the parameters to
+where \( \delta_0 > 0 \) and \( \delta_1 > 0 \) are the parameters to
 be estimated.
 This parameterization guarantees that the thresholds are strictly ordered 
 and symmetrically centered around zero, which facilitates both 
@@ -883,13 +883,13 @@ For Likert-type indicators with five response categories, we use a
 symmetric threshold parameterization centered at zero:
 \[
 \begin{aligned}
-  \tau_1 &= -(\delta_1 + \delta_2), \\
-  \tau_2 &= -\delta_1, \\
-  \tau_3 &= \phantom{-}\delta_1, \\
-  \tau_4 &= \phantom{-}(\delta_1 + \delta_2),
+  \tau_1 &= -(\delta_0 + \delta_1), \\
+  \tau_2 &= -\delta_0, \\
+  \tau_3 &= \phantom{-}\delta_0, \\
+  \tau_4 &= \phantom{-}(\delta_0 + \delta_1),
 \end{aligned}
 \]
-where $\delta_1 > 0$ and $\delta_2 > 0$ are estimated. This
+where $\delta_0 > 0$ and $\delta_1 > 0$ are estimated. This
 parameterization has three desirable properties. First, it guarantees
 strict ordering of the thresholds by construction. Second, it fixes the
 location of the threshold system by centering it at zero, thereby
@@ -1105,6 +1105,485 @@ All six scripts rely on the same underlying model specification files
 \ref{sec:mimic.py}, and \ref{sec:choice_model.py}); the differences
 between them arise solely from the configuration settings and the chosen
 estimation paradigm.
+
+\section{Estimation results}
+
+In this section,  we report the estimation results for each of the three models:
+
+\begin{itemize}
+\item choice model: general statistics in Table~\vref{tab:choice} and estimated parameters in Table~\vref{tab:choice_beta};
+  \item MIMIC model: general statistics in Table~\vref{tab:mimic}, estimated parameters of the structural equations in Table~\vref{tab:mimic_struct}, and estimated parameters of the measurement equations in Table~\vref{tab:mimic_meas};
+  \item Hybrid choice model: general statistice in Table~\vref{tab:hybrid}, estimated parameters of the choice model in Table~\vref{tab:hybrid_choice}, estimated parameters of the structural equations in Table~\vref{tab:hybrid_struct}, and estimated parameters of the measurement equations in Table~\vref{tab:hybrid_meas}.
+\end{itemize}
+\begin{table}[htb]
+  \footnotesize
+\begin{tabular}{ll}
+Number of estimated parameters & 7 \\
+Sample size & 896 \\
+Init log likelihood & -984.3566 \\
+Final log likelihood & -512.5193 \\
+Likelihood ratio test for the init. model & 943.6747 \\
+Rho-square for the init. model & 0.479 \\
+Rho-square-bar for the init. model & 0.472 \\
+Akaike Information Criterion & 1039.039 \\
+Bayesian Information Criterion & 1072.624 \\
+\end{tabular}
+\caption{\label{tab:choice}Choice model: general statistics}
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
+          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{BHHH}  &  \multicolumn{4}{l}{}  \\
+Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
+number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
+\hline
+0 & choice\_asc\_pt & -0&665 & 0&277 & -2&4 & 0&0163 \\ 
+1 & choice\_beta\_time\_pt\_ref & -0&956 & 0&113 & -8&44 & 0&0 \\ 
+2 & choice\_beta\_cost & -0&0795 & 0&00833 & -9&55 & 0&0 \\ 
+3 & choice\_asc\_car & -0&246 & 0&231 & -1&07 & 0&286 \\ 
+4 & choice\_beta\_time\_car\_ref & -2&03 & 0&155 & -13&1 & 0&0 \\ 
+5 & choice\_beta\_dist\_work & -0&205 & 0&0148 & -13&8 & 0&0 \\ 
+6 & choice\_beta\_dist\_other\_purposes & -0&324 & 0&0306 & -10&6 & 0&0 \\ 
+
+\end{tabular}
+\caption{\label{tab:choice_beta}Choice model: estimated parameters}
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+  \begin{tabular}{ll}
+Number of estimated parameters & 60 \\
+Sample size & 896 \\
+Init log likelihood & -29507.39 \\
+Final log likelihood & -17009.57 \\
+Likelihood ratio test for the init. model & 24995.64 \\
+Rho-square for the init. model & 0.424 \\
+Rho-square-bar for the init. model & 0.422 \\
+Akaike Information Criterion & 34139.14 \\
+Bayesian Information Criterion & 34427.01 \\
+Number of draws & 20000 \\
+  \end{tabular}
+  \caption{\label{tab:mimic}MIMIC model: general statistics}
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+  \begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
+          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{BHHH}  &  \multicolumn{4}{l}{}  \\
+Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
+number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
+\hline
+2 & struct\_environmental\_attitude\_childSuburb & 0&0773 & 0&0306 & 2&53 & 0&0115 \\ 
+3 & struct\_environmental\_attitude\_ScaledIncome & 0&0195 & 0&00577 & 3&39 & 0&000711 \\ 
+4 & struct\_environmental\_attitude\_city\_center\_as\_kid & 0&151 & 0&0731 & 2&07 & 0&0389 \\ 
+5 & struct\_environmental\_attitude\_artisans & 0&129 & 0&0588 & 2&19 & 0&0288 \\ 
+6 & struct\_environmental\_attitude\_high\_education & 0&14 & 0&0461 & 3&04 & 0&00237 \\ 
+7 & struct\_environmental\_attitude\_low\_education & 0&045 & 0&0306 & 1&47 & 0&142 \\ 
+8 & struct\_environmental\_attitude\_sigma\_log & -1&32 & 0&232 & -5&7 & 1&22e-08 \\
+\hline
+14 & struct\_car\_centric\_attitude\_high\_education & -0&451 & 0&106 & -4&25 & 2&1e-05 \\ 
+15 & struct\_car\_centric\_attitude\_top\_manager & 0&146 & 0&135 & 1&08 & 0&28 \\ 
+16 & struct\_car\_centric\_attitude\_employees & -0&0609 & 0&0813 & -0&748 & 0&454 \\ 
+17 & struct\_car\_centric\_attitude\_age\_30\_less & 0&489 & 0&172 & 2&85 & 0&00442 \\ 
+18 & struct\_car\_centric\_attitude\_ScaledIncome & 0&00453 & 0&0109 & 0&416 & 0&677 \\ 
+19 & struct\_car\_centric\_attitude\_car\_oriented\_parents & 0&324 & 0&0998 & 3&25 & 0&00116 \\ 
+20 & struct\_car\_centric\_attitude\_sigma\_log & -0&17 & 0&102 & -1&67 & 0&0949 \\ 
+\end{tabular}
+
+  \caption{\label{tab:mimic_struct}MIMIC model: estimated parameters of the structural equations}
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+  \begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
+          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{BHHH}  &  \multicolumn{4}{l}{}  \\
+Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
+number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
+\hline
+40 & measurement\_coefficient\_environmental\_attitude\_Envir01 & 1&74 & 0&457 & 3&8 & 0&000142 \\ 
+\hline
+48 & measurement\_coefficient\_car\_centric\_attitude\_Envir02 & -0&201 & 0&0383 & -5&24 & 1&6e-07 \\ 
+49 & measurement\_Envir02\_sigma\_log & -1&07 & 0&221 & -4&86 & 1&19e-06 \\ 
+\hline
+22 & measurement\_intercept\_Envir03 & 0&664 & 0&184 & 3&62 & 0&000294 \\ 
+23 & measurement\_coefficient\_environmental\_attitude\_Envir03 & -1&17 & 0&199 & -5&89 & 3&84e-09 \\ 
+24 & measurement\_Envir03\_sigma\_log & -0&38 & 0&242 & -1&57 & 0&116 \\ 
+\hline
+28 & measurement\_intercept\_Envir04 & 0&185 & 0&0597 & 3&09 & 0&00198 \\ 
+29 & measurement\_coefficient\_environmental\_attitude\_Envir04 & -0&773 & 0&0943 & -8&19 & 2&22e-16 \\ 
+30 & measurement\_Envir04\_sigma\_log & -0&995 & 0&222 & -4&48 & 7&41e-06 \\ 
+\hline
+25 & measurement\_intercept\_Envir05 & 0&128 & 0&0533 & 2&41 & 0&016 \\ 
+26 & measurement\_coefficient\_environmental\_attitude\_Envir05 & 1&11 & 0&113 & 9&82 & 0&0 \\ 
+27 & measurement\_Envir05\_sigma\_log & -1&05 & 0&229 & -4&61 & 4&06e-06 \\
+\hline
+56 & measurement\_intercept\_Envir06 & 0&277 & 0&0655 & 4&23 & 2&33e-05 \\ 
+57 & measurement\_coefficient\_car\_centric\_attitude\_Envir06 & -0&0436 & 0&0202 & -2&16 & 0&0309 \\ 
+58 & measurement\_coefficient\_environmental\_attitude\_Envir06 & 0&91 & 0&0847 & 10&7 & 0&0 \\
+59 & measurement\_Envir06\_sigma\_log & -1&63 & 0&227 & -7&16 & 8&21e-13 \\ 
+\hline
+41 & measurement\_intercept\_Mobil03 & 0&479 & 0&139 & 3&44 & 0&000591 \\ 
+42 & measurement\_coefficient\_car\_centric\_attitude\_Mobil03 & -0&209 & 0&0539 & -3&88 & 0&000103 \\ 
+43 & measurement\_Mobil03\_sigma\_log & -0&445 & 0&244 & -1&83 & 0&0675 \\ 
+\hline
+31 & measurement\_intercept\_Mobil05 & 0&786 & 0&266 & 2&95 & 0&00314 \\ 
+32 & measurement\_coefficient\_car\_centric\_attitude\_Mobil05 & -0&416 & 0&104 & -3&99 & 6&61e-05 \\ 
+33 & measurement\_Mobil05\_sigma\_log & -0&107 & 0&28 & -0&381 & 0&703 \\ 
+\hline
+53 & measurement\_intercept\_Mobil08 & 0&0853 & 0&069 & 1&24 & 0&217 \\ 
+54 & measurement\_coefficient\_car\_centric\_attitude\_Mobil08 & 0&28 & 0&0782 & 3&58 & 0&000345 \\ 
+55 & measurement\_Mobil08\_sigma\_log & -0&127 & 0&268 & -0&473 & 0&636 \\ 
+\hline
+12 & measurement\_intercept\_Mobil09 & 0&67 & 0&171 & 3&91 & 9&28e-05 \\ 
+13 & measurement\_coefficient\_car\_centric\_attitude\_Mobil09 & -0&256 & 0&0509 & -5&03 & 4&85e-07 \\ 
+21 & measurement\_Mobil09\_sigma\_log & -0&842 & 0&232 & -3&63 & 0&000286 \\ 
+\hline
+34 & measurement\_intercept\_Mobil10 & 1&22 & 0&637 & 1&91 & 0&056 \\ 
+35 & measurement\_coefficient\_car\_centric\_attitude\_Mobil10 & 1&17 & 0&464 & 2&53 & 0&0115 \\ 
+36 & measurement\_Mobil10\_sigma\_log & 0&464 & 0&473 & 0&981 & 0&327 \\ 
+\hline
+0 & measurement\_intercept\_Mobil12 & 0&636 & 0&462 & 1&38 & 0&169 \\ 
+1 & measurement\_coefficient\_environmental\_attitude\_Mobil12 & -3&34 & 1&51 & -2&21 & 0&0273 \\ 
+9 & measurement\_Mobil12\_sigma\_log & 0&775 & 0&481 & 1&61 & 0&107 \\
+\hline
+50 & measurement\_intercept\_LifSty01 & 0&0742 & 0&0475 & 1&56 & 0&118 \\ 
+51 & measurement\_coefficient\_environmental\_attitude\_LifSty01 & 0&342 & 0&092 & 3&72 & 0&000197 \\ 
+52 & measurement\_LifSty01\_sigma\_log & -0&62 & 0&231 & -2&69 & 0&00719 \\ 
+\hline
+37 & measurement\_intercept\_LifSty07 & -0&0521 & 0&0535 & -0&974 & 0&33 \\ 
+38 & measurement\_coefficient\_car\_centric\_attitude\_LifSty07 & 0&0896 & 0&0449 & 2&0 & 0&0458 \\ 
+39 & measurement\_LifSty07\_sigma\_log & -0&208 & 0&274 & -0&76 & 0&447 \\ 
+\hline
+10 & $\ln(\delta_0)$ & -2&61 & 0&223 & -11&7 & 0&0 \\ 
+11 & $\ln(\delta_1)$ & -1&03 & 0&21 & -4&9 & 9&66e-07 \\
+\hline
+44 & measurement\_intercept\_NbCar & 2&06 & 0&139 & 14&8 & 0&0 \\ 
+45 & measurement\_coefficient\_car\_centric\_attitude\_NbCar & 0&67 & 0&111 & 6&01 & 1&84e-09 \\
+\hline
+46 & $\ln(\delta^{\text{NbCar}}_1)$ & 0&67 & 0&0714 & 9&39 & 0&0 \\ 
+47 & $\ln(\delta^{\text{NbCar}}_2)$ & 0&614 & 0&0664 & 9&26 & 0&0 \\ 
+
+\end{tabular}
+  \caption{\label{tab:mimic_meas}MIMIC model: estimated parameters of the measurement equations}
+
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+  \begin{tabular}{ll}
+Number of estimated parameters & 75 \\
+Sample size & 896 \\
+Excluded observations & 0 \\
+Init log likelihood & -29927.74 \\
+Final log likelihood & -17432.33 \\
+Likelihood ratio test for the init. model & 24990.82 \\
+Rho-square for the init. model & 0.418 \\
+Rho-square-bar for the init. model & 0.415 \\
+Akaike Information Criterion & 35014.65 \\
+Bayesian Information Criterion & 35374.5 \\
+Final gradient norm & 4.7392E-01 \\
+Number of draws & 20000 \\
+\end{tabular}
+  \caption{\label{tab:hybrid}Hybrid choice model: general statistics}
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
+          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{BHHH}  &  \multicolumn{4}{l}{}  \\
+Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
+number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
+\hline
+0 & choice\_asc\_pt & -2&1 & 0&725 & -2&9 & 0&00373 \\ 
+1 & choice\_beta\_time\_pt\_ref & -1&59 & 0&397 & -4&0 & 6&24e-05 \\ 
+2 & beta\_time\_pt\_lambda\_environment & -0&817 & 0&407 & -2&01 & 0&0446 \\ 
+10 & beta\_time\_pt\_lambda\_car\_centric & -1&32 & 0&213 & -6&21 & 5&15e-10 \\ 
+18 & choice\_beta\_cost & -0&104 & 0&0132 & -7&86 & 3&77e-15 \\ 
+19 & choice\_car\_centric\_pt\_cte & -0&676 & 0&673 & -1&0 & 0&316 \\ 
+20 & choice\_environment\_pt\_cte & -0&42 & 1&47 & -0&286 & 0&775 \\ 
+21 & choice\_asc\_car & -1&62 & 0&615 & -2&63 & 0&00856 \\ 
+22 & choice\_beta\_time\_car\_ref & -3&55 & 0&943 & -3&76 & 0&000167 \\ 
+23 & beta\_time\_car\_lambda\_environment & -1&01 & 0&451 & -2&23 & 0&0259 \\ 
+24 & beta\_time\_car\_lambda\_car\_centric & -1&58 & 0&251 & -6&31 & 2&7e-10 \\ 
+25 & choice\_car\_centric\_car\_cte & 1&06 & 0&622 & 1&71 & 0&0872 \\ 
+26 & choice\_environment\_car\_cte & -0&483 & 1&24 & -0&39 & 0&697 \\ 
+27 & choice\_beta\_dist\_work & -0&597 & 0&0809 & -7&38 & 1&54e-13 \\ 
+28 & choice\_beta\_dist\_other\_purposes & -0&898 & 0&163 & -5&5 & 3&87e-08 \\ 
+\end{tabular}
+  \caption{\label{tab:hybrid_choice}Hybrid choice model: estimated parameters of the choice model}
+
+\end{table}
+
+
+\begin{table}[htb]
+  \footnotesize
+\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
+          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{BHHH}  &  \multicolumn{4}{l}{}  \\
+Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
+number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
+\hline
+3 & struct\_environmental\_attitude\_childSuburb & 0&0857 & 0&0329 & 2&6 & 0&00923 \\ 
+4 & struct\_environmental\_attitude\_ScaledIncome & 0&0228 & 0&00603 & 3&77 & 0&00016 \\ 
+5 & struct\_environmental\_attitude\_city\_center\_as\_kid & 0&169 & 0&084 & 2&01 & 0&044 \\ 
+6 & struct\_environmental\_attitude\_artisans & 0&136 & 0&0622 & 2&19 & 0&0282 \\ 
+7 & struct\_environmental\_attitude\_high\_education & 0&161 & 0&0499 & 3&22 & 0&00127 \\ 
+8 & struct\_environmental\_attitude\_low\_education & 0&0512 & 0&0339 & 1&51 & 0&13 \\ 
+9 & struct\_environmental\_attitude\_sigma\_log & -1&23 & 0&213 & -5&77 & 7&74e-09 \\ 
+11 & struct\_car\_centric\_attitude\_high\_education & -0&396 & 0&099 & -4&0 & 6&33e-05 \\ 
+12 & struct\_car\_centric\_attitude\_top\_manager & 0&199 & 0&134 & 1&48 & 0&139 \\ 
+13 & struct\_car\_centric\_attitude\_employees & -0&0551 & 0&0771 & -0&714 & 0&475 \\ 
+14 & struct\_car\_centric\_attitude\_age\_30\_less & 0&437 & 0&162 & 2&69 & 0&00716 \\ 
+15 & struct\_car\_centric\_attitude\_ScaledIncome & 0&0171 & 0&0108 & 1&58 & 0&113 \\ 
+16 & struct\_car\_centric\_attitude\_car\_oriented\_parents & 0&312 & 0&0919 & 3&39 & 0&000692 \\ 
+17 & struct\_car\_centric\_attitude\_sigma\_log & -0&228 & 0&102 & -2&24 & 0&025 \\ 
+
+\end{tabular}
+  \caption{\label{tab:hybrid_struct}Hybrid choice model: estimated parameters of the structural equations}
+\end{table}
+
+\begin{table}[htb]
+  \footnotesize
+\begin{tabular}{rlr@{.}lr@{.}lr@{.}lr@{.}l}
+          &              &   \multicolumn{2}{l}{}         & \multicolumn{2}{l}{BHHH}  &  \multicolumn{4}{l}{}  \\
+Parameter &              &   \multicolumn{2}{l}{Coeff.}   & \multicolumn{2}{l}{Asympt.}       & \multicolumn{4}{l}{}   \\
+number    &  Description &   \multicolumn{2}{l}{estimate} & \multicolumn{2}{l}{std. error}    & \multicolumn{2}{l}{$t$-stat}  &  \multicolumn{2}{l}{$p$-value} \\
+\hline
+50 & measurement\_coefficient\_environmental\_attitude\_Envir01 & 1&84 & 0&428 & 4&31 & 1&66e-05 \\ 
+\hline
+69 & measurement\_coefficient\_car\_centric\_attitude\_Envir02 & -0&183 & 0&0351 & -5&21 & 1&9e-07 \\ 
+70 & measurement\_Envir02\_sigma\_log & -1&03 & 0&206 & -4&99 & 5&98e-07 \\ 
+\hline
+29 & measurement\_intercept\_Envir03 & 0&689 & 0&181 & 3&8 & 0&000144 \\ 
+30 & measurement\_coefficient\_environmental\_attitude\_Envir03 & -1&09 & 0&181 & -6&02 & 1&78e-09 \\ 
+31 & measurement\_Envir03\_sigma\_log & -0&366 & 0&231 & -1&58 & 0&113 \\
+\hline
+57 & measurement\_intercept\_Envir04 & 0&198 & 0&0586 & 3&38 & 0&000737 \\ 
+58 & measurement\_coefficient\_environmental\_attitude\_Envir04 & -0&706 & 0&0853 & -8&27 & 2&22e-16 \\ 
+59 & measurement\_Envir04\_sigma\_log & -0&958 & 0&211 & -4&54 & 5&53e-06 \\ 
+\hline
+40 & measurement\_intercept\_Envir05 & 0&144 & 0&0579 & 2&48 & 0&0131 \\ 
+41 & measurement\_coefficient\_environmental\_attitude\_Envir05 & 1&02 & 0&105 & 9&71 & 0&0 \\ 
+42 & measurement\_Envir05\_sigma\_log & -0&985 & 0&217 & -4&54 & 5&53e-06 \\ 
+\hline
+43 & measurement\_intercept\_Envir06 & 0&315 & 0&0737 & 4&27 & 1&95e-05 \\ 
+44 & measurement\_coefficient\_car\_centric\_attitude\_Envir06 & -0&0627 & 0&0232 & -2&71 & 0&00681 \\ 
+45 & measurement\_coefficient\_environmental\_attitude\_Envir06 & 0&814 & 0&0764 & 10&7 & 0&0 \\ 
+46 & measurement\_Envir06\_sigma\_log & -1&53 & 0&213 & -7&16 & 8&01e-13 \\ 
+\hline
+34 & measurement\_intercept\_Mobil03 & 0&49 & 0&137 & 3&57 & 0&000357 \\ 
+35 & measurement\_coefficient\_car\_centric\_attitude\_Mobil03 & -0&253 & 0&0611 & -4&14 & 3&43e-05 \\ 
+36 & measurement\_Mobil03\_sigma\_log & -0&471 & 0&232 & -2&03 & 0&0424 \\ 
+\hline
+37 & measurement\_intercept\_Mobil05 & 0&829 & 0&264 & 3&14 & 0&00172 \\ 
+38 & measurement\_coefficient\_car\_centric\_attitude\_Mobil05 & -0&457 & 0&111 & -4&11 & 4&03e-05 \\ 
+39 & measurement\_Mobil05\_sigma\_log & -0&119 & 0&266 & -0&446 & 0&656 \\
+\hline
+47 & measurement\_intercept\_Mobil08 & 0&0849 & 0&0768 & 1&11 & 0&269 \\ 
+48 & measurement\_coefficient\_car\_centric\_attitude\_Mobil08 & 0&238 & 0&0799 & 2&98 & 0&00286 \\ 
+49 & measurement\_Mobil08\_sigma\_log & -0&027 & 0&267 & -0&101 & 0&92 \\ 
+\hline
+63 & measurement\_intercept\_Mobil09 & 0&775 & 0&184 & 4&22 & 2&47e-05 \\ 
+64 & measurement\_coefficient\_car\_centric\_attitude\_Mobil09 & -0&251 & 0&0515 & -4&87 & 1&09e-06 \\ 
+65 & measurement\_Mobil09\_sigma\_log & -0&741 & 0&219 & -3&38 & 0&000738 \\ 
+\hline
+60 & measurement\_intercept\_Mobil10 & 1&35 & 0&814 & 1&66 & 0&0964 \\ 
+61 & measurement\_coefficient\_car\_centric\_attitude\_Mobil10 & 1&39 & 0&633 & 2&19 & 0&0286 \\ 
+62 & measurement\_Mobil10\_sigma\_log & 0&669 & 0&529 & 1&26 & 0&206 \\ 
+\hline
+54 & measurement\_intercept\_Mobil12 & 0&676 & 0&463 & 1&46 & 0&144 \\ 
+55 & measurement\_coefficient\_environmental\_attitude\_Mobil12 & -3&06 & 1&34 & -2&29 & 0&022 \\ 
+56 & measurement\_Mobil12\_sigma\_log & 0&76 & 0&463 & 1&64 & 0&101 \\ 
+\hline
+51 & measurement\_intercept\_LifSty01 & 0&0613 & 0&0476 & 1&29 & 0&199 \\ 
+52 & measurement\_coefficient\_environmental\_attitude\_LifSty01 & 0&339 & 0&0857 & 3&96 & 7&58e-05 \\ 
+53 & measurement\_LifSty01\_sigma\_log & -0&603 & 0&218 & -2&77 & 0&00561 \\
+\hline
+66 & measurement\_intercept\_LifSty07 & -0&0608 & 0&0547 & -1&11 & 0&266 \\ 
+67 & measurement\_coefficient\_car\_centric\_attitude\_LifSty07 & 0&0723 & 0&0483 & 1&5 & 0&135 \\ 
+68 & measurement\_LifSty07\_sigma\_log & -0&176 & 0&265 & -0&663 & 0&507 \\ 
+\hline
+32 & likert\_delta\_0\_log & -2&6 & 0&21 & -12&3 & 0&0 \\ 
+33 & likert\_delta\_1\_log & -1&0 & 0&197 & -5&09 & 3&54e-07 \\ 
+\hline
+71 & measurement\_intercept\_NbCar & 2&04 & 0&149 & 13&8 & 0&0 \\ 
+72 & measurement\_coefficient\_car\_centric\_attitude\_NbCar & 0&816 & 0&122 & 6&68 & 2&45e-11 \\ 
+\hline
+73 & cars\_delta\_1\_log & 0&719 & 0&0711 & 10&1 & 0&0 \\ 
+74 & cars\_delta\_2\_log & 0&663 & 0&0644 & 10&3 & 0&0 \\ 
+
+\end{tabular}
+  \caption{\label{tab:hybrid_meas}Hybrid choice model: estimated parameters of the measurement equations}
+
+\end{table}
+
+\subsection{Comparison of the three models}
+
+We report below the value of each parameter in each model. 
+{\footnotesize
+  \begin{longtable}{rp{5cm}SSS}
+& & \multicolumn{1}{c}{Choice only} & \multicolumn{1}{c}{MIMIC} & \multicolumn{1}{c}{Hybrid} \\
+ & Parameter name &  \multicolumn{1}{c}{Coef./(SE)} &  \multicolumn{1}{c}{Coef./(SE)} &  \multicolumn{1}{c}{Coef./(SE)} \\
+\hline
+0 &beta\_time\_car\_lambda\_car\_centric &  & & -1.58\textsuperscript{***}  \\
+ &  &  & &(0.251) \\
+1 &beta\_time\_car\_lambda\_environment &  & & -1.01\textsuperscript{**}  \\
+ &  &  & &(0.451) \\
+2 &beta\_time\_pt\_lambda\_car\_centric &  & & -1.32\textsuperscript{***}  \\
+ &  &  & &(0.213) \\
+3 &beta\_time\_pt\_lambda\_environment &  & & -0.817\textsuperscript{**}  \\
+ &  &  & &(0.407) \\
+4 &cars\_delta\_1\_log & & 0.67\textsuperscript{***} & 0.719\textsuperscript{***}  \\
+ &  & &(0.0714)&(0.0711) \\
+5 &cars\_delta\_2\_log & & 0.614\textsuperscript{***} & 0.663\textsuperscript{***}  \\
+ &  & &(0.0664)&(0.0644) \\
+6 &choice\_asc\_car& -0.246  & & -1.62\textsuperscript{***}  \\
+ & &(0.231) & &(0.615) \\
+7 &choice\_asc\_pt& -0.665\textsuperscript{**}  & & -2.1\textsuperscript{***}  \\
+ & &(0.277) & &(0.725) \\
+8 &choice\_beta\_cost& -0.0795\textsuperscript{***}  & & -0.104\textsuperscript{***}  \\
+ & &(0.00833) & &(0.0132) \\
+9 &choice\_beta\_dist\_other\_purposes& -0.324\textsuperscript{***}  & & -0.898\textsuperscript{***}  \\
+ & &(0.0306) & &(0.163) \\
+10 &choice\_beta\_dist\_work& -0.205\textsuperscript{***}  & & -0.597\textsuperscript{***}  \\
+ & &(0.0148) & &(0.0809) \\
+11 &choice\_beta\_time\_car\_ref& -2.03\textsuperscript{***}  & & -3.55\textsuperscript{***}  \\
+ & &(0.155) & &(0.943) \\
+12 &choice\_beta\_time\_pt\_ref& -0.956\textsuperscript{***}  & & -1.59\textsuperscript{***}  \\
+ & &(0.113) & &(0.397) \\
+13 &choice\_car\_centric\_car\_cte &  & & 1.06\textsuperscript{*}  \\
+ &  &  & &(0.622) \\
+14 &choice\_car\_centric\_pt\_cte &  & & -0.676  \\
+ &  &  & &(0.673) \\
+15 &choice\_environment\_car\_cte &  & & -0.483  \\
+ &  &  & &(1.24) \\
+16 &choice\_environment\_pt\_cte &  & & -0.42  \\
+ &  &  & &(1.47) \\
+17 &likert\_delta\_0\_log & & -2.61\textsuperscript{***} & -2.6\textsuperscript{***}  \\
+ &  & &(0.223)&(0.21) \\
+18 &likert\_delta\_1\_log & & -1.03\textsuperscript{***} & -1.0\textsuperscript{***}  \\
+ &  & &(0.21)&(0.197) \\
+19 &measurement\_Envir02\_sigma\_log & & -1.07\textsuperscript{***} & -1.03\textsuperscript{***}  \\
+ &  & &(0.221)&(0.206) \\
+20 &measurement\_Envir03\_sigma\_log & & -0.38 & -0.366  \\
+ &  & &(0.242)&(0.231) \\
+21 &measurement\_Envir04\_sigma\_log & & -0.995\textsuperscript{***} & -0.958\textsuperscript{***}  \\
+ &  & &(0.222)&(0.211) \\
+22 &measurement\_Envir05\_sigma\_log & & -1.05\textsuperscript{***} & -0.985\textsuperscript{***}  \\
+ &  & &(0.229)&(0.217) \\
+23 &measurement\_Envir06\_sigma\_log & & -1.63\textsuperscript{***} & -1.53\textsuperscript{***}  \\
+ &  & &(0.227)&(0.213) \\
+24 &measurement\_LifSty01\_sigma\_log & & -0.62\textsuperscript{***} & -0.603\textsuperscript{***}  \\
+ &  & &(0.231)&(0.218) \\
+25 &measurement\_LifSty07\_sigma\_log & & -0.208 & -0.176  \\
+ &  & &(0.274)&(0.265) \\
+26 &measurement\_Mobil03\_sigma\_log & & -0.445\textsuperscript{*} & -0.471\textsuperscript{**}  \\
+ &  & &(0.244)&(0.232) \\
+27 &measurement\_Mobil05\_sigma\_log & & -0.107 & -0.119  \\
+ &  & &(0.28)&(0.266) \\
+28 &measurement\_Mobil08\_sigma\_log & & -0.127 & -0.027  \\
+ &  & &(0.268)&(0.267) \\
+29 &measurement\_Mobil09\_sigma\_log & & -0.842\textsuperscript{***} & -0.741\textsuperscript{***}  \\
+ &  & &(0.232)&(0.219) \\
+30 &measurement\_Mobil10\_sigma\_log & & 0.464 & 0.669  \\
+ &  & &(0.473)&(0.529) \\
+31 &measurement\_Mobil12\_sigma\_log & & 0.775 & 0.76  \\
+ &  & &(0.481)&(0.463) \\
+32 &measurement\_coefficient\_car\_centric\_attitude\_Envir02 & & -0.201\textsuperscript{***} & -0.183\textsuperscript{***}  \\
+ &  & &(0.0383)&(0.0351) \\
+33 &measurement\_coefficient\_car\_centric\_attitude\_Envir06 & & -0.0436\textsuperscript{**} & -0.0627\textsuperscript{***}  \\
+ &  & &(0.0202)&(0.0232) \\
+34 &measurement\_coefficient\_car\_centric\_attitude\_LifSty07 & & 0.0896\textsuperscript{**} & 0.0723  \\
+ &  & &(0.0449)&(0.0483) \\
+35 &measurement\_coefficient\_car\_centric\_attitude\_Mobil03 & & -0.209\textsuperscript{***} & -0.253\textsuperscript{***}  \\
+ &  & &(0.0539)&(0.0611) \\
+36 &measurement\_coefficient\_car\_centric\_attitude\_Mobil05 & & -0.416\textsuperscript{***} & -0.457\textsuperscript{***}  \\
+ &  & &(0.104)&(0.111) \\
+37 &measurement\_coefficient\_car\_centric\_attitude\_Mobil08 & & 0.28\textsuperscript{***} & 0.238\textsuperscript{***}  \\
+ &  & &(0.0782)&(0.0799) \\
+38 &measurement\_coefficient\_car\_centric\_attitude\_Mobil09 & & -0.256\textsuperscript{***} & -0.251\textsuperscript{***}  \\
+ &  & &(0.0509)&(0.0515) \\
+39 &measurement\_coefficient\_car\_centric\_attitude\_Mobil10 & & 1.17\textsuperscript{**} & 1.39\textsuperscript{**}  \\
+ &  & &(0.464)&(0.633) \\
+40 &measurement\_coefficient\_car\_centric\_attitude\_NbCar & & 0.67\textsuperscript{***} & 0.816\textsuperscript{***}  \\
+ &  & &(0.111)&(0.122) \\
+41 &measurement\_coefficient\_environmental\_attitude\_Envir01 & & 1.74\textsuperscript{***} & 1.84\textsuperscript{***}  \\
+ &  & &(0.457)&(0.428) \\
+42 &measurement\_coefficient\_environmental\_attitude\_Envir03 & & -1.17\textsuperscript{***} & -1.09\textsuperscript{***}  \\
+ &  & &(0.199)&(0.181) \\
+43 &measurement\_coefficient\_environmental\_attitude\_Envir04 & & -0.773\textsuperscript{***} & -0.706\textsuperscript{***}  \\
+ &  & &(0.0943)&(0.0853) \\
+44 &measurement\_coefficient\_environmental\_attitude\_Envir05 & & 1.11\textsuperscript{***} & 1.02\textsuperscript{***}  \\
+ &  & &(0.113)&(0.105) \\
+45 &measurement\_coefficient\_environmental\_attitude\_Envir06 & & 0.91\textsuperscript{***} & 0.814\textsuperscript{***}  \\
+ &  & &(0.0847)&(0.0764) \\
+46 &measurement\_coefficient\_environmental\_attitude\_LifSty01 & & 0.342\textsuperscript{***} & 0.339\textsuperscript{***}  \\
+ &  & &(0.092)&(0.0857) \\
+47 &measurement\_coefficient\_environmental\_attitude\_Mobil12 & & -3.34\textsuperscript{**} & -3.06\textsuperscript{**}  \\
+ &  & &(1.51)&(1.34) \\
+48 &measurement\_intercept\_Envir03 & & 0.664\textsuperscript{***} & 0.689\textsuperscript{***}  \\
+ &  & &(0.184)&(0.181) \\
+49 &measurement\_intercept\_Envir04 & & 0.185\textsuperscript{***} & 0.198\textsuperscript{***}  \\
+ &  & &(0.0597)&(0.0586) \\
+50 &measurement\_intercept\_Envir05 & & 0.128\textsuperscript{**} & 0.144\textsuperscript{**}  \\
+ &  & &(0.0533)&(0.0579) \\
+51 &measurement\_intercept\_Envir06 & & 0.277\textsuperscript{***} & 0.315\textsuperscript{***}  \\
+ &  & &(0.0655)&(0.0737) \\
+52 &measurement\_intercept\_LifSty01 & & 0.0742 & 0.0613  \\
+ &  & &(0.0475)&(0.0476) \\
+53 &measurement\_intercept\_LifSty07 & & -0.0521 & -0.0608  \\
+ &  & &(0.0535)&(0.0547) \\
+54 &measurement\_intercept\_Mobil03 & & 0.479\textsuperscript{***} & 0.49\textsuperscript{***}  \\
+ &  & &(0.139)&(0.137) \\
+55 &measurement\_intercept\_Mobil05 & & 0.786\textsuperscript{***} & 0.829\textsuperscript{***}  \\
+ &  & &(0.266)&(0.264) \\
+56 &measurement\_intercept\_Mobil08 & & 0.0853 & 0.0849  \\
+ &  & &(0.069)&(0.0768) \\
+57 &measurement\_intercept\_Mobil09 & & 0.67\textsuperscript{***} & 0.775\textsuperscript{***}  \\
+ &  & &(0.171)&(0.184) \\
+58 &measurement\_intercept\_Mobil10 & & 1.22\textsuperscript{*} & 1.35\textsuperscript{*}  \\
+ &  & &(0.637)&(0.814) \\
+59 &measurement\_intercept\_Mobil12 & & 0.636 & 0.676  \\
+ &  & &(0.462)&(0.463) \\
+60 &measurement\_intercept\_NbCar & & 2.06\textsuperscript{***} & 2.04\textsuperscript{***}  \\
+ &  & &(0.139)&(0.149) \\
+61 &struct\_car\_centric\_attitude\_ScaledIncome & & 0.00453 & 0.0171  \\
+ &  & &(0.0109)&(0.0108) \\
+62 &struct\_car\_centric\_attitude\_age\_30\_less & & 0.489\textsuperscript{***} & 0.437\textsuperscript{***}  \\
+ &  & &(0.172)&(0.162) \\
+63 &struct\_car\_centric\_attitude\_car\_oriented\_parents & & 0.324\textsuperscript{***} & 0.312\textsuperscript{***}  \\
+ &  & &(0.0998)&(0.0919) \\
+64 &struct\_car\_centric\_attitude\_employees & & -0.0609 & -0.0551  \\
+ &  & &(0.0813)&(0.0771) \\
+65 &struct\_car\_centric\_attitude\_high\_education & & -0.451\textsuperscript{***} & -0.396\textsuperscript{***}  \\
+ &  & &(0.106)&(0.099) \\
+66 &struct\_car\_centric\_attitude\_sigma\_log & & -0.17\textsuperscript{*} & -0.228\textsuperscript{**}  \\
+ &  & &(0.102)&(0.102) \\
+67 &struct\_car\_centric\_attitude\_top\_manager & & 0.146 & 0.199  \\
+ &  & &(0.135)&(0.134) \\
+68 &struct\_environmental\_attitude\_ScaledIncome & & 0.0195\textsuperscript{***} & 0.0228\textsuperscript{***}  \\
+ &  & &(0.00577)&(0.00603) \\
+69 &struct\_environmental\_attitude\_artisans & & 0.129\textsuperscript{**} & 0.136\textsuperscript{**}  \\
+ &  & &(0.0588)&(0.0622) \\
+70 &struct\_environmental\_attitude\_childSuburb & & 0.0773\textsuperscript{**} & 0.0857\textsuperscript{***}  \\
+ &  & &(0.0306)&(0.0329) \\
+71 &struct\_environmental\_attitude\_city\_center\_as\_kid & & 0.151\textsuperscript{**} & 0.169\textsuperscript{**}  \\
+ &  & &(0.0731)&(0.084) \\
+72 &struct\_environmental\_attitude\_high\_education & & 0.14\textsuperscript{***} & 0.161\textsuperscript{***}  \\
+ &  & &(0.0461)&(0.0499) \\
+73 &struct\_environmental\_attitude\_low\_education & & 0.045 & 0.0512  \\
+ &  & &(0.0306)&(0.0339) \\
+74 &struct\_environmental\_attitude\_sigma\_log & & -1.32\textsuperscript{***} & -1.23\textsuperscript{***}  \\
+ &  & &(0.232)&(0.213) \\
+\hline
+\multicolumn{2}{l}{Number of observations} &896 & 896 & 896 \\
+\multicolumn{2}{l}{Number of parameters} &7 & 60 & 75 \\
+\multicolumn{2}{l}{Akaike Information Criterion} &1039.0 & 34139.1 & 35014.7 \\
+\multicolumn{2}{l}{Bayesian Information Criterion} &1072.6 & 34427.0 & 35374.5 \\
+\hline
+\multicolumn{4}{l}{\footnotesize Standard errors: \textsuperscript{***}: $p < 0.01$, \textsuperscript{**}: $p < 0.05$, \textsuperscript{*}: $p < 0.1$}
+\end{longtable}
+}
 \section{Conclusion}
 
 Choice models with latent variables offer a powerful and flexible

@@ -1,0 +1,120 @@
+# File b01_choice_only_ml.yaml has automatically been generated on 2025-12-24 17:59:14.170966
+# biogeme 3.3.2 [2025-12-24]
+
+beta_names:
+- choice_asc_pt
+- choice_beta_time_pt_ref
+- choice_beta_cost
+- choice_asc_car
+- choice_beta_time_car_ref
+- choice_beta_dist_work
+- choice_beta_dist_other_purposes
+beta_values:
+- -0.6651181630013845
+- -0.9555219642915302
+- -0.07953187828885923
+- -0.24614548994436072
+- -2.0332038730800694
+- -0.2046945244129578
+- -0.3239699044119938
+bhhh:
+- - 114.77110883016893
+  - 223.39729932797349
+  - 306.5989578779068
+  - -108.76114040214166
+  - -105.44333809687917
+  - -63.796453485585445
+  - -15.55246867894556
+- - 223.39729932797349
+  - 614.6823595435559
+  - 1050.2490583527365
+  - -217.14826313216452
+  - -293.33043662446113
+  - -101.73029572504805
+  - -20.315509465542704
+- - 306.5989578779068
+  - 1050.2490583527365
+  - 18650.811629900265
+  - -231.8375996321954
+  - -158.07576723387436
+  - -1265.2034881833786
+  - -293.6399055324695
+- - -108.76114040214166
+  - -217.14826313216452
+  - -231.8375996321954
+  - 138.32340453523116
+  - 112.1895702462089
+  - -159.49742837442008
+  - -105.93543937667069
+- - -105.44333809687917
+  - -293.33043662446113
+  - -158.07576723387436
+  - 112.1895702462089
+  - 192.5411051578436
+  - -110.28099154990919
+  - -36.825239503754354
+- - -63.796453485585445
+  - -101.73029572504805
+  - -1265.2034881833786
+  - -159.49742837442008
+  - -110.28099154990919
+  - 6668.3476158455405
+  - 0.0
+- - -15.55246867894556
+  - -20.315509465542704
+  - -293.6399055324695
+  - -105.93543937667069
+  - -36.825239503754354
+  - 0.0
+  - 1609.2411810252354
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: optima.dat
+draws_processing_time: '0.0'
+final_log_likelihood: -512.5192688911002
+gradient:
+- 2.7258161184651186e-05
+- -0.00012643014189084312
+- -0.0033042545196373396
+- 0.0011218745063810154
+- 2.0388959825812236e-05
+- 0.005250635912279034
+- 0.0004968739872657224
+hessian: null
+initial_log_likelihood: -984.3566106466271
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+- null
+- null
+model_name: b01_choice_only_ml
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 20000
+number_of_excluded_data: 0
+number_of_observations: 896
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 5.3e-06 <= 6.1e-06
+  Number of function evaluations: 187
+  Number of gradient evaluations: 105
+  Number of hessian evaluations: 0
+  Number of iterations: '82'
+  Optimization time: '0.77255'
+  Proportion of Hessian calculation: 0/52 = 0.0%
+  Relative gradient: 5.334078986692184e-06
+sample_size: 896
+types_of_draws: null
+upper_bounds:
+- null
+- 0
+- 0
+- null
+- 0
+- 0
+- 0
+user_notes: null
