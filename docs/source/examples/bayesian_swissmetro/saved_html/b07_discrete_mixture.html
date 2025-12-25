@@ -1,0 +1,361 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>b07_discrete_mixture - Report from biogeme 3.3.2 [2025-12-24]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.3.2 [2025-12-24]">
+<meta name="author" content="{bv.author}">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+
+<p>biogeme 3.3.2 [2025-12-24]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2025-12-24 13:58:39.420415</p>
+<table>
+<tr class=biostyle><td align=right><strong>Bayesian estimation report file</strong>:	</td><td>b07_discrete_mixture.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>swissmetro</td></tr>
+</table>
+
+<h1>Bayesian estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>6768</td></tr>
+<tr class=biostyle><td align=right ><strong>Sampler</strong>: </td> <td>NUTS</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of chains</strong>: </td> <td>4</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of draws per chain</strong>: </td> <td>2000</td></tr>
+<tr class=biostyle><td align=right ><strong>Total number of draws</strong>: </td> <td>8000</td></tr>
+<tr class=biostyle><td align=right ><strong>Acceptance rate target</strong>: </td> <td>0.9</td></tr>
+<tr class=biostyle><td align=right ><strong>Run time</strong>: </td> <td>0:01:20.750559</td></tr>
+<tr class=biostyle><td align=right ><strong>Posterior predictive log-likelihood (sum of log mean p)</strong>: </td> <td>-5208.04</td></tr>
+<tr class=biostyle><td align=right ><strong>Expected log-likelihood E[log L(Y|θ)]</strong>: </td> <td>-5211.01</td></tr>
+<tr class=biostyle><td align=right ><strong>Best-draw log-likelihood (posterior upper bound)</strong>: </td> <td>-5208.55</td></tr>
+<tr class=biostyle><td align=right ><strong>WAIC (Widely Applicable Information Criterion)</strong>: </td> <td>-5213.98</td></tr>
+<tr class=biostyle><td align=right ><strong>WAIC Standard Error</strong>: </td> <td>53.21</td></tr>
+<tr class=biostyle><td align=right ><strong>Effective number of parameters (p_WAIC)</strong>: </td> <td>5.94</td></tr>
+<tr class=biostyle><td align=right ><strong>LOO (Leave-One-Out Cross-Validation)</strong>: </td> <td>-5213.98</td></tr>
+<tr class=biostyle><td align=right ><strong>LOO Standard Error</strong>: </td> <td>53.21</td></tr>
+<tr class=biostyle><td align=right ><strong>Effective number of parameters (p_LOO)</strong>: </td> <td>5.94</td></tr>
+</table>
+
+<h1>Estimated parameters</h1>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value (mean)</th><th>Value (median)</th><th>Value (mode)</th><th>std err.</th><th>z-value</th><th>p-value</th><th>HDI low</th><th>HDI high</th><th>R hat</th><th>ESS (bulk)</th><th>ESS (tail)</th></tr>
+<tr class=biostyle><td>2</td><td>asc_car</td><td>0.123</td><td>0.123</td><td>0.132</td><td>0.0509</td><td>2.42</td><td>0.0123</td><td>0.0284</td><td>0.221</td><td>1</td><td>4.42e+03</td><td>4.98e+03</td></tr>
+<tr class=biostyle><td>0</td><td>asc_train</td><td>-0.4</td><td>-0.399</td><td>-0.395</td><td>0.0611</td><td>-6.54</td><td>0</td><td>-0.517</td><td>-0.289</td><td>1</td><td>4.43e+03</td><td>5.04e+03</td></tr>
+<tr class=biostyle><td>1</td><td>b_cost</td><td>-1.27</td><td>-1.27</td><td>-1.27</td><td>0.0616</td><td>-20.5</td><td>0</td><td>-1.38</td><td>-1.14</td><td>1</td><td>5.09e+03</td><td>4.91e+03</td></tr>
+<tr class=biostyle><td>3</td><td>b_time</td><td>-2.81</td><td>-2.8</td><td>-2.8</td><td>0.176</td><td>-15.9</td><td>0</td><td>-3.14</td><td>-2.48</td><td>1</td><td>4.3e+03</td><td>4.2e+03</td></tr>
+<tr class=biostyle><td>4</td><td>prob_class1</td><td>0.252</td><td>0.252</td><td>0.252</td><td>0.0217</td><td>11.6</td><td>0</td><td>0.21</td><td>0.291</td><td>1</td><td>4.57e+03</td><td>4.84e+03</td></tr>
+</table>
+<table border="0">
+<tr class=biostyle><td>Name:</td><td>Identifier of the model parameter being estimated.</td></tr>
+<tr class=biostyle><td>Value:</td><td>Posterior mean (expected value) of the parameter.</td></tr>
+<tr class=biostyle><td>Median:</td><td>Posterior median (50% quantile) of the parameter.</td></tr>
+<tr class=biostyle><td>Mode:</td><td>Posterior mode (most frequent value) of the parameter</td></tr>
+<tr class=biostyle><td>Std err.:</td><td>Posterior standard deviation, measuring uncertainty around the mean.</td></tr>
+<tr class=biostyle><td>z-value:</td><td>Standardized estimate (mean divided by std. dev.), indicating signal-to-noise ratio.</td></tr>
+<tr class=biostyle><td>p-value:</td><td>Two-sided Bayesian tail probability that the parameter differs in sign from zero.</td></tr>
+<tr class=biostyle><td>HDI low / HDI high:</td><td>Lower and upper bounds of the Highest Density Interval containing the most probable parameter values.</td></tr>
+<tr class=biostyle><td>R-hat (Gelman–Rubin):</td><td>Convergence diagnostic; values very close to 1 (typically ≤ 1.01) indicate well-mixed chains.</td></tr>
+<tr class=biostyle><td>ESS (bulk):</td><td>Effective sample size for the central part of the posterior; values above ~400 are generally considered sufficient.</td></tr>
+<tr class=biostyle><td>ESS (tail):</td><td>Effective sample size for the posterior tails; values above ~100 ensure reliable estimates of extreme quantiles.</td></tr>
+</table>
+
+<h1>Identification diagnostics</h1>
+<p class="biostyle">This section reports quick numerical checks for <em>non-identification</em> or <em>weak identification</em>. Intuitively, identification problems mean that some combinations of parameters can change without changing the likelihood much, so the posterior is very wide (or nearly flat) in some directions. These checks use the posterior draws (and the prior draws, if available).</p>
+<h2>How to read the numbers</h2>
+<ul class="biostyle"><li><strong>Posterior covariance diagnostics</strong> (eigenvalues, condition number, effective rank): these describe the <em>shape</em> of the posterior cloud in parameter space.<ul class="biostyle"><li><strong>max_eigenvalue</strong>: the <em>largest posterior-variance</em> direction (widest direction of the posterior). When identification is weak, the posterior can become extremely wide along some linear combination of parameters; this often shows up as a very large <code>max_eigenvalue</code> together with a large condition number. If reported, the <code>max_eigenvector_top</code> loadings indicate which parameters contribute most to that weakly identified linear combination.</li><li><strong>condition_number = max_eigenvalue / min_eigenvalue</strong>: anisotropy of the posterior covariance. Larger values indicate stronger near-dependencies among parameters. Rough rule of thumb: around <strong>10^3</strong> deserves attention; <strong>10^5</strong> or more is a strong red flag.</li><li><strong>effective_rank</strong>: an “effective dimension” of posterior variability (between 0 and <code>n_parameters</code>). If it is much smaller than <code>n_parameters</code>, the posterior variability concentrates in a lower-dimensional subspace, consistent with (near) linear dependencies among parameters.</li></ul></li><li><strong>Prior covariance diagnostics</strong>: same metrics, but for the prior. If the prior has normal scale and full rank but the posterior becomes ill-conditioned, the issue is typically in the likelihood/model specification (not in the prior).</li><li><strong>Identified by the prior</strong> (requires prior draws): compare prior vs posterior dispersion. For each parameter, <code>std_ratio_post_over_prior ≈ 1</code> means the data did not shrink uncertainty much (likelihood weakly informative for that parameter). A ratio <strong>well below 1</strong> (say 0.1 or 0.01) means the likelihood is informative for that parameter.</li></ul>
+</p>
+<h2>Posterior covariance diagnostics</h2>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>n_parameters</strong>: </td> <td>5</td></tr>
+<tr class=biostyle><td align=right ><strong>n_draws</strong>: </td> <td>8000</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue</strong>: </td> <td>0.000148</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvalue</strong>: </td> <td>0.0329</td></tr>
+<tr class=biostyle><td align=right ><strong>condition_number</strong>: </td> <td>222</td></tr>
+<tr class=biostyle><td align=right ><strong>effective_rank</strong>: </td> <td>2.06</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue_ratio</strong>: </td> <td>0.00451</td></tr>
+</table>
+<h2>Prior covariance diagnostics</h2>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>n_parameters</strong>: </td> <td>5</td></tr>
+<tr class=biostyle><td align=right ><strong>n_draws</strong>: </td> <td>2000</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue</strong>: </td> <td>0.0816</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvalue</strong>: </td> <td>26.1</td></tr>
+<tr class=biostyle><td align=right ><strong>condition_number</strong>: </td> <td>320</td></tr>
+<tr class=biostyle><td align=right ><strong>effective_rank</strong>: </td> <td>4.02</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue_ratio</strong>: </td> <td>0.00312</td></tr>
+</table>
+<h2>Per-parameter prior/posterior dispersion</h2>
+<p class="biostyle">The table below compares posterior and prior standard deviations when prior draws are available. A ratio close to 1 suggests the prior dominates; a ratio well below 1 suggests the data are informative. </p>
+<table class="dataframe table table-striped table-sm">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>name</th>
+      <th>posterior_std</th>
+      <th>prior_std</th>
+      <th>std_ratio_post_over_prior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>prob_class1</td>
+      <td>0.021690</td>
+      <td>0.285892</td>
+      <td>0.075867</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>asc_train</td>
+      <td>0.061106</td>
+      <td>5.098240</td>
+      <td>0.011986</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>b_cost</td>
+      <td>0.061613</td>
+      <td>5.009704</td>
+      <td>0.012299</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>asc_car</td>
+      <td>0.050898</td>
+      <td>4.978121</td>
+      <td>0.010224</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>b_time</td>
+      <td>0.175993</td>
+      <td>5.012689</td>
+      <td>0.035110</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1>Simulated quantities</h1>
+<table class="dataframe table table-striped table-sm">
+  <thead>
+    <tr style="text-align: left;">
+      <th>group</th>
+      <th>variable</th>
+      <th>dims</th>
+      <th>shape</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>constant_data</td>
+      <td>CAR_AV_SP</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CAR_CO_SCALED</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CAR_TT_SCALED</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CHOICE</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>SM_AV</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>SM_COST_SCALED</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>SM_TT_SCALED</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TRAIN_AV_SP</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TRAIN_COST_SCALED</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TRAIN_TT_SCALED</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>log_likelihood</td>
+      <td>_choice</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(4, 2000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_cost</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_time</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>log_like</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(4, 2000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>prob_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car</td>
+      <td>(chain, draw)</td>
+      <td>(1, 2000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train</td>
+      <td>(chain, draw)</td>
+      <td>(1, 2000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_cost</td>
+      <td>(chain, draw)</td>
+      <td>(1, 2000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_time</td>
+      <td>(chain, draw)</td>
+      <td>(1, 2000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>log_like</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(1, 2000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>prob_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>acceptance_rate</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>diverging</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>energy</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>lp</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>n_steps</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>step_size</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>tree_depth</td>
+      <td>(chain, draw)</td>
+      <td>(4, 2000)</td>
+    </tr>
+  </tbody>
+</table>
+<h1>Diagnostics</h1>
+<p class="biostyle">The plots below summarize MCMC diagnostics. Look for well-mixed chains, agreement across chains, and weak lag dependence. </p><table border="0">
+<tr class=biostyle><td colspan=2><p><strong>Trace</strong>: per-chain draws vs iteration and marginal density. Good: chains overlap, no trends or stickiness, rapid mixing. Suspicious: chains at different levels, strong drifts, long flat stretches, sudden jumps.</p></td></tr>
+<tr class=biostyle><td><strong>Trace</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b07_discrete_mixture_figs/trace.png" alt="trace"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Rank plot</strong>: rank-normalized samples by chain. Good: chains produce nearly uniform, overlapping ranks. Suspicious: U-shapes, spikes, or chains with very different rank distributions (poor mixing or non-stationarity).</p></td></tr>
+<tr class=biostyle><td><strong>Rank plot</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b07_discrete_mixture_figs/rank.png" alt="rank"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Energy</strong>: HMC energy diagnostics and BFMI. Good: similar energy distributions across chains, no extreme tails; BFMI not flagged. Suspicious: clearly separated energy histograms across chains or very low BFMI (e.g., &lt; 0.3) indicating poor exploration.</p></td></tr>
+<tr class=biostyle><td><strong>Energy</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b07_discrete_mixture_figs/energy.png" alt="energy"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Autocorrelation</strong>: lag correlation within chains. Good: autocorrelation decays quickly toward 0 within tens of lags. Suspicious: long positive tails (slow decay), high values at large lags, or periodic patterns (slow mixing).</p></td></tr>
+<tr class=biostyle><td><strong>Autocorrelation</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b07_discrete_mixture_figs/autocorr.png" alt="autocorr"></td></tr>
+</table>
+
+</body>
+</html>
