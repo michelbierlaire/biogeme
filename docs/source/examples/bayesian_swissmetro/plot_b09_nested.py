@@ -12,7 +12,7 @@ Mon Nov 03 2025, 20:02:56
 from IPython.core.display_functions import display
 
 from biogeme import biogeme_logging as blog
-from biogeme.bayesian_estimation import get_pandas_estimated_parameters
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import lognested
