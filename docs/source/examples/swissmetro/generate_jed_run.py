@@ -1,3 +1,22 @@
+"""Generate SLURM `.run` scripts for Biogeme experiments.
+
+This script scans the current directory for Python files whose names start
+with ``plot_`` and automatically generates corresponding SLURM ``.run``
+submission scripts for each of them.
+
+Each generated ``.run`` file:
+- executes the matching Python script,
+- uses a predefined SLURM template (CPU-based, OpenBLAS, JAX/XLA enabled), and
+- writes both stdout and stderr to a log file named ``<script>_slurm.out``.
+
+The script is intended to simplify batch submission of multiple Biogeme
+experiments on the JED cluster while ensuring consistent resource requests
+and runtime settings.
+
+Michel Bierlaire
+Thu Dec 25 2025, 10:01:15
+"""
+
 #!/usr/bin/env python3
 import os
 from pathlib import Path
@@ -45,6 +64,13 @@ def is_valid_script(path: Path) -> bool:
 
 
 def main():
+    """Generate one SLURM `.run` file per eligible Python script.
+
+    The function scans the base directory for Python scripts whose names start
+    with ``plot_`` (excluding this file), generates a corresponding ``.run``
+    file using the SLURM template, makes it executable, and reports the
+    generated filenames.
+    """
     py_files = [f for f in BASE_DIR.iterdir() if is_valid_script(f)]
 
     if not py_files:

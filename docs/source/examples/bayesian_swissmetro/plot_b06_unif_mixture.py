@@ -10,14 +10,12 @@ Thu Nov 20 2025, 11:30:45
 
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import BayesianResults
+from IPython.core.display_functions import display
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, DistributedParameter, Draws
 from biogeme.models import loglogit
-from biogeme.results_processing import get_pandas_estimated_parameters
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
