@@ -143,7 +143,7 @@ def create_rst_structure(src_dir: str, dst_dir: str) -> None:
     the_parameters.dump_file(file_name=biogeme_toml)
 
     exclude_dirs = ['.mypy_cache', 'biogeme.egg-info', '__pycache__']
-    exclude_files = ['__init__.py', 'logging_tmp.py']
+    exclude_files = ['__init__.py', 'logging_tmp.py', 'generate_jed_run.py']
 
     # Create first the auto-modules
     for root, dirs, files in os.walk(src_dir):
