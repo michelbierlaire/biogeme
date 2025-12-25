@@ -1,7 +1,7 @@
 """
 
-Hybrid choice model — Bayesian estimation
-=========================================
+6. Hybrid choice model - Bayesian estimation
+============================================
 
 This script estimates the **full hybrid choice model**, combining:
 
