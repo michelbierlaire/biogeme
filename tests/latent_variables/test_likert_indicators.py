@@ -40,6 +40,7 @@ def test_get_thresholds_raises_when_positive_factory_missing():
         symmetric=True,
         categories=[-1, 0, 1],
         neutral_labels=[0],
+        scale_normalization="I1",
         positive_parameter_factory=None,
     )
     with pytest.raises(ValueError, match="Positive parameter factory is undefined"):
@@ -53,6 +54,7 @@ def test_get_thresholds_raises_for_too_few_categories():
         symmetric=True,
         categories=[0],  # <2
         neutral_labels=[0],
+        scale_normalization="I1",
         positive_parameter_factory=pf,
     )
     with pytest.raises(
@@ -77,6 +79,7 @@ def test_get_thresholds_symmetric_builds_expected_structure(
         symmetric=True,
         categories=categories,
         neutral_labels=[0],
+        scale_normalization="I1",
         positive_parameter_factory=pf,
     )
 
@@ -114,6 +117,7 @@ def test_get_thresholds_monotone_with_fixed_first_cutpoint():
         symmetric=False,
         categories=[1, 2, 3, 4, 5],  # K=5 => n_tau=4
         neutral_labels=[],
+        scale_normalization="I1",
         positive_parameter_factory=pf,
         fix_first_cut_point_for_non_symmetric_thresholds=-1.5,
     )
@@ -142,6 +146,7 @@ def test_get_thresholds_monotone_with_free_first_cutpoint_is_beta_then_numeric()
         symmetric=False,
         categories=[0, 1, 2, 3],  # K=4 => n_tau=3
         neutral_labels=[],
+        scale_normalization="I1",
         positive_parameter_factory=pf,
         fix_first_cut_point_for_non_symmetric_thresholds=None,
     )
@@ -166,6 +171,7 @@ def test_internal_length_guard_raises_runtime_error(monkeypatch):
         symmetric=True,
         categories=[-1, 0, 1],  # K=3 => n_tau=2
         neutral_labels=[0],
+        scale_normalization="I1",
         positive_parameter_factory=pf,
     )
 
