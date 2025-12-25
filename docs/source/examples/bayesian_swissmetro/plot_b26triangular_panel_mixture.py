@@ -14,10 +14,9 @@ Tue Nov 18 2025, 18:31:04
 
 from functools import partial
 
+import biogeme.biogeme_logging as blog
 import pymc as pm
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
 from biogeme.bayesian_estimation import BayesianResults
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
@@ -100,22 +99,33 @@ b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
 # The constants are distributed across individuals, to address serial correlation.
+# In a panel setting, the corresponding draws are generated at the individual level.
+# Wrapping them in `DistributedParameter` ensures they are expanded consistently
+# when combined with observation-level variables.
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_car_s = Beta('asc_car_s', 1, None, None, 0)
-asc_car_rnd = asc_car + asc_car_s * Draws(
-    'asc_car_rnd', 'TRIANGULAR', dict_of_distributions=DISTRIBUTIONS
+asc_car_rnd = DistributedParameter(
+    'asc_car_rnd',
+    asc_car
+    + asc_car_s
+    * Draws('asc_car_eps', 'TRIANGULAR', dict_of_distributions=DISTRIBUTIONS),
 )
 
 asc_train = Beta('asc_train', 0, None, None, 0)
 asc_train_s = Beta('asc_train_s', 1, None, None, 0)
-asc_train_rnd = asc_train + asc_train_s * Draws(
-    'asc_train_rnd', 'TRIANGULAR', dict_of_distributions=DISTRIBUTIONS
+asc_train_rnd = DistributedParameter(
+    'asc_train_rnd',
+    asc_train
+    + asc_train_s
+    * Draws('asc_train_eps', 'TRIANGULAR', dict_of_distributions=DISTRIBUTIONS),
 )
 
 asc_sm = Beta('asc_sm', 0, None, None, 1)
 asc_sm_s = Beta('asc_sm_s', 1, None, None, 0)
-asc_sm_rnd = asc_sm + asc_sm_s * Draws(
-    'asc_sm_rnd', 'TRIANGULAR', dict_of_distributions=DISTRIBUTIONS
+asc_sm_rnd = DistributedParameter(
+    'asc_sm_rnd',
+    asc_sm
+    + asc_sm_s * Draws('asc_sm_eps', 'TRIANGULAR', dict_of_distributions=DISTRIBUTIONS),
 )
 
 # %%
