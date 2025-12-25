@@ -15,14 +15,16 @@ Sat Jun 21 2025, 16:50:19
 
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import logcnl
 from biogeme.nests import NestsForCrossNestedLogit, OneNestForCrossNestedLogit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
