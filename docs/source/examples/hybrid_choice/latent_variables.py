@@ -1,4 +1,36 @@
-# Latent variable for the car centric attitude
+"""
+
+Latent variables
+================
+
+Definitions of latent variables used in the hybrid choice model.
+
+This module centralizes the specification of latent variables that enter the
+hybrid choice (MIMIC) model. For each latent variable, it defines:
+
+- the name of the latent variable,
+- the list of explanatory variables entering its structural equation, and
+- the set of Likert-type indicators used in its measurement equations.
+
+The goal is to keep all latent-variable metadata in a single, transparent
+location, making the model specification easier to read, maintain, and
+modify.
+
+The variables defined here are imported by higher-level model construction
+code and should therefore remain lightweight and declarative (no model logic
+is implemented in this file).
+
+Michel Bierlaire
+Thu Dec 25 2025, 08:13:19
+"""
+
+"""Latent variable representing the car-centric attitude.
+
+This latent variable captures preferences and attitudes related to car
+ownership and car-oriented lifestyles. It is explained by socio-demographic
+and background variables and measured using a set of mobility, lifestyle,
+and environment-related Likert indicators.
+"""
 car_explanatory_variables: list[str] = [
     'high_education',
     'top_manager',
@@ -22,7 +54,13 @@ car_likert_indicators: set[str] = {
     'NbCar',
 }
 
-# Latent variable for the environmental attitude
+"""Latent variable representing the environmental attitude.
+
+This latent variable captures environmental awareness and sensitivity. Its
+structural equation depends on socio-demographic and residential background
+variables, and it is measured using a set of environment-, mobility-, and
+lifestyle-related Likert indicators.
+"""
 environment_explanatory_variables: list[str] = [
     'childSuburb',
     'ScaledIncome',
@@ -42,5 +80,4 @@ environment_likert_indicators: set[str] = {
     'Envir06',
     'Mobil12',
     'LifSty01',
-    'NbCar',
 }

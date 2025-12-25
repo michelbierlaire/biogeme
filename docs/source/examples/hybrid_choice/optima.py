@@ -1,19 +1,32 @@
 """
 .. _optima_data:
 
-Data preparation for Optima
-===========================
+Data preparation
+================
 
-Prepare data for the Optima case study.
+Optima data preparation for Biogeme.
 
-:author: Michel Bierlaire
-:date: Wed Apr 12 20:52:37 2023
+This module reads the Optima case-study dataset from the tab-separated file
+``optima.dat`` and prepares a :class:`biogeme.database.Database` object.
 
+The preparation consists of:
+
+- **Filtering / cleaning**: remove observations that are incompatible with the
+  modeling assumptions (invalid choices, non-workers, tours with a single trip,
+  and observations with zero travel times or distance).
+- **Feature engineering**: create derived variables used later in the choice and
+  latent-variable specifications (e.g., normalized weights, categories, scaled
+  variables).
+- **Convenience exports**: expose a large set of
+  :class:`biogeme.expressions.Variable` objects corresponding to columns in the
+  dataset so that other modules can simply import them from here.
+
+Michel Bierlaire
+2023-04-12
 """
 
-import pandas as pd
-
 import biogeme.database as db
+import pandas as pd
 from biogeme.expressions import Variable
 
 data_file_path = 'optima.dat'

@@ -1,6 +1,45 @@
+"""
+
+Likert indicators
+=================
+
+Definition of Likert indicators and Likert scale types used in the hybrid choice model.
+
+This module centralizes the specification of all Likert-type survey indicators
+used in the measurement equations of the hybrid choice (MIMIC) model, together
+with the definition of the corresponding Likert scale types.
+
+It contains two main objects:
+
+- ``likert_indicators``: a list of :class:`LikertIndicator` objects, each
+  corresponding to a survey question (statement) and its associated metadata.
+- ``likert_types``: a list of :class:`LikertType` objects, defining how different
+  types of indicators are mapped to ordered categories and threshold
+  parameterizations.
+
+The content of this file is purely declarative: no estimation or model logic is
+implemented here. The definitions are imported by higher-level model-building
+code.
+
+Michel Bierlaire
+Thu Dec 25 2025, 08:14:12
+"""
+
 from biogeme.latent_variables import LikertIndicator
 from biogeme.latent_variables.likert_indicators import LikertType
 
+"""List of Likert indicators used in the model.
+
+Each entry corresponds to one survey item and specifies:
+
+- a unique indicator name,
+- the text of the statement presented to respondents,
+- the indicator type, which determines the associated Likert scale
+  specification defined in ``likert_types``.
+
+The indicators cover environmental attitudes, mobility-related perceptions,
+lifestyle preferences, and the number of cars in the household.
+"""
 likert_indicators = [
     LikertIndicator(
         name='Envir01',
@@ -79,12 +118,25 @@ likert_indicators = [
     ),
 ]
 
+"""Definition of Likert scale types and their threshold structures.
+
+Each :class:`LikertType` defines how responses for a given indicator type are
+modeled, including:
+
+- whether the thresholds are symmetric or non-symmetric,
+- the ordered response categories,
+- labels corresponding to neutral or missing responses,
+- normalization rules for the scale parameters.
+
+These specifications are shared across all indicators of the same type.
+"""
 likert_types = [
     LikertType(
         type='likert',
         symmetric=True,
         categories=[1, 2, 3, 4, 5],
         neutral_labels=[6, -1],
+        scale_normalization='Envir01',
     ),
     LikertType(
         type='cars',
@@ -92,5 +144,6 @@ likert_types = [
         categories=[0, 1, 2, 3],
         neutral_labels=[-1],
         fix_first_cut_point_for_non_symmetric_thresholds=0.0,
+        scale_normalization='NbCar',
     ),
 ]

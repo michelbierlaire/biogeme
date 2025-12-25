@@ -1,8 +1,18 @@
-"""Choice model only. Maximum likelihood estimation
+"""
+Choice model only — maximum likelihood estimation
+=================================================
+
+This script runs a **standard discrete choice model** without any latent
+variables, estimated by **maximum likelihood** using Biogeme.
+
+It serves as a baseline specification against which hybrid choice models
+(with latent variables and measurement equations) can be compared.
+
+The configuration is defined locally in this file and passed to the generic
+estimation pipeline via :func:`estimate_model`.
 
 Michel Bierlaire
-Tue Dec 23 2025, 14:52:48
-
+Thu Dec 25 2025, 08:24:06
 """
 
 import biogeme.biogeme_logging as blog

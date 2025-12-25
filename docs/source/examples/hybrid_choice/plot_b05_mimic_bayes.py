@@ -1,7 +1,23 @@
-"""MIMIC model. Bayesian estimation
+"""
+MIMIC model — Bayesian estimation
+=================================
+
+This script estimates a **pure MIMIC model** (latent-variable structural and
+measurement equations only) using **Bayesian estimation** in Biogeme, without
+an associated discrete choice model.
+
+It is primarily intended to:
+
+- assess identification and normalization under Bayesian inference,
+- inspect posterior distributions of latent-variable parameters, and
+- provide a Bayesian benchmark for comparison with the maximum likelihood
+  MIMIC specification.
+
+The configuration is defined locally in this file and passed to the generic
+estimation pipeline via :func:`estimate_model`.
 
 Michel Bierlaire
-Tue Dec 23 2025, 14:56:34
+Thu Dec 25 2025, 08:27:04
 """
 
 import biogeme.biogeme_logging as blog

@@ -1,4 +1,24 @@
 #!/usr/bin/env python3
+"""
+
+Prepare for server
+==================
+
+Generate SLURM .run job scripts for batch execution on the JED cluster.
+
+This script scans the current directory for Python files whose names start
+with ``plot_`` and automatically generates corresponding ``.run`` SLURM job
+scripts. Each generated job script executes the Python file using ``srun``
+with a predefined set of SLURM directives suitable for long Bayesian
+computations on the JED cluster.
+
+The goal is to avoid manually writing and maintaining multiple SLURM job
+files when running a collection of similar Python scripts.
+
+Michel Bierlaire
+Thu Dec 25 2025, 08:13:11
+"""
+
 import os
 from pathlib import Path
 
@@ -28,7 +48,15 @@ echo FINISHED AT `date`
 
 
 def is_valid_script(path: Path) -> bool:
-    """Return True if the file should have a .run job script generated."""
+    """Return True if the file should have a ``.run`` job script generated.
+
+    A file is considered valid if it:
+
+    - is a regular file,
+    - has the ``.py`` extension,
+    - starts with the prefix ``plot_``, and
+    - is not this script itself.
+    """
     return (
         path.is_file()
         and path.suffix == ".py"
@@ -38,6 +66,20 @@ def is_valid_script(path: Path) -> bool:
 
 
 def main():
+    """Generate one SLURM ``.run`` file per eligible Python script.
+
+    The function:
+
+    - scans the current directory for Python files matching the naming
+      convention defined in :func:`is_valid_script`,
+    - fills the SLURM template with script-specific parameters (job name,
+      log files, working directory),
+    - writes the resulting ``.run`` files next to the original scripts, and
+    - marks them as executable.
+
+    If no matching Python files are found, a short message is printed and
+    the function exits without creating any job scripts.
+    """
     py_files = [f for f in BASE_DIR.iterdir() if is_valid_script(f)]
 
     if not py_files:

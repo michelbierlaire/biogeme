@@ -1,8 +1,22 @@
-"""MIMIC model. Maximum likelihood estimation
+"""
+MIMIC model — maximum likelihood estimation
+===========================================
+
+This script estimates a **pure MIMIC model** (measurement and structural
+components only) using **maximum likelihood**, without an associated discrete
+choice model.
+
+It is mainly intended to:
+
+- test and validate the latent-variable specification,
+- assess identification and normalization issues, and
+- serve as a building block for hybrid choice models.
+
+The model configuration is defined locally in this file and passed to the
+generic estimation pipeline via :func:`estimate_model`.
 
 Michel Bierlaire
-Tue Dec 23 2025, 14:53:49
-
+Thu Dec 25 2025, 08:24:35
 """
 
 import biogeme.biogeme_logging as blog

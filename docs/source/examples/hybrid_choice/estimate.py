@@ -1,3 +1,32 @@
+"""
+
+Model estimation
+================
+
+Estimation pipeline for discrete and hybrid choice models.
+
+This module defines the high-level logic used to construct and estimate
+choice models and hybrid choice (MIMIC) models using Biogeme. The behavior
+of the pipeline is fully controlled by a :class:`Config` object, allowing
+the same code to be reused across multiple experimental configurations.
+
+Depending on the configuration, the module can:
+
+- estimate a standard discrete choice model without latent variables,
+- estimate a hybrid choice model with two latent variables and measurement
+  equations,
+- perform either maximum likelihood or Bayesian estimation,
+- optionally combine the choice model likelihood with the measurement
+  likelihood.
+
+The module is intentionally declarative: model structure is assembled here,
+while data handling, estimation, and result post-processing are delegated
+to specialized helper modules.
+
+Michel Bierlaire
+Thu Dec 25 2025, 08:13:25
+"""
+
 from IPython.core.display_functions import display
 from biogeme.bayesian_estimation import (
     get_pandas_estimated_parameters as get_pandas_bayesian_estimated_parameters,
@@ -14,13 +43,36 @@ from choice_model import generate_choice_model
 from config import (
     Config,
 )
-from latent_variables import car_name, env_name
 from mimic import generate_mimic_model
 from optima import Choice, read_data
 from read_or_estimate import read_or_estimate
 
 
 def generate_expression(config: Config) -> Expression:
+    """Generate the likelihood expression to be estimated.
+
+    This function constructs the Biogeme expression corresponding to the
+    selected model configuration.
+
+    - If ``config.latent_variables == 'zero'``, only the discrete choice
+      model likelihood is returned.
+    - Otherwise, the likelihood from the latent-variable measurement
+      equations is constructed and optionally combined with the choice
+      model likelihood.
+
+    The expression is wrapped differently depending on the estimation
+    paradigm:
+
+    - Bayesian estimation uses log-likelihood expressions (``loglogit`` and
+      log measurement equations).
+    - Maximum likelihood estimation uses Monte Carlo integration when
+      required.
+
+    :param config: Configuration object controlling model structure and
+        estimation mode.
+    :return: A Biogeme expression representing the full likelihood to be
+        estimated.
+    """
     utilities = generate_choice_model(config=config)
 
     # If there are no latent variables, return only the choice model.
@@ -32,8 +84,6 @@ def generate_expression(config: Config) -> Expression:
         )
 
     mimic = generate_mimic_model(config=config)
-    car_centric_attitude = mimic.get_latent_variable(name=car_name)
-    environmental_attitude = mimic.get_latent_variable(name=env_name)
 
     # Build the "inside" of the likelihood once
     if config.estimation == "bayes":
@@ -50,6 +100,20 @@ def generate_expression(config: Config) -> Expression:
 
 
 def estimate_model(config: Config) -> None:
+    """Estimate the model specified by the given configuration.
+
+    This function:
+
+    1. Builds the likelihood expression using :func:`generate_expression`.
+    2. Creates and configures a :class:`BIOGEME` object.
+    3. Either reads existing estimation results from disk or runs a new
+       estimation.
+    4. Prints a short textual summary and displays the estimated parameters
+       in a pandas table.
+
+    :param config: Configuration object defining the model specification,
+        estimation method, and numerical settings.
+    """
     the_expression = generate_expression(config=config)
     estimation_mode = (
         EstimationMode.BAYESIAN

@@ -1,8 +1,21 @@
-"""Choice model only. Bayesian estimation
+"""
+Choice model only — Bayesian estimation
+=======================================
+
+This script estimates a **standard discrete choice model** without any latent
+variables using **Bayesian estimation** in Biogeme.
+
+It serves as the Bayesian counterpart of the choice-only maximum likelihood
+specification and provides a baseline for comparison with:
+
+- the Bayesian hybrid choice model, and
+- the corresponding maximum likelihood estimates.
+
+The configuration is defined locally in this file and passed to the generic
+estimation pipeline via :func:`estimate_model`.
 
 Michel Bierlaire
-Tue Dec 23 2025, 14:56:09
-
+Thu Dec 25 2025, 08:27:04
 """
 
 import biogeme.biogeme_logging as blog

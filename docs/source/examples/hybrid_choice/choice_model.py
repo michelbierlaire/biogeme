@@ -1,3 +1,38 @@
+"""
+
+Choice model
+============
+
+Choice model specification with optional latent-variable interactions.
+
+This module defines the utility functions for a discrete choice model that can
+optionally incorporate latent variables estimated in a hybrid choice (MIMIC)
+framework.
+
+The behavior of the choice model is controlled by the `Config` object, in
+particular by the attribute `config.latent_variables`, which can take two
+values:
+
+- ``"zero"``: no latent variables are used; the choice model reduces to a
+  standard discrete choice model with observed attributes only.
+- ``"two"``: two latent variables (car-centric and environmental attitudes)
+  enter the utilities through interaction terms.
+
+Latent variables affect the model in two ways:
+
+1. Multiplicative effects on time coefficients, where the base time sensitivity
+   is scaled by an exponential function of the latent variable(s).
+2. Additive alternative-specific constants that shift utilities depending on
+   the latent attitudes.
+
+This module only constructs the systematic utility functions. The likelihood
+construction (logit, Monte Carlo integration, Bayesian or maximum-likelihood
+wrapping) is handled elsewhere in the codebase.
+
+Michel Bierlaire
+Thu Dec 25 2025, 08:07:33
+"""
+
 from biogeme.expressions import Beta, Expression, Numeric, exp
 
 from config import Config
@@ -20,15 +55,18 @@ def generate_choice_model(config: Config) -> dict[int, Expression]:
     The behavior depends on the number of latent variables requested:
 
     - ``config.latent_variables == 'zero'``: no latent variables enter the choice model.
-    - ``config.latent_variables == 'one'``: only the car-centric latent variable enters.
     - ``config.latent_variables == 'two'``: both car-centric and environmental latent variables enter.
 
     Note: this function returns only the utilities. The estimation / likelihood wrapping
     is handled elsewhere.
     """
+    if config.latent_variables not in {"zero", "two"}:
+        raise ValueError(
+            f"config.latent_variables must be 'zero' or 'two', got {config.latent_variables!r}."
+        )
     include_latent_variables = config.latent_variables == "two"
 
-    # Latent variables can be: zero, one (car-centric only), or two (car-centric + environmental).
+    # Latent variables can be: zero (none) or two (car-centric + environmental).
     car_centric_attitude = None
     environmental_attitude = None
 

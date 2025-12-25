@@ -1,3 +1,36 @@
+"""
+
+MIMIC model
+===========
+
+Construction of the MIMIC (latent-variable) component of the hybrid choice model.
+
+This module defines a helper function that builds and returns an
+:class:`OrderedMimic` object, fully configured according to a given
+:class:`Config`.
+
+The MIMIC model includes two latent variables:
+
+- a car-centric attitude latent variable, and
+- an environmental attitude latent variable.
+
+For each latent variable, the module specifies:
+
+- the structural equation (explanatory variables),
+- the associated Likert-type indicators, and
+- the normalization used for identification.
+
+The resulting MIMIC model is used by higher-level code to construct
+measurement equations and to combine them with the choice model, under
+either maximum likelihood or Bayesian estimation.
+
+This file is intentionally limited to model specification; it contains no
+data handling or estimation logic.
+
+Michel Bierlaire
+Thu Dec 25 2025, 08:15:26
+"""
+
 from biogeme.latent_variables import (
     EstimationMode,
     LatentVariable,
@@ -19,6 +52,21 @@ from likert_indicators import likert_indicators, likert_types
 
 
 def generate_mimic_model(config: Config):
+    """Generate and return a configured MIMIC model.
+
+    The estimation mode (Bayesian or maximum likelihood) is selected based on
+    ``config.estimation``. The function then:
+
+    1. Creates an :class:`OrderedMimic` container with the appropriate
+       estimation mode and Likert indicator definitions.
+    2. Defines the car-centric and environmental latent variables, including
+       their structural equations, indicators, and normalizations.
+    3. Registers both latent variables with the MIMIC model.
+
+    :param config: Global configuration object controlling the estimation
+        paradigm.
+    :return: A fully specified :class:`OrderedMimic` instance.
+    """
     bayesian_estimation = config.estimation == "bayes"
     estimation_mode = (
         EstimationMode.BAYESIAN
