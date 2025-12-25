@@ -79,11 +79,16 @@ class DummyLikertType:
     """Minimal LikertType substitute."""
 
     def __init__(
-        self, type_label: str, categories: list[int], neutral_labels: list[int]
+        self,
+        type_label: str,
+        categories: list[int],
+        neutral_labels: list[int],
+        scale_normalization: str,
     ):
         self.type = type_label
         self.categories = categories
         self.neutral_labels = neutral_labels
+        self.scale_normalization = scale_normalization
         self.threshold_calls = 0
 
     def get_thresholds(self) -> list[Expression]:
@@ -119,7 +124,12 @@ def test_ordered_model_happy_path_and_normalization_effect_on_cutpoints():
     ind2 = DummyLikertIndicator(
         name="I2", type_label="T", intercept_value=-0.2, scale_value=2.0
     )
-    lt = DummyLikertType(type_label="T", categories=[1, 2, 3], neutral_labels=[2])
+    lt = DummyLikertType(
+        type_label="T",
+        categories=[1, 2, 3],
+        neutral_labels=[2],
+        scale_normalization="I1",
+    )
 
     ordered_ll = _ordered_model(
         latent_variables=[lv1],
@@ -162,7 +172,9 @@ def test_ordered_model_raises_for_unknown_type():
     ind1 = DummyLikertIndicator(
         name="I1", type_label="UNKNOWN", intercept_value=0.0, scale_value=3.0
     )
-    lt = DummyLikertType(type_label="T", categories=[1, 2], neutral_labels=[])
+    lt = DummyLikertType(
+        type_label="T", categories=[1, 2], neutral_labels=[], scale_normalization="I1"
+    )
 
     with pytest.raises(ValueError, match=r"Unknown type for indicator I1: UNKNOWN"):
         _ordered_model(
@@ -183,7 +195,12 @@ def test_ordered_model_raises_if_indicator_sets_inconsistent():
     ind1 = DummyLikertIndicator(
         name="I1", type_label="T", intercept_value=0.0, scale_value=2.0
     )
-    lt = DummyLikertType(type_label="T", categories=[1, 2, 3], neutral_labels=[2])
+    lt = DummyLikertType(
+        type_label="T",
+        categories=[1, 2, 3],
+        neutral_labels=[2],
+        scale_normalization="I1",
+    )
 
     with pytest.raises(Exception):
         _ordered_model(
@@ -203,7 +220,12 @@ def test_measurement_equations_jax_runs_through_multipleproduct():
     ind1 = DummyLikertIndicator(
         name="I1", type_label="T", intercept_value=0.0, scale_value=2.0
     )
-    lt = DummyLikertType(type_label="T", categories=[1, 2, 3], neutral_labels=[2])
+    lt = DummyLikertType(
+        type_label="T",
+        categories=[1, 2, 3],
+        neutral_labels=[2],
+        scale_normalization="I1",
+    )
 
     expr = measurement_equations_jax(
         latent_variables=[lv1],
@@ -224,7 +246,12 @@ def test_log_measurement_equations_jax_runs_through_multiplesum_and_log():
     ind1 = DummyLikertIndicator(
         name="I1", type_label="T", intercept_value=0.0, scale_value=2.0
     )
-    lt = DummyLikertType(type_label="T", categories=[1, 2, 3], neutral_labels=[2])
+    lt = DummyLikertType(
+        type_label="T",
+        categories=[1, 2, 3],
+        neutral_labels=[2],
+        scale_normalization="I1",
+    )
 
     expr = log_measurement_equations_jax(
         latent_variables=[lv1],
