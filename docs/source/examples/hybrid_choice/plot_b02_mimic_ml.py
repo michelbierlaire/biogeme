@@ -1,6 +1,6 @@
 """
-MIMIC model — maximum likelihood estimation
-===========================================
+2. MIMIC model - maximum likelihood estimation
+==============================================
 
 This script estimates a **pure MIMIC model** (measurement and structural
 components only) using **maximum likelihood**, without an associated discrete
