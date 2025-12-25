@@ -1,6 +1,6 @@
 """
-Choice model only — maximum likelihood estimation
-=================================================
+1. Choice model only - maximum likelihood estimation
+====================================================
 
 This script runs a **standard discrete choice model** without any latent
 variables, estimated by **maximum likelihood** using Biogeme.
