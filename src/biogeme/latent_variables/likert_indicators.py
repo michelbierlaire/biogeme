@@ -65,6 +65,7 @@ class LikertType:
     symmetric: bool
     categories: list[int]
     neutral_labels: list[int]
+    scale_normalization: str
     sigma_factory: SigmaFactory | None = None
     positive_parameter_factory: PositiveParameterFactory | None = None
     fix_first_cut_point_for_non_symmetric_thresholds: float | None = None
