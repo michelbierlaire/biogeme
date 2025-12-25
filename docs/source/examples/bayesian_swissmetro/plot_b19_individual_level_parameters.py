@@ -16,7 +16,7 @@ from biogeme.bayesian_estimation import BayesianResults
 
 # %%
 # Retrieve estimation results
-result_file_name = 'saved_results/b05normal_mixture.nc'
+result_file_name = 'saved_results/b05_normal_mixture.nc'
 the_estimation_results = BayesianResults.from_netcdf(filename=result_file_name)
 
 # %%
