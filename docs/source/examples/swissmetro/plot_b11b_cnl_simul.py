@@ -12,7 +12,6 @@ Sat Jun 21 2025, 16:53:57
 import sys
 
 from IPython.core.display_functions import display
-
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Derive
 from biogeme.models import cnl
@@ -113,10 +112,10 @@ nests = NestsForCrossNestedLogit(
 # %%
 # Read the estimation results from the pickle file.
 try:
-    results = EstimationResults.from_yaml_file(filename='saved_results/b11cnl.yaml')
+    results = EstimationResults.from_yaml_file(filename='saved_results/b11a_cnl.yaml')
 except FileNotFoundError:
     print(
-        'Run first the script b11cnl.py in order to generate the file b11cnl.yaml, and move it to the directory '
+        'Run first the script plot_b11a_cnl.py in order to generate the file b11a_cnl.yaml, and move it to the directory '
         'saved_results.'
     )
     sys.exit()
