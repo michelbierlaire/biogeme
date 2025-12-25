@@ -1,6 +1,6 @@
 """
-MIMIC model — Bayesian estimation
-=================================
+5. MIMIC model - Bayesian estimation
+====================================
 
 This script estimates a **pure MIMIC model** (latent-variable structural and
 measurement equations only) using **Bayesian estimation** in Biogeme, without
