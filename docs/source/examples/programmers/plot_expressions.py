@@ -13,11 +13,10 @@ Michel Bierlaire
 Sun Jun 29 2025, 07:12:52
 """
 
+import biogeme.biogeme_logging as blog
 import numpy as np
 import pandas as pd
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
@@ -56,6 +55,7 @@ from biogeme.jax_calculator.single_formula import (
     calculate_single_formula_from_expression,
     get_value_and_derivatives,
 )
+from biogeme.model_elements import RegularAdapter
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_text
 
@@ -583,9 +583,10 @@ display(pd.DataFrame(value_and_derivatives.bhhh))
 # parameters as argument, and provides a tuple with the value of the
 # expression and its derivatives. .
 
+the_database_adapter = RegularAdapter(database=simple_database)
 the_function: CallableExpression = function_from_expression(
     expression=expr1,
-    database=simple_database,
+    adapter=the_database_adapter,
     numerically_safe=False,
     use_jit=True,
     the_betas={},
@@ -610,7 +611,7 @@ display(f'Value of the BHHH matrix: {result.bhhh}')
 # %% If the names of the variables are needed, the parameter `named_results` must be set to True
 the_function: CallableExpression = function_from_expression(
     expression=expr1,
-    database=simple_database,
+    adapter=the_database_adapter,
     numerically_safe=False,
     the_betas={},
     named_output=True,
