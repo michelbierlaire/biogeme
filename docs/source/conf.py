@@ -5,9 +5,8 @@
 import os
 import sys
 
-from sphinx_gallery.sorting import FileNameSortKey
-
 from biogeme.version import __version__
+from sphinx_gallery.sorting import FileNameSortKey
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -58,6 +57,7 @@ exclude_patterns = [
     "setup.py",
     "flycheck*",
     "verify_scripts.py",
+    'generate_jed_run.py',
 ]
 
 # Set the behavior for type hints. Options are "none", "description", or "signature".
