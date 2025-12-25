@@ -1,0 +1,113 @@
+# File b03_scale.yaml has automatically been generated on 2025-12-25 13:28:14.099806
+# biogeme 3.3.3a0 [2025-12-25]
+
+beta_names:
+- scale_not_group3
+- scale_group3
+- asc_train
+- b_time
+- asc_car
+beta_values:
+- 0.35735029074038976
+- 1.4929757852483019
+- -1.2510367216352956
+- -1.0478200782379041
+- -0.042906722726911595
+bhhh:
+- - 2511.5691225453784
+  - 0.0
+  - -342.30894897564417
+  - -393.54973375780696
+  - 1.0956021606608104
+- - 0.0
+  - 1107.415013000239
+  - -279.95666409608276
+  - -1093.761079239638
+  - -207.29250125031814
+- - -342.30894897564417
+  - -279.95666409608276
+  - 321.710248958441
+  - 183.93657670121206
+  - -86.3798955386254
+- - -393.54973375780696
+  - -1093.761079239638
+  - 183.93657670121206
+  - 1848.9064424898274
+  - 784.9682019877239
+- - 1.0956021606608104
+  - -207.29250125031814
+  - -86.3798955386254
+  - 784.9682019877239
+  - 1700.1838230247577
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -4976.690601779127
+gradient:
+- 0.019746949703375094
+- 0.02313835833365374
+- -0.029036871697812217
+- -0.03689259417791391
+- -0.009933815352020758
+hessian:
+- - -1936.5116270153717
+  - 0.0
+  - 395.038562987398
+  - 163.2977723883527
+  - -350.61286916356835
+- - 0.0
+  - -807.490668304444
+  - 341.05032591350624
+  - 614.7035150399121
+  - 240.71515075866625
+- - 395.038562987398
+  - 341.05032591350624
+  - -363.77163561327006
+  - -217.20542473717356
+  - 117.71602273633535
+- - 163.29777238835268
+  - 614.7035150399121
+  - -217.20542473717353
+  - -1078.6085918245772
+  - -843.89460927527
+- - -350.61286916356835
+  - 240.71515075866625
+  - 117.71602273633536
+  - -843.89460927527
+  - -1731.1760606553435
+initial_log_likelihood: -7034.631006967598
+lower_bounds:
+- 0.001
+- 0.001
+- null
+- null
+- null
+model_name: b03_scale
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 5.5e-06 <= 6.1e-06
+  Number of function evaluations: 20
+  Number of gradient evaluations: 13
+  Number of hessian evaluations: 6
+  Number of iterations: '7'
+  Optimization time: '0.542031'
+  Proportion of Hessian calculation: 6/6 = 100.0%
+  Relative gradient: 5.495213733259435e-06
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: Illustrates a moneymetric and heteroscedastic specification. A different
+  scale is associated with different segments of the sample. The utility function
+  is expressed in CHF.
