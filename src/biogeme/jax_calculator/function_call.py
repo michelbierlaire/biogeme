@@ -12,13 +12,12 @@ from __future__ import annotations
 from typing import Protocol
 
 import numpy as np
-
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
+
 from .single_formula import CompiledFormulaEvaluator
 from ..constants import LOG_LIKE
-from ..database import Database
 from ..expressions import Expression
-from ..model_elements import ModelElements
+from ..model_elements import ModelElements, ModelElementsAdapter
 from ..second_derivatives import SecondDerivativesMode
 
 
@@ -108,7 +107,7 @@ def function_from_compiled_formula(
 
 def function_from_expression(
     expression: Expression,
-    database: Database,
+    adapter: ModelElementsAdapter,
     numerically_safe: bool,
     use_jit: bool,
     the_betas: dict[str, float],
@@ -118,7 +117,7 @@ def function_from_expression(
 
     model_elements = ModelElements(
         expressions={LOG_LIKE: expression},
-        database=database,
+        adapter=adapter,
         number_of_draws=number_of_draws,
         use_jit=use_jit,
     )
