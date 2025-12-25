@@ -12,7 +12,6 @@ Fri Jun 20 2025, 10:29:35
 import sys
 
 import numpy as np
-
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Draws, MonteCarlo
 from biogeme.models import logit
@@ -78,7 +77,7 @@ av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 # The estimation results are read from the pickle file.
 try:
     results = EstimationResults.from_yaml_file(
-        filename='saved_results/b05normal_mixture.yaml'
+        filename='saved_results/b05a_normal_mixture.yaml'
     )
 except FileNotFoundError:
     print(
