@@ -17,7 +17,7 @@ from functools import partial
 import biogeme.biogeme_logging as blog
 import pymc as pm
 from IPython.core.display_functions import display
-from biogeme.bayesian_estimation import BayesianResults
+from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
     Beta,
@@ -25,9 +25,6 @@ from biogeme.expressions import (
     Draws,
 )
 from biogeme.models import loglogit
-from biogeme.results_processing import (
-    get_pandas_estimated_parameters,
-)
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
