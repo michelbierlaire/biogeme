@@ -1,6 +1,6 @@
 """
-Choice model only — Bayesian estimation
-=======================================
+4. Choice model only - Bayesian estimation
+==========================================
 
 This script estimates a **standard discrete choice model** without any latent
 variables using **Bayesian estimation** in Biogeme.
