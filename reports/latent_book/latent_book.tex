@@ -281,308 +281,289 @@ where \( f(x_n^*) \) is the pdf of the vector of latent variables \( x_n^* \).
 Again, this integral is approximated using Monte-Carlo integration.
 
 
-\subsection{Normalization and identification in latent-variable models}
+\section{Normalization and identification in latent-variable models}
 \label{sec:normalization}
 
-Models with latent variables involve parameters that are not directly
-identified from the data without additional restrictions. These
-restrictions, known as \emph{normalizations}, are not substantive
-assumptions about behavior; rather, they fix the arbitrary units of
-measurement (location and scale) that are inherent to latent constructs.
-This section explains \emph{why} normalization is needed, \emph{where}
-non-identification arises in our notation, and provides practical
-guidelines. We emphasize the \emph{reference-indicator} strategy because
-it yields parameters with a direct interpretation and tends to be
-numerically stable, although it is not the only valid approach.
+Models with latent variables contain parameters that are not uniquely
+identified from the data unless additional restrictions are imposed.
+These restrictions, referred to as \emph{normalizations}, are not
+behavioral assumptions; rather, they fix the arbitrary units of
+measurement (location and scale) that are inherent to latent constructs
+and ordinal measurement schemes.
 
-Latent-variable models are invariant to certain transformations of the
+This section explains why normalization is required, where
+non-identification arises, and how to impose a consistent and
+non-redundant set of normalizations. We distinguish carefully between
+normalizations related to the \emph{latent variables themselves} and
+those related to the \emph{ordinal measurement models}. Although the
+reference-indicator strategy is emphasized for its interpretability and
+numerical stability, the underlying principles apply more generally.
+
+\subsection{Sources of non-identification}
+
+Latent-variable models are invariant to specific transformations of the
 latent variables and associated parameters. Without normalization,
-multiple parameter vectors generate exactly the same probability of the
-observed data, hence the same likelihood. In such a case, maximization is
-ill-posed (flat directions), standard errors are meaningless, and
-numerical optimization or Bayesian sampling may become unstable.
+multiple parameter vectors generate exactly the same likelihood. In such
+a case, estimation is ill-posed: the likelihood exhibits flat or weakly
+curved directions, standard errors are unreliable, and numerical
+optimization or Bayesian sampling may be unstable.
 
-Two systematic sources of non-identification arise:
-
-\begin{itemize}
-  \item \textbf{Location (translation) invariance}: the origin of a latent
-  variable is arbitrary.
-  \item \textbf{Scale invariance}: the unit (measurement scale) of a latent
-  variable is arbitrary.
-\end{itemize}
-
-Both must be addressed to obtain a well-identified model.
-
-We first consider the continuous measurement equation
-\eqref{eq:linearMeasurement}:
-\[
-I_{n\ell} = \lambda_{\ell 0} + \sum_k \lambda_{\ell k} x_{nk}^*
-+ \sigma_{\upsilon \ell}\upsilon_{n\ell},
-\qquad \upsilon_{n\ell}\sim\mathcal N(0,1).
-\]
-The structural equation is \eqref{eq:linearStructural}:
-\[
-x_{nk}^* = \sum_s \psi_{sk}x_{ns}+\sigma_{\omega k}\omega_{nk},
-\qquad \omega_{nk}\sim\mathcal N(0,1).
-\]
-
-Suppose that the intercept $\lambda_{\ell 0}$ is estimated for at least
-one indicator that loads on latent variable $k$. Then, for any constant
-$c_k$, define
-\[
-x_{nk}^{*'} = x_{nk}^* + c_k.
-\]
-In the measurement equation, the term $\lambda_{\ell k}x_{nk}^*$ can be
-rewritten as $\lambda_{\ell k}(x_{nk}^{*'}-c_k)$, which is the same as
-keeping $x_{nk}^{*'}$ but shifting the intercept:
-\[
-\lambda_{\ell 0}' = \lambda_{\ell 0}-\lambda_{\ell k}c_k.
-\]
-Therefore, the distribution of $I_{n\ell}$ (and hence the likelihood)
-is unchanged: the model cannot distinguish a shift in the latent variable
-from a compensating shift in intercepts. This is why the \emph{origin} of
-each latent variable must be fixed.
-
-Also, for any nonzero constant $a_k$, define
-\[
-x_{nk}^{*'} = a_k x_{nk}^*.
-\]
-Then $\lambda_{\ell k}x_{nk}^* = (\lambda_{\ell k}/a_k)x_{nk}^{*'}$.
-Hence, scaling the latent variable can be compensated by inversely
-scaling all associated loadings. On the structural side, scaling $x_{nk}^*$
-can be compensated by scaling $\sigma_{\omega k}$ and the coefficients
-$\psi_{sk}$. Again, the likelihood is unchanged: the model cannot infer
-the \emph{unit} in which $x_{nk}^*$ is measured unless we fix it.
-
-Consequently, for each latent variable $k$, the analyst must impose
-\emph{one} location normalization and \emph{one} scale normalization.
-These two restrictions remove two degrees of freedom per latent
-variable: one for translation, one for rescaling.
-
-A practical and interpretable approach is to choose, for each latent
-variable $k$, a \emph{reference indicator} $\ell(k)$ among the indicators
-intended to measure $x_{nk}^*$. The key idea is to anchor the latent
-variable to a concrete observed scale.
-
-First, we fix the location by fixing one intercept.
-For each $k$, impose
-\[
-\boxed{\lambda_{\ell(k)0}=0.}
-\]
-Because $\lambda_{\ell 0}$ can absorb any shift of
-$x_{nk}^*$, setting the intercept of one measurement equation to zero
-declares where the latent variable ``zero'' is, in a way that is tied to
-an observed indicator.
-
-Second, fix the scale by fixing one loading.
-For each $k$, impose
-\[
-\boxed{\lambda_{\ell(k)k}=1.}
-\]
-Because the product $\lambda_{\ell k}x_{nk}^*$ is all that
-matters, fixing $\lambda_{\ell(k)k}=1$ defines the unit of $x_{nk}^*$ as
-the unit that makes the reference indicator respond one-for-one (in its
-systematic part) to changes in the latent variable.
-
-Importantly, fixing the loading to $+1$ is a \emph{convention}. Since the sign of a latent variable is itself
-arbitrary, it may be equally appropriate to fix
-$\lambda_{\ell(k)k}=-1$. This choice simply reverses the orientation of
-the latent scale, without affecting the likelihood or the model fit.
-The advantage of using $-1$ arises when the natural interpretation of
-the reference indicator runs opposite to the intended interpretation of
-the latent construct.
-
-For instance, suppose $x_{nk}^*$ represents \emph{environmental
-concern}, with higher values intended to mean \emph{stronger concern}.
-Consider a reference indicator based on agreement with the statement
-``I do not care about the environmental impact of my travel,'' coded so
-that higher responses correspond to stronger agreement. In this case,
-higher values of the indicator imply \emph{lower} environmental concern.
-Fixing $\lambda_{\ell(k)k}=+1$ would force increases in $x_{nk}^*$ to
-increase the indicator, leading to a latent variable whose numerical
-interpretation runs counter to its conceptual meaning. By fixing
-$\lambda_{\ell(k)k}=-1$ instead, higher values of $x_{nk}^*$ decrease the
-expected indicator response, restoring a coherent and intuitive
-interpretation: larger $x_{nk}^*$ corresponds to stronger environmental
-concern.
-
-Thus, choosing $\lambda_{\ell(k)k}=1$ or $-1$ does not affect
-identification or statistical fit, but it greatly improves the semantic
-consistency and interpretability of the model parameters.
-
-With $\lambda_{\ell(k)0}=0$ and $\lambda_{\ell(k)k}=1$ fixed, it is
-meaningful to estimate $\sigma_{\upsilon\ell(k)}$: it quantifies the
-amount of noise in that indicator relative to the anchored latent scale.
-In other words, it is now a genuine signal-to-noise parameter rather than
-a normalization device.
-
-If the model contains multiple latent variables, the reference indicator
-for $k$ should ideally load only on $k$:
-\[
-\lambda_{\ell(k)h}=0 \quad \text{for } h\neq k.
-\]
-Inded, if the reference indicator mixes several latent variables,
-then fixing a single loading to one does not define a clean unit for a
-single construct; it anchors a linear combination instead, which
-complicates interpretation and may reintroduce weak identification.
-
-We now consider ordinal indicators (Likert-type) modeled through an
-ordered probit mechanism (Section~\ref{sec:likert}). The essential
-difference with the continuous case is that the observed indicator
-$I_{n\ell}$ is not the latent response $I^*_{n\ell}$ itself, but only
-the interval in which it lies:
-\[
-I_{n\ell}=j_m \quad \text{if} \quad
-\tau_{m-1}\le I_{n\ell}^*<\tau_m,
-\qquad m=1,\ldots,M_\ell,
-\]
-with $\tau_0=-\infty$ and $\tau_{M_\ell}=+\infty$.
-
-The latent response is given by
-\[
-I^*_{n\ell}
-= \lambda_{\ell 0}
-+ \sum_k \lambda_{\ell k}x_{nk}^*
-+ \sigma_{\upsilon\ell}\upsilon_{n\ell},
-\qquad \upsilon_{n\ell}\sim\mathcal N(0,1).
-\]
-
-What changes compared to the continuous case? In the ordered probit likelihood \eqref{eq:discreteMeas-d}, probabilities
-depend only on \emph{standardized differences}
-\[
-\frac{\tau_m
-- \lambda_{\ell 0}
-- \sum_k \lambda_{\ell k}x_{nk}^*}
-{\sigma_{\upsilon\ell}}.
-\]
-As a consequence, the ordered probit layer introduces \emph{two additional
-invariances} that must be addressed explicitly:
+Two fundamental sources of non-identification arise at the level of the
+latent variables:
 
 \begin{itemize}
-  \item a \emph{location invariance}: adding the same constant to
-  $I^*_{n\ell}$ and to all thresholds leaves probabilities unchanged;
-  \item a \emph{scale invariance}: multiplying $I^*_{n\ell}$,
-  all thresholds, and $\sigma_{\upsilon\ell}$ by the same positive
-  constant leaves probabilities unchanged.
+  \item \textbf{Location invariance}: the origin of a latent variable is
+  arbitrary.
+  \item \textbf{Scale invariance}: the unit in which a latent variable is
+  measured is arbitrary.
 \end{itemize}
 
-These invariances are specific to ordinal models and are \emph{in
-addition} to the invariances already present in the latent-variable
-structure discussed in the continuous case.
+Both must be addressed for each latent variable in the model.
+Note that the need for normalization in latent-variable models is closely analogous
+to the well-known identification issues in logit models and
+related random utility models. In logit, utilities are latent and only
+differences in utility matter. As a consequence, utilities are invariant
+to the addition of a constant (location invariance) and to multiplication
+by a positive scalar (scale invariance). Standard practice therefore
+requires fixing one alternative-specific constant (or equivalently
+normalizing utilities relative to a base alternative) and fixing the
+scale of utility, typically by normalizing the variance of the error term.
 
-We adopt the same reference-indicator philosophy as in the continuous
-case. For each latent variable $k$, one ordinal indicator $\ell(k)$ is
-chosen as its reference indicator.
+Latent variables play a role analogous to latent utilities: they enter
+the likelihood only through systematic components and relative
+comparisons. Continuous measurement equations therefore require exactly
+the same type of normalization as utility functions in logit models --- one
+restriction to fix location and one to fix scale. Likewise, ordinal
+measurement equations introduce additional latent constructs (latent
+responses) that must be normalized in the same spirit as discrete choice
+utilities defined over ordered alternatives.
+
+\subsection{Normalization for continuous measurement equations}
+
+Consider the linear measurement and structural equations introduced in
+Section~\ref{sec:model}. If intercepts are estimated, any
+shift of a latent variable can be absorbed by a compensating shift in
+the measurement intercepts. Likewise, any rescaling of a latent variable
+can be offset by rescaling loadings and structural parameters. As a
+result, neither the location nor the scale of the latent variable is
+identified from the data alone.
+
+Therefore, for each latent variable, exactly two normalizations are
+required:
+\begin{itemize}
+  \item one to fix its \emph{location};
+  \item one to fix its \emph{scale}.
+\end{itemize}
+
+A practical and interpretable approach is the
+\emph{reference-indicator strategy}. For each latent variable $k$, one
+indicator $\ell(k)$ is selected as its reference indicator. Location is
+fixed by setting the corresponding intercept to zero, and scale is fixed
+by fixing the corresponding loading to $\pm 1$. The sign choice is a
+convention that determines the orientation of the latent scale and
+should be chosen to preserve semantic consistency between the latent
+variable and its indicators.
+
+Once these two constraints are imposed, remaining parameters—such as
+measurement error variances—become meaningful and interpretable.
+
+\subsection{Ordinal indicators and ordered probit measurement models}
+
+We now consider ordinal indicators modeled using an ordered probit
+specification, as introduced in Section~\ref{sec:likert}. In this case,
+the observed response does not reveal the latent measurement equation
+directly, but only the interval in which an underlying latent response
+lies.
+
+Compared to continuous indicators, ordered probit models introduce
+\emph{additional} invariances:
+\begin{itemize}
+  \item a \textbf{threshold-location invariance}: adding the same
+  constant to the latent response and all thresholds leaves choice
+  probabilities unchanged;
+  \item a \textbf{threshold-scale invariance}: multiplying the latent
+  response, all thresholds, and the measurement error standard deviation
+  by the same positive constant leaves probabilities unchanged.
+\end{itemize}
+
+These invariances are \emph{specific to each ordered probit measurement
+equation}. Crucially, they arise \emph{independently for each distinct
+set of thresholds}. As a consequence, normalization of the ordered
+probit layer must be performed \emph{separately for each independent
+threshold system}.
+
+\subsection{Separation of roles: latent variables vs.\ ordinal layers}
+
+It is essential to distinguish clearly between:
+\begin{itemize}
+  \item normalizations that identify the \emph{latent variables};
+  \item normalizations that identify the \emph{ordinal measurement
+  scales}.
+\end{itemize}
+
+The reference-indicator normalizations (intercept and loading) serve
+only to fix the location and scale of the latent variables. They do
+\emph{not} resolve the invariances intrinsic to the ordered probit
+measurement model. Those must be addressed at the level of the ordinal
+layer itself.
+
+\subsection{Normalization procedure for ordinal indicators}
+
+For each ordinal indicator (or group of indicators) that shares a common
+set of thresholds, the following steps are required.
+
+\paragraph{Step 1: Anchor the latent variable (once per latent variable).}
+If the ordinal indicator is chosen as the reference indicator for a
+latent variable, impose the same normalization as in the continuous
+case: fix the intercept and one loading. This step fixes the location,
+scale, and orientation of the latent variable and should be applied
+\emph{once per latent variable}, not per indicator.
+
+\paragraph{Step 2: Fix the location of the threshold system (once per
+threshold set).}
+Because only differences between the latent response and the thresholds
+matter, the threshold system has an arbitrary origin. This must be fixed
+exactly once for each independent set of thresholds. This can be done
+either by fixing one threshold to zero or, when the response scale is
+designed to be symmetric, by imposing symmetry around zero. The latter
+approach is often preferable, as it aligns the statistical
+parameterization with the semantics of Likert-type scales and reduces
+dimensionality.
+
+\paragraph{Step 3: Fix the scale of the ordered probit layer (once per
+threshold set).}
+Ordered probit models do not identify the scale of the latent response
+relative to the threshold spacing and the measurement error variance.
+Therefore, one scale normalization is required for each independent
+threshold system. A standard and convenient choice is to fix the
+measurement error standard deviation to one. This follows conventional
+ordered probit practice and prevents threshold spacings from being
+confounded with noise variance.
+
+\subsection{Key principle: no redundancy}
+
+Each source of invariance must be removed \emph{once, and only once}.
+Over-normalization—such as fixing both threshold location and an
+equivalent intercept, or fixing both loading and latent variance—does
+not improve identification and may instead induce artificial parameter
+correlations or numerical instability.
+
+\subsection{Alternative normalizations and choice of parameterization}
+
+The normalizations described above are not unique. As in discrete choice
+models, several equivalent normalization strategies can be adopted,
+leading to identical likelihood values and identical fitted probabilities.
+The choice among them affects interpretation, numerical stability, and
+the transparency of the resulting parameters, but not the model's ability
+to fit the data.
+
+For latent variables, scale can be fixed in different ways. Instead of
+fixing a factor loading to $\pm 1$, one may fix the variance of the latent
+variable (or of the structural disturbance) to one, or impose a
+``money-metric'' normalization by fixing the coefficient of a monetary
+variable to a known value. Such approaches are common in structural
+discrete choice models and welfare analysis. However, when latent
+variables are measured through multiple indicators, these alternatives
+often lead to less transparent interpretations: the latent variable is no
+longer anchored directly to an observed indicator, and factor loadings
+must be interpreted relative to an abstract latent scale.
+
+Similarly, in ordered probit measurement models, scale may in principle
+be fixed by normalizing threshold spacings or by normalizing the variance
+of the latent response. Fixing the measurement error variance to one is
+the most common convention, as it cleanly separates threshold locations
+from noise and aligns the specification with standard ordered probit
+practice.
+
+In this work, we adopt the reference-indicator strategy for latent
+variables and variance normalization for ordered probit layers because
+this combination offers three practical advantages. First, it yields
+parameters with a direct and intuitive interpretation: the latent
+variable is measured in the same units as a concrete, observed indicator.
+Second, it avoids entangling scale normalization with structural
+parameters, which improves numerical stability in both maximum
+likelihood and Bayesian estimation. Third, it allows different ordinal
+indicators --- possibly with different numbers of categories or symmetric
+designs --- to be normalized independently and consistently.
+
+Importantly, this choice reflects a modeling convention rather than a
+substantive behavioral assumption. Alternative normalizations are valid
+and may be preferable in other contexts, provided that each source of
+invariance is addressed exactly once and that the resulting parameter
+interpretation is clearly documented.
+
+\subsection{Summary of recommended practice}
+
+The main normalization principles are summarized in
+Table~\ref{tab:normalization_summary}.
 
 \begin{itemize}
-\item Step 1: anchor the latent variable.
-Exactly as in the continuous case, we fix
-\[
-\boxed{
-\lambda_{\ell(k)0}=0,
-\qquad
-\lambda_{\ell(k)k}=1
-\quad (\text{or } -1).
-}
-\]
-This fixes the \emph{location} and \emph{orientation} of the latent
-variable $x_{nk}^*$ and defines its unit through the response of the
-reference indicator. This step is conceptually identical to the
-continuous case and should always be applied first.
-
-\item Step 2: fix the location of the threshold system.
-Because only differences $\tau_m-I^*_{n\ell}$ matter, the threshold
-system has an arbitrary origin. This must be fixed \emph{once}, and only
-once.
-
-There are two principled ways to do so. For non-symmetric thresholds, fix one threshold to zero,
-  for example $\tau_c=0$. This is a pure location normalization. For symmetric thresholds, impose symmetry around zero.   In this case, location is fixed by construction.
-
-When the Likert scale is designed to be symmetric (which is typically
-the case), the symmetric parameterization is recommended, because it
-aligns the statistical model with the semantics of the survey scale and
-reduces the number of free parameters.
-
-Note that, in  the symmetric case, it is advised to re-parametrize the model.
-Let $M_\ell$ be the number of ordered categories. There are
-$M_\ell-1$ finite thresholds.
-When $M_\ell$ is odd (e.g., 5-point Likert), there is a natural central category. For
-$M_\ell=5$, there are four thresholds. A symmetric parameterization is:
-\[
-\boxed{
-\begin{aligned}
-\tau_1 &= -(\delta_1+\delta_2),\\
-\tau_2 &= -\delta_1,\\
-\tau_3 &= \phantom{-}\delta_1,\\
-\tau_4 &= \phantom{-}(\delta_1+\delta_2),
-\end{aligned}
-\qquad
-\delta_1>0,\ \delta_2>0.
-}
-\]
-This construction:
-\begin{itemize}
-  \item enforces strict ordering automatically;
-  \item fixes the location (centered at zero);
-  \item reduces dimensionality (two parameters instead of four).
+  \item For each latent variable: fix one intercept and one loading using
+  a reference indicator.
+  \item For each independent ordered probit threshold system:
+  \begin{itemize}
+    \item fix threshold location (preferably via symmetry);
+    \item fix threshold scale (e.g.\ by setting the measurement error
+    standard deviation to one).
+  \end{itemize}
 \end{itemize}
 
-When $M_\ell$ is even, there is no central category. In this case,
-$M_\ell-1$ is odd, and symmetry necessarily implies that one threshold
-lies exactly at zero. For $M_\ell=4$:
-\[
-\boxed{
-\tau_1=-\delta_1,
-\qquad
-\tau_2=0,
-\qquad
-\tau_3=\delta_1,
-\qquad
-\delta_1>0.
-}
-\]
-Here again, location is fixed by symmetry, and ordering is guaranteed.
+This strategy removes all location and scale indeterminacies without
+redundancy, yields stable estimation, and ensures that all parameters
+retain a clear and interpretable meaning.
 
-\item Step 3: fix the scale of the ordered probit layer.
-In ordered probit models, scale is not identified because
-\[
-(\tau_m,\ I^*_{n\ell},\ \sigma_{\upsilon\ell})
-\mapsto
-(a\tau_m,\ a I^*_{n\ell},\ a\sigma_{\upsilon\ell})
-\]
-leaves probabilities unchanged. Therefore, one scale normalization is
-required \emph{within the ordinal layer}.
+\begin{sidewaystable}[htbp]
+\centering
+\caption{Summary of normalization requirements in latent-variable and ordered probit models}
+\label{tab:normalization_summary}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{4.5cm} p{5.0cm} p{6.0cm} p{4.5cm}}
+\hline
+\textbf{Model component} 
+& \textbf{Source of non-identification} 
+& \textbf{Normalization required} 
+& \textbf{Applied how often} \\
+\hline
 
-To remain consistent with the reference-indicator philosophy adopted
-for latent variables, we fix
- the scale of the latent variable  by
-  $\lambda_{\ell(k)k}=1$; and  the scale of the ordinal response by fixing
-  $\sigma_{\upsilon\ell}=1$ for ordinal indicators.
+Latent variable $x_k^*$ 
+& Location invariance 
+& Fix one measurement intercept (reference indicator) 
+& Once per latent variable \\
 
-This choice has three advantages:
-\begin{enumerate}
-  \item it follows the standard ordered probit convention;
-  \item it avoids entangling threshold spacings with noise variance;
-  \item it preserves a clear interpretation of thresholds as cutpoints
-  on a standardized latent response scale.
-\end{enumerate}
-\end{itemize}
+Latent variable $x_k^*$ 
+& Scale invariance 
+& Fix one loading to $\pm 1$ (reference indicator) 
+& Once per latent variable \\
 
-In summary, for an ordinal indicator $\ell$ measuring latent variable $k$, the
-recommended normalization strategy is:
+\hline
 
-\begin{enumerate}
-  \item choose $\ell(k)$ as reference indicator;
-  \item fix $\lambda_{\ell(k)0}=0$ and $\lambda_{\ell(k)k}=\pm1$;
-  \item impose an ordered threshold parameterization;
-  \item fix threshold location (preferably via symmetry);
-  \item fix $\sigma_{\upsilon\ell}=1$.
-\end{enumerate}
+Continuous measurement equation 
+& None beyond latent-variable invariance 
+& No additional normalization 
+& --- \\
 
-These steps jointly remove all location and scale indeterminacies,
-without redundancy, and yield a model whose parameters have a clear,
-stable, and interpretable meaning.
+\hline
 
+Ordinal measurement (ordered probit) 
+& Threshold location invariance 
+& Fix one threshold to zero \emph{or} impose symmetry 
+& Once per independent threshold set \\
+
+Ordinal measurement (ordered probit) 
+& Threshold scale invariance 
+& Fix measurement error scale (e.g.\ $\sigma=1$) 
+& Once per independent threshold set \\
+
+\hline
+
+Multiple ordinal indicators 
+& Independent threshold systems 
+& Each threshold system normalized separately 
+& Once per threshold system \\
+
+\hline
+\end{tabular}
+\end{sidewaystable}
 
 %================================================================
 \section{Hybrid choice models}
