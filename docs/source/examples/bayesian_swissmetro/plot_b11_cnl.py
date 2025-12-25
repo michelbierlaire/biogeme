@@ -12,9 +12,8 @@ Michel Bierlaire, EPFL
 Mon Nov 03 2025, 20:14:23
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
@@ -123,6 +122,7 @@ the_biogeme = BIOGEME(
     chains=4,
     bayesian_draws=40_000,
     warmup=40_000,
+    calculate_loo=False,
 )
 the_biogeme.model_name = 'b11_cnl'
 
