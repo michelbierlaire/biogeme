@@ -13,9 +13,8 @@ Sat Nov 15 2025, 17:39:13
 
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import (
@@ -26,6 +25,7 @@ from biogeme.expressions import (
     log,
 )
 from biogeme.models import logit
+
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
 from swissmetro_panel import (
@@ -167,7 +167,7 @@ the_biogeme = BIOGEME(
     conditional_log_probability,
     warmup=4000,
     bayesian_draws=4000,
-    chains=8,
+    chains=4,
 )
 the_biogeme.model_name = 'b15_panel_discrete'
 
