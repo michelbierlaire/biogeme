@@ -1,0 +1,2010 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>b06_hybrid_bayes - Report from biogeme 3.3.2 [2025-12-23]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.3.2 [2025-12-23]">
+<meta name="author" content="{bv.author}">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+
+<p>biogeme 3.3.2 [2025-12-23]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2025-12-24 08:35:30.397706</p>
+<table>
+<tr class=biostyle><td align=right><strong>Bayesian estimation report file</strong>:	</td><td>b06_hybrid_bayes.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>optima.dat</td></tr>
+</table>
+
+<h1>Bayesian estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>896</td></tr>
+<tr class=biostyle><td align=right ><strong>Sampler</strong>: </td> <td>NUTS</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of chains</strong>: </td> <td>4</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of draws per chain</strong>: </td> <td>20000</td></tr>
+<tr class=biostyle><td align=right ><strong>Total number of draws</strong>: </td> <td>80000</td></tr>
+<tr class=biostyle><td align=right ><strong>Acceptance rate target</strong>: </td> <td>0.9</td></tr>
+<tr class=biostyle><td align=right ><strong>Run time</strong>: </td> <td>17:16:37.615076</td></tr>
+<tr class=biostyle><td align=right ><strong>Posterior predictive log-likelihood (sum of log mean p)</strong>: </td> <td>-16041.66</td></tr>
+<tr class=biostyle><td align=right ><strong>Expected log-likelihood E[log L(Y|θ)]</strong>: </td> <td>-16446.06</td></tr>
+<tr class=biostyle><td align=right ><strong>Best-draw log-likelihood (posterior upper bound)</strong>: </td> <td>-16224.07</td></tr>
+<tr class=biostyle><td align=right ><strong>WAIC (Widely Applicable Information Criterion)</strong>: </td> <td>-17159.38</td></tr>
+<tr class=biostyle><td align=right ><strong>WAIC Standard Error</strong>: </td> <td>134.55</td></tr>
+<tr class=biostyle><td align=right ><strong>Effective number of parameters (p_WAIC)</strong>: </td> <td>1117.72</td></tr>
+<tr class=biostyle><td align=right ><strong>LOO (Leave-One-Out Cross-Validation)</strong>: </td> <td>-17452.54</td></tr>
+<tr class=biostyle><td align=right ><strong>LOO Standard Error</strong>: </td> <td>134.97</td></tr>
+<tr class=biostyle><td align=right ><strong>Effective number of parameters (p_LOO)</strong>: </td> <td>1410.88</td></tr>
+</table>
+
+<h1>Estimated parameters</h1>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value (mean)</th><th>Value (median)</th><th>Value (mode)</th><th>std err.</th><th>z-value</th><th>p-value</th><th>HDI low</th><th>HDI high</th><th>R hat</th><th>ESS (bulk)</th><th>ESS (tail)</th></tr>
+<tr class=biostyle><td>58</td><td>beta_time_car_lambda_car_centric</td><td>-78.2</td><td>-3.86</td><td>-2.39</td><td>152</td><td>-0.514</td><td>0</td><td>-391</td><td>-2.39</td><td>1.61</td><td>6.92</td><td>26.9</td></tr>
+<tr class=biostyle><td>57</td><td>beta_time_car_lambda_environment</td><td>-81.6</td><td>-2.68</td><td>-3.31</td><td>169</td><td>-0.482</td><td>0</td><td>-434</td><td>-0.55</td><td>1.79</td><td>6.02</td><td>26.4</td></tr>
+<tr class=biostyle><td>53</td><td>beta_time_pt_lambda_car_centric</td><td>-78.2</td><td>-3.25</td><td>-2</td><td>153</td><td>-0.512</td><td>0</td><td>-395</td><td>-2.02</td><td>1.63</td><td>6.75</td><td>27.1</td></tr>
+<tr class=biostyle><td>51</td><td>beta_time_pt_lambda_environment</td><td>-68.6</td><td>-2.23</td><td>-3</td><td>143</td><td>-0.478</td><td>0</td><td>-365</td><td>-0.264</td><td>1.87</td><td>5.79</td><td>24.1</td></tr>
+<tr class=biostyle><td>68</td><td>cars_delta_1</td><td>859</td><td>963</td><td>53.9</td><td>544</td><td>1.58</td><td>0</td><td>10.3</td><td>1.64e+03</td><td>1.63</td><td>6.87</td><td>26.6</td></tr>
+<tr class=biostyle><td>69</td><td>cars_delta_2</td><td>818</td><td>919</td><td>52</td><td>520</td><td>1.57</td><td>0</td><td>9.45</td><td>1.57e+03</td><td>1.63</td><td>6.88</td><td>27.1</td></tr>
+<tr class=biostyle><td>15</td><td>choice_asc_car</td><td>-170</td><td>-186</td><td>-1.18</td><td>121</td><td>-1.4</td><td>0.00415</td><td>-349</td><td>0.39</td><td>1.79</td><td>6.01</td><td>18</td></tr>
+<tr class=biostyle><td>0</td><td>choice_asc_pt</td><td>-169</td><td>-186</td><td>-1.56</td><td>121</td><td>-1.41</td><td>0.00202</td><td>-348</td><td>0.229</td><td>1.79</td><td>6</td><td>18.6</td></tr>
+<tr class=biostyle><td>55</td><td>choice_beta_cost</td><td>-0.118</td><td>-0.116</td><td>-0.11</td><td>0.0282</td><td>-4.2</td><td>0</td><td>-0.172</td><td>-0.0668</td><td>1.33</td><td>9.81</td><td>27.1</td></tr>
+<tr class=biostyle><td>60</td><td>choice_beta_dist_other_purposes</td><td>-71.9</td><td>-82.2</td><td>-1.12</td><td>47.7</td><td>-1.51</td><td>0</td><td>-137</td><td>-0.417</td><td>1.83</td><td>5.86</td><td>25.3</td></tr>
+<tr class=biostyle><td>59</td><td>choice_beta_dist_work</td><td>-48.6</td><td>-53.2</td><td>-0.55</td><td>33.2</td><td>-1.46</td><td>0</td><td>-95.9</td><td>-0.279</td><td>1.81</td><td>5.9</td><td>24.9</td></tr>
+<tr class=biostyle><td>56</td><td>choice_beta_time_car_ref</td><td>-4.18</td><td>-3.76</td><td>-3.13</td><td>2.1</td><td>-1.99</td><td>0</td><td>-8.17</td><td>-0.942</td><td>1.08</td><td>38.3</td><td>193</td></tr>
+<tr class=biostyle><td>50</td><td>choice_beta_time_pt_ref</td><td>-2.38</td><td>-2.13</td><td>-1.63</td><td>1.11</td><td>-2.14</td><td>0</td><td>-4.55</td><td>-0.701</td><td>1.12</td><td>24</td><td>200</td></tr>
+<tr class=biostyle><td>16</td><td>choice_car_centric_car_cte</td><td>89.1</td><td>236</td><td>260</td><td>327</td><td>0.272</td><td>0.494</td><td>-573</td><td>397</td><td>1.75</td><td>6.02</td><td>27.5</td></tr>
+<tr class=biostyle><td>13</td><td>choice_car_centric_pt_cte</td><td>81.8</td><td>234</td><td>259</td><td>336</td><td>0.244</td><td>0.495</td><td>-605</td><td>392</td><td>1.76</td><td>6</td><td>26.6</td></tr>
+<tr class=biostyle><td>17</td><td>choice_environment_car_cte</td><td>101</td><td>129</td><td>138</td><td>154</td><td>0.659</td><td>0.397</td><td>-165</td><td>350</td><td>1.5</td><td>7.38</td><td>27.1</td></tr>
+<tr class=biostyle><td>14</td><td>choice_environment_pt_cte</td><td>67.6</td><td>126</td><td>141</td><td>205</td><td>0.33</td><td>0.519</td><td>-326</td><td>355</td><td>1.67</td><td>6.4</td><td>27.6</td></tr>
+<tr class=biostyle><td>62</td><td>likert_delta_0</td><td>0.159</td><td>0.158</td><td>0.157</td><td>0.018</td><td>8.84</td><td>0</td><td>0.125</td><td>0.192</td><td>1.03</td><td>126</td><td>110</td></tr>
+<tr class=biostyle><td>63</td><td>likert_delta_1</td><td>0.796</td><td>0.792</td><td>0.782</td><td>0.0657</td><td>12.1</td><td>0</td><td>0.679</td><td>0.926</td><td>1.11</td><td>25.6</td><td>34</td></tr>
+<tr class=biostyle><td>66</td><td>measurement_Envir03_sigma</td><td>1.49</td><td>1.47</td><td>1.43</td><td>0.213</td><td>7.01</td><td>0</td><td>1.12</td><td>1.91</td><td>1.04</td><td>76.5</td><td>174</td></tr>
+<tr class=biostyle><td>72</td><td>measurement_Envir04_sigma</td><td>0.825</td><td>0.816</td><td>0.807</td><td>0.108</td><td>7.62</td><td>0</td><td>0.621</td><td>1.03</td><td>1.19</td><td>14.5</td><td>28.5</td></tr>
+<tr class=biostyle><td>65</td><td>measurement_Envir05_sigma</td><td>0.94</td><td>0.881</td><td>0.841</td><td>0.211</td><td>4.46</td><td>0</td><td>0.627</td><td>1.36</td><td>1.48</td><td>7.55</td><td>25.3</td></tr>
+<tr class=biostyle><td>61</td><td>measurement_Envir06_sigma</td><td>0.482</td><td>0.456</td><td>0.405</td><td>0.102</td><td>4.75</td><td>0</td><td>0.341</td><td>0.706</td><td>1.63</td><td>6.49</td><td>25.7</td></tr>
+<tr class=biostyle><td>73</td><td>measurement_LifSty01_sigma</td><td>1.23</td><td>1.23</td><td>1.21</td><td>0.139</td><td>8.87</td><td>0</td><td>0.962</td><td>1.5</td><td>1.04</td><td>80.2</td><td>95</td></tr>
+<tr class=biostyle><td>71</td><td>measurement_LifSty07_sigma</td><td>2</td><td>1.95</td><td>1.88</td><td>0.361</td><td>5.54</td><td>0</td><td>1.39</td><td>2.68</td><td>1.01</td><td>185</td><td>464</td></tr>
+<tr class=biostyle><td>64</td><td>measurement_Mobil03_sigma</td><td>1.5</td><td>1.45</td><td>1.37</td><td>0.266</td><td>5.64</td><td>0</td><td>1.09</td><td>2</td><td>1.22</td><td>13.4</td><td>52.5</td></tr>
+<tr class=biostyle><td>77</td><td>measurement_Mobil05_sigma</td><td>2.34</td><td>2.25</td><td>2.14</td><td>0.609</td><td>3.84</td><td>0</td><td>1.49</td><td>3.28</td><td>1.15</td><td>19.6</td><td>37.6</td></tr>
+<tr class=biostyle><td>70</td><td>measurement_Mobil08_sigma</td><td>2.34</td><td>2.26</td><td>2.13</td><td>0.511</td><td>4.58</td><td>0</td><td>1.52</td><td>3.3</td><td>1.06</td><td>52.7</td><td>133</td></tr>
+<tr class=biostyle><td>76</td><td>measurement_Mobil09_sigma</td><td>1.04</td><td>1.03</td><td>0.973</td><td>0.134</td><td>7.77</td><td>0</td><td>0.782</td><td>1.29</td><td>1.12</td><td>23.3</td><td>33.5</td></tr>
+<tr class=biostyle><td>75</td><td>measurement_Mobil10_sigma</td><td>815</td><td>866</td><td>19.4</td><td>593</td><td>1.38</td><td>0</td><td>2.98</td><td>1.71e+03</td><td>1.54</td><td>7.32</td><td>25.2</td></tr>
+<tr class=biostyle><td>74</td><td>measurement_Mobil12_sigma</td><td>911</td><td>920</td><td>8.7</td><td>698</td><td>1.31</td><td>0</td><td>1.77</td><td>1.99e+03</td><td>1.57</td><td>7.27</td><td>24.9</td></tr>
+<tr class=biostyle><td>67</td><td>measurement_NbCar_sigma</td><td>441</td><td>495</td><td>29.1</td><td>278</td><td>1.58</td><td>0</td><td>5.09</td><td>839</td><td>1.63</td><td>6.83</td><td>26.6</td></tr>
+<tr class=biostyle><td>22</td><td>measurement_coefficient_car_centric_attitude_Envir02</td><td>64.8</td><td>-0.448</td><td>-0.643</td><td>134</td><td>0.484</td><td>0.5</td><td>-0.643</td><td>340</td><td>1.63</td><td>6.76</td><td>27</td></tr>
+<tr class=biostyle><td>19</td><td>measurement_coefficient_car_centric_attitude_Envir06</td><td>11.8</td><td>-0.0817</td><td>-0.0416</td><td>26.8</td><td>0.441</td><td>0.499</td><td>-0.225</td><td>63.8</td><td>1.67</td><td>6.43</td><td>26.5</td></tr>
+<tr class=biostyle><td>37</td><td>measurement_coefficient_car_centric_attitude_LifSty07</td><td>-28.1</td><td>0.0574</td><td>-0.577</td><td>62</td><td>-0.454</td><td>0.688</td><td>-149</td><td>0.433</td><td>1.56</td><td>6.98</td><td>26.3</td></tr>
+<tr class=biostyle><td>24</td><td>measurement_coefficient_car_centric_attitude_Mobil03</td><td>24.3</td><td>-0.444</td><td>-0.72</td><td>51.7</td><td>0.47</td><td>0.5</td><td>-0.781</td><td>130</td><td>1.63</td><td>6.87</td><td>25.9</td></tr>
+<tr class=biostyle><td>49</td><td>measurement_coefficient_car_centric_attitude_Mobil05</td><td>70.5</td><td>-0.816</td><td>-1.53</td><td>152</td><td>0.464</td><td>0.5</td><td>-1.53</td><td>373</td><td>1.59</td><td>6.89</td><td>26.1</td></tr>
+<tr class=biostyle><td>35</td><td>measurement_coefficient_car_centric_attitude_Mobil08</td><td>-59.3</td><td>0.424</td><td>1.08</td><td>126</td><td>-0.472</td><td>0.5</td><td>-312</td><td>1.08</td><td>1.56</td><td>7.07</td><td>26.3</td></tr>
+<tr class=biostyle><td>47</td><td>measurement_coefficient_car_centric_attitude_Mobil09</td><td>46.2</td><td>-0.419</td><td>-0.657</td><td>96</td><td>0.481</td><td>0.5</td><td>-0.657</td><td>243</td><td>1.56</td><td>7.17</td><td>26.9</td></tr>
+<tr class=biostyle><td>45</td><td>measurement_coefficient_car_centric_attitude_Mobil10</td><td>-4.13</td><td>461</td><td>525</td><td>1.07e+03</td><td>-0.00387</td><td>0.5</td><td>-2.26e+03</td><td>1.18e+03</td><td>1.55</td><td>7.22</td><td>24.7</td></tr>
+<tr class=biostyle><td>32</td><td>measurement_coefficient_car_centric_attitude_NbCar</td><td>-66</td><td>295</td><td>330</td><td>797</td><td>-0.0829</td><td>0.49</td><td>-1.78e+03</td><td>665</td><td>1.56</td><td>7.17</td><td>24.8</td></tr>
+<tr class=biostyle><td>30</td><td>measurement_coefficient_environmental_attitude_Envir01</td><td>-89.3</td><td>1.71</td><td>2.66</td><td>192</td><td>-0.466</td><td>0.5</td><td>-492</td><td>2.66</td><td>1.66</td><td>6.51</td><td>27.7</td></tr>
+<tr class=biostyle><td>28</td><td>measurement_coefficient_environmental_attitude_Envir03</td><td>50.1</td><td>-1.46</td><td>-0.773</td><td>109</td><td>0.458</td><td>0.5</td><td>-2.57</td><td>278</td><td>1.57</td><td>6.99</td><td>27.9</td></tr>
+<tr class=biostyle><td>39</td><td>measurement_coefficient_environmental_attitude_Envir04</td><td>29</td><td>-0.976</td><td>-1.53</td><td>63.6</td><td>0.456</td><td>0.5</td><td>-1.53</td><td>161</td><td>1.62</td><td>6.7</td><td>28</td></tr>
+<tr class=biostyle><td>26</td><td>measurement_coefficient_environmental_attitude_Envir05</td><td>-39.9</td><td>1.36</td><td>1.13</td><td>87.4</td><td>-0.456</td><td>0.5</td><td>-222</td><td>2.47</td><td>1.61</td><td>6.77</td><td>27.6</td></tr>
+<tr class=biostyle><td>20</td><td>measurement_coefficient_environmental_attitude_Envir06</td><td>-30.7</td><td>1.1</td><td>0.753</td><td>67.6</td><td>-0.454</td><td>0.5</td><td>-171</td><td>1.81</td><td>1.66</td><td>6.52</td><td>28.1</td></tr>
+<tr class=biostyle><td>41</td><td>measurement_coefficient_environmental_attitude_LifSty01</td><td>-15.7</td><td>0.368</td><td>0.269</td><td>34.6</td><td>-0.453</td><td>0.5</td><td>-87</td><td>0.875</td><td>1.6</td><td>6.85</td><td>26.6</td></tr>
+<tr class=biostyle><td>43</td><td>measurement_coefficient_environmental_attitude_Mobil12</td><td>-546</td><td>-814</td><td>-1.08e+03</td><td>1.04e+03</td><td>-0.523</td><td>0.5</td><td>-2.13e+03</td><td>1.53e+03</td><td>1.57</td><td>7.53</td><td>25.1</td></tr>
+<tr class=biostyle><td>33</td><td>measurement_coefficient_environmental_attitude_NbCar</td><td>443</td><td>1.64</td><td>-21.7</td><td>872</td><td>0.508</td><td>0.984</td><td>-207</td><td>2.31e+03</td><td>1.57</td><td>6.94</td><td>24.7</td></tr>
+<tr class=biostyle><td>29</td><td>measurement_intercept_Envir01</td><td>0.157</td><td>0.158</td><td>0.156</td><td>0.171</td><td>0.916</td><td>0.337</td><td>-0.162</td><td>0.488</td><td>1.03</td><td>113</td><td>270</td></tr>
+<tr class=biostyle><td>21</td><td>measurement_intercept_Envir02</td><td>0.992</td><td>1.01</td><td>1.05</td><td>0.12</td><td>8.25</td><td>0</td><td>0.743</td><td>1.21</td><td>1.22</td><td>14.3</td><td>30.1</td></tr>
+<tr class=biostyle><td>27</td><td>measurement_intercept_Envir03</td><td>0.809</td><td>0.78</td><td>0.696</td><td>0.233</td><td>3.47</td><td>0</td><td>0.378</td><td>1.26</td><td>1.16</td><td>17.9</td><td>31.5</td></tr>
+<tr class=biostyle><td>38</td><td>measurement_intercept_Envir04</td><td>-0.0121</td><td>-0.014</td><td>-0.012</td><td>0.0866</td><td>-0.14</td><td>0.862</td><td>-0.172</td><td>0.16</td><td>1.12</td><td>23.8</td><td>116</td></tr>
+<tr class=biostyle><td>25</td><td>measurement_intercept_Envir05</td><td>1.12</td><td>1.02</td><td>0.876</td><td>0.354</td><td>3.16</td><td>0</td><td>0.613</td><td>1.84</td><td>1.53</td><td>7.36</td><td>25.4</td></tr>
+<tr class=biostyle><td>18</td><td>measurement_intercept_Envir06</td><td>1.2</td><td>1.15</td><td>1.15</td><td>0.225</td><td>5.3</td><td>0</td><td>0.847</td><td>1.65</td><td>1.49</td><td>7.76</td><td>25.4</td></tr>
+<tr class=biostyle><td>40</td><td>measurement_intercept_LifSty01</td><td>0.389</td><td>0.386</td><td>0.397</td><td>0.101</td><td>3.86</td><td>0</td><td>0.203</td><td>0.58</td><td>1.09</td><td>37.7</td><td>212</td></tr>
+<tr class=biostyle><td>36</td><td>measurement_intercept_LifSty07</td><td>-0.0505</td><td>-0.0645</td><td>-0.0782</td><td>0.128</td><td>-0.394</td><td>0.612</td><td>-0.261</td><td>0.204</td><td>1.03</td><td>156</td><td>627</td></tr>
+<tr class=biostyle><td>23</td><td>measurement_intercept_Mobil03</td><td>1.2</td><td>1.16</td><td>1.11</td><td>0.247</td><td>4.85</td><td>0</td><td>0.792</td><td>1.66</td><td>1.12</td><td>23.4</td><td>114</td></tr>
+<tr class=biostyle><td>48</td><td>measurement_intercept_Mobil05</td><td>2.19</td><td>2.12</td><td>1.96</td><td>0.608</td><td>3.6</td><td>0</td><td>1.28</td><td>3.09</td><td>1.05</td><td>72.4</td><td>72.5</td></tr>
+<tr class=biostyle><td>34</td><td>measurement_intercept_Mobil08</td><td>0.325</td><td>0.295</td><td>0.241</td><td>0.223</td><td>1.46</td><td>0.0691</td><td>-0.0485</td><td>0.739</td><td>1.03</td><td>108</td><td>378</td></tr>
+<tr class=biostyle><td>46</td><td>measurement_intercept_Mobil09</td><td>1.64</td><td>1.63</td><td>1.57</td><td>0.263</td><td>6.23</td><td>0</td><td>1.11</td><td>2.11</td><td>1.35</td><td>9.6</td><td>24.9</td></tr>
+<tr class=biostyle><td>44</td><td>measurement_intercept_Mobil10</td><td>657</td><td>690</td><td>17.1</td><td>484</td><td>1.36</td><td>0</td><td>2.56</td><td>1.39e+03</td><td>1.55</td><td>7.36</td><td>25.3</td></tr>
+<tr class=biostyle><td>42</td><td>measurement_intercept_Mobil12</td><td>72</td><td>41.5</td><td>-0.519</td><td>99</td><td>0.727</td><td>0.645</td><td>-63.2</td><td>296</td><td>1.18</td><td>16.2</td><td>145</td></tr>
+<tr class=biostyle><td>31</td><td>measurement_intercept_NbCar</td><td>864</td><td>967</td><td>54.7</td><td>544</td><td>1.59</td><td>0</td><td>9.29</td><td>1.64e+03</td><td>1.63</td><td>6.82</td><td>27.1</td></tr>
+<tr class=biostyle><td>11</td><td>struct_car_centric_attitude_ScaledIncome</td><td>0.011</td><td>0.0101</td><td>1.37e-05</td><td>0.0111</td><td>0.99</td><td>0.179</td><td>-0.00439</td><td>0.0322</td><td>1.31</td><td>10.7</td><td>55.3</td></tr>
+<tr class=biostyle><td>10</td><td>struct_car_centric_attitude_age_30_less</td><td>0.365</td><td>0.408</td><td>-0.00167</td><td>0.261</td><td>1.4</td><td>0.502</td><td>-0.0101</td><td>0.751</td><td>1.6</td><td>6.76</td><td>29.6</td></tr>
+<tr class=biostyle><td>12</td><td>struct_car_centric_attitude_car_oriented_parents</td><td>0.308</td><td>0.375</td><td>-0.000727</td><td>0.193</td><td>1.59</td><td>0.496</td><td>-0.00543</td><td>0.532</td><td>1.6</td><td>6.74</td><td>26.2</td></tr>
+<tr class=biostyle><td>9</td><td>struct_car_centric_attitude_employees</td><td>-0.0106</td><td>5.24e-05</td><td>0.000689</td><td>0.0813</td><td>-0.13</td><td>0.971</td><td>-0.187</td><td>0.146</td><td>1.54</td><td>38.6</td><td>86</td></tr>
+<tr class=biostyle><td>7</td><td>struct_car_centric_attitude_high_education</td><td>-0.321</td><td>-0.392</td><td>0.00224</td><td>0.203</td><td>-1.58</td><td>0.5</td><td>-0.554</td><td>0.0087</td><td>1.65</td><td>6.78</td><td>27.4</td></tr>
+<tr class=biostyle><td>54</td><td>struct_car_centric_attitude_sigma</td><td>0.728</td><td>0.941</td><td>0.976</td><td>0.423</td><td>1.72</td><td>0</td><td>0.000765</td><td>1.08</td><td>1.65</td><td>6.52</td><td>27.3</td></tr>
+<tr class=biostyle><td>8</td><td>struct_car_centric_attitude_top_manager</td><td>0.169</td><td>0.166</td><td>-7.82e-05</td><td>0.155</td><td>1.09</td><td>0.575</td><td>-0.0305</td><td>0.464</td><td>1.34</td><td>10.2</td><td>141</td></tr>
+<tr class=biostyle><td>2</td><td>struct_environmental_attitude_ScaledIncome</td><td>0.00695</td><td>0.00689</td><td>2.7e-05</td><td>0.00622</td><td>1.12</td><td>0.327</td><td>-0.000556</td><td>0.0182</td><td>1.38</td><td>9.04</td><td>104</td></tr>
+<tr class=biostyle><td>4</td><td>struct_environmental_attitude_artisans</td><td>0.113</td><td>0.114</td><td>0.000441</td><td>0.0962</td><td>1.18</td><td>0.36</td><td>-0.00736</td><td>0.289</td><td>1.44</td><td>8.68</td><td>175</td></tr>
+<tr class=biostyle><td>1</td><td>struct_environmental_attitude_childSuburb</td><td>0.0635</td><td>0.0656</td><td>-0.000498</td><td>0.0507</td><td>1.25</td><td>0.459</td><td>-0.00412</td><td>0.147</td><td>1.6</td><td>6.85</td><td>36</td></tr>
+<tr class=biostyle><td>3</td><td>struct_environmental_attitude_city_center_as_kid</td><td>0.156</td><td>0.173</td><td>-0.00226</td><td>0.115</td><td>1.36</td><td>0.499</td><td>-0.0109</td><td>0.33</td><td>1.56</td><td>7</td><td>28.3</td></tr>
+<tr class=biostyle><td>5</td><td>struct_environmental_attitude_high_education</td><td>0.0919</td><td>0.0967</td><td>-0.00143</td><td>0.0726</td><td>1.26</td><td>0.507</td><td>-0.00807</td><td>0.208</td><td>1.62</td><td>6.72</td><td>32.9</td></tr>
+<tr class=biostyle><td>6</td><td>struct_environmental_attitude_low_education</td><td>-0.0961</td><td>-0.109</td><td>0.00171</td><td>0.0736</td><td>-1.31</td><td>0.513</td><td>-0.203</td><td>0.00739</td><td>1.54</td><td>7.32</td><td>37.1</td></tr>
+<tr class=biostyle><td>52</td><td>struct_environmental_attitude_sigma</td><td>0.335</td><td>0.423</td><td>0.442</td><td>0.195</td><td>1.72</td><td>0</td><td>0.000987</td><td>0.515</td><td>1.68</td><td>6.47</td><td>28.1</td></tr>
+</table>
+<table border="0">
+<tr class=biostyle><td>Name:</td><td>Identifier of the model parameter being estimated.</td></tr>
+<tr class=biostyle><td>Value:</td><td>Posterior mean (expected value) of the parameter.</td></tr>
+<tr class=biostyle><td>Median:</td><td>Posterior median (50% quantile) of the parameter.</td></tr>
+<tr class=biostyle><td>Mode:</td><td>Posterior mode (most frequent value) of the parameter</td></tr>
+<tr class=biostyle><td>Std err.:</td><td>Posterior standard deviation, measuring uncertainty around the mean.</td></tr>
+<tr class=biostyle><td>z-value:</td><td>Standardized estimate (mean divided by std. dev.), indicating signal-to-noise ratio.</td></tr>
+<tr class=biostyle><td>p-value:</td><td>Two-sided Bayesian tail probability that the parameter differs in sign from zero.</td></tr>
+<tr class=biostyle><td>HDI low / HDI high:</td><td>Lower and upper bounds of the Highest Density Interval containing the most probable parameter values.</td></tr>
+<tr class=biostyle><td>R-hat (Gelman–Rubin):</td><td>Convergence diagnostic; values very close to 1 (typically ≤ 1.01) indicate well-mixed chains.</td></tr>
+<tr class=biostyle><td>ESS (bulk):</td><td>Effective sample size for the central part of the posterior; values above ~400 are generally considered sufficient.</td></tr>
+<tr class=biostyle><td>ESS (tail):</td><td>Effective sample size for the posterior tails; values above ~100 ensure reliable estimates of extreme quantiles.</td></tr>
+</table>
+
+<h1>Identification diagnostics</h1>
+<p class="biostyle">This section reports quick numerical checks for <em>non-identification</em> or <em>weak identification</em>. Intuitively, identification problems mean that some combinations of parameters can change without changing the likelihood much, so the posterior is very wide (or nearly flat) in some directions. These checks use the posterior draws (and the prior draws, if available).</p>
+<h2>How to read the numbers</h2>
+<ul class="biostyle"><li><strong>Posterior covariance diagnostics</strong> (eigenvalues, condition number, effective rank): these describe the <em>shape</em> of the posterior cloud in parameter space.<ul class="biostyle"><li><strong>max_eigenvalue</strong>: the <em>largest posterior-variance</em> direction (widest direction of the posterior). When identification is weak, the posterior can become extremely wide along some linear combination of parameters; this often shows up as a very large <code>max_eigenvalue</code> together with a large condition number. If reported, the <code>max_eigenvector_top</code> loadings indicate which parameters contribute most to that weakly identified linear combination.</li><li><strong>condition_number = max_eigenvalue / min_eigenvalue</strong>: anisotropy of the posterior covariance. Larger values indicate stronger near-dependencies among parameters. Rough rule of thumb: around <strong>10^3</strong> deserves attention; <strong>10^5</strong> or more is a strong red flag.</li><li><strong>effective_rank</strong>: an “effective dimension” of posterior variability (between 0 and <code>n_parameters</code>). If it is much smaller than <code>n_parameters</code>, the posterior variability concentrates in a lower-dimensional subspace, consistent with (near) linear dependencies among parameters.</li></ul></li><li><strong>Prior covariance diagnostics</strong>: same metrics, but for the prior. If the prior has normal scale and full rank but the posterior becomes ill-conditioned, the issue is typically in the likelihood/model specification (not in the prior).</li><li><strong>Identified by the prior</strong> (requires prior draws): compare prior vs posterior dispersion. For each parameter, <code>std_ratio_post_over_prior ≈ 1</code> means the data did not shrink uncertainty much (likelihood weakly informative for that parameter). A ratio <strong>well below 1</strong> (say 0.1 or 0.01) means the likelihood is informative for that parameter.</li></ul>
+</p>
+<p class="biostyle"><strong>Flags:</strong> Weak-identification direction detected from the posterior covariance (largest posterior variance direction). This suggests a linear combination of parameters that remains weakly constrained. Top loadings: -0.455·measurement_coefficient_car_centric_attitude_Mobil10 + +0.434·measurement_coefficient_environmental_attitude_Mobil12 + +0.359·measurement_coefficient_environmental_attitude_NbCar + -0.325·measurement_coefficient_car_centric_attitude_NbCar + -0.255·measurement_Mobil12_sigma + -0.218·measurement_Mobil10_sigma + -0.217·cars_delta_1 + -0.217·measurement_intercept_NbCar, Posterior covariance is extremely ill-conditioned (condition number > 1e10); this can indicate weak/non-identification., Some parameters have posterior std close to prior std (ratio > 0.8), suggesting they may be largely identified by the prior: measurement_coefficient_car_centric_attitude_NbCar, measurement_coefficient_environmental_attitude_NbCar, cars_delta_1, cars_delta_2, measurement_coefficient_environmental_attitude_Mobil12, measurement_Mobil12_sigma, measurement_coefficient_car_centric_attitude_Mobil10, measurement_Mobil10_sigma</p>
+<h2>Posterior covariance diagnostics</h2>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>n_parameters</strong>: </td> <td>78</td></tr>
+<tr class=biostyle><td align=right ><strong>n_draws</strong>: </td> <td>80000</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue</strong>: </td> <td>4.48e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvalue</strong>: </td> <td>4.94e+06</td></tr>
+<tr class=biostyle><td align=right ><strong>condition_number</strong>: </td> <td>1.1e+12</td></tr>
+<tr class=biostyle><td align=right ><strong>effective_rank</strong>: </td> <td>2.51</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue_ratio</strong>: </td> <td>9.07e-13</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvector</strong>: </td> <td>0.455·measurement_coefficient_car_centric_attitude_Mobil10, -0.434·measurement_coefficient_environmental_attitude_Mobil12, -0.359·measurement_coefficient_environmental_attitude_NbCar, 0.325·measurement_coefficient_car_centric_attitude_NbCar, 0.255·measurement_Mobil12_sigma, 0.218·measurement_Mobil10_sigma, 0.217·cars_delta_1, 0.217·measurement_intercept_NbCar, 0.207·cars_delta_2, 0.175·measurement_intercept_Mobil10</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvector_top</strong>: </td> <td>0.455·measurement_coefficient_car_centric_attitude_Mobil10, -0.434·measurement_coefficient_environmental_attitude_Mobil12, -0.359·measurement_coefficient_environmental_attitude_NbCar, 0.325·measurement_coefficient_car_centric_attitude_NbCar, 0.255·measurement_Mobil12_sigma, 0.218·measurement_Mobil10_sigma, 0.217·cars_delta_1, 0.217·measurement_intercept_NbCar, 0.207·cars_delta_2, 0.175·measurement_intercept_Mobil10</td></tr>
+</table>
+<h2>Prior covariance diagnostics</h2>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>n_parameters</strong>: </td> <td>78</td></tr>
+<tr class=biostyle><td align=right ><strong>n_draws</strong>: </td> <td>20000</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue</strong>: </td> <td>3.36e+05</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvalue</strong>: </td> <td>1.1e+06</td></tr>
+<tr class=biostyle><td align=right ><strong>condition_number</strong>: </td> <td>3.26</td></tr>
+<tr class=biostyle><td align=right ><strong>effective_rank</strong>: </td> <td>71.3</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue_ratio</strong>: </td> <td>0.306</td></tr>
+</table>
+<h2>Per-parameter prior/posterior dispersion</h2>
+<p class="biostyle">The table below compares posterior and prior standard deviations when prior draws are available. A ratio close to 1 suggests the prior dominates; a ratio well below 1 suggests the data are informative. </p>
+<table class="dataframe table table-striped table-sm">
+  <thead>
+    <tr style="text-align: left;">
+      <th></th>
+      <th>name</th>
+      <th>posterior_std</th>
+      <th>prior_std</th>
+      <th>std_ratio_post_over_prior</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>choice_asc_pt</td>
+      <td>120.535485</td>
+      <td>995.664925</td>
+      <td>0.121060</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>choice_beta_time_pt_ref</td>
+      <td>1.112403</td>
+      <td>600.031131</td>
+      <td>0.001854</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>beta_time_pt_lambda_environment</td>
+      <td>143.346123</td>
+      <td>601.090150</td>
+      <td>0.238477</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>struct_environmental_attitude_childSuburb</td>
+      <td>0.050717</td>
+      <td>1007.299725</td>
+      <td>0.000050</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>struct_environmental_attitude_ScaledIncome</td>
+      <td>0.006216</td>
+      <td>1002.075246</td>
+      <td>0.000006</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>struct_environmental_attitude_city_center_as_kid</td>
+      <td>0.114743</td>
+      <td>992.456839</td>
+      <td>0.000116</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>struct_environmental_attitude_artisans</td>
+      <td>0.096177</td>
+      <td>1002.452588</td>
+      <td>0.000096</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>struct_environmental_attitude_high_education</td>
+      <td>0.072615</td>
+      <td>1002.024534</td>
+      <td>0.000072</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>struct_environmental_attitude_low_education</td>
+      <td>0.073577</td>
+      <td>989.686173</td>
+      <td>0.000074</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>struct_environmental_attitude_sigma</td>
+      <td>0.194694</td>
+      <td>603.335696</td>
+      <td>0.000323</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>beta_time_pt_lambda_car_centric</td>
+      <td>152.722166</td>
+      <td>600.359911</td>
+      <td>0.254384</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>struct_car_centric_attitude_high_education</td>
+      <td>0.202617</td>
+      <td>1000.132891</td>
+      <td>0.000203</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>struct_car_centric_attitude_top_manager</td>
+      <td>0.155476</td>
+      <td>1002.435167</td>
+      <td>0.000155</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>struct_car_centric_attitude_employees</td>
+      <td>0.081275</td>
+      <td>1006.698078</td>
+      <td>0.000081</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>struct_car_centric_attitude_age_30_less</td>
+      <td>0.261292</td>
+      <td>1009.990329</td>
+      <td>0.000259</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>struct_car_centric_attitude_ScaledIncome</td>
+      <td>0.011113</td>
+      <td>1004.201912</td>
+      <td>0.000011</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>struct_car_centric_attitude_car_oriented_parents</td>
+      <td>0.193455</td>
+      <td>999.566121</td>
+      <td>0.000194</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>struct_car_centric_attitude_sigma</td>
+      <td>0.423305</td>
+      <td>606.075636</td>
+      <td>0.000698</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>choice_beta_cost</td>
+      <td>0.028214</td>
+      <td>605.481493</td>
+      <td>0.000047</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>choice_car_centric_pt_cte</td>
+      <td>335.822122</td>
+      <td>994.291481</td>
+      <td>0.337750</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>choice_environment_pt_cte</td>
+      <td>205.030738</td>
+      <td>996.655596</td>
+      <td>0.205719</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>choice_asc_car</td>
+      <td>120.933379</td>
+      <td>997.164396</td>
+      <td>0.121277</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>choice_beta_time_car_ref</td>
+      <td>2.098582</td>
+      <td>602.064585</td>
+      <td>0.003486</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>beta_time_car_lambda_environment</td>
+      <td>169.134049</td>
+      <td>601.479476</td>
+      <td>0.281197</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>beta_time_car_lambda_car_centric</td>
+      <td>152.163500</td>
+      <td>604.275134</td>
+      <td>0.251812</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>choice_car_centric_car_cte</td>
+      <td>327.095286</td>
+      <td>996.699135</td>
+      <td>0.328179</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>choice_environment_car_cte</td>
+      <td>153.570973</td>
+      <td>995.907422</td>
+      <td>0.154202</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>choice_beta_dist_work</td>
+      <td>33.185538</td>
+      <td>611.476815</td>
+      <td>0.054271</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>choice_beta_dist_other_purposes</td>
+      <td>47.683498</td>
+      <td>597.124082</td>
+      <td>0.079855</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>measurement_intercept_Envir06</td>
+      <td>0.225300</td>
+      <td>1005.792174</td>
+      <td>0.000224</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>measurement_coefficient_car_centric_attitude_Envir06</td>
+      <td>26.806278</td>
+      <td>1003.971690</td>
+      <td>0.026700</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>measurement_coefficient_environmental_attitude_Envir06</td>
+      <td>67.607273</td>
+      <td>1008.926901</td>
+      <td>0.067009</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>measurement_Envir06_sigma</td>
+      <td>0.101558</td>
+      <td>599.525690</td>
+      <td>0.000169</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>likert_delta_0</td>
+      <td>0.017971</td>
+      <td>604.717421</td>
+      <td>0.000030</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>likert_delta_1</td>
+      <td>0.065670</td>
+      <td>596.599525</td>
+      <td>0.000110</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>measurement_intercept_Envir02</td>
+      <td>0.120260</td>
+      <td>993.797756</td>
+      <td>0.000121</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>measurement_coefficient_car_centric_attitude_Envir02</td>
+      <td>133.831853</td>
+      <td>1005.632326</td>
+      <td>0.133082</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>measurement_intercept_Mobil03</td>
+      <td>0.246678</td>
+      <td>993.541657</td>
+      <td>0.000248</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>measurement_coefficient_car_centric_attitude_Mobil03</td>
+      <td>51.735089</td>
+      <td>997.121825</td>
+      <td>0.051884</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>measurement_Mobil03_sigma</td>
+      <td>0.266030</td>
+      <td>613.270239</td>
+      <td>0.000434</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>measurement_intercept_Envir05</td>
+      <td>0.353599</td>
+      <td>1001.230529</td>
+      <td>0.000353</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>measurement_coefficient_environmental_attitude_Envir05</td>
+      <td>87.417840</td>
+      <td>995.466113</td>
+      <td>0.087816</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>measurement_Envir05_sigma</td>
+      <td>0.210729</td>
+      <td>601.852193</td>
+      <td>0.000350</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>measurement_intercept_Envir03</td>
+      <td>0.233087</td>
+      <td>996.538220</td>
+      <td>0.000234</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>measurement_coefficient_environmental_attitude_Envir03</td>
+      <td>109.417165</td>
+      <td>993.227461</td>
+      <td>0.110163</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>measurement_Envir03_sigma</td>
+      <td>0.213011</td>
+      <td>605.147268</td>
+      <td>0.000352</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>measurement_intercept_Envir01</td>
+      <td>0.171198</td>
+      <td>1003.848026</td>
+      <td>0.000171</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>measurement_coefficient_environmental_attitude_Envir01</td>
+      <td>191.609544</td>
+      <td>994.997838</td>
+      <td>0.192573</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>measurement_intercept_NbCar</td>
+      <td>543.652845</td>
+      <td>998.669191</td>
+      <td>0.544377</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>measurement_coefficient_car_centric_attitude_NbCar</td>
+      <td>797.039141</td>
+      <td>993.755553</td>
+      <td>0.802047</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>measurement_coefficient_environmental_attitude_NbCar</td>
+      <td>871.636198</td>
+      <td>1003.096879</td>
+      <td>0.868945</td>
+    </tr>
+    <tr>
+      <th>51</th>
+      <td>measurement_NbCar_sigma</td>
+      <td>278.358593</td>
+      <td>607.202626</td>
+      <td>0.458428</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>cars_delta_1</td>
+      <td>544.446821</td>
+      <td>598.246327</td>
+      <td>0.910071</td>
+    </tr>
+    <tr>
+      <th>53</th>
+      <td>cars_delta_2</td>
+      <td>520.315536</td>
+      <td>611.389078</td>
+      <td>0.851038</td>
+    </tr>
+    <tr>
+      <th>54</th>
+      <td>measurement_intercept_Mobil08</td>
+      <td>0.222671</td>
+      <td>998.488097</td>
+      <td>0.000223</td>
+    </tr>
+    <tr>
+      <th>55</th>
+      <td>measurement_coefficient_car_centric_attitude_Mobil08</td>
+      <td>125.764640</td>
+      <td>1001.336598</td>
+      <td>0.125597</td>
+    </tr>
+    <tr>
+      <th>56</th>
+      <td>measurement_Mobil08_sigma</td>
+      <td>0.511442</td>
+      <td>602.324575</td>
+      <td>0.000849</td>
+    </tr>
+    <tr>
+      <th>57</th>
+      <td>measurement_intercept_LifSty07</td>
+      <td>0.128105</td>
+      <td>1006.968406</td>
+      <td>0.000127</td>
+    </tr>
+    <tr>
+      <th>58</th>
+      <td>measurement_coefficient_car_centric_attitude_LifSty07</td>
+      <td>61.957292</td>
+      <td>996.958793</td>
+      <td>0.062146</td>
+    </tr>
+    <tr>
+      <th>59</th>
+      <td>measurement_LifSty07_sigma</td>
+      <td>0.360571</td>
+      <td>598.713333</td>
+      <td>0.000602</td>
+    </tr>
+    <tr>
+      <th>60</th>
+      <td>measurement_intercept_Envir04</td>
+      <td>0.086608</td>
+      <td>999.539966</td>
+      <td>0.000087</td>
+    </tr>
+    <tr>
+      <th>61</th>
+      <td>measurement_coefficient_environmental_attitude_Envir04</td>
+      <td>63.571720</td>
+      <td>1003.140434</td>
+      <td>0.063373</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>measurement_Envir04_sigma</td>
+      <td>0.108290</td>
+      <td>599.585779</td>
+      <td>0.000181</td>
+    </tr>
+    <tr>
+      <th>63</th>
+      <td>measurement_intercept_LifSty01</td>
+      <td>0.100934</td>
+      <td>1001.246699</td>
+      <td>0.000101</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>measurement_coefficient_environmental_attitude_LifSty01</td>
+      <td>34.623805</td>
+      <td>995.223349</td>
+      <td>0.034790</td>
+    </tr>
+    <tr>
+      <th>65</th>
+      <td>measurement_LifSty01_sigma</td>
+      <td>0.139289</td>
+      <td>598.847892</td>
+      <td>0.000233</td>
+    </tr>
+    <tr>
+      <th>66</th>
+      <td>measurement_intercept_Mobil12</td>
+      <td>99.024212</td>
+      <td>997.230298</td>
+      <td>0.099299</td>
+    </tr>
+    <tr>
+      <th>67</th>
+      <td>measurement_coefficient_environmental_attitude_Mobil12</td>
+      <td>1044.479586</td>
+      <td>1005.969345</td>
+      <td>1.038282</td>
+    </tr>
+    <tr>
+      <th>68</th>
+      <td>measurement_Mobil12_sigma</td>
+      <td>697.849378</td>
+      <td>599.239471</td>
+      <td>1.164558</td>
+    </tr>
+    <tr>
+      <th>69</th>
+      <td>measurement_intercept_Mobil10</td>
+      <td>483.781049</td>
+      <td>1000.598506</td>
+      <td>0.483492</td>
+    </tr>
+    <tr>
+      <th>70</th>
+      <td>measurement_coefficient_car_centric_attitude_Mobil10</td>
+      <td>1065.398151</td>
+      <td>1002.628493</td>
+      <td>1.062605</td>
+    </tr>
+    <tr>
+      <th>71</th>
+      <td>measurement_Mobil10_sigma</td>
+      <td>592.593396</td>
+      <td>603.951582</td>
+      <td>0.981194</td>
+    </tr>
+    <tr>
+      <th>72</th>
+      <td>measurement_intercept_Mobil09</td>
+      <td>0.262918</td>
+      <td>1005.051297</td>
+      <td>0.000262</td>
+    </tr>
+    <tr>
+      <th>73</th>
+      <td>measurement_coefficient_car_centric_attitude_Mobil09</td>
+      <td>96.033664</td>
+      <td>999.800050</td>
+      <td>0.096053</td>
+    </tr>
+    <tr>
+      <th>74</th>
+      <td>measurement_Mobil09_sigma</td>
+      <td>0.133518</td>
+      <td>605.964052</td>
+      <td>0.000220</td>
+    </tr>
+    <tr>
+      <th>75</th>
+      <td>measurement_intercept_Mobil05</td>
+      <td>0.607574</td>
+      <td>991.507210</td>
+      <td>0.000613</td>
+    </tr>
+    <tr>
+      <th>76</th>
+      <td>measurement_coefficient_car_centric_attitude_Mobil05</td>
+      <td>151.797430</td>
+      <td>996.826720</td>
+      <td>0.152281</td>
+    </tr>
+    <tr>
+      <th>77</th>
+      <td>measurement_Mobil05_sigma</td>
+      <td>0.609002</td>
+      <td>600.321392</td>
+      <td>0.001014</td>
+    </tr>
+  </tbody>
+</table>
+
+<h1>Simulated quantities</h1>
+<table class="dataframe table table-striped table-sm">
+  <thead>
+    <tr style="text-align: left;">
+      <th>group</th>
+      <th>variable</th>
+      <th>dims</th>
+      <th>shape</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>constant_data</td>
+      <td>Choice</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CostCarCHF</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Envir01</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Envir02</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Envir03</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Envir04</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Envir05</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Envir06</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>LifSty01</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>LifSty07</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>MarginalCostPT</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Mobil03</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Mobil05</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Mobil08</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Mobil09</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Mobil10</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>Mobil12</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>NbCar</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>PurpHWH</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>ScaledIncome</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TimeCar_hour</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TimePT_hour</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>WaitingTimePT</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>age_30_less</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>artisans</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>car_oriented_parents</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>childSuburb</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>city_center_as_kid</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>distance_km</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>employees</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>high_education</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>low_education</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>top_manager</td>
+      <td>(Dimension.OBS,)</td>
+      <td>(896,)</td>
+    </tr>
+    <tr>
+      <td>log_likelihood</td>
+      <td>_choice</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(4, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>beta_time_car_lambda_car_centric</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>beta_time_car_lambda_environment</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>beta_time_pt_lambda_car_centric</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>beta_time_pt_lambda_environment</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>car_centric_attitude</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>cars_delta_1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>cars_delta_2</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_asc_car</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_asc_pt</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_beta_cost</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_beta_dist_other_purposes</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_beta_dist_work</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_beta_time_car_ref</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_beta_time_pt_ref</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_car_centric_car_cte</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_car_centric_pt_cte</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_environment_car_cte</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>choice_environment_pt_cte</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>environmental_attitude</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>likert_delta_0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>likert_delta_1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>log_like</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(4, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Envir03_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Envir04_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Envir05_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Envir06_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_LifSty01_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_LifSty07_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Mobil03_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Mobil05_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Mobil08_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Mobil09_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Mobil10_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_Mobil12_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_NbCar_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Envir02</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Envir06</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_LifSty07</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil03</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil05</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil08</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil09</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil10</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_car_centric_attitude_NbCar</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir01</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir03</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir04</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir05</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir06</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_LifSty01</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_Mobil12</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_coefficient_environmental_attitude_NbCar</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Envir01</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Envir02</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Envir03</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Envir04</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Envir05</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Envir06</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_LifSty01</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_LifSty07</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Mobil03</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Mobil05</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Mobil08</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Mobil09</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Mobil10</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_Mobil12</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>measurement_intercept_NbCar</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_ScaledIncome</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_age_30_less</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_car_oriented_parents</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_draws</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(4, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_employees</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_high_education</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_car_centric_attitude_top_manager</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_ScaledIncome</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_artisans</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_childSuburb</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_city_center_as_kid</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_draws</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(4, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_high_education</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_low_education</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>struct_environmental_attitude_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>beta_time_car_lambda_car_centric</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>beta_time_car_lambda_environment</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>beta_time_pt_lambda_car_centric</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>beta_time_pt_lambda_environment</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>car_centric_attitude</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>cars_delta_1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>cars_delta_2</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_asc_car</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_asc_pt</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_beta_cost</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_beta_dist_other_purposes</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_beta_dist_work</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_beta_time_car_ref</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_beta_time_pt_ref</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_car_centric_car_cte</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_car_centric_pt_cte</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_environment_car_cte</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>choice_environment_pt_cte</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>environmental_attitude</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>likert_delta_0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>likert_delta_1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>log_like</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(1, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Envir03_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Envir04_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Envir05_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Envir06_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_LifSty01_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_LifSty07_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Mobil03_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Mobil05_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Mobil08_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Mobil09_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Mobil10_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_Mobil12_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_NbCar_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Envir02</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Envir06</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_LifSty07</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil03</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil05</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil08</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil09</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_Mobil10</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_car_centric_attitude_NbCar</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir01</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir03</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir04</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir05</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_Envir06</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_LifSty01</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_Mobil12</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_coefficient_environmental_attitude_NbCar</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Envir01</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Envir02</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Envir03</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Envir04</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Envir05</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Envir06</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_LifSty01</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_LifSty07</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Mobil03</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Mobil05</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Mobil08</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Mobil09</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Mobil10</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_Mobil12</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>measurement_intercept_NbCar</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_ScaledIncome</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_age_30_less</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_car_oriented_parents</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_draws</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(1, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_employees</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_high_education</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_car_centric_attitude_top_manager</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_ScaledIncome</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_artisans</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_childSuburb</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_city_center_as_kid</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_draws</td>
+      <td>(chain, draw, Dimension.OBS)</td>
+      <td>(1, 20000, 896)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_high_education</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_low_education</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>struct_environmental_attitude_sigma</td>
+      <td>(chain, draw)</td>
+      <td>(1, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>acceptance_rate</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>diverging</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>energy</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>lp</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>n_steps</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>step_size</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>tree_depth</td>
+      <td>(chain, draw)</td>
+      <td>(4, 20000)</td>
+    </tr>
+  </tbody>
+</table>
+<h1>Diagnostics</h1>
+<p class="biostyle">The plots below summarize MCMC diagnostics. Look for well-mixed chains, agreement across chains, and weak lag dependence. </p><table border="0">
+<tr class=biostyle><td colspan=2><p><strong>Trace</strong>: per-chain draws vs iteration and marginal density. Good: chains overlap, no trends or stickiness, rapid mixing. Suspicious: chains at different levels, strong drifts, long flat stretches, sudden jumps.</p></td></tr>
+<tr class=biostyle><td><strong>Trace</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b06_hybrid_bayes_figs/trace.png" alt="trace"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Rank plot</strong>: rank-normalized samples by chain. Good: chains produce nearly uniform, overlapping ranks. Suspicious: U-shapes, spikes, or chains with very different rank distributions (poor mixing or non-stationarity).</p></td></tr>
+<tr class=biostyle><td><strong>Rank plot</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b06_hybrid_bayes_figs/rank.png" alt="rank"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Energy</strong>: HMC energy diagnostics and BFMI. Good: similar energy distributions across chains, no extreme tails; BFMI not flagged. Suspicious: clearly separated energy histograms across chains or very low BFMI (e.g., &lt; 0.3) indicating poor exploration.</p></td></tr>
+<tr class=biostyle><td><strong>Energy</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b06_hybrid_bayes_figs/energy.png" alt="energy"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Autocorrelation</strong>: lag correlation within chains. Good: autocorrelation decays quickly toward 0 within tens of lags. Suspicious: long positive tails (slow decay), high values at large lags, or periodic patterns (slow mixing).</p></td></tr>
+<tr class=biostyle><td><strong>Autocorrelation</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b06_hybrid_bayes_figs/autocorr.png" alt="autocorr"></td></tr>
+</table>
+
+</body>
+</html>

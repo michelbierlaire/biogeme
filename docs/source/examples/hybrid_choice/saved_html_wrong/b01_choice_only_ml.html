@@ -1,0 +1,98 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>b01_choice_only_ml - Report from biogeme 3.3.2 [2025-12-23]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.3.2 [2025-12-23]">
+<meta name="author" content="{bv.author}">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+
+<p>biogeme 3.3.2 [2025-12-23]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2025-12-23 15:18:17.225302</p>
+<table>
+<tr class=biostyle><td align=right><strong>Report file</strong>:	</td><td>b01_choice_only_ml.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>optima.dat</td></tr>
+</table>
+<h2>Warning: second derivatives matrix not available.</h2>
+<p>The second derivatives matrix has not been calculated. The statistics requiring it have been generated using the BHHH matrix or the bootstrap samples (if available).</p>
+<h1>Estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Number of estimated parameters</strong>: </td> <td>7</td></tr>
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>896</td></tr>
+<tr class=biostyle><td align=right ><strong>Excluded observations</strong>: </td> <td>0</td></tr>
+<tr class=biostyle><td align=right ><strong>Init log likelihood</strong>: </td> <td>-984.3566</td></tr>
+<tr class=biostyle><td align=right ><strong>Final log likelihood</strong>: </td> <td>-512.5193</td></tr>
+<tr class=biostyle><td align=right ><strong>Likelihood ratio test for the init. model</strong>: </td> <td>943.6747</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square for the init. model</strong>: </td> <td>0.479</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square-bar for the init. model</strong>: </td> <td>0.472</td></tr>
+<tr class=biostyle><td align=right ><strong>Akaike Information Criterion</strong>: </td> <td>1039.039</td></tr>
+<tr class=biostyle><td align=right ><strong>Bayesian Information Criterion</strong>: </td> <td>1072.624</td></tr>
+<tr class=biostyle><td align=right ><strong>Final gradient norm</strong>: </td> <td>6.3253E-03</td></tr>
+<tr class=biostyle><td align=right ><strong>Bootstrapping time</strong>: </td> <td>None</td></tr>
+<tr class=biostyle><td align=right ><strong>Relative gradient</strong>: </td> <td>5.334079e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Cause of termination</strong>: </td> <td>Relative gradient = 5.3e-06 <= 6.1e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of function evaluations</strong>: </td> <td>187</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of gradient evaluations</strong>: </td> <td>105</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of hessian evaluations</strong>: </td> <td>0</td></tr>
+<tr class=biostyle><td align=right ><strong>Algorithm</strong>: </td> <td>BFGS with trust region for simple bound constraints</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of iterations</strong>: </td> <td>82</td></tr>
+<tr class=biostyle><td align=right ><strong>Proportion of Hessian calculation</strong>: </td> <td>0/52 = 0.0%</td></tr>
+<tr class=biostyle><td align=right ><strong>Optimization time</strong>: </td> <td>0:00:00.739568</td></tr>
+</table>
+
+<h1>Estimated parameters</h1>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value</th><th>BHHH std err.</th><th>BHHH t-stat.</th><th>BHHH p-value</th></tr>
+<tr class=biostyle><td>3</td><td>choice_asc_car</td><td>-0.246</td><td>0.231</td><td>-1.07</td><td>0.286</td></tr>
+<tr class=biostyle><td>0</td><td>choice_asc_pt</td><td>-0.665</td><td>0.277</td><td>-2.4</td><td>0.0163</td></tr>
+<tr class=biostyle><td>2</td><td>choice_beta_cost</td><td>-0.0795</td><td>0.00833</td><td>-9.55</td><td>0</td></tr>
+<tr class=biostyle><td>6</td><td>choice_beta_dist_other_purposes</td><td>-0.324</td><td>0.0306</td><td>-10.6</td><td>0</td></tr>
+<tr class=biostyle><td>5</td><td>choice_beta_dist_work</td><td>-0.205</td><td>0.0148</td><td>-13.8</td><td>0</td></tr>
+<tr class=biostyle><td>4</td><td>choice_beta_time_car_ref</td><td>-2.03</td><td>0.155</td><td>-13.1</td><td>0</td></tr>
+<tr class=biostyle><td>1</td><td>choice_beta_time_pt_ref</td><td>-0.956</td><td>0.113</td><td>-8.44</td><td>0</td></tr>
+</table>
+<h2>Correlation of coefficients</h2>
+<table border="1">
+<tr class=biostyle><th>Coefficient 1</th><th>Coefficient 2</th><th>BHHH covariance</th><th>BHHH correlation</th><th>BHHH t-test</th><th>BHHH p-value</th></tr><tr class=biostyle><td>choice_beta_time_pt_ref</td><td>choice_asc_pt</td><td>-0.0111</td><td>-0.355</td><td>-0.869</td><td>0.385</td></tr>
+<tr class=biostyle><td>choice_beta_cost</td><td>choice_asc_pt</td><td>0.000145</td><td>0.063</td><td>2.12</td><td>0.0342</td></tr>
+<tr class=biostyle><td>choice_beta_cost</td><td>choice_beta_time_pt_ref</td><td>-0.000398</td><td>-0.422</td><td>7.49</td><td>6.97e-14</td></tr>
+<tr class=biostyle><td>choice_asc_car</td><td>choice_asc_pt</td><td>0.0497</td><td>0.777</td><td>2.4</td><td>0.0166</td></tr>
+<tr class=biostyle><td>choice_asc_car</td><td>choice_beta_time_pt_ref</td><td>0.000851</td><td>0.0326</td><td>2.79</td><td>0.0052</td></tr>
+<tr class=biostyle><td>choice_asc_car</td><td>choice_beta_cost</td><td>-2.82e-05</td><td>-0.0147</td><td>-0.721</td><td>0.471</td></tr>
+<tr class=biostyle><td>choice_beta_time_car_ref</td><td>choice_asc_pt</td><td>-0.00206</td><td>-0.0479</td><td>-4.22</td><td>2.4e-05</td></tr>
+<tr class=biostyle><td>choice_beta_time_car_ref</td><td>choice_beta_time_pt_ref</td><td>0.0128</td><td>0.73</td><td>-10.2</td><td>0</td></tr>
+<tr class=biostyle><td>choice_beta_time_car_ref</td><td>choice_beta_cost</td><td>-0.000454</td><td>-0.351</td><td>-12.3</td><td>0</td></tr>
+<tr class=biostyle><td>choice_beta_time_car_ref</td><td>choice_asc_car</td><td>-0.000811</td><td>-0.0226</td><td>-6.36</td><td>2.05e-10</td></tr>
+<tr class=biostyle><td>choice_beta_dist_work</td><td>choice_asc_pt</td><td>0.00175</td><td>0.425</td><td>1.7</td><td>0.0893</td></tr>
+<tr class=biostyle><td>choice_beta_dist_work</td><td>choice_beta_time_pt_ref</td><td>0.000246</td><td>0.147</td><td>6.7</td><td>2.04e-11</td></tr>
+<tr class=biostyle><td>choice_beta_dist_work</td><td>choice_beta_cost</td><td>3.14e-07</td><td>0.00254</td><td>-7.37</td><td>1.77e-13</td></tr>
+<tr class=biostyle><td>choice_beta_dist_work</td><td>choice_asc_car</td><td>0.00175</td><td>0.51</td><td>0.185</td><td>0.853</td></tr>
+<tr class=biostyle><td>choice_beta_dist_work</td><td>choice_beta_time_car_ref</td><td>0.000469</td><td>0.204</td><td>12</td><td>0</td></tr>
+<tr class=biostyle><td>choice_beta_dist_other_purposes</td><td>choice_asc_pt</td><td>0.00385</td><td>0.455</td><td>1.29</td><td>0.197</td></tr>
+<tr class=biostyle><td>choice_beta_dist_other_purposes</td><td>choice_beta_time_pt_ref</td><td>0.000331</td><td>0.0956</td><td>5.52</td><td>3.41e-08</td></tr>
+<tr class=biostyle><td>choice_beta_dist_other_purposes</td><td>choice_beta_cost</td><td>-3.19e-06</td><td>-0.0125</td><td>-7.68</td><td>1.58e-14</td></tr>
+<tr class=biostyle><td>choice_beta_dist_other_purposes</td><td>choice_asc_car</td><td>0.00398</td><td>0.563</td><td>-0.362</td><td>0.718</td></tr>
+<tr class=biostyle><td>choice_beta_dist_other_purposes</td><td>choice_beta_time_car_ref</td><td>0.000557</td><td>0.117</td><td>11.1</td><td>0</td></tr>
+<tr class=biostyle><td>choice_beta_dist_other_purposes</td><td>choice_beta_dist_work</td><td>0.000146</td><td>0.321</td><td>-4.05</td><td>5.03e-05</td></tr>
+</table>
+</body>
+</html>
