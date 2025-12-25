@@ -125,10 +125,10 @@ def _ordered_model(
     for lv in latent_variables:
         intercepts[lv.normalization.indicator] = 0.0
 
-    # Normalization: for each latent variable, force sigma_star at its normalization
-    # indicator to 1.0 (anchor scale).
-    for lv in latent_variables:
-        sigma_star[lv.normalization.indicator] = 1.0
+    # Normalization: for each group of thresholds, normalize one sigma_star to 1.
+    # This is due to the ordered probit.
+    for lt in likert_types:
+        sigma_star[lt.scale_normalization] = 1.0
 
     # Linear predictors per indicator.
     models: dict[str, float | Expression] = {
