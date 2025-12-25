@@ -13,6 +13,17 @@ There are also examples associated with published documentation. The documentati
 is written for the version of Biogeme at the time of publication. The online examples are updated for the latest
 version.
 
+Bayesian estimation
+%%%%%%%%%%%%%%%%%%%
+All the Swissmetro examples are provided in a version using Bayesian estimation. We refer the interested user to
+`Bierlaire (2025a) <https://transp-or.epfl.ch/documents/technicalReports/Bier25_bayes_a.pdf>`_ and
+`Bierlaire (2025b) <https://transp-or.epfl.ch/documents/technicalReports/Bier25_bayes_b.pdf>`_.
+
+.. toctree::
+  :maxdepth: 2
+
+  auto_examples/bayesian_swissmetro/index.rst
+
 Calculating indicators
 %%%%%%%%%%%%%%%%%%%%%%
 After the parameters of a model have been estimated, the model can be used to derive various indicators, such as
@@ -45,13 +56,12 @@ in `Bierlaire (2019) <http://transp-or.epfl.ch/documents/technicalReports/Bier19
 
 Choice models with latent variables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Hybrid choice models, that is, choice models involving latent variables, can be estimated with Biogeme. This is
-explained in details in `Bierlaire (2018b) <https://transp-or.epfl.ch/documents/technicalReports/Bier18b.pdf>`_
+Hybrid choice models, that is, choice models involving latent variables, can be estimated with Biogeme.
 
 .. toctree::
   :maxdepth: 2
 
-  auto_examples/latent/index.rst
+  auto_examples/hybrid_choice/index.rst
 
 Assisted specification algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
