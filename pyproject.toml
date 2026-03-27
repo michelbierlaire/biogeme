@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "biogeme"
 dynamic = ["version"]
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.10"
 description = "Estimation and application of discrete choice models"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
@@ -97,4 +97,5 @@ dev = [
     "black>=26.3.1",
     "pytest>=9.0.2",
     "ruff>=0.15.8",
+    "tox>=4.35.0",
 ]
