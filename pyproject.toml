@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "biogeme"
 dynamic = ["version"]
+requires-python = ">=3.13,<3.14"
 description = "Estimation and application of discrete choice models"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
@@ -23,6 +24,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython"
 ]
 
@@ -51,7 +53,7 @@ dependencies = [
 
 [project.optional-dependencies]
 testing = [
-    "pytest >= 7.2.0",
+    "pytest>=9.0.2",
     "pytest-cov >= 4.0.0",
     "tox >= 3.27.1"
 ]
@@ -83,7 +85,16 @@ biogeme = ["*/__pycache__", "*/__pycache__/*", "*/*.pyc", "__pycache__", "*.pyc"
 [tool.black]
 line-length = 88
 
-[tool.isort]
-profile = "black"
-line_length = 88
+[tool.ruff]
+line-length = 88
 
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
+ignore = ["E501"]
+
+[dependency-groups]
+dev = [
+    "black>=26.3.1",
+    "pytest>=9.0.2",
+    "ruff>=0.15.8",
+]
