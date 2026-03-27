@@ -447,6 +447,6 @@ reports/bayesian/bayesian_biogeme.toc
 reports/bayesian/bayesian_theory.ps
 reports/bayesian/bayesian_theory.toc
 reports/latent_book/latent_book.out
-/docs/source/examples/hybrid_choice/saved_results
+/docs/source/examples/hybrid_choice_old/saved_results
 reports/latent_book/saved_results/b04_choice_only_bayes.nc
 *.nc
