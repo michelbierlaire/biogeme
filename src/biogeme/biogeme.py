@@ -20,7 +20,6 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 import pytensor.tensor as pt
-from icecream import ic
 from tqdm import tqdm
 
 from biogeme.bayesian_estimation import (
@@ -171,7 +170,6 @@ class BIOGEME:
            exception is raised.
 
         """
-        ic("BIOGEME OBJECT CREATED")
         if isinstance(parameters, Parameters):
             logger.info("Biogeme parameters provided by the user.")
             self.biogeme_parameters: Parameters = parameters
