@@ -2,6 +2,7 @@ import os
 import shutil
 
 import tomlkit as tk
+
 from faq import faq
 from sections import about, archives, documentation, install, resources, special
 
