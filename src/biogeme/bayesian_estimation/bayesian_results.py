@@ -27,6 +27,7 @@ from biogeme.tools import timeit
 from scipy.stats import gaussian_kde
 from tabulate import tabulate
 
+from .bayesian_results_summary import BayesianResultsSummary, EstimatedBetaSummary
 from .raw_bayesian_results import RawBayesianResults
 
 logger = logging.getLogger(__name__)
@@ -182,8 +183,8 @@ class BayesianResults:
             raise ValueError("No scalar variables found in the posterior to summarize.")
         self.model_name = raw.model_name
         self.data_name = raw.data_name
-        self.chains = int(getattr(raw, "chains", 0) or 0)
-        self.draws = int(getattr(raw, "draws", 0) or 0)
+        self.chains = int(raw.chains or 0)
+        self.draws = int(raw.draws or 0)
         self.hdi_prob = hdi_prob
         self.parameters = params
         self.array_metadata = arrays
@@ -203,10 +204,12 @@ class BayesianResults:
         self._ess_bulk_ds = None
         self._ess_tail_ds = None
         self._diagnostics_computed = False
+        self._identification_diagnostics_summary: dict[str, Any] | None = None
+        self._diagnostic_figure_references: dict[str, str] = {}
 
     def ensure_diagnostics(self) -> None:
         """Compute R-hat and ESS lazily. Cached after first attempt."""
-        if getattr(self, "_diagnostics_computed", False):
+        if self._diagnostics_computed:
             return
 
         import time
@@ -317,6 +320,42 @@ class BayesianResults:
         p_neg = 1.0 - p_pos
         return 2.0 * min(p_pos, p_neg)
 
+    @staticmethod
+    def _normalize_identification_diagnostics_for_summary(
+        diagnostics: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Normalize identification diagnostics for storage in the summary object.
+
+        The HTML reporting layer expects the keys ``posterior`` and ``prior``
+        rather than the internal names ``posterior_cov`` and ``prior_cov``.
+        Pandas objects are converted to plain records so they can be serialized
+        to YAML.
+
+        :param diagnostics: Raw diagnostics returned by
+            :meth:`identification_diagnostics`.
+        :return: Normalized diagnostics dictionary suitable for
+            :class:`BayesianResultsSummary`.
+        """
+        per_parameter = diagnostics.get('per_parameter')
+        if isinstance(per_parameter, pd.DataFrame):
+            per_parameter_summary: list[dict[str, Any]] | None = per_parameter.to_dict(
+                'records'
+            )
+        else:
+            per_parameter_summary = per_parameter
+
+        return {
+            'has_prior': diagnostics.get('has_prior'),
+            'posterior': diagnostics.get('posterior_cov') or {},
+            'prior': diagnostics.get('prior_cov') or {},
+            'per_parameter': per_parameter_summary,
+            'flags': diagnostics.get('flags') or [],
+            'posterior_near_null_direction': diagnostics.get(
+                'posterior_near_null_direction'
+            ),
+            'prior_near_null_direction': diagnostics.get('prior_near_null_direction'),
+        }
+
     @property
     @timeit(label="log_likelihood")
     def log_likelihood(self):
@@ -362,7 +401,7 @@ class BayesianResults:
             or self.__dict__['raw_bayesian_results'] is None
         ):
             raise BiogemeError(f'Impossible to obtain {name}. No result available.')
-        return getattr(self.raw_bayesian_results, name)
+        return object.__getattribute__(self.raw_bayesian_results, name)
 
     @property
     def idata(self) -> az.InferenceData:
@@ -561,13 +600,13 @@ class BayesianResults:
         :return: A DataFrame with columns ``group``, ``variable``, ``dims``, and ``shape``.
         :raises BiogemeError: If the inference data is missing or malformed.
         """
-        if getattr(self, "_idata", None) is None:
+        if self._idata is None:
             raise BiogemeError("No inference data is available.")
 
         rows: list[dict[str, Any]] = []
 
         # Iterate over ArviZ groups present in the InferenceData
-        for group in getattr(self._idata, "groups", lambda: [])():
+        for group in self._idata.groups():
             ds = getattr(self._idata, group, None)
             if ds is None:
                 continue
@@ -599,6 +638,24 @@ class BayesianResults:
         # Stable, readable ordering
         df = df.sort_values(["group", "variable"], kind="stable").reset_index(drop=True)
         return df
+
+    def set_diagnostic_figure_references(
+        self,
+        figure_references: dict[str, str] | None,
+    ) -> None:
+        """Store references to pre-rendered diagnostic figures.
+
+        These references are later transmitted to
+        :class:`BayesianResultsSummary` so that reports can be generated without
+        access to posterior draws.
+
+        :param figure_references: Mapping from diagnostic figure names to
+            filenames or paths.
+        """
+        if figure_references is None:
+            self._diagnostic_figure_references = {}
+        else:
+            self._diagnostic_figure_references = dict(figure_references)
 
     def generate_general_information(self):
         results = {
@@ -632,6 +689,77 @@ class BayesianResults:
 
     def short_summary(self):
         return tabulate(self.generate_general_information().items(), tablefmt="plain")
+
+    def to_summary(self) -> BayesianResultsSummary:
+        """Convert the full Bayesian results into a lightweight summary object.
+
+        The returned object contains only derived summaries and metadata needed
+        for inspection and serialization. It does not contain posterior draws.
+
+        :return: Lightweight summary of the Bayesian estimation results.
+        """
+        self.ensure_diagnostics()
+
+        parameter_summaries = {
+            name: EstimatedBetaSummary(
+                name=beta.name,
+                mean=beta.mean,
+                median=beta.median,
+                mode=beta.mode,
+                std_err=beta.std_err,
+                z_value=beta.z_value,
+                p_value=beta.p_value,
+                hdi_low=beta.hdi_low,
+                hdi_high=beta.hdi_high,
+                rhat=beta.rhat,
+                effective_sample_size_bulk=beta.effective_sample_size_bulk,
+                effective_sample_size_tail=beta.effective_sample_size_tail,
+            )
+            for name, beta in self.parameters.items()
+        }
+
+        stored_variables_report = self.report_stored_variables().to_dict("records")
+
+        return BayesianResultsSummary(
+            model_name=self.model_name,
+            data_name=self.data_name,
+            chains=self.chains,
+            draws=self.draws,
+            hdi_prob=self.hdi_prob,
+            calculate_likelihood=self.calculate_likelihood,
+            calculate_waic=self.calculate_waic,
+            calculate_loo=self.calculate_loo,
+            beta_names=list(self.raw_bayesian_results.beta_names),
+            parameters=parameter_summaries,
+            array_metadata=dict(self.array_metadata),
+            posterior_predictive_loglike=(
+                self.posterior_predictive_loglike if self.calculate_likelihood else None
+            ),
+            expected_log_likelihood=(
+                self.expected_log_likelihood if self.calculate_likelihood else None
+            ),
+            best_draw_log_likelihood=(
+                self.best_draw_log_likelihood if self.calculate_likelihood else None
+            ),
+            waic=self.waic if self.calculate_waic else None,
+            waic_se=self.waic_se if self.calculate_waic else None,
+            p_waic=self.p_waic if self.calculate_waic else None,
+            loo=self.loo if self.calculate_loo else None,
+            loo_se=self.loo_se if self.calculate_loo else None,
+            p_loo=self.p_loo if self.calculate_loo else None,
+            sampler=self.raw_bayesian_results.sampler,
+            target_accept=self.raw_bayesian_results.target_accept,
+            run_time=self.raw_bayesian_results.run_time,
+            number_of_observations=self.raw_bayesian_results.number_of_observations,
+            user_notes=self.raw_bayesian_results.user_notes,
+            stored_variables_report=stored_variables_report,
+            identification_diagnostics_summary=self._identification_diagnostics_summary,
+            diagnostic_figure_references=(
+                dict(self._diagnostic_figure_references)
+                if self._diagnostic_figure_references
+                else None
+            ),
+        )
 
     def summarize_array_variable(
         self,
@@ -1086,7 +1214,7 @@ class BayesianResults:
 
         # Select variables
         if var_names is None:
-            candidates = list(getattr(self.raw_bayesian_results, 'beta_names', []))
+            candidates = list(self.raw_bayesian_results.beta_names)
             # keep only scalar posterior vars that we summarized
             var_names = [n for n in candidates if n in self.parameters]
             if not var_names:
@@ -1125,9 +1253,7 @@ class BayesianResults:
         post_std = np.sqrt(np.diag(cov_post))
         post_std = np.asarray(post_std, dtype=float)
 
-        has_prior = (
-            hasattr(idata, 'prior') and getattr(idata, 'prior', None) is not None
-        )
+        has_prior = 'prior' in idata.groups()
         prior_diag: dict[str, float] | None = None
         prior_std: np.ndarray | None = None
 
@@ -1188,7 +1314,7 @@ class BayesianResults:
                     + ("" if len(worst) < 10 else ", ...")
                 )
 
-        return {
+        diagnostics = {
             "has_prior": bool(prior_std is not None),
             "posterior_cov": post_diag,
             "prior_cov": prior_diag,
@@ -1199,3 +1325,7 @@ class BayesianResults:
                 prior_null_direction if prior_std is not None else None
             ),
         }
+        self._identification_diagnostics_summary = (
+            self._normalize_identification_diagnostics_for_summary(diagnostics)
+        )
+        return diagnostics

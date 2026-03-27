@@ -12,9 +12,12 @@ import pandas as pd
 
 from .container import Database
 
-RELEVANT_PREFIX = 'relevant_'
+RELEVANT_PREFIX = "relevant_"
 
 logger = logging.getLogger(__name__)
+
+
+# Set to False to silence IceCream debugging without removing the calls.
 
 
 def observation_suffix(index: int) -> str:
@@ -38,7 +41,7 @@ class PanelDatabase:
         self.panel_column: str = panel_column
 
     def __str__(self) -> str:
-        return f'biogeme panel database {self.database.name}'
+        return f"biogeme panel database {self.database.name}"
 
     def flatten_database(self, missing_data: float) -> tuple[pd.DataFrame, int]:
         """
@@ -57,7 +60,7 @@ class PanelDatabase:
 
         """
         dataframe = self.original_database.dataframe
-        logger.info(f'Flattening database [{dataframe.shape}].')
+        logger.info(f"Flattening database [{dataframe.shape}].")
 
         grouping_column = self.panel_column
         if dataframe.empty:
@@ -95,6 +98,6 @@ class PanelDatabase:
             flattened_rows.append(row)
 
         flat_dataframe = pd.DataFrame(flattened_rows)
-        logger.info(f'Database flattened [{flat_dataframe.shape}]')
+        logger.info(f"Database flattened [{flat_dataframe.shape}]")
 
         return flat_dataframe, largest_group

@@ -54,12 +54,12 @@ class PanelLikelihoodTrajectory(Expression):
         return the_copy
 
     def set_maximum_number_of_observations_per_individual(
-        self, max_number: int
+            self, max_number: int
     ) -> None:
-        from biogeme.database import observation_suffix, RELEVANT_PREFIX
+        from biogeme.database import RELEVANT_PREFIX, observation_suffix
 
         self.maximum_number_of_observations_per_individual = max_number
-        if self.initial_formula.get_class_name() == 'exp':
+        if self.initial_formula.get_class_name() == "exp":
             copies_of_expression = [
                 copy.deepcopy(self.initial_formula.child)
                 for _ in range(self.maximum_number_of_observations_per_individual)
@@ -72,9 +72,9 @@ class PanelLikelihoodTrajectory(Expression):
         list_of_terms = []
         for index, a_copy in enumerate(copies_of_expression):
             suffix = observation_suffix(index)
-            add_prefix_suffix_to_all_variables(expr=a_copy, prefix='', suffix=suffix)
+            add_prefix_suffix_to_all_variables(expr=a_copy, prefix="", suffix=suffix)
             the_term = ConditionalTermTuple(
-                condition=Variable(f'{RELEVANT_PREFIX}{suffix}'), term=a_copy
+                condition=Variable(f"{RELEVANT_PREFIX}{suffix}"), term=a_copy
             )
             list_of_terms.append(the_term)
 
@@ -82,24 +82,24 @@ class PanelLikelihoodTrajectory(Expression):
         self.children.append(self.child)
 
     def __str__(self) -> str:
-        return f'PanelLikelihoodTrajectory({self.initial_formula})'
+        return f"PanelLikelihoodTrajectory({self.initial_formula})"
 
     def __repr__(self) -> str:
-        return f'PanelLikelihoodTrajectory({repr(self.initial_formula)})'
+        return f"PanelLikelihoodTrajectory({repr(self.initial_formula)})"
 
     def recursive_construct_jax_function(
-        self, numerically_safe: bool
+            self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates recursively a function to be used by biogeme_jax. Must be overloaded by each expression
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
         if self.child is None:
-            error_msg = 'The PanelLikelihoodTrajectory has not been prepared before being evaluated.'
+            error_msg = "The PanelLikelihoodTrajectory has not been prepared before being evaluated."
             raise BiogemeError(error_msg)
         if self.maximum_number_of_observations_per_individual is None:
             error_msg = (
-                'Maximum number of observations per individual has not been defined.'
+                "Maximum number of observations per individual has not been defined."
             )
             raise BiogemeError(error_msg)
 

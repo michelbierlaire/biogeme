@@ -76,7 +76,7 @@ class MultipleProduct(Expression):
         :return: value of the expression
         :rtype: float
         """
-        result = 0.0
+        result = 1.0
         for e in self.get_children():
             result *= e.get_value()
         return result
@@ -106,7 +106,7 @@ class MultipleProduct(Expression):
                 fn(parameters, one_row, the_draws, the_random_variables)
                 for fn in compiled_children
             ]
-            result = jnp.prod(jnp.stack(terms))
+            result = jnp.prod(jnp.stack(terms), axis=0)
             return result
 
         return the_jax_function

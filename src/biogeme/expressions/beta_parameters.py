@@ -12,10 +12,10 @@ from typing import Protocol
 
 import pandas as pd
 import pymc as pm
-from biogeme.exceptions import BiogemeError
 from jax import numpy as jnp
 from pytensor.tensor import TensorVariable
 
+from biogeme.exceptions import BiogemeError
 from .bayesian import PymcModelBuilderType
 from .elementary_expressions import Elementary
 from .elementary_types import TypeOfElementaryExpression
@@ -44,9 +44,10 @@ class PriorFactory(Protocol):
     :param upper_bound:
         The upper bound of the truncation, or None if no upper bound.
 
-    and must return a **PyMC distribution** (RandomVariable) suitable as a prior
-    for that parameter. The returned object must be a valid PyMC *distribution
-    node*, not a sampled value.
+    and must return a **named scalar PyMC random variable** suitable as a prior
+    for that parameter. The returned object must be a valid PyMC scalar random
+    variable registered in the current model, not a bare ``.dist()`` object and
+    not an unnamed transformed expression.
 
     Example
     -------
@@ -93,7 +94,11 @@ class PriorFactory(Protocol):
     """
 
     def __call__(
-        self, name: str, initial_value: float, lower_bound: float, upper_bound: float
+        self,
+        name: str,
+        initial_value: float,
+        lower_bound: float | None,
+        upper_bound: float | None,
     ) -> TensorVariable: ...
 
 
@@ -306,11 +311,13 @@ class Beta(Elementary):
                     lower_bound=self.lower_bound,
                     upper_bound=self.upper_bound,
                 )
+
             else:
                 if self.lower_bound is None and self.upper_bound is None:
                     rv = pm.Normal(
                         self.name, mu=self.init_value, sigma=self.sigma_prior
                     )
+
                 else:
                     rv = pm.TruncatedNormal(
                         self.name,
@@ -319,6 +326,7 @@ class Beta(Elementary):
                         lower=self.lower_bound,
                         upper=self.upper_bound,
                     )
+
             return rv
 
         return builder

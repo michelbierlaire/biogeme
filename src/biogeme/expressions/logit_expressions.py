@@ -15,9 +15,9 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import pytensor.tensor as pt
-from biogeme.floating_point import JAX_FLOAT, MIN_EXP_ARG
 from jax.scipy.special import logsumexp
 
+from biogeme.floating_point import JAX_FLOAT, MIN_EXP_ARG
 from .base_expressions import Expression, LogitTuple
 from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
@@ -262,6 +262,18 @@ class LogLogit(Expression):
             to any of entry in the availability condition
 
         """
+
+        def available(alt: int) -> bool:
+            if self.av is None:
+                return True
+            if alt not in self.av:
+                error_msg = (
+                    f'Alternative {choice} does not appear in the list '
+                    f'of availabilities: {self.av.keys()}'
+                )
+                raise BiogemeError(error_msg)
+            return self.av[alt].get_value() != 0.0
+
         choice = int(self.choice.get_value())
         if choice not in self.util:
             error_msg = (
@@ -269,18 +281,13 @@ class LogLogit(Expression):
                 f'of utility functions: {self.util.keys()}'
             )
             raise BiogemeError(error_msg)
-        if choice not in self.av:
-            error_msg = (
-                f'Alternative {choice} does not appear in the list '
-                f'of availabilities: {self.av.keys()}'
-            )
-            raise BiogemeError(error_msg)
-        if self.av[choice].get_value() == 0.0:
+
+        if not available(choice):
             return -np.log(0)
         v_chosen = self.util[choice].get_value()
         denom = 0.0
         for i, V in self.util.items():
-            if self.av[i].get_value() != 0.0:
+            if available(i):
                 denom += np.exp(V.get_value() - v_chosen)
         return -np.log(denom)
 

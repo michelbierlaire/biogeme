@@ -40,7 +40,7 @@ class OrderedBase(Expression):
     :param categories: Ordered list of category labels (e.g. ``[1, 2, 3, 4, 5]``).
         If ``None``, defaults to ``[0, 1, ..., K-1]``.
     :param enforce_order: If ``True``, ensures that cutpoints are monotonically
-        increasing, using a softplus transform (JAX) or sorting (PyTensor).
+        increasing, using differentiable softplus-based increments (both in JAX and PyTensor) to ensure monotonically increasing cutpoints.
     :param eps: Lower bound for probabilities to avoid numerical issues.
     :param neutral_labels: Labels that may appear in the data and must be
         treated as “always valid”; their contribution is probability 1.

@@ -11,7 +11,6 @@ from itertools import chain
 from typing import NamedTuple, TYPE_CHECKING, TypeAlias
 
 from biogeme.exceptions import BiogemeError, NotImplementedError
-
 from .bayesian import PymcModelBuilderType
 from .elementary_types import TypeOfElementaryExpression
 from .jax_utils import JaxFunctionType
@@ -77,7 +76,7 @@ class Expression:
             f"recursive_construct_pymc_model_builder not implemented for {type(self).__name__}"
         )
 
-    def recursive_construct_jax_function(self) -> PymcModelBuilderType:
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
         """
         Generates recursively a function to be used by PyMc. Must be overloaded by each expression
         :return: the expression in TensorVariable format, suitable for PyMc

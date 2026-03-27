@@ -12,17 +12,16 @@ import logging
 import jax
 import jax.numpy as jnp
 import numpy as np
-
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     Expression,
-    build_vectorized_function,
     collect_init_values,
 )
 from biogeme.floating_point import JAX_FLOAT, NUMPY_FLOAT
 from biogeme.function_output import FunctionOutput, NamedFunctionOutput
 from biogeme.model_elements import FlatPanelAdapter, ModelElements, RegularAdapter
+from biogeme.profiling import JaxExecutionProfile
 from biogeme.second_derivatives import SecondDerivativesMode
 
 logger = logging.getLogger(__name__)
@@ -39,6 +38,7 @@ class CompiledFormulaEvaluator:
         model_elements: ModelElements,
         second_derivatives_mode: SecondDerivativesMode,
         numerically_safe: bool,
+        profiler: JaxExecutionProfile | None = None,
     ):
         """
         Prepares and compiles the JAX function for evaluating a Biogeme expression.
@@ -46,6 +46,8 @@ class CompiledFormulaEvaluator:
         :param model_elements: All elements needed to calculate the expression.
         :param second_derivatives_mode: specifies how second derivatives are calculated.
         :param numerically_safe: improves the numerical stability of the calculations.
+        :param profiler: optional execution profiler used to record build counts,
+            call counts, signatures, and timings of JAX-related functions.
         """
         from biogeme.expressions import build_vectorized_function
 
@@ -53,6 +55,7 @@ class CompiledFormulaEvaluator:
         self.second_derivatives_mode = second_derivatives_mode
         self.numerically_safe = numerically_safe
         self.use_jit = model_elements.use_jit
+        self.profiler = profiler if profiler is not None else JaxExecutionProfile()
         self.free_betas_names = (
             self.model_elements.expressions_registry.free_betas_names
         )
@@ -76,11 +79,17 @@ class CompiledFormulaEvaluator:
                 f'Available expressions: {self.model_elements.formula_names}'
             )
             raise BiogemeError(error_message)
-        the_function = log_likelihood.recursive_construct_jax_function(
-            numerically_safe=self.numerically_safe
+        self.row_loglikelihood_function = (
+            log_likelihood.recursive_construct_jax_function(
+                numerically_safe=self.numerically_safe
+            )
         )
-        vectorized_function = build_vectorized_function(
-            the_function, use_jit=self.use_jit
+        self.profiler.record_build('row_loglikelihood_function')
+        self.vectorized_loglikelihood_function = build_vectorized_function(
+            self.row_loglikelihood_function,
+            use_jit=self.use_jit,
+            profiler=self.profiler,
+            profile_name='vectorized_loglikelihood_function',
         )
 
         if self.model_elements.weight is not None:
@@ -89,11 +98,14 @@ class CompiledFormulaEvaluator:
                     numerically_safe=numerically_safe
                 )
             )
-            vectorized_weight_function = build_vectorized_function(
-                weight_function, use_jit=self.use_jit
+            self.vectorized_weight_function = build_vectorized_function(
+                weight_function,
+                use_jit=self.use_jit,
+                profiler=self.profiler,
+                profile_name='vectorized_weight_function',
             )
         else:
-            vectorized_weight_function = None
+            self.vectorized_weight_function = None
 
         def sum_function(
             params: list[float],
@@ -101,15 +113,72 @@ class CompiledFormulaEvaluator:
             draws: jnp.ndarray,
             random_variables: jnp.ndarray,
         ) -> tuple[jnp.ndarray, jnp.ndarray]:
-            values = vectorized_function(params, data, draws, random_variables)
-            if vectorized_weight_function is not None:
-                weights = vectorized_weight_function(
+            values = self.vectorized_loglikelihood_function(
+                params, data, draws, random_variables
+            )
+            if self.vectorized_weight_function is not None:
+                weights = self.vectorized_weight_function(
                     params, data, draws, random_variables
                 )
                 values *= weights
             return jnp.asarray(jnp.sum(values), dtype=JAX_FLOAT), values
 
         self.sum_function = jax.jit(sum_function) if self.use_jit else sum_function
+        self.profiler.record_build('sum_function')
+
+        def scalar_function(
+            params: list[float],
+            data: jnp.ndarray,
+            draws: jnp.ndarray,
+            random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            return self.sum_function(params, data, draws, random_variables)[0]
+
+        self.scalar_function = (
+            jax.jit(scalar_function) if self.use_jit else scalar_function
+        )
+        self.profiler.record_build('scalar_function')
+        self.value_and_grad_function = jax.value_and_grad(
+            self.scalar_function,
+            argnums=0,
+        )
+        self.profiler.record_build('value_and_grad_function')
+        self.autodiff_hessian_function = jax.jacfwd(
+            jax.grad(self.scalar_function, argnums=0),
+            argnums=0,
+        )
+        self.profiler.record_build('autodiff_hessian_function')
+
+        def one_observation_loglikelihood(
+            params: list[float],
+            row: jnp.ndarray,
+            draws: jnp.ndarray,
+            random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            # Important: this is intentionally the *unweighted* contribution of one
+            # observation. For the BHHH matrix, the observation weight must multiply
+            # each outer-product contribution only once. If the weight were applied
+            # here, before differentiation, the resulting gradient would already be
+            # scaled by the weight and the outer product would therefore include the
+            # weight squared, which is incorrect.
+            #
+            # Also important: the row-level JAX function expects the complete draw
+            # array for one observation. In particular, MonteCarlo expressions perform
+            # their own internal vectorization/integration over draws. Therefore we
+            # must pass the full `draws` array directly here, and not vectorize over
+            # draws again. This keeps the semantics identical to the previous code
+            # while avoiding routing a single observation through the full batch-
+            # oriented vectorized wrapper.
+            return self.row_loglikelihood_function(params, row, draws, random_variables)
+
+        per_obs_grad_fn = jax.vmap(
+            jax.grad(one_observation_loglikelihood, argnums=0),
+            in_axes=(None, 0, 0, 0),
+        )
+        self.per_observation_gradient_function = (
+            jax.jit(per_obs_grad_fn) if self.use_jit else per_obs_grad_fn
+        )
+        self.profiler.record_build('per_observation_gradient_function')
 
     def evaluate(
         self,
@@ -131,7 +200,7 @@ class CompiledFormulaEvaluator:
             if hessian:
                 return self._evaluate_autodiff_hessian_bhhh(free_betas_values)
             else:
-                return self._evaluate_bhhh_only(free_betas_values, use_jit=self.use_jit)
+                return self._evaluate_bhhh_only(free_betas_values)
 
         if hessian:
             return self._evaluate_autodiff_hessian(free_betas_values)
@@ -139,7 +208,9 @@ class CompiledFormulaEvaluator:
         return self._evaluate_function_and_gradient(free_betas_values)
 
     def _evaluate_function_only(self, free_betas_values):
-        value_jax, _ = self.sum_function(
+        value_jax, _ = self.profiler.timed_call(
+            'sum_function',
+            self.sum_function,
             free_betas_values,
             self.data_jax,
             self.draws_jax,
@@ -153,10 +224,9 @@ class CompiledFormulaEvaluator:
         )
 
     def _evaluate_function_and_gradient(self, free_betas_values):
-        value_and_grad_fn = jax.value_and_grad(
-            lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0], argnums=0
-        )
-        value, the_gradient = value_and_grad_fn(
+        value, the_gradient = self.profiler.timed_call(
+            'value_and_grad_function',
+            self.value_and_grad_function,
             free_betas_values,
             self.data_jax,
             self.draws_jax,
@@ -174,11 +244,9 @@ class CompiledFormulaEvaluator:
             error_msg = 'The second derivatives are not supposed to be evaluated'
             raise BiogemeError(error_msg)
 
-        value_and_grad_fn = jax.value_and_grad(
-            lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
-            argnums=0,
-        )
-        value, the_gradient = value_and_grad_fn(
+        value, the_gradient = self.profiler.timed_call(
+            'value_and_grad_function',
+            self.value_and_grad_function,
             free_betas_values,
             self.data_jax,
             self.draws_jax,
@@ -191,14 +259,9 @@ class CompiledFormulaEvaluator:
         elif self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES:
             the_hessian = self._evaluate_finite_difference_hessian(free_betas_values)
         else:
-            hessian_fn = jax.jacfwd(
-                jax.grad(
-                    lambda p, d, r, rv: self.sum_function(p, d, r, rv)[0],
-                    argnums=0,
-                ),
-                argnums=0,
-            )
-            hess_autodiff = hessian_fn(
+            hess_autodiff = self.profiler.timed_call(
+                'autodiff_hessian_function',
+                self.autodiff_hessian_function,
                 free_betas_values,
                 self.data_jax,
                 self.draws_jax,
@@ -221,36 +284,23 @@ class CompiledFormulaEvaluator:
             bhhh=None,
         )
 
-    def _evaluate_bhhh_only(self, free_betas_values, use_jit: bool):
-        _, individual_values = self.sum_function(
+    def _evaluate_bhhh_only(self, free_betas_values):
+        _, individual_values = self.profiler.timed_call(
+            'sum_function',
+            self.sum_function,
             free_betas_values,
             self.data_jax,
             self.draws_jax,
             self.random_variables_jax,
         )
 
-        def one_gradient(p, d, r, rv):
-            loglik_fn = (
-                self.model_elements.loglikelihood.recursive_construct_jax_function(
-                    numerically_safe=self.numerically_safe
-                )
-            )
-            vectorized_function = build_vectorized_function(loglik_fn, use_jit=use_jit)
-            draw_values = vectorized_function(p, d[None, :], r[None, :, :], rv)
-            return jnp.mean(draw_values)
-
-        per_obs_grad_fn = (
-            jax.jit(
-                jax.vmap(jax.grad(one_gradient, argnums=0), in_axes=(None, 0, 0, 0))
-            )
-            if self.use_jit
-            else jax.vmap(jax.grad(one_gradient, argnums=0), in_axes=(None, 0, 0, 0))
-        )
         free_betas_values_jnp = jnp.asarray(free_betas_values, dtype=JAX_FLOAT)
         random_variables_broadcast = jnp.tile(
             self.random_variables_jax[None, :], (self.data_jax.shape[0], 1)
         )
-        individual_gradients = per_obs_grad_fn(
+        individual_gradients = self.profiler.timed_call(
+            'per_observation_gradient_function',
+            self.per_observation_gradient_function,
             free_betas_values_jnp,
             self.data_jax,
             self.draws_jax,
@@ -259,14 +309,37 @@ class CompiledFormulaEvaluator:
 
         expected_shape = (self.data_jax.shape[0], len(free_betas_values))
         if individual_gradients.shape != expected_shape:
-            individual_gradients = jnp.tile(
-                individual_gradients, (self.data_jax.shape[0], 1)
+            error_msg = (
+                f'Unexpected shape for individual gradients: '
+                f'{individual_gradients.shape}. Expected {expected_shape}.'
             )
+            raise BiogemeError(error_msg)
 
-        the_gradient = jnp.sum(individual_gradients, axis=0)
-        bhhh_matrix = jnp.sum(
-            jnp.stack([jnp.outer(g, g) for g in individual_gradients]), axis=0
+        if self.vectorized_weight_function is not None:
+            individual_weights = self.profiler.timed_call(
+                'vectorized_weight_function',
+                self.vectorized_weight_function,
+                free_betas_values_jnp,
+                self.data_jax,
+                self.draws_jax,
+                self.random_variables_jax,
+            )
+        else:
+            individual_weights = jnp.ones((self.data_jax.shape[0],), dtype=JAX_FLOAT)
+
+        # The overall gradient of the weighted log likelihood is obtained by
+        # multiplying each per-observation gradient by its observation weight.
+        weighted_individual_gradients = (
+            individual_gradients * individual_weights[:, None]
         )
+        the_gradient = jnp.sum(weighted_individual_gradients, axis=0)
+
+        # The BHHH matrix is the sum over observations of
+        #     w_i * g_i g_i^T
+        # where g_i is the gradient of the *unweighted* contribution of
+        # observation i. The weight must therefore be applied once to the outer
+        # product contribution itself, not to g_i before forming g_i g_i^T.
+        bhhh_matrix = individual_gradients.T @ weighted_individual_gradients
 
         return FunctionOutput(
             function=float(jnp.sum(individual_values)),
@@ -276,7 +349,7 @@ class CompiledFormulaEvaluator:
         )
 
     def _evaluate_autodiff_hessian_bhhh(self, free_betas_values):
-        bhhh_result = self._evaluate_bhhh_only(free_betas_values, use_jit=self.use_jit)
+        bhhh_result = self._evaluate_bhhh_only(free_betas_values)
         hessian = self._evaluate_autodiff_hessian(free_betas_values).hessian
         return FunctionOutput(
             function=bhhh_result.function,
@@ -341,6 +414,7 @@ def calculate_single_formula(
     bhhh: bool,
     second_derivatives_mode: SecondDerivativesMode,
     numerically_safe: bool,
+    profiler: JaxExecutionProfile | None = None,
 ) -> FunctionOutput:
     """
     Evaluates a single Biogeme expression using JAX, optionally computing the gradient
@@ -353,6 +427,8 @@ def calculate_single_formula(
     :param bhhh: Unused here, included for compatibility.
     :param second_derivatives_mode: specifies how second derivatives are calculated.
     :param numerically_safe: improves the numerical stability of the calculations.
+    :param profiler: optional execution profiler used to record JAX build counts
+        and timings.
     :return: A BiogemeFunctionOutput with the value, gradient,
        and optionally the Hessian.
     """
@@ -360,6 +436,7 @@ def calculate_single_formula(
         model_elements=model_elements,
         second_derivatives_mode=second_derivatives_mode,
         numerically_safe=numerically_safe,
+        profiler=profiler,
     )
     return the_compiled_formula.evaluate(
         the_betas=the_betas, gradient=gradient, hessian=hessian, bhhh=bhhh

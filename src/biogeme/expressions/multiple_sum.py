@@ -109,7 +109,7 @@ class MultipleSum(Expression):
                 fn(parameters, one_row, the_draws, the_random_variables)
                 for fn in compiled_children
             ]
-            return jnp.sum(jnp.stack(terms))
+            return jnp.sum(jnp.stack(terms, axis=0), axis=0)
 
         return the_jax_function
 

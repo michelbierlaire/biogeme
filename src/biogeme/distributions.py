@@ -7,7 +7,6 @@
 """
 
 import math
-from typing import Union
 
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
@@ -21,9 +20,9 @@ from biogeme.expressions import (
 
 
 def normalpdf(
-    x: Union[float, Expression],
-    mu: Union[float, Expression] = Numeric(0.0),
-    s: Union[float, Expression] = Numeric(1.0),
+    x: float | Expression,
+    mu: float | Expression = Numeric(0.0),
+    s: float | Expression = Numeric(1.0),
 ) -> Expression:
     """
     Normal pdf
@@ -66,9 +65,9 @@ def normalpdf(
 
 
 def normal_logpdf(
-    x: Union[float, Expression],
-    mu: Union[float, Expression] = Numeric(0.0),
-    s: Union[float, Expression] = Numeric(1.0),
+    x: float | Expression,
+    mu: float | Expression = Numeric(0.0),
+    s: float | Expression = Numeric(1.0),
 ) -> Expression:
     """
     Logarithm of the Normal pdf
@@ -117,9 +116,9 @@ def normal_logpdf(
 
 
 def lognormalpdf(
-    x: Union[float, Expression],
-    mu: Union[float, Expression] = Numeric(0.0),
-    s: Union[float, Expression] = Numeric(1.0),
+    x: float | Expression,
+    mu: float | Expression = Numeric(0.0),
+    s: float | Expression = Numeric(1.0),
 ) -> Expression:
     """
     Log normal pdf
@@ -173,9 +172,9 @@ def lognormalpdf(
 
 
 def uniformpdf(
-    x: Union[float, Expression],
-    a: Union[float, Expression] = Numeric(-1),
-    b: Union[float, Expression] = Numeric(1.0),
+    x: float | Expression,
+    a: float | Expression = Numeric(-1),
+    b: float | Expression = Numeric(1.0),
 ) -> Expression:
     """
     Uniform pdf
@@ -220,10 +219,10 @@ def uniformpdf(
 
 
 def triangularpdf(
-    x: Union[float, Expression],
-    a: Union[float, Expression] = Numeric(-1.0),
-    b: Union[float, Expression] = Numeric(1.0),
-    c: Union[float, Expression] = Numeric(0.0),
+    x: float | Expression,
+    a: float | Expression = Numeric(-1.0),
+    b: float | Expression = Numeric(1.0),
+    c: float | Expression = Numeric(0.0),
 ) -> Expression:
     """
     Triangular pdf
@@ -302,9 +301,9 @@ def triangularpdf(
 
 
 def logisticcdf(
-    x: Union[float, Expression],
-    mu: Union[float, Expression] = Numeric(0.0),
-    s: Union[float, Expression] = Numeric(1.0),
+    x: float | Expression,
+    mu: float | Expression = Numeric(0.0),
+    s: float | Expression = Numeric(1.0),
 ) -> Expression:
     """
     Logistic CDF

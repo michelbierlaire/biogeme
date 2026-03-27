@@ -1,4 +1,7 @@
-"""Store results in Pandas databases
+"""Store Bayesian summary results in Pandas DataFrames.
+
+This module generates pandas outputs from :class:`BayesianResultsSummary`,
+without requiring access to posterior draws.
 
 Michel Bierlaire
 Thu Oct 30 2025, 10:02:39
@@ -6,11 +9,11 @@ Thu Oct 30 2025, 10:02:39
 
 import pandas as pd
 
-from .bayesian_results import BayesianResults
+from .bayesian_results_summary import BayesianResultsSummary
 
 
 def _build_parameters_dataframe(
-    estimation_results: BayesianResults,
+    estimation_results: BayesianResultsSummary,
     *,
     estimated_parameters: bool = True,
     renaming_parameters: dict[str, str] | None = None,
@@ -90,7 +93,7 @@ def _build_parameters_dataframe(
 
 
 def get_pandas_estimated_parameters(
-    estimation_results: BayesianResults,
+    estimation_results: BayesianResultsSummary,
     renaming_parameters: dict[str, str] | None = None,
     sort_by_name: bool = False,
 ) -> pd.DataFrame:
@@ -104,7 +107,7 @@ def get_pandas_estimated_parameters(
 
 
 def get_pandas_other_variables(
-    estimation_results: BayesianResults,
+    estimation_results: BayesianResultsSummary,
     renaming_parameters: dict[str, str] | None = None,
     sort_by_name: bool = False,
 ) -> pd.DataFrame:
