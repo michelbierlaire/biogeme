@@ -14,6 +14,7 @@ from datetime import timedelta
 
 import arviz as az
 import xarray as xr
+
 from biogeme.tools import print_file_size, timeit
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class RawBayesianResults:
       * run_time (timedelta | None)
     """
 
-    _META_GROUP = "biogeme_meta"
+    _META_GROUP = 'biogeme_meta'
 
     def __init__(
         self,
@@ -54,8 +55,8 @@ class RawBayesianResults:
         model_name: str,
         log_like_name: str,
         number_of_observations: int,
-        user_notes: str = "",
-        data_name: str = "",
+        user_notes: str = '',
+        data_name: str = '',
         beta_names: list[str] | None = None,
         sampler: str | None = None,
         target_accept: float | None = None,
@@ -112,14 +113,14 @@ class RawBayesianResults:
     @property
     def chains(self) -> int:
         try:
-            return int(self._idata.posterior.sizes.get("chain", 1))
+            return int(self._idata.posterior.sizes.get('chain', 1))
         except (AttributeError, KeyError, TypeError, ValueError):
             return 1
 
     @property
     def draws(self) -> int:
         try:
-            return int(self._idata.posterior.sizes.get("draw", 0))
+            return int(self._idata.posterior.sizes.get('draw', 0))
         except (AttributeError, KeyError, TypeError, ValueError):
             return 0
 
@@ -131,22 +132,22 @@ class RawBayesianResults:
     def _metadata_dataset(self) -> xr.Dataset:
         """Build a tiny xarray Dataset to store metadata as attributes."""
         ds = xr.Dataset()
-        ds.attrs["model_name"] = self._model_name
-        ds.attrs["user_notes"] = self._user_notes
-        ds.attrs["data_name"] = self._data_name
-        ds.attrs["log_like_name"] = self._log_like_name
-        ds.attrs["number_of_observations"] = self._number_of_observations
-        ds.attrs["beta_names"] = list(self._beta_names)
-        ds.attrs["sampler"] = self._sampler if self._sampler is not None else ""
-        ds.attrs["target_accept"] = (
+        ds.attrs['model_name'] = self._model_name
+        ds.attrs['user_notes'] = self._user_notes
+        ds.attrs['data_name'] = self._data_name
+        ds.attrs['log_like_name'] = self._log_like_name
+        ds.attrs['number_of_observations'] = self._number_of_observations
+        ds.attrs['beta_names'] = list(self._beta_names)
+        ds.attrs['sampler'] = self._sampler if self._sampler is not None else ''
+        ds.attrs['target_accept'] = (
             float(self._target_accept)
             if self._target_accept is not None
-            else float("nan")
+            else float('nan')
         )
-        ds.attrs["run_time_seconds"] = (
+        ds.attrs['run_time_seconds'] = (
             float(self._run_time.total_seconds())
             if self._run_time is not None
-            else float("nan")
+            else float('nan')
         )
         return ds
 
@@ -161,49 +162,49 @@ class RawBayesianResults:
             meta_ds = xr.Dataset()
             meta_ds.attrs.update(
                 {
-                    "model_name": self._model_name or "",
-                    "user_notes": self._user_notes or "",
-                    "data_name": self._data_name or "",
-                    "log_like_name": self._log_like_name or "",
-                    "number_of_observations": self._number_of_observations or "",
-                    "beta_names": json.dumps(self._beta_names or []),
-                    "sampler": self._sampler or "",
-                    "target_accept": (
-                        self._target_accept if self._target_accept is not None else ""
+                    'model_name': self._model_name or '',
+                    'user_notes': self._user_notes or '',
+                    'data_name': self._data_name or '',
+                    'log_like_name': self._log_like_name or '',
+                    'number_of_observations': self._number_of_observations or '',
+                    'beta_names': json.dumps(self._beta_names or []),
+                    'sampler': self._sampler or '',
+                    'target_accept': (
+                        self._target_accept if self._target_accept is not None else ''
                     ),
-                    "run_time_seconds": (
+                    'run_time_seconds': (
                         self._run_time.total_seconds()
                         if self._run_time is not None
-                        else ""
+                        else ''
                     ),
                 }
             )
         except (AttributeError, KeyError, TypeError, ValueError) as e:
-            logger.warning("Could not JSON-encode metadata cleanly: %s", e)
+            logger.warning('Could not JSON-encode metadata cleanly: %s', e)
 
         # Mirror metadata on a standard group so it survives az.from_netcdf
         try:
             import json as _json
 
             posterior_attrs = {
-                "model_name": self._model_name or "",
-                "user_notes": self._user_notes or "",
-                "data_name": self._data_name or "",
-                "log_like_name": self._log_like_name or "",
-                "number_of_observations": self._number_of_observations or "",
-                "beta_names": _json.dumps(self._beta_names or []),
-                "sampler": self._sampler or "",
-                "target_accept": (
-                    self._target_accept if self._target_accept is not None else ""
+                'model_name': self._model_name or '',
+                'user_notes': self._user_notes or '',
+                'data_name': self._data_name or '',
+                'log_like_name': self._log_like_name or '',
+                'number_of_observations': self._number_of_observations or '',
+                'beta_names': _json.dumps(self._beta_names or []),
+                'sampler': self._sampler or '',
+                'target_accept': (
+                    self._target_accept if self._target_accept is not None else ''
                 ),
-                "run_time_seconds": (
-                    self._run_time.total_seconds() if self._run_time is not None else ""
+                'run_time_seconds': (
+                    self._run_time.total_seconds() if self._run_time is not None else ''
                 ),
             }
             idata.posterior.attrs.update(posterior_attrs)
         except (AttributeError, KeyError, TypeError, ValueError) as e:
-            logger.warning("Could not set posterior attrs metadata cleanly: %s", e)
-        az.to_netcdf(idata, path, engine="h5netcdf")
+            logger.warning('Could not set posterior attrs metadata cleanly: %s', e)
+        idata.to_netcdf(path, engine='h5netcdf')
         logger.info(f'Saved Bayesian results (posterior + metadata) to {path}')
 
     @classmethod
@@ -216,7 +217,7 @@ class RawBayesianResults:
         stored by :meth:`save`. No custom ``biogeme_meta`` group is used
         anymore.
         """
-        logger.debug(f"Read file {path}")
+        logger.debug(f'Read file {path}')
         # On Windows, NetCDF backends may keep the file handle open via xarray's
         # file-manager cache. We therefore (i) reduce/disable caching when possible,
         # (ii) eagerly load all groups into memory, and (iii) close datasets.
@@ -227,7 +228,7 @@ class RawBayesianResults:
             cache_ctx = contextlib.nullcontext()
 
         with cache_ctx:
-            idata = az.from_netcdf(path, engine="h5netcdf")
+            idata = az.from_netcdf(path, engine='h5netcdf')
 
         # Detach from disk: load all datasets and close any open file handles.
         # This makes it safe to delete the NetCDF file immediately after loading.
@@ -256,13 +257,13 @@ class RawBayesianResults:
             FILE_CACHE.clear()
         except Exception:
             pass
-        logger.info(f"Loaded NetCDF file size: {print_file_size(path)}")
+        logger.info(f'Loaded NetCDF file size: {print_file_size(path)}')
         # Defaults
-        model_name = ""
-        user_notes = ""
-        log_like_name = ""
+        model_name = ''
+        user_notes = ''
+        log_like_name = ''
         number_of_observations: int = 0
-        data_name = ""
+        data_name = ''
         beta_names: list[str] = []
         sampler: str | None = None
 
@@ -271,7 +272,7 @@ class RawBayesianResults:
             p_attrs = idata.posterior.attrs
         except AttributeError as e:
             logger.info(
-                "Posterior group missing or invalid in InferenceData loaded from %s: %s",
+                'Posterior group missing or invalid in InferenceData loaded from %s: %s',
                 path,
                 e,
             )
@@ -279,38 +280,38 @@ class RawBayesianResults:
 
         import json as _json
 
-        model_name = p_attrs.get("model_name", model_name)
-        user_notes = p_attrs.get("user_notes", user_notes)
-        data_name = p_attrs.get("data_name", data_name)
-        log_like_name = p_attrs.get("log_like_name", log_like_name)
+        model_name = p_attrs.get('model_name', model_name)
+        user_notes = p_attrs.get('user_notes', user_notes)
+        data_name = p_attrs.get('data_name', data_name)
+        log_like_name = p_attrs.get('log_like_name', log_like_name)
 
         # number_of_observations may come as str, int, or be missing
-        no_raw = p_attrs.get("number_of_observations", number_of_observations)
+        no_raw = p_attrs.get('number_of_observations', number_of_observations)
         try:
             number_of_observations = int(no_raw)
         except (TypeError, ValueError):
             number_of_observations = 0
 
         # beta_names stored as JSON string
-        beta_names_raw = p_attrs.get("beta_names", "[]")
+        beta_names_raw = p_attrs.get('beta_names', '[]')
         try:
             beta_names = _json.loads(beta_names_raw) or beta_names
         except (TypeError, ValueError):
             beta_names = []
 
-        sampler = p_attrs.get("sampler") or sampler
+        sampler = p_attrs.get('sampler') or sampler
 
-        ta = p_attrs.get("target_accept")
+        ta = p_attrs.get('target_accept')
         try:
-            target_accept = float(ta) if ta not in (None, "") else None
+            target_accept = float(ta) if ta not in (None, '') else None
         except (TypeError, ValueError):
             target_accept = None
 
-        rts = p_attrs.get("run_time_seconds")
+        rts = p_attrs.get('run_time_seconds')
         try:
             run_time = (
                 timedelta(seconds=float(rts))
-                if rts not in (None, "", float("nan"))
+                if rts not in (None, '', float('nan'))
                 else None
             )
         except (TypeError, ValueError):
@@ -332,17 +333,17 @@ class RawBayesianResults:
     # Convenience dict for quick reporting
     def to_dict(self) -> dict:
         return {
-            "model_name": self.model_name,
-            "user_notes": self.user_notes,
-            "data_name": self.data_name,
-            "log_like_name": self.log_like_name,
-            "number_of_observations": self.number_of_observations,
-            "beta_names": self.beta_names,
-            "sampler": self.sampler,
-            "chains": self.chains,
-            "draws": self.draws,
-            "target_accept": self.target_accept,
-            "run_time_seconds": (
+            'model_name': self.model_name,
+            'user_notes': self.user_notes,
+            'data_name': self.data_name,
+            'log_like_name': self.log_like_name,
+            'number_of_observations': self.number_of_observations,
+            'beta_names': self.beta_names,
+            'sampler': self.sampler,
+            'chains': self.chains,
+            'draws': self.draws,
+            'target_accept': self.target_accept,
+            'run_time_seconds': (
                 self.run_time.total_seconds() if self.run_time is not None else None
             ),
         }

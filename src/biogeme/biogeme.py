@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 import pymc as pm
 import pytensor.tensor as pt
+import xarray as xr
 from tqdm import tqdm
 
 from biogeme.bayesian_estimation import (
@@ -31,6 +32,7 @@ from biogeme.bayesian_estimation import (
 from biogeme.bayesian_estimation import (
     generate_html_file_from_results as generate_bayesian_html_file_from_results,
 )
+from biogeme.bayesian_estimation.bayesian_results import CHOICE_LABEL
 from biogeme.bayesian_estimation.sampling_strategy import make_sampling_config
 from biogeme.biogeme_logging import suppress_logs
 from biogeme.catalog import (
@@ -101,7 +103,7 @@ from biogeme.tools import (
 from biogeme.tools.files import files_of_type
 from biogeme.validation import ValidationResult, cross_validate_model
 
-DEFAULT_MODEL_NAME = "biogeme_model_default_name"
+DEFAULT_MODEL_NAME = 'biogeme_model_default_name'
 logger = logging.getLogger(__name__)
 
 
@@ -118,34 +120,35 @@ class BIOGEME:
 
     # Type hints for dynamically injected attributes
     __annotations__ = {
-        "seed": int,
-        "tolerance": float,
-        "steptol": float,
-        "max_iterations": int,
-        "number_of_threads": int,
-        "enlarging_factor": float,
-        "initial_radius": float,
-        "infeasible_cg": bool,
-        "second_derivatives": int,
-        "dogleg": bool,
-        "bootstrap_samples": int,
-        "save_iterations": bool,
-        "generate_html": bool,
-        "generate_yaml": bool,
-        "generate_netcdf": bool,
-        "optimization_algorithm": str,
-        "maximum_number_catalog_expressions": int,
-        "max_number_parameters_to_report": int,
+        'seed': int,
+        'tolerance': float,
+        'steptol': float,
+        'max_iterations': int,
+        'number_of_threads': int,
+        'enlarging_factor': float,
+        'initial_radius': float,
+        'infeasible_cg': bool,
+        'second_derivatives': int,
+        'dogleg': bool,
+        'bootstrap_samples': int,
+        'save_iterations': bool,
+        'generate_html': bool,
+        'generate_yaml': bool,
+        'generate_netcdf': bool,
+        'optimization_algorithm': str,
+        'maximum_number_catalog_expressions': int,
+        'max_number_parameters_to_report': int,
     }
 
     def __init__(
-            self,
-            database: Database,
-            formulas: Expression | dict[str, Expression],
-            random_number_generators: dict[str, RandomNumberGeneratorTuple] | None = None,
-            user_notes: str | None = None,
-            parameters: str | Parameters | None = None,
-            **kwargs,
+        self,
+        database: Database,
+        formulas: Expression | dict[str, Expression],
+        random_number_generators: dict[str, RandomNumberGeneratorTuple] | None = None,
+        user_notes: str | None = None,
+        parameters: str | Parameters | None = None,
+        group_of_parameters: dict[str, list[str]] | None = None,
+        **kwargs,
     ):
         """Constructor
 
@@ -165,13 +168,16 @@ class BIOGEME:
         :param random_number_generators: user defined random number generators.
         :param user_notes: these notes will be included in the report file.
         :param parameters: name of the .toml file where the parameters are read, or Parameters object containing
+        :param group_of_parameters: optional dictionary mapping group names
+            to lists of parameter names. When HTML reports are generated,
+            estimated parameters are organized according to these groups.
         :raise BiogemeError: an audit of the formulas is performed.
            If a formula has issues, an error is detected and an
            exception is raised.
 
         """
         if isinstance(parameters, Parameters):
-            logger.info("Biogeme parameters provided by the user.")
+            logger.info('Biogeme parameters provided by the user.')
             self.biogeme_parameters: Parameters = parameters
         else:
             self.biogeme_parameters: Parameters = Parameters()
@@ -207,19 +213,21 @@ class BIOGEME:
         """ Keywords used for the name of the loglikelihood formula.
         Default: 'log_like'"""
 
-        self.log_like_valid_names: list[str] = [LOG_LIKE, "loglike"]
+        self.log_like_valid_names: list[str] = [LOG_LIKE, 'loglike']
 
         self.weight_name = WEIGHT
         """Keyword used for the name of the weight formula. Default: 'weight'
         """
 
-        self.weight_valid_names = [WEIGHT, "weights"]
+        self.weight_valid_names = [WEIGHT, 'weights']
 
         self.model_name = DEFAULT_MODEL_NAME
         """Name of the model. Default: 'biogemeModelDefaultName'
         """
 
         self.random_number_generators = random_number_generators
+        self.group_of_parameters = group_of_parameters
+        """Optional grouping of parameters used when generating reports."""
 
         self.second_derivatives_mode = SecondDerivativesMode(
             self.calculating_second_derivatives
@@ -248,13 +256,14 @@ class BIOGEME:
 
     @classmethod
     def from_configuration_and_controller(
-            cls,
-            config_id: str,
-            central_controller: CentralController,
-            database: Database,
-            user_notes: str | None = None,
-            parameters: str | Parameters | None = None,
-            **kwargs,
+        cls,
+        config_id: str,
+        central_controller: CentralController,
+        database: Database,
+        user_notes: str | None = None,
+        parameters: str | Parameters | None = None,
+        group_of_parameters: dict[str, list[str]] | None = None,
+        **kwargs,
     ) -> BIOGEME:
         """Obtain the Biogeme object corresponding to the
         configuration of a multiple expression
@@ -274,17 +283,17 @@ class BIOGEME:
             # We verify that the configuration is valid
             the_set = central_controller.all_configurations_ids
             if not the_set:
-                error_msg = "No configuration found in the expression"
+                error_msg = 'No configuration found in the expression'
                 raise BiogemeError(error_msg)
             if config_id not in the_set:
                 close_matches = difflib.get_close_matches(config_id, the_set)
                 if close_matches:
                     error_msg = (
-                        f"Unknown configuration: [{config_id}]. "
-                        f"Did you mean [{close_matches[0]}]?"
+                        f'Unknown configuration: [{config_id}]. '
+                        f'Did you mean [{close_matches[0]}]?'
                     )
                 else:
-                    error_msg = f"Unknown configuration: {config_id}."
+                    error_msg = f'Unknown configuration: {config_id}.'
                 raise BiogemeError(error_msg)
         the_configuration = Configuration.from_string(config_id)
         central_controller.set_configuration(the_configuration)
@@ -296,18 +305,20 @@ class BIOGEME:
             formulas=flat_expression,
             user_notes=user_notes,
             parameters=parameters,
+            group_of_parameters=group_of_parameters,
             **kwargs,
         )
 
     @classmethod
     def from_configuration(
-            cls,
-            config_id: str,
-            multiple_expression: Expression,
-            database: Database,
-            user_notes: str | None = None,
-            parameters: str | Parameters | None = None,
-            **kwargs,
+        cls,
+        config_id: str,
+        multiple_expression: Expression,
+        database: Database,
+        user_notes: str | None = None,
+        parameters: str | Parameters | None = None,
+        group_of_parameters: dict[str, list[str]] | None = None,
+        **kwargs,
     ) -> BIOGEME:
         """Obtain the Biogeme object corresponding to the
         configuration of a multiple expression
@@ -329,6 +340,7 @@ class BIOGEME:
             database=database,
             user_notes=user_notes,
             parameters=parameters,
+            group_of_parameters=group_of_parameters,
             **kwargs,
         )
 
@@ -339,7 +351,7 @@ class BIOGEME:
         def setter(obj, value):
             error_msg = (
                 f"Direct assignment to '{name}' is not allowed. Please set the value in the "
-                f"constructor or in the .toml file."
+                f'constructor or in the .toml file.'
             )
             raise BiogemeError(error_msg)
 
@@ -425,10 +437,10 @@ class BIOGEME:
                 expressions=self.formulas,
                 adapter=adapter,
                 number_of_draws=self.biogeme_parameters.get_value(
-                    name="number_of_draws"
+                    name='number_of_draws'
                 ),
                 user_defined_draws=self.random_number_generators,
-                use_jit=self.biogeme_parameters.get_value(name="use_jit"),
+                use_jit=self.biogeme_parameters.get_value(name='use_jit'),
             )
         return self._model_elements
 
@@ -447,7 +459,7 @@ class BIOGEME:
         return self._function_evaluator
 
     def _normalize_formulas(
-            self, formulas: Expression | dict[str, Expression]
+        self, formulas: Expression | dict[str, Expression]
     ) -> dict[str, Expression]:
         """
         Normalize user input to a dictionary of expressions.
@@ -466,7 +478,7 @@ class BIOGEME:
                 valid_keywords=self.log_like_valid_names,
             )
         raise BiogemeError(
-            f"Invalid type for formulas: {type(formulas)}. Expected Expression or dict."
+            f'Invalid type for formulas: {type(formulas)}. Expected Expression or dict.'
         )
 
     def is_model_complex(self) -> bool:
@@ -482,88 +494,88 @@ class BIOGEME:
     def function_parameters(self) -> dict[str, ParameterValue]:
         """Prepare the parameters for the function"""
         return {
-            "tolerance": self.biogeme_parameters.get_value("tolerance"),
-            "steptol": self.biogeme_parameters.get_value("steptol"),
+            'tolerance': self.biogeme_parameters.get_value('tolerance'),
+            'steptol': self.biogeme_parameters.get_value('steptol'),
         }
 
     @property
     def algo_parameters(self) -> dict[str, ParameterValue]:
         """Prepare the parameters for the optimization algorithm."""
         common_bounds_params = {
-            "infeasibleConjugateGradient": self.biogeme_parameters.get_value(
-                "infeasible_cg"
+            'infeasibleConjugateGradient': self.biogeme_parameters.get_value(
+                'infeasible_cg'
             ),
-            "radius": self.biogeme_parameters.get_value("initial_radius"),
-            "enlargingFactor": self.biogeme_parameters.get_value("enlarging_factor"),
-            "maxiter": self.biogeme_parameters.get_value("max_iterations"),
-            "max_number_parameters_to_report": self.biogeme_parameters.get_value(
-                "max_number_parameters_to_report"
+            'radius': self.biogeme_parameters.get_value('initial_radius'),
+            'enlargingFactor': self.biogeme_parameters.get_value('enlarging_factor'),
+            'maxiter': self.biogeme_parameters.get_value('max_iterations'),
+            'max_number_parameters_to_report': self.biogeme_parameters.get_value(
+                'max_number_parameters_to_report'
             ),
         }
 
-        if self.optimization_algorithm == "automatic":
+        if self.optimization_algorithm == 'automatic':
             if (
-                    self.is_model_complex()
-                    or self.second_derivatives_mode == SecondDerivativesMode.NEVER
+                self.is_model_complex()
+                or self.second_derivatives_mode == SecondDerivativesMode.NEVER
             ):
                 logger.info(
-                    "As the model is rather complex, we cancel the calculation of second derivatives. "
+                    'As the model is rather complex, we cancel the calculation of second derivatives. '
                     'If you want to control the parameters, change the algorithm from "automatic" '
                     'to "simple_bounds" in the TOML file.'
                 )
                 algo_parameters = common_bounds_params | {
-                    "proportionAnalyticalHessian": 0,
+                    'proportionAnalyticalHessian': 0,
                 }
             else:
                 logger.info(
-                    "As the model is not too complex, we activate the calculation of second derivatives. "
+                    'As the model is not too complex, we activate the calculation of second derivatives. '
                     'To change this behavior, modify the algorithm to "simple_bounds" in the TOML file.'
                 )
                 algo_parameters = common_bounds_params | {
-                    "proportionAnalyticalHessian": 1,
+                    'proportionAnalyticalHessian': 1,
                 }
             return algo_parameters
 
-        if self.optimization_algorithm == "simple_bounds":
+        if self.optimization_algorithm == 'simple_bounds':
             algo_parameters = common_bounds_params | {
-                "proportionAnalyticalHessian": self.biogeme_parameters.get_value(
-                    "second_derivatives"
+                'proportionAnalyticalHessian': self.biogeme_parameters.get_value(
+                    'second_derivatives'
                 ),
             }
             if (
-                    self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES
-                    and self.biogeme_parameters.get_value("second_derivatives") > 0
+                self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES
+                and self.biogeme_parameters.get_value('second_derivatives') > 0
             ):
                 warning = (
-                    "The proportion of the analytical hessian is not zero, and the second derivatives are approximated by "
-                    "finite difference. It may not be the desired configuration."
+                    'The proportion of the analytical hessian is not zero, and the second derivatives are approximated by '
+                    'finite difference. It may not be the desired configuration.'
                 )
                 logger.warning(warning)
             if (
-                    self.second_derivatives_mode == SecondDerivativesMode.NEVER
-                    and self.biogeme_parameters.get_value("second_derivatives") > 0
+                self.second_derivatives_mode == SecondDerivativesMode.NEVER
+                and self.biogeme_parameters.get_value('second_derivatives') > 0
             ):
                 error_msg = (
-                    "The proportion of the analytical hessian is not zero, and the second derivatives cannot be "
+                    'The proportion of the analytical hessian is not zero, and the second derivatives cannot be '
                     'evaluated. The parameters "calculating_second_derivatives" and "second_derivatives" are inconsistent.'
                 )
             return algo_parameters
 
         if self.optimization_algorithm in {
-            "simple_bounds_newton",
-            "simple_bounds_BFGS",
+            'simple_bounds_newton',
+            'simple_bounds_BFGS',
         }:
             return common_bounds_params
 
-        if self.optimization_algorithm in {"TR-newton", "TR-BFGS"}:
+        if self.optimization_algorithm in {'TR-newton', 'TR-BFGS'}:
             algo_parameters = common_bounds_params | {
-                "dogleg": self.biogeme_parameters.get_value("dogleg"),
-                "radius": self.biogeme_parameters.get_value("initial_radius"),
-                "maxiter": self.biogeme_parameters.get_value("max_iterations"),
+                'dogleg': self.biogeme_parameters.get_value('dogleg'),
+                'radius': self.biogeme_parameters.get_value('initial_radius'),
+                'maxiter': self.biogeme_parameters.get_value('max_iterations'),
             }
             return algo_parameters
 
-        if self.optimization_algorithm in {"LS-newton", "LS-BFGS"}:
+        if self.optimization_algorithm in {'LS-newton', 'LS-BFGS'}:
             return common_bounds_params
 
         return common_bounds_params
@@ -577,17 +589,17 @@ class BIOGEME:
         :return: The name of the file where the iterations are saved.
         :rtype: str
         """
-        return f"__{self.model_name}.iter"
+        return f'__{self.model_name}.iter'
 
     def _default_yaml_file_path(self) -> Path:
         """Generate the default YAML file path from the model name.
 
         :return: Path to the default YAML file associated with the current model name.
         """
-        return Path(get_new_file_name(self.model_name, "yaml"))
+        return Path(get_new_file_name(self.model_name, 'yaml'))
 
     def _validate_loaded_parameter_names(
-            self, loaded_names: list[str], source: str
+        self, loaded_names: list[str], source: str
     ) -> None:
         """Validate that the parameter names in the loaded object match the current model.
 
@@ -602,14 +614,14 @@ class BIOGEME:
             missing = expected - loaded
             extra = loaded - expected
             message = (
-                f"Parameter mismatch between current model and {source}.\n"
-                f"Expected parameters: {sorted(expected)}\n"
-                f"Loaded parameters: {sorted(loaded)}\n"
+                f'Parameter mismatch between current model and {source}.\n'
+                f'Expected parameters: {sorted(expected)}\n'
+                f'Loaded parameters: {sorted(loaded)}\n'
             )
             if missing:
-                message += f"Missing in loaded file: {sorted(missing)}\n"
+                message += f'Missing in loaded file: {sorted(missing)}\n'
             if extra:
-                message += f"Unexpected in loaded file: {sorted(extra)}\n"
+                message += f'Unexpected in loaded file: {sorted(extra)}\n'
             raise BiogemeError(message)
 
     def _validate_loaded_estimation_results(self, results: EstimationResults) -> None:
@@ -634,11 +646,11 @@ class BIOGEME:
 
         self._validate_loaded_parameter_names(
             loaded_names=raw.beta_names,
-            source="estimation results YAML file",
+            source='estimation results YAML file',
         )
 
     def _validate_loaded_bayesian_summary(
-            self, summary: BayesianResultsSummary
+        self, summary: BayesianResultsSummary
     ) -> None:
         """Validate that a loaded Bayesian summary is consistent with the current model.
 
@@ -659,7 +671,7 @@ class BIOGEME:
 
         self._validate_loaded_parameter_names(
             loaded_names=summary.beta_names,
-            source="Bayesian summary YAML file",
+            source='Bayesian summary YAML file',
         )
 
     @property
@@ -720,7 +732,7 @@ class BIOGEME:
         return result.function
 
     def _get_likelihood_function(
-            self,
+        self,
     ) -> CallableExpression:
         return function_from_compiled_formula(
             the_compiled_function=self.function_evaluator,
@@ -741,30 +753,30 @@ class BIOGEME:
         """
         length = min(
             array.size,
-            self.biogeme_parameters.get_value("max_number_parameters_to_report"),
+            self.biogeme_parameters.get_value('max_number_parameters_to_report'),
         )
         if with_names:
             names = self.expressions_registry.free_betas_names
-            report = ", ".join(
+            report = ', '.join(
                 [
-                    f"{name}={value:.2g}"
+                    f'{name}={value:.2g}'
                     for name, value in zip(names[:length], array[:length])
                 ]
             )
             return report
-        report = ", ".join([f"{value:.2g}" for value in array[:length]])
+        report = ', '.join([f'{value:.2g}' for value in array[:length]])
         return report
 
     def _save_iteration(self, values_to_save: dict[str, float]) -> None:
         filename = self._save_iterations_file_name()
         with open(
-                filename,
-                "w",
-                encoding="utf-8",
+            filename,
+            'w',
+            encoding='utf-8',
         ) as pf:
             for key, value in values_to_save.items():
                 print(
-                    f"{key} = {value}",
+                    f'{key} = {value}',
                     file=pf,
                 )
 
@@ -777,15 +789,15 @@ class BIOGEME:
         filename = self._save_iterations_file_name()
         betas = {}
         try:
-            with open(filename, encoding="utf-8") as fp:
+            with open(filename, encoding='utf-8') as fp:
                 for line in fp:
-                    ell = line.split("=")
+                    ell = line.split('=')
                     betas[ell[0].strip()] = float(ell[1])
             self.change_init_values(betas)
-            logger.info(f"Parameter values restored from {filename}")
+            logger.info(f'Parameter values restored from {filename}')
             return betas
         except OSError:
-            logger.info(f"Cannot read file {filename}. Statement is ignored.")
+            logger.info(f'Cannot read file {filename}. Statement is ignored.')
             return {}
 
     def set_random_init_values(self, default_bound: float = 100.0) -> None:
@@ -824,37 +836,37 @@ class BIOGEME:
                 beta.init_value = value
 
     def _load_saved_estimates(self) -> EstimationResults:
-        yaml_files = files_of_type("yaml", name=self.model_name)
+        yaml_files = files_of_type('yaml', name=self.model_name)
         yaml_files.sort()
         if yaml_files:
             yaml_to_read = yaml_files[-1]
             if len(yaml_files) > 1:
                 warning_msg = (
-                    f"Several files .yaml are available for "
-                    f"this model: {yaml_files}. "
-                    f"The file {yaml_to_read} "
-                    f"is used to load the results."
+                    f'Several files .yaml are available for '
+                    f'this model: {yaml_files}. '
+                    f'The file {yaml_to_read} '
+                    f'is used to load the results.'
                 )
                 logger.warning(warning_msg)
             results = EstimationResults.from_yaml_file(filename=yaml_to_read)
             logger.warning(
-                f"Estimation results read from {yaml_to_read}. "
-                f"There is no guarantee that they correspond "
-                f"to the specified model."
+                f'Estimation results read from {yaml_to_read}. '
+                f'There is no guarantee that they correspond '
+                f'to the specified model.'
             )
             return results
-        raise BiogemeError(f"No yaml file has been found for model {self.model_name}")
+        raise BiogemeError(f'No yaml file has been found for model {self.model_name}')
 
     def _bootstrap(self, estimated_parameters: dict[str, float]) -> list[np.ndarray]:
         number_of_bootstrap_samples = self.biogeme_parameters.get_value(
-            "bootstrap_samples"
+            'bootstrap_samples'
         )
         if number_of_bootstrap_samples == 0:
             return []
 
         logger.info(
-            f"Re-estimate the model {self.biogeme_parameters.get_value('bootstrap_samples')} "
-            f"times for bootstrapping"
+            f'Re-estimate the model {self.biogeme_parameters.get_value("bootstrap_samples")} '
+            f'times for bootstrapping'
         )
         with suppress_logs(level=logging.WARNING):
             # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
@@ -867,10 +879,10 @@ class BIOGEME:
                 parameters=opt_parameters,
                 starting_values=estimated_parameters,
                 second_derivatives_mode=self.biogeme_parameters.get_value(
-                    name="calculating_second_derivatives"
+                    name='calculating_second_derivatives'
                 ),
                 numerically_safe=self.numerically_safe,
-                number_of_jobs=self.biogeme_parameters.get_value(name="number_of_jobs"),
+                number_of_jobs=self.biogeme_parameters.get_value(name='number_of_jobs'),
                 use_jit=self.use_jit,
             )
 
@@ -894,13 +906,13 @@ class BIOGEME:
             return None
 
     def bayesian_estimation(
-            self, starting_values: dict[str, float] | None = None
+        self, starting_values: dict[str, float] | None = None
     ) -> BayesianResults:
         saved_starting_values = {}
-        if self.biogeme_parameters.get_value("save_iterations"):
+        if self.biogeme_parameters.get_value('save_iterations'):
             logger.info(
-                f"*** Initial values of the parameters are "
-                f"obtained from the file {self._save_iterations_file_name()}"
+                f'*** Initial values of the parameters are '
+                f'obtained from the file {self._save_iterations_file_name()}'
             )
             saved_starting_values = self._load_saved_iteration()
 
@@ -909,15 +921,15 @@ class BIOGEME:
         else:
             for key, value in saved_starting_values.items():
                 starting_values.setdefault(key, value)
-        logger.info(f"Starting values for the algorithm: {starting_values}")
+        logger.info(f'Starting values for the algorithm: {starting_values}')
         if self.database.is_panel():
             return self.bayesian_estimation_panel(starting_values=starting_values)
         return self.bayesian_estimation_non_panel(starting_values=starting_values)
 
     def bayesian_estimation_or_load_summary(
-            self,
-            yaml_file_name: str | None = None,
-            starting_values: dict[str, float] | None = None,
+        self,
+        yaml_file_name: str | None = None,
+        starting_values: dict[str, float] | None = None,
     ) -> BayesianResultsSummary:
         """Load a Bayesian summary from YAML, or estimate and build one.
 
@@ -942,7 +954,7 @@ class BIOGEME:
 
         if yaml_path.exists():
             logger.info(
-                f"Bayesian summary is read from {yaml_path}. No estimation is performed."
+                f'Bayesian summary is read from {yaml_path}. No estimation is performed.'
             )
             bayesian_summary = BayesianResultsSummary.from_yaml_file(
                 filename=str(yaml_path)
@@ -951,26 +963,26 @@ class BIOGEME:
             return bayesian_summary
 
         logger.info(
-            f"No YAML file found at {yaml_path}. Bayesian estimation is performed."
+            f'No YAML file found at {yaml_path}. Bayesian estimation is performed.'
         )
         estimation_results = self.bayesian_estimation(starting_values=starting_values)
 
         return estimation_results.to_summary()
 
     def bayesian_estimation_non_panel(
-            self, starting_values: dict[str, float]
+        self, starting_values: dict[str, float]
     ) -> BayesianResults:
         warning_cpu_devices()
         logger.info(report_jax_cpu_devices())
-        bayesian_draws = self.biogeme_parameters.get_value("bayesian_draws")
-        warmup = self.biogeme_parameters.get_value("warmup")
-        chains = self.biogeme_parameters.get_value("chains")
-        target_accept = self.biogeme_parameters.get_value("target_accept")
-        sampling_strategy = self.biogeme_parameters.get_value("mcmc_sampling_strategy")
-        calculate_likelihood = self.biogeme_parameters.get_value("calculate_likelihood")
-        calculate_waic = self.biogeme_parameters.get_value("calculate_waic")
-        calculate_loo = self.biogeme_parameters.get_value("calculate_loo")
-        sample_from_prior = self.biogeme_parameters.get_value("sample_from_prior")
+        bayesian_draws = self.biogeme_parameters.get_value('bayesian_draws')
+        warmup = self.biogeme_parameters.get_value('warmup')
+        chains = self.biogeme_parameters.get_value('chains')
+        target_accept = self.biogeme_parameters.get_value('target_accept')
+        sampling_strategy = self.biogeme_parameters.get_value('mcmc_sampling_strategy')
+        calculate_likelihood = self.biogeme_parameters.get_value('calculate_likelihood')
+        calculate_waic = self.biogeme_parameters.get_value('calculate_waic')
+        calculate_loo = self.biogeme_parameters.get_value('calculate_loo')
+        sample_from_prior = self.biogeme_parameters.get_value('sample_from_prior')
         sampling_config = make_sampling_config(
             strategy=sampling_strategy, target_accept=target_accept
         )
@@ -980,7 +992,7 @@ class BIOGEME:
         with pm.Model(coords={Dimension.OBS: obs_coord}) as model:
             loglike_total = pymc_formula_evaluator(model_elements=self.model_elements)
             pm.Deterministic(self.log_like_name, loglike_total, dims=Dimension.OBS)
-            pm.Potential("choice_logp", pt.sum(loglike_total))
+            pm.Potential('choice_logp', pt.sum(loglike_total))
 
             # --- Prior draws (stored in the .nc file if generated) ---
             # If priors are defined in the model builder, PyMC can generate prior samples.
@@ -988,7 +1000,7 @@ class BIOGEME:
             try:
                 prior_idata = (
                     pm.sample_prior_predictive(
-                        samples=int(bayesian_draws),
+                        draws=int(bayesian_draws),
                         return_inferencedata=True,
                         random_seed=None if self.seed == 0 else int(self.seed),
                     )
@@ -999,7 +1011,7 @@ class BIOGEME:
                 # Prior sampling is a convenience feature. If it fails for any reason,
                 # we continue without a prior group.
                 logger.warning(
-                    f"Could not generate prior draws (they will not be saved in the NetCDF file): {e}"
+                    f'Could not generate prior draws (they will not be saved in the NetCDF file): {e}'
                 )
                 prior_idata = None
 
@@ -1015,9 +1027,25 @@ class BIOGEME:
             # Attach the prior group(s) to the returned InferenceData, so they are
             # preserved when dumping to NetCDF.
             if prior_idata is not None:
-                idata.extend(prior_idata)
+                for group in prior_idata.groups:
+                    if group == '/':
+                        continue
+                    idata[group] = prior_idata[group]
 
         sampling_time = datetime.now() - start_time
+
+        if self.log_like_name in idata.posterior.data_vars:
+            log_likelihood = idata.posterior[self.log_like_name]
+            log_likelihood = xr.DataArray(
+                np.asarray(log_likelihood.values),
+                dims=log_likelihood.dims,
+                coords=log_likelihood.coords,
+                name=CHOICE_LABEL,
+            )
+
+            idata['log_likelihood'] = xr.DataTree(
+                dataset=xr.Dataset({CHOICE_LABEL: log_likelihood})
+            )
 
         posterior_means = {
             name: float(idata.posterior[name].mean().values)
@@ -1033,7 +1061,7 @@ class BIOGEME:
             user_notes=self.user_notes,
             data_name=self.database.name,
             beta_names=self.free_betas_names,
-            sampler="NUTS",
+            sampler='NUTS',
             target_accept=float(target_accept),
             run_time=sampling_time,
         )
@@ -1046,46 +1074,49 @@ class BIOGEME:
         )
         bayesian_summary = None
         if self.biogeme_parameters.get_value(
-                "generate_html"
-        ) or self.biogeme_parameters.get_value("generate_yaml"):
+            'generate_html'
+        ) or self.biogeme_parameters.get_value('generate_yaml'):
             bayesian_summary = final_results.to_summary()
-        if self.biogeme_parameters.get_value("generate_html"):
-            self.html_filename = get_new_file_name(self.model_name, "html")
+        if self.biogeme_parameters.get_value('generate_html'):
+            self.html_filename = get_new_file_name(self.model_name, 'html')
             generate_bayesian_html_file_from_results(
                 filename=self.html_filename,
                 estimation_results=final_results,
+                identification_threshold=self.biogeme_parameters.get_value(
+                    'identification_threshold'
+                ),
             )
-        if self.biogeme_parameters.get_value("generate_yaml"):
-            self.yaml_filename = get_new_file_name(self.model_name, "yaml")
+        if self.biogeme_parameters.get_value('generate_yaml'):
+            self.yaml_filename = get_new_file_name(self.model_name, 'yaml')
             if bayesian_summary is None:
                 bayesian_summary = final_results.to_summary()
             bayesian_summary.dump_yaml(path=self.yaml_filename)
-        if self.biogeme_parameters.get_value("generate_netcdf"):
-            self.netcdf_filename = get_new_file_name(self.model_name, "nc")
+        if self.biogeme_parameters.get_value('generate_netcdf'):
+            self.netcdf_filename = get_new_file_name(self.model_name, 'nc')
             final_results.dump(path=self.netcdf_filename)
             logger.info(
-                f"Bayesian estimation completed. The file {self.netcdf_filename} "
-                f"containing all posterior draws has been generated."
+                f'Bayesian estimation completed. The file {self.netcdf_filename} '
+                f'containing all posterior draws has been generated.'
             )
         return final_results
 
     def bayesian_estimation_panel(
-            self, starting_values: dict[str, float]
+        self, starting_values: dict[str, float]
     ) -> BayesianResults:
         panel_id = self.database.panel_column
         set_panel_id(expr=self.log_like, panel_id=panel_id)
         warning_cpu_devices()
         logger.info(report_jax_cpu_devices())
 
-        bayesian_draws = self.biogeme_parameters.get_value("bayesian_draws")
-        warmup = self.biogeme_parameters.get_value("warmup")
-        chains = self.biogeme_parameters.get_value("chains")
-        target_accept = self.biogeme_parameters.get_value("target_accept")
-        sampling_strategy = self.biogeme_parameters.get_value("mcmc_sampling_strategy")
-        calculate_ll = self.biogeme_parameters.get_value("calculate_likelihood")
-        calculate_waic = self.biogeme_parameters.get_value("calculate_waic")
-        calculate_loo = self.biogeme_parameters.get_value("calculate_loo")
-        sample_from_prior = self.biogeme_parameters.get_value("sample_from_prior")
+        bayesian_draws = self.biogeme_parameters.get_value('bayesian_draws')
+        warmup = self.biogeme_parameters.get_value('warmup')
+        chains = self.biogeme_parameters.get_value('chains')
+        target_accept = self.biogeme_parameters.get_value('target_accept')
+        sampling_strategy = self.biogeme_parameters.get_value('mcmc_sampling_strategy')
+        calculate_ll = self.biogeme_parameters.get_value('calculate_likelihood')
+        calculate_waic = self.biogeme_parameters.get_value('calculate_waic')
+        calculate_loo = self.biogeme_parameters.get_value('calculate_loo')
+        sample_from_prior = self.biogeme_parameters.get_value('sample_from_prior')
 
         sampling_config = make_sampling_config(
             strategy=sampling_strategy, target_accept=target_accept
@@ -1097,7 +1128,7 @@ class BIOGEME:
 
         if not panel_id or panel_id not in df.columns:
             raise BiogemeError(
-                "Panel mode requires a panel-id column configured on the database "
+                'Panel mode requires a panel-id column configured on the database '
                 "(e.g., database.panel_id_column = 'ID') and present in the dataframe."
             )
 
@@ -1107,28 +1138,28 @@ class BIOGEME:
         if panel_map.indptr[0] != 0:
             first = int(panel_map.indptr[0])
             error_msg = (
-                "Inconsistent panel mapping: panel_map.indptr[0] must be 0 "
-                f"(first observation index), but is {first}. "
-                "This usually indicates that the ContiguousPanelMap was built from a "
-                "dataframe that is not aligned with the one used to compute the "
-                "observation-level log-likelihood, or that observations for each "
-                "individual are not stored in contiguous blocks by panel_id. "
-                "Check that:\n"
-                "  1. The same dataframe, with the same row order, is passed both to "
-                "build_contiguous_panel_map and to the PyMC log-likelihood builder, and\n"
-                "  2. The dataframe is sorted so that all rows for a given panel_id "
-                "are contiguous."
+                'Inconsistent panel mapping: panel_map.indptr[0] must be 0 '
+                f'(first observation index), but is {first}. '
+                'This usually indicates that the ContiguousPanelMap was built from a '
+                'dataframe that is not aligned with the one used to compute the '
+                'observation-level log-likelihood, or that observations for each '
+                'individual are not stored in contiguous blocks by panel_id. '
+                'Check that:\n'
+                '  1. The same dataframe, with the same row order, is passed both to '
+                'build_contiguous_panel_map and to the PyMC log-likelihood builder, and\n'
+                '  2. The dataframe is sorted so that all rows for a given panel_id '
+                'are contiguous.'
             )
             raise BiogemeError(error_msg)
         if panel_map.indptr[-1] != df.shape[0]:
             last = int(panel_map.indptr[-1])
             n_obs = int(df.shape[0])
             error_msg = (
-                "Inconsistent panel mapping: panel_map.indptr[-1] must equal the number "
-                f"of observations ({n_obs}), but is {last}. "
-                "This suggests a mismatch between the dataframe used to build the "
-                "ContiguousPanelMap and the one used to compute logp_obs, or that some "
-                "observations were dropped/filtered after building the panel map."
+                'Inconsistent panel mapping: panel_map.indptr[-1] must equal the number '
+                f'of observations ({n_obs}), but is {last}. '
+                'This suggests a mismatch between the dataframe used to build the '
+                'ContiguousPanelMap and the one used to compute logp_obs, or that some '
+                'observations were dropped/filtered after building the panel map.'
             )
             raise BiogemeError(error_msg)
         n_individuals = int(panel_map.unique_ids.size)
@@ -1139,10 +1170,10 @@ class BIOGEME:
         logp_obs_builder = self.log_like.recursive_construct_pymc_model_builder()
         start_time = datetime.now()
         with pm.Model(
-                coords={
-                    Dimension.INDIVIDUALS: individual_coord,
-                    Dimension.OBS: obs_coord,
-                }
+            coords={
+                Dimension.INDIVIDUALS: individual_coord,
+                Dimension.OBS: obs_coord,
+            }
         ) as model:
             logp_obs = logp_obs_builder(dataframe=df)
             s = pt.cumsum(logp_obs)  # (N_obs,)
@@ -1158,7 +1189,7 @@ class BIOGEME:
             pm.Deterministic(self.log_like_name, ll_indiv, dims=Dimension.INDIVIDUALS)
 
             # Sampling target: sum over individuals
-            pm.Potential("panel_choice_logp", pt.sum(ll_indiv))
+            pm.Potential('panel_choice_logp', pt.sum(ll_indiv))
 
             # --- Prior draws (stored in the .nc file if generated) ---
             # If priors are defined in the model builder, PyMC can generate prior samples.
@@ -1166,7 +1197,7 @@ class BIOGEME:
             try:
                 prior_idata = (
                     pm.sample_prior_predictive(
-                        samples=int(bayesian_draws),
+                        draws=int(bayesian_draws),
                         return_inferencedata=True,
                         random_seed=None if self.seed == 0 else int(self.seed),
                     )
@@ -1175,7 +1206,7 @@ class BIOGEME:
                 )
             except Exception as e:  # pragma: no cover
                 logger.warning(
-                    f"Could not generate prior draws (they will not be saved in the NetCDF file): {e}"
+                    f'Could not generate prior draws (they will not be saved in the NetCDF file): {e}'
                 )
                 prior_idata = None
 
@@ -1191,9 +1222,25 @@ class BIOGEME:
             # Attach the prior group(s) to the returned InferenceData, so they are
             # preserved when dumping to NetCDF.
             if prior_idata is not None:
-                idata.extend(prior_idata)
+                for group in prior_idata.groups:
+                    if group == '/':
+                        continue
+                    idata[group] = prior_idata[group]
 
         sampling_time = datetime.now() - start_time
+
+        if self.log_like_name in idata.posterior.data_vars:
+            log_likelihood = idata.posterior[self.log_like_name]
+            log_likelihood = xr.DataArray(
+                np.asarray(log_likelihood.values),
+                dims=log_likelihood.dims,
+                coords=log_likelihood.coords,
+                name=CHOICE_LABEL,
+            )
+
+            idata['log_likelihood'] = xr.DataTree(
+                dataset=xr.Dataset({CHOICE_LABEL: log_likelihood})
+            )
 
         posterior_means = {
             name: float(idata.posterior[name].mean().values)
@@ -1208,7 +1255,7 @@ class BIOGEME:
             user_notes=self.user_notes,
             data_name=self.database.name,
             beta_names=self.free_betas_names,
-            sampler="NUTS",
+            sampler='NUTS',
             target_accept=float(target_accept),
             run_time=sampling_time,
         )
@@ -1220,35 +1267,38 @@ class BIOGEME:
         )
         bayesian_summary = None
         if self.biogeme_parameters.get_value(
-                "generate_html"
-        ) or self.biogeme_parameters.get_value("generate_yaml"):
+            'generate_html'
+        ) or identification_threshold('generate_yaml'):
             bayesian_summary = final_results.to_summary()
-        if self.biogeme_parameters.get_value("generate_html"):
-            self.html_filename = get_new_file_name(self.model_name, "html")
+        if self.biogeme_parameters.get_value('generate_html'):
+            self.html_filename = get_new_file_name(self.model_name, 'html')
             generate_bayesian_html_file_from_results(
                 filename=self.html_filename,
                 estimation_results=final_results,
+                identification_threshold=self.biogeme_parameters.get_value(
+                    'identification_threshold'
+                ),
             )
-        if self.biogeme_parameters.get_value("generate_yaml"):
-            self.yaml_filename = get_new_file_name(self.model_name, "yaml")
+        if self.biogeme_parameters.get_value('generate_yaml'):
+            self.yaml_filename = get_new_file_name(self.model_name, 'yaml')
             if bayesian_summary is None:
                 bayesian_summary = final_results.to_summary()
             bayesian_summary.dump_yaml(path=self.yaml_filename)
-        if self.biogeme_parameters.get_value("generate_netcdf"):
-            self.netcdf_filename = get_new_file_name(self.model_name, "nc")
+        if self.biogeme_parameters.get_value('generate_netcdf'):
+            self.netcdf_filename = get_new_file_name(self.model_name, 'nc')
             final_results.dump(path=self.netcdf_filename)
             logger.info(
-                f"Bayesian estimation completed. The file {self.netcdf_filename} "
-                f"containing all posterior draws has been generated."
+                f'Bayesian estimation completed. The file {self.netcdf_filename} '
+                f'containing all posterior draws has been generated.'
             )
 
         return final_results
 
     def estimate_or_load(
-            self,
-            yaml_file_name: str | None = None,
-            starting_values: dict[str, float] | None = None,
-            run_bootstrap: bool = False,
+        self,
+        yaml_file_name: str | None = None,
+        starting_values: dict[str, float] | None = None,
+        run_bootstrap: bool = False,
     ) -> EstimationResults:
         """Load estimation results from YAML, or estimate the model.
 
@@ -1274,14 +1324,14 @@ class BIOGEME:
 
         if yaml_path.exists():
             logger.info(
-                f"Estimation results are read from {yaml_path}. No estimation is performed."
+                f'Estimation results are read from {yaml_path}. No estimation is performed.'
             )
             estimation_results = EstimationResults.from_yaml_file(
                 filename=str(yaml_path)
             )
             self._validate_loaded_estimation_results(results=estimation_results)
             return estimation_results
-        logger.info(f"No YAML file found at {yaml_path}. Estimation is performed.")
+        logger.info(f'No YAML file found at {yaml_path}. Estimation is performed.')
         return self.estimate(
             starting_values=starting_values,
             run_bootstrap=run_bootstrap,
@@ -1289,17 +1339,17 @@ class BIOGEME:
 
     @deprecated_parameters(
         {
-            "recycle": None,
-            "bootstrap": None,
-            "algorithm": None,
-            "algo_parameters": None,
-            "algoParameters": None,
+            'recycle': None,
+            'bootstrap': None,
+            'algorithm': None,
+            'algo_parameters': None,
+            'algoParameters': None,
         }
     )
     def estimate(
-            self,
-            starting_values: dict[str, float] | None = None,
-            run_bootstrap: bool = False,
+        self,
+        starting_values: dict[str, float] | None = None,
+        run_bootstrap: bool = False,
     ) -> EstimationResults:
         """Estimate the parameters of the model(s).
 
@@ -1325,29 +1375,29 @@ class BIOGEME:
         self.use_flatten_database = self.database.is_panel()
 
         if self.log_like is None:
-            raise BiogemeError("No log likelihood function has been specified")
+            raise BiogemeError('No log likelihood function has been specified')
 
         if self.model_name == DEFAULT_MODEL_NAME:
             logger.warning(
-                f"You have not defined a name for the model. "
-                f"The output files are named from the model name. "
-                f"The default is [{DEFAULT_MODEL_NAME}]"
+                f'You have not defined a name for the model. '
+                f'The output files are named from the model name. '
+                f'The default is [{DEFAULT_MODEL_NAME}]'
             )
         if self.database.is_panel():
             if self._function_evaluator is not None:
-                raise BiogemeError("Function evaluator has already been created")
+                raise BiogemeError('Function evaluator has already been created')
 
         if self.expressions_registry.number_of_free_betas == 0:
             raise BiogemeError(
-                f"There is no parameter to estimate in the formula: {self.log_like}."
+                f'There is no parameter to estimate in the formula: {self.log_like}.'
             )
 
         save_iteration_file_name = None
         saved_starting_values = {}
-        if self.biogeme_parameters.get_value("save_iterations"):
+        if self.biogeme_parameters.get_value('save_iterations'):
             logger.info(
-                f"*** Initial values of the parameters are "
-                f"obtained from the file {self._save_iterations_file_name()}"
+                f'*** Initial values of the parameters are '
+                f'obtained from the file {self._save_iterations_file_name()}'
             )
             save_iteration_file_name = self._save_iterations_file_name()
             saved_starting_values = self._load_saved_iteration()
@@ -1357,9 +1407,9 @@ class BIOGEME:
         else:
             for key, value in saved_starting_values.items():
                 starting_values.setdefault(key, value)
-        logger.info(f"Starting values for the algorithm: {starting_values}")
+        logger.info(f'Starting values for the algorithm: {starting_values}')
         init_log_likelihood = self.calculate_init_likelihood()
-        logger.debug(f"Init log likelihood: {init_log_likelihood}")
+        logger.debug(f'Init log likelihood: {init_log_likelihood}')
 
         # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
         # I have no clue why.
@@ -1373,11 +1423,11 @@ class BIOGEME:
             save_iterations_filename=save_iteration_file_name,
         )
         if algorithm_results.convergence:
-            logger.info("Optimization algorithm has converged.")
+            logger.info('Optimization algorithm has converged.')
         else:
-            logger.info("Optimization algorithm has *not* converged.")
+            logger.info('Optimization algorithm has *not* converged.')
         for key, msg in algorithm_results.optimization_messages.items():
-            logger.info(f"{key}: {msg}")
+            logger.info(f'{key}: {msg}')
 
         optimal_betas = self.expressions_registry.get_named_betas_values(
             algorithm_results.solution
@@ -1385,9 +1435,9 @@ class BIOGEME:
 
         calculate_hessian = self.second_derivatives_mode != SecondDerivativesMode.NEVER
         if calculate_hessian:
-            logger.info("Calculate second derivatives and BHHH")
+            logger.info('Calculate second derivatives and BHHH')
         else:
-            logger.info("Calculate BHHH")
+            logger.info('Calculate BHHH')
         f_g_h_b: FunctionOutput = self.function_evaluator.evaluate(
             the_betas=optimal_betas,
             gradient=True,
@@ -1456,18 +1506,20 @@ class BIOGEME:
 
         if not estimation_results.algorithm_has_converged:
             logger.warning(
-                "It seems that the optimization algorithm did not converge. "
-                "Therefore, the results may not correspond to the maximum "
-                "likelihood estimator. Check the specification of the model, "
-                "or the criteria for convergence of the algorithm."
+                'It seems that the optimization algorithm did not converge. '
+                'Therefore, the results may not correspond to the maximum '
+                'likelihood estimator. Check the specification of the model, '
+                'or the criteria for convergence of the algorithm.'
             )
-        if self.biogeme_parameters.get_value("generate_html"):
-            self.html_filename = get_new_file_name(self.model_name, "html")
+        if self.biogeme_parameters.get_value('generate_html'):
+            self.html_filename = get_new_file_name(self.model_name, 'html')
             generate_html_file(
-                filename=self.html_filename, estimation_results=estimation_results
+                filename=self.html_filename,
+                estimation_results=estimation_results,
+                group_of_parameters=self.group_of_parameters,
             )
-        if self.biogeme_parameters.get_value("generate_yaml"):
-            self.yaml_filename = get_new_file_name(self.model_name, "yaml")
+        if self.biogeme_parameters.get_value('generate_yaml'):
+            self.yaml_filename = get_new_file_name(self.model_name, 'yaml')
             estimation_results.dump_yaml_file(filename=self.yaml_filename)
         return estimation_results
 
@@ -1498,10 +1550,10 @@ class BIOGEME:
         # I have no clue why.
         save_iteration_file_name = None
         starting_values = {}
-        if self.biogeme_parameters.get_value("save_iterations"):
+        if self.biogeme_parameters.get_value('save_iterations'):
             logger.info(
-                f"*** Initial values of the parameters are "
-                f"obtained from the file {self._save_iterations_file_name()}"
+                f'*** Initial values of the parameters are '
+                f'obtained from the file {self._save_iterations_file_name()}'
             )
             save_iteration_file_name = self._save_iterations_file_name()
             starting_values = self._load_saved_iteration()
@@ -1571,10 +1623,10 @@ class BIOGEME:
         return EstimationResults(raw_estimation_results=raw_estimation_results)
 
     def estimate_catalog(
-            self,
-            selected_configurations: set[Configuration] = None,
-            quick_estimate: bool = False,
-            run_bootstrap: bool = False,
+        self,
+        selected_configurations: set[Configuration] = None,
+        quick_estimate: bool = False,
+        run_bootstrap: bool = False,
     ) -> dict[str, EstimationResults]:
         """Estimate all or selected versions of a model with Catalog's,
         corresponding to multiple specifications.
@@ -1592,31 +1644,31 @@ class BIOGEME:
             self.short_names = ModelNames(prefix=self.modelName)
 
         if self.log_like is None:
-            raise BiogemeError("No log likelihood function has been specified")
+            raise BiogemeError('No log likelihood function has been specified')
 
         central_controller = CentralController(
             expression=self.log_like,
             maximum_number_of_configurations=self.biogeme_parameters.get_value(
-                "maximum_number_catalog_expressions"
+                'maximum_number_catalog_expressions'
             ),
         )
         if selected_configurations is None:
             number_of_specifications = central_controller.number_of_configurations()
-            logger.info(f"Estimating {number_of_specifications} models.")
+            logger.info(f'Estimating {number_of_specifications} models.')
 
             if (
-                    number_of_specifications is None
-                    or number_of_specifications > self.maximum_number_catalog_expressions
+                number_of_specifications is None
+                or number_of_specifications > self.maximum_number_catalog_expressions
             ):
                 error_msg = (
-                    f"There are too many [{number_of_specifications}] different "
-                    f"specifications for the log likelihood function. This is "
-                    f"above the maximum number: "
-                    f"{self.maximum_number_catalog_expressions}. Simplify "
-                    f"the specification, change the value of the parameter "
-                    f"maximum_number_catalog_expressions, or consider using "
+                    f'There are too many [{number_of_specifications}] different '
+                    f'specifications for the log likelihood function. This is '
+                    f'above the maximum number: '
+                    f'{self.maximum_number_catalog_expressions}. Simplify '
+                    f'the specification, change the value of the parameter '
+                    f'maximum_number_catalog_expressions, or consider using '
                     f'the AssistedSpecification object in the "biogeme.assisted" '
-                    f"module."
+                    f'module.'
                 )
                 raise ValueOutOfRange(error_msg)
 
@@ -1649,10 +1701,10 @@ class BIOGEME:
         return configurations
 
     def validate(
-            self,
-            estimation_results: EstimationResults,
-            slices: int,
-            groups: str | None = None,
+        self,
+        estimation_results: EstimationResults,
+        slices: int,
+        groups: str | None = None,
     ) -> list[ValidationResult]:
         """
         Perform out-of-sample validation of the model.
@@ -1674,8 +1726,8 @@ class BIOGEME:
         # For some reason, the self.optimization_parameters cannot be used as such in the function call below.
         # I have no clue why.
         parameters = self.optimization_parameters
-        parameters["calculating_second_derivatives"] = (
-            self.biogeme_parameters.get_value(name="calculating_second_derivatives")
+        parameters['calculating_second_derivatives'] = (
+            self.biogeme_parameters.get_value(name='calculating_second_derivatives')
         )
         return cross_validate_model(
             the_algorithm=self._algorithm_configuration(),
@@ -1688,16 +1740,16 @@ class BIOGEME:
         )
 
     def _algorithm_configuration(self) -> OptimizationAlgorithm:
-        if self.biogeme_parameters.get_value("optimization_algorithm") == "automatic":
-            self.biogeme_parameters.set_value("optimization_algorithm", "simple_bounds")
+        if self.biogeme_parameters.get_value('optimization_algorithm') == 'automatic':
+            self.biogeme_parameters.set_value('optimization_algorithm', 'simple_bounds')
         return algorithms.get(self.optimization_algorithm)
 
     def simulate_bayesian(
-            self,
-            bayesian_estimation_results: BayesianResults,
-            lower_quantile: float = 0.025,
-            upper_quantile: float = 0.975,
-            percentage_of_draws_to_use: float = 10.0,
+        self,
+        bayesian_estimation_results: BayesianResults,
+        lower_quantile: float = 0.025,
+        upper_quantile: float = 0.975,
+        percentage_of_draws_to_use: float = 10.0,
     ) -> pd.DataFrame:
         """
         Simulate all formulas in self.formulas over posterior draws and
@@ -1708,10 +1760,10 @@ class BIOGEME:
         posterior draws.
         """
         if percentage_of_draws_to_use <= 0:
-            error_msg = f"Percentage must be positive, not {percentage_of_draws_to_use}"
+            error_msg = f'Percentage must be positive, not {percentage_of_draws_to_use}'
             raise BiogemeError(error_msg)
         if percentage_of_draws_to_use > 100:
-            warning_msg = f"Percentage cannot exceed 100. The value of 100 is assumed instead of {percentage_of_draws_to_use}."
+            warning_msg = f'Percentage cannot exceed 100. The value of 100 is assumed instead of {percentage_of_draws_to_use}.'
             logger.warning(warning_msg)
             percentage_of_draws_to_use = 100.0
 
@@ -1721,19 +1773,19 @@ class BIOGEME:
         )
         if number_of_draws_to_use <= 0:
             raise BiogemeError(
-                "No posterior draws selected for simulation. "
-                "Check percentage_of_draws_to_use and posterior_draws."
+                'No posterior draws selected for simulation. '
+                'Check percentage_of_draws_to_use and posterior_draws.'
             )
         if number_of_draws_to_use < 100:
             ideal_percentage = int(np.ceil(10_000 / total_draws))
             warning_msg = (
-                f"Bayesian simulation performed with {percentage_of_draws_to_use}% of the draws, that is "
+                f'Bayesian simulation performed with {percentage_of_draws_to_use}% of the draws, that is '
                 f'{number_of_draws_to_use}/{total_draws} draws. It is advised to use at least 100 draws. You may want to adjust the parameter "percentage_of_draws_to_use={ideal_percentage}"'
             )
             logger.warning(warning_msg)
         else:
             info_msg = (
-                f"Bayesian simulation performed with {percentage_of_draws_to_use}% of the draws, that is "
+                f'Bayesian simulation performed with {percentage_of_draws_to_use}% of the draws, that is '
                 f'{number_of_draws_to_use}/{total_draws} draws. Adjust the parameter "percentage_of_draws_to_use" if you need a different number of draws.'
             )
             logger.info(info_msg)
@@ -1769,8 +1821,8 @@ class BIOGEME:
             sim_i = self.simulate(beta_values)
 
             # Keep track of which draw and which observation
-            _INTERNAL_OBS_COL = "__biogeme_internal_obs_id__"
-            _INTERNAL_DRAW_COL = "__biogeme_internal_draw_id__"
+            _INTERNAL_OBS_COL = '__biogeme_internal_obs_id__'
+            _INTERNAL_DRAW_COL = '__biogeme_internal_draw_id__'
             sim_i = sim_i.copy()
             sim_i[_INTERNAL_DRAW_COL] = int(draw_id)
             sim_i[_INTERNAL_OBS_COL] = sim_i.index
@@ -1785,9 +1837,9 @@ class BIOGEME:
         ]
         if not formula_names:
             raise BiogemeError(
-                "No simulation columns found in the results matching formula "
-                f"names. Expected one of: {list(self.formulas.keys())}, "
-                f"but found columns: {list(all_simulations_df.columns)}"
+                'No simulation columns found in the results matching formula '
+                f'names. Expected one of: {list(self.formulas.keys())}, '
+                f'but found columns: {list(all_simulations_df.columns)}'
             )
 
         # Group by observation and compute summary stats for each formula
@@ -1800,7 +1852,7 @@ class BIOGEME:
                 return float(np.quantile(x, q))
 
             # e.g. q=0.025 -> "q025", q=0.975 -> "q975"
-            _q.__name__ = f"q{int(round(q * 1000)):03d}"
+            _q.__name__ = f'q{int(round(q * 1000)):03d}'
             return _q
 
         q_lower_fn = _named_quantile_func(lower_quantile)
@@ -1809,7 +1861,7 @@ class BIOGEME:
         summary = grouped.agg(
             {
                 col: [
-                    "mean",
+                    'mean',
                     q_lower_fn,
                     q_upper_fn,
                 ]
@@ -1818,7 +1870,7 @@ class BIOGEME:
         )
 
         summary.columns = [
-            f"{col}_{stat}" for col, stat in summary.columns.to_flat_index()
+            f'{col}_{stat}' for col, stat in summary.columns.to_flat_index()
         ]
 
         return summary
@@ -1838,15 +1890,15 @@ class BIOGEME:
         if the_beta_values is None:
             current_beta_values = self.expressions_registry.free_betas
             err = (
-                f"Contrarily to previous versions of Biogeme, "
-                f"the values of Beta must "
-                f"now be explicitly mentioned. If they have been estimated, they can be obtained from "
-                f"results.get_beta_values(). If not, use the default values: {current_beta_values}"
+                f'Contrarily to previous versions of Biogeme, '
+                f'the values of Beta must '
+                f'now be explicitly mentioned. If they have been estimated, they can be obtained from '
+                f'results.get_beta_values(). If not, use the default values: {current_beta_values}'
             )
             raise BiogemeError(err)
 
         if not isinstance(the_beta_values, dict):
-            error_msg = f"the_beta_values must be a dict, and not an object of type {type(the_beta_values)}"
+            error_msg = f'the_beta_values must be a dict, and not an object of type {type(the_beta_values)}'
             raise BiogemeError(error_msg)
 
         the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
@@ -1859,7 +1911,7 @@ class BIOGEME:
         return results
 
     def confidence_intervals(
-            self, beta_values: list[dict[str, float]], interval_size: float = 0.9
+        self, beta_values: list[dict[str, float]], interval_size: float = 0.9
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Calculate confidence intervals on the simulated quantities
 
@@ -1913,11 +1965,11 @@ class BIOGEME:
         return left, right
 
     def __str__(self) -> str:
-        r = f"{self.model_name}: database [{self.model_elements.database.name}]"
+        r = f'{self.model_name}: database [{self.model_elements.database.name}]'
         r += str(self.formulas)
         return r
 
-    @deprecated_parameters({"beta": None})
+    @deprecated_parameters({'beta': None})
     def check_derivatives(self, verbose: bool = False) -> CheckDerivativesResults:
         """Verifies the implementation of the derivatives.
 

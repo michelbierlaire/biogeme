@@ -12,12 +12,12 @@ from .resolved import ParameterCreationKind, ResolvedLinearCombination, Resolved
 def _emit_parameter_assignment(name: str, param) -> list[str]:
     lines: list[str] = []
     if param.creation_kind == ParameterCreationKind.NUMERIC_CONSTANT:
-        lines.append(f"{name} = {param.fixed_value}")
+        lines.append(f'{name} = {param.fixed_value}')
     elif param.creation_kind == ParameterCreationKind.LOG_EXP_BETA:
         lines.append(
             f'{name}_log = Beta("{name}_log", {param.initial_value}, None, None, 0)'
         )
-        lines.append(f"{name} = exp({name}_log)")
+        lines.append(f'{name} = exp({name}_log)')
     elif param.creation_kind == ParameterCreationKind.BOUNDED_BETA:
         lines.append(
             f'{name} = Beta("{name}", {param.initial_value}, {param.lower_bound}, {param.upper_bound}, 0)'
@@ -27,7 +27,7 @@ def _emit_parameter_assignment(name: str, param) -> list[str]:
             f'{name} = Beta("{name}", {param.initial_value}, {param.lower_bound}, {param.upper_bound}, 0)'
         )
     else:
-        lines.append(f"{name} = {param.fixed_value}")
+        lines.append(f'{name} = {param.fixed_value}')
     return lines
 
 
@@ -101,18 +101,18 @@ def _emit_threshold_systems(lines: list[str], resolved: ResolvedModel) -> None:
         '# ---------------------------------------------------------------------------'
     )
     for type_name, system in resolved.threshold_systems.items():
-        lines.append(f"# Threshold system: {type_name}")
+        lines.append(f'# Threshold system: {type_name}')
         for cutpoint in system.cutpoints:
-            symbol = f"{type_name}_{cutpoint.symbol_name}"
+            symbol = f'{type_name}_{cutpoint.symbol_name}'
             expr = cutpoint.expression_text
             for source in sorted(
                 cutpoint.source_parameter_names, key=len, reverse=True
             ):
                 expr = expr.replace(
                     source,
-                    f"{type_name}_{source}" if source.startswith('tau_') else source,
+                    f'{type_name}_{source}' if source.startswith('tau_') else source,
                 )
-            lines.append(f"{symbol} = {expr}")
+            lines.append(f'{symbol} = {expr}')
         lines.append('')
 
 
@@ -126,9 +126,9 @@ def _emit_measurement_terms_ml(lines: list[str], resolved: ResolvedModel) -> Non
     )
     latent_symbol_names = set(resolved.latent_variables)
     for indicator_name, equation in resolved.measurement_equations.items():
-        lines.append(f"# Indicator: {indicator_name}")
+        lines.append(f'# Indicator: {indicator_name}')
         lines.append(
-            f"mu_{indicator_name} = {_combo_to_python(equation.systematic_part, latent_symbol_names)}"
+            f'mu_{indicator_name} = {_combo_to_python(equation.systematic_part, latent_symbol_names)}'
         )
         lines.append(
             f'y_{indicator_name} = Variable("{equation.observed_variable_name}")'
@@ -140,12 +140,12 @@ def _emit_measurement_terms_ml(lines: list[str], resolved: ResolvedModel) -> Non
         sigma_name = equation.sigma.final_name
         if equation.measurement_model == MeasurementModel.GAUSSIAN:
             lines.append(
-                f"term_{indicator_name} = normalpdf((y_{indicator_name} - mu_{indicator_name}) / {sigma_name}) / {sigma_name}"
+                f'term_{indicator_name} = normalpdf((y_{indicator_name} - mu_{indicator_name}) / {sigma_name}) / {sigma_name}'
             )
         else:
             system = resolved.threshold_systems[equation.threshold_system_name]
             cutpoints = ', '.join(
-                f"{equation.threshold_system_name}_{cp.symbol_name} / {sigma_name}"
+                f'{equation.threshold_system_name}_{cp.symbol_name} / {sigma_name}'
                 for cp in system.cutpoints
             )
             cls = (
@@ -154,7 +154,7 @@ def _emit_measurement_terms_ml(lines: list[str], resolved: ResolvedModel) -> Non
                 else 'OrderedLogit'
             )
             lines.append(
-                f"term_{indicator_name} = {cls}(eta=mu_{indicator_name} / {sigma_name}, cutpoints=[{cutpoints}], y=y_{indicator_name}, categories={system.categories}, neutral_labels={system.neutral_labels})"
+                f'term_{indicator_name} = {cls}(eta=mu_{indicator_name} / {sigma_name}, cutpoints=[{cutpoints}], y=y_{indicator_name}, categories={system.categories}, neutral_labels={system.neutral_labels})'
             )
         lines.append('')
 
@@ -171,9 +171,9 @@ def _emit_measurement_log_terms_bayesian(
     )
     latent_symbol_names = set(resolved.latent_variables)
     for indicator_name, equation in resolved.measurement_equations.items():
-        lines.append(f"# Indicator: {indicator_name}")
+        lines.append(f'# Indicator: {indicator_name}')
         lines.append(
-            f"mu_{indicator_name} = {_combo_to_python(equation.systematic_part, latent_symbol_names)}"
+            f'mu_{indicator_name} = {_combo_to_python(equation.systematic_part, latent_symbol_names)}'
         )
         lines.append(
             f'y_{indicator_name} = Variable("{equation.observed_variable_name}")'
@@ -185,12 +185,12 @@ def _emit_measurement_log_terms_bayesian(
         sigma_name = equation.sigma.final_name
         if equation.measurement_model == MeasurementModel.GAUSSIAN:
             lines.append(
-                f"log_term_{indicator_name} = normal_logpdf(y_{indicator_name}, mu_{indicator_name}, {sigma_name})"
+                f'log_term_{indicator_name} = normal_logpdf(y_{indicator_name}, mu_{indicator_name}, {sigma_name})'
             )
         else:
             system = resolved.threshold_systems[equation.threshold_system_name]
             cutpoints = ', '.join(
-                f"{equation.threshold_system_name}_{cp.symbol_name} / {sigma_name}"
+                f'{equation.threshold_system_name}_{cp.symbol_name} / {sigma_name}'
                 for cp in system.cutpoints
             )
             cls = (
@@ -199,7 +199,7 @@ def _emit_measurement_log_terms_bayesian(
                 else 'OrderedLogLogit'
             )
             lines.append(
-                f"log_term_{indicator_name} = {cls}(eta=mu_{indicator_name} / {sigma_name}, cutpoints=[{cutpoints}], y=y_{indicator_name}, categories={system.categories}, neutral_labels={system.neutral_labels})"
+                f'log_term_{indicator_name} = {cls}(eta=mu_{indicator_name} / {sigma_name}, cutpoints=[{cutpoints}], y=y_{indicator_name}, categories={system.categories}, neutral_labels={system.neutral_labels})'
             )
         lines.append('')
 
@@ -217,19 +217,17 @@ def _generate_python_code_ml(resolved: ResolvedModel) -> str:
     )
     for latent_name, latent in resolved.latent_variables.items():
         eq = latent.structural_equation
-        deterministic = (
-            ' + '.join(_term_to_python(term) for term in eq.terms) or 'Numeric(0.0)'
-        )
-        lines.append(f"mu_{latent_name} = {deterministic}")
+        deterministic = _combo_to_python(eq.systematic_part)
+        lines.append(f'mu_{latent_name} = {deterministic}')
         lines.append(
             f'draw_{latent_name} = Draws("{eq.draw_name}", draw_type="{eq.draw_type}")'
         )
         if eq.sigma is not None:
             lines.append(
-                f"{latent_name} = mu_{latent_name} + {eq.sigma.final_name} * draw_{latent_name}"
+                f'{latent_name} = mu_{latent_name} + {eq.sigma.final_name} * draw_{latent_name}'
             )
         else:
-            lines.append(f"{latent_name} = mu_{latent_name}")
+            lines.append(f'{latent_name} = mu_{latent_name}')
         lines.append('')
     _emit_threshold_systems(lines, resolved)
     _emit_measurement_terms_ml(lines, resolved)
@@ -242,10 +240,10 @@ def _generate_python_code_ml(resolved: ResolvedModel) -> str:
     )
     if resolved.measurement_equations:
         product_terms = ', '.join(
-            f"term_{name}" for name in sorted(resolved.measurement_equations)
+            f'term_{name}' for name in sorted(resolved.measurement_equations)
         )
         lines.append(
-            f"conditional_measurement_likelihood = MultipleProduct([{product_terms}])"
+            f'conditional_measurement_likelihood = MultipleProduct([{product_terms}])'
         )
         lines.append(
             'conditional_log_likelihood = MultipleSum([log(term) for term in ['
@@ -275,16 +273,14 @@ def _generate_python_code_bayesian(resolved: ResolvedModel) -> str:
     )
     for latent_name, latent in resolved.latent_variables.items():
         eq = latent.structural_equation
-        deterministic = (
-            ' + '.join(_term_to_python(term) for term in eq.terms) or 'Numeric(0.0)'
-        )
-        lines.append(f"mu_{latent_name} = {deterministic}")
+        deterministic = _combo_to_python(eq.systematic_part)
+        lines.append(f'mu_{latent_name} = {deterministic}')
         lines.append(
             f'draw_{latent_name} = Draws("{eq.draw_name}", draw_type="{eq.draw_type}")'
         )
         if eq.sigma is not None:
             lines.append(
-                f"stochastic_{latent_name} = mu_{latent_name} + {eq.sigma.final_name} * draw_{latent_name}"
+                f'stochastic_{latent_name} = mu_{latent_name} + {eq.sigma.final_name} * draw_{latent_name}'
             )
             lines.append(
                 f'{latent_name} = DistributedParameter("{latent_name}", stochastic_{latent_name})'
@@ -305,9 +301,9 @@ def _generate_python_code_bayesian(resolved: ResolvedModel) -> str:
     )
     if resolved.measurement_equations:
         log_terms = ', '.join(
-            f"log_term_{name}" for name in sorted(resolved.measurement_equations)
+            f'log_term_{name}' for name in sorted(resolved.measurement_equations)
         )
-        lines.append(f"conditional_log_likelihood = MultipleSum([{log_terms}])")
+        lines.append(f'conditional_log_likelihood = MultipleSum([{log_terms}])')
     else:
         lines.append('conditional_log_likelihood = Numeric(0.0)')
     return '\n'.join(lines) + '\n'
@@ -321,4 +317,4 @@ def generate_python_code(resolved: ResolvedModel) -> str:
 
 def save_python_code(code: str, path: str | Path) -> None:
     """Save generated Python code to a file."""
-    Path(path).write_text(code, encoding="utf-8")
+    Path(path).write_text(code, encoding='utf-8')

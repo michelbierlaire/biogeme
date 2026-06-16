@@ -2,7 +2,7 @@ from __future__ import annotations
 
 """Semantic references to normalizable parameters."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass  # noqa: E402
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,7 +22,15 @@ class StructuralCoefficient(ParameterRef):
     variable_name: str
 
     def key(self) -> tuple:
-        return (self.__class__.__name__, self.latent_name, self.variable_name)
+        return self.__class__.__name__, self.latent_name, self.variable_name
+
+
+@dataclass(frozen=True, slots=True)
+class StructuralIntercept(ParameterRef):
+    latent_name: str
+
+    def key(self) -> tuple:
+        return (self.__class__.__name__, self.latent_name)
 
 
 @dataclass(frozen=True, slots=True)

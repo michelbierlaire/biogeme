@@ -43,11 +43,13 @@ class StructuralEquation:
     """Pure structural-equation specification.
 
     :param name: Name of the owning latent variable.
+    :param intercept: Whether a structural intercept should be included.
     :param explanatory_variables: Variables entering the deterministic part.
     """
 
     name: str
-    explanatory_variables: Iterable[str]
+    intercept: bool = True
+    explanatory_variables: Iterable[str] = ()
 
 
 @dataclass(frozen=True, slots=True)

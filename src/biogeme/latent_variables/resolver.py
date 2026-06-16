@@ -3,6 +3,7 @@ from __future__ import annotations
 """Resolution of a pure specification into a resolved semantic model."""
 
 from dataclasses import dataclass
+
 import numpy as np
 
 from .context import BuildContext, PositivityMode
@@ -40,7 +41,7 @@ def _positive_parameter_initial_value(
     natural_start = default_start if spec is None or spec.start is None else spec.start
     if natural_start <= 0:
         raise ValueError(
-            f"Positive parameter starts must be strictly positive. Got {natural_start}."
+            f'Positive parameter starts must be strictly positive. Got {natural_start}.'
         )
     if context.positivity_mode == PositivityMode.LOG_EXP:
         return float(np.log(natural_start))
@@ -53,6 +54,7 @@ from .normalization_refs import (
     MeasurementLoading,
     MeasurementSigma,
     StructuralCoefficient,
+    StructuralIntercept,
     StructuralSigma,
     ThresholdDelta,
     ThresholdFirst,
@@ -80,7 +82,6 @@ from .resolved import (
     ThresholdConstructionKind,
 )
 from .validation import validate_normalization_plan, validate_specification
-
 
 _SMALL_POSITIVE = 1e-15
 
@@ -124,24 +125,32 @@ def _prepare(
     measurement_spec_by_indicator = {
         spec.indicator_name: spec for spec in measurement_configuration.specifications
     }
+    used_indicator_names = {
+        indicator_name for lv in latent_variables for indicator_name in lv.indicators
+    }
     missing_measurement_specs = sorted(
-        name for name in indicator_by_name if name not in measurement_spec_by_indicator
+        name
+        for name in used_indicator_names
+        if name not in measurement_spec_by_indicator
     )
     if missing_measurement_specs:
         raise ValueError(
-            "Missing measurement specification for indicator(s): "
-            + ", ".join(missing_measurement_specs)
+            'Missing measurement specification for indicator(s): '
+            + ', '.join(missing_measurement_specs)
         )
     unknown_measurement_specs = sorted(
         name for name in measurement_spec_by_indicator if name not in indicator_by_name
     )
     if unknown_measurement_specs:
         raise ValueError(
-            "Measurement specification refers to unknown indicator(s): "
-            + ", ".join(unknown_measurement_specs)
+            'Measurement specification refers to unknown indicator(s): '
+            + ', '.join(unknown_measurement_specs)
         )
+    used_indicators = [
+        ind for ind in likert_indicators if ind.name in used_indicator_names
+    ]
     indicator_to_latents: dict[str, list[str]] = {
-        ind.name: [] for ind in likert_indicators
+        ind.name: [] for ind in used_indicators
     }
     for lv in latent_variables:
         for indicator_name in lv.indicators:
@@ -149,14 +158,14 @@ def _prepare(
     ordinal_type_names = sorted(
         {
             ind.type_name
-            for ind in likert_indicators
+            for ind in used_indicators
             if measurement_spec_by_indicator[ind.name].measurement_model
             in {MeasurementModel.ORDERED_PROBIT, MeasurementModel.ORDERED_LOGIT}
         }
     )
     return _Prepared(
         latent_variables=list(latent_variables),
-        indicators=list(likert_indicators),
+        indicators=used_indicators,
         types=list(likert_types),
         indicator_by_name=indicator_by_name,
         type_by_name=type_by_name,
@@ -192,6 +201,7 @@ def _resolve_parameter(
         else None
     )
     if fixed_value is not None:
+        creation_kind = ParameterCreationKind.NUMERIC_CONSTANT
         return ResolvedParameter(
             semantic_ref=semantic_ref,
             final_name=final_name,
@@ -202,12 +212,13 @@ def _resolve_parameter(
             lower_bound=None,
             upper_bound=None,
             positivity_strategy=None,
-            creation_kind=ParameterCreationKind.NUMERIC_CONSTANT,
+            creation_kind=creation_kind,
             notes=notes,
         )
     if positivity:
         strategy = _positivity_strategy(context)
         if strategy == PositivityStrategy.LOG_EXP:
+            creation_kind = ParameterCreationKind.LOG_EXP_BETA
             return ResolvedParameter(
                 semantic_ref=semantic_ref,
                 final_name=final_name,
@@ -218,9 +229,10 @@ def _resolve_parameter(
                 lower_bound=None,
                 upper_bound=None,
                 positivity_strategy=strategy,
-                creation_kind=ParameterCreationKind.LOG_EXP_BETA,
+                creation_kind=creation_kind,
                 notes=notes,
             )
+        creation_kind = ParameterCreationKind.BOUNDED_BETA
         return ResolvedParameter(
             semantic_ref=semantic_ref,
             final_name=final_name,
@@ -231,9 +243,10 @@ def _resolve_parameter(
             lower_bound=_SMALL_POSITIVE,
             upper_bound=None,
             positivity_strategy=strategy,
-            creation_kind=ParameterCreationKind.BOUNDED_BETA,
+            creation_kind=creation_kind,
             notes=notes,
         )
+    creation_kind = ParameterCreationKind.FREE_BETA
     return ResolvedParameter(
         semantic_ref=semantic_ref,
         final_name=final_name,
@@ -244,7 +257,7 @@ def _resolve_parameter(
         lower_bound=None,
         upper_bound=None,
         positivity_strategy=PositivityStrategy.NONE,
-        creation_kind=ParameterCreationKind.FREE_BETA,
+        creation_kind=creation_kind,
         notes=notes,
     )
 
@@ -260,6 +273,20 @@ def _resolve_structural_parameters(
 ) -> dict[str, ResolvedParameter]:
     params: dict[str, ResolvedParameter] = {}
     for lv in prepared.latent_variables:
+        if lv.structural_equation.intercept:
+            intercept_ref = StructuralIntercept(lv.name)
+            intercept_name = context.naming.structural_intercept_name(lv.name)
+            params[intercept_name] = _resolve_parameter(
+                key=intercept_name,
+                semantic_ref=intercept_ref,
+                final_name=intercept_name,
+                role=ParameterRole.STRUCTURAL_INTERCEPT,
+                plan=plan,
+                positivity=False,
+                context=context,
+                initial_value=0.0,
+                notes=[f"Structural intercept for latent '{lv.name}'."],
+            )
         for variable_name in lv.structural_equation.explanatory_variables:
             ref = StructuralCoefficient(lv.name, variable_name)
             final_name = context.naming.structural_beta_name(lv.name, variable_name)
@@ -440,30 +467,34 @@ def _resolve_threshold_systems(
                 context.naming.threshold_delta_name(type_name, i)
                 for i in range(n_deltas)
             ]
+            center_index = n_tau // 2
             for idx in range(n_tau):
-                if n_tau % 2 == 1 and idx == n_tau // 2:
+                if n_tau % 2 == 1 and idx == center_index:
                     cutpoints.append(
                         ResolvedCutpoint(
-                            f'tau_{idx+1}', CutpointKind.DERIVED, '0.0', []
+                            f'tau_{idx + 1}', CutpointKind.DERIVED, '0.0', []
                         )
                     )
-                elif idx < n_tau // 2:
-                    involved = delta_names[idx:]
-                    expr = ' - '.join(involved)
+                elif idx < center_index:
+                    involved = delta_names[: center_index - idx]
+                    expr = ' + '.join(involved)
                     cutpoints.append(
                         ResolvedCutpoint(
-                            f'tau_{idx+1}',
+                            f'tau_{idx + 1}',
                             CutpointKind.DERIVED,
                             f'-({expr})' if len(involved) > 1 else f'-{expr}',
                             involved,
                         )
                     )
                 else:
-                    involved = delta_names[: idx - n_tau // 2 + 1]
+                    positive_index = idx - center_index
+                    if n_tau % 2 == 1:
+                        positive_index -= 1
+                    involved = delta_names[: positive_index + 1]
                     expr = ' + '.join(involved)
                     cutpoints.append(
                         ResolvedCutpoint(
-                            f'tau_{idx+1}', CutpointKind.DERIVED, expr, involved
+                            f'tau_{idx + 1}', CutpointKind.DERIVED, expr, involved
                         )
                     )
             notes.append(f"Symmetric threshold construction for type '{type_name}'.")
@@ -490,7 +521,7 @@ def _resolve_threshold_systems(
             previous = 'tau_1'
             for index in range(1, n_tau):
                 delta_name = context.naming.threshold_delta_name(type_name, index)
-                symbol_name = f'tau_{index+1}'
+                symbol_name = f'tau_{index + 1}'
                 cutpoints.append(
                     ResolvedCutpoint(
                         symbol_name,
@@ -525,11 +556,15 @@ def _resolve_structural_equations(
             terms.append(
                 ResolvedLinearTerm(_parameter_ref(params[name]), variable_name)
             )
+        intercept = None
+        if lv.structural_equation.intercept:
+            intercept_name = context.naming.structural_intercept_name(lv.name)
+            intercept = _parameter_ref(params[intercept_name])
         sigma_name = context.naming.structural_sigma_name(lv.name)
         equations[lv.name] = ResolvedStructuralEquation(
             latent_name=lv.name,
             expression_name=lv.name,
-            terms=terms,
+            systematic_part=ResolvedLinearCombination(intercept, terms),
             sigma=_parameter_ref(params[sigma_name]),
             draw_name=context.naming.structural_draw_name(lv.name),
             draw_type=context.draw_type,
@@ -670,7 +705,11 @@ def resolve_model(
         resolved_latents[lv.name] = ResolvedLatentVariable(
             name=lv.name,
             structural_equation=structural_equations[lv.name],
-            indicator_names=sorted(lv.indicators),
+            indicator_names=sorted(
+                indicator_name
+                for indicator_name in lv.indicators
+                if indicator_name in prepared.indicator_to_latents
+            ),
             reference_indicator=reference_indicator,
             normalization_notes=notes,
         )
@@ -680,8 +719,8 @@ def resolve_model(
     )
     measurement_models_present = sorted(
         {
-            spec.measurement_model
-            for spec in prepared.measurement_spec_by_indicator.values()
+            prepared.measurement_spec_by_indicator[indicator_name].measurement_model
+            for indicator_name in measurement_equations
         },
         key=lambda x: x.value,
     )

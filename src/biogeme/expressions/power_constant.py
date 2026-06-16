@@ -13,6 +13,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import pytensor.tensor as pt
+
 from biogeme.exceptions import BiogemeError
 from biogeme.floating_point import JAX_FLOAT
 
@@ -133,7 +134,7 @@ class PowerConstant(UnaryOperator):
                     def safe_branch(_):
                         return jnp.exp(
                             self.exponent
-                            * jnp.log(jnp.clip(child_value, a_min=epsilon))
+                            * jnp.log(jnp.clip(child_value, epsilon, None))
                         )
 
                     return jax.lax.cond(

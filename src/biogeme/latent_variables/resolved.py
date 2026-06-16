@@ -40,6 +40,7 @@ class PositivityStrategy(str, Enum):
 
 
 class ParameterRole(str, Enum):
+    STRUCTURAL_INTERCEPT = 'structural_intercept'
     STRUCTURAL_COEFFICIENT = 'structural_coefficient'
     STRUCTURAL_SIGMA = 'structural_sigma'
     MEASUREMENT_INTERCEPT = 'measurement_intercept'
@@ -97,7 +98,7 @@ class ResolvedLinearCombination:
 class ResolvedStructuralEquation:
     latent_name: str
     expression_name: str
-    terms: list[ResolvedLinearTerm]
+    systematic_part: ResolvedLinearCombination
     sigma: ResolvedParameterRef | None
     draw_name: str
     draw_type: str
@@ -183,3 +184,18 @@ class ResolvedModel:
     threshold_systems: dict[str, ResolvedThresholdSystem]
     parameters: dict[str, ResolvedParameter]
     normalization: ResolvedNormalizationSummary
+
+    def free_parameters(self) -> list[ResolvedParameter]:
+        """Return the parameters that are estimated.
+
+        Fixed parameters and numeric constants are excluded because they do not
+        appear in the estimation results. The order follows the insertion order
+        of ``self.parameters``.
+
+        :return: list of free resolved parameters.
+        """
+        return [
+            parameter
+            for parameter in self.parameters.values()
+            if parameter.status == ParameterStatus.FREE
+        ]

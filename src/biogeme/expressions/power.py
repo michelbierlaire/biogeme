@@ -14,6 +14,7 @@ import pandas as pd
 import pytensor.tensor as pt
 
 from biogeme.floating_point import JAX_FLOAT
+
 from .base_expressions import ExpressionOrNumeric
 from .bayesian import PymcModelBuilderType
 from .binary_expressions import BinaryOperator
@@ -104,7 +105,7 @@ class Power(BinaryOperator):
                 epsilon = jnp.finfo(JAX_FLOAT).eps
 
                 def safe_power(_):
-                    safe_base = jnp.clip(base, a_min=epsilon)
+                    safe_base = jnp.clip(base, epsilon, None)
                     return jnp.exp(exponent * jnp.log(safe_base))
 
                 def return_nan(_):

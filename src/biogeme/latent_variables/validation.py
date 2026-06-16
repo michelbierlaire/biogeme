@@ -12,6 +12,7 @@ from .normalization_refs import (
     MeasurementLoading,
     MeasurementSigma,
     StructuralCoefficient,
+    StructuralIntercept,
     StructuralSigma,
     ThresholdDelta,
     ThresholdFirst,
@@ -156,6 +157,15 @@ def validate_normalization_plan(
                         f"Unknown latent variable '{target.latent_name}' in fixing '{target}'.",
                     )
                 )
+        elif isinstance(target, StructuralIntercept):
+            if target.latent_name not in lv_names:
+                diagnostics.append(
+                    Diagnostic(
+                        ValidationLevel.ERROR,
+                        'unknown_latent',
+                        f"Unknown latent variable '{target.latent_name}' in fixing '{target}'.",
+                    )
+                )
         elif isinstance(target, StructuralSigma):
             if target.latent_name not in lv_names:
                 diagnostics.append(
@@ -232,7 +242,7 @@ def validate_normalization_plan(
                 Diagnostic(
                     ValidationLevel.ERROR,
                     'unknown_fixing_target',
-                    f"Unknown fixing target type: {type(target).__name__}.",
+                    f'Unknown fixing target type: {type(target).__name__}.',
                 )
             )
 

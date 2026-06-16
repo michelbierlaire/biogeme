@@ -9,13 +9,88 @@ Michel Bierlaire
 Mon Oct 20 2025, 19:27:28
 """
 
-import html
+import html as html_module
 import logging
 import os
 from datetime import datetime
+from pathlib import Path
+
+import arviz as az
+import matplotlib.pyplot as plt
 
 from biogeme import version
 from biogeme.exceptions import BiogemeError
+
+
+def _save_current_matplotlib_figure(path: Path) -> None:
+    """Save and close the current Matplotlib figure.
+
+    :param path: Path where the figure must be written.
+    """
+    plt.gcf().savefig(path, bbox_inches='tight')
+    plt.close('all')
+
+
+def _generate_diagnostic_figures_from_results(
+    estimation_results: BayesianResults,
+    html_filename: str,
+) -> dict[str, str]:
+    """Generate ArviZ diagnostic figures from full Bayesian results.
+
+    The HTML report itself is generated from a lightweight
+    :class:`BayesianResultsSummary`. Therefore, figures that require posterior
+    draws must be generated before the conversion to summary and then stored as
+    file references.
+
+    :param estimation_results: Full Bayesian estimation results containing
+        posterior draws.
+    :param html_filename: Name of the HTML file. Figures are written next to it.
+    :return: Dictionary mapping diagnostic names to relative figure filenames.
+    """
+    output_path = Path(html_filename)
+    figure_directory = output_path.with_suffix('')
+    figure_directory.mkdir(parents=True, exist_ok=True)
+
+    figure_references: dict[str, str] = {}
+    var_names = list(estimation_results.parameter_estimates())
+    if not var_names:
+        return figure_references
+
+    diagnostics = {
+        'trace': lambda: az.plot_trace(
+            estimation_results.idata,
+            var_names=var_names,
+        ),
+        'rank': lambda: az.plot_rank(
+            estimation_results.idata,
+            var_names=var_names,
+        ),
+        'energy': lambda: az.plot_energy(estimation_results.idata),
+        'autocorr': lambda: az.plot_autocorr(
+            estimation_results.idata,
+            var_names=var_names,
+        ),
+    }
+
+    for diagnostic_name, plot_function in diagnostics.items():
+        try:
+            plot_function()
+            figure_path = figure_directory / f'{diagnostic_name}.png'
+            _save_current_matplotlib_figure(figure_path)
+            figure_references[diagnostic_name] = os.path.relpath(
+                figure_path,
+                start=output_path.parent or Path('.'),
+            )
+        except Exception as exc:  # pragma: no cover - plotting is backend-dependent.
+            logger.warning(
+                'Could not generate Bayesian diagnostic figure %s: %s',
+                diagnostic_name,
+                exc,
+            )
+            plt.close('all')
+
+    return figure_references
+
 
 from .bayesian_results import BayesianResults
 from .bayesian_results_summary import BayesianResultsSummary, EstimatedBetaSummary
@@ -58,40 +133,40 @@ def get_html_arviz_diagnostics(
 
     figures = estimation_results.get_diagnostic_figure_references()
     if not figures:
-        return ""
+        return ''
 
     explanations = {
-        "trace": (
-            "<strong>Trace</strong>: per-chain draws vs iteration and marginal "
-            "density. Good: chains overlap, no trends or stickiness, rapid "
-            "mixing. Suspicious: chains at different levels, strong drifts, "
-            "long flat stretches, sudden jumps."
+        'trace': (
+            '<strong>Trace</strong>: per-chain draws vs iteration and marginal '
+            'density. Good: chains overlap, no trends or stickiness, rapid '
+            'mixing. Suspicious: chains at different levels, strong drifts, '
+            'long flat stretches, sudden jumps.'
         ),
-        "rank": (
-            "<strong>Rank plot</strong>: rank-normalized samples by chain. "
-            "Good: chains produce nearly uniform, overlapping ranks. "
-            "Suspicious: U-shapes, spikes, or chains with very different rank "
-            "distributions."
+        'rank': (
+            '<strong>Rank plot</strong>: rank-normalized samples by chain. '
+            'Good: chains produce nearly uniform, overlapping ranks. '
+            'Suspicious: U-shapes, spikes, or chains with very different rank '
+            'distributions.'
         ),
-        "energy": (
-            "<strong>Energy</strong>: HMC energy diagnostics and BFMI. Good: "
-            "similar energy distributions across chains, no extreme tails; BFMI "
-            "not flagged. Suspicious: clearly separated energy histograms across "
-            "chains or very low BFMI."
+        'energy': (
+            '<strong>Energy</strong>: HMC energy diagnostics and BFMI. Good: '
+            'similar energy distributions across chains, no extreme tails; BFMI '
+            'not flagged. Suspicious: clearly separated energy histograms across '
+            'chains or very low BFMI.'
         ),
-        "autocorr": (
-            "<strong>Autocorrelation</strong>: lag correlation within chains. "
-            "Good: autocorrelation decays quickly toward 0 within tens of lags. "
-            "Suspicious: long positive tails, high values at large lags, or "
-            "periodic patterns."
+        'autocorr': (
+            '<strong>Autocorrelation</strong>: lag correlation within chains. '
+            'Good: autocorrelation decays quickly toward 0 within tens of lags. '
+            'Suspicious: long positive tails, high values at large lags, or '
+            'periodic patterns.'
         ),
     }
 
     titles = {
-        "trace": "Trace",
-        "rank": "Rank plot",
-        "energy": "Energy",
-        "autocorr": "Autocorrelation",
+        'trace': 'Trace',
+        'rank': 'Rank plot',
+        'energy': 'Energy',
+        'autocorr': 'Autocorrelation',
     }
 
     html_output = '<h1>Diagnostics</h1>\n'
@@ -102,19 +177,17 @@ def get_html_arviz_diagnostics(
     )
     html_output += '<table border="0">\n'
 
-    for key in ("trace", "rank", "energy", "autocorr"):
+    for key in ('trace', 'rank', 'energy', 'autocorr'):
         figure_ref = figures.get(key)
         if figure_ref is None:
             continue
         html_output += (
-            '<tr class=biostyle><td colspan=2>'
-            f'<p>{explanations[key]}</p>'
-            '</td></tr>\n'
+            f'<tr class=biostyle><td colspan=2><p>{explanations[key]}</p></td></tr>\n'
         )
         html_output += (
             f'<tr class=biostyle><td><strong>{titles[key]}</strong></td>'
             f'<td><img style="max-width:840px;height:auto;display:block;" '
-            f'src="{html.escape(figure_ref)}" alt="{html.escape(key)}"></td></tr>\n'
+            f'src="{html_module.escape(figure_ref)}" alt="{html_module.escape(key)}"></td></tr>\n'
         )
 
     html_output += '</table>\n'
@@ -130,7 +203,7 @@ def _html_code_block(code: str) -> str:
     :param code: Python code to display.
     :return: HTML fragment containing the escaped code.
     """
-    escaped = html.escape(code)
+    escaped = html_module.escape(code)
     return (
         '<pre style="background-color:#f4f4f4;padding:12px;border:1px solid #ccc;'
         'overflow-x:auto;"><code>'
@@ -144,29 +217,61 @@ def get_html_arviz_reproduction_instructions(
     html_filename: str,
     var_names: list[str] | None = None,
 ) -> str:
-    """Generate HTML instructions describing the role of stored diagnostics.
+    """Generate HTML instructions for producing additional ArviZ diagnostics.
 
-    Since the report is generated from a lightweight summary without posterior
-    draws, ArviZ diagnostics must have been generated beforehand and stored as
-    figure references.
+    The report embeds the diagnostic figures generated automatically during the
+    estimation. Additional ArviZ figures can be produced by reloading the
+    Bayesian results file, which contains the posterior draws.
 
     :param estimation_results: Bayesian results summary.
     :param html_filename: Target HTML filename.
-    :param var_names: Unused, kept for API compatibility.
-    :return: HTML snippet explaining how diagnostics are handled.
+    :param var_names: Optional list of variables to include in the examples.
+    :return: HTML snippet explaining how to generate additional diagnostics.
     """
-    _ = estimation_results
     _ = html_filename
-    _ = var_names
 
-    html_output = '<h1>Diagnostic figures</h1>\n'
+    variables = var_names or list(estimation_results.parameter_estimates())
+    variables_as_code = repr(variables) if variables else 'None'
+    results_filename = f'{estimation_results.model_name}.nc'
+
+    code = f"""import arviz as az
+import matplotlib.pyplot as plt
+
+from biogeme.bayesian_estimation.bayesian_results import BayesianResults
+
+results = BayesianResults.from_netcdf({results_filename!r})
+
+# Use None for all variables, or specify a list such as ['beta_time', 'beta_cost'].
+var_names = {variables_as_code}
+
+az.plot_trace(results.idata, var_names=var_names)
+plt.show()
+
+az.plot_rank(results.idata, var_names=var_names)
+plt.show()
+
+az.plot_autocorr(results.idata, var_names=var_names)
+plt.show()
+
+az.plot_energy(results.idata)
+plt.show()
+"""
+
+    html_output = '<h1>More diagnostics...</h1>\n'
     html_output += (
-        '<p class="biostyle">This report was generated from a '
-        '<code>BayesianResultsSummary</code> object. Therefore, posterior draws '
-        'are not available here, and ArviZ figures cannot be regenerated at '
-        'report-generation time. Any diagnostic figures shown above were '
-        'generated beforehand and referenced in the summary object.</p>\n'
+        '<p class="biostyle">The figures above are only a subset of the ArviZ '
+        'diagnostics. To generate additional figures, reload the Bayesian results '
+        'file containing the posterior draws and call ArviZ directly. Adapt the '
+        'filename and variable names in the example below if necessary.</p>\n'
     )
+    html_output += (
+        '<p class="biostyle">See the official ArviZ documentation for more '
+        'plotting functions and options: '
+        '<a href="https://python.arviz.org/en/stable/examples/">ArviZ examples</a>, '
+        '<a href="https://python.arviz.org/projects/plots/en/stable/api/plots.html">'
+        'ArviZ plotting API</a>.</p>\n'
+    )
+    html_output += _html_code_block(code)
     return html_output
 
 
@@ -179,15 +284,15 @@ def get_html_header(estimation_results: BayesianResultsSummary) -> str:
     html = ''
     html += '<html>\n'
     html += '<head>\n'
-    html += '<script src="http://transp-or.epfl.ch/biogeme/sorttable.js">' '</script>\n'
-    html += '<meta http-equiv="Content-Type" content="text/html; ' 'charset=utf-8" />\n'
+    html += '<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>\n'
+    html += '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n'
     html += (
         f'<title>{estimation_results.model_name} - Report from '
         f'biogeme {version.get_version()} '
         f'[{version.versionDate}]</title>\n'
     )
     html += (
-        '<meta name="keywords" content="biogeme, discrete choice, ' 'random utility">\n'
+        '<meta name="keywords" content="biogeme, discrete choice, random utility">\n'
     )
     html += (
         f'<meta name="description" content="Report from '
@@ -248,7 +353,7 @@ def get_html_preamble(
 
     user_notes = estimation_results.get_user_notes()
     if user_notes:
-        notes_html = '<br/>'.join(html.escape(note) for note in user_notes)
+        notes_html = '<br/>'.join(html_module.escape(note) for note in user_notes)
         html += (
             '<blockquote style="border: 2px solid #666; '
             'padding: 10px; background-color: #ccc;">'
@@ -302,27 +407,74 @@ def get_html_identification_diagnostics(
     """
     diag = estimation_results.get_identification_diagnostics_summary()
     if not isinstance(diag, dict) or not diag:
-        return ""
+        return ''
 
     html_output = '<h1>Identification diagnostics</h1>\n'
     html_output += (
-        '<p class="biostyle">This section reports precomputed checks for '
-        '<em>non-identification</em> or <em>weak identification</em>. The '
-        'diagnostics were computed previously from posterior draws and stored '
-        'in the summary object.</p>\n'
+        '<p class="biostyle">This section reports quick numerical checks for '
+        '<em>non-identification</em> or <em>weak identification</em>. '
+        'Intuitively, identification problems mean that some combinations of '
+        'parameters can change without changing the likelihood much, so the '
+        'posterior is very wide, or nearly flat, in some directions. These '
+        'checks use the posterior draws and the prior draws, if available.</p>\n'
+    )
+    html_output += '<h2>How to read the numbers</h2>\n'
+    html_output += (
+        '<p class="biostyle"><strong>Posterior covariance diagnostics</strong> '
+        '(eigenvalues, condition number, effective rank): these describe the '
+        'shape of the posterior cloud in parameter space.</p>\n'
+    )
+    html_output += (
+        '<p class="biostyle"><code>max_eigenvalue</code> is the largest '
+        'posterior-variance direction, that is, the widest direction of the '
+        'posterior. When identification is weak, the posterior can become '
+        'extremely wide along some linear combination of parameters; this often '
+        'shows up as a very large <code>max_eigenvalue</code> together with a '
+        'large condition number. If reported, the '
+        '<code>max_eigenvector_top</code> loadings indicate which parameters '
+        'contribute most to that weakly identified linear combination.</p>\n'
+    )
+    html_output += (
+        '<p class="biostyle"><code>condition_number = max_eigenvalue / '
+        'min_eigenvalue</code> measures anisotropy of the posterior covariance. '
+        'Larger values indicate stronger near-dependencies among parameters. '
+        'As a rough rule of thumb, values around 10<sup>3</sup> deserve '
+        'attention, and values around 10<sup>5</sup> or more are a strong red '
+        'flag.</p>\n'
+    )
+    html_output += (
+        '<p class="biostyle"><code>effective_rank</code> is an effective '
+        'dimension of posterior variability, between 0 and the number of '
+        'parameters. If it is much smaller than the number of parameters, the '
+        'posterior variability concentrates in a lower-dimensional subspace, '
+        'consistent with near linear dependencies among parameters.</p>\n'
+    )
+    html_output += (
+        '<p class="biostyle"><strong>Prior covariance diagnostics</strong> '
+        'report the same metrics for the prior. If the prior has normal scale '
+        'and full rank but the posterior becomes ill-conditioned, the issue is '
+        'typically in the likelihood or model specification, not in the prior.</p>\n'
+    )
+    html_output += (
+        '<p class="biostyle"><strong>Per-parameter prior/posterior '
+        'dispersion</strong>, when prior draws are available, compares prior '
+        'and posterior standard deviations. A ratio close to 1 means the data '
+        'did not shrink uncertainty much, so the likelihood is weakly '
+        'informative for that parameter. A ratio well below 1, for example 0.1 '
+        'or 0.01, means the likelihood is informative for that parameter.</p>\n'
     )
 
-    flags = diag.get("flags")
+    flags = diag.get('flags')
     if flags:
         html_output += (
             '<p class="biostyle"><strong>Flags:</strong> '
-            + ", ".join([str(f) for f in flags])
+            + ', '.join([str(f) for f in flags])
             + '</p>\n'
         )
 
     def _fmt(v: object) -> str:
         if isinstance(v, list) and v and isinstance(v[0], tuple) and len(v[0]) == 2:
-            return ", ".join(
+            return ', '.join(
                 f'{format_real_number(float(coef))}·{name}' for name, coef in v
             )
         if isinstance(v, dict):
@@ -338,14 +490,14 @@ def get_html_identification_diagnostics(
                 except (TypeError, ValueError):
                     coef_str = str(coef)
                 parts.append(f'{coef_str}·{name}')
-            return ", ".join(parts)
+            return ', '.join(parts)
         if isinstance(v, float):
             return format_real_number(v)
         return str(v)
 
     def _render_kv_table(title: str, dct: dict) -> str:
         if not dct:
-            return ""
+            return ''
         out = f'<h2>{title}</h2>\n'
         out += '<table border="0">\n'
         for key, value in dct.items():
@@ -365,7 +517,9 @@ def get_html_identification_diagnostics(
         html_output += '<h2>Per-parameter prior/posterior dispersion</h2>\n'
         html_output += (
             '<p class="biostyle">The table below compares posterior and prior '
-            'standard deviations when prior draws were available.</p>\n'
+            'standard deviations when prior draws are available. A ratio close '
+            'to 1 suggests that the prior dominates; a ratio well below 1 '
+            'suggests that the data are informative.</p>\n'
         )
         cols = list(per_param[0].keys())
         html_output += '<table border="1">\n'
@@ -540,8 +694,8 @@ def generate_html_simulated_data(estimation_results: BayesianResultsSummary) -> 
     return simulated_data.to_html(
         index=False,
         border=0,
-        classes=["table", "table-striped", "table-sm"],
-        justify="left",
+        classes=['table', 'table-striped', 'table-sm'],
+        justify='left',
     )
 
 
@@ -617,17 +771,36 @@ def generate_html_file(
 def generate_html_file_from_results(
     estimation_results: BayesianResults,
     filename: str,
+    identification_threshold: float,
     overwrite: bool = False,
 ) -> None:
     """Generate an HTML report from full Bayesian results.
 
-    The full results are first converted into a
-    :class:`BayesianResultsSummary`, and the HTML report is then generated from
-    that summary object.
+    Diagnostic figures and identification diagnostics are first generated from
+    the full :class:`BayesianResults` object, which still contains the posterior
+    draws. The results are then converted into a lightweight
+    :class:`BayesianResultsSummary`, and the HTML report is generated from that
+    summary object.
 
     :param estimation_results: Full Bayesian estimation results.
     :param filename: Name of the HTML file.
+    :param identification_threshold: Numerical threshold used by the Bayesian
+        identification diagnostics. It follows the same convention as the
+        maximum-likelihood identification threshold: smaller values require
+        stronger numerical evidence before a weak-identification direction is
+        reported.
     :param overwrite: If True and the file exists, it is overwritten.
     """
+    diagnostic_figure_references = _generate_diagnostic_figures_from_results(
+        estimation_results=estimation_results,
+        html_filename=filename,
+    )
+    if diagnostic_figure_references:
+        estimation_results.set_diagnostic_figure_references(
+            diagnostic_figure_references
+        )
+    _ = estimation_results.identification_diagnostics(
+        identification_threshold=identification_threshold
+    )
     summary = estimation_results.to_summary()
     generate_html_file(summary, filename, overwrite=overwrite)

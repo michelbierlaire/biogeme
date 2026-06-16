@@ -13,10 +13,11 @@ from datetime import datetime
 import numpy as np
 
 from biogeme.version import get_latex, get_version, versionDate
-from .estimation_results import EstimateVarianceCovariance, EstimationResults
+
 from ..exceptions import BiogemeError
 from ..parameters import Parameters
 from ..tools.ellipse import Ellipse
+from .estimation_results import EstimateVarianceCovariance, EstimationResults
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ def format_with_period(value):
 def format_real_number(value: float) -> str:
     """Format a real number to be included in the LaTeX table"""
 
-    formatted_value = f'{value:.3g}'
+    formatted_value = f'{value:#.3g}'
 
     # If the scientific notation has been used, we need to cancel it.
     if 'e' in formatted_value:
@@ -178,9 +179,7 @@ def get_latex_preamble(estimation_results: EstimationResults, file_name: str) ->
             latex += r'\begin{tabular}{l@{*}l}'
             for i, ev in enumerate(estimation_results.smallest_eigenvector):
                 if np.abs(ev) > identification_threshold:
-                    latex += (
-                        f'{ev:.3g}' f' & ' f'{estimation_results.beta_names[i]}\\\\ \n'
-                    )
+                    latex += f'{ev:.3g} & {estimation_results.beta_names[i]}\\\\ \n'
             latex += r'\end{tabular}'
     except BiogemeError:
         latex += r'\section{Warning: second derivatives matrix not available}\n'
@@ -235,7 +234,7 @@ def get_latex_one_parameter(
     :return: LaTeX code for the row
     """
     if parameter_index < 0 or parameter_index >= len(estimation_results.beta_names):
-        error_msg = f'Invalid parameter index {parameter_index}. Valid range: 0- {len(estimation_results.beta_names)-1}'
+        error_msg = f'Invalid parameter index {parameter_index}. Valid range: 0- {len(estimation_results.beta_names) - 1}'
         raise ValueError(error_msg)
     if parameter_number is None:
         parameter_number = parameter_index
@@ -322,24 +321,50 @@ def rename_and_renumber(
     return updated_items
 
 
-def get_latex_estimated_parameters(
+def _get_latex_estimated_parameters(
     estimation_results: EstimationResults,
+    selected_parameters: list[str],
     variance_covariance_type: EstimateVarianceCovariance | None = None,
     renumbering_parameters: dict[int, int] | None = None,
     renaming_parameters: dict[str, str] | None = None,
 ) -> str:
-    """Get the estimated parameters coded in LaTeX
+    """Generate a LaTeX table for a selected subset of estimated parameters.
 
-    :param estimation_results: estimation results.
-    :param variance_covariance_type: type of variance-covariance estimate to be used.
-    :param renumbering_parameters: a dict that suggests new numbers for parameters
-    :param renaming_parameters: a dict that suggests new names for some or all parameters.
-    :return: LaTeX code
+    The function builds one table row for each parameter listed in
+    ``selected_parameters``. The rows are ordered according to the parameter
+    numbers obtained after applying ``renumbering_parameters``. The reported
+    parameter names are obtained after applying ``renaming_parameters``.
+
+    :param estimation_results: estimation results containing the parameter
+        estimates and their statistics.
+    :param selected_parameters: names of the parameters to include in the table.
+        Each name must appear in ``estimation_results.beta_names``.
+    :param variance_covariance_type: type of variance-covariance estimate used
+        to compute standard errors, t-statistics, and p-values. If None, the
+        default variance-covariance matrix of ``estimation_results`` is used.
+    :param renumbering_parameters: dictionary mapping original parameter numbers
+        to the numbers to be reported in the table.
+    :param renaming_parameters: dictionary mapping original parameter names to
+        the names to be reported in the table. Parameters not appearing in the
+        dictionary keep their original names.
+    :return: LaTeX code for the table of selected estimated parameters.
     """
     if variance_covariance_type is None:
-        variance_covariance_type = estimation_results.get_default_variance_covariance_matrix()
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
+
+    unknown_parameters = set(selected_parameters) - set(estimation_results.beta_names)
+    if unknown_parameters:
+        error_msg = (
+            f'Unknown parameters requested in the LaTeX table: '
+            f'{sorted(unknown_parameters)}'
+        )
+        raise BiogemeError(error_msg)
+    selected_parameters_set = set(selected_parameters)
+
     if renumbering_parameters is not None:
-        # Verify that the numbering is well-defined
+        # Verify that the numbering is well-defined.
         number_values = list(renumbering_parameters.values())
         if len(number_values) != len(estimation_results.beta_names):
             error_msg = (
@@ -349,7 +374,10 @@ def get_latex_estimated_parameters(
             raise BiogemeError(error_msg)
 
         if len(number_values) != len(set(number_values)):
-            error_msg = f'The new numbering cannot assign the same number to two different parameters: {renumbering_parameters}'
+            error_msg = (
+                f'The new numbering cannot assign the same number to two '
+                f'different parameters: {renumbering_parameters}'
+            )
             raise BiogemeError(error_msg)
 
     the_header = (
@@ -366,6 +394,9 @@ def get_latex_estimated_parameters(
     )
     all_rows = {}
     for old_index, user_defined in renamed_parameters.items():
+        parameter_name = estimation_results.beta_names[old_index]
+        if parameter_name not in selected_parameters_set:
+            continue
         new_index, new_name = user_defined
         the_row = (
             get_latex_one_parameter(
@@ -382,6 +413,80 @@ def get_latex_estimated_parameters(
         output += all_rows[a_row_number]
     output += PARAMETERS_TABLE_FOOTER
     return output
+
+
+def get_latex_estimated_parameters(
+    estimation_results: EstimationResults,
+    group_of_parameters: dict[str, list[str]] = None,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
+    renumbering_parameters: dict[int, int] | None = None,
+    renaming_parameters: dict[str, str] | None = None,
+) -> dict[str, str]:
+    """Get the estimated parameters coded in LaTeX.
+
+    The function returns one LaTeX table for each group of parameters. If no
+    group is provided, a single table containing all estimated parameters is
+    returned. If groups are provided, one table is generated for each group, and
+    an additional table is generated for the parameters that do not belong to
+    any group. A parameter may appear in several groups.
+
+    :param estimation_results: estimation results.
+    :param group_of_parameters: dictionary mapping the name of each group to the
+        corresponding list of parameters. If None, all parameters are reported in
+        a single table.
+    :param variance_covariance_type: type of variance-covariance estimate used
+        to compute standard errors, t-statistics, and p-values. If None, the
+        default variance-covariance matrix of ``estimation_results`` is used.
+    :param renumbering_parameters: dictionary mapping original parameter numbers
+        to the numbers to be reported in the tables.
+    :param renaming_parameters: dictionary mapping original parameter names to
+        the names to be reported in the tables. Parameters not appearing in the
+        dictionary keep their original names.
+    :return: dictionary mapping each group name to the corresponding LaTeX code.
+        The key is an empty string when no grouping is requested.
+    """
+    all_parameters = estimation_results.beta_names
+    if group_of_parameters is None:
+        return {
+            '': _get_latex_estimated_parameters(
+                estimation_results=estimation_results,
+                selected_parameters=all_parameters,
+                variance_covariance_type=variance_covariance_type,
+                renumbering_parameters=renumbering_parameters,
+                renaming_parameters=renaming_parameters,
+            )
+        }
+
+    latex_tables = {}
+    parameters_in_groups = set()
+    for group_name, selected_parameters in group_of_parameters.items():
+        parameters_in_groups.update(selected_parameters)
+        latex_tables[group_name] = _get_latex_estimated_parameters(
+            estimation_results=estimation_results,
+            selected_parameters=selected_parameters,
+            variance_covariance_type=variance_covariance_type,
+            renumbering_parameters=renumbering_parameters,
+            renaming_parameters=renaming_parameters,
+        )
+
+    remaining_parameters = [
+        parameter_name
+        for parameter_name in all_parameters
+        if parameter_name not in parameters_in_groups
+    ]
+    if remaining_parameters:
+        remaining_group_name = 'Other parameters'
+        if remaining_group_name in latex_tables:
+            remaining_group_name = 'Other parameters not in groups'
+        latex_tables[remaining_group_name] = _get_latex_estimated_parameters(
+            estimation_results=estimation_results,
+            selected_parameters=remaining_parameters,
+            variance_covariance_type=variance_covariance_type,
+            renumbering_parameters=renumbering_parameters,
+            renaming_parameters=renaming_parameters,
+        )
+
+    return latex_tables
 
 
 def get_sign_for_p_value(p_value: float, p_thresholds: list[tuple[float, str]]) -> str:
@@ -445,7 +550,7 @@ def compare_parameters(
     latex_code += '& & '
     latex_code += ' & '.join(
         [
-            fr'\multicolumn{{1}}{{c}}{{{model_name}}}'
+            rf'\multicolumn{{1}}{{c}}{{{model_name}}}'
             for model_name in estimation_results.keys()
         ]
     )
@@ -632,6 +737,7 @@ def generate_latex_file_content(
     filename: str,
     variance_covariance_type: EstimateVarianceCovariance,
     include_begin_document=False,
+    group_of_parameters: dict[str, list[str]] | None = None,
 ) -> str:
     """
     Generate the full content of a LaTeX document summarizing the estimation results,
@@ -647,6 +753,10 @@ def generate_latex_file_content(
         in another document.
     :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
         statistics.
+    :param group_of_parameters: dictionary mapping subsection names to lists of
+        parameter names. If None, all estimated parameters are reported in one
+        table. If provided, one table is generated for each group, and another
+        table is generated for parameters that do not appear in any group.
     :return: None. The LaTeX content is generated as a string but not written to a file.
     """
     latex = ''
@@ -656,10 +766,16 @@ def generate_latex_file_content(
         estimation_results=estimation_results, file_name=filename
     )
     latex += get_latex_general_statistics(estimation_results=estimation_results)
-    latex += get_latex_estimated_parameters(
+    parameter_tables = get_latex_estimated_parameters(
         estimation_results=estimation_results,
+        group_of_parameters=group_of_parameters,
         variance_covariance_type=variance_covariance_type,
     )
+    latex += '\\section{Estimated parameters}\n'
+    for group_name, table_latex in parameter_tables.items():
+        if group_name:
+            latex += f'\\subsection{{{group_name}}}\n'
+        latex += table_latex
     if include_begin_document:
         latex += LATEX_FILE_FOOTER
     return latex
@@ -671,6 +787,7 @@ def generate_latex_file(
     include_begin_document=False,
     overwrite=False,
     variance_covariance_type: EstimateVarianceCovariance | None = None,
+    group_of_parameters: dict[str, list[str]] | None = None,
 ) -> None:
     """
     Generate and save a LaTeX document that summarizes the model estimation results.
@@ -686,6 +803,10 @@ def generate_latex_file(
     :param overwrite: If True, overwrite the file if it already exists. Defaults to False.
     :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
         statistics. If None, the bootstrap one is used if available. If not available, the robust one.
+    :param group_of_parameters: dictionary mapping subsection names to lists of
+        parameter names. If None, all estimated parameters are reported in one
+        table. If provided, one table is generated for each group, and another
+        table is generated for parameters that do not appear in any group.
     """
     if variance_covariance_type is None:
         variance_covariance_type = (
@@ -696,7 +817,7 @@ def generate_latex_file(
         and estimation_results.bootstrap_time is None
     ):
         logger.warning(
-            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+            'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
         )
         variance_covariance_type = EstimateVarianceCovariance.ROBUST
 
@@ -709,6 +830,7 @@ def generate_latex_file(
             filename=filename,
             include_begin_document=include_begin_document,
             variance_covariance_type=variance_covariance_type,
+            group_of_parameters=group_of_parameters,
         )
         print(content, file=file)
     logger.info(f'File {filename} has been generated.')

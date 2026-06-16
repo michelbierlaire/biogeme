@@ -10,6 +10,7 @@ from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+
 from biogeme.exceptions import BiogemeError
 from biogeme.results_processing import (
     EstimateVarianceCovariance,
@@ -219,7 +220,11 @@ class TestEstimationResults(unittest.TestCase):
         pandas_results = get_pandas_estimated_parameters(
             estimation_results=self.estimation_results
         )
-        nrows, ncolumns = pandas_results.shape
+        self.assertIsInstance(pandas_results, dict)
+        self.assertEqual(len(pandas_results), 1)
+
+        pandas_table = next(iter(pandas_results.values()))
+        nrows, ncolumns = pandas_table.shape
         self.assertEqual(nrows, 2)
         self.assertEqual(ncolumns, 6)
 

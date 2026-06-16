@@ -5,11 +5,11 @@ import pandas as pd
 import pytensor.tensor as pt
 from pytensor.tensor.math import softplus as pt_softplus
 
+from ..exceptions import BiogemeError
 from .base_expressions import Expression
 from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
-from ..exceptions import BiogemeError
 
 
 class OrderedBase(Expression):
@@ -317,7 +317,7 @@ class OrderedLogit(OrderedBase):
         return 1.0 / (1.0 + pt.exp(-z))
 
     def __repr__(self):
-        return f'OrderedLogit({repr(self.eta)})'
+        return f'OrderedLogit({repr(self.eta)}, {repr(self.cutpoints)})'
 
 
 class OrderedProbit(OrderedBase):
@@ -327,8 +327,8 @@ class OrderedProbit(OrderedBase):
     """
 
     def _cdf_jax(self, z):
-        import jax.numpy as jnp
         import jax.lax as lax
+        import jax.numpy as jnp
 
         return 0.5 * (1.0 + lax.erf(z / jnp.sqrt(2.0)))
 
@@ -336,7 +336,7 @@ class OrderedProbit(OrderedBase):
         return 0.5 * (1.0 + pt.erf(z / pt.sqrt(pt.as_tensor_variable(2.0))))
 
     def __repr__(self):
-        return f'OrderedProbit({repr(self.eta)})'
+        return f'OrderedProbit({repr(self.eta)}, {repr(self.cutpoints)})'
 
 
 class OrderedLogLogit(OrderedLogit):

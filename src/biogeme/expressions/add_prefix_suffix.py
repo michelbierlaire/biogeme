@@ -26,7 +26,7 @@ def prefix_suffix_variable_name_handler(expr, context):
 
 
 def add_prefix_suffix_to_all_variables(
-        expr: Expression, prefix: str, suffix: str
+    expr: Expression, prefix: str, suffix: str
 ) -> int:
     context = {
         "prefix": prefix,

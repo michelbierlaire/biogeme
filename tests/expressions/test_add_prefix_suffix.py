@@ -18,7 +18,7 @@ def make_expression_with_shared_gender():
     size_c = Variable("SIZE_C")
 
     expr = (
-            (size_a + (gender == 1)) + (size_b + (gender == 1)) + (size_c + (gender == 1))
+        (size_a + (gender == 1)) + (size_b + (gender == 1)) + (size_c + (gender == 1))
     )
     return expr, gender, size_a, size_b, size_c
 

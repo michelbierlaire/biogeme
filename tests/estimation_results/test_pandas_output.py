@@ -1,21 +1,20 @@
 import unittest
-import pandas as pd
 from datetime import timedelta
 
+import pandas as pd
 
 from biogeme.results_processing import (
+    EstimateVarianceCovariance,
     EstimationResults,
     RawEstimationResults,
-    get_pandas_one_parameter,
+    get_pandas_correlation_results,
     get_pandas_estimated_parameters,
     get_pandas_one_pair_of_parameters,
-    get_pandas_correlation_results,
-    EstimateVarianceCovariance,
+    get_pandas_one_parameter,
 )
 
 
 class TestPandasGeneration(unittest.TestCase):
-
     def setUp(self):
         # Setting up real estimation results using RawEstimationResults
         raw_estimation = RawEstimationResults(
@@ -71,25 +70,67 @@ class TestPandasGeneration(unittest.TestCase):
         self.assertEqual(result['Value'], 1.2)
 
     def test_get_pandas_estimated_parameters(self):
-        # Test for getting all estimated parameters in pandas DataFrame format
-        df = get_pandas_estimated_parameters(
+        # Test for getting all estimated parameters in pandas DataFrame format.
+        result = get_pandas_estimated_parameters(
             estimation_results=self.estimation_results,
             variance_covariance_type=EstimateVarianceCovariance.ROBUST,
         )
 
-        # Check if the result is a DataFrame
+        # Check that the result is a dictionary containing the default table.
+        self.assertIsInstance(result, dict)
+        self.assertIn('Estimated parameters', result)
+
+        df = result['Estimated parameters']
         self.assertIsInstance(df, pd.DataFrame)
 
-        # Ensure the DataFrame has expected columns and data
+        # Ensure the DataFrame has expected columns and data.
         self.assertIn('Name', df.columns)
         self.assertIn('Value', df.columns)
         self.assertIn('Robust std err.', df.columns)
         self.assertIn('Robust t-stat.', df.columns)
         self.assertIn('Robust p-value', df.columns)
 
-        # Verify the content for the first parameter
+        # Verify the content for the first parameter.
         self.assertEqual(df.iloc[0]['Name'], 'beta1')
         self.assertEqual(df.iloc[0]['Value'], 1.2)
+        self.assertIn('beta2', set(df['Name']))
+
+    def test_get_pandas_estimated_parameters_by_group(self):
+        result = get_pandas_estimated_parameters(
+            estimation_results=self.estimation_results,
+            group_of_parameters={'First group': ['beta1']},
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+
+        self.assertIsInstance(result, dict)
+        self.assertIn('First group', result)
+        self.assertIn('Other parameters', result)
+
+        first_group_df = result['First group']
+        self.assertIsInstance(first_group_df, pd.DataFrame)
+        self.assertEqual(list(first_group_df['Name']), ['beta1'])
+
+        other_parameters_df = result['Other parameters']
+        self.assertIsInstance(other_parameters_df, pd.DataFrame)
+        self.assertEqual(list(other_parameters_df['Name']), ['beta2'])
+
+    def test_get_pandas_estimated_parameters_parameter_in_several_groups(self):
+        result = get_pandas_estimated_parameters(
+            estimation_results=self.estimation_results,
+            group_of_parameters={
+                'First group': ['beta1'],
+                'Second group': ['beta1', 'beta2'],
+            },
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+
+        self.assertIsInstance(result, dict)
+        self.assertIn('First group', result)
+        self.assertIn('Second group', result)
+        self.assertNotIn('Other parameters', result)
+
+        self.assertEqual(list(result['First group']['Name']), ['beta1'])
+        self.assertEqual(list(result['Second group']['Name']), ['beta1', 'beta2'])
 
     def test_get_pandas_one_pair_of_parameters(self):
         # Test for getting one pair of parameter correlations in pandas format

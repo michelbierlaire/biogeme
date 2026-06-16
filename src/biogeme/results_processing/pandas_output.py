@@ -10,13 +10,13 @@ import logging
 import numpy as np
 import pandas as pd
 
+from ..exceptions import BiogemeError
 from .estimation_results import (
     EstimateVarianceCovariance,
     EstimationResults,
     calc_p_value,
     calculates_correlation_matrix,
 )
-from ..exceptions import BiogemeError
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def get_pandas_one_parameter(
     :return: one row of the table
     """
     if parameter_index < 0 or parameter_index >= len(estimation_results.beta_names):
-        error_msg = f'Invalid parameter index {parameter_index}. Valid range: 0- {len(estimation_results.beta_names)-1}'
+        error_msg = f'Invalid parameter index {parameter_index}. Valid range: 0- {len(estimation_results.beta_names) - 1}'
         raise ValueError(error_msg)
     if parameter_number is None:
         parameter_number = parameter_index
@@ -91,21 +91,33 @@ def get_pandas_one_parameter(
     return the_row
 
 
-def get_pandas_estimated_parameters(
+def _get_pandas_estimated_parameters(
     estimation_results: EstimationResults,
+    selected_parameters: list[str],
     variance_covariance_type: EstimateVarianceCovariance | None = None,
     renumbering_parameters: dict[int, int] | None = None,
     renaming_parameters: dict[str, str] | None = None,
 ) -> pd.DataFrame:
-    """Get the estimated parameters as a pandas data frame
+    """Generate a pandas data frame for a selected subset of parameters.
 
-    :param estimation_results: estimation results.
-    :param variance_covariance_type: type of variance-covariance estimate to be used.
-    :param renumbering_parameters: a dict that suggests new numbers for parameters
-    :param renaming_parameters: a dict that suggests new names for some or all parameters.
-    :param variance_covariance_type: select which type of variance-covariance matrix is used to generate the
-        statistics. If None, the bootstrap one is used if available. If not available, the robust one.
-    :return: a Pandas data frame
+    The function builds one row for each parameter listed in
+    ``selected_parameters``. The rows are ordered according to the parameter
+    numbers obtained after applying ``renumbering_parameters``. The reported
+    parameter names are obtained after applying ``renaming_parameters``.
+
+    :param estimation_results: estimation results containing the parameter
+        estimates and their statistics.
+    :param selected_parameters: names of the parameters to include in the data
+        frame. Each name must appear in ``estimation_results.beta_names``.
+    :param variance_covariance_type: type of variance-covariance estimate used
+        to compute standard errors, t-statistics, and p-values. If None, the
+        default variance-covariance matrix of ``estimation_results`` is used.
+    :param renumbering_parameters: dictionary mapping original parameter numbers
+        to the numbers to be reported in the data frame.
+    :param renaming_parameters: dictionary mapping original parameter names to
+        the names to be reported in the data frame. Parameters not appearing in
+        the dictionary keep their original names.
+    :return: pandas data frame containing the selected estimated parameters.
     """
     if variance_covariance_type is None:
         variance_covariance_type = (
@@ -116,24 +128,44 @@ def get_pandas_estimated_parameters(
         and estimation_results.bootstrap_time is None
     ):
         logger.warning(
-            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+            'No bootstrap data is available. The robust variance-covariance '
+            'matrix is used instead.'
         )
         variance_covariance_type = EstimateVarianceCovariance.ROBUST
+
+    unknown_parameters = set(selected_parameters) - set(estimation_results.beta_names)
+    if unknown_parameters:
+        error_msg = (
+            f'Unknown parameters requested in the pandas table: '
+            f'{sorted(unknown_parameters)}'
+        )
+        raise BiogemeError(error_msg)
+    selected_parameters_set = set(selected_parameters)
+
     if renumbering_parameters is not None:
-        # Verify that the numbering is well defined
+        # Verify that the numbering is well defined.
         number_values = list(renumbering_parameters.values())
         if len(number_values) != len(set(number_values)):
-            error_msg = f'The new numbering cannot assign the same number to two different parameters.'
+            error_msg = (
+                'The new numbering cannot assign the same number to two '
+                'different parameters.'
+            )
             raise BiogemeError(error_msg)
 
     if renaming_parameters is not None:
         # Verify that the renaming is well defined.
         name_values = list(renaming_parameters.values())
         if len(name_values) != len(set(name_values)):
-            warning_msg = f'The new renaming assigns the same name for multiple parameters. It may not be the desired action.'
+            warning_msg = (
+                'The new renaming assigns the same name for multiple parameters. '
+                'It may not be the desired action.'
+            )
             logger.warning(warning_msg)
+
     all_rows = {}
     for parameter_index, parameter_name in enumerate(estimation_results.beta_names):
+        if parameter_name not in selected_parameters_set:
+            continue
         new_number = (
             renumbering_parameters.get(parameter_index)
             if renumbering_parameters is not None
@@ -162,6 +194,80 @@ def get_pandas_estimated_parameters(
     return the_frame
 
 
+def get_pandas_estimated_parameters(
+    estimation_results: EstimationResults,
+    group_of_parameters: dict[str, list[str]] = None,
+    variance_covariance_type: EstimateVarianceCovariance | None = None,
+    renumbering_parameters: dict[int, int] | None = None,
+    renaming_parameters: dict[str, str] | None = None,
+) -> dict[str, pd.DataFrame]:
+    """Get the estimated parameters as pandas data frames.
+
+    The function returns one data frame for each group of parameters. If no group
+    is provided, a single data frame containing all estimated parameters is
+    returned. If groups are provided, one data frame is generated for each group,
+    and an additional data frame is generated for the parameters that do not
+    belong to any group. A parameter may appear in several groups.
+
+    :param estimation_results: estimation results.
+    :param group_of_parameters: dictionary mapping the name of each group to the
+        corresponding list of parameters. If None, all parameters are reported in
+        a single data frame.
+    :param variance_covariance_type: type of variance-covariance estimate used
+        to compute standard errors, t-statistics, and p-values. If None, the
+        default variance-covariance matrix of ``estimation_results`` is used.
+    :param renumbering_parameters: dictionary mapping original parameter numbers
+        to the numbers to be reported in the data frames.
+    :param renaming_parameters: dictionary mapping original parameter names to
+        the names to be reported in the data frames. Parameters not appearing in
+        the dictionary keep their original names.
+    :return: dictionary mapping each table title to the corresponding pandas
+        data frame.
+    """
+    all_parameters = estimation_results.beta_names
+    if group_of_parameters is None:
+        return {
+            'Estimated parameters': _get_pandas_estimated_parameters(
+                estimation_results=estimation_results,
+                selected_parameters=all_parameters,
+                variance_covariance_type=variance_covariance_type,
+                renumbering_parameters=renumbering_parameters,
+                renaming_parameters=renaming_parameters,
+            )
+        }
+
+    pandas_tables = {}
+    parameters_in_groups = set()
+    for group_name, selected_parameters in group_of_parameters.items():
+        parameters_in_groups.update(selected_parameters)
+        pandas_tables[group_name] = _get_pandas_estimated_parameters(
+            estimation_results=estimation_results,
+            selected_parameters=selected_parameters,
+            variance_covariance_type=variance_covariance_type,
+            renumbering_parameters=renumbering_parameters,
+            renaming_parameters=renaming_parameters,
+        )
+
+    remaining_parameters = [
+        parameter_name
+        for parameter_name in all_parameters
+        if parameter_name not in parameters_in_groups
+    ]
+    if remaining_parameters:
+        remaining_group_name = 'Other parameters'
+        if remaining_group_name in pandas_tables:
+            remaining_group_name = 'Other parameters not in groups'
+        pandas_tables[remaining_group_name] = _get_pandas_estimated_parameters(
+            estimation_results=estimation_results,
+            selected_parameters=remaining_parameters,
+            variance_covariance_type=variance_covariance_type,
+            renumbering_parameters=renumbering_parameters,
+            renaming_parameters=renaming_parameters,
+        )
+
+    return pandas_tables
+
+
 def get_pandas_one_pair_of_parameters(
     estimation_results: EstimationResults,
     first_parameter_index: int,
@@ -185,7 +291,7 @@ def get_pandas_one_pair_of_parameters(
     ):
         error_msg = (
             f'Invalid parameter index {first_parameter_index}. Valid range: 0-'
-            f' {len(estimation_results.beta_names)-1}'
+            f' {len(estimation_results.beta_names) - 1}'
         )
         raise ValueError(error_msg)
     if second_parameter_index < 0 or second_parameter_index >= len(
@@ -193,7 +299,7 @@ def get_pandas_one_pair_of_parameters(
     ):
         error_msg = (
             f'Invalid parameter index {second_parameter_index}. Valid range: 0-'
-            f' {len(estimation_results.beta_names)-1}'
+            f' {len(estimation_results.beta_names) - 1}'
         )
         raise ValueError(error_msg)
 

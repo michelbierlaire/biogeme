@@ -2,408 +2,424 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
-from biogeme.latent_variables.html_report import (
-    _combo_to_math_text,
-    generate_html_report,
-    save_html_report,
+
+from biogeme.results_processing.estimation_results import EstimateVarianceCovariance
+from biogeme.results_processing.html_output import (
+    _get_html_estimated_parameters,
+    format_real_number,
+    generate_html_file,
+    get_html_condition_number,
+    get_html_correlation_results,
+    get_html_estimated_parameters,
+    get_html_footer,
+    get_html_general_statistics,
+    get_html_header,
+    get_html_one_pair_of_parameters,
+    get_html_one_parameter,
+    get_html_preamble,
 )
-from biogeme.latent_variables.model_spec import MeasurementModel
 
 
-def _resolved_constant(value: object) -> SimpleNamespace:
-    return SimpleNamespace(value=value)
+class FakeEstimationResults:
+    def __init__(self):
+        self.beta_names = ['beta_time', 'beta_cost', 'asc_car']
+        self.raw_estimation_results = SimpleNamespace(
+            model_name='fake_model',
+            data_name='fake_data',
+        )
+        self.algorithm_has_converged = True
+        self.smallest_eigenvalue = 0.5
+        self.largest_eigenvalue = 10.0
+        self.smallest_eigenvector = np.array([0.0, 0.0, 0.0])
+        self.condition_number = 20.0
+        self.user_notes = None
+        self.bootstrap_time = None
+        self.optimization_messages = {
+            'Algorithm': 'fake algorithm',
+            'Relative gradient': 1.23456789e-5,
+        }
 
+    def get_default_variance_covariance_matrix(self):
+        return EstimateVarianceCovariance.ROBUST
 
-def _resolved_parameter(
-    final_name: str,
-    *,
-    lower_bound: object = None,
-    upper_bound: object = None,
-    role: str = "generic_role",
-    status: str = "generic_status",
-    notes: list[str] | None = None,
-) -> SimpleNamespace:
-    return SimpleNamespace(
-        final_name=final_name,
-        lower_bound=lower_bound,
-        upper_bound=upper_bound,
-        role=SimpleNamespace(value=role),
-        status=SimpleNamespace(value=status),
-        notes=[] if notes is None else notes,
-    )
+    def get_general_statistics(self):
+        return {
+            'Number of estimated parameters': 3,
+            'Final log likelihood': -123.456,
+            'Null log likelihood': None,
+        }
 
+    def get_parameter_value_from_index(self, parameter_index):
+        return [-1.23456, -2.34567, 0.45678][parameter_index]
 
-def _term(coefficient: object, variable_name: str) -> SimpleNamespace:
-    return SimpleNamespace(coefficient=coefficient, variable_name=variable_name)
+    def get_parameter_std_err_from_index(self, parameter_index, estimate_var_covar):
+        return [0.1, 0.2, 0.3][parameter_index]
 
+    def get_parameter_t_test_from_index(
+        self, parameter_index, estimate_var_covar, target
+    ):
+        value = self.get_parameter_value_from_index(parameter_index)
+        std_err = self.get_parameter_std_err_from_index(
+            parameter_index, estimate_var_covar
+        )
+        return (value - target) / std_err
 
-def _linear_combination(
-    *,
-    intercept: object | None,
-    terms: list[SimpleNamespace],
-) -> SimpleNamespace:
-    return SimpleNamespace(intercept=intercept, terms=terms)
+    def get_parameter_p_value_from_index(
+        self, parameter_index, estimate_var_covar, target
+    ):
+        return 0.05
 
+    def is_bound_active(self, parameter_name):
+        return parameter_name == 'beta_cost'
 
-def _structural_equation(
-    *,
-    terms: list[SimpleNamespace],
-    sigma: object | None,
-) -> SimpleNamespace:
-    return SimpleNamespace(terms=terms, sigma=sigma)
+    def is_any_bound_active(self):
+        return True
 
+    def get_parameter_index(self, parameter_name):
+        return self.beta_names.index(parameter_name)
 
-def _latent_variable(
-    *,
-    terms: list[SimpleNamespace],
-    sigma: object | None,
-) -> SimpleNamespace:
-    return SimpleNamespace(
-        structural_equation=_structural_equation(terms=terms, sigma=sigma)
-    )
+    def get_variance_covariance_matrix(self, variance_covariance_type):
+        return np.array(
+            [
+                [1.0, 0.2, 0.3],
+                [0.2, 4.0, 0.4],
+                [0.3, 0.4, 9.0],
+            ]
+        )
 
-
-def _measurement_equation(
-    *,
-    systematic_part: SimpleNamespace,
-    sigma: object | None,
-    measurement_model: MeasurementModel,
-) -> SimpleNamespace:
-    return SimpleNamespace(
-        systematic_part=systematic_part,
-        sigma=sigma,
-        measurement_model=measurement_model,
-    )
-
-
-def _threshold_system(cutpoints: list[SimpleNamespace]) -> SimpleNamespace:
-    return SimpleNamespace(cutpoints=cutpoints)
-
-
-def _cutpoint(symbol_name: str, expression_text: str) -> SimpleNamespace:
-    return SimpleNamespace(symbol_name=symbol_name, expression_text=expression_text)
-
-
-def _normalization_rule(
-    reason: str, target_name: str, value: object
-) -> SimpleNamespace:
-    return SimpleNamespace(reason=reason, target_name=target_name, value=value)
-
-
-def _resolved_model(
-    *,
-    metadata: SimpleNamespace | None = None,
-    latent_variables: dict[str, object] | None = None,
-    measurement_equations: dict[str, object] | None = None,
-    threshold_systems: dict[str, object] | None = None,
-    normalization: SimpleNamespace | None = None,
-    parameters: dict[str, object] | None = None,
-) -> SimpleNamespace:
-    return SimpleNamespace(
-        metadata=(
-            metadata
-            if metadata is not None
-            else SimpleNamespace(
-                n_latent_variables=0,
-                n_indicators=0,
-                n_threshold_systems=0,
-            )
-        ),
-        latent_variables={} if latent_variables is None else latent_variables,
-        measurement_equations=(
-            {} if measurement_equations is None else measurement_equations
-        ),
-        threshold_systems={} if threshold_systems is None else threshold_systems,
-        normalization=(
-            normalization
-            if normalization is not None
-            else SimpleNamespace(rules=[], warnings=[])
-        ),
-        parameters={} if parameters is None else parameters,
-    )
+    def calculate_test(self, first_parameter_index, second_parameter_index, covariance):
+        return 1.5
 
 
 @pytest.fixture
-def patched_tex(monkeypatch):
-    import biogeme.latent_variables.html_report as html_report_module
-
-    def fake_tex_escape(text: str) -> str:
-        return f"ESC[{text}]"
-
-    def fake_tex_identifier(text: str) -> str:
-        return f"ID[{text}]"
-
-    monkeypatch.setattr(html_report_module, "tex_escape", fake_tex_escape)
-    monkeypatch.setattr(html_report_module, "tex_identifier", fake_tex_identifier)
-    return html_report_module
+def results():
+    return FakeEstimationResults()
 
 
-def test_combo_to_math_text_returns_zero_for_empty_combination(patched_tex) -> None:
-    combo = _linear_combination(intercept=None, terms=[])
-
-    result = _combo_to_math_text(combo)
-
-    assert result == "0"
+def test_format_real_number():
+    assert format_real_number(1234.567) == '1.23e+03'
+    assert format_real_number(0.00123456) == '0.00123'
+    assert format_real_number(-2.34567) == '-2.35'
 
 
-def test_combo_to_math_text_with_parameter_intercept_and_mixed_terms(
-    patched_tex,
-) -> None:
-    combo = _linear_combination(
-        intercept=_resolved_parameter("alpha"),
-        terms=[
-            _term(_resolved_parameter("beta_time"), "time"),
-            _term(_resolved_constant(2.5), "cost"),
-        ],
+def test_get_html_header(results):
+    html = get_html_header(results)
+
+    assert '<html>' in html
+    assert '<head>' in html
+    assert '<body bgcolor="#ffffff">' in html
+    assert 'fake_model' in html
+    assert 'biogeme' in html
+
+
+def test_get_html_header_without_raw_results(results):
+    results.raw_estimation_results = None
+
+    html = get_html_header(results)
+
+    assert 'No estimation result is available' in html
+
+
+def test_get_html_footer():
+    assert get_html_footer() == '</body>\n</html>'
+
+
+def test_get_html_preamble(results):
+    html = get_html_preamble(results, file_name='report.html')
+
+    assert 'report.html' in html
+    assert 'fake_data' in html
+
+
+def test_get_html_preamble_without_raw_results(results):
+    results.raw_estimation_results = None
+
+    html = get_html_preamble(results, file_name='report.html')
+
+    assert 'No estimation result is available' in html
+
+
+def test_get_html_preamble_non_convergence(results):
+    results.algorithm_has_converged = False
+
+    html = get_html_preamble(results, file_name='report.html')
+
+    assert 'Algorithm failed to converge' in html
+
+
+def test_get_html_preamble_user_notes(results):
+    results.user_notes = 'Important note.'
+
+    html = get_html_preamble(results, file_name='report.html')
+
+    assert 'Important note.' in html
+    assert '<blockquote' in html
+
+
+def test_get_html_general_statistics(results):
+    html = get_html_general_statistics(results)
+
+    assert 'Number of estimated parameters' in html
+    assert 'Final log likelihood' in html
+    assert 'Null log likelihood' not in html
+    assert 'Relative gradient' in html
+
+
+def test_get_html_one_parameter(results):
+    html = get_html_one_parameter(
+        estimation_results=results,
+        parameter_index=1,
+        variance_covariance_type=EstimateVarianceCovariance.ROBUST,
     )
 
-    result = _combo_to_math_text(combo)
+    assert '<tr class=biostyle>' in html
+    assert 'beta_cost' in html
+    assert 'Active bound' in html
 
-    assert result == ("ID[alpha] + ID[beta_time]\\,ID[time] + ESC[2.5]\\,ID[cost]")
 
-
-def test_combo_to_math_text_with_constant_intercept_only(patched_tex) -> None:
-    combo = _linear_combination(
-        intercept=_resolved_constant(7),
-        terms=[],
+def test_get_html_one_parameter_with_custom_name_and_number(results):
+    html = get_html_one_parameter(
+        estimation_results=results,
+        parameter_index=0,
+        variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        parameter_number=99,
+        parameter_name='renamed_time',
     )
 
-    result = _combo_to_math_text(combo)
+    assert '<td>99</td>' in html
+    assert 'renamed_time' in html
 
-    assert result == "ESC[7]"
+
+def test_get_html_one_parameter_invalid_index(results):
+    with pytest.raises(ValueError, match='Invalid parameter index'):
+        get_html_one_parameter(
+            estimation_results=results,
+            parameter_index=99,
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
 
 
-def test_generate_html_report_covers_all_branches_and_escaping(patched_tex) -> None:
-    resolved = _resolved_model(
-        metadata=SimpleNamespace(
-            n_latent_variables=2,
-            n_indicators=3,
-            n_threshold_systems=1,
-        ),
-        latent_variables={
-            "LV_A": _latent_variable(
-                terms=[
-                    _term(_resolved_parameter("beta_a"), "x_a"),
-                    _term(_resolved_parameter("beta_b"), "x_b"),
-                ],
-                sigma=_resolved_parameter("sigma_a"),
-            ),
-            "LV_EMPTY": _latent_variable(
-                terms=[],
-                sigma=None,
-            ),
-        },
-        measurement_equations={
-            "gauss<1>": _measurement_equation(
-                systematic_part=_linear_combination(
-                    intercept=_resolved_parameter("alpha_g"),
-                    terms=[
-                        _term(_resolved_parameter("lambda_g"), "LV_A"),
-                        _term(_resolved_constant(3), "z_g"),
-                    ],
-                ),
-                sigma=_resolved_parameter("sigma_g"),
-                measurement_model=MeasurementModel.GAUSSIAN,
-            ),
-            "probit&2": _measurement_equation(
-                systematic_part=_linear_combination(
-                    intercept=None,
-                    terms=[],
-                ),
-                sigma=_resolved_parameter("sigma_p"),
-                measurement_model=MeasurementModel.ORDERED_PROBIT,
-            ),
-            'logit"3"': _measurement_equation(
-                systematic_part=_linear_combination(
-                    intercept=_resolved_constant(1),
-                    terms=[],
-                ),
-                sigma=_resolved_parameter("sigma_l"),
-                measurement_model=MeasurementModel.ORDERED_LOGIT,
-            ),
-        },
-        threshold_systems={
-            "type<&>": _threshold_system(
-                [
-                    _cutpoint("tau<1>", "a_b"),
-                    _cutpoint("tau&2", "c<d>"),
-                ]
-            )
-        },
-        normalization=SimpleNamespace(
-            rules=[
-                _normalization_rule("fixed because <reason>", "beta_norm", 1),
-                _normalization_rule("anchor & scale", "sigma_norm", 0.5),
-            ],
-            warnings=["warn <one>", "warn & two"],
-        ),
-        parameters={
-            "zeta": _resolved_parameter(
-                "zeta",
-                lower_bound=-1,
-                upper_bound=1,
-                role="role_z",
-                status="status_z",
-                notes=["note z1", "note z2"],
-            ),
-            "alpha": _resolved_parameter(
-                "alpha",
-                lower_bound=None,
-                upper_bound=None,
-                role="role_a",
-                status="status_a",
-                notes=[],
-            ),
+def test_get_html_estimated_parameters_without_groups(results):
+    tables = get_html_estimated_parameters(estimation_results=results)
+
+    assert list(tables.keys()) == ['']
+    assert 'beta_time' in tables['']
+    assert 'beta_cost' in tables['']
+    assert 'asc_car' in tables['']
+
+
+def test_get_html_estimated_parameters_with_groups(results):
+    tables = get_html_estimated_parameters(
+        estimation_results=results,
+        group_of_parameters={
+            'Taste parameters': ['beta_time', 'beta_cost'],
         },
     )
 
-    html = generate_html_report(resolved)
-
-    assert html.startswith("<!DOCTYPE html>")
-    assert html.endswith("</body></html>")
-
-    assert '<meta charset="utf-8">' in html
-    assert (
-        '<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>'
-        in html
-    )
-    assert "<title>Latent Variable Model Report</title>" in html
-    assert "<h1>Latent Variable Model Report</h1>" in html
-
-    assert (
-        "<p>The model contains <strong>2</strong> latent variables, "
-        "<strong>3</strong> indicators, and <strong>1</strong> ordinal threshold systems.</p>"
-        in html
-    )
-
-    assert "<h2>Structural equations</h2>" in html
-    assert (
-        "<p>\\[ID[LV_A] = ID[beta_a]\\,ID[x_a] + ID[beta_b]\\,ID[x_b] + "
-        "ID[sigma_a]\\,\\omega_{ESC[LV_A]}\\]</p>" in html
-    )
-    assert "<p>\\[ID[LV_EMPTY] = 0 + 0\\,\\omega_{ESC[LV_EMPTY]}\\]</p>" in html
-
-    assert "<h2>Measurement equations</h2>" in html
-
-    assert "<h3>gauss&lt;1&gt;</h3>" in html
-    assert (
-        "<p>\\[I^*_{ESC[gauss<1>]} = ID[alpha_g] + ID[lambda_g]\\,ID[LV_A] + "
-        "ESC[3]\\,ID[z_g] + ID[sigma_g]\\,\\varepsilon_{ESC[gauss<1>]}\\]</p>" in html
-    )
-    assert "<p>\\[I_{ESC[gauss<1>]} = I^*_{ESC[gauss<1>]}\\]</p>" in html
-
-    assert "<h3>probit&amp;2</h3>" in html
-    assert (
-        "<p>\\[I^*_{ESC[probit&2]} = 0 + ID[sigma_p]\\,\\varepsilon_{ESC[probit&2]}\\]</p>"
-        in html
-    )
-    assert "<p>Ordered probit measurement model.</p>" in html
-
-    assert "<h3>logit&quot;3&quot;</h3>" in html
-    assert (
-        "<p>\\[I^*_{ESC[logit\"3\"]} = ESC[1] + ID[sigma_l]\\,\\varepsilon_{ESC[logit\"3\"]}\\]</p>"
-        in html
-    )
-    assert "<p>Ordered logit measurement model.</p>" in html
-
-    assert "<h2>Threshold systems</h2>" in html
-    assert "<h3>type&lt;&amp;&gt;</h3>" in html
-    assert "<ul>" in html
-    assert "<li><code>tau&lt;1&gt;</code> = <code>ESC[a_b]</code></li>" in html
-    assert "<li><code>tau&amp;2</code> = <code>ESC[c&lt;d&gt;]</code></li>" in html
-
-    assert "<h2>Normalization</h2>" in html
-    assert (
-        "<li>fixed because &lt;reason&gt; (<code>beta_norm</code> = <code>1</code>)</li>"
-        in html
-    )
-    assert (
-        "<li>anchor &amp; scale (<code>sigma_norm</code> = <code>0.5</code>)</li>"
-        in html
-    )
-    assert "<h3>Warnings</h3><ul>" in html
-    assert "<li>warn &lt;one&gt;</li>" in html
-    assert "<li>warn &amp; two</li>" in html
-
-    assert "<h2>Parameters</h2>" in html
-    assert (
-        "<table><tr><th>Name</th><th>Role</th><th>Status</th><th>Bounds</th><th>Notes</th></tr>"
-        in html
-    )
-    assert (
-        "<tr><td><code>alpha</code></td><td>role_a</td><td>status_a</td>"
-        "<td>[None, None]</td><td></td></tr>" in html
-    )
-    assert (
-        "<tr><td><code>zeta</code></td><td>role_z</td><td>status_z</td>"
-        "<td>[-1, 1]</td><td>note z1; note z2</td></tr>" in html
-    )
+    assert 'Taste parameters' in tables
+    assert 'Other parameters' in tables
+    assert 'beta_time' in tables['Taste parameters']
+    assert 'beta_cost' in tables['Taste parameters']
+    assert 'asc_car' in tables['Other parameters']
 
 
-def test_generate_html_report_without_thresholds_or_normalization_plan(
-    patched_tex,
-) -> None:
-    resolved = _resolved_model(
-        metadata=SimpleNamespace(
-            n_latent_variables=0,
-            n_indicators=0,
-            n_threshold_systems=0,
-        ),
-        latent_variables={},
-        measurement_equations={},
-        threshold_systems={},
-        normalization=SimpleNamespace(
-            rules=[],
-            warnings=[],
-        ),
-        parameters={},
-    )
-
-    html = generate_html_report(resolved)
-
-    assert "<h2>Threshold systems</h2>" not in html
-    assert "<p>No explicit normalization plan was provided.</p>" in html
-    assert "<h3>Warnings</h3>" not in html
-    assert (
-        "<table><tr><th>Name</th><th>Role</th><th>Status</th><th>Bounds</th><th>Notes</th></tr></table>"
-        in html
-    )
-
-
-def test_generate_html_report_raises_when_measurement_sigma_is_missing(
-    patched_tex,
-) -> None:
-    resolved = _resolved_model(
-        metadata=SimpleNamespace(
-            n_latent_variables=0,
-            n_indicators=1,
-            n_threshold_systems=0,
-        ),
-        measurement_equations={
-            "indicator_x": _measurement_equation(
-                systematic_part=_linear_combination(
-                    intercept=None,
-                    terms=[],
-                ),
-                sigma=None,
-                measurement_model=MeasurementModel.GAUSSIAN,
-            )
+def test_get_html_estimated_parameters_parameter_in_several_groups(results):
+    tables = get_html_estimated_parameters(
+        estimation_results=results,
+        group_of_parameters={
+            'Group 1': ['beta_time', 'beta_cost'],
+            'Group 2': ['beta_cost', 'asc_car'],
         },
-        normalization=SimpleNamespace(rules=[], warnings=[]),
     )
 
-    with pytest.raises(
-        ValueError,
-        match="Measurement equation for indicator 'indicator_x' is missing a resolved sigma parameter.",
-    ):
-        generate_html_report(resolved)
+    assert 'Group 1' in tables
+    assert 'Group 2' in tables
+    assert 'Other parameters' not in tables
+    assert 'beta_cost' in tables['Group 1']
+    assert 'beta_cost' in tables['Group 2']
 
 
-def test_save_html_report_writes_utf8_file(tmp_path) -> None:
-    report = "<html><body>électricité</body></html>"
-    path = tmp_path / "report.html"
+def test_get_html_estimated_parameters_existing_other_group(results):
+    tables = get_html_estimated_parameters(
+        estimation_results=results,
+        group_of_parameters={
+            'Other parameters': ['beta_time'],
+        },
+    )
 
-    save_html_report(report, path)
+    assert 'Other parameters' in tables
+    assert 'Other parameters not in groups' in tables
 
-    assert path.read_text(encoding="utf-8") == report
+
+def test_get_html_estimated_parameters_unknown_parameter(results):
+    with pytest.raises(ValueError, match='Unknown parameters requested'):
+        get_html_estimated_parameters(
+            estimation_results=results,
+            group_of_parameters={'Bad group': ['unknown_beta']},
+        )
+
+
+def test_get_html_estimated_parameters_with_renaming(results):
+    tables = get_html_estimated_parameters(
+        estimation_results=results,
+        renaming_parameters={'beta_time': 'travel_time'},
+    )
+
+    assert 'travel_time' in tables['']
+
+
+def test_get_html_estimated_parameters_sort_by_name(results):
+    table = _get_html_estimated_parameters(
+        estimation_results=results,
+        selected_parameters=['beta_time', 'beta_cost', 'asc_car'],
+        sort_by_name=True,
+    )
+
+    assert table.index('asc_car') < table.index('beta_cost') < table.index('beta_time')
+
+
+def test_get_html_one_pair_of_parameters(results):
+    html = get_html_one_pair_of_parameters(
+        estimation_results=results,
+        first_parameter_index=1,
+        second_parameter_index=0,
+        variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+    )
+
+    assert 'beta_cost' in html
+    assert 'beta_time' in html
+    assert '<tr class=biostyle>' in html
+
+
+def test_get_html_one_pair_of_parameters_invalid_first_index(results):
+    with pytest.raises(ValueError, match='Invalid parameter index'):
+        get_html_one_pair_of_parameters(
+            estimation_results=results,
+            first_parameter_index=99,
+            second_parameter_index=0,
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+
+
+def test_get_html_one_pair_of_parameters_invalid_second_index(results):
+    with pytest.raises(ValueError, match='Invalid parameter index'):
+        get_html_one_pair_of_parameters(
+            estimation_results=results,
+            first_parameter_index=0,
+            second_parameter_index=99,
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+
+
+def test_get_html_correlation_results(results):
+    html = get_html_correlation_results(results)
+
+    assert 'Coefficient 1' in html
+    assert 'Coefficient 2' in html
+    assert 'beta_cost' in html
+    assert 'beta_time' in html
+
+
+def test_get_html_correlation_results_with_involved_parameters(results):
+    html = get_html_correlation_results(
+        estimation_results=results,
+        involved_parameters={
+            'beta_time': 'time',
+            'beta_cost': 'cost',
+        },
+    )
+
+    assert 'time' in html
+    assert 'cost' in html
+    assert 'asc_car' not in html
+
+
+def test_get_html_condition_number(results):
+    html = get_html_condition_number(results)
+
+    assert 'Smallest eigenvalue' in html
+    assert 'Largest eigenvalue' in html
+    assert 'Condition number' in html
+    assert '20' in html
+
+
+def test_generate_html_file(results, tmp_path):
+    output_file = tmp_path / 'report.html'
+
+    generate_html_file(
+        estimation_results=results,
+        filename=str(output_file),
+        overwrite=False,
+    )
+
+    html = output_file.read_text()
+
+    assert '<h1>Estimation report</h1>' in html
+    assert '<h1>Estimated parameters</h1>' in html
+    assert 'beta_time' in html
+    assert 'beta_cost' in html
+    assert '<h2>Correlation of coefficients</h2>' in html
+
+
+def test_generate_html_file_with_parameter_groups(results, tmp_path):
+    output_file = tmp_path / 'grouped_report.html'
+
+    generate_html_file(
+        estimation_results=results,
+        filename=str(output_file),
+        overwrite=False,
+        group_of_parameters={
+            'Taste parameters': ['beta_time', 'beta_cost'],
+        },
+    )
+
+    html = output_file.read_text()
+
+    assert '<h3>Taste parameters</h3>' in html
+    assert '<h3>Other parameters</h3>' in html
+    assert 'asc_car' in html
+
+
+def test_generate_html_file_existing_file_raises(results, tmp_path):
+    output_file = tmp_path / 'report.html'
+    output_file.write_text('already exists')
+
+    with pytest.raises(FileExistsError):
+        generate_html_file(
+            estimation_results=results,
+            filename=str(output_file),
+            overwrite=False,
+        )
+
+
+def test_generate_html_file_existing_file_overwrite(results, tmp_path):
+    output_file = tmp_path / 'report.html'
+    output_file.write_text('already exists')
+
+    generate_html_file(
+        estimation_results=results,
+        filename=str(output_file),
+        overwrite=True,
+    )
+
+    html = output_file.read_text()
+
+    assert 'already exists' not in html
+    assert '<h1>Estimation report</h1>' in html
+
+
+def test_generate_html_file_bootstrap_fallback(results, tmp_path):
+    output_file = tmp_path / 'bootstrap_report.html'
+
+    generate_html_file(
+        estimation_results=results,
+        filename=str(output_file),
+        overwrite=False,
+        variance_covariance_type=EstimateVarianceCovariance.BOOTSTRAP,
+    )
+
+    html = output_file.read_text()
+
+    assert '<h1>Estimation report</h1>' in html

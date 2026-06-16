@@ -249,7 +249,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             section='Estimation',
             description=(
                 f'str: optimization algorithm to be used for estimation. '
-                f'Valid values: {["automatic"]+list(opt.algorithms.keys())}'
+                f'Valid values: {["automatic"] + list(opt.algorithms.keys())}'
             ),
             check=(cp.check_algo_name,),
         ),
@@ -453,7 +453,7 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
         ),
         ParameterTuple(
             name='calculate_waic',
-            value=True,
+            value=False,
             type=bool,
             section='Bayesian',
             description='Calculates the Widely Applicable Information Criterion (WAIC)',

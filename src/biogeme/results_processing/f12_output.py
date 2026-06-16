@@ -10,6 +10,7 @@ import logging
 import os
 
 from biogeme.version import get_version
+
 from .estimation_results import (
     EstimateVarianceCovariance,
     EstimationResults,
@@ -32,7 +33,9 @@ def get_f12(
     :return: results formatted in F12 format
     """
     if variance_covariance_type is None:
-        variance_covariance_type = estimation_results.get_default_variance_covariance_matrix()
+        variance_covariance_type = (
+            estimation_results.get_default_variance_covariance_matrix()
+        )
     covar_header = str(variance_covariance_type)
 
     # checkline1 = (
@@ -73,10 +76,11 @@ def get_f12(
     #  characters 39-58, standard error      20 chars
 
     # mystats = estimation_results.get_general_statistics()
-    table = get_pandas_estimated_parameters(
+    pandas_tables = get_pandas_estimated_parameters(
         estimation_results=estimation_results,
         variance_covariance_type=variance_covariance_type,
     )
+    table = next(iter(pandas_tables.values()))
     parameters_indices = table.index.to_list()
     for parameter_index in parameters_indices:
         values = table.loc[parameter_index]
@@ -126,7 +130,7 @@ def get_f12(
     #   characters 5-8, error code (please use 0)                   4 chars
     #   characters 9-29, time and date (sugg. repeat from line 2)  21 chars
 
-    if "Number of iterations" in estimation_results.optimization_messages:
+    if 'Number of iterations' in estimation_results.optimization_messages:
         results += (
             f'{estimation_results.optimization_messages["Number of iterations"]: >4}'
         )
@@ -189,7 +193,7 @@ def generate_f12_file(
         and estimation_results.bootstrap_time is None
     ):
         logger.warning(
-            f'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
+            'No bootstrap data is available. The robust variance-covariance matrix is used instead.'
         )
         variance_covariance_type = EstimateVarianceCovariance.ROBUST
 

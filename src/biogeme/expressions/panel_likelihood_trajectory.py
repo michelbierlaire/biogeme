@@ -54,7 +54,7 @@ class PanelLikelihoodTrajectory(Expression):
         return the_copy
 
     def set_maximum_number_of_observations_per_individual(
-            self, max_number: int
+        self, max_number: int
     ) -> None:
         from biogeme.database import RELEVANT_PREFIX, observation_suffix
 
@@ -88,7 +88,7 @@ class PanelLikelihoodTrajectory(Expression):
         return f"PanelLikelihoodTrajectory({repr(self.initial_formula)})"
 
     def recursive_construct_jax_function(
-            self, numerically_safe: bool
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates recursively a function to be used by biogeme_jax. Must be overloaded by each expression

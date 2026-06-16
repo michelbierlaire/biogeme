@@ -5,10 +5,9 @@ from __future__ import annotations
 from html import escape
 from pathlib import Path
 
-from .tex_utils import tex_escape, tex_identifier
-
 from .model_spec import MeasurementModel
 from .resolved import ResolvedModel
+from .tex_utils import tex_escape, tex_identifier
 
 
 # Helper for TeX-safe rendering of linear combinations for MathJax
@@ -26,7 +25,7 @@ def _combo_to_math_text(combo) -> str:
             if hasattr(term.coefficient, 'final_name')
             else tex_escape(str(term.coefficient.value))
         )
-        parts.append(f"{coef}\\,{tex_identifier(term.variable_name)}")
+        parts.append(f'{coef}\\,{tex_identifier(term.variable_name)}')
     return ' + '.join(parts) if parts else '0'
 
 
@@ -48,13 +47,7 @@ def generate_html_report(resolved: ResolvedModel) -> str:
     parts.append('<h2>Structural equations</h2>')
     for latent_name, latent in resolved.latent_variables.items():
         eq = latent.structural_equation
-        rhs = (
-            ' + '.join(
-                f"{tex_identifier(term.coefficient.final_name)}\\,{tex_identifier(term.variable_name)}"
-                for term in eq.terms
-            )
-            or '0'
-        )
+        rhs = _combo_to_math_text(eq.systematic_part)
         sigma = tex_identifier(eq.sigma.final_name) if eq.sigma is not None else '0'
         parts.append(
             f'<p>\\[{tex_identifier(latent_name)} = {rhs} + {sigma}\\,\\omega_{{{tex_escape(latent_name)}}}\\]</p>'
@@ -122,4 +115,4 @@ def generate_html_report(resolved: ResolvedModel) -> str:
 
 def save_html_report(report: str, path: str | Path) -> None:
     """Save HTML report to a file."""
-    Path(path).write_text(report, encoding="utf-8")
+    Path(path).write_text(report, encoding='utf-8')

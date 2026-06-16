@@ -22,25 +22,26 @@ import arviz as az
 import numpy as np
 import pandas as pd
 import xarray as xr
-from biogeme.exceptions import BiogemeError
-from biogeme.tools import timeit
 from scipy.stats import gaussian_kde
 from tabulate import tabulate
+
+from biogeme.exceptions import BiogemeError
+from biogeme.tools import timeit
 
 from .bayesian_results_summary import BayesianResultsSummary, EstimatedBetaSummary
 from .raw_bayesian_results import RawBayesianResults
 
 logger = logging.getLogger(__name__)
 
-CHOICE_LABEL = "_choice"
+CHOICE_LABEL = '_choice'
 
 
 class PosteriorSummary(str, Enum):
     """Type of posterior point estimate to extract."""
 
-    MEAN = "mean"
-    MEDIAN = "median"
-    MODE = "mode"
+    MEAN = 'mean'
+    MEDIAN = 'median'
+    MODE = 'mode'
 
 
 @dataclass
@@ -90,6 +91,30 @@ class BayesianResults:
     parameters: dict mapping parameter name -> EstimatedBeta
     """
 
+    @staticmethod
+    def _arviz_result_value(result: Any, *names: str) -> float:
+        """Extract a scalar value from an ArviZ result object.
+
+        ArviZ result objects differ across versions in the names used for WAIC
+        and LOO quantities. This helper tries several candidate attribute names
+        and item keys without letting an ``AttributeError`` escape from a
+        property getter.
+
+        :param result: ArviZ result object.
+        :param names: candidate attribute or item names.
+        :return: scalar value converted to float, or NaN if none is available.
+        """
+        for name in names:
+            try:
+                return float(getattr(result, name))
+            except AttributeError:
+                pass
+            try:
+                return float(result[name])
+            except (AttributeError, KeyError, TypeError, IndexError, ValueError):
+                pass
+        return float('nan')
+
     data_name: str
     chains: int
     draws: int
@@ -119,7 +144,7 @@ class BayesianResults:
         """
         if calculate_waic or calculate_loo:
             if not calculate_likelihood:
-                raise ValueError("WAIC/LOO require calculate_likelihood=True.")
+                raise ValueError('WAIC/LOO require calculate_likelihood=True.')
         self.raw_bayesian_results = raw
         self.calculate_likelihood = calculate_likelihood
         self.calculate_waic = calculate_waic
@@ -131,16 +156,16 @@ class BayesianResults:
         arrays: dict[str, dict] = {}
         for name in self._idata.posterior.data_vars:
             da = self._idata.posterior[name]
-            extra_dims = [d for d in da.dims if d not in ("chain", "draw")]
+            extra_dims = [d for d in da.dims if d not in ('chain', 'draw')]
             if extra_dims:
                 # Record metadata for later, do not summarize by default to avoid huge outputs
                 arrays[name] = {
-                    "dims": tuple(extra_dims),
-                    "shape": tuple(
-                        int(da.sizes[d]) for d in da.dims if d not in ("chain", "draw")
+                    'dims': tuple(extra_dims),
+                    'shape': tuple(
+                        int(da.sizes[d]) for d in da.dims if d not in ('chain', 'draw')
                     ),
-                    "sizes": {d: int(da.sizes[d]) for d in extra_dims},
-                    "dtype": str(da.dtype),
+                    'sizes': {d: int(da.sizes[d]) for d in extra_dims},
+                    'dtype': str(da.dtype),
                 }
                 if strict:
                     raise ValueError(
@@ -159,10 +184,15 @@ class BayesianResults:
 
             hdi_low = hdi_high = None
             try:
-                hdi = az.hdi(samples, hdi_prob=hdi_prob)
+                hdi = az.hdi(samples, prob=hdi_prob)
                 hdi_low, hdi_high = float(hdi[0]), float(hdi[1])
-            except (ValueError, TypeError):
-                pass
+            except (ValueError, TypeError) as e:
+                logger.warning(
+                    'HDI could not be computed for parameter %s. '
+                    'The HDI bounds will not be reported. Error: %s',
+                    name,
+                    e,
+                )
 
             params[name] = EstimatedBeta(
                 name=name,
@@ -180,7 +210,7 @@ class BayesianResults:
             )
 
         if not params:
-            raise ValueError("No scalar variables found in the posterior to summarize.")
+            raise ValueError('No scalar variables found in the posterior to summarize.')
         self.model_name = raw.model_name
         self.data_name = raw.data_name
         self.chains = int(raw.chains or 0)
@@ -217,14 +247,14 @@ class BayesianResults:
         t0 = time.time()
 
         try:
-            self._rhat_ds = az.rhat(self._idata, method="rank")
-            self._ess_bulk_ds = az.ess(self._idata, method="bulk")
-            self._ess_tail_ds = az.ess(self._idata, method="tail")
+            self._rhat_ds = az.rhat(self._idata, method='rank')
+            self._ess_bulk_ds = az.ess(self._idata, method='bulk')
+            self._ess_tail_ds = az.ess(self._idata, method='tail')
             self._diagnostics_error = None
         except (ValueError, TypeError, RuntimeError) as e:
             logger.warning(
-                "Diagnostics computation failed (R-hat/ESS). "
-                "Diagnostics will not be retried. Error: %s",
+                'Diagnostics computation failed (R-hat/ESS). '
+                'Diagnostics will not be retried. Error: %s',
                 e,
             )
             self._diagnostics_error = e
@@ -236,7 +266,7 @@ class BayesianResults:
             elapsed = time.time() - t0
             if elapsed > 2.0:
                 logger.info(
-                    "Diagnostics computation took %.1f seconds (cached).", elapsed
+                    'Diagnostics computation took %.1f seconds (cached).', elapsed
                 )
 
         # If diagnostics could not be computed, leave NaNs in the EstimatedBetas
@@ -249,7 +279,7 @@ class BayesianResults:
 
         def _scalar_from_ds(ds: xr.Dataset, var_name: str) -> float:
             if var_name not in ds:
-                return float("nan")
+                return float('nan')
             return float(np.asarray(ds[var_name]).squeeze())
 
         for name, beta in self.parameters.items():
@@ -263,7 +293,7 @@ class BayesianResults:
         filename: str,
         *,
         calculate_likelihood: bool = True,
-        calculate_waic: bool = True,
+        calculate_waic: bool = False,
         calculate_loo: bool = True,
         hdi_prob: float = 0.94,
         strict: bool = False,
@@ -357,41 +387,75 @@ class BayesianResults:
         }
 
     @property
-    @timeit(label="log_likelihood")
+    @timeit(label='log_likelihood')
     def log_likelihood(self):
         if not self.calculate_likelihood:
             return None
         if self._log_likelihood is None:
-            self._log_likelihood = self._idata.posterior[
-                self.raw_bayesian_results.log_like_name
-            ]
-            try:
-                self._idata.add_groups(
-                    {"log_likelihood": xr.Dataset({CHOICE_LABEL: self._log_likelihood})}
-                )
-            except ValueError:
-                ...  # If the group is already there, nothing has to be done.
+            log_likelihood_group = getattr(self._idata, 'log_likelihood', None)
+            if log_likelihood_group is not None and CHOICE_LABEL in getattr(
+                log_likelihood_group, 'data_vars', {}
+            ):
+                self._log_likelihood = log_likelihood_group[CHOICE_LABEL]
+            else:
+                log_like_name = self.raw_bayesian_results.log_like_name
+                posterior_group = getattr(self._idata, 'posterior', None)
+                if posterior_group is None or log_like_name not in posterior_group:
+                    raise BiogemeError(
+                        'The log-likelihood draws are not available. Expected either '
+                        f'the ArviZ log_likelihood group with variable {CHOICE_LABEL!r}, '
+                        f'or the legacy posterior variable {log_like_name!r}.'
+                    )
+                self._log_likelihood = posterior_group[log_like_name]
+                if log_like_name in self._idata.posterior:
+                    self._idata.add_groups(
+                        {
+                            'log_likelihood': {
+                                CHOICE_LABEL: posterior_group[log_like_name]
+                            }
+                        }
+                    )
         return self._log_likelihood
 
     @property
-    @timeit(label="waic_res")
+    @timeit(label='waic_res')
     def waic_res(self):
         if not self.calculate_waic:
             return None
-        # Ensure log_likelihood group exists
+
         if self.log_likelihood is None:
             return None
+
         if self._waic_res is None:
+            if not hasattr(az, 'waic'):
+                logger.warning(
+                    'WAIC requested, but the installed ArviZ version (%s) '
+                    'does not provide az.waic. WAIC will not be reported.',
+                    az.__version__,
+                )
+                return None
+
             self._waic_res = az.waic(self.idata, var_name=CHOICE_LABEL)
+
         return self._waic_res
 
     @property
-    @timeit(label="loo_res")
+    @timeit(label='loo_res')
     def loo_res(self):
         if not self.calculate_loo:
             return None
+        if self.log_likelihood is None:
+            return None
         if self._loo_res is None:
-            self._loo_res = az.loo(self.idata, var_name=CHOICE_LABEL)
+            try:
+                self._loo_res = az.loo(self.idata, var_name=CHOICE_LABEL)
+            except (AttributeError, TypeError, ValueError) as exc:
+                logger.warning(
+                    'LOO requested, but ArviZ could not compute it. '
+                    'LOO will not be reported. Error: %s',
+                    exc,
+                )
+                self._loo_res = None
         return self._loo_res
 
     def __getattr__(self, name: str) -> Any:
@@ -410,7 +474,8 @@ class BayesianResults:
     @timeit(label='arviz_summary')
     def arviz_summary(self) -> pd.DataFrame:
         self.ensure_diagnostics()
-        return az.summary(self.idata)
+        df = az.summary(self.idata)
+        return df
 
     @property
     @timeit(label='posterior_predictive_loglike')
@@ -432,7 +497,7 @@ class BayesianResults:
         a = np.asarray(ll)
         if a.ndim not in (2, 3):
             raise ValueError(
-                f"Expected log_likelihood with 2 or 3 dims ((chain, draw) or (chain, draw, obs)); got shape {a.shape}"
+                f'Expected log_likelihood with 2 or 3 dims ((chain, draw) or (chain, draw, obs)); got shape {a.shape}'
             )
         S = a.shape[0] * a.shape[1]
         if a.ndim == 2:
@@ -473,7 +538,7 @@ class BayesianResults:
         if a.ndim == 3:
             a = a.sum(axis=2)  # (chain, draw)
         if a.ndim != 2:
-            raise ValueError(f"Expected 2D or 3D log_likelihood; got shape {a.shape}")
+            raise ValueError(f'Expected 2D or 3D log_likelihood; got shape {a.shape}')
         self._expected_log_likelihood = float(np.mean(a))
         return self._expected_log_likelihood
 
@@ -490,76 +555,78 @@ class BayesianResults:
         if a.ndim == 3:
             a = a.sum(axis=2)
         if a.ndim != 2:
-            raise ValueError(f"Expected 2D or 3D log_likelihood; got shape {a.shape}")
+            raise ValueError(f'Expected 2D or 3D log_likelihood; got shape {a.shape}')
         self._best_draw_log_likelihood = float(np.max(a))
         return self._best_draw_log_likelihood
 
     @property
     @timeit(label='waic')
     def waic(self):
+        if not self.calculate_waic:
+            return None
         if self.waic_res is None:
             return None
         if self._waic is None:
-            res = self.waic_res
-            self._waic = float(
-                getattr(res, "waic", getattr(res, "elpd_waic", float("nan")))
+            self._waic = self._arviz_result_value(
+                self.waic_res, 'waic', 'elpd_waic', 'elpd'
             )
         return self._waic
 
     @property
     @timeit(label='waic_se')
     def waic_se(self):
+        if not self.calculate_waic:
+            return None
         if self.waic_res is None:
             return None
         if self._waic_se is None:
-            res = self.waic_res
-            self._waic_se = float(
-                getattr(res, "waic_se", getattr(res, "se", float("nan")))
-            )
+            self._waic_se = self._arviz_result_value(self.waic_res, 'waic_se', 'se')
         return self._waic_se
 
     @property
     @timeit(label='p_waic')
     def p_waic(self):
+        if not self.calculate_waic:
+            return None
         if self.waic_res is None:
             return None
         if self._p_waic is None:
-            self._p_waic = float(getattr(self.waic_res, "p_waic", float("nan")))
+            self._p_waic = self._arviz_result_value(self.waic_res, 'p_waic', 'p')
         return self._p_waic
 
     @property
     @timeit(label='loo')
     def loo(self) -> float | None:
+        if not self.calculate_loo:
+            return None
         if self.loo_res is None:
             return None
         if self._loo is None:
-            self._loo = float(
-                getattr(
-                    self.loo_res, "loo", getattr(self.loo_res, "elpd_loo", float("nan"))
-                )
+            self._loo = self._arviz_result_value(
+                self.loo_res, 'loo', 'elpd_loo', 'elpd'
             )
         return self._loo
 
     @property
     @timeit(label='loo_se')
     def loo_se(self):
+        if not self.calculate_loo:
+            return None
         if self.loo_res is None:
             return None
         if self._loo_se is None:
-            self._loo_se = float(
-                getattr(
-                    self.loo_res, "loo_se", getattr(self.loo_res, "se", float("nan"))
-                )
-            )
+            self._loo_se = self._arviz_result_value(self.loo_res, 'loo_se', 'se')
         return self._loo_se
 
     @property
     @timeit(label='p_loo')
     def p_loo(self):
+        if not self.calculate_loo:
+            return None
         if self.loo_res is None:
             return self.loo_res
         if self._p_loo is None:
-            self._p_loo = float(getattr(self.loo_res, "p_loo", float("nan")))
+            self._p_loo = self._arviz_result_value(self.loo_res, 'p_loo', 'p')
         return self._p_loo
 
     def parameter_estimates(self) -> dict[str, EstimatedBeta]:
@@ -601,42 +668,46 @@ class BayesianResults:
         :raises BiogemeError: If the inference data is missing or malformed.
         """
         if self._idata is None:
-            raise BiogemeError("No inference data is available.")
+            raise BiogemeError('No inference data is available.')
 
         rows: list[dict[str, Any]] = []
 
         # Iterate over ArviZ groups present in the InferenceData
-        for group in self._idata.groups():
-            ds = getattr(self._idata, group, None)
-            if ds is None:
-                continue
-            if not isinstance(ds, (xr.Dataset, xr.DataArray)):
+        for group in self._idata.groups:
+            if group == '/':
                 continue
 
-            # ArviZ groups are typically xarray.Dataset
-            if isinstance(ds, xr.DataArray):
-                data_vars = {ds.name or "<unnamed>": ds}
-            else:
-                data_vars = dict(ds.data_vars)
+            node = self._idata[group]
+            ds = node.dataset
+            if ds is None:
+                continue
+            if not isinstance(ds, xr.Dataset):
+                continue
+
+            group_name = group[1:] if group.startswith('/') else group
+            if not group_name:
+                continue
+
+            data_vars = dict(ds.data_vars)
 
             for var_name, da in data_vars.items():
                 dims = tuple(str(d) for d in da.dims)
                 shape = tuple(int(s) for s in da.shape)
                 rows.append(
                     {
-                        "group": str(group),
-                        "variable": str(var_name),
-                        "dims": dims,
-                        "shape": shape,
+                        'group': str(group_name),
+                        'variable': str(var_name),
+                        'dims': dims,
+                        'shape': shape,
                     }
                 )
 
         if not rows:
-            return pd.DataFrame(columns=["group", "variable", "dims", "shape"])
+            return pd.DataFrame(columns=['group', 'variable', 'dims', 'shape'])
 
         df = pd.DataFrame(rows)
         # Stable, readable ordering
-        df = df.sort_values(["group", "variable"], kind="stable").reset_index(drop=True)
+        df = df.sort_values(['group', 'variable'], kind='stable').reset_index(drop=True)
         return df
 
     def set_diagnostic_figure_references(
@@ -674,21 +745,32 @@ class BayesianResults:
                 'Best-draw log-likelihood (posterior upper bound)': f'{self.best_draw_log_likelihood:.2f}',
             }
         if self.calculate_waic:
-            results |= {
-                'WAIC (Widely Applicable Information Criterion)': f'{self.waic:.2f}',
-                'WAIC Standard Error': f'{self.waic_se:.2f}',
-                'Effective number of parameters (p_WAIC)': f'{self.p_waic:.2f}',
-            }
+            waic = self.waic
+            waic_se = self.waic_se
+            p_waic = self.p_waic
+            if waic is not None:
+                results |= {
+                    'WAIC (Widely Applicable Information Criterion)': f'{waic:.2f}',
+                    'WAIC Standard Error': f'{waic_se:.2f}',
+                    'Effective number of parameters (p_WAIC)': f'{p_waic:.2f}',
+                }
         if self.calculate_loo:
-            results |= {
-                'LOO (Leave-One-Out Cross-Validation)': f'{self.loo:.2f}',
-                'LOO Standard Error': f'{self.loo_se:.2f}',
-                'Effective number of parameters (p_LOO)': f'{self.p_loo:.2f}',
-            }
+            loo = self.loo
+
+            loo_se = self.loo_se
+
+            p_loo = self.p_loo
+
+            if loo is not None:
+                results |= {
+                    'LOO (Leave-One-Out Cross-Validation)': f'{self.loo:.2f}',
+                    'LOO Standard Error': f'{self.loo_se:.2f}',
+                    'Effective number of parameters (p_LOO)': f'{self.p_loo:.2f}',
+                }
         return results
 
     def short_summary(self):
-        return tabulate(self.generate_general_information().items(), tablefmt="plain")
+        return tabulate(self.generate_general_information().items(), tablefmt='plain')
 
     def to_summary(self) -> BayesianResultsSummary:
         """Convert the full Bayesian results into a lightweight summary object.
@@ -718,7 +800,7 @@ class BayesianResults:
             for name, beta in self.parameters.items()
         }
 
-        stored_variables_report = self.report_stored_variables().to_dict("records")
+        stored_variables_report = self.report_stored_variables().to_dict('records')
 
         return BayesianResultsSummary(
             model_name=self.model_name,
@@ -741,12 +823,12 @@ class BayesianResults:
             best_draw_log_likelihood=(
                 self.best_draw_log_likelihood if self.calculate_likelihood else None
             ),
-            waic=self.waic if self.calculate_waic else None,
-            waic_se=self.waic_se if self.calculate_waic else None,
-            p_waic=self.p_waic if self.calculate_waic else None,
-            loo=self.loo if self.calculate_loo else None,
-            loo_se=self.loo_se if self.calculate_loo else None,
-            p_loo=self.p_loo if self.calculate_loo else None,
+            waic=(self.waic if self.calculate_waic else None),
+            waic_se=(self.waic_se if self.calculate_waic else None),
+            p_waic=(self.p_waic if self.calculate_waic else None),
+            loo=(self.loo if self.calculate_loo else None),
+            loo_se=(self.loo_se if self.calculate_loo else None),
+            p_loo=(self.p_loo if self.calculate_loo else None),
             sampler=self.raw_bayesian_results.sampler,
             target_accept=self.raw_bayesian_results.target_accept,
             run_time=self.raw_bayesian_results.run_time,
@@ -783,7 +865,7 @@ class BayesianResults:
                 f"Variable '{name}' is not a recorded multi-dimensional posterior variable."
             )
         meta = self.array_metadata[name]
-        if dim not in meta["sizes"]:
+        if dim not in meta['sizes']:
             raise KeyError(
                 f"Dimension '{dim}' not found in variable '{name}' (dims: {meta['dims']})."
             )
@@ -792,7 +874,7 @@ class BayesianResults:
         idata = self._idata
         da = idata.posterior[name]
 
-        size = meta["sizes"][dim]
+        size = meta['sizes'][dim]
         idx_list = list(range(size)) if indices is None else list(indices)
         out: dict[int, EstimatedBeta] = {}
         hp = self.hdi_prob if hdi_prob is None else hdi_prob
@@ -801,7 +883,7 @@ class BayesianResults:
             # select along the requested dim
             sub = da.sel({dim: i})
             # ensure scalar after selecting; if still has more dims, skip
-            extra_dims = [d for d in sub.dims if d not in ("chain", "draw")]
+            extra_dims = [d for d in sub.dims if d not in ('chain', 'draw')]
             if extra_dims:
                 continue
             samples = np.asarray(sub).reshape(-1)
@@ -813,7 +895,7 @@ class BayesianResults:
             p_value = self._two_sided_p_from_posterior(samples)
             hdi_low = hdi_high = None
             try:
-                hdi = az.hdi(samples, hdi_prob=hp)
+                hdi = az.hdi(samples, prob=hp)
                 hdi_low, hdi_high = float(hdi[0]), float(hdi[1])
             except (ValueError, TypeError):
                 pass
@@ -821,16 +903,16 @@ class BayesianResults:
             # rhat/ess for that slice live under a composite var name in the diagnostics dataset,
             # ArviZ uses coordinate-based variables; so compute directly when selection is scalar.
             try:
-                rhat_val = float(np.asarray(az.rhat(sub, method="rank")).squeeze())
-                essb_val = float(np.asarray(az.ess(sub, method="bulk")).squeeze())
-                esst_val = float(np.asarray(az.ess(sub, method="tail")).squeeze())
+                rhat_val = float(np.asarray(az.rhat(sub, method='rank')).squeeze())
+                essb_val = float(np.asarray(az.ess(sub, method='bulk')).squeeze())
+                esst_val = float(np.asarray(az.ess(sub, method='tail')).squeeze())
             except (ValueError, TypeError):
                 rhat_val = np.nan
                 essb_val = np.nan
                 esst_val = np.nan
 
             out[i] = EstimatedBeta(
-                name=f"{name}[{dim}={i}]",
+                name=f'{name}[{dim}={i}]',
                 mean=mean,
                 median=median,
                 mode=mode,
@@ -860,7 +942,7 @@ class BayesianResults:
         if var_name not in self.idata.posterior:
             raise BiogemeError(f'Variable "{var_name}" not found in posterior.')
         da = self.idata.posterior[var_name]
-        extra_dims = [d for d in da.dims if d not in ("chain", "draw")]
+        extra_dims = [d for d in da.dims if d not in ('chain', 'draw')]
         if len(extra_dims) == 0:
             raise BiogemeError(
                 f'Variable "{var_name}" has no observation dimension; dims are {da.dims!r}.'
@@ -871,7 +953,7 @@ class BayesianResults:
                 f'use summarize_array_variable instead.'
             )
         obs_dim = extra_dims[0]
-        mean_da = da.mean(dim=("chain", "draw"))
+        mean_da = da.mean(dim=('chain', 'draw'))
         obs_coord = mean_da.coords.get(obs_dim, None)
         if obs_coord is not None:
             index = pd.Index(np.asarray(obs_coord), name=obs_dim)
@@ -899,7 +981,7 @@ class BayesianResults:
         if my_betas is not None:
             unknown = [b for b in my_betas if b not in the_betas]
             if unknown:
-                raise BiogemeError(f"Unknown parameter(s): {', '.join(unknown)}")
+                raise BiogemeError(f'Unknown parameter(s): {", ".join(unknown)}')
             selected = {name: the_betas[name] for name in my_betas}
         else:
             selected = the_betas
@@ -913,7 +995,7 @@ class BayesianResults:
             extractor = lambda b: b.mode
         else:
             raise BiogemeError(
-                f"Invalid posterior summary: {summary!r}. Valid options are PosteriorSummary.MEAN, PosteriorSummary.MEDIAN, PosteriorSummary.MODE."
+                f'Invalid posterior summary: {summary!r}. Valid options are PosteriorSummary.MEAN, PosteriorSummary.MEDIAN, PosteriorSummary.MODE.'
             )
 
         return {name: extractor(beta) for name, beta in selected.items()}
@@ -969,7 +1051,7 @@ class BayesianResults:
             if total_S is None:
                 total_S = S
             elif total_S != S:
-                raise ValueError("All variables must have the same number of draws.")
+                raise ValueError('All variables must have the same number of draws.')
 
         # Select draw indices with thinning and optional shuffle
         idx = np.arange(0, total_S)
@@ -1021,7 +1103,7 @@ class BayesianResults:
             if S_expected is None:
                 S_expected = S
             elif S_expected != S:
-                raise ValueError("All variables must have the same number of draws.")
+                raise ValueError('All variables must have the same number of draws.')
 
             if vals.size == S:
                 vec = vals.reshape(S)
@@ -1120,7 +1202,7 @@ class BayesianResults:
             return None
         if len(var_names) != P:
             raise ValueError(
-                f"var_names length ({len(var_names)}) does not match covariance size ({P})."
+                f'var_names length ({len(var_names)}) does not match covariance size ({P}).'
             )
 
         # Eigen-decomposition (ascending eigenvalues); eigenvectors are columns.
@@ -1153,7 +1235,7 @@ class BayesianResults:
             return None
 
         # ML-like trigger translated to covariance: huge max variance relative to min positive variance
-        ratio = float(vmax_pos / vmin_pos) if vmin_pos > 0.0 else float("inf")
+        ratio = float(vmax_pos / vmin_pos) if vmin_pos > 0.0 else float('inf')
         if ratio < float(1.0 / max(tol_ratio, 1e-300)):
             return None
 
@@ -1169,10 +1251,10 @@ class BayesianResults:
         top = [(var_names[i], float(v[i])) for i in order[:max_terms]]
 
         return {
-            "eigenvalue": float(eigvals[idx_max]),
-            "ratio_to_min_positive": ratio,
-            "vector": full,
-            "top_loadings": top,
+            'eigenvalue': float(eigvals[idx_max]),
+            'ratio_to_min_positive': ratio,
+            'vector': full,
+            'top_loadings': top,
         }
 
     def identification_diagnostics(
@@ -1184,33 +1266,57 @@ class BayesianResults:
     ) -> dict[str, Any]:
         """Compute heuristic diagnostics for potential identification issues.
 
-        Designed for the workflow where a posterior :class:`arviz.InferenceData` is available and
-        an optional `prior_idata` is produced via
+        Designed for the workflow where a posterior :class:`arviz.InferenceData`
+        is available and an optional ``prior_idata`` is produced via
         ``pm.sample_prior_predictive(..., return_inferencedata=True)``.
 
-        If `prior_idata` is provided, it is merged into the stored InferenceData using
-        ``idata.extend(prior_idata)`` so the resulting NetCDF can contain both posterior and prior groups.
+        The diagnostics are heuristic indicators of weak or non-identification.
+        They are based on the posterior covariance matrix and, when available,
+        on comparisons between posterior and prior distributions.
 
-        The diagnostics are heuristics (not proofs):
+        The parameter ``identification_threshold`` follows the same philosophy
+        as the corresponding threshold used in maximum-likelihood estimation.
+        In the ML case, identification issues are associated with very small
+        eigenvalues of the Hessian. In the Bayesian case, they are associated
+        with very large eigenvalues of the posterior covariance matrix. The
+        threshold therefore controls the maximum tolerated anisotropy of the
+        posterior covariance.
 
-        - Eigen-structure of the posterior covariance (near-zero eigenvalues / large condition number)
-          can indicate weak or non-identification.
-        - Comparing posterior vs prior marginal scales highlights parameters that may be largely
-          "identified by the prior" (posterior std close to prior std).
+        More precisely, a weak-identification direction is reported when
 
-        :param prior_idata: Optional prior InferenceData to merge before computing diagnostics.
-        :param var_names: Variables to analyze. If None, uses `raw_bayesian_results.beta_names`
-            filtered to scalar variables present in the posterior.
-        :return: Dictionary with keys ``has_prior``, ``posterior_cov``, ``prior_cov``,
-            ``per_parameter`` (DataFrame), ``flags`` (list of strings), and (if detected)
-            ``posterior_near_null_direction`` / ``prior_near_null_direction``.
+            max_eigenvalue / min_positive_eigenvalue
+                >= 1 / identification_threshold
+
+        where the eigenvalues are those of the posterior covariance matrix.
+
+        For example:
+
+        - ``identification_threshold = 1e-3`` corresponds to a condition
+          number threshold of 10^3.
+        - ``identification_threshold = 1e-5`` corresponds to a condition
+          number threshold of 10^5.
+        - ``identification_threshold = 1e-8`` corresponds to a condition
+          number threshold of 10^8.
+
+        If ``prior_idata`` is provided, prior and posterior dispersions are
+        compared in order to identify parameters whose uncertainty is reduced
+        only marginally by the likelihood.
+
+        :param identification_threshold: Threshold controlling the detection
+            of weak-identification directions. Smaller values require stronger
+            evidence before a warning is reported.
+        :param prior_idata: Optional prior InferenceData.
+        :param var_names: Variables to analyze. If None, the estimated model
+            parameters are used.
+        :return: Dictionary containing covariance diagnostics, prior/posterior
+            comparisons, and warning flags.
         """
         idata = self._idata
         if prior_idata is not None:
             try:
                 idata.extend(prior_idata)
             except Exception as e:  # pragma: no cover
-                logger.warning("Could not extend InferenceData with prior group: %s", e)
+                logger.warning('Could not extend InferenceData with prior group: %s', e)
 
         # Select variables
         if var_names is None:
@@ -1239,21 +1345,25 @@ class BayesianResults:
             max_terms=8,
         )
         if post_null_direction is not None:
-            top = post_null_direction["top_loadings"]
-            human = " + ".join(
-                [f"{coef:+.3g}·{nm}" for nm, coef in top if np.isfinite(coef)]
+            top = post_null_direction['top_loadings']
+            human = ' + '.join(
+                [f'{coef:+.3g}·{nm}' for nm, coef in top if np.isfinite(coef)]
             )
             flags.append(
-                "Weak-identification direction detected from the posterior covariance (largest posterior variance direction). "
-                "This suggests a linear combination of parameters that remains weakly constrained. "
-                f"Top loadings: {human}"
+                'Weak-identification direction detected from the posterior covariance (largest posterior variance direction). '
+                'This suggests a linear combination of parameters that remains weakly constrained. '
+                f'Top loadings: {human}'
             )
 
         # Per-parameter scale diagnostics (posterior)
         post_std = np.sqrt(np.diag(cov_post))
         post_std = np.asarray(post_std, dtype=float)
 
-        has_prior = 'prior' in idata.groups()
+        has_prior = (
+            hasattr(idata, 'prior')
+            or 'prior' in idata.groups
+            or '/prior' in idata.groups
+        )
         prior_diag: dict[str, float] | None = None
         prior_std: np.ndarray | None = None
 
@@ -1276,7 +1386,7 @@ class BayesianResults:
                 prior_diag = None
                 prior_std = None
                 prior_null_direction = None
-                logger.warning("Prior group present but could not be analyzed: %s", e)
+                logger.warning('Prior group present but could not be analyzed: %s', e)
 
         # Build per-parameter table
         df = pd.DataFrame({'name': var_names, 'posterior_std': post_std})
@@ -1294,11 +1404,11 @@ class BayesianResults:
             and post_diag['condition_number'] > 1e10
         ):
             flags.append(
-                "Posterior covariance is extremely ill-conditioned (condition number > 1e10); this can indicate weak/non-identification."
+                'Posterior covariance is extremely ill-conditioned (condition number > 1e10); this can indicate weak/non-identification.'
             )
         if post_diag.get('min_positive_eigenvalue', 0.0) <= 0.0:
             flags.append(
-                "Posterior covariance appears rank-deficient (no strictly positive eigenvalues above tolerance); this strongly suggests non-identification or severe collinearity."
+                'Posterior covariance appears rank-deficient (no strictly positive eigenvalues above tolerance); this strongly suggests non-identification or severe collinearity.'
             )
 
         if prior_std is not None:
@@ -1309,19 +1419,19 @@ class BayesianResults:
             if len(near_one) > 0:
                 worst = df.loc[near_one.index, 'name'].tolist()[:10]
                 flags.append(
-                    "Some parameters have posterior std close to prior std (ratio > 0.8), suggesting they may be largely identified by the prior: "
-                    + ", ".join(worst)
-                    + ("" if len(worst) < 10 else ", ...")
+                    'Some parameters have posterior std close to prior std (ratio > 0.8), suggesting they may be largely identified by the prior: '
+                    + ', '.join(worst)
+                    + ('' if len(worst) < 10 else ', ...')
                 )
 
         diagnostics = {
-            "has_prior": bool(prior_std is not None),
-            "posterior_cov": post_diag,
-            "prior_cov": prior_diag,
-            "per_parameter": df.reset_index(drop=True),
-            "flags": flags,
-            "posterior_near_null_direction": post_null_direction,
-            "prior_near_null_direction": (
+            'has_prior': bool(prior_std is not None),
+            'posterior_cov': post_diag,
+            'prior_cov': prior_diag,
+            'per_parameter': df.reset_index(drop=True),
+            'flags': flags,
+            'posterior_near_null_direction': post_null_direction,
+            'prior_near_null_direction': (
                 prior_null_direction if prior_std is not None else None
             ),
         }

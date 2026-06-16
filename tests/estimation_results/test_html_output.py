@@ -20,7 +20,6 @@ from biogeme.version import get_version, versionDate
 
 
 class TestHTMLGeneration(unittest.TestCase):
-
     def setUp(self):
         # Setting up real estimation results using RawEstimationResults
         raw_estimation = RawEstimationResults(
@@ -69,10 +68,10 @@ class TestHTMLGeneration(unittest.TestCase):
         self.assertEqual(result, '</body>\n</html>')
 
     def test_get_html_preamble(self):
-        result = get_html_preamble(self.estimation_results, "testfile.html")
-        self.assertIn("testfile.html", result)
-        self.assertIn("test_data", result)
-        self.assertIn("Algorithm failed to converge", result)
+        result = get_html_preamble(self.estimation_results, 'testfile.html')
+        self.assertIn('testfile.html', result)
+        self.assertIn('test_data', result)
+        self.assertIn('Algorithm failed to converge', result)
 
     def test_get_html_general_statistics(self):
         result = get_html_general_statistics(self.estimation_results)
@@ -85,9 +84,50 @@ class TestHTMLGeneration(unittest.TestCase):
             self.estimation_results,
             variance_covariance_type=EstimateVarianceCovariance.ROBUST,
         )
-        self.assertIn('<th>Name</th>', result)
-        self.assertIn('<td>beta1</td>', result)
-        self.assertIn('<td>1.2</td>', result)
+        self.assertIn('', result)
+        self.assertNotIn('Estimated parameters', result)
+
+        table = result['']
+        self.assertIn('<th>Name</th>', table)
+        self.assertIn('<td>beta1</td>', table)
+        self.assertIn('<td>beta2</td>', table)
+        self.assertIn('<td>1.2</td>', table)
+
+    def test_get_html_estimated_parameters_by_group(self):
+        result = get_html_estimated_parameters(
+            self.estimation_results,
+            group_of_parameters={'First group': ['beta1']},
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+        self.assertIsInstance(result, dict)
+        self.assertIn('First group', result)
+        self.assertIn('Other parameters', result)
+
+        first_group_table = result['First group']
+        self.assertIn('<td>beta1</td>', first_group_table)
+        self.assertNotIn('<td>beta2</td>', first_group_table)
+
+        other_parameters_table = result['Other parameters']
+        self.assertNotIn('<td>beta1</td>', other_parameters_table)
+        self.assertIn('<td>beta2</td>', other_parameters_table)
+
+    def test_get_html_estimated_parameters_parameter_in_several_groups(self):
+        result = get_html_estimated_parameters(
+            self.estimation_results,
+            group_of_parameters={
+                'First group': ['beta1'],
+                'Second group': ['beta1', 'beta2'],
+            },
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+        self.assertIn('First group', result)
+        self.assertIn('Second group', result)
+        self.assertNotIn('Other parameters', result)
+
+        self.assertIn('<td>beta1</td>', result['First group'])
+        self.assertNotIn('<td>beta2</td>', result['First group'])
+        self.assertIn('<td>beta1</td>', result['Second group'])
+        self.assertIn('<td>beta2</td>', result['Second group'])
 
     def test_get_html_condition_number(self):
         result = get_html_condition_number(self.estimation_results)
@@ -107,7 +147,7 @@ class TestHTMLGeneration(unittest.TestCase):
         self.assertIn('<th>Robust p-value</th>', result)
 
     def test_generate_html_file(self):
-        filename = "testfile.html"
+        filename = 'testfile.html'
 
         if os.path.exists(filename):
             os.remove(filename)
@@ -121,10 +161,53 @@ class TestHTMLGeneration(unittest.TestCase):
             content = file.read()
             self.assertIn('<html>', content)
             self.assertIn('<h1>Estimation report</h1>', content)
+            self.assertIn('<h1>Estimated parameters</h1>', content)
+            self.assertNotIn('<h3>Estimated parameters</h3>', content)
+            self.assertIn('<td>beta1</td>', content)
+            self.assertIn('<td>beta2</td>', content)
             self.assertIn('<h2>Correlation of coefficients</h2>', content)
             self.assertIn('</html>', content)
 
         # Clean up by removing the file
+        os.remove(filename)
+
+    def test_generate_html_file_with_parameter_groups(self):
+        filename = 'testfile_groups.html'
+
+        if os.path.exists(filename):
+            os.remove(filename)
+
+        generate_html_file(
+            self.estimation_results,
+            filename,
+            overwrite=True,
+            group_of_parameters={'First group': ['beta1']},
+            variance_covariance_type=EstimateVarianceCovariance.ROBUST,
+        )
+
+        self.assertTrue(os.path.exists(filename))
+
+        with open(filename, 'r') as file:
+            content = file.read()
+            self.assertIn('<h1>Estimated parameters</h1>', content)
+            self.assertIn('<h3>First group</h3>', content)
+            self.assertIn('<h3>Other parameters</h3>', content)
+
+            first_group_position = content.index('<h3>First group</h3>')
+            other_parameters_position = content.index('<h3>Other parameters</h3>')
+            first_group_section = content[
+                first_group_position:other_parameters_position
+            ]
+            correlation_position = content.index('<h2>Correlation of coefficients</h2>')
+            other_parameters_section = content[
+                other_parameters_position:correlation_position
+            ]
+
+            self.assertIn('<td>beta1</td>', first_group_section)
+            self.assertNotIn('<td>beta2</td>', first_group_section)
+            self.assertNotIn('<td>beta1</td>', other_parameters_section)
+            self.assertIn('<td>beta2</td>', other_parameters_section)
+
         os.remove(filename)
 
 
