@@ -13,13 +13,13 @@ import sys
 import time
 
 import pandas as pd
+from scenarios import scenario
 
 from biogeme.biogeme import BIOGEME
 from biogeme.data.optima import normalized_weight, read_data
 from biogeme.jax_calculator import get_value_c
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
-from scenarios import scenario
 
 # %%
 # Obtain the specification for the default scenario.
@@ -43,7 +43,7 @@ try:
     )
 except FileNotFoundError:
     sys.exit(
-        'Run first the script b02simulation.py '
+        'Run first the script plot_b02estimation.py '
         'in order to generate the '
         'file b02estimation.yaml.'
     )
@@ -113,10 +113,7 @@ simulated_values = pd.DataFrame.from_dict(simulate_formulas)
 end_time = time.time()
 
 # %%
-print(
-    f'--- Execution time without Biogeme:    '
-    f'{end_time - start_time:.2f} seconds ---'
-)
+print(f'--- Execution time without Biogeme:    {end_time - start_time:.2f} seconds ---')
 
 # %%
 # We now perform the same simulation using Biogeme. The results are
@@ -145,8 +142,7 @@ end_time = time.time()
 
 # %%
 print(
-    f'--- Execution time with Biogeme:       '
-    f'{time.time() - start_time:.2f} seconds ---'
+    f'--- Execution time with Biogeme:       {time.time() - start_time:.2f} seconds ---'
 )
 
 # %%
