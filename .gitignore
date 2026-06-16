@@ -450,3 +450,4 @@ reports/latent_book/latent_book.out
 /docs/source/examples/hybrid_choice_old/saved_results
 reports/latent_book/saved_results/b04_choice_only_bayes.nc
 *.nc
+.python-version
