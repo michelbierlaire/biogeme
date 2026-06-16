@@ -123,26 +123,32 @@ def create_rst_structure(src_dir: str, dst_dir: str) -> None:
         if user_input.lower() == 'yes':
             shutil.rmtree(dst_dir)
         else:
-            print("Operation cancelled.")
+            print('Operation cancelled.')
             return
 
     os.makedirs(dst_dir)
 
-    readme = os.path.join(dst_dir, f'README.rst')
+    readme = os.path.join(dst_dir, 'README.rst')
     readme_file(filename=readme)
 
-    draws = os.path.join(dst_dir, f'native_draws.rst')
+    draws = os.path.join(dst_dir, 'native_draws.rst')
     draws_documentation(filename=draws)
 
-    toml = os.path.join(dst_dir, f'toml.rst')
+    toml = os.path.join(dst_dir, 'toml.rst')
     toml_documentation(filename=toml)
 
     # Generate a TOML file
-    biogeme_toml = os.path.join(dst_dir, f'biogeme.toml')
+    biogeme_toml = os.path.join(dst_dir, 'biogeme.toml')
     the_parameters = Parameters()
     the_parameters.dump_file(file_name=biogeme_toml)
 
-    exclude_dirs = ['.mypy_cache', 'biogeme.egg-info', '__pycache__']
+    exclude_dirs = [
+        '.mypy_cache',
+        'biogeme.egg-info',
+        '__pycache__',
+        'latent_variables_old',
+        'working_examples',
+    ]
     exclude_files = ['__init__.py', 'logging_tmp.py', 'generate_jed_run.py']
 
     # Create first the auto-modules
@@ -207,7 +213,7 @@ def create_rst_structure(src_dir: str, dst_dir: str) -> None:
                     print(f'  {the_dir}/{rst}', file=f)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     src = '../src'
     dst = 'source/code'
 
