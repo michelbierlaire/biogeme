@@ -13,22 +13,6 @@ Mon Jun 23 2025, 16:29:45
 
 from IPython.core.display_functions import display
 
-import biogeme.biogeme_logging as blog
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import (
-    Beta,
-    Draws,
-    ExpressionOrNumeric,
-    MonteCarlo,
-    PanelLikelihoodTrajectory,
-    log,
-)
-from biogeme.models import logit
-from biogeme.results_processing import (
-    EstimationResults,
-    get_pandas_estimated_parameters,
-)
-
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
 from swissmetro_panel import (
@@ -44,6 +28,22 @@ from swissmetro_panel import (
     TRAIN_COST_SCALED,
     TRAIN_TT_SCALED,
     database,
+)
+
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import (
+    Beta,
+    Draws,
+    ExpressionOrNumeric,
+    MonteCarlo,
+    PanelLikelihoodTrajectory,
+    log,
+)
+from biogeme.models import logit
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -101,6 +101,36 @@ asc_sm_rnd = [
     asc_sm[i] + asc_sm_s[i] * Draws(f'asc_sm_rnd_class{i}', 'NORMAL_ANTI')
     for i in range(NUMBER_OF_CLASSES)
 ]
+
+# %%
+# Parameter groups used in the generated reports.
+#
+# Each group contains the estimated parameters associated with one latent class.
+# Fixed parameters and parameters that are replaced by identification constraints
+# are not listed here, as they do not appear in the estimation results. The
+# parameters of the class membership model are not included in either group, and
+# will therefore be reported in the automatically generated ``Other parameters``
+# section.
+PARAMETER_GROUPS = {
+    'Class 0': [
+        'b_cost_class0',
+        'asc_car_class0',
+        'asc_car_s_class0',
+        'asc_train_class0',
+        'asc_train_s_class0',
+        'asc_sm_s_class0',
+    ],
+    'Class 1': [
+        'b_cost_class1',
+        'b_time_class1',
+        'b_time_s_class1',
+        'asc_car_class1',
+        'asc_car_s_class1',
+        'asc_train_class1',
+        'asc_train_s_class1',
+        'asc_sm_s_class1',
+    ],
+}
 
 # %%
 # Parameters for the class membership model.
@@ -165,9 +195,10 @@ log_probability = log(MonteCarlo(conditional_choice_probability))
 the_biogeme = BIOGEME(
     database,
     log_probability,
-    number_of_draws=10_000,
+    number_of_draws=5_000,
     seed=1223,
     calculating_second_derivatives='never',
+    group_of_parameters=PARAMETER_GROUPS,
 )
 the_biogeme.model_name = 'b16_panel_discrete_socio_eco'
 
@@ -184,5 +215,10 @@ except FileNotFoundError:
 print(results.short_summary())
 
 # %%
-pandas_results = get_pandas_estimated_parameters(estimation_results=results)
-display(pandas_results)
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=results,
+    group_of_parameters=PARAMETER_GROUPS,
+)
+for group_name, pandas_table in pandas_results.items():
+    display(group_name if group_name else 'Estimated parameters')
+    display(pandas_table)

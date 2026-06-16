@@ -25,7 +25,7 @@ from biogeme.catalog import count_number_of_specifications
 from biogeme.multiobjectives import aic_bic_dimension
 from biogeme.results_processing import compile_estimation_results
 
-from plot_b22multiple_models_spec import PARETO_FILE_NAME, the_biogeme
+from plot_b22b_multiple_models_spec import PARETO_FILE_NAME, the_biogeme
 
 logger = blog.get_screen_logger(blog.INFO)
 logger.info('Example b22multiple_models')

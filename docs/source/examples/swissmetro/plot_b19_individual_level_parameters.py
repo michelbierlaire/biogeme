@@ -11,13 +11,10 @@ Thu Jun 26 2025, 15:55:41
 
 """
 
+import sys
+
 from IPython.core.display_functions import display
 from pandas.core.interchange.dataframe_protocol import DataFrame
-
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, Draws, MonteCarlo
-from biogeme.models import logit
-from biogeme.results_processing import EstimationResults
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -35,6 +32,11 @@ from swissmetro_data import (
     database,
 )
 
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Draws, MonteCarlo
+from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
+
 # %%
 # Parameters. The initial value is irrelevant.
 asc_car = Beta('asc_car', 0, None, None, 0)
@@ -51,8 +53,11 @@ b_time_rnd = b_time + b_time_s * Draws('b_time_rnd', 'NORMAL')
 # %%
 # Retrieve estimation results
 result_file_name = 'saved_results/b05a_normal_mixture.yaml'
-the_estimation_results = EstimationResults.from_yaml_file(filename=result_file_name)
-
+try:
+    the_estimation_results = EstimationResults.from_yaml_file(filename=result_file_name)
+except FileNotFoundError:
+    print(f'File {result_file_name} is not available.')
+    sys.exit()
 # %%
 # Definition of the utility functions.
 v_train = asc_train + b_time_rnd * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED

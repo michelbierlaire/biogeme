@@ -15,15 +15,17 @@ Michel Bierlaire, EPFL
 Sat Jun 21 2025, 17:13:33
 """
 
+import biogeme.biogeme_logging as blog
 import numpy as np
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import get_mev_for_nested, logmev_endogenous_sampling
 from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.

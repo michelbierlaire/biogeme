@@ -14,12 +14,12 @@ Michel Bierlaire, EPFL
 Sat Jun 28 2025, 19:21:26
 """
 
-from plot_b21multiple_models_spec import PARETO_FILE_NAME, the_biogeme
-
 import biogeme.biogeme_logging as blog
 from biogeme.assisted import AssistedSpecification
 from biogeme.multiobjectives import loglikelihood_dimension
 from biogeme.results_processing import compile_estimation_results
+
+from plot_b21b_multiple_models_spec import PARETO_FILE_NAME, the_biogeme
 
 logger = blog.get_screen_logger(blog.INFO)
 logger.info('Example b21a_multiple_models')

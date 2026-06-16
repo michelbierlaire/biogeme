@@ -10,9 +10,8 @@ Michel Bierlaire, EPFL
 Sat Jun 21 2025, 16:54:51
 """
 
-from IPython.core.display_functions import display
-
 import biogeme.biogeme_logging as blog
+from IPython.core.display_functions import display
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta, Draws, MonteCarlo, PanelLikelihoodTrajectory, log
 from biogeme.models import logit
@@ -105,7 +104,13 @@ log_probability = log(MonteCarlo(conditional_trajectory_probability))
 # As the objective is to illustrate the
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
-the_biogeme = BIOGEME(database, log_probability, number_of_draws=10_000, seed=1223)
+the_biogeme = BIOGEME(
+    database,
+    log_probability,
+    number_of_draws=5_000,
+    seed=1223,
+    calculating_second_derivatives='never',
+)
 the_biogeme.model_name = 'b12_panel'
 
 

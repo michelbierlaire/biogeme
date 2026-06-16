@@ -11,10 +11,9 @@ Michel Bierlaire, EPFL
 
 """
 
+import biogeme.biogeme_logging as blog
 import numpy as np
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
 from biogeme.biogeme import BIOGEME
 from biogeme.draws import RandomNumberGeneratorTuple
 from biogeme.expressions import (
@@ -137,7 +136,8 @@ the_biogeme = BIOGEME(
     database,
     log_probability,
     random_number_generators=my_random_number_generators,
-    number_of_draws=10_000,
+    number_of_draws=5_000,
+    calculating_second_derivatives='never',
     seed=1223,
 )
 the_biogeme.model_name = 'b26_triangular_panel_mixture'

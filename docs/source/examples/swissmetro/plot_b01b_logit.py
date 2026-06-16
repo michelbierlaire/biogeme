@@ -1,12 +1,35 @@
 """
 
-1b. Illustration of additional features of Biogeme
-==================================================
+1b. Illustration of additional Biogeme features
+===============================================
 
-Same model as b01logit, using LinearUtility, segmentations
+This example estimates the same logit model as in Example 1a, but
+illustrates several additional features available in Biogeme.
+
+In particular, it demonstrates:
+
+- the use of `LinearUtility` to define utility functions,
+- automatic parameter segmentation,
+- the generation of alternative variance-covariance matrices,
+- the production of several output formats.
+
+The model considers three transportation alternatives:
+
+- Train,
+- Swissmetro,
+- Car.
+
+The utility functions include alternative-specific constants and
+generic coefficients associated with travel time and travel cost.
+The Swissmetro alternative is used as the reference alternative.
+
+The `# %%` markers are used to separate the script into notebook
+cells when the example gallery is converted into Jupyter notebooks.
+
+Tested with Biogeme 3.3.3.
 
 Michel Bierlaire, EPFL
-Wed Jun 18 2025, 10:57:53
+Tue Jun 09 2026, 14:40:00
 
 """
 
@@ -14,21 +37,8 @@ import os
 
 from IPython.core.display_functions import display
 
-import biogeme.biogeme_logging as blog
-from biogeme.biogeme import BIOGEME
-from biogeme.exceptions import BiogemeError
-from biogeme.expressions import Beta, LinearTermTuple, LinearUtility
-from biogeme.models import loglogit
-from biogeme.results_processing import (
-    EstimateVarianceCovariance,
-    EstimationResults,
-    generate_html_file,
-    get_pandas_estimated_parameters,
-)
-from biogeme.segmentation import Segmentation
-
 # %%
-# See the data processing script: :ref:`swissmetro_data`.
+# Import the variables and the database prepared in the Swissmetro data-processing example.
 from swissmetro_data import (
     CAR_AV_SP,
     CAR_CO_SCALED,
@@ -45,22 +55,34 @@ from swissmetro_data import (
     database,
 )
 
+import biogeme.biogeme_logging as blog
+from biogeme.biogeme import BIOGEME
+from biogeme.exceptions import BiogemeError
+from biogeme.expressions import Beta, LinearTermTuple, LinearUtility
+from biogeme.models import loglogit
+from biogeme.results_processing import (
+    EstimateVarianceCovariance,
+    EstimationResults,
+    generate_html_file,
+    get_pandas_estimated_parameters,
+)
+from biogeme.segmentation import Segmentation
+
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b01logit_bis.py')
 
 # %%
-# Parameters to be estimated.
+# Define the model parameters to be estimated.
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_train = Beta('asc_train', 0, None, None, 0)
 
 # %%
-# Starting value.
-# We use starting values estimated from a previous run
+# Starting values obtained from a previous estimation run.
 b_time = Beta('b_time', -1.28, None, None, 0)
 b_cost = Beta('b_cost', -1.08, None, None, 0)
 
 # %%
-# Define segmentations.
+# Define the segmentation schemes used for the alternative-specific constants.
 gender_segmentation = database.generate_segmentation(
     variable=MALE, mapping={0: 'female', 1: 'male'}
 )
@@ -75,16 +97,16 @@ segmentations_for_asc = [
 ]
 
 # %%
-# Segmentation of the constants.
+# Apply the segmentations to the alternative-specific constants.
 asc_train_segmentation = Segmentation(asc_train, segmentations_for_asc)
 segmented_asc_train = asc_train_segmentation.segmented_beta()
 asc_car_segmentation = Segmentation(asc_car, segmentations_for_asc)
 segmented_asc_car = asc_car_segmentation.segmented_beta()
 
-# %%
-# Definition of the utility functions.A `LinearTermTuple` combines a coefficient (`beta`) and a variable (`x`).
-# The linear utility function is the sum over those tuples of the product of each variable by its respective
-# coefficient.
+#
+# Define the utility functions. A `LinearTermTuple` combines a coefficient
+# and an explanatory variable. A `LinearUtility` is the sum of the
+# products of each coefficient by its associated variable.
 terms1 = [
     LinearTermTuple(beta=b_time, x=TRAIN_TT_SCALED),
     LinearTermTuple(beta=b_cost, x=TRAIN_COST_SCALED),
@@ -104,24 +126,19 @@ terms3 = [
 v_car = segmented_asc_car + LinearUtility(terms3)
 
 # %%
-# Associate utility functions with the numbering of alternatives.
+# Associate each utility function with the corresponding alternative identifier.
 v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
-# Associate the availability conditions with the alternatives.
+# Associate the availability conditions with each alternative.
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Definition of the model.
-#
-# This is the contribution of each observation to the log likelihood
-# function.
+# Define the log-likelihood contribution of each observation.
 logprob = loglogit(v, av, CHOICE)
 
 # %%
-# User notes.
-#
-# These notes will be included as such in the report file.
+# User notes that will be included in the generated report.
 USER_NOTES = (
     'Example of a logit model with three alternatives: Train, Car and'
     ' Swissmetro. Same as 01logit and '
@@ -131,10 +148,9 @@ USER_NOTES = (
 
 
 # %%
-# Create the Biogeme object. We include users notes, and we ask not to calculate the second derivatives.
-# The parameter 'calculating_second_derivatives' is a general instruction for Biogeme, In this case, the
-# second derivatives will not even be calculated after the algorithm has converged. It means that the statistics
-# will have to rely on bootstrap or BHHH.
+# Create the Biogeme object. Second derivatives are disabled. Therefore,
+# statistics requiring the Hessian matrix will not be available and
+# alternative procedures such as bootstrap or BHHH must be used.
 the_biogeme = BIOGEME(
     database,
     logprob,
@@ -153,7 +169,7 @@ the_biogeme.calculate_null_loglikelihood(av)
 the_biogeme.model_name = 'b01b_logit'
 
 # %%
-# Estimate the parameters.
+# Estimate the parameters or retrieve previously saved results.
 try:
     results = EstimationResults.from_yaml_file(
         filename=f'saved_results/{the_biogeme.model_name}.yaml'
@@ -162,16 +178,14 @@ except FileNotFoundError:
     results = the_biogeme.estimate(run_bootstrap=True)
 
 # %%
-# Get the results in a pandas table.
-#
+# Convert the estimated parameters into a pandas DataFrame.
 print('Parameters')
 print('----------')
 pandas_results = get_pandas_estimated_parameters(estimation_results=results)
 display(pandas_results)
 
 # %%
-# Get general statistics.
-#
+# Display general estimation statistics.
 print('General statistics')
 print('------------------')
 stats = results.get_general_statistics()
@@ -179,16 +193,16 @@ for description, value in stats.items():
     print(f'{description}: {value}')
 
 # %%
-# Messages from the optimization algorithm.
-#
+# Display messages returned by the optimization algorithm.
 print('Optimization algorithm')
 print('----------------------')
 for description, message in results.optimization_messages.items():
     print(f'{description}:\t{message}')
 
 # %%
-# Try to generate the html output with the robust variance-covariance matrix. It does not work as the second derivatives
-# matrix is not calculated.
+# Attempt to generate an HTML report based on the robust
+# variance-covariance matrix. This fails because second derivatives
+# have not been calculated.
 try:
     robust_html_filename = f'{the_biogeme.model_name}_robust.html'
     # The following function assumes that the file does not exist.
@@ -206,7 +220,7 @@ except BiogemeError as e:
     print(f'BiogemeError: {e}')
 
 # %%
-# Generate the html output with the BHHH variance-covariance matrix
+# Generate an HTML report using the BHHH variance-covariance matrix.
 bhhh_html_filename = f'{the_biogeme.model_name}_bhhh.html'
 # The following function assumes that the file does not exist. Therefore, if it does exist, we erase it.
 if os.path.exists(bhhh_html_filename):
@@ -219,13 +233,11 @@ generate_html_file(
 print(f'Estimation results with BHHH statistics generated: {bhhh_html_filename}')
 
 # %%
-# Generate the file in Alogit format.
-#
+# Generate the results file in ALogit format.
 f12_filename = results.write_f12()
 print(f'Estimation results in ALogit format generated: {f12_filename}')
 
 # %%
-# Generate LaTeX code with the results.
-#
+# Generate LaTeX output containing the estimation results.
 latex_filename = results.write_latex(include_begin_document=True)
 print(f'Estimation results in LaTeX format generated: {latex_filename}')

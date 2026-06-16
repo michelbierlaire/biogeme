@@ -1,24 +1,31 @@
 """
 
 1d. Simulation of a logit model
-===============================
+==============================
 
-Example of simulation with a logit model
+This example illustrates how to simulate choice probabilities and
+point elasticities for a logit model using previously estimated
+parameters.
 
+Two formulations of direct elasticities are compared:
+
+- the general definition based on symbolic derivatives using
+  ``Derive``;
+- the closed-form expression available for the logit model.
+
+The example verifies that both formulations produce identical
+results.
+
+The script has been tested with Biogeme 3.3.3.
 
 Michel Bierlaire, EPFL
-Wed Jun 18 2025, 11:05:50
+Tue Jun 09 2026
 """
 
 from IPython.core.display_functions import display
 
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, Derive
-from biogeme.models import logit
-from biogeme.results_processing import EstimationResults
-
 # %%
-# See the data processing script: :ref:`swissmetro_data`.
+# Load the Swissmetro data set and the variables required for the simulation.
 from swissmetro_data import (
     CAR_AV_SP,
     CAR_CO_SCALED,
@@ -32,8 +39,13 @@ from swissmetro_data import (
     database,
 )
 
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Derive
+from biogeme.models import logit
+from biogeme.results_processing import EstimationResults
+
 # %%
-# Parameters.
+# Define the model parameters.
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_train = Beta('asc_train', 0, None, None, 0)
 asc_sm = Beta('asc_sm', 0, None, None, 1)
@@ -41,15 +53,19 @@ b_time = Beta('b_time', 0, None, None, 0)
 b_cost = Beta('b_cost', 0, None, None, 0)
 
 # %%
-# Definition of the utility functions. As we will calculate the derivative with respect to TRAIN_TT, SM_TT and CAR_TT,
-# they must explicitly appear in the model. If not, the derivative will be zero. Therefore, we do not use the
-# `_SCALED` version of the attributes. We explicitly include their definition.
+# Define the utility functions.
+#
+# The elasticities are calculated with respect to TRAIN_TT, SM_TT,
+# and CAR_TT. Therefore, these variables must appear explicitly in
+# the utility functions. Using the scaled travel-time variables would
+# hide the original variables from the symbolic differentiation and
+# would lead to zero derivatives.
 v_train = asc_train + b_time * TRAIN_TT / 100 + b_cost * TRAIN_COST_SCALED
 v_swissmetro = asc_sm + b_time * SM_TT / 100 + b_cost * SM_COST_SCALED
 v_car = asc_car + b_time * CAR_TT / 100 + b_cost * CAR_CO_SCALED
 
 # %%
-# Associate utility functions with the numbering of alternatives.
+# Associate each utility function with its alternative identifier.
 v = {1: v_train, 2: v_swissmetro, 3: v_car}
 
 # %%
@@ -57,23 +73,24 @@ v = {1: v_train, 2: v_swissmetro, 3: v_car}
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Choice probability.
+# Define the choice probabilities for each alternative.
 #
 prob_train = logit(v, av, 1)
 prob_swissmetro = logit(v, av, 2)
 prob_car = logit(v, av, 3)
 
 # %%
-# Elasticities.
+# Define direct elasticities.
 #
-# Elasticities can be computed. We illustrate below two
-# formulas. Check in the output file that they produce the same
-# results.
+# Two formulations are implemented and compared in order to verify
+# that they produce identical results.
 
 # %%
-# First, the general definition of elasticities. This illustrates the
-# use of the Derive expression, and can be used with any model,
-# however complicated it is. Note the quotes in the Derive operator.
+# General definition based on symbolic differentiation.
+#
+# This formulation can be applied to any choice model, regardless of
+# its complexity. The variable name must be provided as a string in
+# the Derive expression.
 
 general_time_elasticity_train = Derive(prob_train, 'TRAIN_TT') * TRAIN_TT / prob_train
 general_time_elasticity_swissmetro = (
@@ -82,8 +99,10 @@ general_time_elasticity_swissmetro = (
 general_time_elasticity_car = Derive(prob_car, 'CAR_TT') * CAR_TT / prob_car
 
 # %%
-# Second, the elasticity of logit models. See Ben-Akiva and Lerman for
-# the formula
+# Closed-form elasticity formula for the logit model.
+#
+# The expression follows the standard result presented in
+# Ben-Akiva and Lerman.
 
 logit_time_elasticity_train = TRAIN_AV_SP * (1.0 - prob_train) * TRAIN_TT * b_time / 100
 logit_time_elasticity_swissmetro = (
@@ -92,7 +111,7 @@ logit_time_elasticity_swissmetro = (
 logit_time_elasticity_car = CAR_AV_SP * (1.0 - prob_car) * CAR_TT * b_time / 100
 
 # %%
-# Quantities to be simulated.
+# Define the quantities to be simulated.
 #
 simulate = {
     'Prob. train': prob_train,
@@ -108,22 +127,23 @@ simulate = {
 
 
 # %%
-# Create the Biogeme object.
+# Create the Biogeme object used for simulation.
 #
-# As we simulate the probability for all alternatives, even when one of
-# them is not available, Biogeme may trigger some warnings.
+# Because probabilities are simulated for all alternatives, including
+# observations where an alternative may be unavailable, Biogeme may
+# generate warning messages.
 biosim = BIOGEME(database, simulate)
 biosim.model_name = 'b01d_logit_simul'
 
 # %%
-# Retrieve the estimated values of the parameters.
+# Load the parameter estimates obtained from a previous estimation.
 RESULTS_FILE_NAME = 'saved_results/b01a_logit.yaml'
 estimation_results = EstimationResults.from_yaml_file(filename=RESULTS_FILE_NAME)
 betas = estimation_results.get_beta_values()
 
 
 # %%
-# Simulation
+# Run the simulation and display descriptive statistics.
 #
 results = biosim.simulate(the_beta_values=betas)
 display(results.describe())
