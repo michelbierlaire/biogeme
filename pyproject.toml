@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "biogeme"
 dynamic = ["version"]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 description = "Estimation and application of discrete choice models"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
@@ -29,33 +29,33 @@ classifiers = [
 ]
 
 dependencies = [
-    "pandas>=2.3.0, <3",
-    "scipy>=1.15.3, <2",
-    "tqdm>=4.67.1",
-    "tomlkit>=0.13.3",
-    "python-levenshtein>=0.25.1",
+    "pandas>=2.3.3, <3",
+    "scipy>=1.17.1, <2",
+    "tqdm>=4.68.1",
+    "tomlkit>=0.15.0",
+    "python-levenshtein>=0.27.3",
     "fuzzywuzzy>=0.18.0",
     "biogeme_optimization>=0.0.11, <0.1",
-    "matplotlib>=3.10.3, <4",
-    "numpy>=2.2.6, <3",
-    "ipython>=8.37.0",
-    "Jinja2>=3.1.4",
-    "PyYAML>=6.0.2",
-    "jax >= 0.6.2",
-    "tabulate >= 0.9.0",
-    "joblib >= 1.5.1",
-    "tqdm_joblib >= 0.0.4",
-    "pymc >= 5.25.1",
-    "numpyro >= 0.19.0",
-    "h5netcdf>=1.7.3",
-    "h5py>=3.15.1",
+    "matplotlib>=3.10.9, <4",
+    "numpy>=2.4.6, <3",
+    "ipython>=9.14.1",
+    "Jinja2>=3.1.6",
+    "PyYAML>=6.0.3",
+    "jax >= 0.10.1",
+    "tabulate >= 0.10.0",
+    "joblib >= 1.5.3",
+    "tqdm_joblib >= 0.0.5",
+    "pymc >= 6.0.1",
+    "numpyro >= 0.21.0",
+    "h5netcdf>=1.8.1",
+    "h5py>=3.16.0",
 ]
 
 [project.optional-dependencies]
 testing = [
-    "pytest>=9.0.2",
+    "pytest>=9.0.3",
     "pytest-cov >= 4.0.0",
-    "tox >= 3.27.1"
+    "tox >= 4.35.0"
 ]
 
 [project.urls]
@@ -84,6 +84,7 @@ biogeme = ["*/__pycache__", "*/__pycache__/*", "*/*.pyc", "__pycache__", "*.pyc"
 
 [tool.black]
 line-length = 88
+skip-string-normalization = true
 
 [tool.ruff]
 line-length = 88
@@ -91,6 +92,11 @@ line-length = 88
 [tool.ruff.lint]
 select = ["E", "F", "I", "B"]
 ignore = ["E501"]
+extend-select = ["UP034"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
 
 [dependency-groups]
 dev = [
@@ -98,4 +104,10 @@ dev = [
     "pytest>=9.0.2",
     "ruff>=0.15.8",
     "tox>=4.35.0",
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx_gallery",
+    "sphinx_autodoc_typehints",
+    "myst-parser",
+    "furo"
 ]
