@@ -3,31 +3,32 @@
 1a. Estimation of a logit model (Bayesian)
 ==========================================
 
- Three alternatives:
+This example illustrates the Bayesian estimation of a logit model using
+Biogeme and the Swissmetro stated-preference dataset.
 
-   - train,
-   - car and,
-   - Swissmetro.
+The choice situation involves three transportation alternatives:
 
- Stated preferences data.
+- train,
+- car,
+- Swissmetro.
+
+The script is organized into sections separated by ``# %%`` markers.
+These markers are important because the examples are automatically
+converted into Jupyter notebooks for the documentation. Each ``# %%``
+marker defines a new notebook cell.
+
+Tested with Biogeme 3.3.3.
 
 Michel Bierlaire, EPFL
-Thu Oct 30 2025, 10:15:52
+Tue Jun 09 2026, 15:30:00
 """
+
+from pathlib import Path
 
 from IPython.core.display_functions import display
 
-import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import (
-    BayesianResults,
-    get_pandas_estimated_parameters,
-)
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta
-from biogeme.models import loglogit
-
 # %%
-# See the data processing script: :ref:`swissmetro_data`.
+# Import the processed Swissmetro dataset and all variables used in the specification.
 from swissmetro_data import (
     CAR_AV_SP,
     CAR_CO_SCALED,
@@ -42,50 +43,59 @@ from swissmetro_data import (
     database,
 )
 
+import biogeme.biogeme_logging as blog
+from biogeme.bayesian_estimation import (
+    BayesianResults,
+    BayesianResultsSummary,
+    get_pandas_estimated_parameters,
+)
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta
+from biogeme.models import loglogit
+
 # %%
-# The logger sets the verbosity of Biogeme. By default, Biogeme is quite silent and generates only warnings.
-# To have more information about what it happening behind the scene, the level should be set to `blog.INFO`.
+# Configure the logger. DEBUG provides detailed information about the execution of the example.
 logger = blog.get_screen_logger(level=blog.DEBUG)
 logger.info('Example b01a_logit.py')
 
 
 # %%
-# Parameters to be estimated: alternative specific constants.
-# By default, the prior distribution is normal, possibly truncated if bounds are defined, with the mean
-# defined by the user, and scale parameter 10.
+# Alternative-specific constants.
+# By default, Biogeme assigns a normal prior distribution centered on the
+# starting value. Bounds, when specified, are also used to truncate the prior.
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_train = Beta('asc_train', 0, None, None, 0)
 
 # %%
-# The constant associated with Swissmetro is normalized to zero. It does not need to be defined at all.
-# Here, we illustrate the fact that setting the last argument of the `Beta` function to 1 fixes the parameter
-# to its default value (here, 0).
+# The Swissmetro constant is normalized to zero for identification purposes.
+# Setting the last argument of Beta to 1 fixes the parameter at its default
+# value and removes it from the estimation.
 asc_sm = Beta('asc_sm', 0, None, None, 1)
 
 # %%
-# Coefficients of the attributes. It is useful to set the upper bound to 0 to reflect the prior assumption about
-# the sign of those parameters.
+# Coefficients associated with travel time and travel cost.
+# The upper bound is set to zero to enforce a non-positive marginal utility.
 b_time = Beta('b_time', 0, None, 0, 0)
 b_cost = Beta('b_cost', 0, None, 0, 0)
 
 
 # %%
-# Definition of the utility functions.
+# Utility functions for the three alternatives.
 v_train = asc_train + b_time * TRAIN_TT_SCALED + b_cost * TRAIN_COST_SCALED
 v_sm = asc_sm + b_time * SM_TT_SCALED + b_cost * SM_COST_SCALED
 v_car = asc_car + b_time * CAR_TT_SCALED + b_cost * CAR_CO_SCALED
 
 # %%
-# Associate utility functions with the numbering of alternatives.
+# Mapping between alternative identifiers and utility functions.
 v = {1: v_train, 2: v_sm, 3: v_car}
 
 # %%
-# Associate the availability conditions with the alternatives.
+# Availability conditions associated with each alternative.
 av = {1: TRAIN_AV_SP, 2: SM_AV, 3: CAR_AV_SP}
 
 # %%
-# Definition of the model.
-# This is the contribution of each observation to the log likelihood function.
+# Log of the choice probability for the logit model.
+# This expression defines the contribution of one observation to the log likelihood.
 log_probability = loglogit(v, av, CHOICE)
 
 # %%
@@ -94,19 +104,25 @@ the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b01a_logit'
 
 # %%
-# Estimate the parameters.
-results: BayesianResults = the_biogeme.bayesian_estimation()
+# Estimate the posterior distribution of the parameters, or read the results if
+# already available.
+yaml_file = Path('saved_results') / f'{the_biogeme.model_name}.yaml'
+try:
+    summary_results = BayesianResultsSummary.from_yaml_file(filename=yaml_file)
+except FileNotFoundError:
+    results: BayesianResults = the_biogeme.bayesian_estimation()
+    summary_results = results.to_summary()
 
 # %%
-print(results.short_summary())
+print(summary_results.short_summary())
 
 # %%
-# Get the results in a pandas table
+# Present the parameter estimates in a pandas table.
 pandas_results = get_pandas_estimated_parameters(
-    estimation_results=results,
+    estimation_results=summary_results,
 )
 display(pandas_results)
 
 # %%
-# Describe the draws stored in the PyMC report.
-display(results.report_stored_variables())
+# Report the variables stored in the Bayesian estimation results.
+display(summary_results.report_stored_variables())

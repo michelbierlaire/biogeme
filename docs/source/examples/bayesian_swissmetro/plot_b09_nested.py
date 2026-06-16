@@ -9,14 +9,9 @@ Michel Bierlaire, EPFL
 Mon Nov 03 2025, 20:02:56
 """
 
-from IPython.core.display_functions import display
+from pathlib import Path
 
-from biogeme import biogeme_logging as blog
-from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta
-from biogeme.models import lognested
-from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
+from IPython.core.display_functions import display
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -33,6 +28,17 @@ from swissmetro_data import (
     TRAIN_TT_SCALED,
     database,
 )
+
+from biogeme import biogeme_logging as blog
+from biogeme.bayesian_estimation import (
+    BayesianResults,
+    BayesianResultsSummary,
+    get_pandas_estimated_parameters,
+)
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta
+from biogeme.models import lognested
+from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b09_nested')
@@ -87,26 +93,34 @@ the_biogeme = BIOGEME(
 the_biogeme.model_name = 'b09_nested'
 
 # %%
-# Estimate the parameters.
+# Estimate the posterior distribution of the parameters, or read the results if
+# already available.
+yaml_file = Path('saved_results') / f'{the_biogeme.model_name}.yaml'
 try:
-    results = BayesianResults.from_netcdf(
-        filename=f'saved_results/{the_biogeme.model_name}.nc'
-    )
+    summary_results = BayesianResultsSummary.from_yaml_file(filename=yaml_file)
 except FileNotFoundError:
-    results = the_biogeme.bayesian_estimation()
+    results: BayesianResults = the_biogeme.bayesian_estimation()
+    summary_results = results.to_summary()
 
 # %%
-print(results.short_summary())
+print(summary_results.short_summary())
 
 # %%
-pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+# Present the parameter estimates in a pandas table.
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=summary_results,
+)
 display(pandas_results)
+
+# %%
+# Report the variables stored in the Bayesian estimation results.
+display(summary_results.report_stored_variables())
 
 # %%
 # We calculate the correlation between the error terms of the
 # alternatives.
 corr = nests.correlation(
-    parameters=results.get_beta_values(),
+    parameters=summary_results.get_beta_values(),
     alternatives_names={1: 'Train', 2: 'Swissmetro', 3: 'Car'},
 )
 print(corr)

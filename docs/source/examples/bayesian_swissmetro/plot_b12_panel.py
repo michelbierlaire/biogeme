@@ -8,22 +8,12 @@ The datafile is organized as panel data.
 Note that, with Bayesian estimation, there is no need to calculate a Monte-Carlo integration.
 
 Michel Bierlaire, EPFL
-Thu Nov 20 2025, 14:50:04
+Mon Jun 08 2026, 16:45:17
 """
 
-from IPython.core.display_functions import display
+from pathlib import Path
 
-import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import (
-    BayesianResults,
-    FigureSize,
-    generate_html_file as generate_bayesian_html_file,
-    get_pandas_estimated_parameters,
-)
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, DistributedParameter, Draws
-from biogeme.filenames import get_new_file_name
-from biogeme.models import loglogit
+from IPython.core.display_functions import display
 
 # %%
 # See the data processing script: :ref:`swissmetro_panel`.
@@ -40,6 +30,16 @@ from swissmetro_panel import (
     TRAIN_TT_SCALED,
     database,
 )
+
+import biogeme.biogeme_logging as blog
+from biogeme.bayesian_estimation import (
+    BayesianResults,
+    BayesianResultsSummary,
+    get_pandas_estimated_parameters,
+)
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, DistributedParameter, Draws
+from biogeme.models import loglogit
 
 logger = blog.get_screen_logger(level=blog.INFO)
 logger.info('Example b12_panel.py')
@@ -109,36 +109,32 @@ log_probability_one_observation = loglogit(v, av, CHOICE)
 the_biogeme = BIOGEME(
     database,
     log_probability_one_observation,
-    warmup=5000,
-    bayesian_draws=5000,
+    warmup=10,
+    bayesian_draws=10,
     chains=4,
 )
 the_biogeme.model_name = 'b12_panel'
 
 # %%
-# Estimate the parameters.
+# Estimate the posterior distribution of the parameters, or read the results if
+# already available.
+yaml_file = Path('saved_results') / f'{the_biogeme.model_name}.yaml'
 try:
-    results = BayesianResults.from_netcdf(
-        filename=f'saved_results/{the_biogeme.model_name}.nc'
-    )
-    html_filename = get_new_file_name(the_biogeme.model_name, "html")
-    generate_bayesian_html_file(
-        filename=html_filename,
-        estimation_results=results,
-        figure_size=FigureSize.LARGE,
-    )
-    print(f'{html_filename} generated')
-
+    summary_results = BayesianResultsSummary.from_yaml_file(filename=yaml_file)
 except FileNotFoundError:
-    results = the_biogeme.bayesian_estimation()
+    results: BayesianResults = the_biogeme.bayesian_estimation()
+    summary_results = results.to_summary()
 
 # %%
-print(results.short_summary())
+print(summary_results.short_summary())
 
 # %%
-pandas_results = get_pandas_estimated_parameters(estimation_results=results)
+# Present the parameter estimates in a pandas table.
+pandas_results = get_pandas_estimated_parameters(
+    estimation_results=summary_results,
+)
 display(pandas_results)
 
-
-print(results.idata.posterior.dims)
-print(results.idata.posterior)
+# %%
+# Report the variables stored in the Bayesian estimation results.
+display(summary_results.report_stored_variables())

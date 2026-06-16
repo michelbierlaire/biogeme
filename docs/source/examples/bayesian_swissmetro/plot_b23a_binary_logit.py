@@ -11,12 +11,10 @@ Tue Nov 18 2025, 18:42:42
 
 """
 
+from pathlib import Path
+
 from IPython.core.display_functions import display
 
-from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta
-from biogeme.models import loglogit
 # %%
 # See the data processing script: :ref:`swissmetro_binary`.
 from swissmetro_binary import (
@@ -29,6 +27,15 @@ from swissmetro_binary import (
     TRAIN_TT_SCALED,
     database,
 )
+
+from biogeme.bayesian_estimation import (
+    BayesianResults,
+    BayesianResultsSummary,
+    get_pandas_estimated_parameters,
+)
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta
+from biogeme.models import loglogit
 
 # %%
 # Parameters to be estimated.
@@ -63,19 +70,25 @@ the_biogeme = BIOGEME(database, log_probability)
 the_biogeme.model_name = 'b23a_binary_logit'
 
 # %%
-# Estimate the parameters.
+# Estimate the posterior distribution of the parameters, or read the results if
+# already available.
+yaml_file = Path('saved_results') / f'{the_biogeme.model_name}.yaml'
 try:
-    results = BayesianResults.from_netcdf(
-        filename=f'saved_results/{the_biogeme.model_name}.nc'
-    )
+    summary_results = BayesianResultsSummary.from_yaml_file(filename=yaml_file)
 except FileNotFoundError:
-    results = the_biogeme.bayesian_estimation()
-# %%
-print(results.short_summary())
+    results: BayesianResults = the_biogeme.bayesian_estimation()
+    summary_results = results.to_summary()
 
 # %%
-# Get the results in a pandas table
+print(summary_results.short_summary())
+
+# %%
+# Present the parameter estimates in a pandas table.
 pandas_results = get_pandas_estimated_parameters(
-    estimation_results=results,
+    estimation_results=summary_results,
 )
 display(pandas_results)
+
+# %%
+# Report the variables stored in the Bayesian estimation results.
+display(summary_results.report_stored_variables())
