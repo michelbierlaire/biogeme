@@ -5,8 +5,9 @@
 import os
 import sys
 
-from biogeme.version import __version__
 from sphinx_gallery.sorting import FileNameSortKey
+
+from biogeme.version import __version__
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -14,7 +15,7 @@ from sphinx_gallery.sorting import FileNameSortKey
 sys.path.insert(0, os.path.abspath('./extensions'))
 
 project = 'Biogeme'
-copyright = '2025, Michel Bierlaire'
+copyright = '2026, Michel Bierlaire'
 author = 'Michel Bierlaire'
 
 # The full version, including alpha/Beta/rc tags
@@ -25,15 +26,15 @@ language = 'en'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.viewcode",
-    "sphinx.ext.autosectionlabel",
-    "sphinx.ext.doctest",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.todo",
-    "sphinx_autodoc_typehints",
-    "sphinx_gallery.gen_gallery",
-    "sphinx_gallery.load_style",
+    'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
+    'sphinx.ext.doctest',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.todo',
+    'sphinx_autodoc_typehints',
+    'sphinx_gallery.gen_gallery',
+    'sphinx_gallery.load_style',
     'deprecated_extension',
 ]
 
@@ -51,33 +52,33 @@ locale_dirs = []
 gettext_compact = False
 
 exclude_patterns = [
-    "_build",
-    "Thumbs.db",
-    ".DS_Store",
-    "setup.py",
-    "flycheck*",
-    "verify_scripts.py",
+    '_build',
+    'Thumbs.db',
+    '.DS_Store',
+    'setup.py',
+    'flycheck*',
+    'verify_scripts.py',
     'generate_jed_run.py',
 ]
 
 # Set the behavior for type hints. Options are "none", "description", or "signature".
-autodoc_typehints = "description"
-autodoc_typehints_format = "short"
+autodoc_typehints = 'description'
+autodoc_typehints_format = 'short'
 python_use_unqualified_type_names = True
 
 autodoc_default_options = {
-    "members": True,
-    "undoc-members": True,
-    "private-members": False,
-    "show-inheritance": True,
+    'members': True,
+    'undoc-members': True,
+    'private-members': False,
+    'show-inheritance': True,
 }
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "furo"
+html_theme = 'furo'
 html_theme_options = {
-    "navigation_depth": 4,
-    "collapse_navigation": False,
+    'navigation_depth': 4,
+    'collapse_navigation': False,
 }
 html_static_path = ['_static']
