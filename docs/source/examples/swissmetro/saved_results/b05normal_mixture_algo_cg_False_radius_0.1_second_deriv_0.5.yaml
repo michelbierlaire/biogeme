@@ -1,0 +1,108 @@
+# File b05normal_mixture_algo_cg_False_radius_0.1_second_deriv_0.5.yaml has automatically been generated on 2026-06-08 19:12:27.064815
+# biogeme 3.3.3 [2026-06-08]
+
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.7011868916856909
+- -1.2778597983711935
+- 0.6928367908374178
+- -1.0837904448710918
+- -0.1546325209908375
+bhhh:
+- - 694.7808620108588
+  - 397.23770531564884
+  - 114.68716521529694
+  - -35.850578209818515
+  - -135.01670131171534
+- - 397.23770531564884
+  - 783.7870655284527
+  - 336.1011000177178
+  - -197.5900682830926
+  - 324.5488207361389
+- - 114.68716521529694
+  - 336.1011000177178
+  - 313.22645234991427
+  - 19.28153889304714
+  - 18.582921529144432
+- - -35.850578209818515
+  - -197.5900682830926
+  - 19.28153889304714
+  - 694.491952838355
+  - -302.4893339097942
+- - -135.01670131171534
+  - 324.5488207361389
+  - 18.582921529144432
+  - -302.4893339097942
+  - 920.294866323926
+bootstrap: []
+bootstrap_time: null
+convergence: false
+data_name: swissmetro
+draws_processing_time: '22.770114'
+final_log_likelihood: -5266.710577903635
+gradient:
+- -49.91803658193119
+- -129.4749330233928
+- 18.653924434674767
+- 0.4880449621792522
+- -0.2760811019769065
+hessian:
+- - -762.427912984395
+  - -431.27624092013843
+  - -124.100107446233
+  - 53.19246634220949
+  - 224.73109100518974
+- - -431.27624092013843
+  - -755.9765413291573
+  - -240.7694925625095
+  - 189.48620459999339
+  - -299.8920622022344
+- - -124.100107446233
+  - -240.76949256250947
+  - -275.43999283195603
+  - -7.5695189592290655
+  - 13.535914696882628
+- - 53.19246634220947
+  - 189.48620459999339
+  - -7.569518959229059
+  - -432.24160293720524
+  - 227.3402604516161
+- - 224.73109100518974
+  - -299.89206220223434
+  - 13.535914696882632
+  - 227.34026045161607
+  - -990.4371927123516
+initial_log_likelihood: -5266.710577903635
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b05normal_mixture_algo_cg_False_radius_0.1_second_deriv_0.5
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: 'Trust region is too small: 1.1920928955078126e-08'
+  Number of iterations: '23'
+  Optimization time: '12.774695'
+  Proportion of Hessian calculation: 0/1 = 0.0%
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: NORMAL
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

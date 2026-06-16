@@ -1,5 +1,5 @@
-# File b01c_logit.yaml has automatically been generated on 2025-12-25 13:27:59.612484
-# biogeme 3.3.3a0 [2025-12-25]
+# File b01c_logit.yaml has automatically been generated on 2026-06-08 18:58:07.740892
+# biogeme 3.3.3 [2026-06-08]
 
 beta_names:
 - asc_train
@@ -7,10 +7,10 @@ beta_names:
 - b_cost
 - asc_car
 beta_values:
-- -0.7011872849436401
-- -1.2778589565196719
+- -0.7011872849436404
+- -1.2778589565196716
 - -1.0837900371207714
-- -0.15463267198926273
+- -0.15463267198926287
 bhhh:
 - []
 bootstrap: []
@@ -41,9 +41,9 @@ optimization_messages:
   Number of gradient evaluations: 9
   Number of hessian evaluations: 4
   Number of iterations: '4'
-  Optimization time: '0.358529'
+  Optimization time: '1.244813'
   Proportion of Hessian calculation: 4/4 = 100.0%
-  Relative gradient: 1.059559503933971e-07
+  Relative gradient: 1.0595595039600445e-07
 sample_size: 6768
 types_of_draws: null
 upper_bounds:

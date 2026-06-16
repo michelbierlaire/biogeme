@@ -1,0 +1,88 @@
+# File b18b_ordinal_probit.yaml has automatically been generated on 2026-06-08 18:58:36.700795
+# biogeme 3.3.3 [2026-06-08]
+
+beta_names:
+- b_time
+- b_cost
+- tau1
+- delta2
+beta_values:
+- 0.018052627394305416
+- 0.6871832033411697
+- -0.6047967329959083
+- 1.7543464023643967
+bhhh:
+- - 14830.521441491863
+  - 8135.682115950863
+  - -7937.798900010106
+  - -4606.59613964323
+- - 8135.682115950863
+  - 7904.85964708491
+  - -4546.951879459064
+  - -2930.2038086673037
+- - -7937.798900010106
+  - -4546.951879459064
+  - 5004.174073703358
+  - 2663.013404585954
+- - -4606.59613964323
+  - -2930.2038086673037
+  - 2663.013404585954
+  - 2680.204766590202
+bootstrap: []
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5789.054727618485
+gradient:
+- 3.3407264709239826e-05
+- 2.0459204904454964e-05
+- -1.682461021346171e-05
+- 5.577948130053301e-06
+hessian:
+- - -16060.052386411495
+  - -7763.480847389162
+  - 8264.299013518166
+  - 4480.493267782191
+- - -7763.480847389162
+  - -5461.858504975049
+  - 4154.335309470329
+  - 2587.2737678743647
+- - 8264.299013518164
+  - 4154.33530947033
+  - -5004.174111064056
+  - -2565.9413407786274
+- - 4480.493267782191
+  - 2587.273767874365
+  - -2565.941340778628
+  - -2597.450814661599
+initial_log_likelihood: -6676.77851924551
+lower_bounds:
+- null
+- null
+- null
+- 0
+model_name: b18b_ordinal_probit
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 5e-09 <= 6.1e-06
+  Number of function evaluations: 10
+  Number of gradient evaluations: 7
+  Number of hessian evaluations: 3
+  Number of iterations: '3'
+  Optimization time: '1.112782'
+  Proportion of Hessian calculation: 3/3 = 100.0%
+  Relative gradient: 5.003500507459534e-09
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- 0
+- null
+user_notes: null
