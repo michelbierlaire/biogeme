@@ -10,6 +10,12 @@ New version of the assisted specification using Catalogs
 import logging
 from typing import Callable
 
+from biogeme_optimization.neighborhood import Neighborhood
+from biogeme_optimization.neighborhood import Operator as VnsOperator
+from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
+from biogeme_optimization.vns import ParetoClass, vns
+from matplotlib.axes import Axes
+
 import biogeme.tools.unique_ids
 import biogeme.version as bv
 from biogeme.biogeme import BIOGEME
@@ -17,12 +23,25 @@ from biogeme.catalog import CentralController, Configuration, ControllerOperator
 from biogeme.catalog.specification import Specification
 from biogeme.exceptions import BiogemeError
 from biogeme.results_processing import EstimationResults
-from biogeme_optimization.neighborhood import Neighborhood, Operator as VnsOperator
-from biogeme_optimization.pareto import DATE_TIME_STRING, Pareto, SetElement
-from biogeme_optimization.vns import ParetoClass, vns
-from matplotlib.axes import Axes
 
 logger = logging.getLogger(__name__)
+
+
+def _convert_pareto_set_to_native_floats(elements: set[SetElement]) -> set[SetElement]:
+    return {
+        SetElement(
+            element_id=element.element_id,
+            objectives=[float(value) for value in element.objectives],
+        )
+        for element in elements
+    }
+
+
+def _convert_pareto_objectives_to_native_floats(pareto: Pareto) -> None:
+    pareto.pareto = _convert_pareto_set_to_native_floats(pareto.pareto)
+    pareto.considered = _convert_pareto_set_to_native_floats(pareto.considered)
+    pareto.removed = _convert_pareto_set_to_native_floats(pareto.removed)
+    pareto.invalid = _convert_pareto_set_to_native_floats(pareto.invalid)
 
 
 # Operators
@@ -47,6 +66,7 @@ class ParetoPostProcessing:
         """
         self.biogeme_object = biogeme_object
         self.pareto = Pareto(filename=pareto_file_name)
+        _convert_pareto_objectives_to_native_floats(self.pareto)
         self.expression = biogeme_object.log_like
         if self.expression is None:
             error_msg = 'No log likelihood function is defined'
@@ -79,10 +99,14 @@ class ParetoPostProcessing:
                 central_controller=self.central_controller,
                 database=self.database,
                 parameters=self.biogeme_object.biogeme_parameters,
+                generate_html=False,
+                generate_yaml=False,
             )
             _ = Configuration.from_string(config_id)
             the_biogeme.model_name = self.model_names(config_id)
-            the_result = the_biogeme.estimate(recycle=recycle)
+            the_result = (
+                the_biogeme.estimate_or_load() if recycle else the_biogeme.estimate()
+            )
             all_results[config_id] = the_result
         return all_results
 
@@ -106,30 +130,22 @@ class ParetoPostProcessing:
             y-coordinate of the plot.
 
         :param objective_x: index of the objective function to use for the x-coordinate.
-        :type objective_x: int
-
         :param objective_y: index of the objective function to use for the y-coordinate.
-        :type objective_y: int
-
         :param label_x: label for the x_axis
-        :type label_x: str
-
         :param label_y: label for the y_axis
-        :type label_y: str
-
         :param margin_x: margin for the x axis
-        :type margin_x: int
-
         :param margin_y: margin for the y axis
-        :type margin_y: int
-
         :param ax: matplotlib axis for the plot
-        :type ax: matplotlib.Axes
-
         """
 
         return self.pareto.plot(
-            objective_x, objective_y, label_x, label_y, margin_x, margin_y, ax
+            objective_x,
+            objective_y,
+            label_x,
+            label_y,
+            margin_x,
+            margin_y,
+            ax,
         )
 
 
