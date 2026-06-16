@@ -22,7 +22,7 @@ import os
 from pathlib import Path
 
 # Directory containing the Python scripts (current directory)
-BASE_DIR = Path(".")
+BASE_DIR = Path('.')
 
 JED_DIRECTORY = 'swissmetro'
 
@@ -37,19 +37,31 @@ SLURM_TEMPLATE = """#!/bin/bash -l
 #SBATCH --output={log_filename}
 #SBATCH --error={log_filename}
 
-# Load required modules (cluster-provided toolchain/libs)
-module load gcc python openblas
-export OPENBLAS_HOME="$OPENBLAS_ROOT"
+module load gcc
 
-# (Optional but often useful) ensure OpenBLAS doesn't oversubscribe threads
+unset CPATH
+unset C_INCLUDE_PATH
+unset CPLUS_INCLUDE_PATH
+unset GCC_EXEC_PREFIX
+
+export CC=/usr/bin/gcc
+export CXX=/usr/bin/g++
+GCC_INCLUDE=/usr/lib/gcc/x86_64-redhat-linux/11/include
+export PYTENSOR_FLAGS="cxx=/usr/bin/g++,base_compiledir=/tmp/$SLURM_JOB_ID/pytensor,gcc__cxxflags=-I${{GCC_INCLUDE}}"
+mkdir -p "/tmp/$SLURM_JOB_ID/pytensor"
+rm -rf ~/.pytensor
+
 export OPENBLAS_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 
-
 source ~/venvs/biogeme/bin/activate
-echo STARTING AT `date`
-srun python -u {script}
-echo FINISHED AT `date`
+
+echo "PYTHON: $(which python)"
+python --version
+echo "CXX: $CXX"
+echo "STARTING AT $(date)"
+srun --export=ALL python -u {script}
+echo "FINISHED AT $(date)"
 """
 
 
@@ -57,8 +69,8 @@ def is_valid_script(path: Path) -> bool:
     """Return True if the file should have a .run job script generated."""
     return (
         path.is_file()
-        and path.suffix == ".py"
-        and path.name.startswith("plot_")
+        and path.suffix == '.py'
+        and path.name.startswith('plot_')
         and path.name != Path(__file__).name
     )
 
@@ -74,14 +86,14 @@ def main():
     py_files = [f for f in BASE_DIR.iterdir() if is_valid_script(f)]
 
     if not py_files:
-        print("No Python scripts found.")
+        print('No Python scripts found.')
         return
 
     workdir = f'/home/bierlair/{JED_DIRECTORY}'
 
     for py in py_files:
-        run_filename = py.with_suffix(".run")
-        log_filename = py.with_name(py.stem + "_slurm.out")
+        run_filename = py.with_suffix('.run')
+        log_filename = py.with_name(py.stem + '_slurm.out')
 
         content = SLURM_TEMPLATE.format(
             workdir=workdir,
@@ -89,14 +101,14 @@ def main():
             log_filename=log_filename,
         )
 
-        with open(run_filename, "w") as f:
+        with open(run_filename, 'w') as f:
             f.write(content)
 
         # Make run file executable
         os.chmod(run_filename, 0o755)
 
-        print(f"Generated: {run_filename}")
+        print(f'Generated: {run_filename}')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
