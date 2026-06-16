@@ -9,14 +9,10 @@ Michel Bierlaire, EPFL
 Thu Oct 30 2025, 14:03:15
 """
 
+import sys
+
 import pandas as pd
 from IPython.core.display_functions import display
-
-import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import BayesianResults
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta, Derive
-from biogeme.models import logit
 
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
@@ -32,6 +28,12 @@ from swissmetro_data import (
     TRAIN_TT,
     database,
 )
+
+import biogeme.biogeme_logging as blog
+from biogeme.bayesian_estimation import BayesianResults
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta, Derive
+from biogeme.models import logit
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -90,7 +92,13 @@ biosim.model_name = 'b01c_logit_simul'
 # %%
 # Retrieve the estimated values of the parameters.
 RESULTS_FILE_NAME = 'saved_results/b01a_logit.nc'
-estimation_results = BayesianResults.from_netcdf(filename=RESULTS_FILE_NAME)
+try:
+    estimation_results = BayesianResults.from_netcdf(filename=RESULTS_FILE_NAME)
+except FileNotFoundError:
+    logger.error(
+        f'File {RESULTS_FILE_NAME} does not exist. Run the estimation script first.'
+    )
+    sys.exit()
 betas = estimation_results.get_beta_values()
 
 
