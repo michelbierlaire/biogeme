@@ -63,23 +63,23 @@ about['Links'] = (
 """,
 )
 
-about["What's new in Biogeme 3.3.2?"] = (
+about["What's new in Biogeme 3.3.3?"] = (
     """
-The main new features introduced in Biogeme 3.3.2 are the integration
-of PyMC for Bayesian estimation and the introduction of a set
-of dedicated Python classes designed to facilitate the specification
-and estimation of hybrid choice models. The PyMC interface enables
-full Bayesian inference for complex models involving latent variables,
-providing access to posterior distributions, credible intervals, and
-diagnostic tools for convergence and model assessment. In parallel,
-the new object-oriented specification framework allows analysts to
-define structural equations, measurement equations, normalization
-rules, and choice models in a modular and transparent way. This
-significantly reduces boilerplate code, improves readability and
-maintainability of model specifications, and makes it easier to
-combine or compare different model variants (such as choice-only,
-MIMIC, and full hybrid choice models) within a unified and consistent
-framework.
+The main new feature introduced in Biogeme 3.3.3 is a completely redesigned 
+framework for the specification and estimation of hybrid choice models, that is, 
+discrete choice models involving latent variables. The new implementation provides 
+a high-level object-oriented interface that allows analysts to define latent variables, 
+structural equations, measurement equations, normalization rules, and choice models in 
+a modular and transparent way. This substantially reduces the amount of code required to 
+specify complex models, improves readability and maintainability, and facilitates the development and comparison of alternative model specifications. The framework supports a wide range of configurations, from simple MIMIC models to full hybrid choice models integrating multiple latent constructs and measurement systems.
+In addition, several improvements have been made to the Bayesian estimation framework 
+introduced in version 3.3.2. These include a more robust estimation workflow, 
+improved management of estimation results through YAML summaries and NetCDF files, 
+and enhanced diagnostic and post-processing capabilities. Reporting facilities have also 
+been strengthened, with better support for parameter grouping and more consistent generation 
+of HTML, LaTeX, and pandas summaries.
+Finally, compatibility has been updated for recent Python releases, including Python 3.14, 
+and development workflows based on uv are now fully supported.
 """,
 )
 
@@ -491,6 +491,8 @@ Package Index</a> repository.
     """
 Previous webpages:
 <ul>
+<li><a href="https://transp-or.epfl.ch/biogeme-3.3.2/"
+target="blank">Webpage for Pandasbiogeme 3.3.2</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.3.1/"
 target="blank">Webpage for Pandasbiogeme 3.3.1</a></li>
 <li><a href="https://transp-or.epfl.ch/biogeme-3.2.12/"

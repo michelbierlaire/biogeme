@@ -198,6 +198,12 @@ class LogLogit(Expression):
             for (alt_id, util_expression) in util.items()
         }
 
+        # Convert the utility dict into ordered sequences for biogeme_jax.
+        # This order is used consistently for utilities and availabilities.
+        util_keys = list(self.util.keys())
+        self.util_keys = jnp.array(util_keys, dtype=JAX_FLOAT)
+        self.util_values = tuple(self.util[k] for k in util_keys)
+
         #: dict of availability formulas
         self.av: dict[int, Expression] | None = None
         if av is not None:
@@ -205,10 +211,22 @@ class LogLogit(Expression):
                 alt_id: validate_and_convert(avail_expression)
                 for (alt_id, avail_expression) in av.items()
             }
+
+            missing_availability = set(util_keys) - set(self.av.keys())
+            unknown_availability = set(self.av.keys()) - set(util_keys)
+            if missing_availability or unknown_availability:
+                raise BiogemeError(
+                    'The availability dictionary must contain exactly the same '
+                    'alternative identifiers as the utility dictionary. '
+                    f'Missing availability entries: {missing_availability}. '
+                    f'Unknown availability entries: {unknown_availability}.'
+                )
+
             for i, e in self.av.items():
                 self.children.append(e)
-            self.av_keys = jnp.array(list(self.av.keys()), dtype=JAX_FLOAT)
-            self.av_values = tuple(self.av[k] for k in self.av.keys())
+
+            self.av_keys = self.util_keys
+            self.av_values = tuple(self.av[k] for k in util_keys)
 
         self.choice: Expression = validate_and_convert(choice)
         """expression for the chosen alternative"""
@@ -216,10 +234,6 @@ class LogLogit(Expression):
         self.children.append(self.choice)
         for i, e in self.util.items():
             self.children.append(e)
-
-        # Convert the dict into list for biogeme_jax
-        self.util_keys = jnp.array(list(self.util.keys()), dtype=JAX_FLOAT)
-        self.util_values = tuple(self.util[k] for k in self.util.keys())
 
     def deep_flat_copy(self) -> LogLogit:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.

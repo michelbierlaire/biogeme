@@ -6,6 +6,7 @@ Fri Mar 28 17:35:27 2025
 
 import unittest
 
+from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
     BelongsTo,
     Beta,
@@ -58,9 +59,8 @@ class TestAuditFunctions(unittest.TestCase):
     def test_loglogit_with_mismatched_keys(self):
         util = {1: Beta('b1', 1.0, None, None, 0)}
         av = {2: Beta('a1', 1.0, None, None, 0)}
-        expr = LogLogit(util, av, 1)
-        errors, warnings = audit_expression(expr)
-        self.assertTrue(any('Incompatible list of alternatives' in e for e in errors))
+        with self.assertRaises(BiogemeError):
+            LogLogit(util, av, 1)
 
     def test_loglogit_with_matching_keys(self):
         util = {1: Beta('b1', 1.0, None, None, 0)}

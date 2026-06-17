@@ -1,8 +1,25 @@
 faq = {}
 
-faq[
-    'What was new in Biogeme 3.3.2?'
-] = """
+faq["What's new in Biogeme 3.3.3?"] = """
+The main new feature introduced in Biogeme 3.3.3 is a completely redesigned 
+framework for the specification and estimation of hybrid choice models, that is, 
+discrete choice models involving latent variables. The new implementation provides 
+a high-level object-oriented interface that allows analysts to define latent variables, 
+structural equations, measurement equations, normalization rules, and choice models in 
+a modular and transparent way. This substantially reduces the amount of code required to 
+specify complex models, improves readability and maintainability, and facilitates the development and comparison of alternative model specifications. The framework supports a wide range of configurations, from simple MIMIC models to full hybrid choice models integrating multiple latent constructs and measurement systems.
+In addition, several improvements have been made to the Bayesian estimation framework 
+introduced in version 3.3.2. These include a more robust estimation workflow, 
+improved management of estimation results through YAML summaries and NetCDF files, 
+and enhanced diagnostic and post-processing capabilities. Reporting facilities have also 
+been strengthened, with better support for parameter grouping and more consistent generation 
+of HTML, LaTeX, and pandas summaries.
+Finally, compatibility has been updated for recent Python releases, including Python 3.14, 
+and development workflows based on uv are now fully supported.
+"""
+
+
+faq['What was new in Biogeme 3.3.2?'] = """
 The main new features introduced in Biogeme 3.3.2 are the integration
 of PyMC for Bayesian estimation and the introduction of a set
 of dedicated Python classes designed to facilitate the specification
@@ -19,18 +36,14 @@ combine or compare different model variants (such as choice-only,
 MIMIC, and full hybrid choice models) within a unified and consistent
 framework."""
 
-faq[
-    'What was new in Biogeme 3.3.1?'
-] = """
+faq['What was new in Biogeme 3.3.1?'] = """
 Biogeme 3.3.1 is a major release. In earlier versions, the computation of the likelihood function and its derivatives 
 was handled by Cythonbiogeme, a C++-based engine. Starting with this release, Biogeme now relies on JAX, a 
 high-performance numerical computing library for Python developed by Google Research. This transition brings 
 substantial performance improvements, particularly for mixture models that require Monte Carlo integration. 
 Although the transition has been designed to be seamless, some minor adjustments to existing models may still be necessary.
 """
-faq[
-    'What was new in Biogeme 3.2.14?'
-] = """
+faq['What was new in Biogeme 3.2.14?'] = """
 <p>
 In this release, various improvements have been made, including code
 reorganization and documentation, bug fixes, and new functionalities. In particular, the name of several objects and functions have been modified for a better compliance with the Python recommendations. The old syntax has been maintained, but is tagged as deprecated.
@@ -44,9 +57,7 @@ reorganization and documentation, bug fixes, and new functionalities. In particu
 """
 
 
-faq[
-    'What was new in Biogeme 3.2.13?'
-] = """
+faq['What was new in Biogeme 3.2.13?'] = """
 <dl>
 <dt>MDCEV</dt>
 <dd>The Multiple Discrete Continuous Extreme Value model has been implemented. The code is still experimental, and the documentation is not ready yet.
@@ -70,17 +81,13 @@ faq[
 
 </dl>
 """
-faq[
-    'What was new in Biogeme 3.2.12?'
-] = """
+faq['What was new in Biogeme 3.2.12?'] = """
 <p>
 This release mainly implements some re-organization of the code and bugs fixes. In particular, the generic optimization algorithms are now distributed in a different package, called biogeme_optimization.
 </p>
 """
 
-faq[
-    'What was new in Biogeme 3.2.11?'
-] = """
+faq['What was new in Biogeme 3.2.11?'] = """
 <dl>
 
 <dt>Sampling of alternatives</dt>
@@ -117,9 +124,7 @@ faq[
 </dl>
 """
 
-faq[
-    'What was new in Biogeme 3.2.10?'
-] = """
+faq['What was new in Biogeme 3.2.10?'] = """
   <p><strong>Note</strong>: versions 3.2.9 and 3.2.10 are
 	  identical. Therefore, version 3.2.9 has been removed from
 	  the official distribution platform. </p>
@@ -192,9 +197,7 @@ faq[
 	  </dl>
 
 """
-faq[
-    'What was new in Biogeme 3.2.8?'
-] = """
+faq['What was new in Biogeme 3.2.8?'] = """
 	  <p>Note that version 3.2.7 and 3.2.8 are almost
 	  identical. The description belows compares to version 3.2.6.
 	  <dl>
@@ -270,9 +273,7 @@ faq[
 
 """
 
-faq[
-    'What was new in Biogeme 3.2.6?'
-] = """
+faq['What was new in Biogeme 3.2.6?'] = """
 	  <dl>
 	    <dt>Optimization</dt>
 	    <dd>New optimization algorithms are
@@ -326,9 +327,7 @@ faq[
 
 """
 
-faq[
-    'Why is the file headers.py not generated?'
-] = """
+faq['Why is the file headers.py not generated?'] = """
 <p>In order to comply better with good programming practice in
 Python, the syntax to import the variable names from the data
 file has been modified since version 3.2.5. The file
@@ -379,9 +378,7 @@ from biogeme.expressions import *
 </code></p>
 <p>  although this is not recommended. </p>
 """
-faq[
-    'What initial values should I select for the parameters?'
-] = """
+faq['What initial values should I select for the parameters?'] = """
 If you have the results of a previous estimation, it may be
 a good idea to use the estimated values as a starting point
 for the estimation of similar models. If not, it depends
@@ -418,16 +415,12 @@ with PandasBiogeme</a> for a detailed discussion. </li>
 Note that if a file <code>__mymodel.iter</code> exists, where <code>mymodel</code> is the name of the model
 to be estimated, the initial values of the parameters are read from this file. 
 """
-faq[
-    'How do I cancel the calculation of second derivatives during estimation?'
-] = """
+faq['How do I cancel the calculation of second derivatives during estimation?'] = """
 <p>Change the optimization algorithm to '<code>simple_bounds_BFGS</code>'. It can be done in the .toml file, or
 in the biogeme object: </p>
 <p><code>biogeme.optimization_algorithm = 'simple_bounds_BFGS'</code></p>
 """
-faq[
-    'Can I save intermediate iterations during the estimation?'
-] = """
+faq['Can I save intermediate iterations during the estimation?'] = """
 <p>
 Yes. It is actually the default behavior. At each
 iteration, Biogeme creates a
@@ -438,9 +431,7 @@ file. See <a href="file:///Users/bierlair/Library/CloudStorage/OneDrive-epfl.ch/
 the documentation</a> for details.
 </p>
 """
-faq[
-    'Does Biogeme provide support for out-of-sample validation?'
-] = """
+faq['Does Biogeme provide support for out-of-sample validation?'] = """
 <p>
 Yes.  See
 <a href="sphinx/auto_examples/swissmetro/plot_b04validation.html#sphx-glr-auto-examples-swissmetro-plot-b04validation-py">this example</a>.
@@ -478,9 +469,7 @@ The issue is that in Python 3.8 and older on Windows, DLLs are loaded from trust
 </ul> (credit: Facundo Storani)
 """
 
-faq[
-    'Why is Cython library not found?'
-] = """
+faq['Why is Cython library not found?'] = """
 On Mac OSX, the
 following error is sometimes
 generated: <pre>

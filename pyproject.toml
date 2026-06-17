@@ -110,5 +110,6 @@ dev = [
     "sphinx_gallery",
     "sphinx_autodoc_typehints",
     "myst-parser",
-    "furo"
+    "furo",
+    "twine>=6.2.0",
 ]

@@ -21,6 +21,8 @@ import matplotlib.pyplot as plt
 from biogeme import version
 from biogeme.exceptions import BiogemeError
 
+from .bayesian_results import BayesianResults
+
 
 def _save_current_matplotlib_figure(path: Path) -> None:
     """Save and close the current Matplotlib figure.

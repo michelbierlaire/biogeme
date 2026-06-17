@@ -61,7 +61,8 @@ Hybrid choice models, that is, choice models involving latent variables, can be 
 .. toctree::
   :maxdepth: 2
 
-  auto_examples/hybrid_choice/index.rst
+  auto_examples/hybrid_choice_models/index.rst
+  auto_examples/hybrid_choice_specs/index.rst
 
 Assisted specification algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,6 +93,14 @@ and to use the estimated model for forecasting. This is described in `Bierlaire 
 .. toctree::
   :maxdepth: 2
 
-  auto_examples/mdcev/index.rst
+  auto_examples/mdcev_no_outside_good/index.rst
 
+Examples for programmers
+%%%%%%%%%%%%%%%%%%%%%%%%
+It illustrates the use of various classes and functions
+
+.. toctree::
+  :maxdepth: 2
+
+  auto_examples/programmers/index.rst
 

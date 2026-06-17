@@ -678,12 +678,12 @@ def test_resolve_threshold_systems_symmetric_covers_left_middle_and_right() -> N
         'tau_4',
     ]
     assert system.cutpoints[0].kind is CutpointKind.DERIVED
-    assert system.cutpoints[0].expression_text == '-(sym5_delta_0 - sym5_delta_1)'
+    assert system.cutpoints[0].expression_text == '-(sym5_delta_0 + sym5_delta_1)'
     assert system.cutpoints[0].source_parameter_names == [
         'sym5_delta_0',
         'sym5_delta_1',
     ]
-    assert system.cutpoints[1].expression_text == '-sym5_delta_1'
+    assert system.cutpoints[1].expression_text == '-sym5_delta_0'
     assert system.cutpoints[2].expression_text == 'sym5_delta_0'
     assert system.cutpoints[3].expression_text == 'sym5_delta_0 + sym5_delta_1'
 

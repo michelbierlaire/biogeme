@@ -10,22 +10,26 @@ Sat Jul 26 2025, 13:01:22
 """
 
 import pandas as pd
+from alternatives import ID_COLUMN, all_alternatives, alternatives, asian, partitions
+from compare import compare
 from IPython.core.display_functions import display
+from specification_sampling import V, combined_variables
 
 import biogeme.biogeme_logging as blog
-from alternatives import ID_COLUMN, all_alternatives, alternatives, asian, partitions
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
-from biogeme.results_processing import get_pandas_estimated_parameters
+from biogeme.results_processing import (
+    EstimationResults,
+    get_pandas_estimated_parameters,
+)
 from biogeme.sampling_of_alternatives import (
     ChoiceSetsGeneration,
     GenerateModel,
     SamplingContext,
     generate_segment_size,
 )
-from compare import compare
-from specification_sampling import V, combined_variables
+from biogeme.tools import timeit
 
 # %%
 logger = blog.get_screen_logger(level=blog.INFO)
@@ -107,14 +111,21 @@ the_biogeme.calculate_null_loglikelihood(
 )
 
 # %%
-# Estimate the parameters
-results = the_biogeme.estimate(recycle=False)
+# Estimate the parameters.
+try:
+    results = EstimationResults.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
+    )
+except FileNotFoundError:
+    with timeit(f'Estimate of model {the_biogeme.model_name}'):
+        results = the_biogeme.estimate()
 
 # %%
 print(results.short_summary())
 
 # %%
-estimated_parameters = get_pandas_estimated_parameters(estimation_results=results)
+parameters_tables = get_pandas_estimated_parameters(estimation_results=results)
+estimated_parameters = parameters_tables['Estimated parameters']
 display(estimated_parameters)
 
 # %%

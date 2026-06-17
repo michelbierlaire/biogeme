@@ -28,13 +28,23 @@ logger = logging.getLogger(__name__)
 
 
 def _convert_pareto_set_to_native_floats(elements: set[SetElement]) -> set[SetElement]:
-    return {
-        SetElement(
-            element_id=element.element_id,
-            objectives=[float(value) for value in element.objectives],
+    converted_elements = set()
+    for element in elements:
+        try:
+            objectives = element.objectives
+        except AttributeError as exc:
+            raise BiogemeError(
+                f'Invalid Pareto element {element!r}: missing objectives.'
+            ) from exc
+
+        converted_elements.add(
+            SetElement(
+                element_id=element.element_id,
+                objectives=[float(value) for value in objectives],
+            )
         )
-        for element in elements
-    }
+
+    return converted_elements
 
 
 def _convert_pareto_objectives_to_native_floats(pareto: Pareto) -> None:

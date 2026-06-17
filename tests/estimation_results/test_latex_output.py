@@ -67,6 +67,40 @@ class TestGroupedLatexOutput(unittest.TestCase):
         self.assertIn('beta1', result['Second group'])
         self.assertIn('beta2', result['Second group'])
 
+    def test_generate_latex_file_content_without_parameter_groups(self):
+        content = latex_output.generate_latex_file_content(
+            estimation_results=self.estimation_results,
+            filename='testfile.tex',
+            variance_covariance_type=self.estimation_results.get_default_variance_covariance_matrix(),
+        )
+
+        self.assertIn('\\section{Estimated parameters}', content)
+        self.assertNotIn('\\subsection{Estimated parameters}', content)
+        self.assertIn('beta1', content)
+        self.assertIn('beta2', content)
+
+    def test_generate_latex_file_content_with_parameter_groups(self):
+        content = latex_output.generate_latex_file_content(
+            estimation_results=self.estimation_results,
+            filename='testfile_groups.tex',
+            variance_covariance_type=self.estimation_results.get_default_variance_covariance_matrix(),
+            group_of_parameters={'First group': ['beta1']},
+        )
+
+        self.assertIn('\\section{Estimated parameters}', content)
+        self.assertIn('\\subsection{First group}', content)
+        self.assertIn('\\subsection{Other parameters}', content)
+
+        first_group_position = content.index('\\subsection{First group}')
+        other_parameters_position = content.index('\\subsection{Other parameters}')
+        first_group_section = content[first_group_position:other_parameters_position]
+        other_parameters_section = content[other_parameters_position:]
+
+        self.assertIn('beta1', first_group_section)
+        self.assertNotIn('beta2', first_group_section)
+        self.assertNotIn('beta1', other_parameters_section)
+        self.assertIn('beta2', other_parameters_section)
+
 
 class TestAddTrailingZero(unittest.TestCase):
     def test_string_without_period(self):
@@ -91,29 +125,29 @@ class TestFormatRealNumber(unittest.TestCase):
         # Test values that don't need scientific notation
         self.assertEqual(latex_output.format_real_number(123.456), '123.0')
         self.assertEqual(latex_output.format_real_number(0.0123456), '0.0123')
-        self.assertEqual(latex_output.format_real_number(999.999), '1.0e+03')
+        self.assertEqual(latex_output.format_real_number(999.999), '1.00e+03')
 
     def test_scientific_lowercase_e(self):
         # Test values that result in scientific notation with 'e'
         self.assertEqual(latex_output.format_real_number(1.2345e-5), '1.23e-05')
-        self.assertEqual(latex_output.format_real_number(1e-10), '1.0e-10')
+        self.assertEqual(latex_output.format_real_number(1e-10), '1.00e-10')
         self.assertEqual(latex_output.format_real_number(3.1415e20), '3.14e+20')
 
     def test_scientific_uppercase_E(self):
         # Test values that result in scientific notation with 'E'
         # If necessary, you can modify format_real_number to support 'E' if required
-        self.assertEqual(latex_output.format_real_number(2.5e-4), '0.00025')
+        self.assertEqual(latex_output.format_real_number(2.5e-4), '0.000250')
         self.assertEqual(latex_output.format_real_number(9.8765e10), '9.88e+10')
 
     def test_edge_cases(self):
         # Test very small and very large numbers
-        self.assertEqual(latex_output.format_real_number(1e-100), '1.0e-100')
-        self.assertEqual(latex_output.format_real_number(1e100), '1.0e+100')
+        self.assertEqual(latex_output.format_real_number(1e-100), '1.00e-100')
+        self.assertEqual(latex_output.format_real_number(1e100), '1.00e+100')
 
     def test_zero_and_near_zero(self):
         # Test zero and very small values close to zero
-        self.assertEqual(latex_output.format_real_number(0), '0.0')
-        self.assertEqual(latex_output.format_real_number(0.00000001), '1.0e-08')
+        self.assertEqual(latex_output.format_real_number(0), '0.00')
+        self.assertEqual(latex_output.format_real_number(0.00000001), '1.00e-08')
 
     def test_negative_numbers(self):
         # Test negative values
@@ -123,7 +157,7 @@ class TestFormatRealNumber(unittest.TestCase):
 
     def test_trailing_zeros(self):
         # Test proper formatting of numbers that require trailing zeros
-        self.assertEqual(latex_output.format_real_number(1), '1.0')
+        self.assertEqual(latex_output.format_real_number(1), '1.00')
         self.assertEqual(latex_output.format_real_number(10), '10.0')
         self.assertEqual(latex_output.format_real_number(1.234), '1.23')
 
@@ -191,37 +225,3 @@ class TestGetSignForPValue(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-    def test_generate_latex_file_content_without_parameter_groups(self):
-        content = latex_output.generate_latex_file_content(
-            estimation_results=self.estimation_results,
-            filename='testfile.tex',
-            variance_covariance_type=self.estimation_results.get_default_variance_covariance_matrix(),
-        )
-
-        self.assertIn('\\section{Estimated parameters}', content)
-        self.assertNotIn('\\subsection{Estimated parameters}', content)
-        self.assertIn('beta1', content)
-        self.assertIn('beta2', content)
-
-    def test_generate_latex_file_content_with_parameter_groups(self):
-        content = latex_output.generate_latex_file_content(
-            estimation_results=self.estimation_results,
-            filename='testfile_groups.tex',
-            variance_covariance_type=self.estimation_results.get_default_variance_covariance_matrix(),
-            group_of_parameters={'First group': ['beta1']},
-        )
-
-        self.assertIn('\\section{Estimated parameters}', content)
-        self.assertIn('\\subsection{First group}', content)
-        self.assertIn('\\subsection{Other parameters}', content)
-
-        first_group_position = content.index('\\subsection{First group}')
-        other_parameters_position = content.index('\\subsection{Other parameters}')
-        first_group_section = content[first_group_position:other_parameters_position]
-        other_parameters_section = content[other_parameters_position:]
-
-        self.assertIn('beta1', first_group_section)
-        self.assertNotIn('beta2', first_group_section)
-        self.assertNotIn('beta1', other_parameters_section)
-        self.assertIn('beta2', other_parameters_section)
