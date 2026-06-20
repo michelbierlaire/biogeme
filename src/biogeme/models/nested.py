@@ -1,8 +1,4 @@
-"""Implements the nested logit model.
-
-:author: Michel Bierlaire
-:date: Fri Mar 29 17:13:14 2019
-"""
+"""Simplified nested logit model using the dedicated LogNested expression."""
 
 from __future__ import annotations
 
@@ -15,44 +11,22 @@ from biogeme.expressions import (
     ConditionalTermTuple,
     Expression,
     ExpressionOrNumeric,
+    LogNested,
     MultipleSum,
     Numeric,
     exp,
     log,
 )
-from biogeme.models import logmev, mev
 from biogeme.nests import NestsForNestedLogit, OldNestsForNestedLogit
 
 logger = logging.getLogger(__name__)
 
 
-def get_mev_generating_for_nested(
+def _normalize_and_check_nests(
     util: dict[int, ExpressionOrNumeric],
-    availability: dict[int, ExpressionOrNumeric] | None,
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
-) -> Expression:
-    """Implements the  MEV generating function for the nested logit model
-
-    :param util: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability of each
-               alternative, indexed
-               by numerical ids. Must be consistent with util, or
-               None. In this case, all alternatives are supposed to be
-               always available.
-
-    :param nests: an object describing the nests
-
-    :return: a dictionary mapping each alternative id with the function
-
-    .. math:: G(e^{V_1},
-              \\ldots,e^{V_J}) =  \\sum_m \\left( \\sum_{\\ell \\in C_m}
-              y_\\ell^{\\mu_m}\\right)^{\\frac{\\mu}{\\mu_m}}
-
-    where :math:`G` is the MEV generating function.
-
-    """
+) -> NestsForNestedLogit:
+    """Convert old nest syntax if needed and check partition validity."""
     if not isinstance(nests, NestsForNestedLogit):
         logger.warning(
             'It is recommended to define the nests of the nested logit model using '
@@ -60,28 +34,48 @@ def get_mev_generating_for_nested(
             'in biogeme.nests.'
         )
         nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
+
     ok, message = nests.check_partition()
     if not ok:
         raise excep.BiogemeError(message)
 
+    return nests
+
+
+def get_mev_generating_for_nested(
+    util: dict[int, ExpressionOrNumeric],
+    availability: dict[int, ExpressionOrNumeric] | None,
+    nests: NestsForNestedLogit | OldNestsForNestedLogit,
+) -> Expression:
+    """Implements the MEV generating function for the nested logit model.
+
+    Kept for backward compatibility.
+    """
+    nests = _normalize_and_check_nests(util, nests)
+
     terms_for_nests = []
-    for m in nests:
+    for nest in nests:
         if availability is None:
-            sum_terms = [exp(m.nest_param * util[i]) for i in m.list_of_alternatives]
-            the_sum = MultipleSum(sum_terms)
+            sum_terms = [
+                exp(nest.nest_param * util[i]) for i in nest.list_of_alternatives
+            ]
+            nest_sum = MultipleSum(sum_terms)
         else:
             sum_terms = [
                 ConditionalTermTuple(
                     condition=availability[i] != Numeric(0),
-                    term=exp(m.nest_param * util[i]),
+                    term=exp(nest.nest_param * util[i]),
                 )
-                for i in m.list_of_alternatives
+                for i in nest.list_of_alternatives
             ]
-            the_sum = ConditionalSum(list_of_terms=sum_terms)
-        terms_for_nests.append(the_sum ** (1.0 / m.nest_param))
+            nest_sum = ConditionalSum(list_of_terms=sum_terms)
+
+        terms_for_nests.append(nest_sum ** (1.0 / nest.nest_param))
+
     if nests.alone is not None:
         for i in nests.alone:
             terms_for_nests.append(util[i])
+
     return MultipleSum(terms_for_nests)
 
 
@@ -91,7 +85,8 @@ def getMevGeneratingForNested(
     availability: dict[int, Expression],
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
 ) -> Expression:
-    pass
+    """Deprecated name for get_mev_generating_for_nested."""
+    return get_mev_generating_for_nested(util, availability, nests)
 
 
 def get_mev_for_nested(
@@ -99,65 +94,38 @@ def get_mev_for_nested(
     availability: dict[int, ExpressionOrNumeric] | None,
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
 ) -> dict[int, Expression]:
-    """Implements the derivatives of MEV generating function for the
-    nested logit model
+    """Implements the derivatives of the MEV generating function.
 
-    :param util: dict of objects representing the utility functions of
-        each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability of each
-               alternative, indexed
-               by numerical ids. Must be consistent with util, or
-               None. In this case, all alternatives are supposed to be
-               always available.
-
-    :param nests: object containing the description of the nests.
-
-    :return: a dictionary mapping each alternative id with the function
-
-        .. math:: \\ln \\frac{\\partial G}{\\partial y_i}(e^{V_1},
-              \\ldots,e^{V_J}) = e^{(\\mu_m-1)V_i}
-              \\left(\\sum_{i=1}^{J_m} e^{\\mu_m V_i}\\right)^
-              {\\frac{1}{\\mu_m}-1}
-
-        where :math:`m` is the (only) nest containing alternative :math:`i`,
-        and :math:`G` is the MEV generating function.
-
+    Kept for backward compatibility.
     """
-    if not isinstance(nests, NestsForNestedLogit):
-        logger.warning(
-            'It is recommended to define the nests of the nested logit model using '
-            'the objects OneNestForNestedLogit and NestsForNestedLogit defined '
-            'in biogeme.nests.'
-        )
-        nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
-
-    ok, message = nests.check_partition()
-    if not ok:
-        raise excep.BiogemeError(message)
+    nests = _normalize_and_check_nests(util, nests)
 
     if nests.alone is None:
         log_gi = {}
     else:
         log_gi = {i: Numeric(0) for i in nests.alone}
-    for m in nests:
-        if availability is None:
-            sum_terms = [exp(m.nest_param * util[i]) for i in m.list_of_alternatives]
-            the_sum = MultipleSum(sum_terms)
-        else:
-            sum_terms = [
-                ConditionalTermTuple(
-                    condition=availability[i] != Numeric(0),
-                    term=exp(m.nest_param * util[i]),
-                )
-                for i in m.list_of_alternatives
-            ]
-            the_sum = ConditionalSum(list_of_terms=sum_terms)
 
-        for i in m.list_of_alternatives:
-            log_gi[i] = (m.nest_param - 1.0) * util[i] + (
-                1.0 / m.nest_param - 1.0
-            ) * log(the_sum)
+    for nest in nests:
+        if availability is None:
+            nest_sum = MultipleSum(
+                [exp(nest.nest_param * util[i]) for i in nest.list_of_alternatives]
+            )
+        else:
+            nest_sum = ConditionalSum(
+                list_of_terms=[
+                    ConditionalTermTuple(
+                        condition=availability[i] != Numeric(0),
+                        term=exp(nest.nest_param * util[i]),
+                    )
+                    for i in nest.list_of_alternatives
+                ]
+            )
+
+        for i in nest.list_of_alternatives:
+            log_gi[i] = (nest.nest_param - 1.0) * util[i] + (
+                1.0 / nest.nest_param - 1.0
+            ) * log(nest_sum)
+
     return log_gi
 
 
@@ -167,7 +135,8 @@ def getMevForNested(
     availability: dict[int, Expression] | None,
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
 ) -> dict[int, Expression]:
-    pass
+    """Deprecated name for get_mev_for_nested."""
+    return get_mev_for_nested(V, availability, nests)
 
 
 def get_mev_for_nested_mu(
@@ -176,67 +145,40 @@ def get_mev_for_nested_mu(
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
     mu: ExpressionOrNumeric,
 ) -> dict[int, Expression]:
-    """Implements the MEV generating function for the nested logit model,
-    including the scale parameter
+    """Implements the MEV derivative terms for explicit-mu nested logit.
 
-    :param util: dict of objects representing the utility functions of
-        each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability
-        of each alternative, indexed
-        by numerical ids. Must be consistent with util, or
-        None. In this case, all alternatives are supposed to be
-        always available.
-
-    :param nests: object describing the nesting structure
-
-    :param mu: scale parameter
-
-    :return: a dictionary mapping each alternative id with the function
-
-        .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
-                  \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
-                  e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
-
-        where :math:`m` is the (only) nest containing alternative :math:`i`,
-        and :math:`G` is the MEV generating function.
-
+    Kept for backward compatibility.
     """
-    if not isinstance(nests, NestsForNestedLogit):
-        logger.warning(
-            'It is recommended to define the nests of the nested logit model using '
-            'the objects OneNestForNestedLogit and NestsForNestedLogit defined '
-            'in biogeme.nests.'
-        )
-        nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
-    ok, message = nests.check_partition()
-    if not ok:
-        raise excep.BiogemeError(message)
+    nests = _normalize_and_check_nests(util, nests)
 
     if nests.alone is None:
         log_gi = {}
     else:
         log_gi = {i: log(mu) + (mu - 1) * util[i] for i in nests.alone}
-    for m in nests:
-        if availability is None:
-            sum_terms = [exp(m.nest_param * util[i]) for i in m.list_of_alternatives]
-            the_sum = MultipleSum(sum_terms)
 
+    for nest in nests:
+        if availability is None:
+            nest_sum = MultipleSum(
+                [exp(nest.nest_param * util[i]) for i in nest.list_of_alternatives]
+            )
         else:
-            sum_terms = [
-                ConditionalTermTuple(
-                    condition=availability[i] != Numeric(0),
-                    term=exp(m.nest_param * util[i]),
-                )
-                for i in m.list_of_alternatives
-            ]
-            the_sum = ConditionalSum(list_of_terms=sum_terms)
-        for i in m.list_of_alternatives:
+            nest_sum = ConditionalSum(
+                list_of_terms=[
+                    ConditionalTermTuple(
+                        condition=availability[i] != Numeric(0),
+                        term=exp(nest.nest_param * util[i]),
+                    )
+                    for i in nest.list_of_alternatives
+                ]
+            )
+
+        for i in nest.list_of_alternatives:
             log_gi[i] = (
                 log(mu)
-                + (m.nest_param - 1.0) * util[i]
-                + (mu / m.nest_param - 1.0) * log(the_sum)
+                + (nest.nest_param - 1.0) * util[i]
+                + (mu / nest.nest_param - 1.0) * log(nest_sum)
             )
+
     return log_gi
 
 
@@ -247,7 +189,8 @@ def getMevForNestedMu(
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
     mu: Expression,
 ) -> dict[int, Expression]:
-    pass
+    """Deprecated name for get_mev_for_nested_mu."""
+    return get_mev_for_nested_mu(util, availability, nests, mu)
 
 
 def nested(
@@ -256,32 +199,8 @@ def nested(
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
     choice: ExpressionOrNumeric,
 ) -> Expression:
-    """Implements the nested logit model as a MEV model.
-
-    :param util: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability
-                         of each alternative, indexed by numerical
-                         ids. Must be consistent with util, or None. In
-                         this case, all alternatives are supposed to
-                         be always available.
-
-    :param nests: object containing the description of the nests.
-
-    :param choice: id of the alternative for which the probability must be
-              calculated.
-
-    :return: choice probability for the nested logit model,
-             based on the derivatives of the MEV generating function produced
-             by the function getMevForNested
-
-    :raise BiogemeError: if the definition of the nests is invalid.
-    """
-
-    log_gi = get_mev_for_nested(util, availability, nests)
-    P = mev(util, log_gi, availability, choice)
-    return P
+    """Choice probability for the nested logit model."""
+    return exp(lognested(util, availability, nests, choice))
 
 
 def lognested(
@@ -290,46 +209,13 @@ def lognested(
     nests: NestsForNestedLogit | OldNestsForNestedLogit,
     choice: ExpressionOrNumeric,
 ) -> Expression:
-    """Implements the log of a nested logit model as a MEV model.
-
-    :param util: dict of objects representing the utility functions of
-        each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability of each
-        alternative (:math:`a_i` in the above formula), indexed
-        by numerical ids. Must be consistent with util, or
-        None. In this case, all alternatives are supposed to be
-        always available.
-
-    :param nests: object describing the nesting structure
-
-    :param choice: id of the alternative for which the probability must be
-              calculated.
-
-    :return: log of choice probability for the nested logit model,
-             based on the derivatives of the MEV generating function produced
-             by the function getMevForNested
-
-    :raise BiogemeError: if the definition of the nests is invalid.
-    """
-    if not isinstance(nests, NestsForNestedLogit):
-        logger.warning(
-            'It is recommended to define the nests of the nested logit model using '
-            'the objects OneNestForNestedLogit and NestsForNestedLogit defined '
-            'in biogeme.nests.'
-        )
-        nests = NestsForNestedLogit(choice_set=list(util), tuple_of_nests=nests)
-
-    ok, message = nests.check_partition()
-    if not ok:
-        raise excep.BiogemeError(message)
-    log_gi = get_mev_for_nested(
-        util,
-        availability,
-        nests,
+    """Log probability for the nested logit model."""
+    return LogNested(
+        util=util,
+        av=availability,
+        nests=nests,
+        choice=choice,
     )
-    log_p = logmev(util, log_gi, availability, choice)
-    return log_p
 
 
 def nested_mev_mu(
@@ -339,38 +225,7 @@ def nested_mev_mu(
     choice: ExpressionOrNumeric,
     mu: ExpressionOrNumeric,
 ) -> Expression:
-    """Implements the nested logit model as a MEV model, where mu is also
-    a parameter, if the user wants to test different normalization
-    schemes.
-
-    :param util: dict of objects representing the utility functions of
-              each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability of each
-               alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with util, or
-               None. In this case, all alternatives are supposed to be
-               always available.
-
-    :param nests: object describing the nesting structure
-
-    :param choice: id of the alternative for which the probability must be
-              calculated.
-
-    :param mu: expression producing the value of the top-level scale parameter.
-
-    :return: the nested logit choice probability based on the following
-             derivatives of the MEV generating function:
-
-    .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
-              \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
-              e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
-
-    Where :math:`m` is the (only) nest containing alternative :math:`i`, and
-    :math:`G` is the MEV generating function.
-
-
-    """
+    """Choice probability for the nested logit model with explicit mu."""
     return exp(lognested_mev_mu(util, availability, nests, choice, mu))
 
 
@@ -382,7 +237,8 @@ def nestedMevMu(
     choice: Expression,
     mu: Expression,
 ) -> Expression:
-    pass
+    """Deprecated name for nested_mev_mu."""
+    return nested_mev_mu(util, availability, nests, choice, mu)
 
 
 def lognested_mev_mu(
@@ -392,43 +248,14 @@ def lognested_mev_mu(
     choice: ExpressionOrNumeric,
     mu: ExpressionOrNumeric,
 ) -> Expression:
-    """Implements the log of the nested logit model as a MEV model, where
-    mu is also a parameter, if the user wants to test different
-    normalization schemes.
-
-
-    :param util: dict of objects representing the utility functions of
-        each alternative, indexed by numerical ids.
-
-    :param availability: dict of objects representing the availability of each
-               alternative (:math:`a_i` in the above formula), indexed
-               by numerical ids. Must be consistent with util, or
-               None. In this case, all alternatives are supposed to be
-               always available.
-
-    :param nests: object describing the nesting structure
-
-    :param choice: id of the alternative for which the probability must be
-              calculated.
-
-    :param mu: expression producing the value of the top-level scale parameter.
-
-    :return: the log of the nested logit choice probability based on the
-        following derivatives of the MEV generating function:
-
-        .. math:: \\frac{\\partial G}{\\partial y_i}(e^{V_1},\\ldots,e^{V_J}) =
-                  \\mu e^{(\\mu_m-1)V_i} \\left(\\sum_{i=1}^{J_m}
-                  e^{\\mu_m V_i}\\right)^{\\frac{\\mu}{\\mu_m}-1}
-
-        where :math:`m` is the (only) nest containing alternative :math:`i`,
-        and :math:`G` is the MEV generating function.
-
-
-    """
-
-    log_gi = get_mev_for_nested_mu(util, availability, nests, mu)
-    log_p = logmev(util, log_gi, availability, choice)
-    return log_p
+    """Log probability for the nested logit model with explicit mu."""
+    return LogNested(
+        util=util,
+        av=availability,
+        nests=nests,
+        choice=choice,
+        mu=mu,
+    )
 
 
 @deprecated(lognested_mev_mu)
@@ -439,4 +266,5 @@ def lognestedMevMu(
     choice: Expression,
     mu: Expression,
 ) -> Expression:
-    pass
+    """Deprecated name for lognested_mev_mu."""
+    return lognested_mev_mu(util, availability, nests, choice, mu)

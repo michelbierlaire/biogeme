@@ -54,15 +54,20 @@ from .integrate import IntegrateNormal
 from .jax_utils import build_vectorized_function
 from .linear_utility import LinearTermTuple, LinearUtility
 from .log import log
+from .log_cross_nested import LogCrossNested
+from .log_nested import LogNested
+from .log_sampled_cross_nested import LogSampleCrossNested
+from .log_sampled_logit import LogSampledLogit
+from .log_sampled_nested import LogSampledNested
 from .logit_expressions import LogLogit
 from .logzero import logzero
 from .montecarlo import MonteCarlo
 from .multiple_expressions import (
+    SELECTION_SEPARATOR,
+    SEPARATOR,
     CatalogItem,
     MultipleExpression,
     NamedExpression,
-    SELECTION_SEPARATOR,
-    SEPARATOR,
 )
 from .multiple_product import MultipleProduct
 from .multiple_sum import MultipleSum
@@ -70,10 +75,11 @@ from .named_expression import named_function_output
 from .normalcdf import NormalCdf
 from .numeric_expressions import Numeric
 from .numeric_tools import is_numeric
-from .ordered import OrderedLogLogit, OrderedLogProbit, OrderedLogit, OrderedProbit
+from .ordered import OrderedLogit, OrderedLogLogit, OrderedLogProbit, OrderedProbit
 from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
 from .random_variable import RandomVariable
 from .rename_variables import OldNewName, rename_all_variables
 from .sin import sin
 from .variable import Variable
 from .visitor import ExpressionVisitor
+from .weighted_logsum_exp import WeightedLogSumExp
