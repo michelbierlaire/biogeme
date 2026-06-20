@@ -459,3 +459,5 @@ reports/latent_book/latent_book_joans_comments.pdf
 /docs/source/examples/hybrid_choice_models/saved_html_no_intercept
 /docs/source/examples/hybrid_choice_specs/b01_generated_files
 /docs/source/examples/bayesian_swissmetro/saved_html_archives
+src/biogeme/models/nested_slow.py
+src/biogeme/models/cnl_slow.py
