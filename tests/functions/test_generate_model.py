@@ -3,7 +3,14 @@ from unittest.mock import Mock
 
 import pandas as pd
 
-from biogeme.expressions import Beta, Expression, Variable
+from biogeme.expressions import (
+    Beta,
+    Expression,
+    LogSampleCrossNested,
+    LogSampledLogit,
+    LogSampledNested,
+    Variable,
+)
 from biogeme.nests import (
     NestsForCrossNestedLogit,
     NestsForNestedLogit,
@@ -96,8 +103,8 @@ class TestGenerateModel(unittest.TestCase):
         expected = (
             "((Beta('beta_cost', 0, None, None, "
             "0) * prefix_travel_cost_suffix) + (Beta('beta_age_time', 0, "
-            "None, None, 0) * "
-            "prefix_age_time_suffix))"
+            'None, None, 0) * '
+            'prefix_age_time_suffix))'
         )
         self.assertEqual(utility_str, expected)
 
@@ -116,23 +123,20 @@ class TestGenerateModel(unittest.TestCase):
         model = GenerateModel(context)
         logit_expression = model.get_logit()
         self.assertIsInstance(logit_expression, Expression)
-        expected_start = 'LogLogit[choice=`0.0`]'
-        self.assertTrue(str(logit_expression).startswith(expected_start))
+        self.assertIsInstance(logit_expression, LogSampledLogit)
 
     def test_get_nested_logit(self):
         model = GenerateModel(self.mock_context)
         nested_logit_expression = model.get_nested_logit(self.nests)
         self.assertIsInstance(nested_logit_expression, Expression)
-        expected = 'LogLogit[choice=`0.0`]'
-        self.assertTrue(str(nested_logit_expression).startswith(expected))
+        self.assertIsInstance(nested_logit_expression, LogSampledNested)
 
     def test_get_cross_nested_logit(self):
         self.mock_context.cnl_nests = self.cnl_nests
         model = GenerateModel(self.mock_context)
         cross_nested_logit_expression = model.get_cross_nested_logit()
         self.assertIsInstance(cross_nested_logit_expression, Expression)
-        expected = 'LogLogit[choice=`0.0`]'
-        self.assertTrue(str(cross_nested_logit_expression).startswith(expected))
+        self.assertIsInstance(cross_nested_logit_expression, LogSampleCrossNested)
 
 
 if __name__ == '__main__':
