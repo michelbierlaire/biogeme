@@ -461,3 +461,4 @@ reports/latent_book/latent_book_joans_comments.pdf
 /docs/source/examples/bayesian_swissmetro/saved_html_archives
 src/biogeme/models/nested_slow.py
 src/biogeme/models/cnl_slow.py
+src/biogeme/sampling_of_alternatives/generate_model_slow.py
