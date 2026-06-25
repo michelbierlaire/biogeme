@@ -110,6 +110,39 @@ class TestCompiledFormulaEvaluator(unittest.TestCase):
         output = evaluator.evaluate(self.betas, gradient=True, hessian=False, bhhh=True)
         self.assertIsNotNone(output.bhhh)
         self.assertEqual(output.bhhh.shape, (1, 1))
+        expected_bhhh = np.array([[1.0**2 + 2.0**2 + 3.0**2]])
+        self.assertTrue(np.allclose(output.bhhh, expected_bhhh))
+
+    def test_function_bhhh_with_weight(self):
+        weight = Variable('weight')
+        weighted_data = pd.DataFrame.from_dict(
+            {'x': [1.0, 2.0, 3.0], 'weight': [1.0, 0.5, 2.0]}
+        )
+        weighted_database = Database('weighted_test', weighted_data)
+        adapter = (
+            FlatPanelAdapter(database=weighted_database)
+            if weighted_database.is_panel()
+            else RegularAdapter(database=weighted_database)
+        )
+        model_elements = ModelElements.from_expression_and_weight(
+            log_like=self.expression, weight=weight, adapter=adapter, use_jit=True
+        )
+        evaluator = CompiledFormulaEvaluator(
+            model_elements=model_elements,
+            second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+            numerically_safe=False,
+        )
+
+        output = evaluator.evaluate(self.betas, gradient=True, hessian=False, bhhh=True)
+
+        self.assertIsNotNone(output.gradient)
+        self.assertIsNotNone(output.bhhh)
+        expected_gradient = np.sum(weighted_data['weight'] * weighted_data['x'])
+        expected_bhhh = np.array(
+            [[np.sum(weighted_data['weight'] * weighted_data['x'] ** 2)]]
+        )
+        self.assertAlmostEqual(output.gradient[0], expected_gradient, places=6)
+        self.assertTrue(np.allclose(output.bhhh, expected_bhhh))
 
     def test_missing_beta_uses_default(self):
         betas_missing = {}
