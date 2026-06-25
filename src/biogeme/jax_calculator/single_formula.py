@@ -12,6 +12,7 @@ import logging
 import jax
 import jax.numpy as jnp
 import numpy as np
+
 from biogeme.database import Database
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions import (
@@ -171,14 +172,51 @@ class CompiledFormulaEvaluator:
             # oriented vectorized wrapper.
             return self.row_loglikelihood_function(params, row, draws, random_variables)
 
-        per_obs_grad_fn = jax.vmap(
-            jax.grad(one_observation_loglikelihood, argnums=0),
-            in_axes=(None, 0, 0, 0),
+        per_obs_value_and_grad_fn = jax.vmap(
+            jax.value_and_grad(one_observation_loglikelihood, argnums=0),
+            in_axes=(None, 0, 0, None),
         )
-        self.per_observation_gradient_function = (
-            jax.jit(per_obs_grad_fn) if self.use_jit else per_obs_grad_fn
+        self.per_observation_value_and_grad_function = (
+            jax.jit(per_obs_value_and_grad_fn)
+            if self.use_jit
+            else per_obs_value_and_grad_fn
         )
-        self.profiler.record_build('per_observation_gradient_function')
+        self.profiler.record_build('per_observation_value_and_grad_function')
+
+        def bhhh_function(
+            params: jnp.ndarray,
+            data: jnp.ndarray,
+            draws: jnp.ndarray,
+            random_variables: jnp.ndarray,
+        ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+            individual_values, individual_gradients = per_obs_value_and_grad_fn(
+                params,
+                data,
+                draws,
+                random_variables,
+            )
+
+            if self.vectorized_weight_function is not None:
+                individual_weights = self.vectorized_weight_function(
+                    params,
+                    data,
+                    draws,
+                    random_variables,
+                )
+            else:
+                individual_weights = jnp.ones((data.shape[0],), dtype=JAX_FLOAT)
+
+            weighted_values = individual_values * individual_weights
+            weighted_individual_gradients = (
+                individual_gradients * individual_weights[:, None]
+            )
+            the_gradient = jnp.sum(weighted_individual_gradients, axis=0)
+            bhhh_matrix = individual_gradients.T @ weighted_individual_gradients
+
+            return jnp.sum(weighted_values), the_gradient, bhhh_matrix
+
+        self.bhhh_function = jax.jit(bhhh_function) if self.use_jit else bhhh_function
+        self.profiler.record_build('bhhh_function')
 
     def evaluate(
         self,
@@ -285,64 +323,26 @@ class CompiledFormulaEvaluator:
         )
 
     def _evaluate_bhhh_only(self, free_betas_values):
-        _, individual_values = self.profiler.timed_call(
-            'sum_function',
-            self.sum_function,
-            free_betas_values,
+        free_betas_values_jnp = jnp.asarray(free_betas_values, dtype=JAX_FLOAT)
+        value, the_gradient, bhhh_matrix = self.profiler.timed_call(
+            'bhhh_function',
+            self.bhhh_function,
+            free_betas_values_jnp,
             self.data_jax,
             self.draws_jax,
             self.random_variables_jax,
         )
 
-        free_betas_values_jnp = jnp.asarray(free_betas_values, dtype=JAX_FLOAT)
-        random_variables_broadcast = jnp.tile(
-            self.random_variables_jax[None, :], (self.data_jax.shape[0], 1)
-        )
-        individual_gradients = self.profiler.timed_call(
-            'per_observation_gradient_function',
-            self.per_observation_gradient_function,
-            free_betas_values_jnp,
-            self.data_jax,
-            self.draws_jax,
-            random_variables_broadcast,
-        )
-
-        expected_shape = (self.data_jax.shape[0], len(free_betas_values))
-        if individual_gradients.shape != expected_shape:
+        expected_shape = (len(free_betas_values), len(free_betas_values))
+        if bhhh_matrix.shape != expected_shape:
             error_msg = (
-                f'Unexpected shape for individual gradients: '
-                f'{individual_gradients.shape}. Expected {expected_shape}.'
+                f'Unexpected shape for BHHH matrix: '
+                f'{bhhh_matrix.shape}. Expected {expected_shape}.'
             )
             raise BiogemeError(error_msg)
 
-        if self.vectorized_weight_function is not None:
-            individual_weights = self.profiler.timed_call(
-                'vectorized_weight_function',
-                self.vectorized_weight_function,
-                free_betas_values_jnp,
-                self.data_jax,
-                self.draws_jax,
-                self.random_variables_jax,
-            )
-        else:
-            individual_weights = jnp.ones((self.data_jax.shape[0],), dtype=JAX_FLOAT)
-
-        # The overall gradient of the weighted log likelihood is obtained by
-        # multiplying each per-observation gradient by its observation weight.
-        weighted_individual_gradients = (
-            individual_gradients * individual_weights[:, None]
-        )
-        the_gradient = jnp.sum(weighted_individual_gradients, axis=0)
-
-        # The BHHH matrix is the sum over observations of
-        #     w_i * g_i g_i^T
-        # where g_i is the gradient of the *unweighted* contribution of
-        # observation i. The weight must therefore be applied once to the outer
-        # product contribution itself, not to g_i before forming g_i g_i^T.
-        bhhh_matrix = individual_gradients.T @ weighted_individual_gradients
-
         return FunctionOutput(
-            function=float(jnp.sum(individual_values)),
+            function=float(value),
             gradient=np.asarray(the_gradient, dtype=NUMPY_FLOAT),
             hessian=None,
             bhhh=np.asarray(bhhh_matrix, dtype=NUMPY_FLOAT),
