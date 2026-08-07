@@ -44,6 +44,10 @@ class BIOGEME:
     optimization_algorithm: (
         str  # Dynamically injected parameter (e.g., via setattr or property)
     )
+    analytical_hessian_mode: str
+    hessian_parameter_block_size: int
+    hessian_observation_batch_size: int
+    hessian_memory_fraction: float
     maximum_number_catalog_expressions: (
         int  # Dynamically injected parameter (e.g., via setattr or property)
     )

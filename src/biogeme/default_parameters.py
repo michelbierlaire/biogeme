@@ -191,6 +191,47 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.check_calculating_second_derivatives,),
         ),
         ParameterTuple(
+            name='analytical_hessian_mode',
+            value='full',
+            type=str,
+            section='Estimation',
+            description=(
+                'Implementation of the analytical Hessian: full, chunked, or automatic. '
+                'The compatibility default is full.'
+            ),
+            check=(cp.check_analytical_hessian_mode,),
+        ),
+        ParameterTuple(
+            name='hessian_parameter_block_size',
+            value=4,
+            type=int,
+            section='Estimation',
+            description=(
+                'Number of parameter directions evaluated simultaneously by the chunked analytical Hessian.'
+            ),
+            check=(cp.is_integer, cp.is_positive),
+        ),
+        ParameterTuple(
+            name='hessian_observation_batch_size',
+            value=100,
+            type=int,
+            section='Estimation',
+            description=(
+                'Number of observations evaluated simultaneously by the chunked analytical Hessian.'
+            ),
+            check=(cp.is_integer, cp.is_positive),
+        ),
+        ParameterTuple(
+            name='hessian_memory_fraction',
+            value=0.25,
+            type=float,
+            section='Estimation',
+            description=(
+                'Maximum fraction of available device memory allocated to analytical Hessian intermediates.'
+            ),
+            check=(cp.is_number, cp.is_positive, cp.zero_one),
+        ),
+        ParameterTuple(
             name='large_data_set',
             value=100_000,
             type=int,

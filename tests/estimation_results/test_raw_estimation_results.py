@@ -9,18 +9,19 @@ import os
 import tempfile
 import unittest
 from datetime import timedelta
+from pathlib import Path
+from unittest.mock import patch
 
-from yaml import dump, load, SafeLoader
+from yaml import SafeLoader, dump, load
 
 from biogeme.results_processing import (
     RawEstimationResults,
-    serialize_to_yaml,
     deserialize_from_yaml,
+    serialize_to_yaml,
 )
 
 
 class TestRawEstimationResults(unittest.TestCase):
-
     def setUp(self):
         """Set up test fixtures before each test"""
         self.test_data = RawEstimationResults(
@@ -93,6 +94,57 @@ class TestRawEstimationResults(unittest.TestCase):
         # Clean up the temp file
         os.remove(temp_filename)
 
+    def test_old_yaml_without_lifecycle_fields_is_complete(self):
+        """Files created before recoverable post-processing remain compatible."""
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_filename = temp_file.name
+        serialize_to_yaml(self.test_data, temp_filename)
+        with open(temp_filename) as file:
+            content = file.read()
+        lifecycle_names = (
+            'optimization_complete',
+            'gradient_bhhh_complete',
+            'hessian_complete',
+            'bootstrap_complete',
+        )
+        filtered = '\n'.join(
+            line
+            for line in content.splitlines()
+            if not line.startswith(lifecycle_names)
+        )
+        with open(temp_filename, 'w') as file:
+            file.write(filtered)
+
+        loaded = deserialize_from_yaml(temp_filename)
+        self.assertTrue(loaded.optimization_complete)
+        self.assertTrue(loaded.gradient_bhhh_complete)
+        self.assertTrue(loaded.hessian_complete)
+        self.assertTrue(loaded.bootstrap_complete)
+        os.remove(temp_filename)
+
+    def test_atomic_serialization_preserves_previous_checkpoint(self):
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_filename = temp_file.name
+        serialize_to_yaml(self.test_data, temp_filename)
+        with open(temp_filename) as file:
+            original_content = file.read()
+
+        self.test_data.model_name = 'Replacement that must not be installed'
+        with patch(
+            'biogeme.results_processing.raw_estimation_results.os.replace',
+            side_effect=OSError('simulated atomic replacement failure'),
+        ):
+            with self.assertRaisesRegex(OSError, 'simulated atomic replacement'):
+                serialize_to_yaml(self.test_data, temp_filename)
+
+        with open(temp_filename) as file:
+            self.assertEqual(file.read(), original_content)
+        temporary_files = list(
+            Path(temp_filename).parent.glob(f'.{Path(temp_filename).name}.*.tmp')
+        )
+        self.assertEqual(temporary_files, [])
+        os.remove(temp_filename)
+
     def test_timedelta_representer(self):
         """Test timedelta serialization"""
         result_yaml = dump(
@@ -111,8 +163,8 @@ class TestRawEstimationResults(unittest.TestCase):
     def test_empty_serialization(self):
         """Test that serialization works with minimal data"""
         empty_data = RawEstimationResults(
-            model_name="",
-            user_notes="",
+            model_name='',
+            user_notes='',
             beta_names=[],
             beta_values=[],
             lower_bounds=[],
@@ -123,7 +175,7 @@ class TestRawEstimationResults(unittest.TestCase):
             null_log_likelihood=0.0,
             initial_log_likelihood=0.0,
             final_log_likelihood=0.0,
-            data_name="",
+            data_name='',
             sample_size=0,
             number_of_observations=0,
             monte_carlo=False,

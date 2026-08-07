@@ -67,6 +67,11 @@ def get_biogeme(the_draws: bioDraws, number_of_draws: int) -> BIOGEME:
 
     database = read_data()
 
-    the_biogeme = BIOGEME(database, log_probability, number_of_draws=number_of_draws)
+    the_biogeme = BIOGEME(
+        database,
+        log_probability,
+        number_of_draws=number_of_draws,
+        analytical_hessian_mode='automatic',
+    )
 
     return the_biogeme

@@ -122,6 +122,7 @@ the_biogeme = BIOGEME(
     random_number_generators=my_random_number_generators,
     number_of_draws=10_000,
     seed=1223,
+    analytical_hessian_mode='automatic',
 )
 the_biogeme.model_name = 'b25_triangular_mixture'
 

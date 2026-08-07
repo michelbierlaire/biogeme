@@ -80,6 +80,7 @@ from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
 from .random_variable import RandomVariable
 from .rename_variables import OldNewName, rename_all_variables
 from .sin import sin
+from .sparse_log_cross_nested import SparseLogCrossNested
 from .variable import Variable
 from .visitor import ExpressionVisitor
 from .weighted_logsum_exp import WeightedLogSumExp

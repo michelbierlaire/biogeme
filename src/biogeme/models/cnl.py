@@ -13,6 +13,7 @@ from biogeme.expressions import (
     ExpressionOrNumeric,
     LogCrossNested,
     MultipleSum,
+    SparseLogCrossNested,
     exp,
     log,
     logzero,
@@ -46,6 +47,22 @@ def cnl(
     :return: choice probability for the cross-nested logit model.
     """
     return exp(logcnl(util, availability, nests, choice))
+
+
+def sparse_cnl(
+    util: dict[int, ExpressionOrNumeric],
+    availability: dict[int, ExpressionOrNumeric] | None,
+    nests: NestsForCrossNestedLogit | OldNestsForCrossNestedLogit,
+    choice: ExpressionOrNumeric,
+    mu: ExpressionOrNumeric | None = None,
+) -> Expression:
+    """Return a CNL probability using structurally sparse memberships.
+
+    Literal zero allocation parameters are omitted from the JAX calculation.
+    Parameter-dependent allocations remain active. The optional ``mu`` selects
+    the explicit-homogeneity formulation.
+    """
+    return exp(log_sparse_cnl(util, availability, nests, choice, mu=mu))
 
 
 @deprecated(cnl)
@@ -214,6 +231,28 @@ def logcnl(
         av=availability,
         nests=nests,
         choice=choice,
+    )
+
+
+def log_sparse_cnl(
+    util: dict[int, ExpressionOrNumeric],
+    availability: dict[int, ExpressionOrNumeric] | None,
+    nests: NestsForCrossNestedLogit | OldNestsForCrossNestedLogit,
+    choice: ExpressionOrNumeric,
+    mu: ExpressionOrNumeric | None = None,
+) -> Expression:
+    """Return a CNL log probability using structurally sparse memberships.
+
+    Only literal zero allocation parameters are treated as inactive. Any
+    expression involving a parameter is retained, even if its current value is
+    zero. The optional ``mu`` selects the explicit-homogeneity formulation.
+    """
+    return SparseLogCrossNested(
+        util=util,
+        av=availability,
+        nests=nests,
+        choice=choice,
+        mu=mu,
     )
 
 

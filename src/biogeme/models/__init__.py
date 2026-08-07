@@ -10,6 +10,8 @@ from .cnl import (
     logcnl,
     logcnl_avail,
     logcnlmu,
+    log_sparse_cnl,
+    sparse_cnl,
 )
 from .logit import logit, loglogit
 from .mev import (

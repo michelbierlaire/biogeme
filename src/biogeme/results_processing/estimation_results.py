@@ -78,10 +78,18 @@ class EstimationResults:
             )
         self.raw_estimation_results = raw_estimation_results
 
-        self._are_derivatives_available = True
+        self._are_derivatives_available = (
+            raw_estimation_results.gradient is not None
+            and raw_estimation_results.bhhh is not None
+        )
         self._is_hessian_available = raw_estimation_results.hessian is not None
-        if self.raw_estimation_results.gradient is None:
-            self.raw_estimation_results.gradient = []
+        if (
+            raw_estimation_results.gradient_bhhh_complete
+            and not self._are_derivatives_available
+        ):
+            raise BiogemeError(
+                'Gradient and BHHH are marked as complete but are not available.'
+            )
 
         if (
             self.raw_estimation_results.gradient == []
@@ -89,7 +97,7 @@ class EstimationResults:
             and self.raw_estimation_results.bhhh == [[]]
         ):
             self._are_derivatives_available = False
-        elif (
+        elif self._are_derivatives_available and (
             len(self.raw_estimation_results.beta_names)
             != len(self.raw_estimation_results.gradient)
             or (
@@ -691,11 +699,10 @@ class EstimationResults:
         text += f'Final log likelihood:\t\t{self.raw_estimation_results.final_log_likelihood:.7g}\n'
         if self.raw_estimation_results.null_log_likelihood is not None:
             text += (
-                f'Likelihood ratio test (null):\t\t'
-                f'{self.likelihood_ratio_null:.7g}\n'
+                f'Likelihood ratio test (null):\t\t{self.likelihood_ratio_null:.7g}\n'
             )
             text += f'Rho square (null):\t\t\t{self.rho_square_null:.3g}\n'
-            text += f'Rho bar square (null):\t\t\t' f'{self.rho_bar_square_null:.3g}\n'
+            text += f'Rho bar square (null):\t\t\t{self.rho_bar_square_null:.3g}\n'
         text += (
             f'Akaike Information Criterion:\t{self.akaike_information_criterion:.7g}\n'
         )
@@ -792,7 +799,7 @@ class EstimationResults:
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
-                f'{len(self.beta_values)-1}'
+                f'{len(self.beta_values) - 1}'
             )
             raise ValueError(error_msg)
 
@@ -819,7 +826,7 @@ class EstimationResults:
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
-                f'{len(self.beta_values)-1}'
+                f'{len(self.beta_values) - 1}'
             )
             raise ValueError(error_msg)
         var_covar = self.get_variance_covariance_matrix(
@@ -865,7 +872,7 @@ class EstimationResults:
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
-                f'{len(self.beta_values)-1}'
+                f'{len(self.beta_values) - 1}'
             )
             raise ValueError(error_msg)
         value = self.get_parameter_value_from_index(parameter_index=parameter_index)
@@ -919,7 +926,7 @@ class EstimationResults:
         if parameter_index < 0 or parameter_index >= len(self.beta_values):
             error_msg = (
                 f'Invalid parameter index {parameter_index}. Valid range: 0- '
-                f'{len(self.beta_values)-1}'
+                f'{len(self.beta_values) - 1}'
             )
             raise ValueError(error_msg)
         t_test = self.get_parameter_t_test_from_index(

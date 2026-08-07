@@ -124,8 +124,9 @@ for infeasible_cg, initial_radius, second_derivatives in itertools.product(
     the_biogeme = BIOGEME(
         database,
         logprob,
-        number_of_draws=10000,
+        number_of_draws=10_000,
         seed=1223,
+        analytical_hessian_mode='automatic',
         infeasible_cg=infeasible_cg,
         initial_radius=initial_radius,
         second_derivatives=second_derivatives,

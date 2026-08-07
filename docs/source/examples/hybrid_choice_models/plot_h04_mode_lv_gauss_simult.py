@@ -205,7 +205,10 @@ biogeme = BIOGEME(
     database,
     log_likelihood,
     number_of_draws=NUMBER_OF_DRAWS,
-    calculating_second_derivatives='never',
+    calculating_second_derivatives='analytical',
+    analytical_hessian_mode='chunked',
+    hessian_parameter_block_size=4,
+    hessian_observation_batch_size=100,
     max_iterations=5_000,
     group_of_parameters=built_model.parameter_groups,
 )

@@ -89,7 +89,12 @@ USER_NOTES = (
 # %%
 # Create the Biogeme object.
 the_biogeme = BIOGEME(
-    database, logprob, user_notes=USER_NOTES, number_of_draws=10_000, seed=1223
+    database,
+    logprob,
+    user_notes=USER_NOTES,
+    number_of_draws=10_000,
+    seed=1223,
+    analytical_hessian_mode='automatic',
 )
 the_biogeme.model_name = 'b05a_normal_mixture'
 

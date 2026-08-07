@@ -103,6 +103,9 @@ biogeme = BIOGEME(
     loglikelihood,
     number_of_draws=NUMBER_OF_DRAWS,
     numerically_safe=True,
+    analytical_hessian_mode='chunked',
+    hessian_parameter_block_size=4,
+    hessian_observation_batch_size=100,
     max_iterations=5_000,
 )
 biogeme.model_name = 'plot_h03_model_lv_gauss_seq'

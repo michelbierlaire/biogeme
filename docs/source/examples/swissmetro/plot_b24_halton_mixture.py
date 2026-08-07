@@ -96,7 +96,12 @@ USER_NOTES = (
 # syntax, we calculate the Monte-Carlo approximation with a small
 # number of draws.
 the_biogeme = BIOGEME(
-    database, log_probability, user_notes=USER_NOTES, number_of_draws=10_000, seed=1223
+    database,
+    log_probability,
+    user_notes=USER_NOTES,
+    number_of_draws=10_000,
+    seed=1223,
+    analytical_hessian_mode='automatic',
 )
 the_biogeme.model_name = 'b24_halton_mixture'
 

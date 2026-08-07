@@ -16,6 +16,7 @@ from biogeme.floating_point import JAX_FLOAT
 from .base_expressions import Expression, LogitTuple
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
+from .numeric_expressions import Numeric
 
 if TYPE_CHECKING:
     from biogeme.nests import NestsForCrossNestedLogit, OldNestsForCrossNestedLogit
@@ -23,6 +24,13 @@ if TYPE_CHECKING:
     from . import ExpressionOrNumeric
 
 logger = logging.getLogger(__name__)
+
+# These thresholds are advisory performance heuristics based on CPU benchmarks.
+# They deliberately leave a neutral region where no recommendation is emitted.
+SPARSE_CNL_MIN_MATRIX_SIZE = 500
+SPARSE_CNL_MAX_DENSITY = 0.20
+DENSE_CNL_MAX_MATRIX_SIZE = 300
+DENSE_CNL_MIN_DENSITY = 0.30
 
 
 def index_of(key: float, keys: jnp.ndarray) -> jnp.ndarray:
@@ -64,6 +72,8 @@ class LogCrossNested(Expression):
     formulation is used.
     """
 
+    uses_sparse_memberships = False
+
     def __init__(
         self,
         util: dict[int, ExpressionOrNumeric],
@@ -71,6 +81,7 @@ class LogCrossNested(Expression):
         nests: NestsForCrossNestedLogit | OldNestsForCrossNestedLogit,
         choice: ExpressionOrNumeric,
         mu: ExpressionOrNumeric | None = None,
+        _log_recommendation: bool = True,
     ):
         """Constructor."""
         from biogeme.nests import NestsForCrossNestedLogit
@@ -142,6 +153,19 @@ class LogCrossNested(Expression):
             )
             for nest in nests
         )
+        self.number_of_dense_memberships = (
+            self.number_of_nests * self.number_of_alternatives
+        )
+        self.number_of_active_memberships = sum(
+            not (isinstance(alpha, Numeric) and alpha.value == 0.0)
+            for alpha_row in self.alpha_matrix
+            for alpha in alpha_row
+        )
+        self.membership_density = (
+            self.number_of_active_memberships / self.number_of_dense_memberships
+        )
+        if _log_recommendation:
+            self._log_implementation_recommendation()
 
         if self.av is not None:
             for expression in self.availability_values:
@@ -160,6 +184,40 @@ class LogCrossNested(Expression):
         for nest_alpha_values in self.alpha_matrix:
             for expression in nest_alpha_values:
                 self.children.append(expression)
+
+    def _log_implementation_recommendation(self) -> None:
+        """Log an advisory implementation recommendation once at construction."""
+        active = self.number_of_active_memberships
+        total = self.number_of_dense_memberships
+        density = self.membership_density
+
+        if (
+            not self.uses_sparse_memberships
+            and total >= SPARSE_CNL_MIN_MATRIX_SIZE
+            and density <= SPARSE_CNL_MAX_DENSITY
+        ):
+            logger.info(
+                'The CNL allocation matrix contains %s active memberships out '
+                'of %s (density %.1f%%). The sparse CNL implementation may be '
+                'faster for this specification. Consider using '
+                'log_sparse_cnl or sparse_cnl.',
+                active,
+                total,
+                100.0 * density,
+            )
+        elif self.uses_sparse_memberships and (
+            total < DENSE_CNL_MAX_MATRIX_SIZE
+            or density >= DENSE_CNL_MIN_DENSITY
+        ):
+            logger.info(
+                'The CNL allocation matrix contains %s active memberships out '
+                'of %s (density %.1f%%). The regular dense CNL implementation '
+                'may be faster for this specification. Consider using logcnl '
+                'or cnl.',
+                active,
+                total,
+                100.0 * density,
+            )
 
     def deep_flat_copy(self) -> LogCrossNested:
         """Deep flat copy."""
@@ -189,6 +247,7 @@ class LogCrossNested(Expression):
             nests=self.nests,
             choice=copy_choice,
             mu=copy_mu,
+            _log_recommendation=False,
         )
 
     def logit_choice_avail(self) -> list[LogitTuple]:
@@ -316,6 +375,13 @@ class LogCrossNested(Expression):
         numerically_safe: bool,
     ) -> JaxFunctionType:
         """Generate a compact JAX function for CNL log probability."""
+
+        if numerically_safe:
+            from .log_domain_cnl import LogDomainLogCrossNested
+
+            return LogDomainLogCrossNested.recursive_construct_jax_function(
+                self, numerically_safe=True
+            )
 
         utility_functions = tuple(
             utility.recursive_construct_jax_function(numerically_safe=numerically_safe)

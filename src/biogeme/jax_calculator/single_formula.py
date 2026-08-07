@@ -40,6 +40,9 @@ class CompiledFormulaEvaluator:
         second_derivatives_mode: SecondDerivativesMode,
         numerically_safe: bool,
         profiler: JaxExecutionProfile | None = None,
+        analytical_hessian_mode: str = 'full',
+        hessian_parameter_block_size: int = 4,
+        hessian_observation_batch_size: int = 100,
     ):
         """
         Prepares and compiles the JAX function for evaluating a Biogeme expression.
@@ -50,13 +53,14 @@ class CompiledFormulaEvaluator:
         :param profiler: optional execution profiler used to record build counts,
             call counts, signatures, and timings of JAX-related functions.
         """
-        from biogeme.expressions import build_vectorized_function
-
         self.model_elements = model_elements
-        self.second_derivatives_mode = second_derivatives_mode
+        self.second_derivatives_mode = SecondDerivativesMode(second_derivatives_mode)
         self.numerically_safe = numerically_safe
         self.use_jit = model_elements.use_jit
         self.profiler = profiler if profiler is not None else JaxExecutionProfile()
+        self.analytical_hessian_mode = analytical_hessian_mode
+        self.hessian_parameter_block_size = hessian_parameter_block_size
+        self.hessian_observation_batch_size = hessian_observation_batch_size
         self.free_betas_names = (
             self.model_elements.expressions_registry.free_betas_names
         )
@@ -86,12 +90,11 @@ class CompiledFormulaEvaluator:
             )
         )
         self.profiler.record_build('row_loglikelihood_function')
-        self.vectorized_loglikelihood_function = build_vectorized_function(
+        self.vectorized_loglikelihood_function = jax.vmap(
             self.row_loglikelihood_function,
-            use_jit=self.use_jit,
-            profiler=self.profiler,
-            profile_name='vectorized_loglikelihood_function',
+            in_axes=(None, 0, 0, None),
         )
+        self.profiler.record_build('vectorized_loglikelihood_function')
 
         if self.model_elements.weight is not None:
             weight_function = (
@@ -99,12 +102,11 @@ class CompiledFormulaEvaluator:
                     numerically_safe=numerically_safe
                 )
             )
-            self.vectorized_weight_function = build_vectorized_function(
+            self.vectorized_weight_function = jax.vmap(
                 weight_function,
-                use_jit=self.use_jit,
-                profiler=self.profiler,
-                profile_name='vectorized_weight_function',
+                in_axes=(None, 0, 0, None),
             )
+            self.profiler.record_build('vectorized_weight_function')
         else:
             self.vectorized_weight_function = None
 
@@ -121,7 +123,7 @@ class CompiledFormulaEvaluator:
                 weights = self.vectorized_weight_function(
                     params, data, draws, random_variables
                 )
-                values *= weights
+                values = values * weights
             return jnp.asarray(jnp.sum(values), dtype=JAX_FLOAT), values
 
         self.sum_function = jax.jit(sum_function) if self.use_jit else sum_function
@@ -133,22 +135,63 @@ class CompiledFormulaEvaluator:
             draws: jnp.ndarray,
             random_variables: jnp.ndarray,
         ) -> jnp.ndarray:
-            return self.sum_function(params, data, draws, random_variables)[0]
+            return sum_function(params, data, draws, random_variables)[0]
 
-        self.scalar_function = (
-            jax.jit(scalar_function) if self.use_jit else scalar_function
-        )
+        self.scalar_function = scalar_function
         self.profiler.record_build('scalar_function')
-        self.value_and_grad_function = jax.value_and_grad(
-            self.scalar_function,
-            argnums=0,
+        value_and_grad_function = jax.value_and_grad(scalar_function, argnums=0)
+        gradient_function = jax.grad(scalar_function, argnums=0)
+        self.value_and_grad_function = (
+            jax.jit(value_and_grad_function)
+            if self.use_jit
+            else value_and_grad_function
         )
         self.profiler.record_build('value_and_grad_function')
-        self.autodiff_hessian_function = jax.jacfwd(
-            jax.grad(self.scalar_function, argnums=0),
+        autodiff_hessian_function = jax.jacfwd(
+            jax.grad(scalar_function, argnums=0),
             argnums=0,
         )
+        self.autodiff_hessian_function = (
+            jax.jit(autodiff_hessian_function)
+            if self.use_jit
+            else autodiff_hessian_function
+        )
         self.profiler.record_build('autodiff_hessian_function')
+        self._chunked_hessian_functions = {}
+
+        def build_chunked_hessian_function(block_size: int):
+            """Build an exact Hessian-vector product function for one block."""
+
+            def hessian_vector_products(
+                params: jnp.ndarray,
+                directions: jnp.ndarray,
+                data: jnp.ndarray,
+                draws: jnp.ndarray,
+                random_variables: jnp.ndarray,
+            ) -> jnp.ndarray:
+                def one_product(direction: jnp.ndarray) -> jnp.ndarray:
+                    def gradient_at(candidate_params: jnp.ndarray) -> jnp.ndarray:
+                        return gradient_function(
+                            candidate_params, data, draws, random_variables
+                        )
+
+                    return jax.jvp(
+                        gradient_at,
+                        (params,),
+                        (direction,),
+                    )[1]
+
+                return jax.vmap(one_product)(directions)
+
+            result = (
+                jax.jit(hessian_vector_products)
+                if self.use_jit
+                else hessian_vector_products
+            )
+            self.profiler.record_build(f'chunked_hessian_vector_products[{block_size}]')
+            return result
+
+        self._build_chunked_hessian_function = build_chunked_hessian_function
 
         def one_observation_loglikelihood(
             params: list[float],
@@ -218,6 +261,25 @@ class CompiledFormulaEvaluator:
         self.bhhh_function = jax.jit(bhhh_function) if self.use_jit else bhhh_function
         self.profiler.record_build('bhhh_function')
 
+        def value_gradient_hessian_function(
+            params: jnp.ndarray,
+            data: jnp.ndarray,
+            draws: jnp.ndarray,
+            random_variables: jnp.ndarray,
+        ) -> tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+            value, gradient = value_and_grad_function(
+                params, data, draws, random_variables
+            )
+            hessian = autodiff_hessian_function(params, data, draws, random_variables)
+            return value, gradient, hessian
+
+        self.value_gradient_hessian_function = (
+            jax.jit(value_gradient_hessian_function)
+            if self.use_jit
+            else value_gradient_hessian_function
+        )
+        self.profiler.record_build('value_gradient_hessian_function')
+
     def evaluate(
         self,
         the_betas: dict[str, float],
@@ -282,6 +344,38 @@ class CompiledFormulaEvaluator:
             error_msg = 'The second derivatives are not supposed to be evaluated'
             raise BiogemeError(error_msg)
 
+        if self.second_derivatives_mode == SecondDerivativesMode.ANALYTICAL:
+            if self.analytical_hessian_mode == 'chunked':
+                return self._evaluate_chunked_hessian_values(
+                    free_betas_values=free_betas_values,
+                    block_size=self.hessian_parameter_block_size,
+                    observation_batch_size=self.hessian_observation_batch_size,
+                )
+            value, the_gradient, the_hessian = self.profiler.timed_call(
+                'value_gradient_hessian_function',
+                self.value_gradient_hessian_function,
+                free_betas_values,
+                self.data_jax,
+                self.draws_jax,
+                self.random_variables_jax,
+            )
+            if jnp.all(the_gradient == 0.0):
+                the_hessian = np.zeros(
+                    (len(free_betas_values), len(free_betas_values)),
+                    dtype=NUMPY_FLOAT,
+                )
+            elif jnp.any(jnp.isnan(the_hessian)):
+                logger.warning(
+                    'The calculation of second derivatives generated numerical errors.'
+                )
+
+            return FunctionOutput(
+                function=float(value),
+                gradient=np.asarray(the_gradient, dtype=NUMPY_FLOAT),
+                hessian=np.asarray(the_hessian, dtype=NUMPY_FLOAT),
+                bhhh=None,
+            )
+
         value, the_gradient = self.profiler.timed_call(
             'value_and_grad_function',
             self.value_and_grad_function,
@@ -297,28 +391,144 @@ class CompiledFormulaEvaluator:
         elif self.second_derivatives_mode == SecondDerivativesMode.FINITE_DIFFERENCES:
             the_hessian = self._evaluate_finite_difference_hessian(free_betas_values)
         else:
-            hess_autodiff = self.profiler.timed_call(
-                'autodiff_hessian_function',
-                self.autodiff_hessian_function,
-                free_betas_values,
-                self.data_jax,
-                self.draws_jax,
-                self.random_variables_jax,
+            raise BiogemeError(
+                f'Unknown second derivatives mode: {self.second_derivatives_mode}'
             )
-            if jnp.any(jnp.isnan(hess_autodiff)):
-                logger.warning(
-                    'The calculation of second derivatives generated numerical errors.'
-                )
-            #    raise BiogemeError(
-            #        'The calculation of second derivatives generated numerical errors.'
-            #    )
-
-            the_hessian = np.asarray(hess_autodiff, dtype=NUMPY_FLOAT)
 
         return FunctionOutput(
             function=float(value),
             gradient=np.asarray(the_gradient, dtype=NUMPY_FLOAT),
             hessian=the_hessian,
+            bhhh=None,
+        )
+
+    def evaluate_chunked_hessian(
+        self,
+        the_betas: dict[str, float],
+        block_size: int,
+        observation_batch_size: int | None = None,
+    ) -> FunctionOutput:
+        """Experimentally calculate the exact Hessian in parameter blocks.
+
+        This method leaves :meth:`evaluate` and the production analytical
+        Hessian unchanged. Each block contains Hessian-vector products for a
+        subset of the identity basis, limiting the number of forward tangent
+        directions propagated simultaneously through the likelihood.
+
+        :param the_betas: Parameter values keyed by name.
+        :param block_size: Number of Hessian columns evaluated simultaneously.
+        :param observation_batch_size: Optional number of observations evaluated
+            at once. The likelihood contributions and their derivatives are
+            accumulated exactly across batches.
+        """
+        if not isinstance(block_size, int) or isinstance(block_size, bool):
+            raise BiogemeError(
+                f'Hessian block size must be an integer. Got {block_size!r}.'
+            )
+        if block_size <= 0:
+            raise BiogemeError(
+                f'Hessian block size must be strictly positive. Got {block_size}.'
+            )
+        if observation_batch_size is not None:
+            if not isinstance(observation_batch_size, int) or isinstance(
+                observation_batch_size, bool
+            ):
+                raise BiogemeError(
+                    'Observation batch size must be an integer or None. '
+                    f'Got {observation_batch_size!r}.'
+                )
+            if observation_batch_size <= 0:
+                raise BiogemeError(
+                    'Observation batch size must be strictly positive. '
+                    f'Got {observation_batch_size}.'
+                )
+        if self.second_derivatives_mode == SecondDerivativesMode.NEVER:
+            raise BiogemeError(
+                'The second derivatives are not supposed to be evaluated'
+            )
+
+        free_betas_values = (
+            self.model_elements.expressions_registry.get_complete_betas_array(
+                betas_dict=the_betas
+            )
+        )
+        return self._evaluate_chunked_hessian_values(
+            free_betas_values=free_betas_values,
+            block_size=block_size,
+            observation_batch_size=observation_batch_size,
+        )
+
+    def _evaluate_chunked_hessian_values(
+        self,
+        free_betas_values,
+        block_size: int,
+        observation_batch_size: int | None,
+    ) -> FunctionOutput:
+        """Calculate a chunked Hessian from an ordered parameter array."""
+        parameters = jnp.asarray(free_betas_values, dtype=JAX_FLOAT)
+        number_of_parameters = len(free_betas_values)
+        effective_block_size = min(block_size, number_of_parameters)
+
+        block_function = self._chunked_hessian_functions.get(effective_block_size)
+        if block_function is None:
+            block_function = self._build_chunked_hessian_function(effective_block_size)
+            self._chunked_hessian_functions[effective_block_size] = block_function
+
+        identity = np.eye(number_of_parameters, dtype=NUMPY_FLOAT)
+        hessian = np.zeros(
+            (number_of_parameters, number_of_parameters), dtype=NUMPY_FLOAT
+        )
+        gradient = np.zeros(number_of_parameters, dtype=NUMPY_FLOAT)
+        value = 0.0
+
+        number_of_observations = self.data_jax.shape[0]
+        batch_size = observation_batch_size or number_of_observations
+        for observation_start in range(0, number_of_observations, batch_size):
+            observation_stop = min(
+                observation_start + batch_size, number_of_observations
+            )
+            data_batch = self.data_jax[observation_start:observation_stop]
+            draws_batch = (
+                None
+                if self.draws_jax is None
+                else self.draws_jax[observation_start:observation_stop]
+            )
+            batch_value, batch_gradient = self.profiler.timed_call(
+                'chunked_value_and_grad_function',
+                self.value_and_grad_function,
+                parameters,
+                data_batch,
+                draws_batch,
+                self.random_variables_jax,
+            )
+            value += float(batch_value)
+            gradient += np.asarray(batch_gradient, dtype=NUMPY_FLOAT)
+
+            for start in range(0, number_of_parameters, effective_block_size):
+                stop = min(start + effective_block_size, number_of_parameters)
+                actual_size = stop - start
+                directions = np.zeros(
+                    (effective_block_size, number_of_parameters), dtype=NUMPY_FLOAT
+                )
+                directions[:actual_size] = identity[start:stop]
+                products = self.profiler.timed_call(
+                    'chunked_hessian_vector_products',
+                    block_function,
+                    parameters,
+                    jnp.asarray(directions, dtype=JAX_FLOAT),
+                    data_batch,
+                    draws_batch,
+                    self.random_variables_jax,
+                )
+                # Each returned row is H @ e_i, hence a Hessian column.
+                hessian[:, start:stop] += np.asarray(
+                    products[:actual_size], dtype=NUMPY_FLOAT
+                ).T
+
+        return FunctionOutput(
+            function=value,
+            gradient=gradient,
+            hessian=hessian,
             bhhh=None,
         )
 

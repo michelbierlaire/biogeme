@@ -76,7 +76,13 @@ log_probability = log(MonteCarlo(conditional_probability))
 
 # %%
 # Create the Biogeme object.
-the_biogeme = BIOGEME(database, log_probability, number_of_draws=10000, seed=1223)
+the_biogeme = BIOGEME(
+    database,
+    log_probability,
+    number_of_draws=10_000,
+    seed=1223,
+    analytical_hessian_mode='automatic',
+)
 the_biogeme.model_name = 'b06a_unif_mixture'
 
 # %%

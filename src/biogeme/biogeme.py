@@ -11,11 +11,13 @@ from __future__ import annotations
 
 import difflib
 import logging
+import os
 import warnings
 from datetime import datetime
 from pathlib import Path
 
 import arviz as az
+import jax
 import numpy as np
 import pandas as pd
 import pymc as pm
@@ -136,6 +138,10 @@ class BIOGEME:
         'generate_yaml': bool,
         'generate_netcdf': bool,
         'optimization_algorithm': str,
+        'analytical_hessian_mode': str,
+        'hessian_parameter_block_size': int,
+        'hessian_observation_batch_size': int,
+        'hessian_memory_fraction': float,
         'maximum_number_catalog_expressions': int,
         'max_number_parameters_to_report': int,
     }
@@ -447,16 +453,125 @@ class BIOGEME:
     @property
     def function_evaluator(self) -> CompiledFormulaEvaluator:
         if self._function_evaluator is None:
+            hessian_mode = self._select_analytical_hessian_mode()
             self._function_evaluator = (
                 CompiledFormulaEvaluator(
                     model_elements=self.model_elements,
                     second_derivatives_mode=self.second_derivatives_mode,
                     numerically_safe=self.numerically_safe,
+                    analytical_hessian_mode=hessian_mode,
+                    hessian_parameter_block_size=self.hessian_parameter_block_size,
+                    hessian_observation_batch_size=self.hessian_observation_batch_size,
                 )
                 if self.contains_log_likelihood()
                 else None
             )
         return self._function_evaluator
+
+    @staticmethod
+    def _available_jax_memory() -> int | None:
+        """Best-effort available memory for the active JAX device."""
+        try:
+            statistics = jax.devices()[0].memory_stats()
+            if statistics and statistics.get('bytes_limit') is not None:
+                return max(
+                    0,
+                    int(statistics['bytes_limit'])
+                    - int(statistics.get('bytes_in_use', 0)),
+                )
+        except (AttributeError, IndexError, RuntimeError, TypeError, ValueError):
+            pass
+        try:
+            available = int(os.sysconf('SC_AVPHYS_PAGES')) * int(
+                os.sysconf('SC_PAGE_SIZE')
+            )
+            return available if available > 0 else None
+        except (AttributeError, OSError, TypeError, ValueError):
+            return None
+
+    def _select_analytical_hessian_mode(self) -> str:
+        """Select and validate the analytical Hessian implementation."""
+        requested = self.analytical_hessian_mode
+        if self.second_derivatives_mode != SecondDerivativesMode.ANALYTICAL:
+            return 'full'
+
+        observations = self.model_elements.number_of_observations
+        parameters = self.expressions_registry.number_of_free_betas
+        draws = (
+            max(int(self.model_elements.number_of_draws or 0), 1)
+            if self.expressions_registry.requires_draws
+            else 1
+        )
+        available_memory = self._available_jax_memory()
+        budget = (
+            None
+            if available_memory is None
+            else int(available_memory * self.hessian_memory_fraction)
+        )
+
+        # This conservative proxy accounts for double precision tangent values
+        # and a safety multiplier for several live autodiff intermediates.
+        bytes_per_tangent_cell = np.dtype(np.float64).itemsize * 8
+
+        def estimate_bytes(parameter_block: int, observation_batch: int) -> int:
+            return (
+                min(parameter_block, parameters)
+                * min(observation_batch, observations)
+                * draws
+                * bytes_per_tangent_cell
+            )
+
+        full_estimate = estimate_bytes(parameters, observations)
+        chunked_estimate = estimate_bytes(
+            self.hessian_parameter_block_size,
+            self.hessian_observation_batch_size,
+        )
+
+        if requested == 'automatic':
+            if budget is None:
+                selected = (
+                    'chunked' if self.expressions_registry.requires_draws else 'full'
+                )
+            else:
+                selected = 'full' if full_estimate <= budget else 'chunked'
+        else:
+            selected = requested
+
+        selected_estimate = full_estimate if selected == 'full' else chunked_estimate
+        if budget is not None and selected_estimate > budget:
+            denominator = (
+                max(1, min(self.hessian_parameter_block_size, parameters))
+                * draws
+                * bytes_per_tangent_cell
+            )
+            suggested_observation_batch = max(
+                1, min(observations, int(budget / denominator))
+            )
+            raise BiogemeError(
+                'The configured analytical Hessian is estimated to exceed the '
+                'memory budget.\n'
+                f'Requested method: {requested}\n'
+                f'Available memory: {available_memory / 1024**3:.2f} GB\n'
+                f'Hessian memory budget: {budget / 1024**3:.2f} GB\n'
+                f'Observations: {observations}; draws: {draws}; parameters: {parameters}\n'
+                'Suggested configuration:\n'
+                "analytical_hessian_mode = 'chunked'\n"
+                f'hessian_parameter_block_size = {min(4, parameters)}\n'
+                f'hessian_observation_batch_size = {suggested_observation_batch}'
+            )
+
+        logger.info(f'Analytical Hessian method: {selected}')
+        if budget is not None:
+            logger.info(
+                f'Estimated Hessian working memory: {selected_estimate / 1024**3:.2f} GB; '
+                f'budget: {budget / 1024**3:.2f} GB'
+            )
+        if selected == 'chunked':
+            logger.info(
+                f'Hessian parameter block size: {self.hessian_parameter_block_size}; '
+                f'observation batch size: {self.hessian_observation_batch_size}'
+            )
+        return selected
 
     def _normalize_formulas(
         self, formulas: Expression | dict[str, Expression]
@@ -878,12 +993,13 @@ class BIOGEME:
                 modeling_elements=self.model_elements,
                 parameters=opt_parameters,
                 starting_values=estimated_parameters,
-                second_derivatives_mode=self.biogeme_parameters.get_value(
-                    name='calculating_second_derivatives'
-                ),
+                second_derivatives_mode=self.second_derivatives_mode,
                 numerically_safe=self.numerically_safe,
                 number_of_jobs=self.biogeme_parameters.get_value(name='number_of_jobs'),
                 use_jit=self.use_jit,
+                analytical_hessian_mode=self._select_analytical_hessian_mode(),
+                hessian_parameter_block_size=self.hessian_parameter_block_size,
+                hessian_observation_batch_size=self.hessian_observation_batch_size,
             )
 
         return [result.solution for result in bootstrap_results]
@@ -1330,12 +1446,108 @@ class BIOGEME:
                 filename=str(yaml_path)
             )
             self._validate_loaded_estimation_results(results=estimation_results)
+            if not (
+                estimation_results.raw_estimation_results.gradient_bhhh_complete
+                and estimation_results.raw_estimation_results.hessian_complete
+                and estimation_results.raw_estimation_results.bootstrap_complete
+            ):
+                logger.info(
+                    'Optimization results are complete, but post-processing is '
+                    'incomplete. The optimization will not be repeated.'
+                )
+                return self.complete_estimation_results(
+                    estimation_results=estimation_results,
+                    yaml_file_name=str(yaml_path),
+                    resuming=True,
+                    complete_bootstrap=True,
+                )
             return estimation_results
         logger.info(f'No YAML file found at {yaml_path}. Estimation is performed.')
         return self.estimate(
             starting_values=starting_values,
             run_bootstrap=run_bootstrap,
+            yaml_file_name=str(yaml_path),
         )
+
+    def complete_estimation_results(
+        self,
+        estimation_results: EstimationResults,
+        yaml_file_name: str | None = None,
+        resuming: bool = True,
+        complete_bootstrap: bool = False,
+    ) -> EstimationResults:
+        """Calculate missing post-estimation derivatives without optimizing again.
+
+        :param estimation_results: Results containing a completed optimization.
+        :param yaml_file_name: Optional checkpoint file updated after each phase.
+        :param resuming: Whether this completion occurs in a new recovery phase.
+        :param complete_bootstrap: Complete a previously requested bootstrap.
+        """
+        self._validate_loaded_estimation_results(results=estimation_results)
+        raw_results = estimation_results.raw_estimation_results
+        if not raw_results.optimization_complete:
+            raise BiogemeError(
+                'Cannot complete results before optimization is complete.'
+            )
+        if resuming and raw_results.monte_carlo:
+            logger.warning(
+                'Post-estimation derivatives are resumed for a Monte Carlo model. '
+                'Exact reproduction of the optimization draws is guaranteed only '
+                'when a fixed random seed was configured.'
+            )
+
+        checkpoint = Path(yaml_file_name) if yaml_file_name is not None else None
+
+        def save_checkpoint() -> None:
+            if checkpoint is not None:
+                estimation_results.dump_yaml_file(filename=str(checkpoint))
+
+        beta_values = estimation_results.get_beta_values()
+        if not raw_results.gradient_bhhh_complete:
+            logger.info('Calculate final gradient and BHHH')
+            derivative_result = self.function_evaluator.evaluate(
+                the_betas=beta_values,
+                gradient=True,
+                hessian=False,
+                bhhh=True,
+            )
+            raw_results.final_log_likelihood = derivative_result.function
+            raw_results.gradient = safe_serialize_array(derivative_result.gradient)
+            raw_results.bhhh = safe_serialize_array(derivative_result.bhhh)
+            raw_results.gradient_bhhh_complete = True
+            save_checkpoint()
+
+        if not raw_results.hessian_complete:
+            logger.info('Calculate second derivatives')
+            hessian_result = self.function_evaluator.evaluate(
+                the_betas=beta_values,
+                gradient=True,
+                hessian=True,
+                bhhh=False,
+            )
+            raw_results.hessian = safe_serialize_array(hessian_result.hessian)
+            raw_results.hessian_complete = True
+            raw_results.analytical_hessian_mode = (
+                self.function_evaluator.analytical_hessian_mode
+            )
+            raw_results.hessian_parameter_block_size = self.hessian_parameter_block_size
+            raw_results.hessian_observation_batch_size = (
+                self.hessian_observation_batch_size
+            )
+            save_checkpoint()
+
+        if complete_bootstrap and not raw_results.bootstrap_complete:
+            logger.info('Resume bootstrap calculations')
+            start_time = datetime.now()
+            bootstrap_results = self._bootstrap(estimated_parameters=beta_values)
+            raw_results.bootstrap = [
+                one_result.tolist() for one_result in bootstrap_results
+            ]
+            raw_results.bootstrap_time = datetime.now() - start_time
+            raw_results.bootstrap_complete = True
+            save_checkpoint()
+
+        return EstimationResults(raw_estimation_results=raw_results)
 
     @deprecated_parameters(
         {
@@ -1350,9 +1562,12 @@ class BIOGEME:
         self,
         starting_values: dict[str, float] | None = None,
         run_bootstrap: bool = False,
+        yaml_file_name: str | None = None,
     ) -> EstimationResults:
         """Estimate the parameters of the model(s).
 
+        :param yaml_file_name: Optional YAML destination used for recoverable
+            intermediate and final results.
         :return: object containing the estimation results.
         :rtype: biogeme.bioResults
 
@@ -1433,27 +1648,6 @@ class BIOGEME:
             algorithm_results.solution
         )
 
-        calculate_hessian = self.second_derivatives_mode != SecondDerivativesMode.NEVER
-        if calculate_hessian:
-            logger.info('Calculate second derivatives and BHHH')
-        else:
-            logger.info('Calculate BHHH')
-        f_g_h_b: FunctionOutput = self.function_evaluator.evaluate(
-            the_betas=optimal_betas,
-            gradient=True,
-            hessian=calculate_hessian,
-            bhhh=True,
-        )
-
-        if run_bootstrap:
-            start_time = datetime.now()
-            bootstrap_results = self._bootstrap(estimated_parameters=optimal_betas)
-            # Time needed to generate the bootstrap results
-            bootstrap_time = datetime.now() - start_time
-        else:
-            bootstrap_results = []
-            bootstrap_time = None
-
         clean_optimization_messages = {}
         for key, value in algorithm_results.optimization_messages.items():
             if isinstance(value, np.floating):
@@ -1468,9 +1662,21 @@ class BIOGEME:
             if self.null_loglikelihood is not None
             else None
         )
-        the_hessian = (
-            None if f_g_h_b.hessian is None else safe_serialize_array(f_g_h_b.hessian)
+        final_function = self.function_evaluator.evaluate(
+            the_betas=optimal_betas,
+            gradient=False,
+            hessian=False,
+            bhhh=False,
         )
+        checkpoint_path: Path | None = None
+        if self.biogeme_parameters.get_value('generate_yaml'):
+            checkpoint_path = (
+                Path(yaml_file_name)
+                if yaml_file_name is not None
+                else self._default_yaml_file_path()
+            )
+            self.yaml_filename = str(checkpoint_path)
+
         raw_estimation_results = RawEstimationResults(
             model_name=self.model_name,
             user_notes=self.user_notes,
@@ -1478,12 +1684,12 @@ class BIOGEME:
             beta_values=algorithm_results.solution.tolist(),
             lower_bounds=[bound[0] for bound in self.expressions_registry.bounds],
             upper_bounds=[bound[1] for bound in self.expressions_registry.bounds],
-            gradient=safe_serialize_array(f_g_h_b.gradient),
-            hessian=the_hessian,
-            bhhh=safe_serialize_array(f_g_h_b.bhhh),
+            gradient=None,
+            hessian=None,
+            bhhh=None,
             null_log_likelihood=null_log_likelihood,
             initial_log_likelihood=init_log_likelihood,
-            final_log_likelihood=f_g_h_b.function,
+            final_log_likelihood=final_function.function,
             data_name=self.model_elements.database.name,
             sample_size=self.model_elements.sample_size,
             number_of_observations=self.model_elements.number_of_observations,
@@ -1494,12 +1700,46 @@ class BIOGEME:
             draws_processing_time=self.model_elements.draws_management.processing_time,
             optimization_messages=clean_optimization_messages,
             convergence=algorithm_results.convergence,
-            bootstrap=[one_result.tolist() for one_result in bootstrap_results],
-            bootstrap_time=bootstrap_time,
+            bootstrap=[],
+            bootstrap_time=None,
+            optimization_complete=True,
+            gradient_bhhh_complete=False,
+            hessian_complete=(
+                self.second_derivatives_mode == SecondDerivativesMode.NEVER
+            ),
+            bootstrap_complete=not run_bootstrap,
+            analytical_hessian_mode=self.function_evaluator.analytical_hessian_mode,
+            hessian_parameter_block_size=self.hessian_parameter_block_size,
+            hessian_observation_batch_size=self.hessian_observation_batch_size,
         )
         estimation_results = EstimationResults(
             raw_estimation_results=raw_estimation_results
         )
+        if checkpoint_path is not None:
+            logger.info(
+                f'Optimization is complete. Save recoverable results in {checkpoint_path}.'
+            )
+            estimation_results.dump_yaml_file(filename=str(checkpoint_path))
+
+        estimation_results = self.complete_estimation_results(
+            estimation_results=estimation_results,
+            yaml_file_name=(None if checkpoint_path is None else str(checkpoint_path)),
+            resuming=False,
+        )
+
+        if run_bootstrap:
+            start_time = datetime.now()
+            bootstrap_results = self._bootstrap(estimated_parameters=optimal_betas)
+            estimation_results.raw_estimation_results.bootstrap = [
+                one_result.tolist() for one_result in bootstrap_results
+            ]
+            estimation_results.raw_estimation_results.bootstrap_time = (
+                datetime.now() - start_time
+            )
+            estimation_results.raw_estimation_results.bootstrap_complete = True
+            if checkpoint_path is not None:
+                estimation_results.dump_yaml_file(filename=str(checkpoint_path))
+
         estimated_betas = estimation_results.get_beta_values()
         for f in self.formulas.values():
             f.change_init_values(estimated_betas)
@@ -1518,9 +1758,8 @@ class BIOGEME:
                 estimation_results=estimation_results,
                 group_of_parameters=self.group_of_parameters,
             )
-        if self.biogeme_parameters.get_value('generate_yaml'):
-            self.yaml_filename = get_new_file_name(self.model_name, 'yaml')
-            estimation_results.dump_yaml_file(filename=self.yaml_filename)
+        if checkpoint_path is not None:
+            estimation_results.dump_yaml_file(filename=str(checkpoint_path))
         return estimation_results
 
     def quick_estimate(self) -> EstimationResults:

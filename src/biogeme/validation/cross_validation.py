@@ -47,6 +47,13 @@ def cross_validate_model(
             model_elements=fold.estimation,
             second_derivatives_mode=parameters['calculating_second_derivatives'],
             numerically_safe=numerically_safe,
+            analytical_hessian_mode=parameters.get('analytical_hessian_mode', 'full'),
+            hessian_parameter_block_size=parameters.get(
+                'hessian_parameter_block_size', 4
+            ),
+            hessian_observation_batch_size=parameters.get(
+                'hessian_observation_batch_size', 100
+            ),
         )
         one_result: AlgorithmResults = model_estimation(
             the_algorithm=the_algorithm,
@@ -94,7 +101,7 @@ def bayesian_cross_validate_model(
         with pm.Model() as model:
             loglike_total = pymc_formula_evaluator(model_elements=modeling_elements)
             pm.Deterministic(modeling_elements.loglikelihood_name, loglike_total)
-            pm.Potential("choice_logp", loglike_total)
+            pm.Potential('choice_logp', loglike_total)
 
             idata, used_numpyro = run_sampling(
                 model=model,

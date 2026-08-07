@@ -6,8 +6,11 @@ Sun Sep 29 16:54:42 2024
 """
 
 import logging
+import os
+import tempfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from yaml import (
@@ -41,9 +44,9 @@ class RawEstimationResults:
     beta_values: list[float]
     lower_bounds: list[float]
     upper_bounds: list[float]
-    gradient: list[float]
-    hessian: list[list[float]]
-    bhhh: list[list[float]]
+    gradient: list[float] | None
+    hessian: list[list[float]] | None
+    bhhh: list[list[float]] | None
     null_log_likelihood: float
     initial_log_likelihood: float | None
     final_log_likelihood: float
@@ -59,6 +62,13 @@ class RawEstimationResults:
     convergence: bool
     bootstrap: list[list[float]]
     bootstrap_time: timedelta | None
+    optimization_complete: bool = True
+    gradient_bhhh_complete: bool = True
+    hessian_complete: bool = True
+    bootstrap_complete: bool = True
+    analytical_hessian_mode: str | None = None
+    hessian_parameter_block_size: int | None = None
+    hessian_observation_batch_size: int | None = None
 
 
 # Register the custom handlers with PyYAML
@@ -81,14 +91,35 @@ def serialize_to_yaml(data: RawEstimationResults, filename: str) -> None:
     # Check for unsafe Python-specific tags
     if contains_python_tags(yaml_string):
         raise ValueError(
-            f"The YAML output [{yaml_string}] contains unsafe Python object tags. Aborting serialization of {filename}."
+            f'The YAML output [{yaml_string}] contains unsafe Python object tags. Aborting serialization of {filename}.'
         )
 
-    with open(filename, 'w') as file:
-        now = datetime.now()
-        print(f'# File {filename} has automatically been generated on {now}', file=file)
-        print(f'# biogeme {get_version()} [{versionDate}]\n', file=file)
-        file.write(yaml_string)
+    destination = Path(filename)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary_name: str | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode='w',
+            encoding='utf-8',
+            dir=destination.parent,
+            prefix=f'.{destination.name}.',
+            suffix='.tmp',
+            delete=False,
+        ) as file:
+            temporary_name = file.name
+            now = datetime.now()
+            print(
+                f'# File {filename} has automatically been generated on {now}',
+                file=file,
+            )
+            print(f'# biogeme {get_version()} [{versionDate}]\n', file=file)
+            file.write(yaml_string)
+            file.flush()
+            os.fsync(file.fileno())
+        os.replace(temporary_name, destination)
+    finally:
+        if temporary_name is not None and os.path.exists(temporary_name):
+            os.unlink(temporary_name)
     logger.info(f'File {filename} has been generated.')
 
 
@@ -119,11 +150,15 @@ def deserialize_from_yaml(filename) -> RawEstimationResults:
         beta_values=list(data['beta_values']),
         lower_bounds=data['lower_bounds'],
         upper_bounds=data['upper_bounds'],
-        gradient=safe_deserialize_array(data['gradient']),
+        gradient=(
+            None
+            if data['gradient'] is None
+            else safe_deserialize_array(data['gradient'])
+        ),
         hessian=(
             None if data['hessian'] is None else safe_deserialize_array(data['hessian'])
         ),
-        bhhh=safe_deserialize_array(data['bhhh']),
+        bhhh=(None if data['bhhh'] is None else safe_deserialize_array(data['bhhh'])),
         null_log_likelihood=data['null_log_likelihood'],
         initial_log_likelihood=data['initial_log_likelihood'],
         final_log_likelihood=data['final_log_likelihood'],
@@ -139,4 +174,11 @@ def deserialize_from_yaml(filename) -> RawEstimationResults:
         convergence=data['convergence'],
         bootstrap=data['bootstrap'],
         bootstrap_time=bootstrap_time,
+        optimization_complete=data.get('optimization_complete', True),
+        gradient_bhhh_complete=data.get('gradient_bhhh_complete', True),
+        hessian_complete=data.get('hessian_complete', True),
+        bootstrap_complete=data.get('bootstrap_complete', True),
+        analytical_hessian_mode=data.get('analytical_hessian_mode'),
+        hessian_parameter_block_size=data.get('hessian_parameter_block_size'),
+        hessian_observation_batch_size=data.get('hessian_observation_batch_size'),
     )

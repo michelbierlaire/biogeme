@@ -5,7 +5,9 @@ Test the check_parameters module
 :date: Thu Dec  1 16:35:18 2022
 
 """
+
 import unittest
+
 import biogeme.check_parameters as cp
 
 
@@ -51,6 +53,14 @@ class TestCheckParameters(unittest.TestCase):
         self.assertEqual(diag, True)
         diag, _ = cp.check_algo_name('any_string')
         self.assertEqual(diag, False)
+
+    def test_check_analytical_hessian_mode(self):
+        for value in ('automatic', 'full', 'chunked'):
+            diag, _ = cp.check_analytical_hessian_mode(value)
+            self.assertTrue(diag)
+        for value in ('invalid', 1):
+            diag, _ = cp.check_analytical_hessian_mode(value)
+            self.assertFalse(diag)
 
     def test_boolean(self):
         diag, _ = cp.is_boolean(True)

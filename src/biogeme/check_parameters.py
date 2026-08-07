@@ -117,6 +117,16 @@ def check_calculating_second_derivatives(x: ParameterValue) -> tuple[bool, str |
     return False, f'Value must be in: {possibilities}'
 
 
+def check_analytical_hessian_mode(x: ParameterValue) -> tuple[bool, str | None]:
+    """Validate the implementation used for an analytical Hessian."""
+    if not isinstance(x, str):
+        return False, f'Parameter must be a string: {x}'
+    possibilities = ['automatic', 'full', 'chunked']
+    if x in possibilities:
+        return True, None
+    return False, f'Value must be in: {possibilities}'
+
+
 def is_boolean(x: ParameterValue) -> tuple[bool, str | None]:
     """Return true if x is a boolean
 

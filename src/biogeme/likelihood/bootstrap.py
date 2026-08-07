@@ -24,6 +24,9 @@ def bootstrap(
     numerically_safe: bool,
     use_jit: bool,
     number_of_jobs: int,
+    analytical_hessian_mode: str = 'full',
+    hessian_parameter_block_size: int = 4,
+    hessian_observation_batch_size: int = 100,
 ) -> list[AlgorithmResults]:
     """
     Perform bootstrap estimation to assess the variability of model parameters.
@@ -63,6 +66,9 @@ def bootstrap(
             model_elements=bootstrap_modeling_elements,
             second_derivatives_mode=second_derivatives_mode,
             numerically_safe=numerically_safe,
+            analytical_hessian_mode=analytical_hessian_mode,
+            hessian_parameter_block_size=hessian_parameter_block_size,
+            hessian_observation_batch_size=hessian_observation_batch_size,
         )
         one_result = model_estimation(
             the_algorithm=the_algorithm,
@@ -79,7 +85,7 @@ def bootstrap(
     if PARALLEL:
         with tqdm_joblib(
             tqdm(
-                desc="Bootstraps",
+                desc='Bootstraps',
                 total=number_of_bootstrap_samples,
             )
         ) as progress_bar:
