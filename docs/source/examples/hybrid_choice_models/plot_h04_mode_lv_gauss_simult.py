@@ -36,6 +36,9 @@ Mon Jun 15 2026, 09:54:37
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from choice_latent_variables import generate_utility_functions
 from likert_spec import likert_indicators, likert_types
 from number_of_draws import NUMBER_OF_DRAWS
@@ -201,20 +204,27 @@ log_likelihood = log(integrated_likelihood)
 # Estimate the model with Biogeme.
 # --------------------------------
 # Existing results are reloaded from the YAML file when available.
+number_of_draws = int(os.environ.get('BIOGEME_H04_NUMBER_OF_DRAWS', NUMBER_OF_DRAWS))
+max_iterations = int(os.environ.get('BIOGEME_H04_MAX_ITERATIONS', '5000'))
+
 biogeme = BIOGEME(
     database,
     log_likelihood,
-    number_of_draws=NUMBER_OF_DRAWS,
+    number_of_draws=number_of_draws,
     calculating_second_derivatives='analytical',
     analytical_hessian_mode='chunked',
     hessian_parameter_block_size=4,
     hessian_observation_batch_size=100,
-    max_iterations=5_000,
+    max_iterations=max_iterations,
     group_of_parameters=built_model.parameter_groups,
 )
 biogeme.model_name = 'plot_h04_mode_lv_gauss_simult'
 
-yaml_file_name = f'saved_results/{biogeme.model_name}.yaml'
+results_directory = Path(
+    os.environ.get('BIOGEME_H04_RESULTS_DIRECTORY', 'saved_results')
+)
+results_directory.mkdir(parents=True, exist_ok=True)
+yaml_file_name = results_directory / f'{biogeme.model_name}.yaml'
 results = biogeme.estimate_or_load(yaml_file_name=yaml_file_name)
 
 # %%
