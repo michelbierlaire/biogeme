@@ -17,8 +17,8 @@ Clone the development branch or exact commit that contains the Hessian changes.
 The reference must have been pushed to GitHub first.
 
 ```bash
-git clone https://github.com/michelbierlaire/biogeme.git "$HOME/biogeme"
-cd "$HOME/biogeme"
+git clone https://github.com/michelbierlaire/biogeme.git "$HOME/github/biogeme"
+cd "$HOME/github/biogeme"
 git checkout GIT_REFERENCE
 ```
 
@@ -27,20 +27,21 @@ locked environment:
 
 ```bash
 docs/source/examples/hybrid_choice_models/jed/setup_biogeme.sh \
-    "$HOME/biogeme" GIT_REFERENCE
+    "$HOME/github/biogeme" GIT_REFERENCE
 ```
 
 The repository requires Python 3.12 or newer. `uv sync --frozen` uses the
-committed lock file and creates `$HOME/biogeme/.venv`.
+committed lock file and creates `$HOME/github/biogeme/.venv`.
 
 ## 2. Submit the preflight
 
-Use the Slurm account reported by `sacctmgr show assoc where user=$USER`. For a
-research account, the defaults are Jed's `standard` partition and `serial` QoS:
+The supplied research job uses Jed's `standard` partition and `serial` QoS. If
+your allocation requires an explicit account, add
+`#SBATCH --account=YOUR_ACCOUNT` to the `.run` file:
 
 ```bash
-cd "$HOME/biogeme"
-docs/source/examples/hybrid_choice_models/jed/submit_h04.sh ACCOUNT preflight
+cd /home/bierlair/github/biogeme
+sbatch docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult_preflight.run
 ```
 
 The preflight uses 1,000 draws and three optimization iterations. It validates
@@ -49,10 +50,8 @@ it is not a statistical result.
 
 Academic users select the academic partition and QoS at submission time:
 
-```bash
-BIOGEME_SLURM_PARTITION=academic BIOGEME_SLURM_QOS=academic \
-docs/source/examples/hybrid_choice_models/jed/submit_h04.sh ACCOUNT preflight
-```
+Academic users must copy the `.run` file and change both `--partition` and
+`--qos` to `academic` before submitting it.
 
 Inspect the job with `squeue --me`, its log under
 `/scratch/$USER/biogeme-h04/COMMIT/preflight/logs`, and the completed accounting
@@ -63,18 +62,14 @@ record with `Sjob JOB_ID` or `sacct -j JOB_ID`.
 After the preflight succeeds:
 
 ```bash
-docs/source/examples/hybrid_choice_models/jed/submit_h04.sh ACCOUNT full
+cd /home/bierlair/github/biogeme
+sbatch docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult.run
 ```
 
 The initial full profile requests 16 CPU cores, 112 GB, and 48 hours. These are
 conservative starting values, not universal recommendations. Review elapsed
-time, peak memory, and CPU efficiency after the first run. Resource settings can
-be overridden without editing the scripts, for example:
-
-```bash
-BIOGEME_H04_CPUS=8 BIOGEME_H04_MEMORY=56G BIOGEME_H04_WALL_TIME=24:00:00 \
-docs/source/examples/hybrid_choice_models/jed/submit_h04.sh ACCOUNT full
-```
+time, peak memory, and CPU efficiency after the first run, then revise the
+corresponding `#SBATCH` directives using the measured values.
 
 By default, persistent files live below
 `/scratch/$USER/biogeme-h04/GIT_COMMIT/{preflight,full}`. Set

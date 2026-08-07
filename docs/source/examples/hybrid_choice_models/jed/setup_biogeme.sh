@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-repository_directory="${1:-$HOME/biogeme}"
+repository_directory="${1:-$HOME/github/biogeme}"
 git_reference="${2:-main}"
 repository_url="${BIOGEME_REPOSITORY_URL:-https://github.com/michelbierlaire/biogeme.git}"
 
