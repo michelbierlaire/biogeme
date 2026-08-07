@@ -66,7 +66,7 @@ cd /home/bierlair/github/biogeme
 sbatch docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult.run
 ```
 
-The initial full profile requests 16 CPU cores, 112 GB, and 48 hours. These are
+The initial full profile requests 16 CPU cores, 7,000 MB per core, and 48 hours. These are
 conservative starting values, not universal recommendations. Review elapsed
 time, peak memory, and CPU efficiency after the first run, then revise the
 corresponding `#SBATCH` directives using the measured values.
