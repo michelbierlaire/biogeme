@@ -211,6 +211,8 @@ examples/notebooks/simpleExample~03.pickle
 examples/notebooks/simpleExample~04.html
 examples/swissmetro/26triangularPanelMixture.run
 *.run
+!docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult.run
+!docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult_preflight.run
 examples/swissmetro/scitas.csh
 examples/swissmetro/scitas.py
 examples/swissmetro/.ipynb_checkpoints/Untitled-checkpoint.ipynb
