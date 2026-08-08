@@ -227,7 +227,8 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             type=float,
             section='Estimation',
             description=(
-                'Maximum fraction of available device memory allocated to analytical Hessian intermediates.'
+                'Maximum fraction of effective process memory allocated to analytical Hessian intermediates. '
+                'Resource-manager limits, such as a Slurm memory allocation, are honored when available.'
             ),
             check=(cp.is_number, cp.is_positive, cp.zero_one),
         ),

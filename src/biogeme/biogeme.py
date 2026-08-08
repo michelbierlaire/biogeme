@@ -12,6 +12,7 @@ from __future__ import annotations
 import difflib
 import logging
 import os
+import re
 import warnings
 from datetime import datetime
 from pathlib import Path
@@ -469,25 +470,93 @@ class BIOGEME:
         return self._function_evaluator
 
     @staticmethod
-    def _available_jax_memory() -> int | None:
-        """Best-effort available memory for the active JAX device."""
+    def _parse_slurm_memory(value: str | None) -> int | None:
+        """Convert a Slurm memory value to bytes.
+
+        Slurm exports bare memory values in megabytes. Explicit binary unit
+        suffixes are accepted as well, which also makes this helper robust to
+        values supplied by wrappers or tests.
+        """
+        if value is None:
+            return None
+        match = re.fullmatch(r'\s*(\d+(?:\.\d+)?)\s*([KMGTP]?)B?\s*', value.upper())
+        if match is None:
+            return None
+        amount = float(match.group(1))
+        if amount <= 0:
+            return None
+        suffix = match.group(2) or 'M'
+        multiplier = {
+            'K': 1024,
+            'M': 1024**2,
+            'G': 1024**3,
+            'T': 1024**4,
+            'P': 1024**5,
+        }[suffix]
+        return int(amount * multiplier)
+
+    @classmethod
+    def _slurm_memory_allocation(cls) -> int | None:
+        """Return the memory allocated to this Slurm job on the current node."""
+        per_node = cls._parse_slurm_memory(os.environ.get('SLURM_MEM_PER_NODE'))
+        if per_node is not None:
+            return per_node
+
+        per_cpu = cls._parse_slurm_memory(os.environ.get('SLURM_MEM_PER_CPU'))
+        if per_cpu is None:
+            return None
+        cpu_count = next(
+            (
+                count
+                for variable in ('SLURM_CPUS_ON_NODE', 'SLURM_CPUS_PER_TASK')
+                if (count := cls._parse_positive_integer(os.environ.get(variable)))
+                is not None
+            ),
+            1,
+        )
+        return per_cpu * cpu_count
+
+    @staticmethod
+    def _parse_positive_integer(value: str | None) -> int | None:
+        """Parse a positive integer environment value."""
+        if value is None:
+            return None
+        try:
+            parsed = int(value)
+        except ValueError:
+            return None
+        return parsed if parsed > 0 else None
+
+    @classmethod
+    def _available_jax_memory(cls) -> int | None:
+        """Best-effort effective memory available to the active JAX process."""
+        candidates: list[int] = []
         try:
             statistics = jax.devices()[0].memory_stats()
             if statistics and statistics.get('bytes_limit') is not None:
-                return max(
+                device_available = max(
                     0,
                     int(statistics['bytes_limit'])
                     - int(statistics.get('bytes_in_use', 0)),
                 )
+                if device_available > 0:
+                    candidates.append(device_available)
         except (AttributeError, IndexError, RuntimeError, TypeError, ValueError):
             pass
+
+        slurm_allocation = cls._slurm_memory_allocation()
+        if slurm_allocation is not None:
+            candidates.append(slurm_allocation)
+
         try:
             available = int(os.sysconf('SC_AVPHYS_PAGES')) * int(
                 os.sysconf('SC_PAGE_SIZE')
             )
-            return available if available > 0 else None
+            if available > 0:
+                candidates.append(available)
         except (AttributeError, OSError, TypeError, ValueError):
-            return None
+            pass
+        return min(candidates) if candidates else None
 
     def _select_analytical_hessian_mode(self) -> str:
         """Select and validate the analytical Hessian implementation."""

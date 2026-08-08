@@ -245,3 +245,64 @@ def test_automatic_hessian_uses_conservative_draws_fallback(
         generate_html=False,
     )
     assert biogeme.function_evaluator.analytical_hessian_mode == 'chunked'
+
+
+@pytest.mark.parametrize(
+    ('value', 'expected'),
+    [
+        ('28000', 28_000 * 1024**2),
+        ('7G', 7 * 1024**3),
+        ('1.5 GB', int(1.5 * 1024**3)),
+        ('invalid', None),
+        ('0', None),
+        (None, None),
+    ],
+)
+def test_parse_slurm_memory(value: str | None, expected: int | None) -> None:
+    assert BIOGEME._parse_slurm_memory(value) == expected
+
+
+def test_slurm_per_node_memory_takes_precedence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv('SLURM_MEM_PER_NODE', '28000')
+    monkeypatch.setenv('SLURM_MEM_PER_CPU', '7000')
+    monkeypatch.setenv('SLURM_CPUS_ON_NODE', '16')
+    assert BIOGEME._slurm_memory_allocation() == 28_000 * 1024**2
+
+
+def test_slurm_per_cpu_memory_uses_allocated_cpu_count(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv('SLURM_MEM_PER_NODE', raising=False)
+    monkeypatch.setenv('SLURM_MEM_PER_CPU', '7000')
+    monkeypatch.setenv('SLURM_CPUS_ON_NODE', '4')
+    assert BIOGEME._slurm_memory_allocation() == 28_000 * 1024**2
+
+
+def test_slurm_per_cpu_memory_is_conservative_without_cpu_count(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv('SLURM_MEM_PER_NODE', raising=False)
+    monkeypatch.setenv('SLURM_MEM_PER_CPU', '7000')
+    monkeypatch.delenv('SLURM_CPUS_ON_NODE', raising=False)
+    monkeypatch.delenv('SLURM_CPUS_PER_TASK', raising=False)
+    assert BIOGEME._slurm_memory_allocation() == 7_000 * 1024**2
+
+
+def test_effective_memory_honors_slurm_allocation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class DeviceWithoutMemoryStatistics:
+        @staticmethod
+        def memory_stats() -> None:
+            return None
+
+    monkeypatch.setattr(
+        biogeme_module.jax,
+        'devices',
+        lambda: [DeviceWithoutMemoryStatistics()],
+    )
+    monkeypatch.setattr(biogeme_module.os, 'sysconf', lambda _: 10_000_000)
+    monkeypatch.setenv('SLURM_MEM_PER_NODE', '28000')
+    assert BIOGEME._available_jax_memory() == 28_000 * 1024**2
