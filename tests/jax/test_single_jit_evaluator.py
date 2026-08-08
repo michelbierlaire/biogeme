@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -154,6 +156,7 @@ def test_chunked_hessian_matches_full_hessian(
         second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
         numerically_safe=False,
     )
+
     betas = {
         'asc_1': 0.3,
         'asc_2': -0.2,
@@ -173,6 +176,34 @@ def test_chunked_hessian_matches_full_hessian(
     np.testing.assert_allclose(
         chunked.hessian, chunked.hessian.T, rtol=1e-10, atol=1e-10
     )
+
+
+def test_chunked_hessian_reports_progress_and_termination(
+    caplog: pytest.LogCaptureFixture,
+):
+    caplog.set_level(logging.INFO, logger='biogeme.jax_calculator.single_formula')
+    elements = _cnl_model_elements(use_jit=False)
+    evaluator = CompiledFormulaEvaluator(
+        model_elements=elements,
+        second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+        numerically_safe=False,
+    )
+    evaluator.evaluate_chunked_hessian(
+        {
+            'asc_1': 0.3,
+            'asc_2': -0.2,
+            'beta_time': -1.4,
+            'mu_1': 1.25,
+            'mu_2': 1.5,
+            'alpha': 0.35,
+        },
+        block_size=2,
+        observation_batch_size=2,
+    )
+    messages = [record.getMessage() for record in caplog.records]
+    assert any('Chunked analytical Hessian calculation started' in m for m in messages)
+    assert any('estimated termination' in m for m in messages)
+    assert any('calculation completed' in m for m in messages)
 
 
 @pytest.mark.parametrize('block_size', [0, -1, 1.5, True])

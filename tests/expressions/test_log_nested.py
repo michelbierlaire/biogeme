@@ -80,6 +80,70 @@ def _manual_nested_log_probability(
     return kernels[choice] - math.log(denominator)
 
 
+def _stable_logsumexp(values: list[float]) -> float:
+    """Evaluate log(sum(exp(values))) without overflowing."""
+    if not values:
+        return -math.inf
+    maximum = max(values)
+    if not math.isfinite(maximum):
+        return maximum
+    return maximum + math.log(
+        sum(math.exp(value - maximum) for value in values)
+    )
+
+
+def _stable_manual_nested_log_probability(
+    utilities: dict[int, float],
+    availability: dict[int, float],
+    choice: int,
+    nest_parameter: float,
+    mu: float | None = None,
+) -> float:
+    """Independent log-domain reference for the test nested structure."""
+    nested_alternatives = [1, 3]
+    alone_alternatives = [2]
+
+    if availability[choice] == 0.0:
+        return -math.inf
+
+    log_biosum = _stable_logsumexp(
+        [
+            math.log(availability[alternative])
+            + nest_parameter * utilities[alternative]
+            for alternative in nested_alternatives
+            if availability[alternative] > 0.0
+        ]
+    )
+
+    kernels: dict[int, float] = {}
+    if math.isfinite(log_biosum):
+        for alternative in nested_alternatives:
+            if availability[alternative] > 0.0:
+                if mu is None:
+                    kernels[alternative] = nest_parameter * utilities[alternative] + (
+                        1.0 / nest_parameter - 1.0
+                    ) * log_biosum
+                else:
+                    kernels[alternative] = (
+                        math.log(mu)
+                        + nest_parameter * utilities[alternative]
+                        + (mu / nest_parameter - 1.0) * log_biosum
+                    )
+    for alternative in alone_alternatives:
+        kernels[alternative] = (
+            utilities[alternative]
+            if mu is None
+            else math.log(mu) + mu * utilities[alternative]
+        )
+
+    denominator_terms = [
+        math.log(availability[alternative]) + kernels[alternative]
+        for alternative in utilities
+        if availability[alternative] > 0.0 and alternative in kernels
+    ]
+    return kernels[choice] - _stable_logsumexp(denominator_terms)
+
+
 def test_lognested_is_complex():
     utilities = {1: 0.0, 2: 1.0, 3: 2.0}
     nests = _build_nested_structure()
@@ -138,6 +202,65 @@ def test_jax_matches_manual_standard_nested_logit():
     )
 
     assert _evaluate_jax_lognested(expression) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize('mu', [None, 1.2])
+def test_numerically_safe_jax_matches_log_domain_reference_for_extreme_utilities(
+    mu,
+):
+    """The safe JAX path must agree with an independent log-domain reference."""
+    utilities = {1: 1000.0, 2: -1000.0, 3: -1000.0}
+    availability = {1: 1.0, 2: 1.0, 3: 1.0}
+    nest_parameter = 1.5
+    nests = _build_nested_structure(nest_parameter=nest_parameter)
+
+    expression = LogNested(
+        util=utilities,
+        av=availability,
+        nests=nests,
+        choice=1,
+        mu=mu,
+    )
+
+    expected = _stable_manual_nested_log_probability(
+        utilities=utilities,
+        availability=availability,
+        choice=1,
+        nest_parameter=nest_parameter,
+        mu=mu,
+    )
+    result = _evaluate_jax_lognested(expression)
+
+    assert np.isfinite(expected)
+    assert np.isfinite(result)
+    assert result == pytest.approx(expected)
+
+
+def test_numerically_safe_jax_ignores_completely_unavailable_nested_nest():
+    """An unavailable nest must not create 0 * (-inf) or contaminate the denominator."""
+    utilities = {1: 0.0, 2: 0.5, 3: 2.0}
+    availability = {1: 0.0, 2: 1.0, 3: 0.0}
+    nest_parameter = 1.5
+    nests = _build_nested_structure(nest_parameter=nest_parameter)
+
+    expression = LogNested(
+        util=utilities,
+        av=availability,
+        nests=nests,
+        choice=2,
+    )
+
+    expected = _stable_manual_nested_log_probability(
+        utilities=utilities,
+        availability=availability,
+        choice=2,
+        nest_parameter=nest_parameter,
+    )
+    result = _evaluate_jax_lognested(expression)
+
+    assert np.isfinite(expected)
+    assert np.isfinite(result)
+    assert result == pytest.approx(expected)
 
 
 @pytest.mark.parametrize('choice', [1, 2, 3])

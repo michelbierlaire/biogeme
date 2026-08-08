@@ -8,6 +8,8 @@ Wed Mar 26 19:30:57 2025
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timedelta
+from time import perf_counter
 
 import jax
 import jax.numpy as jnp
@@ -483,6 +485,23 @@ class CompiledFormulaEvaluator:
 
         number_of_observations = self.data_jax.shape[0]
         batch_size = observation_batch_size or number_of_observations
+        number_of_observation_batches = (
+            number_of_observations + batch_size - 1
+        ) // batch_size
+        number_of_parameter_blocks = (
+            number_of_parameters + effective_block_size - 1
+        ) // effective_block_size
+        total_chunks = number_of_observation_batches * number_of_parameter_blocks
+        progress_interval = max(1, total_chunks // 10)
+        completed_chunks = 0
+        started_at = perf_counter()
+        logger.info(
+            'Chunked analytical Hessian calculation started: %d chunks '
+            '(%d observation batches x %d parameter blocks).',
+            total_chunks,
+            number_of_observation_batches,
+            number_of_parameter_blocks,
+        )
         for observation_start in range(0, number_of_observations, batch_size):
             observation_stop = min(
                 observation_start + batch_size, number_of_observations
@@ -524,6 +543,36 @@ class CompiledFormulaEvaluator:
                 hessian[:, start:stop] += np.asarray(
                     products[:actual_size], dtype=NUMPY_FLOAT
                 ).T
+                completed_chunks += 1
+                if (
+                    completed_chunks % progress_interval == 0
+                    or completed_chunks == total_chunks
+                ):
+                    elapsed_seconds = perf_counter() - started_at
+                    remaining_seconds = (
+                        elapsed_seconds
+                        * (total_chunks - completed_chunks)
+                        / completed_chunks
+                    )
+                    estimated_termination = datetime.now() + timedelta(
+                        seconds=remaining_seconds
+                    )
+                    logger.info(
+                        'Chunked analytical Hessian progress: %d/%d chunks '
+                        '(%d%%), elapsed %.1f s, estimated termination %s.',
+                        completed_chunks,
+                        total_chunks,
+                        round(100 * completed_chunks / total_chunks),
+                        elapsed_seconds,
+                        estimated_termination.astimezone().isoformat(
+                            timespec='seconds'
+                        ),
+                    )
+
+        logger.info(
+            'Chunked analytical Hessian calculation completed in %.1f s.',
+            perf_counter() - started_at,
+        )
 
         return FunctionOutput(
             function=value,

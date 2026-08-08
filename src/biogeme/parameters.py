@@ -69,6 +69,27 @@ def format_comment(the_param: ParameterTuple) -> str:
     return formatted
 
 
+def add_multiline_comment(table: tk.items.Table, name: str, comment: str) -> None:
+    """Attach a possibly multiline comment to an item in a TOML table.
+
+    ``tomlkit`` only accepts a single line in :meth:`Item.comment`.  The first
+    line is therefore attached to the value, while continuation lines are
+    represented by separate, appropriately indented TOML comment items.
+    """
+    lines = comment.splitlines()
+    if not lines:
+        return
+
+    table[name].comment(lines[0])
+    for line in lines[1:]:
+        stripped_line = line.lstrip()
+        indentation = len(line) - len(stripped_line)
+        comment_text = stripped_line.removeprefix('#').lstrip()
+        continuation = tk.comment(comment_text)
+        continuation.indent(indentation)
+        table.add(continuation)
+
+
 def parse_boolean(value: str) -> bool:
     """Transforms one of the string representing a boolean into an actual boolean
 
@@ -318,7 +339,11 @@ class Parameters:
             else:
                 value = parameter.value
             tables[parameter.section].add(parameter.name, value)
-            tables[parameter.section][parameter.name].comment(format_comment(parameter))
+            add_multiline_comment(
+                table=tables[parameter.section],
+                name=parameter.name,
+                comment=format_comment(parameter),
+            )
 
         for s, t in tables.items():
             doc[s] = t

@@ -426,22 +426,50 @@ class LogNested(Expression):
                 axis=1,
             )
 
-            if global_mu is None:
-                nest_kernels = (
-                    mu_u + ((1.0 / mus) - 1.0)[:, None] * log_biosums[:, None]
+            if numerically_safe:
+                # A nest with no available alternatives has a log biosum of
+                # -inf.  Avoid expressions such as 0 * (-inf), and make sure
+                # that an unavailable nest cannot contribute to the kernels.
+                active_nests = jnp.isfinite(log_biosums)
+                safe_log_biosums = jnp.where(active_nests, log_biosums, 0.0)
+
+                if global_mu is None:
+                    nest_kernels = (
+                        mu_u
+                        + ((1.0 / mus) - 1.0)[:, None]
+                        * safe_log_biosums[:, None]
+                    )
+                else:
+                    nest_kernels = (
+                        jnp.log(global_mu)
+                        + mu_u
+                        + ((global_mu / mus) - 1.0)[:, None]
+                        * safe_log_biosums[:, None]
+                    )
+
+                nest_kernels = jnp.where(
+                    (nest_membership != 0.0) & active_nests[:, None],
+                    nest_kernels,
+                    -jnp.inf,
                 )
             else:
-                nest_kernels = (
-                    jnp.log(global_mu)
-                    + mu_u
-                    + ((global_mu / mus) - 1.0)[:, None] * log_biosums[:, None]
-                )
+                if global_mu is None:
+                    nest_kernels = (
+                        mu_u + ((1.0 / mus) - 1.0)[:, None] * log_biosums[:, None]
+                    )
+                else:
+                    nest_kernels = (
+                        jnp.log(global_mu)
+                        + mu_u
+                        + ((global_mu / mus) - 1.0)[:, None]
+                        * log_biosums[:, None]
+                    )
 
-            nest_kernels = jnp.where(
-                nest_membership != 0.0,
-                nest_kernels,
-                -jnp.inf,
-            )
+                nest_kernels = jnp.where(
+                    nest_membership != 0.0,
+                    nest_kernels,
+                    -jnp.inf,
+                )
 
             kernels_from_nests = jax.nn.logsumexp(nest_kernels, axis=0)
 
@@ -456,8 +484,33 @@ class LogNested(Expression):
                 kernels_from_nests,
             )
 
-            denominator = jnp.sum(availabilities * jnp.exp(kernels))
-            log_probability = kernels[choice_index] - jnp.log(denominator)
+            if numerically_safe:
+                positive_availabilities = availabilities > 0.0
+                safe_availabilities = jnp.where(
+                    positive_availabilities,
+                    availabilities,
+                    1.0,
+                )
+                log_availabilities = jnp.where(
+                    positive_availabilities,
+                    jnp.log(safe_availabilities),
+                    -jnp.inf,
+                )
+                log_denominator = jax.nn.logsumexp(
+                    log_availabilities + kernels
+                )
+                # If every alternative is unavailable, the chosen-availability
+                # branch below returns the sentinel value.  Keep the unused
+                # arithmetic finite to avoid propagating inf/nan derivatives.
+                safe_log_denominator = jnp.where(
+                    jnp.isfinite(log_denominator),
+                    log_denominator,
+                    0.0,
+                )
+                log_probability = kernels[choice_index] - safe_log_denominator
+            else:
+                denominator = jnp.sum(availabilities * jnp.exp(kernels))
+                log_probability = kernels[choice_index] - jnp.log(denominator)
 
             unavailable_value = -jnp.finfo(JAX_FLOAT).max
 

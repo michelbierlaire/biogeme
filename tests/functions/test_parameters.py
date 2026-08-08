@@ -384,6 +384,17 @@ class TestToml(unittest.TestCase):
         test_file = path.join(test_dir, 'any_file_name.toml')
         self.biogeme_parameters.read_file(file_name=test_file)
 
+        with open(test_file, encoding='utf-8') as f:
+            generated_content = f.read()
+        self.assertIn(
+            'identification_threshold = 1e-05 # float: if the smallest eigenvalue',
+            generated_content,
+        )
+        self.assertIn(
+            '\n                                 # second derivative matrix',
+            generated_content,
+        )
+
         with self.assertRaises(excep.BiogemeError):
             _ = self.biogeme_parameters.get_value('a_wrong_param', section='Estimation')
 
