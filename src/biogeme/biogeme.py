@@ -822,7 +822,10 @@ class BIOGEME:
                 f'but loaded results correspond to "{raw.model_name}".'
             )
 
-        if raw.data_name != self.database.name:
+        valid_data_names = {self.database.name}
+        if self.database.is_panel():
+            valid_data_names.add(f'flat {self.database.name}')
+        if raw.data_name not in valid_data_names:
             raise BiogemeError(
                 f'Data name mismatch: current database is "{self.database.name}", '
                 f'but loaded results correspond to "{raw.data_name}".'
@@ -847,7 +850,10 @@ class BIOGEME:
                 f'but loaded summary corresponds to "{summary.model_name}".'
             )
 
-        if summary.data_name != self.database.name:
+        valid_data_names = {self.database.name}
+        if self.database.is_panel():
+            valid_data_names.add(f'flat {self.database.name}')
+        if summary.data_name not in valid_data_names:
             raise BiogemeError(
                 f'Data name mismatch: current database is "{self.database.name}", '
                 f'but loaded summary corresponds to "{summary.data_name}".'

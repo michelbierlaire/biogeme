@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -306,3 +307,30 @@ def test_effective_memory_honors_slurm_allocation(
     monkeypatch.setattr(biogeme_module.os, 'sysconf', lambda _: 10_000_000)
     monkeypatch.setenv('SLURM_MEM_PER_NODE', '28000')
     assert BIOGEME._available_jax_memory() == 28_000 * 1024**2
+
+
+def test_panel_checkpoint_accepts_flattened_database_name() -> None:
+    biogeme = BIOGEME(
+        Database(
+            'panel_data',
+            pd.DataFrame(
+                {
+                    'panel_id': [1, 1, 2],
+                    'x': [1.0, 2.0, 3.0],
+                }
+            ),
+        ),
+        -Beta('beta', 0.7, None, None, 0) * Variable('x'),
+        generate_yaml=False,
+        generate_html=False,
+    )
+    biogeme.database.panel('panel_id')
+    biogeme.use_flatten_database = True
+    raw_results = SimpleNamespace(
+        raw_estimation_results=SimpleNamespace(
+            model_name=biogeme.model_name,
+            data_name='flat panel_data',
+            beta_names=['beta'],
+        )
+    )
+    biogeme._validate_loaded_estimation_results(raw_results)
