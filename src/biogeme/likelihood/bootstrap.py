@@ -83,19 +83,29 @@ def bootstrap(
 
     logger.info(f'Number of jobs for bootstrapping: {number_of_jobs}')
     if PARALLEL:
-        with tqdm_joblib(
-            tqdm(
-                desc='Bootstraps',
-                total=number_of_bootstrap_samples,
+        try:
+            with tqdm_joblib(
+                tqdm(
+                    desc='Bootstraps',
+                    total=number_of_bootstrap_samples,
+                )
+            ):
+                results = Parallel(n_jobs=number_of_jobs)(
+                    delayed(run_one_bootstrap_estimation)(_)
+                    for _ in range(number_of_bootstrap_samples)
+                )
+            return results
+        except PermissionError as exc:
+            # Some restricted environments (for example, sandboxed CI jobs)
+            # deny access to the POSIX semaphore limit queried by joblib's
+            # process backend. The bootstrap itself does not require process
+            # workers, so continue serially when worker creation is forbidden.
+            logger.warning(
+                'Parallel bootstrapping is unavailable (%s); continuing serially.',
+                exc,
             )
-        ) as progress_bar:
-            results = Parallel(n_jobs=number_of_jobs)(
-                delayed(run_one_bootstrap_estimation)(_)
-                for _ in range(number_of_bootstrap_samples)
-            )
-        return results
-    else:
-        results = []
-        for _ in tqdm(range(number_of_bootstrap_samples)):
-            results.append(run_one_bootstrap_estimation(_))
-        return results
+
+    results = []
+    for _ in tqdm(range(number_of_bootstrap_samples), desc='Bootstraps'):
+        results.append(run_one_bootstrap_estimation(_))
+    return results
