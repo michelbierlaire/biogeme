@@ -89,7 +89,8 @@ def test_log_domain_remains_finite_for_extreme_utilities(
     assert np.all(np.isfinite(log_domain.hessian))
 
 
-def test_log_domain_handles_a_nest_with_no_available_alternative():
+@pytest.mark.parametrize('expression_class', [LogCrossNested, SparseLogCrossNested])
+def test_log_domain_handles_a_nest_with_no_available_alternative(expression_class):
     nests = NestsForCrossNestedLogit(
         choice_set=[1, 2, 3],
         tuple_of_nests=(
@@ -105,7 +106,7 @@ def test_log_domain_handles_a_nest_with_no_available_alternative():
             ),
         ),
     )
-    expression = LogCrossNested(
+    expression = expression_class(
         util={1: 0.1, 2: 0.2, 3: 0.3},
         av={1: 0.0, 2: 1.0, 3: 1.0},
         nests=nests,

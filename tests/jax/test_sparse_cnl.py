@@ -173,7 +173,7 @@ def test_sparse_cnl_matches_dense(betas, mode, explicit_mu):
     sparse_log_domain_actual = sparse_log_domain.evaluate(betas, *mode)
     assert_outputs_equal(expected, actual)
     assert_outputs_equal(expected, log_domain_actual)
-    assert_outputs_equal(expected, sparse_log_domain_actual)
+    assert_outputs_equal(log_domain_actual, sparse_log_domain_actual)
 
 
 def test_sparse_expression_reports_structural_sparsity():
@@ -182,3 +182,32 @@ def test_sparse_expression_reports_structural_sparsity():
     assert isinstance(expression, SparseLogCrossNested)
     assert expression.number_of_dense_memberships == 12
     assert expression.number_of_active_memberships == 6
+
+
+def test_sparse_safe_matches_dense_safe_when_parameter_alpha_is_zero():
+    """A dynamic zero allocation remains an active edge in safe mode."""
+    betas = {
+        'asc1': 0.0,
+        'asc2': 0.0,
+        'beta': -0.8,
+        'mu1': 1.2,
+        'mu2': 1.4,
+        'mu3': 1.6,
+        'alpha': 0.0,
+        'global_mu': 1.0,
+    }
+    dense = CompiledFormulaEvaluator(
+        model_elements=build_model(LogCrossNested, explicit_mu=False),
+        second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+        numerically_safe=True,
+    )
+    sparse = CompiledFormulaEvaluator(
+        model_elements=build_model(SparseLogCrossNested, explicit_mu=False),
+        second_derivatives_mode=SecondDerivativesMode.ANALYTICAL,
+        numerically_safe=True,
+    )
+
+    expected = dense.evaluate(betas, gradient=True, hessian=False, bhhh=False)
+    actual = sparse.evaluate(betas, gradient=True, hessian=False, bhhh=False)
+
+    assert_outputs_equal(expected, actual)
