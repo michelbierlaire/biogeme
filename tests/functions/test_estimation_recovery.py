@@ -304,7 +304,14 @@ def test_effective_memory_honors_slurm_allocation(
         'devices',
         lambda: [DeviceWithoutMemoryStatistics()],
     )
-    monkeypatch.setattr(biogeme_module.os, 'sysconf', lambda _: 10_000_000)
+    # ``os.sysconf`` is POSIX-only; on Windows add the fake attribute so the
+    # test exercises the same competing-memory path on every platform.
+    monkeypatch.setattr(
+        biogeme_module.os,
+        'sysconf',
+        lambda _: 10_000_000,
+        raising=False,
+    )
     monkeypatch.setenv('SLURM_MEM_PER_NODE', '28000')
     assert BIOGEME._available_jax_memory() == 28_000 * 1024**2
 
