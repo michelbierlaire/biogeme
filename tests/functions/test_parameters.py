@@ -366,14 +366,17 @@ class TestToml(unittest.TestCase):
 
         check_int = self.biogeme_parameters.get_value('missing_data')
         self.assertEqual(check_int, 99999)
+        self.assertIs(type(check_int), int)
 
         check_float = self.biogeme_parameters.get_value(
             'second_derivatives', section='Estimation'
         )
         self.assertEqual(check_float, 1.0)
+        self.assertIs(type(check_float), float)
 
         check_str = self.biogeme_parameters.get_value('optimization_algorithm')
         self.assertEqual(check_str, 'simple_bounds')
+        self.assertIs(type(check_str), str)
 
         # Remove the directory after the test
         shutil.rmtree(test_dir)

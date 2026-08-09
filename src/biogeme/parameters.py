@@ -295,6 +295,12 @@ class Parameters:
                     )
                     logger.warning(warning_msg)
                     continue
+                # ``tomlkit`` represents parsed scalar values with subclasses
+                # carrying TOML trivia (comments and formatting). Keep those
+                # implementation details at the TOML boundary: they must not
+                # leak into result objects that are serialized as YAML.
+                if hasattr(entry_value, 'unwrap'):
+                    entry_value = entry_value.unwrap()
                 if entry_value is None:
                     value = default.value
                 elif default.type is bool:
