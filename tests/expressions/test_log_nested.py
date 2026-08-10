@@ -4,6 +4,9 @@ import math
 
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+import pymc as pm
+import pytensor
 import pytest
 
 from biogeme.exceptions import BiogemeError
@@ -20,6 +23,16 @@ def _evaluate_jax_lognested(expression: LogNested) -> float:
         jnp.array([]),
     )
     return float(value)
+
+
+def _evaluate_pymc_lognested(
+    expression: LogNested, dataframe: pd.DataFrame
+) -> np.ndarray:
+    """Evaluate the PyTensor builder for fixed parameters."""
+    with pm.Model():
+        builder = expression.recursive_construct_pymc_model_builder()
+        tensor = builder(dataframe)
+        return np.asarray(pytensor.function([], tensor)())
 
 
 def _build_nested_structure(nest_parameter=1.5):
@@ -202,6 +215,56 @@ def test_jax_matches_manual_standard_nested_logit():
     )
 
     assert _evaluate_jax_lognested(expression) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize('mu', [None, 1.2])
+def test_pymc_builder_matches_numpy_and_jax(mu):
+    """The PyTensor implementation agrees with both existing backends."""
+    utilities = {1: -0.2, 2: 0.5, 3: 1.4}
+    availability = {1: 1.0, 2: 1.0, 3: 1.0}
+    nest_parameter = 1.6
+    nests = _build_nested_structure(nest_parameter=nest_parameter)
+    choices = [1, 2, 3]
+
+    pymc_values = []
+    numpy_values = []
+    jax_values = []
+    for choice in choices:
+        expression = LogNested(
+            util=utilities,
+            av=availability,
+            nests=nests,
+            choice=choice,
+            mu=mu,
+        )
+        dataframe = pd.DataFrame({'choice': [choice]})
+        pymc_values.append(_evaluate_pymc_lognested(expression, dataframe)[0])
+        numpy_values.append(expression.get_value())
+        jax_values.append(_evaluate_jax_lognested(expression))
+
+    assert pymc_values == pytest.approx(numpy_values)
+    assert pymc_values == pytest.approx(jax_values)
+
+
+def test_pymc_builder_handles_scalar_nest_and_global_parameters():
+    """Scalar fixed parameters are broadcast across all observations."""
+    utilities = {1: -0.2, 2: 0.5, 3: 1.4}
+    availability = {1: 1.0, 2: 1.0, 3: 1.0}
+    nests = _build_nested_structure(nest_parameter=1.6)
+    expression = LogNested(
+        util=utilities,
+        av=availability,
+        nests=nests,
+        choice=1,
+        mu=1.2,
+    )
+
+    dataframe = pd.DataFrame(index=range(4))
+    values = _evaluate_pymc_lognested(expression, dataframe)
+
+    expected = expression.get_value()
+    assert values.shape == (4,)
+    assert values == pytest.approx([expected] * 4)
 
 
 @pytest.mark.parametrize('mu', [None, 1.2])

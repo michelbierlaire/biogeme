@@ -9,11 +9,14 @@ from typing import TYPE_CHECKING
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+import pytensor.tensor as pt
 
 from biogeme.exceptions import BiogemeError
 from biogeme.floating_point import JAX_FLOAT
 
 from .base_expressions import Expression, LogitTuple
+from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
 
@@ -521,3 +524,184 @@ class LogNested(Expression):
             )
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """Return a vectorized PyTensor builder for nested-logit log probabilities.
+
+        The builder mirrors the compact NumPy and JAX implementations above.  In
+        particular, scalar PyMC random variables (nest parameters and the optional
+        global homogeneity parameter) are broadcast to all observations, while
+        utility, availability, and choice expressions are evaluated row by row.
+        """
+
+        utility_builders = tuple(
+            utility.recursive_construct_pymc_model_builder()
+            for utility in self.utility_values
+        )
+        availability_builders = (
+            None
+            if self.availability_values is None
+            else tuple(
+                availability.recursive_construct_pymc_model_builder()
+                for availability in self.availability_values
+            )
+        )
+        choice_builder = self.choice.recursive_construct_pymc_model_builder()
+        nest_parameter_builders = tuple(
+            nest_parameter.recursive_construct_pymc_model_builder()
+            for nest_parameter in self.nest_parameters
+        )
+        mu_builder = (
+            None
+            if self.mu is None
+            else self.mu.recursive_construct_pymc_model_builder()
+        )
+
+        alt_keys = pt.constant(np.asarray(self.alt_ids, dtype=np.int32))
+        nest_membership = pt.as_tensor_variable(self.nest_membership)
+        alone_membership = pt.as_tensor_variable(self.alone_membership)
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            n_obs = len(dataframe)
+
+            def observation_vector(
+                value: pt.TensorVariable, expression_name: str
+            ) -> pt.TensorVariable:
+                if value.ndim == 0:
+                    return pt.ones((n_obs,), dtype=value.dtype) * value
+                if value.ndim != 1:
+                    raise BiogemeError(
+                        'LogNested PyMC builder: '
+                        f'{expression_name} must return a scalar or a 1-D tensor; '
+                        f'got ndim={value.ndim}'
+                    )
+                return value
+
+            utilities = pt.stack(
+                [
+                    observation_vector(utility_builder(dataframe), 'utility')
+                    for utility_builder in utility_builders
+                ],
+                axis=1,
+            )
+
+            if availability_builders is None:
+                availabilities = pt.ones_like(utilities)
+            else:
+                availabilities = pt.stack(
+                    [
+                        observation_vector(
+                            availability_builder(dataframe), 'availability'
+                        )
+                        for availability_builder in availability_builders
+                    ],
+                    axis=1,
+                )
+                availabilities = pt.where(
+                    ~(pt.isnan(availabilities) | pt.isinf(availabilities)),
+                    availabilities,
+                    0.0,
+                )
+
+            utilities = pt.where(
+                ~(pt.isnan(utilities) | pt.isinf(utilities)),
+                utilities,
+                -1.0e30,
+            )
+
+            choice = observation_vector(choice_builder(dataframe), 'choice')
+            choice_i32 = pt.cast(choice, 'int32')
+
+            nest_parameters = pt.stack(
+                [
+                    observation_vector(
+                        nest_parameter_builder(dataframe), 'nest parameter'
+                    )
+                    for nest_parameter_builder in nest_parameter_builders
+                ],
+                axis=1,
+            )
+            if mu_builder is None:
+                global_mu = None
+            else:
+                global_mu = observation_vector(mu_builder(dataframe), 'global mu')
+
+            membership = pt.cast(nest_membership, utilities.dtype)
+            alone = pt.cast(alone_membership, utilities.dtype)
+            negative_infinity = pt.cast(pt.as_tensor_variable(-np.inf), utilities.dtype)
+
+            available = pt.gt(availabilities, 0.0)
+            mu_times_utility = nest_parameters[:, :, None] * utilities[:, None, :]
+            masked_mu_times_utility = pt.where(
+                pt.neq(membership[None, :, :], 0.0) & available[:, None, :],
+                mu_times_utility,
+                negative_infinity,
+            )
+            log_biosums = pt.logsumexp(masked_mu_times_utility, axis=2)
+            active_nests = ~(pt.isnan(log_biosums) | pt.isinf(log_biosums))
+            safe_log_biosums = pt.where(active_nests, log_biosums, 0.0)
+
+            if global_mu is None:
+                nest_kernels = (
+                    mu_times_utility
+                    + ((1.0 / nest_parameters) - 1.0)[:, :, None]
+                    * safe_log_biosums[:, :, None]
+                )
+            else:
+                nest_kernels = (
+                    pt.log(global_mu)[:, None, None]
+                    + mu_times_utility
+                    + ((global_mu[:, None] / nest_parameters) - 1.0)[:, :, None]
+                    * safe_log_biosums[:, :, None]
+                )
+
+            nest_kernels = pt.where(
+                pt.neq(membership[None, :, :], 0.0) & active_nests[:, :, None],
+                nest_kernels,
+                negative_infinity,
+            )
+            kernels_from_nests = pt.logsumexp(nest_kernels, axis=1)
+
+            if global_mu is None:
+                alone_kernels = utilities
+            else:
+                alone_kernels = (
+                    pt.log(global_mu)[:, None] + global_mu[:, None] * utilities
+                )
+
+            kernels = pt.where(
+                pt.neq(alone[None, :], 0.0),
+                alone_kernels,
+                kernels_from_nests,
+            )
+
+            safe_availabilities = pt.where(available, availabilities, 1.0)
+            log_availabilities = pt.where(
+                available,
+                pt.log(safe_availabilities),
+                negative_infinity,
+            )
+            log_denominator = pt.logsumexp(
+                log_availabilities + kernels,
+                axis=1,
+            )
+            safe_log_denominator = pt.where(
+                ~(pt.isnan(log_denominator) | pt.isinf(log_denominator)),
+                log_denominator,
+                0.0,
+            )
+
+            matches = pt.eq(choice_i32[:, None], alt_keys[None, :])
+            choice_index = pt.argmax(matches, axis=1)
+            any_match = pt.any(matches, axis=1)
+            row_index = pt.arange(n_obs)
+            safe_choice_index = pt.where(any_match, choice_index, 0)
+            chosen_kernel = kernels[row_index, safe_choice_index]
+            chosen_availability = availabilities[row_index, safe_choice_index]
+            log_probability = chosen_kernel - safe_log_denominator
+
+            negative_large = pt.cast(pt.as_tensor_variable(-1.0e30), utilities.dtype)
+            valid_choice = any_match & pt.neq(chosen_availability, 0.0)
+            return pt.where(valid_choice, log_probability, negative_large)
+
+        return builder

@@ -4,6 +4,9 @@ import math
 
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+import pymc as pm
+import pytensor
 import pytest
 
 from biogeme.exceptions import BiogemeError
@@ -20,6 +23,14 @@ def _evaluate_jax(expression: LogCrossNested) -> float:
         jnp.array([]),
     )
     return float(value)
+
+
+def _evaluate_pymc(expression: LogCrossNested, dataframe: pd.DataFrame) -> np.ndarray:
+    """Evaluate the PyTensor builder for fixed CNL parameters."""
+    with pm.Model():
+        builder = expression.recursive_construct_pymc_model_builder()
+        tensor = builder(dataframe)
+        return np.asarray(pytensor.function([], tensor)())
 
 
 # Helper to convert Numeric or float to float
@@ -168,6 +179,51 @@ def test_jax_matches_manual_standard_cnl():
     )
 
     assert _evaluate_jax(expression) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize('mu', [None, 1.3])
+def test_pymc_builder_matches_numpy_and_jax(mu):
+    """The PyTensor implementation agrees with both existing backends."""
+    utilities = {1: -0.5, 2: 0.3, 3: 1.2}
+    availability = {1: 1.0, 2: 1.0, 3: 1.0}
+    nests = _build_cross_nested_structure(mu_existing=1.4, mu_public=1.8)
+    choices = [1, 2, 3]
+
+    pymc_values = []
+    numpy_values = []
+    jax_values = []
+    for choice in choices:
+        expression = LogCrossNested(
+            util=utilities,
+            av=availability,
+            nests=nests,
+            choice=choice,
+            mu=mu,
+        )
+        dataframe = pd.DataFrame({'choice': [choice]})
+        pymc_values.append(_evaluate_pymc(expression, dataframe)[0])
+        numpy_values.append(expression.get_value())
+        jax_values.append(_evaluate_jax(expression))
+
+    assert pymc_values == pytest.approx(numpy_values)
+    assert pymc_values == pytest.approx(jax_values)
+
+
+def test_pymc_builder_broadcasts_scalar_nest_and_alpha_parameters():
+    """Scalar PyMC inputs are broadcast over every observation."""
+    nests = _build_cross_nested_structure(mu_existing=1.4, mu_public=1.8)
+    expression = LogCrossNested(
+        util={1: -0.5, 2: 0.3, 3: 1.2},
+        av=None,
+        nests=nests,
+        choice=1,
+        mu=1.3,
+    )
+
+    values = _evaluate_pymc(expression, pd.DataFrame(index=range(4)))
+
+    assert values.shape == (4,)
+    assert values == pytest.approx([expression.get_value()] * 4)
 
 
 @pytest.mark.parametrize('choice', [1, 2, 3])

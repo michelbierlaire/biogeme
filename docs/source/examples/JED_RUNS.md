@@ -8,6 +8,7 @@ example that consumes another example's results waits for its producer.
 The current resource defaults are based on the existing JED files:
 
 - standard and Bayesian/Monte-Carlo estimation: 36 CPU cores, 70 hours;
+- high-draw panel simulation: 36 CPU cores, 7 GB per core, 70 hours;
 - maintained H04 hybrid estimation: 8 cores, 7 GB per core, 2 days;
 - non-estimation reports: 4 cores, 4 hours.
 
@@ -15,6 +16,32 @@ Resource profiles and dependency exceptions are in
 tools/jed_examples.toml. The generated .run files, Slurm logs, job IDs,
 diagnostics, and reset backups are stored below .jed_runs/, which is ignored
 by Git.
+
+## Start a completely fresh run
+
+When the previous run and all of its Slurm jobs are finished, use
+`tools/jed_fresh_start.py` to remove every generated example artifact. This
+includes files in `saved_results` and `saved_html`, root-level result files,
+generated `.run` files, Slurm logs, diagnostics, Python/pytest caches, and the
+ignored `.jed_runs/` job state. Model scripts, input data, configuration files,
+and reusable runner code are preserved. The JED state is removed without a
+backup, so use the reset command below when recovery is required.
+
+~~~bash
+cd "$HOME/github/biogeme"
+
+# Review the complete deletion list first.
+python tools/jed_fresh_start.py
+
+# Start the fresh run (only after confirming that no Slurm job is running).
+python tools/jed_fresh_start.py --apply
+~~~
+
+The cleaner keeps empty `saved_results` and `saved_html` directories so that
+dependent examples and the result harvester can recreate files there. It does
+not follow symlinks. Never use `git clean -fdx` as a substitute: that command
+can remove source files, input data, environments, and other recoverable
+state outside the example-output scope.
 
 ## Complete workflow
 
@@ -37,6 +64,10 @@ python tools/jed_examples.py launch --run-id "$RUN_ID" --force
 # 4. Inspect status at any time.
 python tools/jed_examples.py status
 python tools/jed_examples.py status --verbose
+
+# 5. After every job is finished, inspect and remove root-level generated files.
+python tools/jed_cleanup.py
+python tools/jed_cleanup.py --apply
 ~~~
 
 ## Investigate failed jobs
@@ -51,12 +82,17 @@ output, standard error, and completion records afterward.
 ~~~bash
 cd "$HOME/github/biogeme"
 
+# Inspect the newest run.
+python tools/jed_error_report.py
+
+# Or inspect a particular run.
 python tools/jed_error_report.py --run-id "$RUN_ID"
 less ".jed_runs/$RUN_ID/error-report.md"
 ~~~
 
-If the launch shell no longer has `RUN_ID`, omit the option to inspect the
-newest run. To send the complete Markdown report directly to the terminal:
+The command prints the report path and the number of failed jobs. If the
+launch shell no longer has `RUN_ID`, use the no-argument form above to inspect
+the newest run. To send the complete Markdown report directly to the terminal:
 
 ~~~bash
 python tools/jed_error_report.py --run-id "$RUN_ID" --output -
@@ -67,6 +103,19 @@ python tools/jed_error_report.py --run-id "$RUN_ID" --output -
 Commit results only after every job in the run is reported as
 `finished without error`. Do not commit while a job is `running`,
 `scheduled and pending`, `not scheduled`, or `finished with errors`.
+
+After the run is complete, copy the current result files into the tracked
+archive directories and clean the root-level working files:
+
+~~~bash
+cd "$HOME/github/biogeme"
+python tools/jed_cleanup.py
+python tools/jed_cleanup.py --apply
+~~~
+
+The first command is a dry run. The second removes only generated artifacts
+outside `saved_results/` and `saved_html/`; it preserves source code, input
+data, configuration files, `.run` files, and the archived result copies.
 
 Run the status command once more and keep the diagnostic output with the
 run state (the `.jed_runs/` directory is ignored by Git):
@@ -144,9 +193,14 @@ $HOME/venvs/biogeme/bin/python if that interpreter is unavailable.
 
 The reset command removes generated files from the example directories by
 moving them into .jed_runs/resets/<timestamp>/. It preserves Python source,
-input data, configuration files, and .run files. On successful completion,
-new root-level YAML/NetCDF/HTML/Pareto results are harvested into the
-saved_results or saved_html directory expected by dependent examples.
+input data, configuration files, and .run files. During a run, job-finish
+copies new root-level YAML/NetCDF/HTML/Pareto results into the saved_results
+or saved_html directory expected by dependent examples. It deliberately
+leaves the root-level files in place so concurrent jobs cannot invalidate one
+another's harvest; same-named archive copies are replaced. Once all jobs have
+completed, run `python tools/jed_cleanup.py`
+to review those root-level files and `python tools/jed_cleanup.py --apply` to
+remove them.
 
 The status report uses both Slurm accounting and the job completion record.
 For jobs that declare an expected artifact, success requires Slurm exit code

@@ -187,6 +187,47 @@ class TestBiogeme(unittest.TestCase):
         results = my_biogeme.estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
+    def test_bootstrap_with_second_derivatives_never(self):
+        data = getData(1)
+        my_biogeme = BIOGEME(
+            data,
+            self.get_dict_of_expressions(),
+            calculating_second_derivatives='never',
+            bootstrap_samples=2,
+            number_of_jobs=1,
+            save_iterations=False,
+            generate_yaml=False,
+            generate_html=False,
+        )
+        results = my_biogeme.estimate(run_bootstrap=True)
+        self.assertEqual(len(results.raw_estimation_results.bootstrap), 2)
+
+    def test_automatic_algorithm_configuration_is_not_mutated(self):
+        my_biogeme = BIOGEME(
+            getData(1),
+            self.get_dict_of_expressions(),
+            calculating_second_derivatives='never',
+            bootstrap_samples=0,
+        )
+        self.assertEqual(my_biogeme.optimization_algorithm, 'automatic')
+        self.assertEqual(
+            my_biogeme.algo_parameters['proportionAnalyticalHessian'], 0
+        )
+        my_biogeme._algorithm_configuration()
+        self.assertEqual(my_biogeme.optimization_algorithm, 'automatic')
+
+    def test_inconsistent_simple_bounds_derivative_parameters(self):
+        my_biogeme = BIOGEME(
+            getData(1),
+            self.get_dict_of_expressions(),
+            calculating_second_derivatives='never',
+            optimization_algorithm='simple_bounds',
+            second_derivatives=1.0,
+            bootstrap_samples=0,
+        )
+        with self.assertRaises(BiogemeError):
+            _ = my_biogeme.optimization_parameters
+
     def test_estimate_panel(self):
         likelihood = self.get_dict_of_expressions_for_panel()
         panel_biogeme = BIOGEME(

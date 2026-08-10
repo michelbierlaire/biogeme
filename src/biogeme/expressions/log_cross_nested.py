@@ -9,11 +9,14 @@ from typing import TYPE_CHECKING
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
+import pytensor.tensor as pt
 
 from biogeme.exceptions import BiogemeError
-from biogeme.floating_point import JAX_FLOAT
+from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
 
 from .base_expressions import Expression, LogitTuple
+from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
 from .numeric_expressions import Numeric
@@ -582,3 +585,198 @@ class LogCrossNested(Expression):
             )
 
         return the_jax_function
+
+    def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
+        """Return a vectorized, log-domain PyTensor builder for CNL."""
+
+        utility_builders = tuple(
+            utility.recursive_construct_pymc_model_builder()
+            for utility in self.utility_values
+        )
+        availability_builders = (
+            None
+            if self.availability_values is None
+            else tuple(
+                availability.recursive_construct_pymc_model_builder()
+                for availability in self.availability_values
+            )
+        )
+        choice_builder = self.choice.recursive_construct_pymc_model_builder()
+        nest_parameter_builders = tuple(
+            nest_parameter.recursive_construct_pymc_model_builder()
+            for nest_parameter in self.nest_parameters
+        )
+        alpha_builders = tuple(
+            tuple(alpha.recursive_construct_pymc_model_builder() for alpha in alpha_row)
+            for alpha_row in self.alpha_matrix
+        )
+        mu_builder = (
+            None
+            if self.mu is None
+            else self.mu.recursive_construct_pymc_model_builder()
+        )
+
+        alt_keys = pt.constant(np.asarray(self.alt_ids, dtype=np.int32))
+        structural_membership_mask = np.asarray(
+            [
+                [
+                    not (isinstance(alpha, Numeric) and alpha.value == 0.0)
+                    for alpha in alpha_row
+                ]
+                for alpha_row in self.alpha_matrix
+            ],
+            dtype=bool,
+        )
+        structural_membership = pt.as_tensor_variable(structural_membership_mask)
+
+        def builder(dataframe: pd.DataFrame) -> pt.TensorVariable:
+            n_obs = len(dataframe)
+
+            def observation_vector(
+                value: pt.TensorVariable, expression_name: str
+            ) -> pt.TensorVariable:
+                if value.ndim == 0:
+                    return pt.ones((n_obs,), dtype=value.dtype) * value
+                if value.ndim != 1:
+                    raise BiogemeError(
+                        'LogCrossNested PyMC builder: '
+                        f'{expression_name} must return a scalar or a 1-D tensor; '
+                        f'got ndim={value.ndim}'
+                    )
+                return value
+
+            utilities = pt.stack(
+                [
+                    observation_vector(utility_builder(dataframe), 'utility')
+                    for utility_builder in utility_builders
+                ],
+                axis=1,
+            )
+            utilities = pt.where(
+                ~(pt.isnan(utilities) | pt.isinf(utilities)),
+                utilities,
+                -1.0e30,
+            )
+
+            if availability_builders is None:
+                availabilities = pt.ones_like(utilities)
+            else:
+                availabilities = pt.stack(
+                    [
+                        observation_vector(
+                            availability_builder(dataframe), 'availability'
+                        )
+                        for availability_builder in availability_builders
+                    ],
+                    axis=1,
+                )
+                availabilities = pt.where(
+                    ~(pt.isnan(availabilities) | pt.isinf(availabilities)),
+                    availabilities,
+                    0.0,
+                )
+
+            choice = observation_vector(choice_builder(dataframe), 'choice')
+            choice_i32 = pt.cast(choice, 'int32')
+
+            nest_parameters = pt.stack(
+                [
+                    observation_vector(
+                        nest_parameter_builder(dataframe), 'nest parameter'
+                    )
+                    for nest_parameter_builder in nest_parameter_builders
+                ],
+                axis=1,
+            )
+            if mu_builder is None:
+                global_mu = None
+            else:
+                global_mu = observation_vector(mu_builder(dataframe), 'global mu')
+
+            alpha_rows = [
+                pt.stack(
+                    [
+                        observation_vector(alpha_builder(dataframe), 'alpha')
+                        for alpha_builder in alpha_row_builders
+                    ],
+                    axis=1,
+                )
+                for alpha_row_builders in alpha_builders
+            ]
+            alphas = pt.stack(alpha_rows, axis=1)
+            membership = structural_membership[None, :, :]
+            safe_alphas = pt.where(membership, alphas, 1.0)
+            safe_alphas = pt.maximum(safe_alphas, float(LOG_CLIP_MIN))
+            log_alphas = pt.log(safe_alphas)
+
+            available = pt.gt(availabilities, 0.0)
+            safe_availabilities = pt.where(available, availabilities, 1.0)
+            negative_infinity = pt.cast(pt.as_tensor_variable(-np.inf), utilities.dtype)
+            log_availabilities = pt.where(
+                available,
+                pt.log(safe_availabilities),
+                negative_infinity,
+            )
+
+            mu_utilities = nest_parameters[:, :, None] * utilities[:, None, :]
+            if global_mu is None:
+                alpha_exponents = nest_parameters
+            else:
+                alpha_exponents = nest_parameters / global_mu[:, None]
+
+            log_nest_terms = (
+                log_availabilities[:, None, :]
+                + alpha_exponents[:, :, None] * log_alphas
+                + mu_utilities
+            )
+            log_nest_terms = pt.where(
+                membership,
+                log_nest_terms,
+                negative_infinity,
+            )
+            log_biosums = pt.logsumexp(log_nest_terms, axis=2)
+            active_nests = ~(pt.isnan(log_biosums) | pt.isinf(log_biosums))
+            safe_log_biosums = pt.where(active_nests, log_biosums, 0.0)
+
+            if global_mu is None:
+                coefficients = (1.0 - nest_parameters) / nest_parameters
+            else:
+                coefficients = (global_mu[:, None] / nest_parameters) - 1.0
+            kernel_terms = (
+                alpha_exponents[:, :, None] * log_alphas
+                + mu_utilities
+                + coefficients[:, :, None] * safe_log_biosums[:, :, None]
+            )
+            kernel_terms = pt.where(
+                membership & active_nests[:, :, None],
+                kernel_terms,
+                negative_infinity,
+            )
+            kernels = pt.logsumexp(kernel_terms, axis=1)
+            if global_mu is not None:
+                kernels = pt.log(global_mu)[:, None] + kernels
+
+            log_denominator = pt.logsumexp(
+                log_availabilities + kernels,
+                axis=1,
+            )
+            safe_log_denominator = pt.where(
+                ~(pt.isnan(log_denominator) | pt.isinf(log_denominator)),
+                log_denominator,
+                0.0,
+            )
+
+            matches = pt.eq(choice_i32[:, None], alt_keys[None, :])
+            choice_index = pt.argmax(matches, axis=1)
+            any_match = pt.any(matches, axis=1)
+            row_index = pt.arange(n_obs)
+            safe_choice_index = pt.where(any_match, choice_index, 0)
+            chosen_kernel = kernels[row_index, safe_choice_index]
+            chosen_availability = availabilities[row_index, safe_choice_index]
+            log_probability = chosen_kernel - safe_log_denominator
+
+            negative_large = pt.cast(pt.as_tensor_variable(-1.0e30), utilities.dtype)
+            valid_choice = any_match & pt.neq(chosen_availability, 0.0)
+            return pt.where(valid_choice, log_probability, negative_large)
+
+        return builder

@@ -31,6 +31,15 @@ time = "70:00:00"
 blas_threads = 36
 xla_devices = 36
 
+[profiles.panel_simulation]
+# High-draw panel simulations need the same CPU layout as the maintained
+# manual panel-simulation job, plus an explicit memory request.
+cpus_per_task = 36
+mem_per_cpu = "7000M"
+time = "70:00:00"
+blas_threads = 36
+xla_devices = 36
+
 [profiles.hybrid]
 # This is the resource profile already used by the maintained H04 JED job.
 cpus_per_task = 8
@@ -128,6 +137,7 @@ depends_on = ["swissmetro/plot_b11a_cnl.py"]
 required_inputs = ["saved_results/b11a_cnl.yaml"]
 
 [jobs."swissmetro/plot_b13_panel_simul.py"]
+profile = "panel_simulation"
 depends_on = ["swissmetro/plot_b12_panel.py"]
 required_inputs = ["saved_results/b12_panel.yaml"]
 

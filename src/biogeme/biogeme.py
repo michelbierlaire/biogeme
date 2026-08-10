@@ -743,6 +743,7 @@ class BIOGEME:
                     'The proportion of the analytical hessian is not zero, and the second derivatives cannot be '
                     'evaluated. The parameters "calculating_second_derivatives" and "second_derivatives" are inconsistent.'
                 )
+                raise BiogemeError(error_msg)
             return algo_parameters
 
         if self.optimization_algorithm in {
@@ -2054,9 +2055,15 @@ class BIOGEME:
         )
 
     def _algorithm_configuration(self) -> OptimizationAlgorithm:
-        if self.biogeme_parameters.get_value('optimization_algorithm') == 'automatic':
-            self.biogeme_parameters.set_value('optimization_algorithm', 'simple_bounds')
-        return algorithms.get(self.optimization_algorithm)
+        configured_algorithm = self.biogeme_parameters.get_value(
+            'optimization_algorithm'
+        )
+        effective_algorithm = (
+            'simple_bounds'
+            if configured_algorithm == 'automatic'
+            else configured_algorithm
+        )
+        return algorithms.get(effective_algorithm)
 
     def simulate_bayesian(
         self,

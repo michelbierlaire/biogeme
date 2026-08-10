@@ -268,8 +268,15 @@ def move_without_overwrite(source: Path, destination: Path) -> Path:
     return target
 
 
+def copy_output(source: Path, destination: Path) -> Path:
+    """Copy an output into its archive, replacing the same-named copy."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(str(source), str(destination))
+    return destination
+
+
 def harvest_outputs(directory: Path, started_at_ns: int) -> list[str]:
-    """Move new root results to the directories consumed by examples."""
+    """Copy new root results to the directories consumed by examples."""
     harvested: list[str] = []
     for path in sorted(directory.iterdir()):
         if not path.is_file() or path.suffix not in HARVEST_SUFFIXES:
@@ -281,7 +288,7 @@ def harvest_outputs(directory: Path, started_at_ns: int) -> list[str]:
             if path.suffix == '.html'
             else directory / 'saved_results'
         )
-        destination = move_without_overwrite(path, destination_directory / path.name)
+        destination = copy_output(path, destination_directory / path.name)
         harvested.append(destination.relative_to(directory).as_posix())
     return harvested
 

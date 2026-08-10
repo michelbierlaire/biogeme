@@ -104,21 +104,31 @@ the_biogeme = BIOGEME(
 )
 the_biogeme.model_name = 'b02_weight'
 
-## %%
-# Estimate the posterior distribution of the parameters, or read the summary
-# if already available.
-yaml_file = Path('saved_results') / f'{the_biogeme.model_name}.yaml'
-
-try:
-    summary_results = BayesianResultsSummary.from_yaml_file(filename=yaml_file)
-except FileNotFoundError:
-    results: BayesianResults = the_biogeme.bayesian_estimation()
-    summary_results = results.to_summary()
-
-## %%
-print(summary_results.short_summary())
-
 # %%
-# Get the results in a pandas table
-pandas_results = get_pandas_estimated_parameters(estimation_results=summary_results)
-display(pandas_results)
+# Estimate the posterior distribution of the parameters, or read the summary
+# if it is already available. The main guard is required because PyMC may use
+# multiprocessing, and worker processes re-import this script.
+def main() -> None:
+    """Estimate the weighted Bayesian logit model and display the results."""
+
+    yaml_file = Path('saved_results') / f'{the_biogeme.model_name}.yaml'
+
+    try:
+        summary_results = BayesianResultsSummary.from_yaml_file(filename=yaml_file)
+    except FileNotFoundError:
+        results: BayesianResults = the_biogeme.bayesian_estimation()
+        summary_results = results.to_summary()
+
+    # %%
+    print(summary_results.short_summary())
+
+    # %%
+    # Get the results in a pandas table
+    pandas_results = get_pandas_estimated_parameters(
+        estimation_results=summary_results
+    )
+    display(pandas_results)
+
+
+if __name__ == '__main__':
+    main()
