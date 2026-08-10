@@ -8,7 +8,7 @@ JED state directory.  Model/data/configuration source files are not targets.
 
 Run this only after all Slurm jobs from the previous run have finished.  The
 JED state directory contains the job records and diagnostics and is removed
-without a backup; use ``tools/jed_examples.py reset --apply`` instead when a
+without a backup; use ``jed_runs/jed_examples.py reset --apply`` instead when a
 recoverable reset is wanted.
 """
 
@@ -20,7 +20,7 @@ import shutil
 import sys
 from pathlib import Path
 
-try:  # Support both ``python -m tools.jed_fresh_start`` and direct execution.
+try:  # Support both ``python -m jed_runs.jed_fresh_start`` and direct execution.
     from .jed_examples import (
         ARTIFACT_SUFFIXES,
         EXAMPLES_ROOT,

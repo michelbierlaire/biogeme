@@ -537,7 +537,7 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + dollar
             + 'PYTHON_EXECUTABLE" "'
             + dollar
-            + 'REPOSITORY/tools/jed_examples.py" job-start '
+            + 'REPOSITORY/jed_runs/jed_examples.py" job-start '
             '--script '
             + shell_value(job.script)
             + ' --job-directory "'
@@ -559,7 +559,7 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + dollar
             + 'PYTHON_EXECUTABLE" "'
             + dollar
-            + 'REPOSITORY/tools/jed_examples.py" job-finish '
+            + 'REPOSITORY/jed_runs/jed_examples.py" job-finish '
             '--script '
             + shell_value(job.script)
             + ' --job-directory "'

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from tools.jed_examples import (
+from jed_runs.jed_examples import (
     Job,
     discover_jobs,
     generated_script,
@@ -8,7 +8,7 @@ from tools.jed_examples import (
     job_start,
     load_config,
 )
-from tools.jed_fresh_start import collect_targets
+from jed_runs.jed_fresh_start import collect_targets
 
 
 def test_high_draw_panel_simulation_uses_memory_profile(tmp_path: Path):

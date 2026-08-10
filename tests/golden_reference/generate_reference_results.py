@@ -29,7 +29,7 @@ from biogeme.model_elements import FlatPanelAdapter, ModelElements, RegularAdapt
 from biogeme.second_derivatives import SecondDerivativesMode
 from biogeme.version import get_version
 
-REFERENCE_DIR = Path(__file__).resolve().parents[1] / 'tests' / 'data' / 'reference'
+REFERENCE_DIR = Path(__file__).resolve().parents[1] / 'data' / 'reference'
 REFERENCE_DIR.mkdir(parents=True, exist_ok=True)
 
 
