@@ -127,6 +127,98 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             check=(cp.is_integer, cp.is_positive),
         ),
         ParameterTuple(
+            name='monte_carlo_diagnostic_auto',
+            value=False,
+            type=bool,
+            section='MonteCarlo',
+            description=(
+                'Run the post-estimation Monte Carlo draw-stability diagnostic '
+                'automatically after estimate_or_load. Disabled by default.'
+            ),
+            check=(cp.is_boolean,),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_draw_factors',
+            value='0.25,0.5,1.0,2.0,4.0',
+            type=str,
+            section='MonteCarlo',
+            description=(
+                'Comma-separated factors applied to the estimation draw count '
+                'for the post-estimation stability diagnostic.'
+            ),
+            check=(),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_replications',
+            value=2,
+            type=int,
+            section='MonteCarlo',
+            description='Number of independent diagnostic draw designs per level.',
+            check=(cp.is_integer, cp.is_positive),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_time_budget',
+            value=1800,
+            type=int,
+            section='MonteCarlo',
+            description=(
+                'Hard wall-clock budget in seconds for the draw-stability diagnostic.'
+            ),
+            check=(cp.is_integer, cp.is_positive),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_max_draws',
+            value=1_000_000,
+            type=int,
+            section='MonteCarlo',
+            description='Maximum number of draws in one diagnostic evaluation.',
+            check=(cp.is_integer, cp.is_positive),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_safety_factor',
+            value=1.5,
+            type=float,
+            section='MonteCarlo',
+            description=(
+                'Safety multiplier applied to the forecast runtime of pending '
+                'diagnostic evaluations.'
+            ),
+            check=(cp.is_number, cp.is_positive),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_objective_tolerance',
+            value=0.001,
+            type=float,
+            section='MonteCarlo',
+            description=(
+                'Maximum absolute objective discrepancy considered stable by '
+                'the Monte Carlo diagnostic.'
+            ),
+            check=(cp.is_number, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_gradient_tolerance',
+            value=0.00001,
+            type=float,
+            section='MonteCarlo',
+            description=(
+                'Maximum infinity norm of the gradient discrepancy considered '
+                'stable by the Monte Carlo diagnostic.'
+            ),
+            check=(cp.is_number, cp.is_non_negative),
+        ),
+        ParameterTuple(
+            name='monte_carlo_diagnostic_minimum_level_factor',
+            value=2.0,
+            type=float,
+            section='MonteCarlo',
+            description=(
+                'Minimum draw-count factor above the original count required '
+                'for a conclusive stability result.'
+            ),
+            check=(cp.is_number, cp.is_positive),
+        ),
+        ParameterTuple(
             name='missing_data',
             value=MISSING_VALUE,
             type=int,

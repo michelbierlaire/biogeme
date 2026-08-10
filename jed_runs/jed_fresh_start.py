@@ -23,6 +23,7 @@ from pathlib import Path
 try:  # Support both ``python -m jed_runs.jed_fresh_start`` and direct execution.
     from .jed_examples import (
         ARTIFACT_SUFFIXES,
+        DIAGNOSTIC_MARKDOWN_SUFFIX,
         EXAMPLES_ROOT,
         INPUT_CSV_NAMES,
         PROJECT_ROOT,
@@ -32,6 +33,7 @@ try:  # Support both ``python -m jed_runs.jed_fresh_start`` and direct execution
 except ImportError:  # pragma: no cover - exercised by direct script execution.
     from jed_examples import (  # type: ignore[no-redef]
         ARTIFACT_SUFFIXES,
+        DIAGNOSTIC_MARKDOWN_SUFFIX,
         EXAMPLES_ROOT,
         INPUT_CSV_NAMES,
         PROJECT_ROOT,
@@ -67,6 +69,8 @@ def is_generated_file(path: Path, in_result_directory: bool) -> bool:
         return True
     if path.suffix == '.csv' and path.name in INPUT_CSV_NAMES:
         return False
+    if path.name.endswith(DIAGNOSTIC_MARKDOWN_SUFFIX):
+        return True
     return path.suffix in ARTIFACT_SUFFIXES or path.suffix in {'.prof', '.pyc'}
 
 

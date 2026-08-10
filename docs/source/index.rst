@@ -51,6 +51,16 @@ This section explains how to use native draws in Biogeme for Monte-Carlo simulat
 
   code/native_draws.rst
 
+Monte Carlo draw-stability diagnostic
+-------------------------------------
+This section explains how to check whether an estimated model appears stable
+with respect to the number and design of Monte Carlo draws.
+
+.. toctree::
+  :maxdepth: 2
+
+  monte_carlo_diagnostic.rst
+
 Biogeme code
 ------------
 This section provides detailed information about the code of Biogeme.

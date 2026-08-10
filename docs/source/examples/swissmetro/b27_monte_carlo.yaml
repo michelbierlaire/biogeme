@@ -1,0 +1,95 @@
+# File b27_monte_carlo.yaml has automatically been generated on 2026-08-10 20:53:41.971814
+# biogeme 3.3.4 [2026-08-10]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.4015092219776694
+- -2.2577862252779703
+- 1.6514748640709194
+- -1.2846270849441463
+- 0.13640379442074155
+bhhh:
+- - 583.5865521719047
+  - 268.1805229888347
+  - 140.41410693877273
+  - -22.418473530005095
+  - -162.7422986131996
+- - 268.1805229888347
+  - 418.305347915814
+  - 210.49827938894902
+  - -118.08027191034337
+  - 211.33292034319697
+- - 140.41410693877273
+  - 210.49827938894902
+  - 175.56836625346625
+  - 24.794138669273178
+  - 14.554177950221728
+- - -22.418473530005095
+  - -118.08027191034337
+  - 24.794138669273178
+  - 596.6933746568367
+  - -239.64707617291094
+- - -162.7422986131996
+  - 211.33292034319697
+  - 14.554177950221728
+  - -239.64707617291094
+  - 809.8343945785302
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '2.914781'
+final_log_likelihood: -5214.785394646062
+gradient:
+- -0.029662514125035955
+- -0.007331073316990455
+- 0.008013238598412187
+- -0.018515288559179055
+- 0.017560784395200812
+gradient_bhhh_complete: true
+hessian: null
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6880.71595035798
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b27_monte_carlo
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 2000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 4.3e-06 <= 6.1e-06
+  Number of function evaluations: 104
+  Number of gradient evaluations: 57
+  Number of hessian evaluations: 0
+  Number of iterations: '47'
+  Optimization time: '14.656143'
+  Proportion of Hessian calculation: 0/28 = 0.0%
+  Relative gradient: 4.310963326932965e-06
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: NORMAL
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: Post-estimation Monte Carlo draw-stability diagnostic for a mixed logit
+  model using the Swissmetro data.

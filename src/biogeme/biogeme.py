@@ -81,6 +81,11 @@ from biogeme.model_elements import (
     ModelElements,
     RegularAdapter,
 )
+from biogeme.monte_carlo_diagnostic import (
+    MonteCarloDiagnosticConfiguration,
+    MonteCarloDiagnosticResult,
+    run_monte_carlo_diagnostic,
+)
 from biogeme.optimization import OptimizationAlgorithm, algorithms
 from biogeme.parameters import (
     DEFAULT_FILE_NAME as DEFAULT_PARAMETER_FILE_NAME,
@@ -143,6 +148,15 @@ class BIOGEME:
         'hessian_parameter_block_size': int,
         'hessian_observation_batch_size': int,
         'hessian_memory_fraction': float,
+        'monte_carlo_diagnostic_auto': bool,
+        'monte_carlo_diagnostic_draw_factors': str,
+        'monte_carlo_diagnostic_replications': int,
+        'monte_carlo_diagnostic_time_budget': int,
+        'monte_carlo_diagnostic_max_draws': int,
+        'monte_carlo_diagnostic_safety_factor': float,
+        'monte_carlo_diagnostic_objective_tolerance': float,
+        'monte_carlo_diagnostic_gradient_tolerance': float,
+        'monte_carlo_diagnostic_minimum_level_factor': float,
         'maximum_number_catalog_expressions': int,
         'max_number_parameters_to_report': int,
     }
@@ -1533,18 +1547,88 @@ class BIOGEME:
                     'Optimization results are complete, but post-processing is '
                     'incomplete. The optimization will not be repeated.'
                 )
-                return self.complete_estimation_results(
+                estimation_results = self.complete_estimation_results(
                     estimation_results=estimation_results,
                     yaml_file_name=str(yaml_path),
                     resuming=True,
                     complete_bootstrap=True,
                 )
-            return estimation_results
+            return self._run_automatic_monte_carlo_diagnostic(estimation_results)
         logger.info(f'No YAML file found at {yaml_path}. Estimation is performed.')
-        return self.estimate(
+        estimation_results = self.estimate(
             starting_values=starting_values,
             run_bootstrap=run_bootstrap,
             yaml_file_name=str(yaml_path),
+        )
+        return self._run_automatic_monte_carlo_diagnostic(estimation_results)
+
+    def _run_automatic_monte_carlo_diagnostic(
+        self, estimation_results: EstimationResults
+    ) -> EstimationResults:
+        """Optionally run the explicitly disabled-by-default diagnostic."""
+        if self.biogeme_parameters.get_value('monte_carlo_diagnostic_auto'):
+            self.check_monte_carlo_stability(
+                estimation_results=estimation_results
+            )
+        return estimation_results
+
+    def check_monte_carlo_stability(
+        self,
+        estimation_results: EstimationResults,
+        output_directory: str | Path | None = None,
+        basename: str | None = None,
+        resume: bool = True,
+    ) -> MonteCarloDiagnosticResult:
+        """Evaluate post-estimation sensitivity to Monte Carlo draw designs.
+
+        The model criterion and gradient are evaluated at the fixed estimated
+        parameter vector. This method never calls :meth:`estimate`, never runs
+        an optimizer, and never requests a Hessian. Results are written to
+        separate ``*_monte_carlo_diagnostic.yaml`` and Markdown files.
+
+        :param estimation_results: Existing results for this exact model and
+            database specification.
+        :param output_directory: Directory for the two companion files. The
+            current directory is used by default.
+        :param basename: Optional filename prefix. The diagnostic suffix is
+            always appended so the normal estimation YAML cannot be replaced.
+        :param resume: Resume a compatible existing diagnostic checkpoint.
+        :return: Structured diagnostic data and the two output paths.
+        """
+        if not isinstance(estimation_results, EstimationResults):
+            raise BiogemeError(
+                'check_monte_carlo_stability requires existing EstimationResults.'
+            )
+        # Estimation always uses the flattened representation for panel data.
+        # A standalone postprocessing script has not necessarily called
+        # ``estimate`` first, so establish the same representation here before
+        # validation constructs the model elements.
+        if self.database.is_panel() and not self.use_flatten_database:
+            self.use_flatten_database = True
+        self._validate_loaded_estimation_results(results=estimation_results)
+
+        configuration = MonteCarloDiagnosticConfiguration.from_parameters(
+            self.biogeme_parameters
+        )
+        directory = Path(output_directory) if output_directory is not None else Path()
+        prefix = Path(basename).name if basename is not None else self.model_name
+        if prefix.endswith(('.yaml', '.yml', '.md')):
+            prefix = Path(prefix).stem
+        suffix = '_monte_carlo_diagnostic'
+        prefix += suffix
+        yaml_file = directory / f'{prefix}.yaml'
+        markdown_file = directory / f'{prefix}.md'
+
+        return run_monte_carlo_diagnostic(
+            estimation_results=estimation_results,
+            model_elements=self.model_elements,
+            configuration=configuration,
+            yaml_file=yaml_file,
+            markdown_file=markdown_file,
+            numerically_safe=self.numerically_safe,
+            user_generators=self.random_number_generators,
+            configured_seed=int(self.seed),
+            resume=resume,
         )
 
     def complete_estimation_results(

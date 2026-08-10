@@ -68,12 +68,39 @@ def test_job_lifecycle_only_harvests_isolated_work_directory(tmp_path: Path):
     assert not (source / 'saved_results' / 'other_job.nc').exists()
 
 
+def test_job_lifecycle_harvests_markdown_diagnostic_report(tmp_path: Path):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_diagnostic.py',
+        path=source / 'plot_diagnostic.py',
+        source='print("diagnostic")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+    )
+
+    assert job_start(job, state, work) == 0
+    (work / 'model_monte_carlo_diagnostic.md').write_text('# Report')
+
+    assert job_finish(job, state, 0, work) == 0
+    assert (
+        source / 'saved_results' / 'model_monte_carlo_diagnostic.md'
+    ).read_text() == '# Report'
+
+
 def test_fresh_start_targets_generated_files_but_preserves_sources(tmp_path: Path):
     examples = tmp_path / 'examples'
     examples.mkdir()
     (examples / 'plot_model.py').write_text('print("model")')
     (examples / 'data.csv').write_text('choice\n1\n')
+    (examples / 'README.md').write_text('source documentation')
     (examples / 'model.yaml').write_text('generated')
+    (examples / 'model_monte_carlo_diagnostic.md').write_text('generated report')
     (examples / 'plot_model.run').write_text('#SBATCH --job-name=test')
     (examples / 'model_slurm.out').write_text('output')
     (examples / 'saved_results').mkdir()
@@ -91,11 +118,13 @@ def test_fresh_start_targets_generated_files_but_preserves_sources(tmp_path: Pat
     relative_directories = {path.relative_to(tmp_path) for path in directories}
 
     assert Path('examples/model.yaml') in relative_files
+    assert Path('examples/model_monte_carlo_diagnostic.md') in relative_files
     assert Path('examples/plot_model.run') in relative_files
     assert Path('examples/model_slurm.out') in relative_files
     assert Path('examples/saved_results/model.yaml') in relative_files
     assert Path('examples/model/trace.png') in relative_files
     assert Path('examples/data.csv') not in relative_files
+    assert Path('examples/README.md') not in relative_files
     assert Path('examples/plot_model.py') not in relative_files
     assert Path('examples/__pycache__') in relative_directories
     assert Path('.jed_runs') in relative_directories

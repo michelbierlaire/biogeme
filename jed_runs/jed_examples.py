@@ -41,7 +41,8 @@ ARTIFACT_SUFFIXES = {
     '.tex',
     '.yaml',
 }
-HARVEST_SUFFIXES = {'.html', '.nc', '.pareto', '.yaml'}
+HARVEST_SUFFIXES = {'.html', '.md', '.nc', '.pareto', '.yaml'}
+DIAGNOSTIC_MARKDOWN_SUFFIX = '_monte_carlo_diagnostic.md'
 RESULT_DIRECTORIES = {'saved_results', 'saved_html'}
 INPUT_CSV_NAMES = {'data.csv', 'optima.csv'}
 MISSING_OUTPUT_EXIT_CODE = 90
@@ -224,6 +225,9 @@ def example_artifacts(directory: Path) -> list[Path]:
         if path.suffix in ARTIFACT_SUFFIXES:
             if path.suffix == '.csv' and path.name in INPUT_CSV_NAMES:
                 continue
+            results.append(path)
+            continue
+        if path.name.endswith(DIAGNOSTIC_MARKDOWN_SUFFIX):
             results.append(path)
             continue
         if path.name.startswith('revenue_') and path.suffix == '.txt':

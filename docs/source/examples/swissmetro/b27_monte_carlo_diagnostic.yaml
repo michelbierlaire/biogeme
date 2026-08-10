@@ -1,0 +1,166 @@
+schema_version: 1
+model_name: b27_monte_carlo
+original_number_of_draws: 2000
+draw_types:
+  b_time_rnd: NORMAL
+estimated_parameters:
+  asc_train: -0.4015092219776694
+  b_time: -2.2577862252779703
+  b_time_s: 1.6514748640709194
+  b_cost: -1.2846270849441463
+  asc_car: 0.13640379442074155
+original_result:
+  objective: -5214.785394646062
+  gradient:
+  - -0.029662514125035955
+  - -0.007331073316990455
+  - 0.008013238598412187
+  - -0.018515288559179055
+  - 0.017560784395200812
+model_metadata:
+  data_name: swissmetro
+  sample_size: 6768
+  number_of_observations: 6768
+  parameter_names:
+  - asc_train
+  - b_time
+  - b_time_s
+  - b_cost
+  - asc_car
+created_at: '2026-08-10T18:53:41+00:00'
+updated_at: '2026-08-10T18:53:53+00:00'
+execution_status: completed
+diagnostic_conclusion: unstable
+recommendation: more_draws_recommended
+configuration:
+  draw_factors:
+  - 0.5
+  - 1.0
+  - 2.0
+  replications: 1
+  time_budget_seconds: 300.0
+  max_draws: 4000
+  safety_factor: 1.5
+  objective_tolerance: 0.001
+  gradient_tolerance: 1.0e-05
+  minimum_level_factor: 2.0
+base_seed: 1001226
+planned_evaluations:
+- draw_count: 1000
+  draw_factor: 0.5
+  replication: 1
+  draw_types: &id001
+    b_time_rnd: NORMAL
+  seed: 1584127666
+  randomization_identifier: diagnostic-seed-1584127666
+- draw_count: 2000
+  draw_factor: 1.0
+  replication: 1
+  draw_types: &id002
+    b_time_rnd: NORMAL
+  seed: 4260784625
+  randomization_identifier: diagnostic-seed-4260784625
+- draw_count: 4000
+  draw_factor: 2.0
+  replication: 1
+  draw_types: &id003
+    b_time_rnd: NORMAL
+  seed: 20440104
+  randomization_identifier: diagnostic-seed-20440104
+completed_evaluations:
+- draw_count: 1000
+  draw_factor: 0.5
+  replication: 1
+  draw_types: *id001
+  seed: 1584127666
+  randomization_identifier: diagnostic-seed-1584127666
+  objective: -5215.201649146643
+  gradient:
+  - 0.7957687984405268
+  - 0.6019471900815638
+  - 0.21753281036885852
+  - -0.321848757776678
+  - -0.2919923062986314
+  objective_difference: 0.4162545005810898
+  relative_objective_difference: 7.982198097901627e-05
+  gradient_difference:
+  - 0.8254313125655628
+  - 0.6092782633985543
+  - 0.20951957177044633
+  - -0.30333346921749893
+  - -0.3095530906938322
+  gradient_linf_difference: 0.8254313125655628
+  gradient_l2_difference: 1.1332650239348978
+  elapsed_seconds: 1.817002624971792
+  started_at: '2026-08-10T18:53:41+00:00'
+  completed_at: '2026-08-10T18:53:43+00:00'
+  draw_design_methods:
+    b_time_rnd: fresh_native_design
+  limitations: []
+- draw_count: 2000
+  draw_factor: 1.0
+  replication: 1
+  draw_types: *id002
+  seed: 4260784625
+  randomization_identifier: diagnostic-seed-4260784625
+  objective: -5215.462062081483
+  gradient:
+  - 0.2500587117098405
+  - 0.9907211360818984
+  - 0.6849138892841999
+  - -0.3072328169280425
+  - 0.46147452993432836
+  objective_difference: 0.6766674354212228
+  relative_objective_difference: 0.00012975940220204393
+  gradient_difference:
+  - 0.27972122583487646
+  - 0.9980522093988888
+  - 0.6769006506857878
+  - -0.28871752836886344
+  - 0.44391374553912755
+  gradient_linf_difference: 0.9980522093988888
+  gradient_l2_difference: 1.3464634760859335
+  elapsed_seconds: 3.304754375014454
+  started_at: '2026-08-10T18:53:43+00:00'
+  completed_at: '2026-08-10T18:53:47+00:00'
+  draw_design_methods:
+    b_time_rnd: fresh_native_design
+  limitations: []
+- draw_count: 4000
+  draw_factor: 2.0
+  replication: 1
+  draw_types: *id003
+  seed: 20440104
+  randomization_identifier: diagnostic-seed-20440104
+  objective: -5215.097229419274
+  gradient:
+  - -0.002606046098193815
+  - 0.5437733118738421
+  - 0.855397537862526
+  - 0.10919048647279084
+  - 0.1118612163566155
+  objective_difference: 0.31183477321246755
+  relative_objective_difference: 5.979819870106705e-05
+  gradient_difference:
+  - 0.02705646802684214
+  - 0.5511043851908326
+  - 0.8473842992641138
+  - 0.1277057750319699
+  - 0.09430043196141469
+  gradient_linf_difference: 0.8473842992641138
+  gradient_l2_difference: 1.0235768573598232
+  elapsed_seconds: 6.4896761670242995
+  started_at: '2026-08-10T18:53:47+00:00'
+  completed_at: '2026-08-10T18:53:53+00:00'
+  draw_design_methods:
+    b_time_rnd: fresh_native_design
+  limitations: []
+skipped_evaluations: []
+timing:
+  elapsed_seconds: 11.611433167010546
+  projected_remaining_seconds: 0.0
+motivation_codes:
+- discrepancy_above_tolerance_at_higher_draw_count
+- objective_unstable_at_higher_draw_count
+- gradient_unstable_at_higher_draw_count
+limitations: []

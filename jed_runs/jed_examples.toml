@@ -134,6 +134,9 @@ required_inputs = ["saved_results/b01a_logit.yaml"]
 depends_on = ["swissmetro/plot_b05a_normal_mixture.py"]
 required_inputs = ["saved_results/b05a_normal_mixture.yaml"]
 
+[jobs."swissmetro/plot_b27_monte_carlo_diagnostic.py"]
+profile = "montecarlo"
+
 [jobs."swissmetro/plot_b11b_cnl_simul.py"]
 depends_on = ["swissmetro/plot_b11a_cnl.py"]
 required_inputs = ["saved_results/b11a_cnl.yaml"]
