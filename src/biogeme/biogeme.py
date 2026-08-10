@@ -258,6 +258,7 @@ class BIOGEME:
         self._model_elements = None
 
         self._function_evaluator = None
+        self._simulation_evaluator: MultiRowEvaluator | None = None
 
         self._use_flatten_database = False
 
@@ -390,6 +391,7 @@ class BIOGEME:
     def use_flatten_database(self, value: bool):
         self._use_flatten_database = value
         self._model_elements = None
+        self._simulation_evaluator = None
 
     @generate_pickle.setter
     def generate_pickle(self, value: bool) -> None:
@@ -2222,13 +2224,14 @@ class BIOGEME:
             error_msg = f'the_beta_values must be a dict, and not an object of type {type(the_beta_values)}'
             raise BiogemeError(error_msg)
 
-        the_evaluator: MultiRowEvaluator = MultiRowEvaluator(
-            model_elements=self.model_elements,
-            numerically_safe=self.numerically_safe,
-            use_jit=self.use_jit,
-        )
+        if self._simulation_evaluator is None:
+            self._simulation_evaluator = MultiRowEvaluator(
+                model_elements=self.model_elements,
+                numerically_safe=self.numerically_safe,
+                use_jit=self.use_jit,
+            )
 
-        results = the_evaluator.evaluate(the_beta_values)
+        results = self._simulation_evaluator.evaluate(the_beta_values)
         return results
 
     def confidence_intervals(

@@ -37,8 +37,6 @@ class MultiRowEvaluator:
             raise BiogemeError('A model must be provided.')
         self.multiple_model_elements = model_elements
         self.free_betas_names = model_elements.expressions_registry.free_betas_names
-        self.data_jax = model_elements.database.data_jax
-        self.draws_jax = model_elements.draws_management.draws_jax
         self.names = list(model_elements.expressions.keys())
         n_rv = (
             self.multiple_model_elements.expressions_registry.number_of_random_variables
@@ -76,7 +74,12 @@ class MultiRowEvaluator:
         param_vector = (
             self.multiple_model_elements.expressions_registry.get_betas_array(the_betas)
         )
+        # Refresh the input arrays from the model elements.  The evaluator is
+        # cached by BIOGEME across simulations, while database rows or draws
+        # may have been updated between calls.
+        data_jax = self.multiple_model_elements.database.data_jax
+        draws_jax = self.multiple_model_elements.draws_management.draws_jax
         values = self._evaluate_all(
-            param_vector, self.data_jax, self.draws_jax, self.random_variables_jax
+            param_vector, data_jax, draws_jax, self.random_variables_jax
         )
         return pd.DataFrame(np.asarray(values, dtype=NUMPY_FLOAT), columns=self.names)

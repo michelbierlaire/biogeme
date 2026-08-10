@@ -371,6 +371,20 @@ class TestBiogeme(unittest.TestCase):
         )
         s = my_biosim.simulate(results.get_beta_values())
         self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
+        cached_evaluator = my_biosim._simulation_evaluator
+        self.assertIsNotNone(cached_evaluator)
+
+        # A second simulation reuses the compiled multi-formula evaluator.
+        s_again = my_biosim.simulate(results.get_beta_values())
+        self.assertIs(my_biosim._simulation_evaluator, cached_evaluator)
+        np.testing.assert_allclose(s.to_numpy(), s_again.to_numpy())
+
+        # The cached evaluator refreshes database arrays between calls.
+        simulation_betas = {'beta1': 0.0, 'beta2': 1.0}
+        s_nonzero = my_biosim.simulate(simulation_betas)
+        my_biosim.database.scale_column('Variable1', 2.0)
+        s_scaled = my_biosim.simulate(simulation_betas)
+        self.assertFalse(np.allclose(s_nonzero['simul'], s_scaled['simul']))
 
         the_betas = results.get_beta_values()
         the_betas['any_beta'] = 0.1

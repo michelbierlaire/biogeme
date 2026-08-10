@@ -36,6 +36,8 @@ def test_h04_uses_high_memory_profile(tmp_path: Path):
     assert 'export OMP_NUM_THREADS=1' in script
     assert 'WORK_DIRECTORY="$JOB_TMP/work"' in script
     assert 'rsync -a' in script
+    assert 'rsync -a --delete --delete-excluded \\\n' in script
+    assert "    --exclude='__pycache__/' \\\n" in script
     assert '--work-directory "$WORK_DIRECTORY"' in script
 
 
