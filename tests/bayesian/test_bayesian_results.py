@@ -272,7 +272,11 @@ def test_loo_returns_none_when_arviz_raises_value_error(
 ) -> None:
     """LOO failures from ArviZ must not make BayesianResults crash."""
 
+    calls = 0
+
     def fake_loo(*args, **kwargs):  # type: ignore[no-untyped-def]
+        nonlocal calls
+        calls += 1
         raise ValueError('All tail values are the same')
 
     monkeypatch.setattr(az, 'loo', fake_loo)
@@ -280,6 +284,7 @@ def test_loo_returns_none_when_arviz_raises_value_error(
     bayes_results._loo = None
     bayes_results._loo_se = None
     bayes_results._p_loo = None
+    bayes_results._loo_attempted = False
 
     with caplog.at_level('WARNING'):
         assert bayes_results.loo_res is None
@@ -287,6 +292,11 @@ def test_loo_returns_none_when_arviz_raises_value_error(
     assert bayes_results.loo is None
     assert bayes_results.loo_se is None
     assert bayes_results.p_loo is None
+    # The failed calculation is cached, so all derived properties share one
+    # warning and one ArviZ call.
+    assert bayes_results.loo_res is None
+    assert calls == 1
+    assert caplog.text.count('LOO requested') == 1
     assert 'LOO requested' in caplog.text
     assert 'could not compute it' in caplog.text
     assert 'All tail values are the same' in caplog.text
@@ -307,6 +317,7 @@ def test_general_information_omits_loo_when_arviz_raises_value_error(
     bayes_results._loo = None
     bayes_results._loo_se = None
     bayes_results._p_loo = None
+    bayes_results._loo_attempted = False
 
     with caplog.at_level('WARNING'):
         info = bayes_results.generate_general_information()
@@ -382,6 +393,7 @@ def test_to_summary_survives_loo_failure(
     bayes_results._loo = None
     bayes_results._loo_se = None
     bayes_results._p_loo = None
+    bayes_results._loo_attempted = False
 
     with caplog.at_level('WARNING'):
         summary = bayes_results.to_summary()

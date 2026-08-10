@@ -391,6 +391,67 @@ def test_pareto_post_processing_plot_delegates_to_pareto(monkeypatch):
     assert call['label_y'] == 'y'
 
 
+def test_pareto_post_processing_plot_converts_toml_floats(tmp_path, monkeypatch):
+    """A Pareto file must be plottable after being restored from TOML.
+
+    ``tomlkit`` keeps numeric values as ``tomlkit.items.Float`` instances.
+    Those objects look like floats, but matplotlib's axis handling can try to
+    index them and raises ``TypeError: Float does not support item access``.
+    The post-processing boundary converts all four Pareto collections to
+    native Python floats before exposing them to the plotting implementation.
+    """
+
+    pareto_file = tmp_path / 'pareto.toml'
+    pareto_file.write_text(
+        '[Pareto]\n'
+        'model_a = [1.5, 2.5]\n'
+        '[Considered]\n'
+        'model_b = [2.5, 3.5]\n'
+        '[Removed]\n'
+        'model_c = [3.5, 4.5]\n'
+        '[Invalid]\n'
+        'model_d = [4.5, 5.5]\n',
+        encoding='utf-8',
+    )
+
+    class DummyBiogeme:
+        log_like = 'LOG'
+        database = pd.DataFrame({'x': [1, 2]})
+        biogeme_parameters = FakeBiogemeParams()
+        model_name = 'dummy'
+
+    monkeypatch.setattr(
+        'biogeme.assisted.CentralController',
+        lambda expression, maximum_number_of_configurations: FakeCentralController(
+            expression, maximum_number_of_configurations
+        ),
+    )
+
+    post_processing = ParetoPostProcessing(
+        DummyBiogeme(), pareto_file_name=str(pareto_file)
+    )
+
+    for collection in (
+        post_processing.pareto.pareto,
+        post_processing.pareto.considered,
+        post_processing.pareto.removed,
+        post_processing.pareto.invalid,
+    ):
+        for element in collection:
+            assert all(type(value) is float for value in element.objectives)
+
+    import matplotlib
+
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    figure, axis = plt.subplots()
+    try:
+        assert post_processing.plot(ax=axis) is axis
+    finally:
+        plt.close(figure)
+
+
 # ---------------------------------------------------------------------------
 # AssistedSpecification tests
 # ---------------------------------------------------------------------------

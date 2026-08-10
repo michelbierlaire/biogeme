@@ -66,10 +66,10 @@ cd /home/bierlair/github/biogeme
 sbatch docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult.run
 ```
 
-The full profile requests 8 CPU cores, 7,000 MB per core, and 48 hours. This
-provides 56,000 MB for the 50,000-draw calculation. Review elapsed time, peak
-memory, and CPU efficiency afterward, then revise the corresponding `#SBATCH`
-directives using the measured values.
+The full profile requests 18 CPU cores, 7,000 MB per core, and 48 hours. This
+provides approximately 126,000 MB for the 50,000-draw calculation. Review
+elapsed time, peak memory, and CPU efficiency afterward, then revise the
+corresponding `#SBATCH` directives using the measured values.
 
 By default, persistent files live below
 `/scratch/$USER/biogeme-h04/GIT_COMMIT/{preflight,full}`. Set

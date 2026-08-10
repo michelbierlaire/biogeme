@@ -98,6 +98,9 @@ extend-select = ["UP034"]
 quote-style = "single"
 indent-style = "space"
 
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
 [dependency-groups]
 dev = [
     "black>=26.3.1",

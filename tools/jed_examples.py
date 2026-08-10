@@ -275,8 +275,16 @@ def copy_output(source: Path, destination: Path) -> Path:
     return destination
 
 
-def harvest_outputs(directory: Path, started_at_ns: int) -> list[str]:
-    """Copy new root results to the directories consumed by examples."""
+def harvest_outputs(
+    directory: Path, started_at_ns: int, destination_root: Path | None = None
+) -> list[str]:
+    """Copy new root results to the directories consumed by examples.
+
+    Results are discovered only in the isolated working directory of this
+    job. They are archived in the checked-out example directory for dependent
+    jobs, without scanning that shared directory for concurrent outputs.
+    """
+    destination_root = destination_root or directory
     harvested: list[str] = []
     for path in sorted(directory.iterdir()):
         if not path.is_file() or path.suffix not in HARVEST_SUFFIXES:
@@ -284,24 +292,28 @@ def harvest_outputs(directory: Path, started_at_ns: int) -> list[str]:
         if path.stat().st_mtime_ns < started_at_ns:
             continue
         destination_directory = (
-            directory / 'saved_html'
+            destination_root / 'saved_html'
             if path.suffix == '.html'
-            else directory / 'saved_results'
+            else destination_root / 'saved_results'
         )
         destination = copy_output(path, destination_directory / path.name)
-        harvested.append(destination.relative_to(directory).as_posix())
+        harvested.append(destination.relative_to(destination_root).as_posix())
     return harvested
 
 
-def required_input_paths(job: Job) -> list[Path]:
-    return [job.directory / relative for relative in job.required_inputs]
+def required_input_paths(job: Job, working_directory: Path | None = None) -> list[Path]:
+    root = working_directory or job.directory
+    return [root / relative for relative in job.required_inputs]
 
 
-def job_start(job: Job, job_directory: Path) -> int:
+def job_start(
+    job: Job, job_directory: Path, working_directory: Path | None = None
+) -> int:
+    working_directory = working_directory or job.directory
     job_directory.mkdir(parents=True, exist_ok=True)
     missing = [
-        str(path.relative_to(job.directory))
-        for path in required_input_paths(job)
+        str(path.relative_to(working_directory))
+        for path in required_input_paths(job, working_directory)
         if not path.is_file()
     ]
     start = {
@@ -309,7 +321,7 @@ def job_start(job: Job, job_directory: Path) -> int:
         'started_at': now_iso(),
         'started_at_ns': time.time_ns(),
         'missing_inputs': missing,
-        'before': snapshot(job.directory),
+        'before': snapshot(working_directory),
     }
     json_dump(job_directory / 'start.json', start)
     if missing:
@@ -327,15 +339,23 @@ def job_start(job: Job, job_directory: Path) -> int:
     return 0
 
 
-def job_finish(job: Job, job_directory: Path, exit_code: int) -> int:
+def job_finish(
+    job: Job,
+    job_directory: Path,
+    exit_code: int,
+    working_directory: Path | None = None,
+) -> int:
+    working_directory = working_directory or job.directory
     start_path = job_directory / 'start.json'
     start = json_load(start_path) if start_path.is_file() else {}
     harvested: list[str] = []
     if exit_code == 0 and start:
         harvested = harvest_outputs(
-            job.directory, int(start.get('started_at_ns', time.time_ns()))
+            working_directory,
+            int(start.get('started_at_ns', time.time_ns())),
+            destination_root=job.directory,
         )
-    after = snapshot(job.directory)
+    after = snapshot(working_directory)
     changed = changed_artifacts(start.get('before', {}), after) if start else []
     diagnostics: list[str] = []
     if exit_code != 0:
@@ -451,16 +471,8 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             '    export CXX="$(command -v g++)"',
             'fi',
             'export PYTHONUNBUFFERED=1',
-            'export OPENBLAS_NUM_THREADS='
-            + dollar
-            + '{SLURM_CPUS_PER_TASK:-'
-            + str(settings['blas_threads'])
-            + '}',
-            'export OMP_NUM_THREADS='
-            + dollar
-            + '{SLURM_CPUS_PER_TASK:-'
-            + str(settings['blas_threads'])
-            + '}',
+            f"export OPENBLAS_NUM_THREADS={settings['blas_threads']}",
+            f"export OMP_NUM_THREADS={settings['blas_threads']}",
             'export MKL_NUM_THREADS=1',
             'export NUMEXPR_NUM_THREADS=1',
             'JOB_TMP="'
@@ -470,7 +482,26 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + '{TMPDIR:-/tmp}}/biogeme-'
             + dollar
             + '{SLURM_JOB_ID:-manual}"',
-            'mkdir -p "' + dollar + 'JOB_TMP/pytensor" "' + dollar + 'JOB_DIRECTORY"',
+            'WORK_DIRECTORY="' + dollar + 'JOB_TMP/work"',
+            'mkdir -p "'
+            + dollar
+            + 'JOB_TMP/pytensor" "'
+            + dollar
+            + 'JOB_DIRECTORY" "'
+            + dollar
+            + 'WORK_DIRECTORY"',
+            'if ! command -v rsync >/dev/null 2>&1; then',
+            '    echo "rsync is required to create an isolated JED work directory" >&2',
+            '    exit 127',
+            'fi',
+            'rsync -a --delete --delete-excluded',
+            "    --exclude='/*.F12' --exclude='/*.err' --exclude='/*.html'",
+            "    --exclude='/*.iter' --exclude='/*.log' --exclude='/*.nc'",
+            "    --exclude='/*.out' --exclude='/*.pareto' --exclude='/*.pickle'",
+            "    --exclude='/*.pkl' --exclude='/*.tex' --exclude='/*.yaml'",
+            "    --exclude='/*.run' --exclude='/slurm-*' --exclude='/*_slurm.out'",
+            "    --exclude='__pycache__/'",
+            '    "' + dollar + 'EXAMPLE_DIRECTORY/" "' + dollar + 'WORK_DIRECTORY/"',
             f'GCC_INCLUDE={shell_value(gcc_include)}',
             'if [[ -d "' + dollar + 'GCC_INCLUDE" ]]; then',
             '    export PYTENSOR_FLAGS="cxx='
@@ -511,10 +542,12 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + shell_value(job.script)
             + ' --job-directory "'
             + dollar
-            + 'JOB_DIRECTORY"',
+            + 'JOB_DIRECTORY" --work-directory "'
+            + dollar
+            + 'WORK_DIRECTORY"',
             'start_status=$?',
             'if [[ "' + dollar + 'start_status" -eq 0 ]]; then',
-            '    srun --ntasks=1 "'
+            '    srun --chdir="' + dollar + 'WORK_DIRECTORY" --ntasks=1 "'
             + dollar
             + 'PYTHON_EXECUTABLE" -u '
             + shell_value(job.script_name),
@@ -532,6 +565,9 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + ' --job-directory "'
             + dollar
             + 'JOB_DIRECTORY" '
+            '--work-directory "'
+            + dollar
+            + 'WORK_DIRECTORY" '
             '--exit-code "' + dollar + 'run_status"',
             'finish_status=$?',
             'set -e',
@@ -807,14 +843,22 @@ def command_job_start(args: argparse.Namespace) -> int:
     jobs = discover_jobs()
     if args.script not in jobs:
         raise ValueError(f'Unknown example job: {args.script}')
-    return job_start(jobs[args.script], Path(args.job_directory))
+    working_directory = (
+        Path(args.work_directory) if args.work_directory else None
+    )
+    return job_start(jobs[args.script], Path(args.job_directory), working_directory)
 
 
 def command_job_finish(args: argparse.Namespace) -> int:
     jobs = discover_jobs()
     if args.script not in jobs:
         raise ValueError(f'Unknown example job: {args.script}')
-    return job_finish(jobs[args.script], Path(args.job_directory), args.exit_code)
+    working_directory = (
+        Path(args.work_directory) if args.work_directory else None
+    )
+    return job_finish(
+        jobs[args.script], Path(args.job_directory), args.exit_code, working_directory
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -851,11 +895,13 @@ def build_parser() -> argparse.ArgumentParser:
     start = subparsers.add_parser('job-start', help=argparse.SUPPRESS)
     start.add_argument('--script', required=True)
     start.add_argument('--job-directory', required=True)
+    start.add_argument('--work-directory')
     start.set_defaults(function=command_job_start)
 
     finish = subparsers.add_parser('job-finish', help=argparse.SUPPRESS)
     finish.add_argument('--script', required=True)
     finish.add_argument('--job-directory', required=True)
+    finish.add_argument('--work-directory')
     finish.add_argument('--exit-code', type=int, required=True)
     finish.set_defaults(function=command_job_finish)
     return parser

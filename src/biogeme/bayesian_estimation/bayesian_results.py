@@ -230,6 +230,10 @@ class BayesianResults:
         self._log_likelihood = None
         self._waic_res = None
         self._loo_res = None
+        # A failed LOO calculation is a valid cached outcome.  Without a
+        # separate flag, every derived LOO property would retry ArviZ and
+        # emit the same warning again.
+        self._loo_attempted = False
         self._rhat_ds = None
         self._ess_bulk_ds = None
         self._ess_tail_ds = None
@@ -446,7 +450,8 @@ class BayesianResults:
             return None
         if self.log_likelihood is None:
             return None
-        if self._loo_res is None:
+        if not self._loo_attempted:
+            self._loo_attempted = True
             try:
                 self._loo_res = az.loo(self.idata, var_name=CHOICE_LABEL)
             except (AttributeError, TypeError, ValueError) as exc:

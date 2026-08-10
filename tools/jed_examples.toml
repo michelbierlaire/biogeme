@@ -41,8 +41,10 @@ blas_threads = 36
 xla_devices = 36
 
 [profiles.hybrid]
-# This is the resource profile already used by the maintained H04 JED job.
-cpus_per_task = 8
+# H04 uses 50,000 Monte-Carlo draws and needs a larger memory allocation.
+# JED limits memory to 7,000 MB per CPU on the standard partition, so request
+# 18 CPUs to obtain approximately 126 GB for the single-process job.
+cpus_per_task = 18
 mem_per_cpu = "7000M"
 time = "2-00:00:00"
 partition = "standard"

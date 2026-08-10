@@ -46,8 +46,12 @@ logger = blog.get_screen_logger(level=blog.INFO)
 asc_car = Beta('asc_car', 0, None, None, 0)
 asc_train = Beta('asc_train', 0, None, None, 0)
 asc_sm = Beta('asc_sm', 0, None, None, 1)
-b_time = Beta('b_time', 0, None, 0, 0)
-b_cost = Beta('b_cost', 0, None, 0, 0)
+# Starting values from the corresponding maximum-likelihood estimate.  They
+# are strictly inside the upper bound (zero), which gives the Bayesian
+# sampler a better initial geometry than starting both coefficients at the
+# truncation boundary.
+b_time = Beta('b_time', -1.675, None, 0, 0)
+b_cost = Beta('b_cost', -1.079, None, 0, 0)
 boxcox_parameter = Beta('boxcox_parameter', 1, -2, 2, 0)
 
 # %%

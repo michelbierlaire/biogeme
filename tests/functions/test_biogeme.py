@@ -183,7 +183,12 @@ class TestBiogeme(unittest.TestCase):
 
     def test_estimate(self):
         data = getData(1)
-        my_biogeme = BIOGEME(data, self.get_dict_of_expressions(), bootstrap_samples=10)
+        my_biogeme = BIOGEME(
+            data,
+            self.get_dict_of_expressions(),
+            bootstrap_samples=10,
+            save_iterations=False,
+        )
         results = my_biogeme.estimate(run_bootstrap=True)
         self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
@@ -351,11 +356,19 @@ class TestBiogeme(unittest.TestCase):
         self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
 
     def test_simulate(self):
-        my_biogeme = self.get_biogeme_instance()
+        my_biogeme = BIOGEME(
+            getData(1),
+            self.get_dict_of_expressions(),
+            save_iterations=False,
+        )
         results = my_biogeme.estimate()
         with self.assertRaises(BiogemeError):
             _ = my_biogeme.simulate(the_beta_values=None)
-        my_biosim = self.get_biogeme_instance()
+        my_biosim = BIOGEME(
+            getData(1),
+            self.get_dict_of_expressions(),
+            save_iterations=False,
+        )
         s = my_biosim.simulate(results.get_beta_values())
         self.assertAlmostEqual(s.loc[0, 'log_like'], 0, 3)
 
@@ -403,7 +416,11 @@ class TestBiogeme(unittest.TestCase):
 
     def test_validate(self):
         my_data = getData(1)
-        my_biogeme = self.get_biogeme_instance()
+        my_biogeme = BIOGEME(
+            my_data,
+            self.get_dict_of_expressions(),
+            save_iterations=False,
+        )
         my_biogeme.algorithm_name = 'simple_bounds'
         results = my_biogeme.estimate()
         validation_results: list[ValidationResult] = my_biogeme.validate(
