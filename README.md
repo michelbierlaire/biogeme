@@ -8,7 +8,7 @@ Biogeme is an open source freeware designed for the maximum likelihood estimatio
 with a special emphasis on discrete choice models.
 
 ## Install
-Biogeme requires Python >= 3.10 and can be installed [from PyPI](https://pypi.org/project/biogeme/).
+Biogeme requires Python >= 3.12 and can be installed [from PyPI](https://pypi.org/project/biogeme/).
 
 `pip install biogeme`
 
