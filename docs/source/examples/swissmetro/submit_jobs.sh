@@ -1,5 +1,9 @@
 #!/bin/bash -l
-for f in *.run; do
-    sbatch "$f"
-    sleep 0.1
-done
+set -euo pipefail
+
+repository="$HOME/github/biogeme"
+if [[ -n "${BIOGEME_JED_REPOSITORY:-}" ]]; then
+    repository="$BIOGEME_JED_REPOSITORY"
+fi
+
+exec python "$repository/tools/jed_examples.py" launch "$@"

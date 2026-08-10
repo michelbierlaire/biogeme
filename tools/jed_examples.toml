@@ -1,0 +1,151 @@
+# Configuration for the JED example runner.
+#
+# The runner discovers every docs/source/examples/**/plot_*.py file. This file
+# contains the cluster defaults and exceptional dependency edges; it does not
+# need one entry per example.
+
+[cluster]
+# The path used by the current JED setup_biogeme.sh documentation. Override
+# these values at run time with BIOGEME_JED_REPOSITORY and BIOGEME_JED_PYTHON.
+repository = "$HOME/github/biogeme"
+python = "$HOME/github/biogeme/.venv/bin/python"
+module = "gcc"
+gcc_include = "/usr/lib/gcc/x86_64-redhat-linux/11/include"
+state_directory = ".jed_runs"
+
+[profiles.standard]
+cpus_per_task = 36
+time = "70:00:00"
+blas_threads = 36
+xla_devices = 36
+
+[profiles.bayesian]
+cpus_per_task = 36
+time = "70:00:00"
+blas_threads = 36
+xla_devices = 36
+
+[profiles.montecarlo]
+cpus_per_task = 36
+time = "70:00:00"
+blas_threads = 36
+xla_devices = 36
+
+[profiles.hybrid]
+# This is the resource profile already used by the maintained H04 JED job.
+cpus_per_task = 8
+mem_per_cpu = "7000M"
+time = "2-00:00:00"
+partition = "standard"
+qos = "serial"
+blas_threads = 1
+xla_devices = 0
+
+[profiles.light]
+# Non-estimation examples should not reserve 36 cores for a short report.
+cpus_per_task = 4
+time = "04:00:00"
+blas_threads = 4
+xla_devices = 4
+
+# Each job key is relative to docs/source/examples. Dependencies are submitted
+# as independent Slurm jobs using --dependency=afterok:<job ids>.
+
+[jobs."assisted/plot_b09post_processing.py"]
+depends_on = ["assisted/plot_b07everything_assisted.py"]
+required_inputs = ["saved_results/b07everything_assisted.pareto"]
+
+[jobs."bayesian_swissmetro/plot_b01c_logit_simul.py"]
+depends_on = ["bayesian_swissmetro/plot_b01a_logit.py"]
+required_inputs = ["saved_results/b01a_logit.nc"]
+
+[jobs."bayesian_swissmetro/plot_b19_individual_level_parameters.py"]
+depends_on = ["bayesian_swissmetro/plot_b05_normal_mixture.py"]
+required_inputs = ["saved_results/b05_normal_mixture.nc"]
+
+[jobs."hybrid_choice_models/plot_h03_mode_lv_gauss_seq.py"]
+depends_on = ["hybrid_choice_models/plot_h02_lv_mimic_gauss.py"]
+required_inputs = ["saved_results/plot_h02_lv_mimic_gauss.yaml"]
+
+[jobs."hybrid_choice_models/plot_h04_mode_lv_gauss_simult.py"]
+profile = "hybrid"
+
+[jobs."indicators/plot_b03simulation.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+
+[jobs."indicators/plot_b04market_shares.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+
+[jobs."indicators/plot_b05revenues.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+requires_artifacts = true
+
+[jobs."indicators/plot_b06point_elasticities.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+
+[jobs."indicators/plot_b07cross_elasticities.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+
+[jobs."indicators/plot_b08arc_elasticities.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+
+[jobs."indicators/plot_b09wtp.py"]
+depends_on = ["indicators/plot_b02estimation.py"]
+required_inputs = ["saved_results/b02estimation.yaml"]
+
+[jobs."mdcev_no_outside_good/plot_gamma_forecasting.py"]
+depends_on = ["mdcev_no_outside_good/plot_gamma_estimation.py"]
+required_inputs = ["saved_results/gamma_profile.yaml"]
+
+[jobs."mdcev_no_outside_good/plot_generalized_forecasting.py"]
+depends_on = ["mdcev_no_outside_good/plot_generalized_estimation.py"]
+required_inputs = ["saved_results/generalized.yaml"]
+
+[jobs."mdcev_no_outside_good/plot_non_monotonic_forecasting.py"]
+depends_on = ["mdcev_no_outside_good/plot_non_monotonic_estimation.py"]
+required_inputs = ["saved_results/non_monotonic.yaml"]
+
+[jobs."mdcev_no_outside_good/plot_translated_forecasting.py"]
+depends_on = ["mdcev_no_outside_good/plot_translated_estimation.py"]
+required_inputs = ["saved_results/translated.yaml"]
+
+[jobs."swissmetro/plot_b01d_logit_simul.py"]
+depends_on = ["swissmetro/plot_b01a_logit.py"]
+required_inputs = ["saved_results/b01a_logit.yaml"]
+
+[jobs."swissmetro/plot_b05c_normal_mixture_simul.py"]
+depends_on = ["swissmetro/plot_b05a_normal_mixture.py"]
+required_inputs = ["saved_results/b05a_normal_mixture.yaml"]
+
+[jobs."swissmetro/plot_b11b_cnl_simul.py"]
+depends_on = ["swissmetro/plot_b11a_cnl.py"]
+required_inputs = ["saved_results/b11a_cnl.yaml"]
+
+[jobs."swissmetro/plot_b13_panel_simul.py"]
+depends_on = ["swissmetro/plot_b12_panel.py"]
+required_inputs = ["saved_results/b12_panel.yaml"]
+
+[jobs."swissmetro/plot_b19_individual_level_parameters.py"]
+depends_on = ["swissmetro/plot_b05a_normal_mixture.py"]
+required_inputs = ["saved_results/b05a_normal_mixture.yaml"]
+
+[jobs."swissmetro/plot_b21c_process_pareto.py"]
+depends_on = ["swissmetro/plot_b21a_multiple_models.py"]
+required_inputs = ["saved_results/b21_multiple_models.pareto"]
+
+[jobs."swissmetro/plot_b22c_process_pareto.py"]
+depends_on = ["swissmetro/plot_b22a_multiple_models.py"]
+required_inputs = ["saved_results/b22_multiple_models.pareto"]
+
+[jobs."tutorials/plot_b05_simulation.py"]
+depends_on = ["tutorials/plot_b01_first_model.py"]
+required_inputs = ["saved_results/first_model.yaml"]
+
+[jobs."tutorials/plot_b04_estimation_results.py"]
+required_inputs = []
