@@ -127,8 +127,8 @@ the_biogeme = BIOGEME(
     database,
     log_probability,
     chains=4,
-    bayesian_draws=40_000,
-    warmup=40_000,
+    bayesian_draws=4000,
+    warmup=4000,
     calculate_loo=False,
 )
 the_biogeme.model_name = 'b11_cnl'
