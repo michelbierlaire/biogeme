@@ -7,6 +7,7 @@ from jed_runs.jed_examples import (
     job_finish,
     job_start,
     load_config,
+    select_jobs,
 )
 from jed_runs.jed_fresh_start import collect_targets
 
@@ -39,6 +40,28 @@ def test_h04_uses_high_memory_profile(tmp_path: Path):
     assert 'rsync -a --delete --delete-excluded \\\n' in script
     assert "    --exclude='__pycache__/' \\\n" in script
     assert '--work-directory "$WORK_DIRECTORY"' in script
+
+
+def test_slow_selection_excludes_light_jobs_and_keeps_dependencies():
+    jobs = discover_jobs(load_config())
+
+    selected = select_jobs(jobs, slow_only=True)
+
+    assert selected
+    assert all(job.profile != 'light' for job in selected.values())
+    assert 'tutorials/plot_b05_simulation.py' not in selected
+    assert 'indicators/plot_b02estimation.py' in selected
+
+
+def test_explicit_selection_rejects_slow_flag():
+    jobs = discover_jobs(load_config())
+
+    try:
+        select_jobs(jobs, ['tutorials/plot_b05_simulation.py'], slow_only=True)
+    except ValueError as error:
+        assert str(error) == 'Use either --only or --slow, not both.'
+    else:  # pragma: no cover - assertion keeps the failure message explicit.
+        raise AssertionError('Expected --only/--slow conflict to be rejected')
 
 
 def test_job_lifecycle_only_harvests_isolated_work_directory(tmp_path: Path):

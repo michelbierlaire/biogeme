@@ -102,6 +102,14 @@ indent-style = "space"
 pythonpath = ["."]
 
 [dependency-groups]
+docs = [
+    "furo",
+    "myst-parser",
+    "sphinx",
+    "sphinx-autodoc-typehints",
+    "sphinx-gallery",
+    "sphinx-rtd-theme",
+]
 dev = [
     "black>=26.3.1",
     "pytest>=9.0.2",

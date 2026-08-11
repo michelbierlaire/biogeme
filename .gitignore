@@ -18,6 +18,8 @@ old_webpage
 archive/*
 stamp-h1
 docs/source/auto_examples
+docs/.cache/
+.docs_runs/
 docs.keep/*
 dist/
 *.egg
@@ -465,3 +467,5 @@ reports/latent_book/latent_book_joans_comments.pdf
 src/biogeme/models/nested_slow.py
 src/biogeme/models/cnl_slow.py
 src/biogeme/sampling_of_alternatives/generate_model_slow.py
+/docs/.cache
+/docs/.cache

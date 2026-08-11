@@ -1,6 +1,8 @@
+import argparse
 import os
 import shutil
 from datetime import datetime
+from pathlib import Path
 
 from biogeme.default_parameters import ParameterTuple, all_parameters_tuple
 from biogeme.draws import description_of_native_draws
@@ -115,16 +117,15 @@ of all parameters that can be configured.
         print('  :caption: Configuration parameters', file=f)
 
 
-def create_rst_structure(src_dir: str, dst_dir: str) -> None:
+def create_rst_structure(src_dir: str, dst_dir: str, force: bool = False) -> None:
     if os.path.exists(dst_dir):
-        user_input = input(
-            f'The destination directory {dst_dir} already exists. Do you want to delete it and create a new one? (yes/no): '
-        )
-        if user_input.lower() == 'yes':
+        if force:
             shutil.rmtree(dst_dir)
         else:
-            print('Operation cancelled.')
-            return
+            raise RuntimeError(
+                f'The destination directory {dst_dir} already exists. '
+                'Use --force to replace generated documentation.'
+            )
 
     os.makedirs(dst_dir)
 
@@ -167,9 +168,8 @@ def create_rst_structure(src_dir: str, dst_dir: str) -> None:
         print('Processing files....')
         for file in files:
             rst_file = os.path.join(dst_root, file.replace('.py', '.rst'))
-            module_path = rst_file.replace(os.sep, '.')[
-                len('source.code.') : -len('.rst')
-            ]
+            relative_rst = Path(rst_file).relative_to(Path(dst_dir)).with_suffix('')
+            module_path = '.'.join(relative_rst.parts)
             print(f'    Create {rst_file}: {module_path}')
             with open(rst_file, 'w') as f:
                 title = f'{module_path} module'
@@ -184,20 +184,18 @@ def create_rst_structure(src_dir: str, dst_dir: str) -> None:
     print('**************** Process directories ***********************')
     # Then create the directory structure
 
-    for root, dirs, files in os.walk(dst_dir, topdown=False):
+    for root, dirs, _files in os.walk(dst_dir, topdown=False):
         dirs[:] = sorted([d for d in dirs if d not in exclude_dirs])
         for the_dir in dirs:
             if not the_dir:
                 continue
             rst_file = os.path.join(root, f'{the_dir}.rst')
-            module_path = root.replace(os.sep, '.')[len('source.code.') :]
-            if module_path == '.':
-                module_path = ''
-            print(
-                f'    Create {rst_file} for directory. Module: {module_path}.{the_dir}'
-            )
+            relative_root = Path(root).relative_to(Path(dst_dir))
+            module_path = '.'.join(relative_root.parts)
+            module_name = f'{module_path}.{the_dir}' if module_path else the_dir
+            print(f'    Create {rst_file} for directory. Module: {module_name}')
             with open(rst_file, 'w') as f:
-                title = f'{module_path}.{the_dir} module'
+                title = f'{module_name} module'
                 print(title, file=f)
                 print('%' * len(title), file=f)
                 print('', file=f)
@@ -214,7 +212,17 @@ def create_rst_structure(src_dir: str, dst_dir: str) -> None:
 
 
 if __name__ == '__main__':
-    src = '../src'
-    dst = 'source/code'
+    parser = argparse.ArgumentParser(
+        description='Generate the ignored API/configuration RST tree.'
+    )
+    parser.add_argument(
+        '--force',
+        action='store_true',
+        help='replace the existing generated tree without prompting',
+    )
+    args = parser.parse_args()
+    docs_directory = Path(__file__).resolve().parent
+    src = docs_directory.parent / 'src'
+    dst = docs_directory / 'source' / 'code'
 
-    create_rst_structure(src, dst)
+    create_rst_structure(str(src), str(dst), force=args.force)

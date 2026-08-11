@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from types import SimpleNamespace
 
 import pytest
@@ -14,6 +14,7 @@ from biogeme.latent_variables.biogeme_builder import (
     _build_biogeme_model_ml,
     _build_measurement_log_terms_bayesian,
     _build_measurement_terms_ml,
+    _mask_neutral_labels,
     _render_linear_combination,
     build_biogeme_model,
 )
@@ -63,6 +64,7 @@ class FakeMeasurementEquation:
     measurement_model: MeasurementModel
     sigma: object | None
     threshold_system_name: str | None = None
+    type_name: str = 'likert'
 
 
 @dataclass
@@ -84,12 +86,18 @@ class FakeMetadata:
 
 
 @dataclass
+class FakeIndicatorType:
+    neutral_labels: list[int]
+
+
+@dataclass
 class FakeResolvedModel:
     parameters: dict[str, object]
     latent_variables: dict[str, object]
     threshold_systems: dict[str, object]
     measurement_equations: dict[str, object]
     metadata: FakeMetadata
+    indicator_types: dict[str, FakeIndicatorType] = field(default_factory=dict)
 
 
 # ------------------------------------------------------------------------------
@@ -350,6 +358,7 @@ def test_build_measurement_terms_ml_gaussian():
         threshold_systems={},
         measurement_equations={'y1': equation},
         metadata=FakeMetadata(estimation_mode=ml_mode()),
+        indicator_types={'likert': FakeIndicatorType(neutral_labels=[6, -1])},
     )
 
     result = _build_measurement_terms_ml(
@@ -363,6 +372,30 @@ def test_build_measurement_terms_ml_gaussian():
     text = expr_text(result['y1'])
     assert 'y_obs' in text
     assert 'sigma_ind' in text
+    assert class_name(result['y1']) == 'Elem'
+    assert '6' in text
+    assert '-1' in text
+
+
+@pytest.mark.parametrize(
+    ('observed', 'neutral_value', 'expected'),
+    [
+        (6, 1.0, 1.0),
+        (-1, 0.0, 0.0),
+        (3, 1.0, 0.25),
+    ],
+)
+def test_mask_neutral_labels(
+    observed: int, neutral_value: float, expected: float
+) -> None:
+    result = _mask_neutral_labels(
+        Numeric(0.25),
+        Numeric(observed),
+        [6, -1],
+        neutral_value=neutral_value,
+    )
+
+    assert result.get_value() == pytest.approx(expected)
 
 
 def test_build_measurement_terms_ml_gaussian_requires_sigma():
@@ -546,6 +579,7 @@ def test_build_measurement_log_terms_bayesian_gaussian():
         threshold_systems={},
         measurement_equations={'ind': equation},
         metadata=FakeMetadata(estimation_mode=bayesian_mode()),
+        indicator_types={'likert': FakeIndicatorType(neutral_labels=[6, -1])},
     )
 
     result = _build_measurement_log_terms_bayesian(
@@ -558,6 +592,9 @@ def test_build_measurement_log_terms_bayesian_gaussian():
     text = expr_text(result['ind'])
     assert 'y_obs' in text
     assert 'sigma_ind' in text
+    assert class_name(result['ind']) == 'Elem'
+    assert '6' in text
+    assert '-1' in text
 
 
 def test_build_measurement_log_terms_bayesian_ordered_probit():

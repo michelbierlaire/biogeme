@@ -3,8 +3,6 @@ set -euo pipefail
 
 : "${BIOGEME_REPOSITORY:?BIOGEME_REPOSITORY is required}"
 : "${BIOGEME_H04_RUN_ROOT:?BIOGEME_H04_RUN_ROOT is required}"
-: "${BIOGEME_H04_NUMBER_OF_DRAWS:=50000}"
-: "${BIOGEME_H04_MAX_ITERATIONS:=5000}"
 
 python_executable="$BIOGEME_REPOSITORY/.venv/bin/python"
 source_directory="$BIOGEME_REPOSITORY/docs/source/examples/hybrid_choice_models"
@@ -31,8 +29,8 @@ rsync -a \
     --exclude='__pycache__/' \
     --exclude='*.run' \
     "$source_directory/" "$work_directory/"
+ln -sfn "$results_directory" "$work_directory/saved_results"
 
-export BIOGEME_H04_RESULTS_DIRECTORY="$results_directory"
 export JAX_COMPILATION_CACHE_DIR="$cache_directory/jax"
 export XDG_CACHE_HOME="$job_temporary_directory/xdg"
 export MPLCONFIGDIR="$job_temporary_directory/matplotlib"
@@ -45,8 +43,6 @@ export PYTHONUNBUFFERED=1
 git -C "$BIOGEME_REPOSITORY" rev-parse HEAD > "$BIOGEME_H04_RUN_ROOT/git-commit.txt"
 "$python_executable" --version
 echo "Commit: $(<"$BIOGEME_H04_RUN_ROOT/git-commit.txt")"
-echo "Draws: $BIOGEME_H04_NUMBER_OF_DRAWS"
-echo "Maximum iterations: $BIOGEME_H04_MAX_ITERATIONS"
 echo "Results: $results_directory"
 echo "Started: $(date --iso-8601=seconds)"
 

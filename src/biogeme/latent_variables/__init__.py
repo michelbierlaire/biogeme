@@ -47,5 +47,5 @@ from .python_generator import (
     generate_python_code,
     save_python_code,
 )
-from .resolved import ResolvedModel
+from .resolved import ResolvedIndicatorType, ResolvedModel
 from .resolver import resolve_model

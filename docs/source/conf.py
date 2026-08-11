@@ -3,9 +3,10 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
+import re
 import sys
-
-from sphinx_gallery.sorting import FileNameSortKey
+import tomllib
+from pathlib import Path
 
 from biogeme.version import __version__
 
@@ -35,16 +36,40 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx_autodoc_typehints',
     'sphinx_gallery.gen_gallery',
-    'sphinx_gallery.load_style',
     'deprecated_extension',
 ]
+
+def gallery_pattern() -> str:
+    """Return the execution pattern selected by the documentation profile."""
+    profile = os.environ.get('BIOGEME_DOCS_GALLERY_PROFILE', 'full').lower()
+    if profile == 'none':
+        return r'(?!)'
+    if profile == 'fast':
+        manifest = Path(__file__).resolve().parents[2] / 'jed_runs' / 'jed_examples.toml'
+        with manifest.open('rb') as manifest_file:
+            configuration = tomllib.load(manifest_file)
+        fast_examples = [
+            name
+            for name, metadata in configuration.get('docs', {}).get('examples', {}).items()
+            if metadata.get('profile') == 'fast' and metadata.get('gallery', True)
+        ]
+        if not fast_examples:
+            raise RuntimeError('The fast documentation profile has no examples.')
+        alternatives = '|'.join(re.escape(name) for name in sorted(fast_examples))
+        return rf'/(?:{alternatives})$'
+    if profile != 'full':
+        raise RuntimeError(f'Unknown BIOGEME_DOCS_GALLERY_PROFILE: {profile}')
+    return r'/plot_'
+
 
 sphinx_gallery_conf = {
     'examples_dirs': 'examples',  # Path to your example scripts
     'gallery_dirs': 'auto_examples',  # Path to save gallery generated output
-    'within_subsection_order': FileNameSortKey,
-    'filename_pattern': '/plot_',  # Pattern to match example files
+    'filename_pattern': gallery_pattern(),
+    'ignore_pattern': r'/(?:generate_jed_run)\.py$',
     'remove_config_comments': True,  # Remove config comments from examples
+    'abort_on_example_error': True,
+    'run_stale_examples': True,
 }
 
 
@@ -78,8 +103,6 @@ autodoc_default_options = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'furo'
-html_theme_options = {
-    'navigation_depth': 4,
-    'collapse_navigation': False,
-}
+html_theme_options = {}
+html_title = f'Biogeme {release} documentation'
 html_static_path = ['_static']

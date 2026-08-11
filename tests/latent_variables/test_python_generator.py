@@ -84,6 +84,10 @@ def _threshold_system(
     )
 
 
+def _indicator_type(neutral_labels: list[int]) -> SimpleNamespace:
+    return SimpleNamespace(neutral_labels=neutral_labels)
+
+
 def _measurement_equation(
     *,
     systematic_part: object,
@@ -91,6 +95,7 @@ def _measurement_equation(
     sigma: object | None,
     measurement_model: MeasurementModel,
     threshold_system_name: str | None = None,
+    type_name: str = 'likert',
 ) -> SimpleNamespace:
     return SimpleNamespace(
         systematic_part=systematic_part,
@@ -98,6 +103,7 @@ def _measurement_equation(
         sigma=sigma,
         measurement_model=measurement_model,
         threshold_system_name=threshold_system_name,
+        type_name=type_name,
     )
 
 
@@ -128,6 +134,7 @@ def _resolved_model(
     threshold_systems: dict[str, object] | None = None,
     measurement_equations: dict[str, object] | None = None,
     latent_variables: dict[str, object] | None = None,
+    indicator_types: dict[str, object] | None = None,
 ) -> SimpleNamespace:
     return SimpleNamespace(
         metadata=SimpleNamespace(estimation_mode=estimation_mode),
@@ -137,6 +144,7 @@ def _resolved_model(
             {} if measurement_equations is None else measurement_equations
         ),
         latent_variables={} if latent_variables is None else latent_variables,
+        indicator_types={} if indicator_types is None else indicator_types,
     )
 
 
@@ -307,6 +315,25 @@ def test_emit_header_bayesian() -> None:
     ]
 
 
+def test_emit_header_imports_elem_for_neutral_gaussian_labels() -> None:
+    resolved = _resolved_model(
+        indicator_types={'likert': _indicator_type([6, -1])},
+        measurement_equations={
+            'indicator': _measurement_equation(
+                systematic_part=_combo(None, []),
+                observed_variable_name='indicator',
+                sigma=_named('sigma'),
+                measurement_model=MeasurementModel.GAUSSIAN,
+            )
+        },
+    )
+    lines: list[str] = []
+
+    _emit_header(lines, resolved, bayesian=False)
+
+    assert 'Draws, Elem, MonteCarlo' in lines[2]
+
+
 # ------------------------------------------------------------------------------
 # _emit_parameters
 # ------------------------------------------------------------------------------
@@ -392,6 +419,7 @@ def test_emit_threshold_systems_emits_and_rewrites_tau_sources_before_shorter_na
 
 def test_emit_measurement_terms_ml_gaussian_and_ordered_models() -> None:
     resolved = _resolved_model(
+        indicator_types={'likert': _indicator_type([6, -1])},
         threshold_systems={
             'scale5': _threshold_system(
                 [
@@ -440,7 +468,7 @@ def test_emit_measurement_terms_ml_gaussian_and_ordered_models() -> None:
         '# Indicator: gauss_ind',
         'mu_gauss_ind = alpha_g + lambda_g * LV1',
         'y_gauss_ind = Variable("obs_g")',
-        'term_gauss_ind = normalpdf((y_gauss_ind - mu_gauss_ind) / sigma_g) / sigma_g',
+        'term_gauss_ind = Elem({0: normalpdf((y_gauss_ind - mu_gauss_ind) / sigma_g) / sigma_g, 1: 1.0}, (y_gauss_ind == 6) | (y_gauss_ind == -1))',
         '',
         '# Indicator: probit_ind',
         'mu_probit_ind = Numeric(0.0)',
@@ -481,6 +509,7 @@ def test_emit_measurement_terms_ml_raises_when_sigma_missing() -> None:
 
 def test_emit_measurement_log_terms_bayesian_gaussian_and_ordered_models() -> None:
     resolved = _resolved_model(
+        indicator_types={'likert': _indicator_type([6, -1])},
         threshold_systems={
             'scale5': _threshold_system(
                 [
@@ -529,7 +558,7 @@ def test_emit_measurement_log_terms_bayesian_gaussian_and_ordered_models() -> No
         '# Indicator: gauss_ind',
         'mu_gauss_ind = alpha_g + lambda_g * LV1',
         'y_gauss_ind = Variable("obs_g")',
-        'log_term_gauss_ind = normal_logpdf(y_gauss_ind, mu_gauss_ind, sigma_g)',
+        'log_term_gauss_ind = Elem({0: normal_logpdf(y_gauss_ind, mu_gauss_ind, sigma_g), 1: 0.0}, (y_gauss_ind == 6) | (y_gauss_ind == -1))',
         '',
         '# Indicator: probit_ind',
         'mu_probit_ind = Numeric(0.0)',

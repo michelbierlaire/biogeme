@@ -1,5 +1,10 @@
 # Running the examples on JED
 
+For the release-oriented walkthrough, including cleanup, slow-only runs,
+laptop import, and the final Sphinx-gallery build, see
+`../../../RELEASE_WORKFLOW.md` in the repository root.  This file remains the
+lower-level JED command reference.
+
 The example runner discovers every plot_*.py below this directory. It
 generates one Slurm job per script and submits dependent jobs with
 afterok dependencies, so independent examples run concurrently while an
@@ -16,6 +21,140 @@ Resource profiles and dependency exceptions are in
 jed_runs/jed_examples.toml. The generated .run files, Slurm logs, job IDs,
 diagnostics, and reset backups are stored below .jed_runs/, which is ignored
 by Git.
+
+## Validate examples locally before using JED
+
+The hermetic local runner uses the same discovery and dependency information,
+but executes each example in a fresh workspace under `.docs_runs/`.  It never
+writes results into the source example directories:
+
+~~~bash
+cd /home/bierlair/github/biogeme
+uv run --locked --group docs python tools/docs_examples.py list
+uv run --locked --group docs python tools/docs_examples.py plan --profile fast
+uv run --locked --group docs python tools/docs_examples.py run --profile fast
+uv run --locked --group docs python tools/docs_examples.py status --verbose
+~~~
+
+The fast profile is intentionally a small pilot.  Add an example to it only
+after it succeeds from a clean workspace and its declared outputs validate.
+Use `--keep-workspace` to inspect a failed run.  Remove only local runner
+state with:
+
+~~~bash
+uv run --locked --group docs python tools/docs_examples.py clean --apply
+~~~
+
+The `html-fast` documentation target does not execute gallery scripts. Run
+the hermetic example check first, then render the site:
+
+~~~bash
+make -C docs examples-fast
+make -C docs html-fast
+~~~
+
+The indicators family is the first migrated artifact-dependent chain. Its
+estimator creates `b02estimation.yaml` and `b02estimation.html`; each
+consumer receives a private copy of the YAML in its isolated workspace. To
+validate the complete chain locally, selecting the final consumer is enough:
+
+~~~bash
+uv run --locked --group docs python tools/docs_examples.py \
+  plan --script indicators/plot_b09wtp.py
+uv run --locked --group docs python tools/docs_examples.py \
+  run --script indicators/plot_b09wtp.py --keep-workspace
+uv run --locked --group docs python tools/docs_examples.py status --verbose
+~~~
+
+The runner forces the non-interactive `Agg` Matplotlib backend. This is
+required for headless laptops and Slurm nodes; interactive `plt.show()` calls
+remain harmless and do not open a display.
+
+The Swissmetro logit chain is also migrated. Validate it with:
+
+~~~bash
+uv run --locked --group docs python tools/docs_examples.py \
+  run --script swissmetro/plot_b01d_logit_simul.py --keep-workspace
+~~~
+
+The Swissmetro normal-mixture chain is migrated as a full-profile check. It
+uses 10,000 Monte-Carlo draws and should be run explicitly:
+
+~~~bash
+uv run --locked --group docs python tools/docs_examples.py \
+  run --script swissmetro/plot_b05c_normal_mixture_simul.py --keep-workspace
+~~~
+
+The Swissmetro cross-nested-logit chain is also migrated:
+
+~~~bash
+uv run --locked --group docs python tools/docs_examples.py \
+  run --script swissmetro/plot_b11b_cnl_simul.py --keep-workspace
+~~~
+
+The Swissmetro panel chain is a full-profile check. It uses 100,000
+Monte-Carlo draws and should be run explicitly:
+
+~~~bash
+uv run --locked --group docs python tools/docs_examples.py \
+  run --script swissmetro/plot_b13_panel_simul.py --keep-workspace
+~~~
+
+Long-running examples should continue to use the JED workflow below.  Their
+results must be validated and promoted as fixtures before a Sphinx build; a
+documentation build must not consume arbitrary files left in `saved_results`.
+
+## Import completed JED results on the laptop
+
+After all required JED jobs report `finished without error`, stage the server
+example tree on the laptop.  `rsync` can copy from the server directly, or the
+`--source` option can point at a mounted checkout:
+
+~~~bash
+cd "$HOME/github/biogeme"
+rsync -a user@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples/ \
+  /tmp/biogeme-jed-examples/
+
+# Review the manifest-limited import.  This is a dry run.
+uv run --locked --group docs python tools/import_jed_results.py \
+  --source /tmp/biogeme-jed-examples --profile full --strict
+~~~
+
+The importer accepts either a complete JED checkout or its
+`docs/source/examples` directory.  It imports only `expected_outputs` and
+`expected_output_globs` declared in `jed_runs/jed_examples.toml`:
+YAML/NetCDF/Pareto results are placed in `saved_results/`, HTML reports in
+`saved_html/`, and declared text reports at the example root.  Globs cover
+estimators whose model names are generated at runtime, such as the
+all-algorithm and multi-model Swissmetro examples.  Source code, input data,
+and undeclared files are never copied.  The `--strict` check must report no
+missing artifacts before applying the import:
+
+~~~bash
+uv run --locked --group docs python tools/import_jed_results.py \
+  --source /tmp/biogeme-jed-examples --profile full --strict --apply
+~~~
+
+The command backs up any overwritten result under the ignored
+`.docs_runs/imports/<timestamp>/backup/` directory and records source/target
+SHA-256 checksums in `report.json`.  A strict `--apply` refuses to copy
+anything when a declared artifact is missing, so fix the JED run and repeat
+the dry run before applying the import.
+
+Four JED jobs are deliberately not imported by the full fixture contract yet:
+`assisted/plot_b09post_processing.py`,
+`swissmetro/plot_b21c_process_pareto.py`, and
+`swissmetro/plot_b22c_process_pareto.py` produce in-memory post-processing
+reports, while `swissmetro/plot_b01e_logit_all_algos.py` produces a CSV summary.
+They must still finish successfully on JED; add an explicit output contract if
+their results are needed by the release documentation.
+
+Finally, build the full documentation gallery on the laptop:
+
+~~~bash
+make -C docs html
+make -C docs check-html
+~~~
 
 ## Start a completely fresh run
 
@@ -60,6 +199,11 @@ python jed_runs/jed_examples.py reset --apply
 RUN_ID="$(date +%Y%m%d-%H%M%S)"
 python jed_runs/jed_examples.py launch --dry-run --run-id "$RUN_ID"
 python jed_runs/jed_examples.py launch --run-id "$RUN_ID" --force
+
+# To submit only non-light (slow) resource profiles, use --slow instead.
+# Do not combine --slow with --only.
+# python jed_runs/jed_examples.py launch --slow --dry-run --run-id "$RUN_ID"
+# python jed_runs/jed_examples.py launch --slow --run-id "$RUN_ID" --force
 
 # 4. Inspect status at any time.
 python jed_runs/jed_examples.py status

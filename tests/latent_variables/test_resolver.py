@@ -1180,8 +1180,8 @@ def test_resolve_model_end_to_end_infers_reference_indicator_and_metadata(
         LikertType(
             type_name='cont',
             symmetric=False,
-            categories=[0, 1],
-            neutral_labels=[],
+            categories=[1, 2, 3, 4, 5],
+            neutral_labels=[6, -1],
         ),
         LikertType(
             type_name='ord5sym',
@@ -1250,6 +1250,15 @@ def test_resolve_model_end_to_end_infers_reference_indicator_and_metadata(
     assert model.metadata.n_latent_variables == 2
     assert model.metadata.n_indicators == 3
     assert model.metadata.n_threshold_systems == 2
+
+    assert set(model.indicator_types) == {'cont', 'ord4mono', 'ord5sym'}
+    assert model.indicator_types['cont'].categories == [1, 2, 3, 4, 5]
+    assert model.indicator_types['cont'].neutral_labels == [6, -1]
+    assert model.indicator_types['cont'].symmetric is False
+    assert (
+        model.threshold_systems['ord5sym'].neutral_labels
+        == model.indicator_types['ord5sym'].neutral_labels
+    )
 
     assert set(model.latent_variables) == {'LV1', 'LV2'}
     assert model.latent_variables['LV1'].indicator_names == ['ind_ord', 'ind_ref']

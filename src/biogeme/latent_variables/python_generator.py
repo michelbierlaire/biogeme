@@ -59,19 +59,41 @@ def _combo_to_python(
 # ------------------------ Mode-specific helpers and generators ------------------------
 
 
+def _neutral_labels_for_equation(resolved: ResolvedModel, equation) -> list[int]:
+    """Return neutral labels from the equation's shared indicator type."""
+    indicator_types = getattr(resolved, 'indicator_types', {})
+    if not indicator_types:
+        return []
+    indicator_type = indicator_types.get(equation.type_name)
+    return [] if indicator_type is None else indicator_type.neutral_labels
+
+
+def _uses_neutral_gaussian_labels(resolved: ResolvedModel) -> bool:
+    return any(
+        equation.measurement_model == MeasurementModel.GAUSSIAN
+        and _neutral_labels_for_equation(resolved, equation)
+        for equation in resolved.measurement_equations.values()
+    )
+
+
+def _neutral_condition(variable_name: str, neutral_labels: list[int]) -> str:
+    return ' | '.join(f'({variable_name} == {label})' for label in neutral_labels)
+
+
 def _emit_header(lines: list[str], resolved: ResolvedModel, *, bayesian: bool) -> None:
     lines.append(
         '"""Pedagogical runnable Biogeme code for the latent-variable part of the model."""'
     )
     lines.append('')
+    elem_import = 'Elem, ' if _uses_neutral_gaussian_labels(resolved) else ''
     if bayesian:
         lines.append(
-            'from biogeme.expressions import Beta, DistributedParameter, Draws, MultipleSum, Numeric, OrderedLogLogit, OrderedLogProbit, Variable, exp'
+            f'from biogeme.expressions import Beta, DistributedParameter, Draws, {elem_import}MultipleSum, Numeric, OrderedLogLogit, OrderedLogProbit, Variable, exp'
         )
         lines.append('from biogeme.distributions import normal_logpdf')
     else:
         lines.append(
-            'from biogeme.expressions import Beta, Draws, MonteCarlo, MultipleProduct, MultipleSum, Numeric, OrderedLogit, OrderedProbit, Variable, exp, log'
+            f'from biogeme.expressions import Beta, Draws, {elem_import}MonteCarlo, MultipleProduct, MultipleSum, Numeric, OrderedLogit, OrderedProbit, Variable, exp, log'
         )
         lines.append('from biogeme.distributions import normalpdf')
     lines.append('')
@@ -139,9 +161,18 @@ def _emit_measurement_terms_ml(lines: list[str], resolved: ResolvedModel) -> Non
             )
         sigma_name = equation.sigma.final_name
         if equation.measurement_model == MeasurementModel.GAUSSIAN:
-            lines.append(
-                f'term_{indicator_name} = normalpdf((y_{indicator_name} - mu_{indicator_name}) / {sigma_name}) / {sigma_name}'
+            gaussian_term = (
+                f'normalpdf((y_{indicator_name} - mu_{indicator_name}) / '
+                f'{sigma_name}) / {sigma_name}'
             )
+            neutral_labels = _neutral_labels_for_equation(resolved, equation)
+            if neutral_labels:
+                condition = _neutral_condition(f'y_{indicator_name}', neutral_labels)
+                lines.append(
+                    f'term_{indicator_name} = Elem({{0: {gaussian_term}, 1: 1.0}}, {condition})'
+                )
+            else:
+                lines.append(f'term_{indicator_name} = {gaussian_term}')
         else:
             system = resolved.threshold_systems[equation.threshold_system_name]
             cutpoints = ', '.join(
@@ -184,9 +215,17 @@ def _emit_measurement_log_terms_bayesian(
             )
         sigma_name = equation.sigma.final_name
         if equation.measurement_model == MeasurementModel.GAUSSIAN:
-            lines.append(
-                f'log_term_{indicator_name} = normal_logpdf(y_{indicator_name}, mu_{indicator_name}, {sigma_name})'
+            gaussian_log_term = (
+                f'normal_logpdf(y_{indicator_name}, mu_{indicator_name}, {sigma_name})'
             )
+            neutral_labels = _neutral_labels_for_equation(resolved, equation)
+            if neutral_labels:
+                condition = _neutral_condition(f'y_{indicator_name}', neutral_labels)
+                lines.append(
+                    f'log_term_{indicator_name} = Elem({{0: {gaussian_log_term}, 1: 0.0}}, {condition})'
+                )
+            else:
+                lines.append(f'log_term_{indicator_name} = {gaussian_log_term}')
         else:
             system = resolved.threshold_systems[equation.threshold_system_name]
             cutpoints = ', '.join(

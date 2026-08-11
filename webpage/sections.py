@@ -63,25 +63,33 @@ about['Links'] = (
 """,
 )
 
-about["What's new in Biogeme 3.3.3?"] = (
-    """
-The main new feature introduced in Biogeme 3.3.3 is a completely redesigned 
-framework for the specification and estimation of hybrid choice models, that is, 
-discrete choice models involving latent variables. The new implementation provides 
-a high-level object-oriented interface that allows analysts to define latent variables, 
-structural equations, measurement equations, normalization rules, and choice models in 
-a modular and transparent way. This substantially reduces the amount of code required to 
-specify complex models, improves readability and maintainability, and facilitates the development and comparison of alternative model specifications. The framework supports a wide range of configurations, from simple MIMIC models to full hybrid choice models integrating multiple latent constructs and measurement systems.
-In addition, several improvements have been made to the Bayesian estimation framework 
-introduced in version 3.3.2. These include a more robust estimation workflow, 
-improved management of estimation results through YAML summaries and NetCDF files, 
-and enhanced diagnostic and post-processing capabilities. Reporting facilities have also 
-been strengthened, with better support for parameter grouping and more consistent generation 
-of HTML, LaTeX, and pandas summaries.
-Finally, compatibility has been updated for recent Python releases, including Python 3.14, 
-and development workflows based on uv are now fully supported.
-""",
-)
+about["What's new in Biogeme 3.3.4?"] = """
+Biogeme 3.3.4 introduces a new expression-based computational backend for nested logit, cross-nested logit, and 
+sampled choice models. These dedicated expressions preserve the model structure during JAX compilation, provide 
+more efficient function, gradient, and Hessian evaluations, and support numerically stable log-domain calculations. 
+The existing public model interfaces remain available for backward compatibility.
+A new sparse cross-nested logit implementation, available through `sparse_cnl`, avoids evaluating structurally zero 
+allocation terms while preserving all parameter-dependent memberships. The original `cnl` implementation remains 
+unchanged, and Biogeme reports when the sparsity pattern suggests that the sparse implementation may be advantageous.
+The calculation of analytical Hessians has been substantially improved. Biogeme now supports exact chunked Hessian 
+calculations based on JAX Hessian-vector products, configurable parameter and observation blocks, and an automatic 
+memory-aware strategy that accounts for the effective memory available to the process, including resource limits 
+imposed by systems such as Slurm. These options are exposed through the estimation parameters 
+`analytical_hessian_mode`, `hessian_parameter_block_size`, `hessian_observation_batch_size`, and 
+`hessian_memory_fraction`. Chunked calculations report their progress and estimated completion time.
+Estimation results are now written as recoverable checkpoints throughout the estimation and post-estimation phases. 
+If the calculation of gradients, BHHH matrices, Hessians, or bootstrap results is interrupted or fails, Biogeme can 
+resume the missing phases without repeating the optimization. Result serialization is also performed atomically, 
+reducing the risk of corrupt YAML files.
+A new post-estimation Monte Carlo draw-stability diagnostic evaluates the objective and gradient at fixed estimates 
+using fresh draw designs and increasing numbers of draws. It supports independent replications, runtime budgets, 
+interruption and resumption, and configurable stability tolerances. Raw diagnostic results and an explanatory 
+Markdown report are stored separately from the ordinary estimation results, allowing users to determine whether 
+additional simulation draws are required.
+Finally, robustness and reproducibility have been improved through expanded regression tests, JAX benchmarks, 
+better handling of bootstrap execution in restricted environments, and enhanced support for recent Python versions. 
+Biogeme 3.3.4 requires Python 3.12 or later and is tested with Python 3.14.
+"""
 
 about['Conditions of use'] = (
     """
@@ -141,6 +149,7 @@ certainly not complete, and I apologize for those who are omitted:
 	    Cristian Arteaga,
 	    Kay Axhausen,
 	    John Bates,
+	    Candice Baud,
 	    Denis Bolduc,
 	    David Bunch,
         Pedro Camargo,
@@ -168,6 +177,7 @@ certainly not complete, and I apologize for those who are omitted:
 	    Carolina Osorio,
 	    Meritxell Pacheco Paneque,
 	    Evangelos Paschalidis,
+	    Anne-Valérie Preto,
 	    Thomas Robin,
 	    Pascal Scheiben,
 	    Matteo Sorci,

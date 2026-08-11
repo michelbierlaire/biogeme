@@ -49,6 +49,7 @@ from optima import (
     PurpHWH,
     TimeCar_hour,
     TimePT_hour,
+    car_is_available,
     distance_km,
 )
 
@@ -194,3 +195,11 @@ def generate_utility_functions(
         2: scale_parameter * v_slow_modes,
     }
     return v
+
+
+def generate_availability():
+    return {
+        0: 1,  # public transport
+        1: car_is_available,  # car
+        2: 1,  # slow modes
+    }

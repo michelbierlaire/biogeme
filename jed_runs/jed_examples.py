@@ -199,6 +199,41 @@ def topological_jobs(jobs: dict[str, Job]) -> list[Job]:
     return ordered
 
 
+def select_jobs(
+    all_jobs: dict[str, Job],
+    requested: list[str] | None = None,
+    slow_only: bool = False,
+) -> dict[str, Job]:
+    """Select jobs and close the selection over their dependencies.
+
+    ``slow_only`` excludes the ``light`` resource profile.  Explicitly
+    requested jobs always include their prerequisites, even when a prerequisite
+    uses the light profile.
+    """
+    requested_set = set(requested or [])
+    if requested_set and slow_only:
+        raise ValueError('Use either --only or --slow, not both.')
+    unknown = requested_set - all_jobs.keys()
+    if unknown:
+        raise ValueError('Unknown job(s): ' + ', '.join(sorted(unknown)))
+    if requested_set:
+        selected = requested_set
+    elif slow_only:
+        selected = {name for name, job in all_jobs.items() if job.profile != 'light'}
+    else:
+        selected = set(all_jobs)
+
+    changed = True
+    while changed:
+        changed = False
+        for name in tuple(selected):
+            for dependency in all_jobs[name].dependencies:
+                if dependency not in selected:
+                    selected.add(dependency)
+                    changed = True
+    return {name: all_jobs[name] for name in selected}
+
+
 def state_root(config: dict[str, Any]) -> Path:
     configured = expand(
         os.environ.get(
@@ -388,9 +423,7 @@ def job_finish(
     json_dump(
         job_directory / 'diagnostic.json',
         {
-            'category': (
-                'finished without error' if exit_code == 0 else 'finished with errors'
-            ),
+            'category': ('Done ' if exit_code == 0 else 'ERROR'),
             **completion,
         },
     )
@@ -475,8 +508,9 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             '    export CXX="$(command -v g++)"',
             'fi',
             'export PYTHONUNBUFFERED=1',
-            f"export OPENBLAS_NUM_THREADS={settings['blas_threads']}",
-            f"export OMP_NUM_THREADS={settings['blas_threads']}",
+            'export MPLBACKEND=Agg',
+            f'export OPENBLAS_NUM_THREADS={settings["blas_threads"]}',
+            f'export OMP_NUM_THREADS={settings["blas_threads"]}',
             'export MKL_NUM_THREADS=1',
             'export NUMEXPR_NUM_THREADS=1',
             'JOB_TMP="'
@@ -551,7 +585,9 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + 'WORK_DIRECTORY"',
             'start_status=$?',
             'if [[ "' + dollar + 'start_status" -eq 0 ]]; then',
-            '    srun --chdir="' + dollar + 'WORK_DIRECTORY" --ntasks=1 "'
+            '    srun --chdir="'
+            + dollar
+            + 'WORK_DIRECTORY" --ntasks=1 "'
             + dollar
             + 'PYTHON_EXECUTABLE" -u '
             + shell_value(job.script_name),
@@ -569,9 +605,7 @@ def generated_script(config: dict[str, Any], job: Job, run_directory: Path) -> s
             + ' --job-directory "'
             + dollar
             + 'JOB_DIRECTORY" '
-            '--work-directory "'
-            + dollar
-            + 'WORK_DIRECTORY" '
+            '--work-directory "' + dollar + 'WORK_DIRECTORY" '
             '--exit-code "' + dollar + 'run_status"',
             'finish_status=$?',
             'set -e',
@@ -654,23 +688,7 @@ def command_reset(args: argparse.Namespace) -> int:
 def command_launch(args: argparse.Namespace) -> int:
     config = load_config()
     all_jobs = discover_jobs(config)
-    requested = set(args.only or [])
-    if requested:
-        unknown = requested - all_jobs.keys()
-        if unknown:
-            raise ValueError('Unknown job(s): ' + ', '.join(sorted(unknown)))
-        selected = set(requested)
-        changed = True
-        while changed:
-            changed = False
-            for name in tuple(selected):
-                for dependency in all_jobs[name].dependencies:
-                    if dependency not in selected:
-                        selected.add(dependency)
-                        changed = True
-        jobs = {name: all_jobs[name] for name in selected}
-    else:
-        jobs = all_jobs
+    jobs = select_jobs(all_jobs, args.only, args.slow)
     ordered = topological_jobs(jobs)
     run_id = args.run_id or datetime.now().strftime('%Y%m%d-%H%M%S')
     run_directory = state_root(config) / run_id
@@ -776,7 +794,7 @@ def classify_job(record: dict[str, Any], run_directory: Path) -> tuple[str, str]
     if state:
         normalized = state.upper().split('+', 1)[0]
         if normalized in {'RUNNING', 'COMPLETING', 'CONFIGURING', 'RESIZING'}:
-            return 'running', detail
+            return '.....', detail
         if normalized in {'PENDING', 'SUSPENDED'}:
             return 'scheduled and pending', detail
         if normalized in {
@@ -847,9 +865,7 @@ def command_job_start(args: argparse.Namespace) -> int:
     jobs = discover_jobs()
     if args.script not in jobs:
         raise ValueError(f'Unknown example job: {args.script}')
-    working_directory = (
-        Path(args.work_directory) if args.work_directory else None
-    )
+    working_directory = Path(args.work_directory) if args.work_directory else None
     return job_start(jobs[args.script], Path(args.job_directory), working_directory)
 
 
@@ -857,9 +873,7 @@ def command_job_finish(args: argparse.Namespace) -> int:
     jobs = discover_jobs()
     if args.script not in jobs:
         raise ValueError(f'Unknown example job: {args.script}')
-    working_directory = (
-        Path(args.work_directory) if args.work_directory else None
-    )
+    working_directory = Path(args.work_directory) if args.work_directory else None
     return job_finish(
         jobs[args.script], Path(args.job_directory), args.exit_code, working_directory
     )
@@ -886,6 +900,11 @@ def build_parser() -> argparse.ArgumentParser:
         '--only',
         nargs='*',
         help='submit selected scripts and their dependencies',
+    )
+    launch.add_argument(
+        '--slow',
+        action='store_true',
+        help='submit every non-light resource profile and its dependencies',
     )
     launch.set_defaults(function=command_launch)
 

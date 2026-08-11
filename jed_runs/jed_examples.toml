@@ -59,12 +59,636 @@ time = "04:00:00"
 blas_threads = 4
 xla_devices = 4
 
+[docs]
+# The local documentation runner uses this section while the JED runner uses
+# the cluster/profile/job sections below.  Both runners discover the same
+# plot_*.py files and therefore share the dependency graph.
+state_directory = ".docs_runs"
+
+# The fast profile is intentionally a small pilot until examples have been
+# migrated to explicit output-directory handling.  Add examples here only
+# after they pass from a clean workspace.
+[docs.examples."montecarlo/plot_b01simple_integral.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."hybrid_choice_specs/plot_b00_normalization.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."hybrid_choice_specs/plot_b01_model_specification.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_distributions.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_biogeme_logging.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_database.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_draws.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_expressions.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_filenames.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_loglikelihood.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_nests.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_segmentation.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_tools.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."programmers/plot_version.py"]
+mode = "self_contained"
+profile = "fast"
+
+[docs.examples."tutorials/plot_b01_first_model.py"]
+mode = "self_contained"
+profile = "fast"
+expected_outputs = ["first_model.yaml", "first_model.html"]
+
+[docs.examples."tutorials/plot_b03_importing_specification.py"]
+mode = "self_contained"
+profile = "fast"
+expected_outputs = ["first_model.yaml", "first_model.html"]
+
+[docs.examples."tutorials/plot_b05_simulation.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."indicators/plot_b02estimation.py"]
+mode = "self_contained"
+profile = "full"
+expected_outputs = ["b02estimation.yaml", "b02estimation.html"]
+
+[docs.examples."indicators/plot_b03simulation.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."indicators/plot_b04market_shares.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."indicators/plot_b05revenues.py"]
+mode = "dependent"
+profile = "full"
+expected_outputs = ["revenue_1.00.txt"]
+
+[docs.examples."indicators/plot_b06point_elasticities.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."indicators/plot_b07cross_elasticities.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."indicators/plot_b08arc_elasticities.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."indicators/plot_b09wtp.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."swissmetro/plot_b01a_logit.py"]
+mode = "self_contained"
+profile = "full"
+expected_outputs = ["b01a_logit.yaml", "b01a_logit.html"]
+
+[docs.examples."swissmetro/plot_b01d_logit_simul.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."swissmetro/plot_b05a_normal_mixture.py"]
+mode = "self_contained"
+profile = "full"
+expected_outputs = ["b05a_normal_mixture.yaml", "b05a_normal_mixture.html"]
+
+[docs.examples."swissmetro/plot_b05c_normal_mixture_simul.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."swissmetro/plot_b11a_cnl.py"]
+mode = "self_contained"
+profile = "full"
+expected_outputs = ["b11a_cnl.yaml", "b11a_cnl.html"]
+
+[docs.examples."swissmetro/plot_b11b_cnl_simul.py"]
+mode = "dependent"
+profile = "full"
+
+[docs.examples."swissmetro/plot_b12_panel.py"]
+mode = "self_contained"
+profile = "full"
+expected_outputs = ["b12_panel.yaml", "b12_panel.html"]
+
+[docs.examples."swissmetro/plot_b13_panel_simul.py"]
+mode = "dependent"
+profile = "full"
+
+# Bayesian estimators.  The YAML summary is used by the examples themselves;
+# NetCDF is also retained for Bayesian simulation and individual-level
+# post-processing.  The HTML report is included when the example leaves the
+# default output settings enabled.
+[docs.examples."bayesian_swissmetro/plot_b01a_logit.py"]
+profile = "full"
+expected_outputs = ["b01a_logit.yaml", "b01a_logit.html", "b01a_logit.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b01b_logit.py"]
+profile = "full"
+expected_outputs = ["b01b_logit.yaml", "b01b_logit.html", "b01b_logit.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b02_weight.py"]
+profile = "full"
+expected_outputs = ["b02_weight.yaml", "b02_weight.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b03_scale.py"]
+profile = "full"
+expected_outputs = ["b03_scale.yaml", "b03_scale.html", "b03_scale.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b04_validation.py"]
+profile = "full"
+expected_outputs = ["b04validation.yaml", "b04validation.html", "b04validation.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b05_normal_mixture.py"]
+profile = "full"
+expected_outputs = [
+    "b05_normal_mixture.yaml",
+    "b05_normal_mixture.html",
+    "b05_normal_mixture.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b06_unif_mixture.py"]
+profile = "full"
+expected_outputs = ["b06_unif_mixture.yaml", "b06_unif_mixture.html", "b06_unif_mixture.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b07_discrete_mixture.py"]
+profile = "full"
+expected_outputs = [
+    "b07_discrete_mixture.yaml",
+    "b07_discrete_mixture.html",
+    "b07_discrete_mixture.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b08_boxcox.py"]
+profile = "full"
+expected_outputs = ["b08_boxcox.yaml", "b08_boxcox.html", "b08_boxcox.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b09_nested.py"]
+profile = "full"
+expected_outputs = ["b09_nested.yaml", "b09_nested.html", "b09_nested.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b10_nested_bottom.py"]
+profile = "full"
+expected_outputs = [
+    "b10_nested_bottom.yaml",
+    "b10_nested_bottom.html",
+    "b10_nested_bottom.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b11_cnl.py"]
+profile = "full"
+expected_outputs = ["b11_cnl.yaml", "b11_cnl.html", "b11_cnl.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b12_panel.py"]
+profile = "full"
+expected_outputs = ["b12_panel.yaml", "b12_panel.html", "b12_panel.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b15_panel_discrete.py"]
+profile = "full"
+expected_outputs = [
+    "b15_panel_discrete.yaml",
+    "b15_panel_discrete.html",
+    "b15_panel_discrete.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b16_panel_discrete_socio_eco.py"]
+profile = "full"
+expected_outputs = [
+    "b16_panel_discrete_socio_eco.yaml",
+    "b16_panel_discrete_socio_eco.html",
+    "b16_panel_discrete_socio_eco.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b17_lognormal_mixture.py"]
+profile = "full"
+expected_outputs = [
+    "b17_lognormal_mixture.yaml",
+    "b17_lognormal_mixture.html",
+    "b17_lognormal_mixture.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b18a_ordinal_logit.py"]
+profile = "full"
+expected_outputs = [
+    "b18a_ordinal_logit.yaml",
+    "b18a_ordinal_logit.html",
+    "b18a_ordinal_logit.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b18b_ordinal_probit.py"]
+profile = "full"
+expected_outputs = [
+    "b18b_ordinal_probit.yaml",
+    "b18b_ordinal_probit.html",
+    "b18b_ordinal_probit.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b23a_binary_logit.py"]
+profile = "full"
+expected_outputs = [
+    "b23a_binary_logit.yaml",
+    "b23a_binary_logit.html",
+    "b23a_binary_logit.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b23b_binary_probit.py"]
+profile = "full"
+expected_outputs = [
+    "b23b_binary_probit.yaml",
+    "b23b_binary_probit.html",
+    "b23b_binary_probit.nc",
+]
+
+[docs.examples."bayesian_swissmetro/plot_b25_triangular_mixture.py"]
+profile = "full"
+expected_outputs = ["b25_triangular.yaml", "b25_triangular.html", "b25_triangular.nc"]
+
+[docs.examples."bayesian_swissmetro/plot_b26triangular_panel_mixture.py"]
+profile = "full"
+expected_outputs = [
+    "b26triangular_panel.yaml",
+    "b26triangular_panel.html",
+    "b26triangular_panel.nc",
+]
+
+# Hybrid-choice estimators. H03 consumes H02 through the dependency declared
+# below in the JED job section.
+[docs.examples."hybrid_choice_models/plot_h01_mode_logit.py"]
+profile = "full"
+expected_outputs = ["plot_h01_mode_logit.yaml", "plot_h01_mode_logit.html"]
+
+[docs.examples."hybrid_choice_models/plot_h02_lv_mimic_gauss.py"]
+profile = "full"
+expected_outputs = ["plot_h02_lv_mimic_gauss.yaml", "plot_h02_lv_mimic_gauss.html"]
+
+[docs.examples."hybrid_choice_models/plot_h03_mode_lv_gauss_seq.py"]
+profile = "full"
+expected_outputs = ["plot_h03_model_lv_gauss_seq.yaml", "plot_h03_model_lv_gauss_seq.html"]
+
+[docs.examples."hybrid_choice_models/plot_h04_mode_lv_gauss_simult.py"]
+profile = "full"
+expected_outputs = [
+    "plot_h04_mode_lv_gauss_simult.yaml",
+    "plot_h04_mode_lv_gauss_simult.html",
+]
+
+[docs.examples."hybrid_choice_models/plot_h05_mode_lv_ordlogit_simult.py"]
+profile = "full"
+expected_outputs = [
+    "plot_h05_mode_lv_ordlogit_simult.yaml",
+    "plot_h05_mode_lv_ordlogit_simult.html",
+]
+
+[docs.examples."hybrid_choice_models/plot_h06_mode_lv_ordprobit_simult.py"]
+profile = "full"
+expected_outputs = [
+    "plot_h06_mode_lv_ordprobit_simult.yaml",
+    "plot_h06_mode_lv_ordprobit_simult.html",
+]
+
+[docs.examples."hybrid_choice_models/plot_h07_mode_lv_ordprobit_simult_generated.py"]
+profile = "full"
+expected_outputs = [
+    "plot_h07_mode_lv_ordprobit_simult_generated.yaml",
+    "plot_h07_mode_lv_ordprobit_simult_generated.html",
+]
+
+# MDCEV estimators and their forecasting consumers.
+[docs.examples."mdcev_no_outside_good/plot_gamma_estimation.py"]
+profile = "full"
+expected_outputs = ["gamma_profile.yaml", "gamma_profile.html"]
+
+[docs.examples."mdcev_no_outside_good/plot_generalized_estimation.py"]
+profile = "full"
+expected_outputs = ["generalized.yaml", "generalized.html"]
+
+[docs.examples."mdcev_no_outside_good/plot_non_monotonic_estimation.py"]
+profile = "full"
+expected_outputs = ["non_monotonic.yaml", "non_monotonic.html"]
+
+[docs.examples."mdcev_no_outside_good/plot_translated_estimation.py"]
+profile = "full"
+expected_outputs = ["translated.yaml", "translated.html"]
+
+# Deterministic Monte-Carlo estimation examples.
+[docs.examples."montecarlo/plot_b06estimation_integral.py"]
+profile = "full"
+expected_outputs = ["06estimation_integral.yaml", "06estimation_integral.html"]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo.py"]
+profile = "full"
+expected_outputs = ["b07estimation_monte_carlo.yaml", "b07estimation_monte_carlo.html"]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_500.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_500.yaml",
+    "b07estimation_monte_carlo_500.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_anti.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_anti.yaml",
+    "b07estimation_monte_carlo_anti.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_anti_500.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_anti_500.yaml",
+    "b07estimation_monte_carlo_anti_500.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_halton.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_halton.yaml",
+    "b07estimation_monte_carlo_halton.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_halton_500.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_halton_500.yaml",
+    "b07estimation_monte_carlo_halton_500.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_mlhs.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_mlhs.yaml",
+    "b07estimation_monte_carlo_mlhs.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_mlhs_500.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_mlhs_500.yaml",
+    "b07estimation_monte_carlo_mlhs_500.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_mlhs_anti.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_mlhs_anti.yaml",
+    "b07estimation_monte_carlo_mlhs_anti.html",
+]
+
+[docs.examples."montecarlo/plot_b07estimation_monte_carlo_mlhs_anti_500.py"]
+profile = "full"
+expected_outputs = [
+    "b07estimation_monte_carlo_mlhs_anti_500.yaml",
+    "b07estimation_monte_carlo_mlhs_anti_500.html",
+]
+
+# Sampling-of-alternatives estimators.
+[docs.examples."sampling/plot_b01logit.py"]
+profile = "full"
+expected_outputs = ["logit_asian_10_alt.yaml", "logit_asian_10_alt.html"]
+
+[docs.examples."sampling/plot_b02nested.py"]
+profile = "full"
+expected_outputs = ["nested_downtown_20.yaml", "nested_downtown_20.html"]
+
+[docs.examples."sampling/plot_b03cnl.py"]
+profile = "full"
+expected_outputs = ["cnl_10_63.yaml", "cnl_10_63.html"]
+
+# Additional standard estimators whose outputs are deterministic and can be
+# promoted to saved_results/saved_html by the laptop importer.
+[docs.examples."assisted/plot_b08selected_specification.py"]
+profile = "full"
+expected_outputs = ["my_favorite_model.yaml", "my_favorite_model.html"]
+
+[docs.examples."assisted/plot_b07everything_assisted.py"]
+profile = "full"
+expected_outputs = ["b07everything_assisted.pareto"]
+
+[docs.examples."swissmetro/plot_b05d_normal_mixture_all_algos.py"]
+profile = "full"
+expected_output_globs = ["b05normal_mixture_algo_*.yaml"]
+
+[docs.examples."swissmetro/plot_b20_multiple_models.py"]
+profile = "full"
+expected_output_globs = ["b20multiple_models_*.yaml", "b20multiple_models_*.html"]
+
+[docs.examples."programmers/plot_biogeme.py"]
+profile = "full"
+expected_outputs = ["simple_example.yaml", "simple_example.html"]
+
+[docs.examples."programmers/plot_results.py"]
+profile = "full"
+expected_outputs = [
+    "simple_example_constrained.yaml",
+    "simple_example_constrained.html",
+]
+
+[docs.examples."tutorials/plot_b04_estimation_results.py"]
+profile = "full"
+expected_outputs = ["example.yaml", "example.html"]
+
+# Additional deterministic Swissmetro estimators. The all-algorithm and
+# assisted-specification examples remain outside this exact-output list
+# because they generate dynamic model names.
+[docs.examples."swissmetro/plot_b01b_logit.py"]
+profile = "full"
+expected_outputs = [
+    "b01b_logit.yaml",
+    "b01b_logit.html",
+    "b01b_logit_bhhh.html",
+]
+
+[docs.examples."swissmetro/plot_b01c_logit.py"]
+profile = "full"
+expected_outputs = ["b01c_logit.yaml"]
+
+[docs.examples."swissmetro/plot_b02_weight.py"]
+profile = "full"
+expected_outputs = ["b02_weight.html"]
+
+[docs.examples."swissmetro/plot_b03_scale.py"]
+profile = "full"
+expected_outputs = ["b03_scale.yaml", "b03_scale.html"]
+
+[docs.examples."swissmetro/plot_b04_validation.py"]
+profile = "full"
+expected_outputs = ["b04_validation.yaml", "b04_validation.html"]
+
+[docs.examples."swissmetro/plot_b05b_normal_mixture_integral.py"]
+profile = "full"
+expected_outputs = [
+    "b05b_normal_mixture_integral.yaml",
+    "b05b_normal_mixture_integral.html",
+]
+
+[docs.examples."swissmetro/plot_b06a_unif_mixture.py"]
+profile = "full"
+expected_outputs = ["b06a_unif_mixture.yaml", "b06a_unif_mixture.html"]
+
+[docs.examples."swissmetro/plot_b06b_unif_mixture_MHLS.py"]
+profile = "full"
+expected_outputs = ["b06b_unif_mixture_MHLS.yaml", "b06b_unif_mixture_MHLS.html"]
+
+[docs.examples."swissmetro/plot_b06c_unif_mixture_integral.py"]
+profile = "full"
+expected_outputs = [
+    "b06c_unif_mixture_integral.yaml",
+    "b06c_unif_mixture_integral.html",
+]
+
+[docs.examples."swissmetro/plot_b07_discrete_mixture.py"]
+profile = "full"
+expected_outputs = ["b07_discrete_mixture.yaml", "b07_discrete_mixture.html"]
+
+[docs.examples."swissmetro/plot_b08_boxcox.py"]
+profile = "full"
+expected_outputs = ["b08_boxcox.yaml", "b08_boxcox.html"]
+
+[docs.examples."swissmetro/plot_b09_nested.py"]
+profile = "full"
+expected_outputs = ["b09_nested.yaml", "b09_nested.html"]
+
+[docs.examples."swissmetro/plot_b10_nested_bottom.py"]
+profile = "full"
+expected_outputs = ["b10_nested_bottom.yaml", "b10_nested_bottom.html"]
+
+[docs.examples."swissmetro/plot_b11c_cnl_sparse.py"]
+profile = "full"
+expected_outputs = ["b11c_cnl_sparse.yaml", "b11c_cnl_sparse.html"]
+
+[docs.examples."swissmetro/plot_b12_panel_bis.py"]
+profile = "full"
+expected_outputs = [
+    "b12_panel_segmented_male.yaml",
+    "b12_panel_segmented_male.html",
+]
+
+[docs.examples."swissmetro/plot_b14_nested_endogenous_sampling.py"]
+profile = "full"
+expected_outputs = [
+    "b14_nested_endogenous_sampling.yaml",
+    "b14_nested_endogenous_sampling.html",
+]
+
+[docs.examples."swissmetro/plot_b15a_panel_discrete.py"]
+profile = "full"
+expected_outputs = ["b15a_panel_discrete.yaml", "b15a_panel_discrete.html"]
+
+[docs.examples."swissmetro/plot_b15b_panel_discrete.py"]
+profile = "full"
+expected_outputs = ["b15b_panel_discrete.yaml", "b15b_panel_discrete.html"]
+
+[docs.examples."swissmetro/plot_b16_panel_discrete_socio_eco.py"]
+profile = "full"
+expected_outputs = [
+    "b16_panel_discrete_socio_eco.yaml",
+    "b16_panel_discrete_socio_eco.html",
+]
+
+[docs.examples."swissmetro/plot_b17a_lognormal_mixture.py"]
+profile = "full"
+expected_outputs = ["b17a_lognormal_mixture.yaml", "b17a_lognormal_mixture.html"]
+
+[docs.examples."swissmetro/plot_b17b_lognormal_mixture_integral.py"]
+profile = "full"
+expected_outputs = [
+    "b17b_lognormal_mixture_integral.yaml",
+    "b17b_lognormal_mixture_integral.html",
+]
+
+[docs.examples."swissmetro/plot_b18a_ordinal_logit.py"]
+profile = "full"
+expected_outputs = ["b18a_ordinal_logit.yaml", "b18a_ordinal_logit.html"]
+
+[docs.examples."swissmetro/plot_b18b_ordinal_probit.py"]
+profile = "full"
+expected_outputs = ["b18b_ordinal_probit.yaml", "b18b_ordinal_probit.html"]
+
+[docs.examples."swissmetro/plot_b23a_binary_logit.py"]
+profile = "full"
+expected_outputs = ["b23a_logit.yaml", "b23a_logit.html"]
+
+[docs.examples."swissmetro/plot_b23b_binary_probit.py"]
+profile = "full"
+expected_outputs = ["b23b_probit.yaml", "b23b_probit.html"]
+
+[docs.examples."swissmetro/plot_b24_halton_mixture.py"]
+profile = "full"
+expected_outputs = ["b24_halton_mixture.yaml", "b24_halton_mixture.html"]
+
+[docs.examples."swissmetro/plot_b25_triangular_mixture.py"]
+profile = "full"
+expected_outputs = ["b25_triangular_mixture.yaml", "b25_triangular_mixture.html"]
+
+[docs.examples."swissmetro/plot_b26_triangular_panel_mixture.py"]
+profile = "full"
+expected_outputs = [
+    "b26_triangular_panel_mixture.yaml",
+    "b26_triangular_panel_mixture.html",
+]
+
+[docs.examples."swissmetro/plot_b27_monte_carlo_diagnostic.py"]
+profile = "full"
+expected_outputs = ["b27_monte_carlo.yaml", "b27_monte_carlo_diagnostic.yaml"]
+
+[docs.examples."swissmetro/plot_b21a_multiple_models.py"]
+profile = "full"
+expected_outputs = ["b21_multiple_models.pareto"]
+
+[docs.examples."swissmetro/plot_b22a_multiple_models.py"]
+profile = "full"
+expected_outputs = ["b22_multiple_models.pareto"]
+
 # Each job key is relative to docs/source/examples. Dependencies are submitted
 # as independent Slurm jobs using --dependency=afterok:<job ids>.
+
+[jobs."programmers/plot_results.py"]
+# This example also uses the ``simple_example`` model name. Serialize it after
+# plot_biogeme so the two jobs cannot overwrite the same archive concurrently.
+depends_on = ["programmers/plot_biogeme.py"]
 
 [jobs."assisted/plot_b09post_processing.py"]
 depends_on = ["assisted/plot_b07everything_assisted.py"]
 required_inputs = ["saved_results/b07everything_assisted.pareto"]
+
+[jobs."assisted/plot_b07everything_assisted.py"]
+# Assisted specification enumerates many models even though the source does
+# not call BIOGEME.estimate() directly, so it must not use the light profile.
+profile = "standard"
 
 [jobs."bayesian_swissmetro/plot_b01c_logit_simul.py"]
 depends_on = ["bayesian_swissmetro/plot_b01a_logit.py"]
@@ -154,9 +778,15 @@ required_inputs = ["saved_results/b05a_normal_mixture.yaml"]
 depends_on = ["swissmetro/plot_b21a_multiple_models.py"]
 required_inputs = ["saved_results/b21_multiple_models.pareto"]
 
+[jobs."swissmetro/plot_b21a_multiple_models.py"]
+profile = "standard"
+
 [jobs."swissmetro/plot_b22c_process_pareto.py"]
 depends_on = ["swissmetro/plot_b22a_multiple_models.py"]
 required_inputs = ["saved_results/b22_multiple_models.pareto"]
+
+[jobs."swissmetro/plot_b22a_multiple_models.py"]
+profile = "standard"
 
 [jobs."tutorials/plot_b05_simulation.py"]
 depends_on = ["tutorials/plot_b01_first_model.py"]

@@ -114,6 +114,16 @@ class ResolvedCutpoint:
 
 
 @dataclass(frozen=True, slots=True)
+class ResolvedIndicatorType:
+    """Resolved metadata shared by indicators of the same semantic type."""
+
+    type_name: str
+    symmetric: bool
+    categories: list[int]
+    neutral_labels: list[int]
+
+
+@dataclass(frozen=True, slots=True)
 class ResolvedThresholdSystem:
     type_name: str
     symmetric: bool
@@ -184,6 +194,7 @@ class ResolvedModel:
     threshold_systems: dict[str, ResolvedThresholdSystem]
     parameters: dict[str, ResolvedParameter]
     normalization: ResolvedNormalizationSummary
+    indicator_types: dict[str, ResolvedIndicatorType] = field(default_factory=dict)
 
     def free_parameters(self) -> list[ResolvedParameter]:
         """Return the parameters that are estimated.

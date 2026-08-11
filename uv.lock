@@ -168,6 +168,14 @@ dev = [
     { name = "tox" },
     { name = "twine" },
 ]
+docs = [
+    { name = "furo" },
+    { name = "myst-parser" },
+    { name = "sphinx" },
+    { name = "sphinx-autodoc-typehints" },
+    { name = "sphinx-gallery" },
+    { name = "sphinx-rtd-theme" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -211,6 +219,14 @@ dev = [
     { name = "sphinx-rtd-theme" },
     { name = "tox", specifier = ">=4.35.0" },
     { name = "twine", specifier = ">=6.2.0" },
+]
+docs = [
+    { name = "furo" },
+    { name = "myst-parser" },
+    { name = "sphinx" },
+    { name = "sphinx-autodoc-typehints" },
+    { name = "sphinx-gallery" },
+    { name = "sphinx-rtd-theme" },
 ]
 
 [[package]]

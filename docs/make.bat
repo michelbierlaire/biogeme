@@ -7,6 +7,9 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
+if "%PYTHON%" == "" (
+	set PYTHON=python
+)
 set SOURCEDIR=source
 set BUILDDIR=build
 
@@ -25,11 +28,28 @@ if errorlevel 9009 (
 
 if "%1" == "" goto help
 
-%SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+if "%1" == "clean" goto clean
+
+%PYTHON% create_code_rst.py --force
+
+if "%1" == "html-fast" (
+	set BIOGEME_DOCS_GALLERY_PROFILE=none
+	set TARGET=html
+) else (
+	set BIOGEME_DOCS_GALLERY_PROFILE=full
+	set TARGET=%1
+)
+
+%SPHINXBUILD% -M %TARGET% %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
 :help
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+goto end
+
+:clean
+%SPHINXBUILD% -M clean %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+%PYTHON% ..\tools\docs_examples.py clean --apply
 
 :end
 popd

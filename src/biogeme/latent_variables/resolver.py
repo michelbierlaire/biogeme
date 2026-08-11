@@ -67,6 +67,7 @@ from .resolved import (
     ParameterStatus,
     PositivityStrategy,
     ResolvedCutpoint,
+    ResolvedIndicatorType,
     ResolvedLatentVariable,
     ResolvedLinearCombination,
     ResolvedLinearTerm,
@@ -445,12 +446,17 @@ def _resolve_threshold_parameters(
 
 
 def _resolve_threshold_systems(
-    prepared: _Prepared, context: BuildContext, params: dict[str, ResolvedParameter]
+    prepared: _Prepared,
+    context: BuildContext,
+    params: dict[str, ResolvedParameter],
+    indicator_types: dict[str, ResolvedIndicatorType] | None = None,
 ) -> dict[str, ResolvedThresholdSystem]:
+    if indicator_types is None:
+        indicator_types = _resolve_indicator_types(prepared)
     systems: dict[str, ResolvedThresholdSystem] = {}
     for type_name in prepared.ordinal_type_names:
-        lt = prepared.type_by_name[type_name]
-        n_tau = len(lt.categories) - 1
+        indicator_type = indicator_types[type_name]
+        n_tau = len(indicator_type.categories) - 1
         used_by = sorted(
             ind.name
             for ind in prepared.indicators
@@ -460,7 +466,7 @@ def _resolve_threshold_systems(
         )
         cutpoints: list[ResolvedCutpoint] = []
         notes: list[str] = []
-        if lt.symmetric:
+        if indicator_type.symmetric:
             construction = ThresholdConstructionKind.SYMMETRIC
             n_deltas = n_tau // 2
             delta_names = [
@@ -534,15 +540,36 @@ def _resolve_threshold_systems(
             notes.append(f"Monotone threshold construction for type '{type_name}'.")
         systems[type_name] = ResolvedThresholdSystem(
             type_name=type_name,
-            symmetric=lt.symmetric,
-            categories=list(lt.categories),
-            neutral_labels=list(lt.neutral_labels),
+            symmetric=indicator_type.symmetric,
+            categories=list(indicator_type.categories),
+            neutral_labels=list(indicator_type.neutral_labels),
             construction_kind=construction,
             cutpoints=cutpoints,
             used_by_indicators=used_by,
             normalization_notes=notes,
         )
     return systems
+
+
+def _resolve_indicator_types(
+    prepared: _Prepared,
+) -> dict[str, ResolvedIndicatorType]:
+    """Resolve metadata for every indicator type used by the model.
+
+    Unlike threshold systems, this metadata is retained for Gaussian indicator
+    types as well. It is therefore the common source for category and neutral
+    label semantics independently of the selected measurement model.
+    """
+    used_type_names = sorted({indicator.type_name for indicator in prepared.indicators})
+    return {
+        type_name: ResolvedIndicatorType(
+            type_name=type_name,
+            symmetric=prepared.type_by_name[type_name].symmetric,
+            categories=list(prepared.type_by_name[type_name].categories),
+            neutral_labels=list(prepared.type_by_name[type_name].neutral_labels),
+        )
+        for type_name in used_type_names
+    }
 
 
 def _resolve_structural_equations(
@@ -674,7 +701,10 @@ def resolve_model(
     parameters.update(
         _resolve_threshold_parameters(prepared, context, normalization_plan)
     )
-    threshold_systems = _resolve_threshold_systems(prepared, context, parameters)
+    indicator_types = _resolve_indicator_types(prepared)
+    threshold_systems = _resolve_threshold_systems(
+        prepared, context, parameters, indicator_types
+    )
     structural_equations = _resolve_structural_equations(prepared, context, parameters)
     measurement_equations = _resolve_measurement_equations(
         prepared, context, parameters
@@ -746,4 +776,5 @@ def resolve_model(
         threshold_systems=threshold_systems,
         parameters=parameters,
         normalization=normalization,
+        indicator_types=indicator_types,
     )

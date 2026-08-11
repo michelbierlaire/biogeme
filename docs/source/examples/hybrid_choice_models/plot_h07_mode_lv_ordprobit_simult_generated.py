@@ -26,6 +26,7 @@ Sat Jun 13 2026, 15:13:40
 """
 
 from choice_latent_variables import (
+    generate_availability,
     generate_utility_functions,
 )
 from number_of_draws import NUMBER_OF_DRAWS
@@ -443,7 +444,8 @@ utilities = generate_utility_functions(latent_expressions)
 # ------------------------------
 # Given a realization of the latent variable, the probability of the observed
 # mode choice is computed using the logit model.
-conditional_choice_likelihood = logit(utilities, None, Choice)
+availability = generate_availability()
+conditional_choice_likelihood = logit(utilities, availability, Choice)
 
 # %%
 # Joint conditional likelihood.

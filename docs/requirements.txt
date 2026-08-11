@@ -1,4 +1,9 @@
+# The canonical documentation environment is the locked ``docs`` dependency
+# group in pyproject.toml.  This file remains for tools that expect a
+# requirements file and mirrors that group for a non-uv installation.
+furo
+myst-parser
 sphinx
-sphinx_gallery
-sphinx_autodoc_typehints
-sphinx_rtd_theme
+sphinx-autodoc-typehints
+sphinx-gallery
+sphinx-rtd-theme

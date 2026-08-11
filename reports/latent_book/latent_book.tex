@@ -57,7 +57,6 @@
 \newcommand{\highEducation}{\mathrm{HighEducation}}
 \newcommand{\lowEducation}{\mathrm{LowEducation}}
 \newcommand{\topManager}{\mathrm{TopManager}}
-\newcommand{\ageThirtyLess}{\mathrm{AgeThirtyLess}}
 \newcommand{\carOrientedParents}{\mathrm{CarOrientedParents}}
 \newcommand{\usedToGoToSchoolByCar}{\mathrm{UsedToGoToSchoolByCar}}
 
@@ -100,7 +99,7 @@ latent variables: hybrid choice models.
 
 We assume that the reader is already familiar with discrete choice
 models, and has successfully installed Biogeme. This document has been
-written using Biogeme 3.3.3.
+written using Biogeme 3.3.3 and 3.3.4.
 
 
 
@@ -255,12 +254,12 @@ Another type of indicator arises when respondents are asked to
 evaluate a statement using an ordinal scale. A typical context for
 this type of measurement is the use of a Likert scale
 (\cite{likert1932technique}), where individuals express their degree
-of agreement or disagreement with a given statement. For example:
-\begin{quote}
-\emph{``I believe that my own actions have an impact on the planet.''}
-\\ Response options: strongly agree (2), agree (1), neutral (0),
-disagree ($-1$), strongly disagree ($-2$).
-\end{quote}
+of agreement or disagreement with a given statement.
+For the case study, valid responses are represented by the ordered
+labels \(1,2,3,4,5\). The numerical labels are arbitrary; only their
+ordering matters. The values \(6\) and \(-1\) are non-informative
+labels and are not valid response categories.
+
 
 In practice, ordinal indicators are sometimes treated as if they were
 continuous variables. This approximation is common when the scale
@@ -1002,6 +1001,42 @@ corresponding normalization of threshold systems.
 
 We now present the examples in the order described above.
 
+\subsection{Running the examples}
+\label{sec:running_examples}
+
+The example files are located in
+\texttt{docs/source/examples/hybrid\_choice\_models}. The data file
+\texttt{optima.dat} is included in that directory. Because the scripts
+use local imports and read the data file using a relative path, they
+should be executed from this directory:
+
+\begin{verbatim}
+cd docs/source/examples/hybrid_choice_models
+uv run python plot_h01_mode_logit.py
+\end{verbatim}
+
+The recommended execution order is:
+
+\begin{enumerate}
+  \item \texttt{plot\_h01\_mode\_logit.py}: baseline mode-choice model;
+  \item \texttt{plot\_h02\_lv\_mimic\_gauss.py}: Gaussian MIMIC model;
+  \item \texttt{plot\_h03\_mode\_lv\_gauss\_seq.py}: sequential hybrid model;
+  \item \texttt{plot\_h04\_mode\_lv\_gauss\_simult.py}: simultaneous Gaussian model;
+  \item \texttt{plot\_h05\_mode\_lv\_ordlogit\_simult.py}: simultaneous ordered-logit model;
+  \item \texttt{plot\_h06\_mode\_lv\_ordprobit\_simult.py}: simultaneous ordered-probit model;
+  \item \texttt{plot\_h07\_mode\_lv\_ordprobit\_simult\_generated.py}: explicit generated implementation of H06.
+\end{enumerate}
+
+The sequential example requires the YAML results produced by the MIMIC
+example. The last four examples are otherwise independent, although
+they all use the same data preparation and latent-variable structure.
+
+The hybrid examples use 50,000 simulation draws and may require
+substantial computation time. For an initial smoke test, H04 can be
+run with fewer draws and fewer iterations as described below. Results
+created with a small number of draws should not be used for scientific
+interpretation.
+
 \subsection{Example 1: baseline mode choice model}
 \label{sec:example_mode_logit}
 
@@ -1255,6 +1290,15 @@ variable, its structural equation, the associated measurement
 equations, and the normalization strategy, without the additional
 complexity of a choice model.
 
+Although this example contains no choice likelihood, it uses the common
+data-preparation function \texttt{read\_data}. The resulting sample is
+therefore also subject to the choice-oriented filters used in the other
+examples. This ensures that the MIMIC and hybrid models are estimated
+on the same observations, but it means that the MIMIC example is not an
+analysis of all respondents with valid psychometric indicators.
+
+
+
 In this example, a single latent variable is considered, $x^*_{n,\text{car}}$,
 interpreted as a \emph{car-centric attitude}. The structural equation
 follows the linear specification of Eq.~\eqref{eq:linearStructural}:
@@ -1270,7 +1314,7 @@ x^*_{n,\text{car}} = &\ \psi_0 + \psi_1 \, \highEducation_n + \psi_2 \,
 where \(\omega_n \sim N(0,1)\). The explanatory variables included in
 the structural equation are exactly those declared in the semantic
 specification used by the script: \texttt{top\_manager},
-\texttt{age\_30\_less}, \texttt{car\_oriented\_parents},
+\texttt{car\_oriented\_parents},
 \texttt{high\_education}, \texttt{low\_education}, and
 \texttt{used\_to\_go\_to\_school\_by\_car}.  As in the implementation,
 the error scale \(\sigma_{\omega,\text{car}}\) is estimated and
@@ -1298,6 +1342,10 @@ when I travel with my children.
 \item[\texttt{LifSty07}] The pleasure of having something beautiful
 consists in showing it.
 \end{description}
+
+In the Optima data, the valid Likert responses use the labels
+\(1,\ldots,5\), while \(6\) and \(-1\) denote non-informative
+responses.
 
 All these indicators are treated as ordinal variables defined on a
 common symmetric Likert scale with five categories. They provide
@@ -1344,7 +1392,12 @@ contribution of individual \(n\) is obtained by integrating out
 where \(f(x^*_{n,\text{car}} \mid x_n;\alpha)\) is the conditional density
 implied by the structural equation \eqref{eq:example2_structural}. As
 discussed in Section~\ref{sec:continuous}, this integral has no closed
-form and is evaluated by Monte-Carlo integration.
+form and is evaluated by Monte-Carlo integration\footnote{For the particular linear-Gaussian MIMIC specification used
+here, the integral can in fact be evaluated analytically because the
+marginal distribution of the indicators is multivariate normal. The
+implementation nevertheless evaluates it by Monte Carlo in order to
+use the same generic construction as the later hybrid choice models,
+for which no such closed form is generally available.}.
 
 \paragraph{Normalization.}
 As explained in Section~\ref{sec:normalization}, identification of the
@@ -1388,7 +1441,7 @@ is used explicitly.
 
 % Observed explanatory variables
 \node[observed] (x) {
-  \(\highEducation_n\)\\ \(\topManager_n\)\\ \(\ageThirtyLess_n\)\\ \(\carOrientedParents_n\)\\ \(\lowEducation_n\)\\ \(\usedToGoToSchoolByCar_n\)
+  \(\highEducation_n\)\\ \(\topManager_n\)\\  \(\carOrientedParents_n\)\\ \(\lowEducation_n\)\\ \(\usedToGoToSchoolByCar_n\)
 };
 
 % Latent variable
@@ -1562,7 +1615,6 @@ variable is specified as
   \hat{\psi}_0
   + \hat{\psi}_1 \highEducation_n
   + \hat{\psi}_2 \topManager_n
-  + \hat{\psi}_3 \ageThirtyLess_n
   \notag \\
   &+
   \hat{\psi}_4 \carOrientedParents_n
@@ -1619,6 +1671,15 @@ approach: the latent variable is first estimated from the measurement
 model, and then introduced into the choice model without joint
 estimation.
 
+A consequence of the sequential procedure is that uncertainty from the
+first-stage MIMIC estimation is not propagated into the second-stage
+standard errors. The second-stage covariance matrix is conditional on
+the estimated structural and measurement parameters from the first
+stage. Sequential estimates can therefore be useful for illustration
+or initialization, but they should not be interpreted as equivalent to
+the estimates and standard errors from a jointly estimated hybrid
+choice model.
+
 This model is implemented in the script
 \texttt{plot\_h03\_mode\_lv\_gauss\_seq.py}. The script reads the
 results of the MIMIC model, reconstructs the latent variable, inserts
@@ -1673,7 +1734,7 @@ node[right] {\(\arg\max_{j \in \mathcal C_n} U_{jn}\)} (choice.north);
 \node[latent, right=5.5cm of u] (lv) { \(x^*_{n,\mathrm{car}}\) };
 
 \node[observed, above=of lv] (xlv) {
-  \(\highEducation_n\)\\ \(\topManager_n\)\\ \(\ageThirtyLess_n\)\\ \(\carOrientedParents_n\)\\ \(\lowEducation_n\)\\ \(\usedToGoToSchoolByCar_n\)
+  \(\highEducation_n\)\\ \(\topManager_n\)\\  \(\carOrientedParents_n\)\\ \(\lowEducation_n\)\\ \(\usedToGoToSchoolByCar_n\)
 };
 
 \node[above left=0.5cm and 1.6cm of lv] (omega) {
@@ -1905,7 +1966,7 @@ tutorial where the full hybrid likelihood is estimated directly.
 \node[latent, right=5.5cm of u] (lv) { \(x^*_{n,\mathrm{car}}\) };
 
 \node[observed, above=of lv] (xlv) {
-  \(\highEducation_n\)\\ \(\topManager_n\)\\ \(\ageThirtyLess_n\)\\ \(\carOrientedParents_n\)\\ \(\lowEducation_n\)\\ \(\usedToGoToSchoolByCar_n\)
+  \(\highEducation_n\)\\ \(\topManager_n\)\\  \(\carOrientedParents_n\)\\ \(\lowEducation_n\)\\ \(\usedToGoToSchoolByCar_n\)
 };
 
 \node[observed, below=of lv, minimum width=4.3cm, minimum
@@ -2443,6 +2504,16 @@ and normal cumulative distributions have comparable shapes, and it
 illustrates the well-known empirical robustness of ordinal models with
 respect to the choice between logit and probit formulations.
 
+The directory also contains
+\texttt{plot\_h07\_mode\_lv\_ordprobit\_simult\_generated.py}. This is
+not a new behavioral specification. It is an explicit,
+automatically-generated Biogeme implementation of the ordered-probit
+model in Example 6. It is useful for inspecting the complete
+expression tree and for verifying that the higher-level semantic
+specification produces the intended low-level model. The two scripts
+should therefore be understood as alternative implementations of the
+same model, rather than as two additional empirical examples.
+
 \FloatBarrier
 
 \section{Conclusion}
@@ -2467,9 +2538,16 @@ thresholds, offers a practical and interpretable solution.
 The case study has illustrated how these elements can be implemented
 step by step. In particular, the comparison between sequential and
 simultaneous estimation highlights the importance of accounting for
-the uncertainty of latent variables. The results show that
-simultaneous estimation yields more consistent and behaviorally
-plausible outcomes.
+the uncertainty of latent variables. The comparison between sequential and simultaneous estimation
+highlights an important distinction in the treatment of latent
+variables. Sequential estimation treats the first-stage parameters as
+fixed in the choice model, whereas simultaneous estimation estimates
+the measurement and choice components through one joint likelihood.
+The two approaches can therefore produce different estimates.
+Simultaneous estimation provides a coherent joint framework, but its
+results remain dependent on the identification, distributional, and
+measurement assumptions of the model and are not automatically more
+behaviorally valid.
 
 Finally, the transition from continuous to ordinal measurement models
 emphasizes the importance of aligning the specification with the
@@ -2668,6 +2746,15 @@ discussed earlier: the cost normalization fixes the scale of utility,
 while the estimated scale parameter controls the sensitivity of the
 choice probabilities to utility differences.
 
+The value specified in \lstinline$number\_of\_draws.py$ overrides the
+general Monte Carlo default in \texttt{biogeme.toml} for these examples.
+Maximum-likelihood latent-variable specifications use the
+\texttt{NORMAL\_MLHS\_ANTI} draw type by default: modified Latin
+hypercube sampling with antithetic draws. The draw type is part of the
+numerical specification and should be reported together with the number
+of draws.
+
+
 \subsection{\lstinline$likert_spec.py$}
 \label{sec:likert_spec.py}
 \lstinputlisting[style=numbers]{../../docs/source/examples/hybrid_choice_models/likert_spec.py}
@@ -2771,6 +2858,10 @@ continuous variables is purely numerical: it improves the conditioning
 of the optimization problem without changing the behavioral content of
 the model.
 
+Note that the normalized sampling weight is prepared for reuse by
+other case studies, but it is not supplied as a Biogeme weight in the
+present examples; the reported estimations are therefore unweighted.
+
 Finally, the lower part of the file defines a large collection of
 Biogeme \lstinline$Variable$ objects. These objects provide symbolic
 access to the columns of the database and to the variables created
@@ -2804,6 +2895,18 @@ generates both pandas and \LaTeX{} tables of the estimated parameters.
 This output provides the reference results against which the
 latent-variable and hybrid-choice specifications are compared in the
 following examples.
+
+The function \lstinline$estimate_or_load$ first checks whether the
+specified YAML result file already exists. If it exists, the saved
+results are loaded and the model is not re-estimated. Consequently,
+changing the source code, the number of draws, or the estimation
+settings does not automatically invalidate an existing result file.
+
+To force a new estimation, rename or remove the corresponding YAML file
+and, when present, the associated iteration file. An alternative is to
+use a separate output directory or model name for each specification.
+This is particularly important when comparing alternative
+implementations.
 
 \subsection{\lstinline$plot_h02_lv_mimic_gauss.py$}
 \label{sec:plot_h02_lv_mimic_gauss.py}
@@ -2926,6 +3029,8 @@ the log-likelihood of the simultaneous hybrid choice model. The last
 part of the script estimates the model, or reloads previously saved
 results, and prints the estimated parameters grouped according to
 their role in the model.
+
+
 
 \subsection{\lstinline$plot_h05_mode_lv_ordlogit_simult.py$}
 \label{sec:plot_h05_mode_lv_ordlogit_simult.py}

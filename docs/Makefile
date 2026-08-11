@@ -1,21 +1,47 @@
-# Minimal makefile for Sphinx documentation
-#
+# Makefile for the Biogeme documentation.
 
-# You can set these variables from the command line, and also
-# from the environment for the first two.
-SPHINXOPTS    ?=
-SPHINXBUILD   ?= uv run sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+SHELL := /bin/bash
 
-# Put it first so that "make" without argument is like "make help".
+UVRUN ?= uv run --locked --group docs
+SPHINXBUILD ?= $(UVRUN) sphinx-build
+DOCSEXAMPLES ?= $(UVRUN) python ../tools/docs_examples.py
+SOURCEDIR = source
+BUILDDIR = build
+PROFILE ?= full
+DOCS_CACHE ?= $(CURDIR)/.cache
+DOCS_ENV = MPLCONFIGDIR=$(DOCS_CACHE)/matplotlib XDG_CACHE_HOME=$(DOCS_CACHE)
+
+.PHONY: help generate examples-fast examples-full html html-fast check-html linkcheck doctest clean
+
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+generate:
+	@mkdir -p "$(DOCS_CACHE)/matplotlib"
+	@$(DOCS_ENV) $(UVRUN) python create_code_rst.py --force
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	uv run create_code_rst.py
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log
+examples-fast:
+	@$(DOCSEXAMPLES) run --profile fast
+
+examples-full:
+	@$(DOCSEXAMPLES) run --profile full
+
+html: generate
+	@set -o pipefail; $(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=$(PROFILE) $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log
+
+html-fast: generate
+	@set -o pipefail; $(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=none $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log
+
+check-html:
+	@$(UVRUN) python check_generated_html.py "$(BUILDDIR)/html"
+
+linkcheck: generate
+	@set -o pipefail; $(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=none $(SPHINXBUILD) -M linkcheck "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee linkcheck.log
+
+doctest: generate
+	@set -o pipefail; $(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=none $(SPHINXBUILD) -M doctest "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee doctest.log
+
+clean:
+	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(DOCSEXAMPLES) clean --apply
+	@rm -rf "$(DOCS_CACHE)"

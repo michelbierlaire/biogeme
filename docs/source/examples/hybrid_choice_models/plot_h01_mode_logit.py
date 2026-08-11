@@ -37,6 +37,9 @@ from biogeme.results_processing import (
     get_latex_general_statistics,
     get_pandas_estimated_parameters,
 )
+from docs.source.examples.hybrid_choice_models.choice_latent_variables import (
+    generate_availability,
+)
 
 logger = blog.get_screen_logger(level=blog.INFO)
 
@@ -47,8 +50,11 @@ database = read_data()
 # Build the utility functions for the transportation alternatives.
 utilities = generate_utility_functions()
 
+# Availability
+availability = generate_availability()
+
 # Construct the log-likelihood of the multinomial logit model.
-log_likelihood = loglogit(utilities, None, Choice)
+log_likelihood = loglogit(utilities, availability, Choice)
 
 # Create the Biogeme object used for estimation.
 biogeme = BIOGEME(

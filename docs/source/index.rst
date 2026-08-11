@@ -33,6 +33,8 @@ This section contains various examples demonstrating how to use Biogeme for diff
 
   examples.rst
 
+  examples_workflow.rst
+
 TOML Configuration
 ------------------
 This section describes the TOML configuration files used by Biogeme.

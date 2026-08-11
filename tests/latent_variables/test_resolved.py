@@ -17,6 +17,7 @@ from biogeme.latent_variables.resolved import (
     PositivityStrategy,
     ResolvedConstant,
     ResolvedCutpoint,
+    ResolvedIndicatorType,
     ResolvedLatentVariable,
     ResolvedLinearCombination,
     ResolvedLinearTerm,
@@ -410,6 +411,25 @@ def test_resolved_cutpoint_is_frozen_and_slotted() -> None:
 
     with pytest.raises(FrozenInstanceError):
         cutpoint.symbol_name = 'tau_2'  # type: ignore[misc]
+
+
+def test_resolved_indicator_type_preserves_shared_metadata() -> None:
+    indicator_type = ResolvedIndicatorType(
+        type_name='likert5',
+        symmetric=True,
+        categories=[1, 2, 3, 4, 5],
+        neutral_labels=[6, -1],
+    )
+
+    assert indicator_type.type_name == 'likert5'
+    assert indicator_type.symmetric is True
+    assert indicator_type.categories == [1, 2, 3, 4, 5]
+    assert indicator_type.neutral_labels == [6, -1]
+    assert hasattr(ResolvedIndicatorType, '__slots__')
+    assert '__dict__' not in dir(indicator_type)
+
+    with pytest.raises(FrozenInstanceError):
+        indicator_type.type_name = 'other'  # type: ignore[misc]
 
 
 def test_resolved_threshold_system_fields_preserved() -> None:
@@ -811,6 +831,14 @@ def test_resolved_model_fields_preserved() -> None:
         warnings=[],
         disclaimer='none',
     )
+    indicator_types = {
+        'continuous': ResolvedIndicatorType(
+            type_name='continuous',
+            symmetric=False,
+            categories=[1, 2, 3, 4, 5],
+            neutral_labels=[6, -1],
+        )
+    }
 
     model = ResolvedModel(
         metadata=metadata,
@@ -819,6 +847,7 @@ def test_resolved_model_fields_preserved() -> None:
         threshold_systems=threshold_systems,
         parameters=parameters,
         normalization=normalization,
+        indicator_types=indicator_types,
     )
 
     assert model.metadata is metadata
@@ -827,6 +856,7 @@ def test_resolved_model_fields_preserved() -> None:
     assert model.threshold_systems is threshold_systems
     assert model.parameters is parameters
     assert model.normalization is normalization
+    assert model.indicator_types is indicator_types
 
 
 def test_resolved_model_is_frozen_and_slotted() -> None:

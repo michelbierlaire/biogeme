@@ -187,6 +187,33 @@ def _render_linear_combination(
     return expr
 
 
+def _neutral_labels_for_equation(resolved: ResolvedModel, equation) -> list[int]:
+    """Return neutral labels from the equation's shared indicator type."""
+    indicator_types = getattr(resolved, 'indicator_types', {})
+    if not indicator_types:
+        return []
+    indicator_type = indicator_types.get(equation.type_name)
+    return [] if indicator_type is None else indicator_type.neutral_labels
+
+
+def _mask_neutral_labels(
+    expression,
+    observed,
+    neutral_labels: list[int],
+    *,
+    neutral_value: float,
+):
+    """Replace an indicator contribution when its response is neutral."""
+    from biogeme.expressions import Elem
+
+    if not neutral_labels:
+        return expression
+    is_neutral = observed == neutral_labels[0]
+    for label in neutral_labels[1:]:
+        is_neutral = is_neutral | (observed == label)
+    return Elem({0: expression, 1: neutral_value}, is_neutral)
+
+
 def _build_measurement_terms_ml(
     resolved: ResolvedModel,
     parameters: dict[str, object],
@@ -210,7 +237,13 @@ def _build_measurement_terms_ml(
                     f"Gaussian indicator '{indicator_name}' requires a resolved sigma parameter."
                 )
             sigma = parameters[equation.sigma.final_name]
-            measurement_terms[indicator_name] = normalpdf((y - mu) / sigma) / sigma
+            gaussian_term = normalpdf((y - mu) / sigma) / sigma
+            measurement_terms[indicator_name] = _mask_neutral_labels(
+                gaussian_term,
+                y,
+                _neutral_labels_for_equation(resolved, equation),
+                neutral_value=1.0,
+            )
         else:
             if equation.sigma is None:
                 raise ValueError(
@@ -259,7 +292,13 @@ def _build_measurement_log_terms_bayesian(
             )
         sigma = parameters[equation.sigma.final_name]
         if equation.measurement_model == MeasurementModel.GAUSSIAN:
-            measurement_log_terms[indicator_name] = normal_logpdf(y, mu, sigma)
+            gaussian_log_term = normal_logpdf(y, mu, sigma)
+            measurement_log_terms[indicator_name] = _mask_neutral_labels(
+                gaussian_log_term,
+                y,
+                _neutral_labels_for_equation(resolved, equation),
+                neutral_value=0.0,
+            )
         else:
             cutpoints = threshold_expressions[equation.threshold_system_name]
             system = resolved.threshold_systems[equation.threshold_system_name]

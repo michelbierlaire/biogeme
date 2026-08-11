@@ -80,8 +80,10 @@ Never put the result directory only in node-local temporary storage.
 
 The submitted source is copied into an isolated work directory, excluding the
 example's bundled `saved_results`. Therefore a first run cannot accidentally
-load the documentation result. The H04 example writes to the result directory
-selected by `BIOGEME_H04_RESULTS_DIRECTORY`:
+load the documentation result. The wrapper links the example's standard
+`saved_results` directory to the persistent result directory before execution.
+Writes are therefore persistent immediately, including if the job is later
+terminated. The Python example uses exactly the same syntax locally and on Jed:
 
 - no YAML: perform optimization and write the result;
 - incomplete YAML: reuse saved raw estimates and complete the missing work;

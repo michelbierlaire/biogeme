@@ -5,6 +5,9 @@ Slurm batch scripts, submit dependency-aware jobs with `sbatch`, and collect
 diagnostics. Run them from the repository root, using the repository's
 `.venv`, not the golden-reference environment under `tests/`.
 
+For the complete release checklist, including laptop result import and the
+Sphinx-gallery build, see `RELEASE_WORKFLOW.md` in the repository root.
+
 ## Prepare the checkout
 
 On JED:
@@ -59,6 +62,16 @@ $PY jed_runs/jed_examples.py launch --only \
   --dry-run --run-id "$RUN_ID"
 ```
 
+To launch every non-light resource profile without maintaining a manual list,
+use `--slow`; declared dependencies are included automatically:
+
+```bash
+$PY jed_runs/jed_examples.py launch --slow \
+  --dry-run --run-id "$RUN_ID"
+$PY jed_runs/jed_examples.py launch --slow \
+  --run-id "$RUN_ID" --force
+```
+
 Each submitted job copies its example into a job-specific temporary work
 directory (`$SLURM_TMPDIR`, or `$TMPDIR`/`/tmp`), runs there, and harvests only
 that job's outputs back into `saved_results` or `saved_html`. This prevents
@@ -86,6 +99,28 @@ cleaned separately:
 $PY jed_runs/jed_cleanup.py
 $PY jed_runs/jed_cleanup.py --apply
 ```
+
+## Commit archived results
+
+The JED runner archives outputs in `saved_results` and `saved_html`.  After
+reviewing a completed run, use the commit helper to stage and commit all such
+archives below `docs/source/examples`:
+
+```bash
+cd /home/bierlair/github/biogeme
+PY=.venv/bin/python
+
+$PY jed_runs/jed_commit_results.py --dry-run
+$PY jed_runs/jed_commit_results.py \
+  --message "Update JED example results"
+```
+
+The helper commits only files inside `saved_results` and `saved_html`.  It
+refuses to proceed if unrelated files are already staged, so unstage other
+work before running it.  It force-adds files in those two directories because
+some result formats, such as NetCDF, are ignored by general repository rules.
+The Git user identity must be configured in the checkout; the dry run is safe
+and does not change the index.
 
 For a completely fresh, non-recoverable cleanup, use
 `jed_runs/jed_fresh_start.py` only after all Slurm jobs have finished.

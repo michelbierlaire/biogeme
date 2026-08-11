@@ -38,7 +38,7 @@ Sat Jun 13 2026, 15:13:40
 
 from __future__ import annotations
 
-from choice_latent_variables import generate_utility_functions
+from choice_latent_variables import generate_availability, generate_utility_functions
 from likert_spec import likert_indicators, likert_types
 from number_of_draws import NUMBER_OF_DRAWS
 from one_latent_variable_spec import latent_variables
@@ -199,7 +199,8 @@ utilities = generate_utility_functions(built_model.latent_expressions)
 # %%
 # Conditional likelihood of the mode choice model
 # -----------------------------------------------
-conditional_choice_likelihood = logit(utilities, None, Choice)
+availability = generate_availability()
+conditional_choice_likelihood = logit(utilities, availability, Choice)
 
 # %%
 # Combined conditional likelihood.

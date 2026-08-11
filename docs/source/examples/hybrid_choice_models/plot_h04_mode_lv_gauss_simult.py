@@ -4,7 +4,10 @@ Gaussian hybrid mode choice model: simultaneous maximum likelihood estimation
 
 This example estimates a hybrid mode choice model with one latent variable and
 Gaussian measurement equations. The observed Likert indicators are treated as
-continuous responses and modeled with Gaussian measurement equations.
+continuous responses and modeled with Gaussian measurement equations. Responses
+using the type's neutral or missing labels (6 and -1 in this case) contribute a
+neutral factor to the measurement likelihood and are therefore excluded from
+the corresponding Gaussian measurement equation.
 
 In contrast with the sequential specification introduced previously, the
 measurement component and the mode-choice component are estimated jointly. The
@@ -36,10 +39,7 @@ Mon Jun 15 2026, 09:54:37
 
 from __future__ import annotations
 
-import os
-from pathlib import Path
-
-from choice_latent_variables import generate_utility_functions
+from choice_latent_variables import generate_availability, generate_utility_functions
 from likert_spec import likert_indicators, likert_types
 from number_of_draws import NUMBER_OF_DRAWS
 from one_latent_variable_spec import latent_variables
@@ -78,6 +78,8 @@ DEFAULT_MEASUREMENT_SIGMA_START = 10.0
 # %%
 # Gaussian measurement configuration for all Likert indicators.
 # -------------------------------------------------------------
+# The neutral-label semantics are supplied by ``likert_types`` and are applied
+# by the latent-variable builder to these Gaussian measurement equations.
 measurement_configuration = MeasurementConfiguration(
     specifications=[
         IndicatorMeasurementSpec(
@@ -178,7 +180,8 @@ utilities = generate_utility_functions(built_model.latent_expressions)
 # %%
 # Conditional likelihood of the mode choice model
 # -----------------------------------------------
-conditional_choice_likelihood = logit(utilities, None, Choice)
+availability = generate_availability()
+conditional_choice_likelihood = logit(utilities, availability, Choice)
 
 # %%
 # Combined conditional likelihood
@@ -204,24 +207,17 @@ log_likelihood = log(integrated_likelihood)
 # Estimate the model with Biogeme.
 # --------------------------------
 # Existing results are reloaded from the YAML file when available.
-number_of_draws = int(os.environ.get('BIOGEME_H04_NUMBER_OF_DRAWS', NUMBER_OF_DRAWS))
-max_iterations = int(os.environ.get('BIOGEME_H04_MAX_ITERATIONS', '5000'))
-
 biogeme = BIOGEME(
     database,
     log_likelihood,
-    number_of_draws=number_of_draws,
+    number_of_draws=NUMBER_OF_DRAWS,
     calculating_second_derivatives='never',
-    max_iterations=max_iterations,
+    max_iterations=5_000,
     group_of_parameters=built_model.parameter_groups,
 )
 biogeme.model_name = 'plot_h04_mode_lv_gauss_simult'
 
-results_directory = Path(
-    os.environ.get('BIOGEME_H04_RESULTS_DIRECTORY', 'saved_results')
-)
-results_directory.mkdir(parents=True, exist_ok=True)
-yaml_file_name = results_directory / f'{biogeme.model_name}.yaml'
+yaml_file_name = f'saved_results/{biogeme.model_name}.yaml'
 results = biogeme.estimate_or_load(yaml_file_name=yaml_file_name)
 
 # %%
